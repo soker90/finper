@@ -8,7 +8,7 @@
     "start": "NODE_ENV=production NTBA_FIX_319=1000 node ./bin/www",
     "start:dev": "NODE_ENV=dev NTBA_FIX_319=1000 nodemon ./bin/www",
     "test": "NODE_ENV=test NTBA_FIX_319=1000 jest --detectOpenHandles --coverage",
-    "lint": "ts-standard --fix'",
+    "lint": "ts-standard --fix",
     "dev": "nodemon",
     "build": "etsc",
     "start2": "node dist/index.js"
@@ -74,5 +74,11 @@
     "mongodbMemoryServer": {
       "version": "4.4.10"
     }
+  },
+  "ts-standard": {
+    "ignore": [
+      "dist",
+      "src/**/*.js"
+    ]
   }
 }

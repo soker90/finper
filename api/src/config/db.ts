@@ -1,5 +1,5 @@
 // TODO create models
-const models = require('node-mongoose-models');
+const models = require('node-mongoose-models')
 
 const {
   user,
@@ -7,22 +7,22 @@ const {
   host,
   port,
   dataBaseName,
-  options: mongoOptions,
-} = require('./index').mongo;
+  options: mongoOptions
+} = require('./index').mongo
 
 /* istanbul ignore next */
-const userPass = user && pass ? `${user}:${pass}@` : '';
+const userPass = user && pass ? `${user}:${pass}@` : ''
 
-const hostProperty = [].concat(host);
-const portProperty = [].concat(port);
+const hostProperty = [].concat(host)
+const portProperty = [].concat(port)
 /* istanbul ignore next */
-const hosts = hostProperty.reduce((s, h, i) => `${s}${i > 0 ? ',' : ''}${h}:${portProperty[i] || portProperty[0]}`, '');
+const hosts = hostProperty.reduce((s, h, i) => `${s}${i > 0 ? ',' : ''}${h}:${portProperty[i] || portProperty[0]}`, '')
 
-const uri = process.env.MONGODB || `mongodb://${userPass}${hosts}/${dataBaseName}?authSource=admin`;
-const options = mongoOptions || {};
-options.useNewUrlParser = true;
+const uri = process.env.MONGODB || `mongodb://${userPass}${hosts}/${dataBaseName}?authSource=admin`
+const options = mongoOptions || {}
+options.useNewUrlParser = true
 
 module.exports = () => {
   /* istanbul ignore next */
-  if (process.env.NODE_ENV !== 'test') models.connect(uri, options);
-};
+  if (process.env.NODE_ENV !== 'test') models.connect(uri, options)
+}
