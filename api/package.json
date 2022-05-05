@@ -8,7 +8,7 @@
     "start": "NODE_ENV=production NTBA_FIX_319=1000 node ./bin/www",
     "start:dev": "NODE_ENV=dev NTBA_FIX_319=1000 nodemon ./bin/www",
     "test": "NODE_ENV=test NTBA_FIX_319=1000 jest --detectOpenHandles --coverage",
-    "lint": "eslint '**/*.js'",
+    "lint": "ts-standard --fix'",
     "dev": "nodemon",
     "build": "etsc",
     "start2": "node dist/index.js"
@@ -50,6 +50,7 @@
     "node-mongoose-models": "git+https://github.com/soker90/node-mongoose-models.git",
     "nodemon": "^2.0.16",
     "supertest": "^6.2.2",
+    "ts-standard": "^11.0.0",
     "typescript": "^4.6.4"
   },
   "jest": {
