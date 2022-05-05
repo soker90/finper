@@ -1,6 +1,6 @@
 const { sign, verify } = require('jsonwebtoken');
 
-const { secret, timeout } = require('../../config').session;
+const { secret, timeout } = require('../../src/config').session;
 
 /**
  * Creates a JWT token

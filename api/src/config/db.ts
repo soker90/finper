@@ -1,3 +1,4 @@
+// TODO create models
 const models = require('node-mongoose-models');
 
 const {
@@ -7,7 +8,7 @@ const {
   port,
   dataBaseName,
   options: mongoOptions,
-} = require('.').mongo;
+} = require('./index').mongo;
 
 /* istanbul ignore next */
 const userPass = user && pass ? `${user}:${pass}@` : '';
