@@ -1,0 +1,10 @@
+{
+  "reminders": [
+    {
+      "message": "Esto es un recordatorio"
+    },
+    {
+      "message": "Esto es otro recordatorio"
+    }
+  ]
+}

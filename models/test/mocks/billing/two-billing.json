@@ -1,0 +1,52 @@
+{
+  "billing": [
+    {
+      "provider": "5f4a4f441d370c2dda0f0cdc",
+      "year": 2021,
+      "invoicesTrimester1": [
+        {
+          "invoice": "5f494202f936882933180784",
+          "total": 3.34,
+          "date": 1588341900011
+        }
+      ],
+      "trimesters": [
+        1000,
+        2000,
+        3000,
+        500
+      ],
+      "annual": 6500,
+      "invoicesTrimester2": [
+        {
+          "invoice": "5f14a47567012016a09e15fc",
+          "total": 3.34,
+          "date": 1597327500000.0
+        },
+        {
+          "invoice": "5f4aa0c649715639cb2861aa",
+          "total": 3.34,
+          "date": 1597327500000.0
+        }
+      ]
+    },
+    {
+      "year": 2021,
+      "provider": "5ed536ff6dc26539c8031181",
+      "trimesters": [
+        6000,
+        2000,
+        1000,
+        1500
+      ],
+      "invoicesTrimester3": [
+        {
+          "invoice": "5f14a47567012016a09e15fc",
+          "total": 3.34,
+          "date": 1597327500000.0
+        }
+      ],
+      "annual": 10500
+    }
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "notes": [
+    {
+      "date": 1589407320000,
+      "concept": "Test message",
+      "quantity": "22,3",
+      "price": "5,4€",
+      "amount": "12.3",
+      "clarification": "Aclaraciones",
+      "year": "2020"
+    },
+    {
+      "date": 1591213980000,
+      "concept": "Un mensaje de prueba para la nota",
+      "quantity": "31,3",
+      "price": "1,24€",
+      "amount": "1.23",
+      "clarification": "Unas aclaraciones",
+      "year": "2021"
+    }
+  ]
+}

@@ -12,5 +12,4 @@ const config = {
     dataBaseName: process.env.DATABASE_NAME || 'myBbdd'
   }
 }
-
-module.exports = config
+export default config;

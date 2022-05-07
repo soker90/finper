@@ -1,0 +1,37 @@
+{
+  "payments": [
+    {
+      "provider": "5e430c9b7d2d2ded823b153b",
+      "nameProvider": "Fulanito SL",
+      "invoices": [
+        "5f18724d869c550017e9adf6",
+        "5f1872ca869c550017e9adf8"
+      ],
+      "nOrder": "3, 34",
+      "paymentDate": 1591213980000,
+      "amount": 23,
+      "type": "Efectivo",
+      "payments": [
+        "5e430c9b7d2d2ded823b153b, 5f187222869c550017e9adf5"
+      ],
+      "invoiceDate": 1591213980012,
+      "nInvoice": "3/2019"
+    },
+    {
+      "provider": "5f187222869c550017e9adf5",
+      "nameProvider": "Pollos JB",
+      "invoices": [
+        "5f1871b3869c550017e9adf3"
+      ],
+      "nOrder": "23",
+      "paymentDate": 1594919520000,
+      "merged": true,
+      "amount": 21,
+      "type": "Talón",
+      "numCheque": "8766B",
+      "paid": true,
+      "invoiceDate": 1591213980032,
+      "nInvoice": "31/2020"
+    }
+  ]
+}

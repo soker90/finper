@@ -1,0 +1,30 @@
+{
+  "provider": "5f4a4f441d370c2dda0f0cdc",
+  "year": 2020,
+  "annual": 10.02,
+  "invoicesTrimester1": [
+    {
+      "invoice": "5f4a608ff0caeb424cd7864e",
+      "total": 3.34,
+      "date": 1588341900000.0
+    }
+  ],
+  "trimesters": [
+    0,
+    3.34,
+    6.68,
+    0
+  ],
+  "invoicesTrimester2": [
+    {
+      "invoice": "5f4a608ff0caeb424cd7864e",
+      "total": 3.34,
+      "date": 1597327500000.0
+    },
+    {
+      "invoice": "5f4aa0c649715639cb2861aa",
+      "total": 3.34,
+      "date": 1597327500000.0
+    }
+  ]
+}

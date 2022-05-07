@@ -1,0 +1,24 @@
+{
+  "deliveryOrders": [
+    {
+      "date": 1590706800000,
+      "products": [
+        {
+          "name": "Chorizo",
+          "weight": 2.200,
+          "unit": "Kg",
+          "price": 2.23,
+          "total": 4.46,
+          "productId": "5e430c9b7d2a2ded823b153b"
+        }
+      ]
+    }
+  ],
+  "date": 1590706800000,
+  "taxBase": 61.2,
+  "iva": 5.56,
+  "total": 323.136,
+  "nInvoice": "20/3",
+  "client": "5e430c9b7d2d2ded823b153b",
+  "businessName": "Client SL"
+}

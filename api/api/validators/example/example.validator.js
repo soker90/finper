@@ -1,5 +1,5 @@
 const { ExampleModel } = require('node-mongoose-models');
-const { exampleErrors } = require('../../../errors');
+const { exampleErrors } = require('../../../src/errors');
 
 /**
  * Check if id is valid

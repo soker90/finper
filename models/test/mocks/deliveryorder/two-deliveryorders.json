@@ -1,0 +1,88 @@
+{
+  "orders": [
+    {
+      "provider": "5e430c9b7d2d2ed823b153b",
+      "nameProvider": "Uno",
+      "date": 1590706800001,
+      "size": 2,
+      "total": 3.136,
+      "iva": 5.5000001,
+      "rate": 2,
+      "re": 1.36,
+      "taxBase": 6.2,
+      "invoice": "5d16110ed10b76e2856f078",
+      "nOrder": 12,
+      "products": [
+        {
+          "code": "645",
+          "product": "5d16110ed10b76e2856f078",
+          "price": 3.5,
+          "quantity": 6.3,
+          "name": "Productor 1",
+          "taxBase": 3.999999998,
+          "rate": 2.3,
+          "diff": 11,
+          "iva": 26.2000000003,
+          "re": 9.1,
+          "total": 11.5
+        },
+        {
+          "code": "66645",
+          "product": "5d16110ed10b76e2856f078",
+          "price": 5.3,
+          "quantity": 35.1,
+          "name": "Prodor 636",
+          "taxBase": 360.599999999999998,
+          "rate": 1.2,
+          "diff": 1.21,
+          "iva": 4269.28000000000003,
+          "re": 49.18,
+          "total": 16.4568
+        }
+      ]
+    },
+    {
+      "provider": "5e430c9b7d2d2ded823b153b",
+      "nameProvider": "La abuela",
+      "date": 1590706800000,
+      "size": 2,
+      "total": 323.136,
+      "iva": 538.5600000000001,
+      "rate": 4,
+      "re": 18.36,
+      "taxBase": 61.199999999999996,
+      "invoice": "5ed16110ed10b76e2856f078",
+      "nOrder": 33,
+      "note": "Mi nota de prueba",
+      "hasCanal": true,
+      "products": [
+        {
+          "code": "666645",
+          "product": "5ed16110ed10b76e2856f078",
+          "price": 3,
+          "quantity": 3,
+          "name": "Productor 636",
+          "taxBase": 30.599999999999998,
+          "rate": 2,
+          "diff": 121,
+          "iva": 269.28000000000003,
+          "re": 9.18,
+          "total": 161.568
+        },
+        {
+          "code": "666645",
+          "product": "5ed16110ed10b76e2856f078",
+          "price": 3,
+          "quantity": 5.1,
+          "name": "Productor 636",
+          "taxBase": 30.599999999999998,
+          "rate": 2,
+          "diff": 121,
+          "iva": 269.28000000000003,
+          "re": 9.18,
+          "total": 161.568
+        }
+      ]
+    }
+  ]
+}

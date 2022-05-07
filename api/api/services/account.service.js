@@ -2,8 +2,8 @@ const { AccountModel } = require('node-mongoose-models');
 const { compare } = require('bcrypt');
 const {
   InvalidLogin, UserNotFound, UserExist, InvalidPassword,
-} = require('../../errors/user.errors');
-const { signToken } = require('../../components/auth/auth.service');
+} = require('../../src/errors/user.errors');
+const { signToken } = require('../../src/components/auth/auth.service');
 
 /**
  * Check user and password and return token

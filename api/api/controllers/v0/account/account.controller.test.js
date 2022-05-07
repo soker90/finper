@@ -1,10 +1,10 @@
 const supertest = require('supertest');
 const { mongoose, AccountModel } = require('node-mongoose-models');
 const testDB = require('../../../../test/test-db')(mongoose);
-const { verifyToken, signToken } = require('../../../../components/auth/auth.service');
+const { verifyToken, signToken } = require('../../../../src/components/auth/auth.service');
 const requestLogin = require('../../../../test/request-login');
 const app = require('../../../../index');
-const { userErrors } = require('../../../../errors');
+const { userErrors } = require('../../../../src/errors');
 
 const user1 = {
   username: 'test',

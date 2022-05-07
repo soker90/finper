@@ -1,0 +1,30 @@
+{
+  "products": [
+    {
+      "code" : "1111",
+      "name" : "Primero",
+      "provider" : "5e430c9b7d2d2ded823b153b",
+      "nameProvider": "Gallinas CB",
+      "rate" : 7,
+      "iva" : 11.2,
+      "re" : 2.2,
+      "profit": 2.11,
+      "price": 2.1,
+      "cost": 8.3,
+      "sale": 3.2
+    },
+    {
+      "code" : "2222",
+      "name" : "Primero",
+      "provider" : "5e430c9b7d2d2ded823b153b",
+      "nameProvider": "Cerdo SL",
+      "rate" : 8,
+      "iva" : 1.2,
+      "re" : 2.63,
+      "profit": 21.02,
+      "price": 23.21,
+      "cost": 81.33,
+      "sale": 33.22
+    }
+  ]
+}

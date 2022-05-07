@@ -1,0 +1,32 @@
+{
+  "providers": [
+    {
+      "_id": "5e430c9b7d2d2ded823b153b",
+      "name": "Proveedor 1",
+      "address": "Calle uno, 1",
+      "city": "Las pedroñeras",
+      "postalCode": "16660",
+      "province": "Cuenca",
+      "phone": "123456",
+      "email": "info@info.es",
+      "businessName": "Proveedor 1 S.L.",
+      "cif": "D4675235884",
+      "note": "Una nota para testear",
+      "type": "GENERAL"
+    },
+    {
+      "_id": "5e430c9b7d2d2ded823b153c",
+      "name": "Proveedor 2",
+      "address": "Calle dos, 2",
+      "city": "Villafranca de los Caballeros",
+      "postalCode": "45000",
+      "province": "Toledo",
+      "phone": "789654",
+      "email": "correo@info.es",
+      "businessName": "Proveedor 2 S.A.",
+      "cif": "B11254652",
+      "type": "GENERAL",
+      "hasCanal": true
+    }
+  ]
+}
