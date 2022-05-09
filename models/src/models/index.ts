@@ -1,1 +1,1 @@
-export {default as AccountModel} from './account';
+export { default as AccountModel } from './account'

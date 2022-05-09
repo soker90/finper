@@ -1,13 +1,21 @@
-import {Schema, model} from 'mongoose'
+import { Schema, model, Document } from 'mongoose'
+import encryptPasswordPreSave from './hooks/encrypt-password-pre-save'
 
-interface IAccount {
-    username: string;
-    password: string;
+export interface IAccount extends Document{
+    username: string
+    password: string
+    create: any
+    countDocuments: any
+    findOne: any
+    find: any
+    findOneAndUpdate: any
 }
 
 const accountSchema = new Schema<IAccount>({
-    username: { type: String, required: true },
-    password: { type: String, required: true },
-}, {versionKey: false});
+  username: { type: String, required: true },
+  password: { type: String, required: true }
+}, { versionKey: false })
 
-export default model('Account', accountSchema, 'account');
+accountSchema.pre<IAccount>('save', encryptPasswordPreSave)
+
+export default model('Account', accountSchema, 'account')

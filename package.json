@@ -1,0 +1,41 @@
+{
+  "name": "finper",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/soker90/finper.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/soker90/finper/issues"
+  },
+  "homepage": "https://github.com/soker90/finper#readme",
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^5.23.0",
+    "@typescript-eslint/parser": "^5.23.0",
+    "eslint": "^8.15.0",
+    "eslint-config-standard": "^17.0.0",
+    "eslint-config-standard-jsx": "^11.0.0",
+    "eslint-plugin-promise": "^6.0.0",
+    "eslint-plugin-react": "^7.29.4",
+    "ts-standard": "^11.0.0",
+    "typescript": "^4.6.4"
+  },
+  "ts-standard": {
+    "ignore": [
+      "models/dist",
+      "models/src/**/*.js"
+    ]
+  },
+  "eslintConfig": {
+    "extends": [
+      "./node_modules/ts-standard/eslintrc.json"
+    ]
+  }
+}
