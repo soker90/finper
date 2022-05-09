@@ -1,0 +1,27 @@
+{
+  "_id": "5ed16182ed10b76e2856f079",
+  "deliveryOrders": [
+    "5e430c9b7d2d2ded823b153b"
+  ],
+  "dateInvoice": 1590706800000,
+  "dateRegister": 1590707800000,
+  "total": 323.136,
+  "iva": 538.5600000000001,
+  "re": 18.36,
+  "taxBase": 61.199999999999996,
+  "nInvoice": "3",
+  "concept": "Alquiler",
+  "reRental": 12.5,
+  "payment": {
+    "type": "Efectivo",
+    "paymentDate": 1590706800000,
+    "paid": true,
+    "invoicesOrder": "23 44"
+  },
+  "bookColumn": "Compras",
+  "businessName": "Provider SL",
+  "cif": "23232B",
+  "nameProvider": "provider",
+  "provider": "5e430c9b7d2d2ded823b153b",
+  "mailSend": true
+}

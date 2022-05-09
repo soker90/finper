@@ -8,7 +8,7 @@ const requestLogin = require('../../../../test/request-login');
 const app = require('../../../../index');
 const {
   exampleErrors,
-} = require('../../../../errors');
+} = require('../../../../src/errors');
 
 const exampleMock = {
   myNumber: 2020,

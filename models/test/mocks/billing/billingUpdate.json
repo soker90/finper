@@ -1,0 +1,26 @@
+{
+  "successUpdate": {
+    "filter": {
+      "provider": "5f4a4f441d370c2dda0f0cdc",
+      "year": 2020
+    },
+    "update": {
+      "$push": {
+        "invoicesTrimester2": {
+          "invoice": "5f172ee736e4d0fa0b90bd11",
+          "total": 12,
+          "date": 1597327500000
+        }
+      }
+    }
+  },
+  "noInvoice": {
+    "filter": {
+      "provider": "5f4a4f441d370c2dda0f0cdc",
+      "year": 2020
+    },
+    "update": {
+      "year": 2019
+    }
+  }
+}

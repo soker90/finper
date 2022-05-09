@@ -1,5 +1,5 @@
-const { authMiddleware } = require('../../../../components/auth');
-const errorHandler = require('../../../../components/error-handlers');
+const { authMiddleware } = require('../../../../src/components/auth');
+const errorHandler = require('../../../../src/components/error-handlers');
 
 const AccountController = require('./account.controller');
 
