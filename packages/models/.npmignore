@@ -1,0 +1,8 @@
+node_modules
+test
+scripts
+coverage
+.vscode
+.eslintrc.json
+jest-mongodb-config.js
+.idea
