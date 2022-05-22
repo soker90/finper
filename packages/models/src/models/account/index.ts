@@ -6,11 +6,7 @@ export interface IAccount extends Document {
     password: string
 }
 
-interface IAccountModel extends Model<IAccount> {
-}
-
-
-const accountSchema = new Schema<IAccount, IAccountModel>({
+const accountSchema = new Schema<IAccount>({
     username: {type: String, required: true},
     password: {type: String, required: true}
 }, {versionKey: false});

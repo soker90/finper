@@ -1,10 +1,11 @@
-import { faker } from '@faker-js/faker';
+import {faker} from '@faker-js/faker';
 
-import {AccountModel, IAccount} from '../../src';
+import {AccountModel} from '../../src';
 
-export default (params?: IAccount) => (
+export default (params = {}) => (
     AccountModel.create({
-        username: params?.username || faker.internet.userName(),
-        password: params?.password || faker.internet.password()
+        username: faker.internet.userName(),
+        password: faker.internet.password(),
+        ...params
     })
 );

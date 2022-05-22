@@ -12,10 +12,12 @@
     "skipLibCheck": true,
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
-    "sourceMap": true
+    "sourceMap": true,
+    "strictNullChecks": false,
+    "declaration": true
   },
   "include": [
-    "src/**/*.ts",
+    "src/**/*"
   ],
-  "exclude": ["node_modules", "lib"],
+  "exclude": ["node_modules", "dist"],
 }

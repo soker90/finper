@@ -2,8 +2,8 @@ import _ from 'lodash';
 import Promise from 'bluebird';
 import mongoose from 'mongoose';
 
-import { AccountModel, IAccount } from './models/account';
 import mongooseConnect from './mongoose-connect';
+import { IAccount, AccountModel } from './models/account';
 
 mongoose.Promise = Promise;
 
@@ -22,7 +22,9 @@ export function connect(uri: string, options: Record<string, unknown>): void {
 }
 
 export {
-  IAccount,
-  AccountModel,
   mongoose,
+
+  IAccount,
+
+  AccountModel,
 };
