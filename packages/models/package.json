@@ -22,7 +22,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git://github.com/soker90/finper.git"
+    "url": "git+https://github.com/soker90/finper.git"
   },
   "keywords": [
     "mongoose",
