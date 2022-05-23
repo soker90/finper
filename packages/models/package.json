@@ -1,5 +1,5 @@
 {
-  "name": "finper-models",
+  "name": "@soker90/finper-models",
   "version": "0.0.1",
   "description": "Models for finper",
   "main": "dist/index.js",
@@ -14,12 +14,15 @@
     "lint",
     "test"
   ],
+  "publishConfig": {
+    "registry":"https://npm.pkg.github.com"
+  },
   "files": [
     "/dist"
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/soker90/finper.git"
+    "url": "git://github.com/soker90/finper.git"
   },
   "keywords": [
     "mongoose",

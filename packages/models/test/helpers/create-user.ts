@@ -1,9 +1,9 @@
 import {faker} from '@faker-js/faker';
 
-import {AccountModel} from '../../src';
+import {UserModel} from '../../src';
 
 export default (params = {}) => (
-    AccountModel.create({
+    UserModel.create({
         username: faker.internet.userName(),
         password: faker.internet.password(),
         ...params

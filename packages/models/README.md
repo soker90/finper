@@ -5,7 +5,7 @@
 ## How it works?
 
 ```sh
-npm install -S finper-models
+npm install -S @soker90/finper-models
 ```
 
 ## Collections

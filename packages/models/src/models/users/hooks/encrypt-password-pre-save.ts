@@ -1,8 +1,8 @@
 /* ts-lint ignore */
 import { genSalt, hash } from 'bcrypt';
-import {IAccount} from '../index';
+import {IUser} from '../index';
 
-export default function encryptPasswordPreSave (this: IAccount, next: (arg0?: Error) => void) {
+export default function encryptPasswordPreSave (this: IUser, next: (arg0?: Error) => void) {
   genSalt(10, (err: Error | undefined, salt: string) => {
     /* istanbul ignore next */
     if (err) {return next(err);}
