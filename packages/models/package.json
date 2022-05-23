@@ -15,7 +15,7 @@
     "test"
   ],
   "publishConfig": {
-    "registry":"https://npm.pkg.github.com"
+    "registry": "https://npm.pkg.github.com"
   },
   "files": [
     "/dist"
@@ -40,7 +40,9 @@
     "@tsconfig/node16": "^1.0.2",
     "@types/bcrypt": "^5.0.0",
     "@types/bluebird": "^3.5.36",
+    "@types/jest": "^27.5.1",
     "@types/lodash": "^4.14.182",
+    "@types/mocha": "^9.1.1",
     "@typescript-eslint/eslint-plugin": "^5.22.0",
     "@typescript-eslint/parser": "^5.22.0",
     "eslint": "^8.14.0",
