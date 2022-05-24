@@ -13,6 +13,7 @@ export interface ITransaction extends Document {
     amount: number,
     type: TransactionType,
     account: string,
+    bank: string,
     note: string,
 }
 
@@ -21,6 +22,7 @@ const transactionSchema = new Schema<ITransaction>({
     category: {type: String, required: true},
     shop: {type: String},
     amount: {type: Number, required: true},
+    bank: {type: String, required: true},
     type: {type: String, required: true},
     account: {type: String, required: true},
     note: {type: String},
