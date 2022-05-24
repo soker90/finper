@@ -11,10 +11,12 @@ describe('Account', () => {
 
     afterAll(() => testDatabase.close());
 
-    describe('when there is a new account', async () => {
-        const accountData: IAccount = await createAccount();
+    describe('when there is a new account', () => {
+        let accountData: IAccount;
 
-        beforeAll(() => AccountModel.create(accountData));
+        beforeAll(() => createAccount().then((account) => {
+            accountData = account;
+        }));
 
         afterAll(() => testDatabase.clear());
 
