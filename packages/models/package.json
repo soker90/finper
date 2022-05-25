@@ -41,7 +41,8 @@
     "@types/bcrypt": "^5.0.0",
     "@types/bluebird": "^3.5.36",
     "@types/jest": "^27.5.1",
-    "@types/lodash": "^4.14.182",
+    "@types/lodash.isnil": "^4.0.7",
+    "@types/lodash.isplainobject": "^4.0.7",
     "@types/mocha": "^9.1.1",
     "@typescript-eslint/eslint-plugin": "^5.22.0",
     "@typescript-eslint/parser": "^5.22.0",
@@ -56,7 +57,8 @@
   "dependencies": {
     "bcrypt": "^5.0.1",
     "bluebird": "^3.7.2",
-    "lodash": "^4.17.21",
+    "lodash.isnil": "^4.0.0",
+    "lodash.isplainobject": "^4.0.6",
     "mongoose": "^6.3.2",
     "typescript": "^4.6.4"
   }

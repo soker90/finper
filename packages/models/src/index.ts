@@ -1,4 +1,5 @@
-import _ from 'lodash';
+import isNil from 'lodash.isnil';
+import isPlainObject from 'lodash.isplainobject';
 import Promise from 'bluebird';
 import mongoose from 'mongoose';
 
@@ -15,13 +16,13 @@ import {IUser, UserModel} from './models/users';
 mongoose.Promise = Promise;
 
 export function connect(uri: string, options: Record<string, unknown>): void {
-    if (_.isNil(mongoose)) {
+    if (isNil(mongoose)) {
         throw new Error('Specify `mongoose` as the first argument');
     }
-    if (_.isNil(uri) || !uri) {
+    if (isNil(uri) || !uri) {
         throw new Error('Missing an `uri` string to establish mongodb connection');
     }
-    if (!_.isNil(options) && !_.isPlainObject(options)) {
+    if (!isNil(options) && !isPlainObject(options)) {
         throw new Error('The `options` argument must be an object');
     }
 
