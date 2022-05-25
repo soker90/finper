@@ -30,7 +30,8 @@ jobs:
         with:
           node-version: 16
           registry-url: https://npm.pkg.github.com/
-      - run: npm --prefix packages/models ci
-      - run: npm --prefix packages/models publish
+      - run: cd --prefix packages/models
+      - run: npm ci
+      - run: npm publish
         env:
           NODE_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
