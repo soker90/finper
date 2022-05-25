@@ -9,23 +9,29 @@ export enum TransactionType {
 export interface ITransaction extends Document {
     date: number,
     category: string,
-    shop: string,
+    categoryId: string,
     amount: number,
     type: TransactionType,
     account: string,
+    accountId: string,
     bank: string,
     note: string,
+    storeId?: string,
+    store?: string,
 }
 
 const transactionSchema = new Schema<ITransaction>({
     date: {type: Number, required: true},
     category: {type: String, required: true},
-    shop: {type: String},
+    categoryId: {type: String, required: true},
     amount: {type: Number, required: true},
     bank: {type: String, required: true},
     type: {type: String, required: true},
     account: {type: String, required: true},
+    accountId: {type: String, required: true},
     note: {type: String},
+    storeId: {type: String},
+    store: {type: String},
 }, {versionKey: false});
 
 
