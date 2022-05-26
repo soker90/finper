@@ -1,4 +1,4 @@
-# Replit Models
+# Finper Models
 
 > Models for Finper project
 
