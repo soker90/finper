@@ -1,4 +1,3 @@
-/* ts-lint ignore */
 import { genSalt, hash } from 'bcrypt';
 import {IUser} from '../index';
 

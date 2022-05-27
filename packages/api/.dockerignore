@@ -1,0 +1,13 @@
+.git
+.env
+node_modules
+docs
+coverage
+*.log
+src
+.eslintignore
+.eslint
+.gitignore
+.jest.config.js
+gitlab.ci.yml
+tsconfig.json
