@@ -1,41 +1,69 @@
-// import passport from 'passport';
-// import { NextFunction, Request, Response } from 'express';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import Boom from '@hapi/boom';
+import passport from 'passport';
+import {NextFunction, Request, Response} from 'express';
 
-// import '../auth/passport-handler';
+import signToken from '../helpers/sign-token';
+import {IUserService} from '../services/user.service';
+import {IAccountService} from '../services/auth.service';
+import validateLoginInputParams from '../validators/validate-login-input-params';
+import validateRegisterInputParams from '../validators/validate-register-input-params';
 
-// export class AuthController {
-//   public authenticateJWT(req: Request, res: Response, next: NextFunction) {
-//     passport.authenticate('jwt', function (err, user) {
-//       if (err) {
-//         return res.status(401).json({ status: 'error', code: 'unauthorized' });
-//       }
+import '../auth/local-strategy-passport-handler';
 
-//       if (!user) {
-//         return res.status(401).json({ status: 'error', code: 'unauthorized' });
-//       }
+type IAccountController = {
+    loggerHandler: any,
+    userService: IUserService,
+    authService: IAccountService,
+}
 
-//       return next();
-//     })(req, res, next);
-//   }
+export class AuthController {
+    private logger;
 
-//   public authorizeJWT(req: Request, res: Response, next: NextFunction) {
-//     passport.authenticate('jwt', function (err, user, jwtToken) {
-//       if (err) {
-//         return res.status(401).json({ status: 'error', code: 'unauthorized' });
-//       }
+    private userService;
 
-//       if (!user) {
-//         return res.status(401).json({ status: 'error', code: 'unauthorized' });
-//       }
+    private authService;
 
-//       const scope = req.baseUrl.split('/').slice(-1)[0];
-//       const authScope = jwtToken.scope;
+    constructor({loggerHandler, userService, authService}: IAccountController) {
+        this.logger = loggerHandler;
+        this.userService = userService;
+        this.authService = authService;
+    }
 
-//       if (authScope && authScope.indexOf(scope) > -1) {
-//         return next();
-//       }
+    public async register(req: Request, res: Response, next: NextFunction): Promise<void> {
+        Promise.resolve(req.body)
+            .tap(({username}) => this.logger.logInfo(`/register - username: ${username && username.toLowerCase()}`))
+            .then(validateRegisterInputParams)
+            .then(this.userService.createUser.bind(this.userService))
+            .tap(({username}) => this.logger.logInfo(`User ${username} has been succesfully created`))
+            .then(({username}) => {
+                const token = this.authService.getSignedToken(username);
+                res.send({token});
+            })
+            .catch((error) => {
+                next(error);
+            });
+    }
 
-//       return res.status(401).json({ status: 'error', code: 'unauthorized' });
-//     })(req, res, next);
-//   }
-// }
+    public login(req: Request, res: Response, next: NextFunction) {
+        Promise.resolve(req.body)
+            .tap(({username}) => this.logger.logInfo(`/login - user: ${username && username.toLowerCase()}`))
+            .then(validateLoginInputParams)
+            .then(() => {
+                passport.authenticate('local', function (error, user) {
+                    if (error) {
+                        return next(error);
+                    }
+
+                    if (!user) {
+                        return next(Boom.unauthorized().output);
+                    }
+
+                    const token = signToken({username: user.username});
+
+                    res.send({token});
+                })(req, res, next);
+            })
+            .catch((error) => next(error));
+    }
+}

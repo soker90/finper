@@ -1,9 +1,9 @@
 import {Router} from 'express';
 
-import {MonitController} from '../controllers/monit.controller';
-
-import loggerHandler from '../utils/logger';
 import passport from "passport";
+
+import {MonitController} from '../controllers/monit.controller';
+import loggerHandler from '../utils/logger';
 
 export class MonitRoutes {
     router: Router;
@@ -19,7 +19,6 @@ export class MonitRoutes {
 
     routes() {
         this.router.get('/health',
-            passport.authenticate('local', {failureRedirect: '/login'}),
             this.monitController.getHealthStatus.bind(this.monitController));
     }
 }

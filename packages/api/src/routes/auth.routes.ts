@@ -1,18 +1,18 @@
 import { Router } from 'express';
 
 import loggerHandler from '../utils/logger';
-import { AccountController } from '../controllers/acccount.controller';
+import { AuthController } from '../controllers/auth.controller';
 
 import { userService, accountService } from '../services';
 
-export class AccountRoutes {
+export class AuthRoutes {
   router: Router;
 
-  public accountController: AccountController = new AccountController({
+  public accountController: AuthController = new AuthController({
     userService,
-    accountService,
+    authService: accountService,
     loggerHandler: loggerHandler('AccountController'),
-  });    
+  });
 
   constructor() {
     this.router = Router();

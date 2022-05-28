@@ -12,7 +12,8 @@ export help
 help:
 	@echo "$$help"
 
-install: install-models install-api
+install:
+	@npm i
 
 install-models:
 	@npm --prefix packages/models/ i
