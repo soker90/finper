@@ -1,7 +1,5 @@
 import {Router} from 'express';
 
-import passport from "passport";
-
 import {MonitController} from '../controllers/monit.controller';
 import loggerHandler from '../utils/logger';
 
