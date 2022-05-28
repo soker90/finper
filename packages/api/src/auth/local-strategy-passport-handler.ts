@@ -6,7 +6,7 @@ const {UserModel} = require('@soker90/finper-models');
 
 const LocalStrategy = passportLocal.Strategy;
 
-passport.use(new LocalStrategy({usernameField: 'user'}, function (user, password, done) {
+passport.use(new LocalStrategy({usernameField: 'username'}, function (user, password, done) {
         const lowercaseUser = user.toLowerCase();
 
         const query = {username: lowercaseUser};

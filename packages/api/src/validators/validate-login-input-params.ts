@@ -3,10 +3,7 @@ import Boom from '@hapi/boom';
 
 export default (input: Record<string, string>) => {
   const schema = Joi.object({
-    user: Joi.alternatives().try(
-      Joi.string().lowercase().trim(),
-      Joi.string().lowercase().email().trim(),
-    ).required(),
+    username: Joi.string().lowercase().trim().required(),
     password: Joi.string().trim().required(),
   });
 
