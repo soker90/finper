@@ -1,5 +1,5 @@
 {
-  "name": "@soker/finper-models",
+  "name": "@soker90/finper-api",
   "version": "0.1.0",
   "description": "Replit API that stores endpoints consumed by a Replit client",
   "main": "src/server",
