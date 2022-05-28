@@ -1,1 +1,1 @@
-declare module 'finper-models';
+declare module '@soker90/finper-models';

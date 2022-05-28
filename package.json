@@ -1,0 +1,8 @@
+{
+  "name": "finper",
+  "workspaces": [
+    "packages/client",
+    "packages/models",
+    "packages/api"
+  ]
+}
