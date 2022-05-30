@@ -1,11 +1,13 @@
 import { useState } from 'react'
 import logo from './logo.svg'
 import './App.css'
+import ThemeCustomization from 'themes'
 
-function App() {
+function App () {
   const [count, setCount] = useState(0)
 
   return (
+      <ThemeCustomization>
     <div className="App">
       <header className="App-header">
         <img src={logo} className="App-logo" alt="logo" />
@@ -39,6 +41,7 @@ function App() {
         </p>
       </header>
     </div>
+        </ThemeCustomization>
   )
 }
 
