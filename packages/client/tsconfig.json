@@ -18,7 +18,8 @@
     "baseUrl": "./src",
     "paths": {
       "themes/*": ["./themes/*"],
-      "components/*": ["./components/*"]
+      "components/*": ["./components/*"],
+      "config/*": ["./config/*"]
     },
     "types": ["@emotion/react/types/css-prop"]
   },

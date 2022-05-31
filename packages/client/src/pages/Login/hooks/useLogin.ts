@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { API_HOST } from 'config'
 
 export type SendLoginParams = {
     username: string
@@ -13,6 +14,7 @@ const ERROR_MESSAGES: Record<number | string, string> = {
 
 export const useLogin = () => {
   const [error, setError] = useState<string>('')
+  const [loading, setLoading] = useState<boolean>(false)
 
   const handleErrors = ({ statusCode }: { statusCode: number }) => {
     const message = ERROR_MESSAGES[statusCode] || ERROR_MESSAGES.default
@@ -20,7 +22,8 @@ export const useLogin = () => {
   }
 
   const sendLogin = ({ username, password }: SendLoginParams) => {
-    fetch('http://localhost:3008/api/auth/login', {
+    setLoading(true)
+    fetch(`${API_HOST}auth/login`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -30,19 +33,22 @@ export const useLogin = () => {
       .then(res => res.json())
       .then(res => {
         if (res.error) {
-          handleErrors(res.error)
+          handleErrors(res)
         } else {
           setError('')
           localStorage.setItem('token', res.token)
-          window.location.href = '/'
         }
       }).catch(error => {
         handleErrors(error)
+      })
+      .finally(() => {
+        setLoading(false)
       })
   }
 
   return {
     sendLogin,
-    error
+    error,
+    loading
   }
 }

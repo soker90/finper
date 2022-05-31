@@ -17,21 +17,17 @@ import { SendLoginParams, useLogin } from './hooks'
 const AuthLogin = () => {
   const [showPassword, setShowPassword] = useState(false)
   const { register, handleSubmit, formState: { errors } } = useForm()
+
   const onSubmit = handleSubmit(data => {
-    console.log(data)
     sendLogin(data as SendLoginParams)
   })
-  const { sendLogin, error } = useLogin()
+  const { sendLogin, error, loading } = useLogin()
 
   const handleClickShowPassword = () => {
-    setShowPassword(!showPassword)
+    setShowPassword(state => !state)
   }
 
-  const handleMouseDownPassword = (event: any) => {
-    event.preventDefault()
-  }
   return (
-
         <form onSubmit={onSubmit}>
             <Grid container spacing={3}>
                 <Grid item xs={12}>
@@ -64,7 +60,6 @@ const AuthLogin = () => {
                                     <IconButton
                                         aria-label="toggle password visibility"
                                         onClick={handleClickShowPassword}
-                                        onMouseDown={handleMouseDownPassword}
                                         edge="end"
                                         size="large"
                                     >
@@ -73,7 +68,7 @@ const AuthLogin = () => {
                                 </InputAdornment>
                             }
                             placeholder="Introduce la contraseña"
-                            {...register('password', { required: true, minLength: 6 })}
+                            {...register('password', { required: true, minLength: 5 })}
                         />
                         {errors.password && (
                             <FormHelperText error>
@@ -91,14 +86,14 @@ const AuthLogin = () => {
                 <Grid item xs={12}>
                     <Button
                         disableElevation
-                        disabled={false}
+                        disabled={loading}
                         fullWidth
                         size="large"
                         type="submit"
                         variant="contained"
                         color="primary"
                     >
-                        Iniciar sesión
+                        {loading ? 'Iniciando...' : 'Iniciar sesión'}
                     </Button>
                 </Grid>
             </Grid>
