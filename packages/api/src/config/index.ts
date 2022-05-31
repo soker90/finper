@@ -1,5 +1,5 @@
 export default {
-    port: 3000,
+    port: 3008,
     mongo: {
         host: [process.env.DATABASE_HOST || '127.0.0.1'], // list of hosts
         port: ['27017'], // list of ports

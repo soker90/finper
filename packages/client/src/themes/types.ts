@@ -2,13 +2,10 @@ import {
   Theme as MaterialUITheme, Palette as MaterialPalette, Color as MaterialColor, PaletteColor as MaterialPaletteColor
 } from '@mui/material'
 
-import {
-  Theme as EmotionTheme
-} from '@emotion/react'
-
 declare module '@emotion/react' {
     interface PaletteColor extends MaterialPaletteColor {
         darker: string
+        lighter: string
     }
 
     interface Color extends MaterialColor {
@@ -18,9 +15,10 @@ declare module '@emotion/react' {
     interface Palette extends MaterialPalette {
         grey: Color
         primary: PaletteColor
+        error: PaletteColor
     }
 
-    export interface Theme extends MaterialUITheme, EmotionTheme {
+    export interface Theme extends MaterialUITheme {
         customShadows: {
             z1: string
         }

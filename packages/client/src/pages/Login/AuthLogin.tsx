@@ -10,11 +10,19 @@ import {
   OutlinedInput,
   Stack
 } from '@mui/material'
-
 import { EyeOutlined, EyeInvisibleOutlined } from '@ant-design/icons'
+import { useForm } from 'react-hook-form'
+import { SendLoginParams, useLogin } from './hooks'
 
 const AuthLogin = () => {
   const [showPassword, setShowPassword] = useState(false)
+  const { register, handleSubmit, formState: { errors } } = useForm()
+  const onSubmit = handleSubmit(data => {
+    console.log(data)
+    sendLogin(data as SendLoginParams)
+  })
+  const { sendLogin, error } = useLogin()
+
   const handleClickShowPassword = () => {
     setShowPassword(!showPassword)
   }
@@ -22,47 +30,35 @@ const AuthLogin = () => {
   const handleMouseDownPassword = (event: any) => {
     event.preventDefault()
   }
-
-  const handleSubmit = () => {}
-  const handleBlur = () => {}
-  const handleChange = () => {}
   return (
 
-        <form noValidate onSubmit={handleSubmit}>
+        <form onSubmit={onSubmit}>
             <Grid container spacing={3}>
                 <Grid item xs={12}>
                     <Stack spacing={1}>
-                        <InputLabel htmlFor="email-login">Email Address</InputLabel>
+                        <InputLabel htmlFor="username">Usuario</InputLabel>
                         <OutlinedInput
-                            id="email-login"
-                            type="email"
-                            value={'values.email'}
-                            name="email"
-                            onBlur={handleBlur}
-                            onChange={handleChange}
-                            placeholder="Enter email address"
+                            id='username'
+                            placeholder="Introduce tu nombre de usuario"
                             fullWidth
-                            error={false}
+                            error={errors.username}
+                            {...register('username', { required: true, minLength: 3 })}
                         />
-                        {false && (
-                            <FormHelperText error id="standard-weight-helper-text-email-login">
-                                No erros
+                        {errors.username && (
+                            <FormHelperText error>
+                                Introduce un nombre de usuario válido
                             </FormHelperText>
                         )}
                     </Stack>
                 </Grid>
                 <Grid item xs={12}>
                     <Stack spacing={1}>
-                        <InputLabel htmlFor="password-login">Password</InputLabel>
+                        <InputLabel htmlFor="password">Contraseña</InputLabel>
                         <OutlinedInput
+                            id='password'
                             fullWidth
-                            error={false}
-                            id="-password-login"
+                            error={errors.password}
                             type={showPassword ? 'text' : 'password'}
-                            value={'values.password'}
-                            name="password"
-                            onBlur={handleBlur}
-                            onChange={handleChange}
                             endAdornment={
                                 <InputAdornment position="end">
                                     <IconButton
@@ -72,37 +68,38 @@ const AuthLogin = () => {
                                         edge="end"
                                         size="large"
                                     >
-                                        {showPassword ? <EyeOutlined/> : <EyeInvisibleOutlined/>}
+                                        {showPassword ? <EyeOutlined /> : <EyeInvisibleOutlined />}
                                     </IconButton>
                                 </InputAdornment>
                             }
-                            placeholder="Enter password"
+                            placeholder="Introduce la contraseña"
+                            {...register('password', { required: true, minLength: 6 })}
                         />
-                        {false && (
-                            <FormHelperText error id="standard-weight-helper-text-password-login">
-                                No errors
+                        {errors.password && (
+                            <FormHelperText error>
+                                Introduce una contraseña válida
                             </FormHelperText>
                         )}
                     </Stack>
                 </Grid>
 
-                {false && (
+                {error && (
                     <Grid item xs={12}>
-                        <FormHelperText error>Erros</FormHelperText>
+                        <FormHelperText error>{error}</FormHelperText>
                     </Grid>
                 )}
                 <Grid item xs={12}>
-                        <Button
-                            disableElevation
-                            disabled={false}
-                            fullWidth
-                            size="large"
-                            type="submit"
-                            variant="contained"
-                            color="primary"
-                        >
-                            Login
-                        </Button>
+                    <Button
+                        disableElevation
+                        disabled={false}
+                        fullWidth
+                        size="large"
+                        type="submit"
+                        variant="contained"
+                        color="primary"
+                    >
+                        Iniciar sesión
+                    </Button>
                 </Grid>
             </Grid>
         </form>
