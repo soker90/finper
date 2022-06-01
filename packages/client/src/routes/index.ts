@@ -1,10 +1,10 @@
 import { useRoutes } from 'react-router-dom'
 
 import LoginRoutes from './LoginRoutes'
-// import MainRoutes from './MainRoutes';
+import MainRoutes from './MainRoutes'
 
 // ==============================|| ROUTING RENDER ||============================== //
 
 export default function Routes () {
-  return useRoutes([LoginRoutes])
+  return useRoutes([MainRoutes, LoginRoutes])
 }
