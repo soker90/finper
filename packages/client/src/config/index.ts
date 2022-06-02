@@ -12,3 +12,4 @@ const config = {
 export default config
 export const drawerWidth = 260
 export const API_HOST = import.meta.env.VITE_API_HOST
+export const FINPER_TOKEN = 'FINPER_TOKEN'

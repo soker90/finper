@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { API_HOST } from 'config'
+import { useNavigate } from 'react-router-dom'
 
 export type SendLoginParams = {
     username: string
@@ -15,6 +16,7 @@ const ERROR_MESSAGES: Record<number | string, string> = {
 export const useLogin = () => {
   const [error, setError] = useState<string>('')
   const [loading, setLoading] = useState<boolean>(false)
+  const navigate = useNavigate()
 
   const handleErrors = ({ statusCode }: { statusCode: number }) => {
     const message = ERROR_MESSAGES[statusCode] || ERROR_MESSAGES.default
@@ -37,6 +39,7 @@ export const useLogin = () => {
         } else {
           setError('')
           localStorage.setItem('token', res.token)
+          navigate('/')
         }
       }).catch(error => {
         handleErrors(error)
