@@ -18,8 +18,12 @@
     "baseUrl": "./src",
     "paths": {
       "themes/*": ["./themes/*"],
+      "hooks/*": ["./hooks/*"],
+      "contexts/*": ["./contexts/*"],
       "components/*": ["./components/*"],
-      "config/*": ["./config/*"]
+      "config/*": ["./config/*"],
+      "utils/*": ["./utils/*"],
+      "services/*": ["./services/*"]
     },
     "types": ["@emotion/react/types/css-prop"]
   },

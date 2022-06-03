@@ -4,7 +4,7 @@ import axios from 'axios'
 import { FINPER_TOKEN } from 'config'
 
 class AuthService {
-  setAxiosInterceptors = ({ onLogout }: {onLogout: () => void}) => {
+  setAxiosInterceptors = ({ onLogout }: { onLogout: () => void }) => {
     axios.interceptors.response.use(
       response => response,
       error => {
@@ -33,7 +33,7 @@ class AuthService {
       .then(({ data }) => {
         if (data.token) {
           this.setSession(data.token)
-          resolve(jwtDecode(data.token).username)
+          resolve(data.token)
         } else reject(data.error)
       })
       .catch(error => {
@@ -41,13 +41,13 @@ class AuthService {
       })
   })
 
-  loginInWithToken = () => new Promise((resolve, reject) => {
-    axios.get('/account/me')
+  loginInWithToken = (): Promise<string> => new Promise((resolve, reject) => {
+    axios.get('/auth/me')
       .then(({ headers }) => {
         if (headers.token) {
           this.setSession(headers.token)
-          resolve(jwtDecode(headers.token).username)
-        } else reject()
+          resolve(headers.token)
+        } else throw new Error()
       })
       .catch(error => {
         reject(error)
@@ -68,7 +68,7 @@ class AuthService {
     }
   }
 
-  getAccessToken = () => localStorage.getItem(FINPER_TOKEN)
+  getAccessToken = (): string => localStorage.getItem(FINPER_TOKEN) as string
 
   isValidToken = (accessToken: string) => {
     if (!accessToken) return false
@@ -77,6 +77,14 @@ class AuthService {
     const currentTime = Date.now() / 1000
 
     return decoded.exp > currentTime
+  }
+
+  getExpireToken = (accessToken: string): number => {
+    if (!accessToken) return 0
+
+    const decoded: any = jwtDecode(accessToken)
+
+    return decoded.exp
   }
 
   isAuthenticated = () => !!this.getAccessToken()

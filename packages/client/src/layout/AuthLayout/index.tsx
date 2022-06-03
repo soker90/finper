@@ -35,4 +35,5 @@ const AuthLayout = () => (
         </Grid>
     </Box>
 )
+
 export default AuthLayout
