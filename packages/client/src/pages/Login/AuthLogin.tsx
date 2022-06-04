@@ -17,11 +17,11 @@ import { SendLoginParams, useLogin } from './hooks'
 const AuthLogin = () => {
   const [showPassword, setShowPassword] = useState(false)
   const { register, handleSubmit, formState: { errors } } = useForm()
+  const { sendLogin, error, loading } = useLogin()
 
   const onSubmit = handleSubmit(data => {
     sendLogin(data as SendLoginParams)
   })
-  const { sendLogin, error, loading } = useLogin()
 
   const handleClickShowPassword = () => {
     setShowPassword(state => !state)
@@ -37,7 +37,7 @@ const AuthLogin = () => {
                             id='username'
                             placeholder="Introduce tu nombre de usuario"
                             fullWidth
-                            error={errors.username}
+                            error={!!errors.username}
                             {...register('username', { required: true, minLength: 3 })}
                         />
                         {errors.username && (
@@ -53,7 +53,7 @@ const AuthLogin = () => {
                         <OutlinedInput
                             id='password'
                             fullWidth
-                            error={errors.password}
+                            error={!!errors.password}
                             type={showPassword ? 'text' : 'password'}
                             endAdornment={
                                 <InputAdornment position="end">
@@ -63,26 +63,27 @@ const AuthLogin = () => {
                                         edge="end"
                                         size="large"
                                     >
-                                        {showPassword ? <EyeOutlined /> : <EyeInvisibleOutlined />}
+                                        {showPassword ? <EyeOutlined/> : <EyeInvisibleOutlined/>}
                                     </IconButton>
                                 </InputAdornment>
                             }
                             placeholder="Introduce la contraseña"
                             {...register('password', { required: true, minLength: 5 })}
                         />
-                        {errors.password && (
+                         {errors.password && (
                             <FormHelperText error>
                                 Introduce una contraseña válida
                             </FormHelperText>
-                        )}
+                         )}
                     </Stack>
                 </Grid>
 
-                {error && (
+                 {error && (
                     <Grid item xs={12}>
                         <FormHelperText error>{error}</FormHelperText>
                     </Grid>
-                )}
+                 )}
+
                 <Grid item xs={12}>
                     <Button
                         disableElevation
