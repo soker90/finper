@@ -1,6 +1,7 @@
 import { useState } from 'react'
-import { API_HOST } from 'config'
 import { useNavigate } from 'react-router-dom'
+import useAuth from 'hooks/useAuth'
+import authService from 'services/authService'
 
 export type SendLoginParams = {
     username: string
@@ -17,6 +18,7 @@ export const useLogin = () => {
   const [error, setError] = useState<string>('')
   const [loading, setLoading] = useState<boolean>(false)
   const navigate = useNavigate()
+  const { setAccessToken } = useAuth()
 
   const handleErrors = ({ statusCode }: { statusCode: number }) => {
     const message = ERROR_MESSAGES[statusCode] || ERROR_MESSAGES.default
@@ -25,28 +27,13 @@ export const useLogin = () => {
 
   const sendLogin = ({ username, password }: SendLoginParams) => {
     setLoading(true)
-    fetch(`${API_HOST}auth/login`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ username, password })
-    })
-      .then(res => res.json())
-      .then(res => {
-        if (res.error) {
-          handleErrors(res)
-        } else {
-          setError('')
-          localStorage.setItem('token', res.token)
-          navigate('/')
-        }
-      }).catch(error => {
-        handleErrors(error)
+    authService.loginWithUsernameAndPassword(username, password)
+      .then((token) => {
+        setAccessToken(token)
+        navigate('/')
       })
-      .finally(() => {
-        setLoading(false)
-      })
+      .catch(response => handleErrors(response))
+      .finally(() => setLoading(false))
   }
 
   return {

@@ -17,6 +17,7 @@
     "jsx": "react-jsx",
     "baseUrl": "./src",
     "paths": {
+      "guards/*": ["./guards/*"],
       "themes/*": ["./themes/*"],
       "hooks/*": ["./hooks/*"],
       "contexts/*": ["./contexts/*"],

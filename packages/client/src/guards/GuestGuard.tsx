@@ -1,17 +1,14 @@
-import { useSelector } from 'react-redux'
 import { Navigate } from 'react-router-dom'
-import PropTypes from 'prop-types'
+import useAuth from 'hooks/useAuth'
 
-const GuestGuard = ({ children }) => {
-  const account = useSelector(state => state.account)
+const GuestGuard = ({ children }: any) => {
+  const { hasToken } = useAuth()
 
-  if (account.user) return <Navigate to='/app' replace />
+  // TODO: check localStorage token previously in Auth component
+
+  if (hasToken()) return <Navigate to='/' replace/>
 
   return children
-}
-
-GuestGuard.propTypes = {
-  children: PropTypes.any
 }
 
 export default GuestGuard

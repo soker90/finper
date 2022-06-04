@@ -28,16 +28,16 @@ class AuthService {
     else this.setSession(null)
   }
 
-  loginWithUsernameAndPassword = (username: string, password: string) => new Promise((resolve, reject) => {
-    axios.post('/account/login', { username, password })
+  loginWithUsernameAndPassword = (username: string, password: string) => new Promise<string>((resolve, reject) => {
+    axios.post('/auth/login', { username, password })
       .then(({ data }) => {
         if (data.token) {
           this.setSession(data.token)
           resolve(data.token)
         } else reject(data.error)
       })
-      .catch(error => {
-        reject(error)
+      .catch(({ response }) => {
+        reject(response.data)
       })
   })
 

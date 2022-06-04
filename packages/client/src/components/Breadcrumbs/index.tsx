@@ -6,8 +6,6 @@ import { Grid, Typography } from '@mui/material'
 
 import MainCard from '../MainCard'
 
-// ==============================|| BREADCRUMBS ||============================== //
-
 const Breadcrumbs = ({ navigation, title, ...others }: any) => {
   const location = useLocation()
   const [main, setMain] = useState<any>()
@@ -38,11 +36,6 @@ const Breadcrumbs = ({ navigation, title, ...others }: any) => {
       return false
     })
   })
-
-  // only used for component demo breadcrumbs
-  if (location.pathname === '/breadcrumbs') {
-    location.pathname = '/dashboard/analytics'
-  }
 
   let mainContent
   let itemContent

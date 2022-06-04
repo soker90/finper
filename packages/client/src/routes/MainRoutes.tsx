@@ -1,6 +1,7 @@
 import { lazy } from 'react'
 
 import MainLayout from '../layout/MainLayout'
+import { Navigate } from 'react-router-dom'
 
 const DashboardDefault = lazy(() => import('../pages/Dashboard'))
 
@@ -8,18 +9,18 @@ const DashboardDefault = lazy(() => import('../pages/Dashboard'))
 
 const MainRoutes = {
   path: '/',
-  element: <MainLayout />,
+  element: <MainLayout/>,
   children: [
     {
       path: '/',
-      element: <DashboardDefault />
+      element: <Navigate to='/dashboard/default'/>
     },
     {
       path: 'dashboard',
       children: [
         {
           path: 'default',
-          element: <DashboardDefault />
+          element: <DashboardDefault/>
         }
       ]
     }
