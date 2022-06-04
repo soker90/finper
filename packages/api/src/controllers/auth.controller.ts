@@ -3,7 +3,6 @@ import Boom from '@hapi/boom';
 import passport from 'passport';
 import {NextFunction, Request, Response} from 'express';
 
-import signToken from '../helpers/sign-token';
 import {IUserService} from '../services/user.service';
 import {IAccountService} from '../services/auth.service';
 import validateLoginInputParams from '../validators/validate-login-input-params';
@@ -46,6 +45,7 @@ export class AuthController {
     }
 
     public login(req: Request, res: Response, next: NextFunction) {
+        const {authService} = this;
         Promise.resolve(req.body)
             .tap(({username}) => this.logger.logInfo(`/login - user: ${username && username.toLowerCase()}`))
             .then(validateLoginInputParams)
@@ -59,11 +59,21 @@ export class AuthController {
                         return next(Boom.unauthorized().output);
                     }
 
-                    const token = signToken({username: user.username});
+                    const token = authService.getSignedToken(user.username);
 
                     res.send({token});
                 })(req, res, next);
             })
+            .catch((error) => next(error));
+    }
+
+    public me(req: Request, res: Response, next: NextFunction) {
+        Promise.resolve(req)
+            .tap(() => {
+                console.log(JSON.stringify(req.headers));
+                res.status(204).send();
+            })
+
             .catch((error) => next(error));
     }
 }

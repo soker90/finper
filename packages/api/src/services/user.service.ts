@@ -1,7 +1,7 @@
 import {
     UserModel,
 } from '@soker90/finper-models';
-import Boom from "@hapi/boom";
+import Boom from '@hapi/boom';
 
 export interface IUserService {
     createUser({username, password}: Record<string, string>): Promise<Record<string, string>>

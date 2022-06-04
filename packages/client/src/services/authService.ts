@@ -49,8 +49,9 @@ class AuthService {
           resolve(headers.token)
         } else throw new Error()
       })
-      .catch(error => {
-        reject(error)
+      .catch(({ response }) => {
+        console.log('error', response)
+        reject(response.data)
       })
   })
 

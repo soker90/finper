@@ -1,9 +1,11 @@
 import { Router } from 'express';
+import passport from 'passport';
 
 import loggerHandler from '../utils/logger';
 import { AuthController } from '../controllers/auth.controller';
-
 import { userService, accountService } from '../services';
+
+import '../auth/jwt-strategy-passport-handler';
 
 export class AuthRoutes {
   router: Router;
@@ -28,6 +30,12 @@ export class AuthRoutes {
     this.router.post(
       '/register',
       this.accountController.register.bind(this.accountController)
+    );
+
+    this.router.get(
+        '/me',
+        passport.authenticate('jwt', { session: false }),
+        this.accountController.me.bind(this.accountController)
     );
   }
 }
