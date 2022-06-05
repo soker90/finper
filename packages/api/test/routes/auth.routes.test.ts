@@ -8,6 +8,7 @@ import { faker } from '@faker-js/faker'
 import { server } from '../../src/server'
 import { insertCredentials } from '../insert-data-to-model'
 import { MAX_USERNAME_LENGTH, MIN_PASSWORD_LENGTH } from '../../src/config/inputs'
+import { requestLogin } from '../request-login'
 
 const testDatabase = require('../test-db')(mongoose)
 
@@ -223,6 +224,22 @@ describe('Account', () => {
 
     test('when token is not valid, it should response with a status code of 401', async () => {
       await supertest(server.app).get(path).set('Authorization', 'notValid').expect(401)
+    })
+
+    describe('when token is valid', () => {
+      let token: string
+
+      beforeAll(async () => {
+        await insertCredentials()
+
+        token = await requestLogin(server.app)
+      })
+
+      afterAll(() => UserModel.deleteMany())
+
+      test('it should response a status code of 204', async () => {
+        await supertest(server.app).get(path).set('Authorization', `Bearer ${token}`).expect(204)
+      })
     })
   })
 })
