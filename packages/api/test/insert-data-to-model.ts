@@ -5,13 +5,12 @@ import {
     MAX_USERNAME_LENGTH,
     MIN_PASSWORD_LENGTH,
 } from '../src/config/inputs';
-import hashPassword from '../src/helpers/hash-password';
 
 export async function insertCredentials(params: Record<string, string | boolean> = {}): Promise<void> {
     const parsedParams: Record<string, string | boolean> = {};
 
     if (params.password) {
-        parsedParams.password = hashPassword(params.password as string);
+        parsedParams.password = params.password;
     }
 
     if (params.username) {
@@ -20,7 +19,7 @@ export async function insertCredentials(params: Record<string, string | boolean>
 
 
     await UserModel.create({
-        password: hashPassword(faker.internet.password(MIN_PASSWORD_LENGTH)),
+        password: faker.internet.password(MIN_PASSWORD_LENGTH),
         username: faker.internet.userName().slice(0, MAX_USERNAME_LENGTH).toLowerCase(),
         ...parsedParams,
     });

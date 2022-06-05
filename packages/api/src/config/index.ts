@@ -13,9 +13,9 @@ export default {
         pass: process.env.MONGODB_PASS || '',
     },
     jwt: {
-        secret: process.env.JWT_SECRET || 'ddd',
-        saltRounds: process.env.SALT_ROUNDS || '',
-        timeout: '2h'
+        secret: process.env.JWT_SECRET || 'test',
+        saltRounds: process.env.SALT_ROUNDS || '10',
+        timeout: '1h'
     },
     logger: {
         loki: {

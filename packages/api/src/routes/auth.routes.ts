@@ -1,4 +1,4 @@
-import {Request, Router} from 'express';
+import {Router} from 'express';
 
 import loggerHandler from '../utils/logger';
 import {AuthController} from '../controllers/auth.controller';
