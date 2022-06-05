@@ -69,11 +69,7 @@ export class AuthController {
 
     public me(req: Request, res: Response, next: NextFunction) {
         Promise.resolve(req)
-            .tap(() => {
-                console.log(JSON.stringify(req.headers));
-                res.status(204).send();
-            })
-
+            .then(() => res.status(204).send())
             .catch((error) => next(error));
     }
 }
