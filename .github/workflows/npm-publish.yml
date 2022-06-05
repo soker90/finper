@@ -15,8 +15,8 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: 16
-      - run: npm ci --workspace=models
-      - run: npm test --workspace=models
+      - run: npm ci --workspaces=models
+      - run: npm test --workspaces=models
 
   publish-npm:
     needs: build
@@ -27,7 +27,7 @@ jobs:
         with:
           node-version: 16
           registry-url: https://registry.npmjs.org/
-      - run: npm ci --workspace=models
-      - run: npm publish --workspace=models
+      - run: npm ci --workspaces=models
+      - run: npm publish --workspaces=models
         env:
           NODE_AUTH_TOKEN: ${{secrets.npm_token}}
