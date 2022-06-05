@@ -5,6 +5,7 @@ define help
   Commands:
 
     install:                    install all dependencies.
+    start-api:                  launch api
 
 endef
 export help
@@ -18,7 +19,7 @@ install:
 build-models:
 	@npm --prefix packages/models/ run build
 
-install-api:
-	@npm --prefix packages/api/ i
+start-api:
+	cd packages/api && npm start
 
 
