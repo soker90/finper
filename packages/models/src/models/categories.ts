@@ -1,5 +1,5 @@
-import {Schema, model, Document} from 'mongoose';
-import {TransactionType} from './transactions';
+import { Schema, model, Document } from 'mongoose'
+import { TransactionType } from './transactions'
 
 export interface ICategory extends Document {
     name: string,
@@ -7,9 +7,8 @@ export interface ICategory extends Document {
 }
 
 const categorySchema = new Schema<ICategory>({
-    name: {type: String, required: true},
-    type: {type: String, required: true},
-}, {versionKey: false});
+  name: { type: String, required: true },
+  type: { type: String, required: true }
+}, { versionKey: false })
 
-
-export const CategoryModel = model<ICategory>('Category', categorySchema);
+export const CategoryModel = model<ICategory>('Category', categorySchema)

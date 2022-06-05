@@ -1,61 +1,60 @@
 import {
-    CategoryModel, ICategory,
-    mongoose,
-} from '../../src';
-import createCategory from '../helpers/create-category';
+  CategoryModel, ICategory,
+  mongoose
+} from '../../src'
+import createCategory from '../helpers/create-category'
 
-const testDatabase = require('../test-db')(mongoose);
+const testDatabase = require('../test-db')(mongoose)
 
 const testCategory = (expected: ICategory, received: ICategory) => {
-    expect(expected.type).toBe(received.type);
-    expect(expected.name).toBe(received.name);
-};
+  expect(expected.type).toBe(received.type)
+  expect(expected.name).toBe(received.name)
+}
 
 describe('Category', () => {
-    beforeAll(() => testDatabase.connect());
+  beforeAll(() => testDatabase.connect())
 
-    afterAll(() => testDatabase.close());
+  afterAll(() => testDatabase.close())
 
-    describe('when there is a new category', () => {
-        let categoryData: ICategory;
+  describe('when there is a new category', () => {
+    let categoryData: ICategory
 
-        beforeAll(() => createCategory().then((category) => {
-            categoryData = category;
-        }));
+    beforeAll(() => createCategory().then((category) => {
+      categoryData = category
+    }))
 
-        afterAll(() => testDatabase.clear());
+    afterAll(() => testDatabase.clear())
 
-        test('it should contain all the defined properties', async () => {
-            const categoryDocument: ICategory = await CategoryModel.findOne() as ICategory;
+    test('it should contain all the defined properties', async () => {
+      const categoryDocument: ICategory = await CategoryModel.findOne() as ICategory
 
-            testCategory(categoryDocument, categoryData);
-        });
-    });
+      testCategory(categoryDocument, categoryData)
+    })
+  })
 
-    describe('when there are multiple accounts', () => {
-        let firstCategory: ICategory;
+  describe('when there are multiple accounts', () => {
+    let firstCategory: ICategory
 
-        beforeAll(async () => {
-            firstCategory = await createCategory();
+    beforeAll(async () => {
+      firstCategory = await createCategory()
 
-            await Promise.all([
-                createCategory(),
-                createCategory(),
-            ]);
-        });
+      await Promise.all([
+        createCategory(),
+        createCategory()
+      ])
+    })
 
-        afterAll(() => testDatabase.clear());
+    afterAll(() => testDatabase.clear())
 
-        test('it should be 3 account stored', async () => {
-            const categoryCounter = await CategoryModel.count();
-            expect(categoryCounter).toBe(3);
-        });
+    test('it should be 3 account stored', async () => {
+      const categoryCounter = await CategoryModel.count()
+      expect(categoryCounter).toBe(3)
+    })
 
-        test('it should contain all the defined properties of the first category', async () => {
-            const categoryDocument: ICategory = await CategoryModel.findOne({_id: firstCategory._id}) as ICategory;
+    test('it should contain all the defined properties of the first category', async () => {
+      const categoryDocument: ICategory = await CategoryModel.findOne({ _id: firstCategory._id }) as ICategory
 
-            testCategory(categoryDocument, firstCategory);
-        });
-
-    });
-});
+      testCategory(categoryDocument, firstCategory)
+    })
+  })
+})
