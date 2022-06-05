@@ -1,39 +1,39 @@
-import {Router} from 'express';
+import { Router } from 'express'
 
-import loggerHandler from '../utils/logger';
-import {AuthController} from '../controllers/auth.controller';
-import {userService, accountService} from '../services';
-import authMiddleware from '../middlewares/auth.middleware';
+import loggerHandler from '../utils/logger'
+import { AuthController } from '../controllers/auth.controller'
+import { userService, accountService } from '../services'
+import authMiddleware from '../middlewares/auth.middleware'
 
 export class AuthRoutes {
-    router: Router;
+  router: Router
 
-    public accountController: AuthController = new AuthController({
-        userService,
-        authService: accountService,
-        loggerHandler: loggerHandler('AccountController'),
-    });
+  public accountController: AuthController = new AuthController({
+    userService,
+    authService: accountService,
+    loggerHandler: loggerHandler('AccountController')
+  })
 
-    constructor() {
-        this.router = Router();
-        this.routes();
-    }
+  constructor () {
+    this.router = Router()
+    this.routes()
+  }
 
-    routes() {
-        this.router.post(
-            '/login',
-            this.accountController.login.bind(this.accountController)
-        );
+  routes () {
+    this.router.post(
+      '/login',
+      this.accountController.login.bind(this.accountController)
+    )
 
-        this.router.post(
-            '/register',
-            this.accountController.register.bind(this.accountController)
-        );
+    this.router.post(
+      '/register',
+      this.accountController.register.bind(this.accountController)
+    )
 
-        this.router.get(
-            '/me',
-            authMiddleware,
-            this.accountController.me.bind(this.accountController)
-        );
-    }
+    this.router.get(
+      '/me',
+      authMiddleware,
+      this.accountController.me.bind(this.accountController)
+    )
+  }
 }

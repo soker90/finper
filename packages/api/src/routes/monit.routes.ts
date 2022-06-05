@@ -1,22 +1,22 @@
-import {Router} from 'express';
+import { Router } from 'express'
 
-import {MonitController} from '../controllers/monit.controller';
-import loggerHandler from '../utils/logger';
+import { MonitController } from '../controllers/monit.controller'
+import loggerHandler from '../utils/logger'
 
 export class MonitRoutes {
-    router: Router;
+  router: Router
 
-    public monitController: MonitController = new MonitController({
-        loggerHandler: loggerHandler('MonitController'),
-    });
+  public monitController: MonitController = new MonitController({
+    loggerHandler: loggerHandler('MonitController')
+  })
 
-    constructor() {
-        this.router = Router();
-        this.routes();
-    }
+  constructor () {
+    this.router = Router()
+    this.routes()
+  }
 
-    routes() {
-        this.router.get('/health',
-            this.monitController.getHealthStatus.bind(this.monitController));
-    }
+  routes () {
+    this.router.get('/health',
+      this.monitController.getHealthStatus.bind(this.monitController))
+  }
 }

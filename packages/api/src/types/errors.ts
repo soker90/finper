@@ -1,4 +1,4 @@
-import Boom from '@hapi/boom';
+import Boom from '@hapi/boom'
 
 export interface CustomError extends Error {
   code: number
