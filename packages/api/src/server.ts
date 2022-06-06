@@ -10,6 +10,7 @@ import config from './config'
 import { MonitRoutes } from './routes/monit.routes'
 import handleError from './middlewares/handle-error'
 import { AuthRoutes } from './routes/auth.routes'
+import logger from './middlewares/logger'
 
 global.Promise = require('bluebird')
 
@@ -35,6 +36,7 @@ class Server {
     this.app.use(express.urlencoded({ extended: false }))
     this.app.use(compression())
     this.app.use(cors())
+    logger(this.app)
   }
 
   public postMiddlewareConfig (): void {
