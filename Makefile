@@ -17,9 +17,11 @@ install:
 	@npm i
 
 build-models:
-	@npm --prefix packages/models/ run build
+	@npm test --workspace=packages/models run build
 
 start-api:
 	cd packages/api && npm start
 
+test-api:
+	@npm test --workspace=packages/api
 
