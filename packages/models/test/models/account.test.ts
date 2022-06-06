@@ -27,7 +27,7 @@ describe('Account', () => {
       expect(accountDocument.bank).toBe(accountData.bank)
       expect(accountDocument.balance).toBe(accountData.balance)
       expect(accountDocument.isActive).toBe(accountData.isActive)
-      expect(accountDocument.username).toBe(accountData.username)
+      expect(accountDocument.user).toBe(accountData.user)
     })
   })
 
@@ -57,7 +57,7 @@ describe('Account', () => {
       expect(accountDocument.bank).toBe(firstAccount.bank)
       expect(accountDocument.balance).toBe(firstAccount.balance)
       expect(accountDocument.isActive).toBe(firstAccount.isActive)
-      expect(accountDocument.username).toBe(firstAccount.username)
+      expect(accountDocument.user).toBe(firstAccount.user)
     })
   })
 })

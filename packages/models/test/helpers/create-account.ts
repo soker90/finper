@@ -8,7 +8,7 @@ export default (params = {}): Promise<IAccount> => (
     bank: faker.lorem.word(),
     balance: faker.finance.amount(),
     isActive: faker.datatype.boolean(),
-    username: faker.internet.userName(),
+    user: faker.internet.userName(),
     ...params
   })
 )

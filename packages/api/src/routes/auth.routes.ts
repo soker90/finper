@@ -10,7 +10,7 @@ export class AuthRoutes {
 
   public accountController: AuthController = new AuthController({
     userService,
-    authService: authService,
+    authService,
     loggerHandler: loggerHandler('AuthController')
   })
 
