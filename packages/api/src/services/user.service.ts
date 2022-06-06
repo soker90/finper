@@ -19,7 +19,7 @@ export default class UserService {
 
     if (credentialDocument) {
       if (credentialDocument.username === username) {
-        throw Boom.conflict('The username already exists').output
+        throw Boom.conflict('El usuario ya existe').output
       }
     }
   }
