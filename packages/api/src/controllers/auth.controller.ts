@@ -4,7 +4,7 @@ import passport from 'passport'
 import { NextFunction, Request, Response } from 'express'
 
 import { IUserService } from '../services/user.service'
-import { IAccountService } from '../services/auth.service'
+import { IAuthService } from '../services/auth.service'
 import validateLoginInputParams from '../validators/validate-login-input-params'
 import validateRegisterInputParams from '../validators/validate-register-input-params'
 
@@ -13,7 +13,7 @@ import '../auth/local-strategy-passport-handler'
 type IAccountController = {
     loggerHandler: any,
     userService: IUserService,
-    authService: IAccountService,
+    authService: IAuthService,
 }
 
 export class AuthController {
