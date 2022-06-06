@@ -3,8 +3,8 @@ import {
   mongoose
 } from '../../src'
 import createCategory from '../helpers/create-category'
-
-const testDatabase = require('../test-db')(mongoose)
+import testDb from '../test-db'
+const testDatabase = testDb(mongoose)
 
 const testCategory = (expected: ICategory, received: ICategory) => {
   expect(expected.type).toBe(received.type)
