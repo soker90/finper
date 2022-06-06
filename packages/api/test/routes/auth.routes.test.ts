@@ -226,6 +226,13 @@ describe('Account', () => {
       await supertest(server.app).get(path).set('Authorization', 'notValid').expect(401)
     })
 
+    test('when token is expired, it should response with a status code of 401', async () => {
+      await supertest(server.app)
+        .get(path)
+        .set('Authorization', 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImVkdSIsImlhdCI6MTY1NDUzNjE1MCwiZXhwIjoxNjU0NTM2MTUwfQ.Vo9EJmvVxLmeal8wtRbTT7Vg0Z7A8QoIUO4GwuS4uJ8')
+        .expect(401)
+    })
+
     describe('when token is valid', () => {
       let token: string
 
