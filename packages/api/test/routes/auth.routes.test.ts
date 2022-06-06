@@ -82,7 +82,7 @@ describe('Account', () => {
       const username = faker.internet.userName()
 
       beforeAll(async () => {
-        await insertCredentials({ username })
+        await insertCredentials({ username, password: faker.internet.password(MIN_PASSWORD_LENGTH - 1) })
 
         response = await supertest(server.app)
           .post(path)
