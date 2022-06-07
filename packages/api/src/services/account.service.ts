@@ -7,7 +7,7 @@ export interface IAccountService {
 
     deleteAccount(account: IAccount): Promise<IAccount>;
 
-    getAccounts(username: string): Promise<IAccount[]>;
+    getAccounts(user: string): Promise<IAccount[]>;
 
     getAccount(id: string): Promise<IAccount| null>;
 }
@@ -22,11 +22,11 @@ export default class AccountService implements IAccountService {
   }
 
   public async deleteAccount (account: IAccount): Promise<any> {
-    return AccountModel.updateOne({ _id: account._id }, { $set: { isActive: true } })
+    return AccountModel.updateOne({ _id: account._id }, { $set: { isActive: false } })
   }
 
-  public async getAccounts (username: string): Promise<IAccount[]> {
-    return AccountModel.find({ username })
+  public async getAccounts (user: string): Promise<IAccount[]> {
+    return AccountModel.find({ user, isActive: true }, '_id name bank balance')
   }
 
   public async getAccount (id: string): Promise<IAccount | null> {

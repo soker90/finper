@@ -8,9 +8,18 @@ const defaultCredentials = {
   password: faker.internet.password(MIN_PASSWORD_LENGTH - 1)
 }
 
+type CredentialsTYpe = {
+    username?: string
+    password?: string
+}
+
 const defaultApp = require('../src/server').app
 
-export const requestLogin = (app = defaultApp, credentials = defaultCredentials): Promise<string> => {
+export const requestLogin = (app = defaultApp, credentials: CredentialsTYpe = defaultCredentials): Promise<string> => {
+  if (!credentials.password) {
+    credentials.password = defaultCredentials.password
+  }
+
   return insertCredentials(credentials).then(() => (
     supertest(app)
       .post('/api/auth/login')

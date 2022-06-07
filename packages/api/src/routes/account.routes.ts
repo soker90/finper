@@ -20,9 +20,15 @@ export class AccountRoutes {
 
   routes () {
     this.router.post(
-      '/create',
+      '/',
       authMiddleware,
       this.accountController.create.bind(this.accountController)
+    )
+
+    this.router.get(
+      '/',
+      authMiddleware,
+      this.accountController.accounts.bind(this.accountController)
     )
   }
 }

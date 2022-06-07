@@ -28,7 +28,7 @@ class Server {
   public routes (): void {
     this.app.use('/api/monit', new MonitRoutes().router)
     this.app.use('/api/auth', new AuthRoutes().router)
-    this.app.use('/api/account', new AccountRoutes().router)
+    this.app.use('/api/accounts', new AccountRoutes().router)
   }
 
   public preMiddlewareConfig (): void {

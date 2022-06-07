@@ -36,4 +36,15 @@ export class AccountController {
         next(error)
       })
   }
+
+  public async accounts (req: Request, res: Response, next: NextFunction): Promise<void> {
+    Promise.resolve(req.user as string)
+      .tap(() => this.logger.logInfo(`/accounts - list accounts of ${req.user}`))
+      .then(this.accountService.getAccounts.bind(this.accountService))
+      .then(response => {
+        res.send(response)
+      }).catch(error => {
+        next(error)
+      })
+  }
 }
