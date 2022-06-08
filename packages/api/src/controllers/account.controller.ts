@@ -2,8 +2,8 @@
 import { NextFunction, Request, Response } from 'express'
 
 import { IAccountService } from '../services/account.service'
-import validateAccountInputParams from '../validators/validate-account-input-params'
 
+import { validateAccountCreateParams } from '../validators/account'
 import '../auth/local-strategy-passport-handler'
 import extractUser from '../helpers/extract-user'
 
@@ -25,7 +25,7 @@ export class AccountController {
   public async create (req: Request, res: Response, next: NextFunction): Promise<void> {
     Promise.resolve(req.body)
       .tap(({ name }) => this.logger.logInfo(`/create - account: ${name?.toLowerCase()}`))
-      .then(validateAccountInputParams)
+      .then(validateAccountCreateParams)
       .then(extractUser(req))
       .then(this.accountService.addAccount.bind(this.accountService))
       .tap(({ name }) => this.logger.logInfo(`Account ${name} has been succesfully created`))

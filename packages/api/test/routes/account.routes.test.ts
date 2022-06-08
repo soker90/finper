@@ -8,7 +8,7 @@ import { server } from '../../src/server'
 
 import { requestLogin } from '../request-login'
 import { insertAccount } from '../insert-data-to-model'
-import { MAX_USERNAME_LENGTH } from '../../src/config/inputs'
+import { generateUsername } from '../generate-values'
 
 const testDatabase = require('../test-db')(mongoose)
 
@@ -21,7 +21,7 @@ describe('Account', () => {
     const path = '/api/accounts'
     let token: string
 
-    beforeEach(async () => {
+    beforeAll(async () => {
       token = await requestLogin(server.app)
     })
 
@@ -30,7 +30,7 @@ describe('Account', () => {
     })
 
     test('when no params provided, it should response an error with status code 422', async () => {
-      await supertest(server.app).post(path).set('Authorization', `Bearer ${token}`).expect(422)
+      await supertest(server.app).post(path).auth(token, { type: 'bearer' }).expect(422)
     })
 
     test.each(['name', 'bank'])('when no %s param provided, it should response an error with status code 422', async (param: string) => {
@@ -62,13 +62,10 @@ describe('Account', () => {
   describe('GET /', () => {
     const path = '/api/accounts'
     let token: string
-    const user: string = faker.internet.userName()
+    const user: string = generateUsername()
 
     beforeAll(async () => {
       await insertAccount({ isActive: true })
-    })
-
-    beforeEach(async () => {
       token = await requestLogin(server.app, { username: user })
     })
 
@@ -90,7 +87,12 @@ describe('Account', () => {
         isActive: true,
         user
       })
-      await supertest(server.app).get(path).auth(token, { type: 'bearer' }).expect(200, [account])
+      await supertest(server.app).get(path).auth(token, { type: 'bearer' }).expect(200, [{
+        _id: account._id.toString(),
+        name: account.name,
+        bank: account.bank,
+        balance: account.balance
+      }])
     })
   })
 })
