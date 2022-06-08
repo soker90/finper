@@ -30,5 +30,11 @@ export class AccountRoutes {
       authMiddleware,
       this.accountController.accounts.bind(this.accountController)
     )
+
+    this.router.patch(
+      '/:id',
+      authMiddleware,
+      this.accountController.edit.bind(this.accountController)
+    )
   }
 }

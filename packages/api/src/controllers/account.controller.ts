@@ -3,9 +3,10 @@ import { NextFunction, Request, Response } from 'express'
 
 import { IAccountService } from '../services/account.service'
 
-import { validateAccountCreateParams } from '../validators/account'
+import { validateAccountCreateParams, validateAccountEditParams } from '../validators/account'
 import '../auth/local-strategy-passport-handler'
 import extractUser from '../helpers/extract-user'
+import { RequestUser } from '../types'
 
 type IAccountController = {
     loggerHandler: any,
@@ -44,6 +45,20 @@ export class AccountController {
       .then(response => {
         res.send(response)
       }).catch(error => {
+        next(error)
+      })
+  }
+
+  public async edit (req: Request, res: Response, next: NextFunction): Promise<void> {
+    Promise.resolve(req as RequestUser)
+      .tap(({ body }) => this.logger.logInfo(`/edit - account: ${body.name?.toLowerCase()}`))
+      .then(validateAccountEditParams)
+      .then(this.accountService.editAccount.bind(this.accountService))
+      .tap(({ id }) => this.logger.logInfo(`Account ${id} has been succesfully edited`))
+      .then((response) => {
+        res.send(response)
+      })
+      .catch((error) => {
         next(error)
       })
   }

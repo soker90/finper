@@ -1,15 +1,19 @@
 import { AccountModel, IAccount } from '@soker90/finper-models'
 
+interface IAccountUser extends IAccount {
+    user: string
+}
+
 export interface IAccountService {
     addAccount(account: IAccount): Promise<IAccount>;
 
-    editAccount(account: IAccount): Promise<IAccount>;
+    editAccount({ id, account }: { id: string, value: IAccount }): Promise<IAccount>;
 
     deleteAccount(account: IAccount): Promise<IAccount>;
 
     getAccounts(user: string): Promise<IAccount[]>;
 
-    getAccount(id: string): Promise<IAccount| null>;
+    getAccount(id: string): Promise<IAccount | null>;
 }
 
 export default class AccountService implements IAccountService {
@@ -17,8 +21,8 @@ export default class AccountService implements IAccountService {
     return AccountModel.create(account)
   }
 
-  public async editAccount (account: IAccount): Promise<IAccount> {
-    return AccountModel.findByIdAndUpdate(account._id, account, { new: true }) as any
+  public async editAccount ({ id, value }: { id: string, value: IAccount }): Promise<IAccount> {
+    return AccountModel.findByIdAndUpdate(id, value, { new: true }) as unknown as IAccount
   }
 
   public async deleteAccount (account: IAccount): Promise<any> {
