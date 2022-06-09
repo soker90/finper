@@ -1,0 +1,24 @@
+{
+  "name": "@soker90/finper-types",
+  "version": "0.0.1",
+  "description": "Types for finper",
+  "main": "index.ts",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "types"
+  ],
+  "author": "Eduardo Parra Mazuecos",
+  "license": "GPL-3.0-or-later",
+  "dependencies": {
+    "typescript": "^4.7.3"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^5.27.0",
+    "@typescript-eslint/parser": "^5.27.0",
+    "eslint": "^8.17.0",
+    "eslint-config-standard": "^17.0.0",
+    "eslint-plugin-import": "^2.26.0"
+  }
+}

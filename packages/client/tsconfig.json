@@ -17,14 +17,15 @@
     "jsx": "react-jsx",
     "baseUrl": "./src",
     "paths": {
-      "guards/*": ["./guards/*"],
-      "themes/*": ["./themes/*"],
-      "hooks/*": ["./hooks/*"],
-      "contexts/*": ["./contexts/*"],
       "components/*": ["./components/*"],
       "config/*": ["./config/*"],
+      "constants/*": ["./constants/*"],
+      "contexts/*": ["./contexts/*"],
+      "guards/*": ["./guards/*"],
+      "hooks/*": ["./hooks/*"],
+      "services/*": ["./services/*"],
+      "themes/*": ["./themes/*"],
       "utils/*": ["./utils/*"],
-      "services/*": ["./services/*"]
     },
     "types": ["@emotion/react/types/css-prop"]
   },

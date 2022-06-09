@@ -7,7 +7,7 @@ interface IAccountUser extends IAccount {
 export interface IAccountService {
     addAccount(account: IAccount): Promise<IAccount>;
 
-    editAccount({ id, account }: { id: string, value: IAccount }): Promise<IAccount>;
+    editAccount({ id, value }: { id: string, value: IAccount }): Promise<IAccount>;
 
     deleteAccount(account: IAccount): Promise<IAccount>;
 
@@ -22,6 +22,7 @@ export default class AccountService implements IAccountService {
   }
 
   public async editAccount ({ id, value }: { id: string, value: IAccount }): Promise<IAccount> {
+    console.log(JSON.stringify(value))
     return AccountModel.findByIdAndUpdate(id, value, { new: true }) as unknown as IAccount
   }
 

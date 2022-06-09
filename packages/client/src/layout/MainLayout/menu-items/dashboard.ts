@@ -1,8 +1,4 @@
-import { DashboardOutlined } from '@ant-design/icons'
-
-const icons = {
-  DashboardOutlined
-}
+import { DashboardOutlined, TeamOutlined } from '@ant-design/icons'
 
 const dashboard = {
   id: 'group-dashboard',
@@ -14,7 +10,15 @@ const dashboard = {
       title: 'Dashboard',
       type: 'item',
       url: '/dashboard/default',
-      icon: icons.DashboardOutlined,
+      icon: DashboardOutlined,
+      breadcrumbs: true
+    },
+    {
+      id: 'accounts',
+      title: 'Cuentas',
+      type: 'item',
+      url: '/cuentas',
+      icon: TeamOutlined,
       breadcrumbs: true
     }
   ]

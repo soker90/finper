@@ -15,7 +15,7 @@ export const validateAccountEditParams = async ({
   const schema = Joi.object({
     name: Joi.string(),
     balance: Joi.string(),
-    isActivate: Joi.boolean(),
+    isActive: Joi.boolean(),
     bank: Joi.string()
   })
 
