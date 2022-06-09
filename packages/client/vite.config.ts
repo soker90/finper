@@ -6,6 +6,7 @@ import * as path from 'path'
 export default defineConfig({
   resolve: {
     alias: [
+      { find: 'assets', replacement: path.resolve(__dirname, '/src/assets') },
       { find: 'components', replacement: path.resolve(__dirname, '/src/components') },
       { find: 'config', replacement: path.resolve(__dirname, '/src/config') },
       { find: 'constants', replacement: path.resolve(__dirname, '/src/constants') },

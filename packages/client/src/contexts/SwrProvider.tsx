@@ -6,7 +6,7 @@ const SwrProvider = ({ children }: { children: ReactNode }) => {
   return (
         <SWRConfig
             value={{
-              refreshInterval: 3000,
+              refreshInterval: 30000,
               fetcher: (url) => axios.get(url).then(res => res.data)
             }}
         >

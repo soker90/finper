@@ -1,22 +1,17 @@
-import { Skeleton } from '@mui/material'
 import { useAccounts } from './hooks'
+import { LoadingBanks, AccountsList } from './components'
 
 const Accounts = () => {
   const { accounts, isLoading } = useAccounts()
 
   if (isLoading) {
-    return <>
-            <Skeleton height={128} animation="wave" />
-            <Skeleton height={128} animation="wave" />
-            <Skeleton height={128} animation="wave" />
-            <Skeleton height={128} animation="wave" />
-        </>
+    return <LoadingBanks />
   }
   if (!accounts.length) {
     return <p>No hay datos</p>
   }
 
-  return accounts.map((account) => <div key={account._id}>{account.name} {account.balance}€</div>)
+  return <AccountsList accounts={accounts} />
 }
 
 export default Accounts
