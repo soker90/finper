@@ -12,12 +12,14 @@ export const validateAccountEditParams = async ({
     await validateAccountExist(params.id, user)
   }
 
-  const schema = Joi.object({
-    name: Joi.string(),
-    balance: Joi.string(),
-    isActive: Joi.boolean(),
-    bank: Joi.string()
-  })
+  const schema = Joi.alternatives().try(
+    Joi.object({
+      balance: Joi.string(),
+      isActive: Joi.boolean()
+    }).required(), Joi.object({
+      name: Joi.string().required(),
+      bank: Joi.string().required()
+    }))
 
   const { error, value } = schema.validate(body)
 

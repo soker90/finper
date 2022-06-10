@@ -1,5 +1,6 @@
 import supertest from 'supertest'
 import {
+  IAccount,
   mongoose
 } from '@soker90/finper-models'
 import { faker } from '@faker-js/faker'
@@ -9,6 +10,7 @@ import { server } from '../../src/server'
 import { requestLogin } from '../request-login'
 import { insertAccount } from '../insert-data-to-model'
 import { generateUsername } from '../generate-values'
+import { ERROR_MESSAGE } from '../../src/i18n'
 
 const testDatabase = require('../test-db')(mongoose)
 
@@ -93,6 +95,63 @@ describe('Account', () => {
         bank: account.bank,
         balance: account.balance
       }])
+    })
+  })
+
+  describe('PATCH /:id', () => {
+    const path = (id: string) => `/api/accounts/${id}`
+    let token: string
+    const username: string = generateUsername()
+
+    beforeAll(async () => {
+      token = await requestLogin(server.app)
+    })
+
+    test('when token is not provided, it should response an error with status code 401', async () => {
+      await supertest(server.app).patch(path('any')).expect(401)
+    })
+
+    test('when the account does not exist, it should response an error with status code 404', async () => {
+      await supertest(server.app).patch(path('62a39498c4497e1fe3c2bf35')).auth(token, { type: 'bearer' })
+        .expect(404)
+        .expect((res) => {
+          expect(res.body.message).toBe(ERROR_MESSAGE.ACCOUNT.NOT_FOUND)
+        })
+    })
+
+    test('when no params provided, it should response an error with status code 422', async () => {
+      const account: IAccount = await insertAccount({ user: username })
+      await supertest(server.app).patch(path(account._id)).auth(token, { type: 'bearer' }).expect(422)
+    })
+
+    test.each(['name', 'bank'])('when no %s param provided and other is name or bank, it should response an error with status code 422', async (param: string) => {
+      const account: IAccount = await insertAccount({ user: username })
+      const params: Record<string, string> = {
+        name: faker.finance.accountName(),
+        bank: faker.lorem.word()
+      }
+
+      delete params[param]
+      await supertest(server.app)
+        .patch(path(account._id))
+        .set('Authorization', `Bearer ${token}`)
+        .send(params)
+        .expect(422)
+    })
+
+    test.each(['balance', 'isActive'])('when %s field is successfully edited', async (param: string) => {
+      const account: IAccount = await insertAccount({ user: username })
+      const params: Record<string, string | boolean> = {
+        balance: faker.finance.amount(),
+        isActive: !account.isActive
+      }
+      await supertest(server.app)
+        .patch(path(account._id))
+        .set('Authorization', `Bearer ${token}`)
+        .send({
+          [param]: params[param]
+        })
+        .expect(200)
     })
   })
 })
