@@ -154,4 +154,40 @@ describe('Account', () => {
         .expect(200)
     })
   })
+
+  describe('GET /:id', () => {
+    const path = (id: string) => `/api/accounts/${id}`
+    let token: string
+    const username: string = generateUsername()
+
+    beforeAll(async () => {
+      token = await requestLogin(server.app, { username })
+    })
+
+    test('when token is not provided, it should response an error with status code 401', async () => {
+      await supertest(server.app).get(path('any')).expect(401)
+    })
+
+    test('when the account does not exist, it should response an error with status code 404', async () => {
+      await supertest(server.app).get(path('62a39498c4497e1fe3c2bf35')).auth(token, { type: 'bearer' })
+        .expect(404)
+    })
+
+    test('when account is of other user, it should response an error with status code 404', async () => {
+      const account: IAccount = await insertAccount()
+      await supertest(server.app).get(path(account._id)).auth(token, { type: 'bearer' }).expect(404)
+    })
+
+    test('when exist account for the user bank, it should response with status code 200', async () => {
+      const account: IAccount = await insertAccount({ user: username })
+
+      await supertest(server.app).get(path(account._id)).set('Authorization', `Bearer ${token}`)
+        .expect(200, {
+          _id: account._id.toString(),
+          name: account.name,
+          bank: account.bank,
+          balance: account.balance
+        })
+    })
+  })
 })

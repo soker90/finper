@@ -36,5 +36,11 @@ export class AccountRoutes {
       authMiddleware,
       this.accountController.edit.bind(this.accountController)
     )
+
+    this.router.get(
+      '/:id',
+      authMiddleware,
+      this.accountController.account.bind(this.accountController)
+    )
   }
 }

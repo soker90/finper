@@ -1,9 +1,5 @@
 import { AccountModel, IAccount } from '@soker90/finper-models'
 
-interface IAccountUser extends IAccount {
-    user: string
-}
-
 export interface IAccountService {
     addAccount(account: IAccount): Promise<IAccount>;
 
@@ -13,7 +9,7 @@ export interface IAccountService {
 
     getAccounts(user: string): Promise<IAccount[]>;
 
-    getAccount(id: string): Promise<IAccount | null>;
+    getAccount({ id }: { id: string }): Promise<IAccount | null>;
 }
 
 export default class AccountService implements IAccountService {
@@ -34,7 +30,7 @@ export default class AccountService implements IAccountService {
     return AccountModel.find({ user, isActive: true }, '_id name bank balance')
   }
 
-  public async getAccount (id: string): Promise<IAccount | null> {
-    return AccountModel.findOne({ _id: id })
+  public async getAccount ({ id }: { id: string }): Promise<IAccount | null> {
+    return AccountModel.findOne({ _id: id }, '_id name bank balance')
   }
 }

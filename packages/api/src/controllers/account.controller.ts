@@ -1,9 +1,8 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { NextFunction, Request, Response } from 'express'
 
 import { IAccountService } from '../services/account.service'
 
-import { validateAccountCreateParams, validateAccountEditParams } from '../validators/account'
+import { validateAccountCreateParams, validateAccountEditParams, validateAccountExist } from '../validators/account'
 import '../auth/local-strategy-passport-handler'
 import extractUser from '../helpers/extract-user'
 import { RequestUser } from '../types'
@@ -59,6 +58,19 @@ export class AccountController {
         res.send(response)
       })
       .catch((error) => {
+        next(error)
+      })
+  }
+
+  public async account (req: Request, res: Response, next: NextFunction): Promise<void> {
+    Promise.resolve(req.params)
+      .tap(({ id }) => this.logger.logInfo(`/account - account: ${id}`))
+      .then(extractUser(req))
+      .tap(({ user, id }) => validateAccountExist(id, user))
+      .then(this.accountService.getAccount.bind(this.accountService))
+      .then(response => {
+        res.send(response)
+      }).catch((error) => {
         next(error)
       })
   }

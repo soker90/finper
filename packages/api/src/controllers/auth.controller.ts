@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import Boom from '@hapi/boom'
 import passport from 'passport'
 import { NextFunction, Request, Response } from 'express'
