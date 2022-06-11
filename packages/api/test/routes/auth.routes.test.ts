@@ -16,7 +16,7 @@ function getUsername (): string {
   return faker.internet.userName().slice(0, MAX_USERNAME_LENGTH)
 }
 
-describe('Account', () => {
+describe('Auth', () => {
   beforeAll(() => testDatabase.connect())
 
   afterAll(() => testDatabase.close())

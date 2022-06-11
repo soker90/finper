@@ -6,14 +6,16 @@ import * as path from 'path'
 export default defineConfig({
   resolve: {
     alias: [
-      { find: 'guards', replacement: path.resolve(__dirname, '/src/guards') },
-      { find: 'themes', replacement: path.resolve(__dirname, '/src/themes') },
-      { find: 'hooks', replacement: path.resolve(__dirname, '/src/hooks') },
-      { find: 'contexts', replacement: path.resolve(__dirname, '/src/contexts') },
+      { find: 'assets', replacement: path.resolve(__dirname, '/src/assets') },
       { find: 'components', replacement: path.resolve(__dirname, '/src/components') },
       { find: 'config', replacement: path.resolve(__dirname, '/src/config') },
+      { find: 'constants', replacement: path.resolve(__dirname, '/src/constants') },
+      { find: 'contexts', replacement: path.resolve(__dirname, '/src/contexts') },
+      { find: 'guards', replacement: path.resolve(__dirname, '/src/guards') },
+      { find: 'hooks', replacement: path.resolve(__dirname, '/src/hooks') },
+      { find: 'services', replacement: path.resolve(__dirname, '/src/services') },
+      { find: 'themes', replacement: path.resolve(__dirname, '/src/themes') },
       { find: 'utils', replacement: path.resolve(__dirname, '/src/utils') },
-      { find: 'services', replacement: path.resolve(__dirname, '/src/services') }
     ]
   },
   plugins: [react()]

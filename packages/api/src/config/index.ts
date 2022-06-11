@@ -4,7 +4,7 @@ export default {
     host: [process.env.DATABASE_HOST || '127.0.0.1'], // list of hosts
     port: ['27017'], // list of ports
     hasPort: false,
-    databaseName: process.env.DATABASE_HOST || 'test',
+    databaseName: process.env.DATABASE_NAME || 'test',
     mongoUri: process.env.MONGODB,
     options: {
       replicaSet: '' // optional

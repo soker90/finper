@@ -2,7 +2,7 @@ import { Router } from 'express'
 
 import loggerHandler from '../utils/logger'
 import { AuthController } from '../controllers/auth.controller'
-import { userService, accountService } from '../services'
+import { userService, authService } from '../services'
 import authMiddleware from '../middlewares/auth.middleware'
 
 export class AuthRoutes {
@@ -10,8 +10,8 @@ export class AuthRoutes {
 
   public accountController: AuthController = new AuthController({
     userService,
-    authService: accountService,
-    loggerHandler: loggerHandler('AccountController')
+    authService,
+    loggerHandler: loggerHandler('AuthController')
   })
 
   constructor () {

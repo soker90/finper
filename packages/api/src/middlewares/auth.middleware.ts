@@ -38,7 +38,7 @@ const checkAuthorization = (req: Request, res: Response, next: NextFunction) => 
 
     if (user.username) {
       refreshToken(res, user.username)
-      req.user = user
+      req.user = user.username
     }
     next()
   })(req, res, next)
