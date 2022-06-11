@@ -104,7 +104,7 @@ describe('Account', () => {
     const username: string = generateUsername()
 
     beforeAll(async () => {
-      token = await requestLogin(server.app)
+      token = await requestLogin(server.app, { username })
     })
 
     test('when token is not provided, it should response an error with status code 401', async () => {
