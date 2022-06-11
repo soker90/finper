@@ -1,5 +1,5 @@
 import { FC } from 'react'
-import { Account } from '../../../types'
+import { Account } from 'types'
 import AccountItem from './AccountItem'
 
 interface AccountsListProps {
@@ -8,7 +8,7 @@ interface AccountsListProps {
 
 const AccountsList: FC<AccountsListProps> = ({ accounts }) => (
     <div>
-        {accounts.map((account) => <AccountItem account={account} />)}
+        {accounts.map((account) => <AccountItem key={account._id} account={account} />)}
     </div>
 )
 

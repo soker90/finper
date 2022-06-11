@@ -11,7 +11,6 @@ const Breadcrumbs = ({ navigation, title, ...others }: any) => {
   const [main, setMain] = useState<any>()
   const [item, setItem] = useState<any>()
 
-  // set active item state
   const getCollapse = (menu: any) => {
     if (menu.children) {
       menu.children.filter((collapse: any) => {
@@ -42,7 +41,6 @@ const Breadcrumbs = ({ navigation, title, ...others }: any) => {
   let breadcrumbContent = <Typography />
   let itemTitle = ''
 
-  // collapse item
   if (main && main.type === 'collapse') {
     mainContent = (
             <Typography component={Link} to={document.location.pathname} variant="h6" sx={{ textDecoration: 'none' }} color="textSecondary">
@@ -51,7 +49,6 @@ const Breadcrumbs = ({ navigation, title, ...others }: any) => {
     )
   }
 
-  // items
   if (item && item.type === 'item') {
     itemTitle = item.title
     itemContent = (
@@ -60,7 +57,6 @@ const Breadcrumbs = ({ navigation, title, ...others }: any) => {
             </Typography>
     )
 
-    // main
     if (item.breadcrumbs !== false) {
       breadcrumbContent = (
                 <MainCard border={false} sx={{ mb: 3, bgcolor: 'transparent' }} {...others} content={false}>

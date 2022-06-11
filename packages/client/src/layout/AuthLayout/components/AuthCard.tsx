@@ -1,7 +1,7 @@
 import { Box } from '@mui/material'
+import { Theme } from '@emotion/react'
 
 import { MainCard } from 'components'
-import { Theme } from '@emotion/react'
 
 const AuthCard = ({ children, ...other }: any) => (
     <MainCard

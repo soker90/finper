@@ -1,5 +1,5 @@
 import { faker } from '@faker-js/faker'
-import {AccountModel, IAccount, IUser, UserModel} from '@soker90/finper-models'
+import { AccountModel, IAccount, IUser, UserModel } from '@soker90/finper-models'
 
 import {
   MAX_USERNAME_LENGTH,
