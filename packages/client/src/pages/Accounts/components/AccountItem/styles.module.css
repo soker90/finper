@@ -1,6 +1,7 @@
 .bankLogo {
     height: 32px;
     width: auto;
+    margin-right: 1rem;
 }
 
 .container {
@@ -13,4 +14,10 @@
 
 .container:hover {
     background-color: rgba(0, 0, 0, 0.04);
+}
+
+.logoName {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
 }

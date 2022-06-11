@@ -7,9 +7,9 @@ interface AccountsListProps {
 }
 
 const AccountsList: FC<AccountsListProps> = ({ accounts }) => (
-    <div>
+    <ul style={{ padding: 0 }}>
         {accounts.map((account) => <AccountItem key={account._id} account={account} />)}
-    </div>
+    </ul>
 )
 
 export default AccountsList
