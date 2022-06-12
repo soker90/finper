@@ -13,7 +13,7 @@ import { ACCOUNTS } from 'constants/api-paths'
 import { Account } from '../../../../types'
 import './style.module.css'
 
-const AccountEdit = ({ account }: { account: Account }) => {
+const AccountEdit = ({ account, hideForm }: { account: Account, hideForm: () => void }) => {
   const [error, setError] = useState<string | undefined>(undefined)
   const { register, handleSubmit, formState: { errors } } = useForm({
     defaultValues: {
@@ -23,13 +23,18 @@ const AccountEdit = ({ account }: { account: Account }) => {
     }
   })
   const onSubmit = handleSubmit(async (params) => {
-    const { data, error } = await editAccount(account._id, params)
+    const { error } = await editAccount(account._id, params)
     if (!error) {
       mutate(ACCOUNTS)
     }
     setError(error)
   })
-  const loading = false
+
+  const handleDeactivateButton = async () => {
+    await editAccount(account._id, { isActive: false })
+    hideForm()
+  }
+
   return (
         <form onSubmit={onSubmit}>
             <Grid container spacing={3}>
@@ -53,12 +58,13 @@ const AccountEdit = ({ account }: { account: Account }) => {
                 <Grid item xs={12} md={6}>
                     <Button
                         disableElevation
-                        disabled={loading}
                         fullWidth
                         size="large"
                         type="submit"
                         variant="contained"
                         color="error"
+                        onClick={handleDeactivateButton}
+                        hidden={!account._id}
                     >
                         Desactivar
                     </Button>
@@ -67,7 +73,6 @@ const AccountEdit = ({ account }: { account: Account }) => {
                 <Grid item xs={12} md={6}>
                     <Button
                         disableElevation
-                        disabled={loading}
                         fullWidth
                         size="large"
                         type="submit"

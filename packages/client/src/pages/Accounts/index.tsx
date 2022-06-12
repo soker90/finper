@@ -11,7 +11,7 @@ const Accounts = () => {
     return <p>No hay datos</p>
   }
 
-  return <AccountsList accounts={accounts} />
+  return <AccountsList accounts={accounts} newAccount={false} />
 }
 
 export default Accounts

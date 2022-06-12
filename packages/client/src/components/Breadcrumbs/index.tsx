@@ -2,11 +2,11 @@ import { useEffect, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 
 import MuiBreadcrumbs from '@mui/material/Breadcrumbs'
-import { Grid, Typography } from '@mui/material'
+import { Box, Button, Grid, Stack, Typography } from '@mui/material'
 
 import MainCard from '../MainCard'
 
-const Breadcrumbs = ({ navigation, title, ...others }: any) => {
+const Breadcrumbs = ({ navigation, title, buttons, ...others }: any) => {
   const location = useLocation()
   const [main, setMain] = useState<any>()
   const [item, setItem] = useState<any>()
@@ -43,7 +43,8 @@ const Breadcrumbs = ({ navigation, title, ...others }: any) => {
 
   if (main && main.type === 'collapse') {
     mainContent = (
-            <Typography component={Link} to={document.location.pathname} variant="h6" sx={{ textDecoration: 'none' }} color="textSecondary">
+            <Typography component={Link} to={document.location.pathname} variant="h6" sx={{ textDecoration: 'none' }}
+                        color="textSecondary">
                 {main.title}
             </Typography>
     )
@@ -63,7 +64,8 @@ const Breadcrumbs = ({ navigation, title, ...others }: any) => {
                     <Grid container direction="column" justifyContent="flex-start" alignItems="flex-start" spacing={1}>
                         <Grid item>
                             <MuiBreadcrumbs aria-label="breadcrumb">
-                                <Typography component={Link} to="/" color="textSecondary" variant="h6" sx={{ textDecoration: 'none' }}>
+                                <Typography component={Link} to="/" color="textSecondary" variant="h6"
+                                            sx={{ textDecoration: 'none' }}>
                                     Inicio
                                 </Typography>
                                 {mainContent}
@@ -71,8 +73,13 @@ const Breadcrumbs = ({ navigation, title, ...others }: any) => {
                             </MuiBreadcrumbs>
                         </Grid>
                         {title && (
-                            <Grid item sx={{ mt: 2 }}>
-                                <Typography variant="h5">{item.title}</Typography>
+                            <Grid item sx={{ mt: 2, width: '100%' }}>
+                                <Stack direction='row' sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                                    <Typography variant="h5">{item.title}</Typography>
+                                    {false && <Box>
+                                        <Button variant='outlined'>Test</Button>
+                                    </Box>}
+                                </Stack>
                             </Grid>
                         )}
                     </Grid>
