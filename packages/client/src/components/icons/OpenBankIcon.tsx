@@ -1,6 +1,7 @@
-const OpenBankIcon = (props: any) => (
+import { ComponentProps } from 'react'
+
+const OpenBankIcon = (props: ComponentProps<any>) => (
     <svg
-        id="Layer_1"
         viewBox="117.9 0 34.56 34.56"
         width={64}
         height={64}

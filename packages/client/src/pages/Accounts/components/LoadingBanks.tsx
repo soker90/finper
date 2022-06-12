@@ -1,11 +1,11 @@
+import { FC } from 'react'
 import { Skeleton } from '@mui/material'
-import { FC, ReactElement } from 'react'
 
-const LoadingBanks: FC = (): ReactElement => (
+const LoadingBanks: FC = () => (
     <>
         {
             [...Array(5)
-            ].map((idx) =>
+            ].map((none, idx) =>
                 <Skeleton key={idx} height={128} animation="wave" />
             )
         }

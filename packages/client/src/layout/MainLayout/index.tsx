@@ -31,7 +31,7 @@ const MainLayout = () => {
                 <Drawer open={open} handleDrawerToggle={handleDrawerToggle} />
                 <Box component="main" sx={{ p: { xs: 2, sm: 3 } }}>
                     <Toolbar />
-                    <Breadcrumbs navigation={navigation} title titleBottom card={false} divider={false} />
+                    <Breadcrumbs navigation={navigation} title divider={false} />
                     <Outlet />
                 </Box>
             </Box>
