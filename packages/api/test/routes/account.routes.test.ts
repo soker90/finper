@@ -124,11 +124,12 @@ describe('Account', () => {
       await supertest(server.app).patch(path(account._id)).auth(token, { type: 'bearer' }).expect(422)
     })
 
-    test.each(['name', 'bank'])('when no %s param provided and other is name or bank, it should response an error with status code 422', async (param: string) => {
+    test.each(['name', 'bank', 'balance'])('when no %s param provided and other is name or bank, it should response an error with status code 422', async (param: string) => {
       const account: IAccount = await insertAccount({ user: username })
       const params: Record<string, string> = {
         name: faker.finance.accountName(),
-        bank: faker.lorem.word()
+        bank: faker.lorem.word(),
+        balance: faker.finance.amount(),
       }
 
       delete params[param]
@@ -139,18 +140,15 @@ describe('Account', () => {
         .expect(422)
     })
 
-    test.each(['balance', 'isActive'])('when %s field is successfully edited', async (param: string) => {
+    test('when isActive field is successfully edited', async () => {
       const account: IAccount = await insertAccount({ user: username })
       const params: Record<string, string | boolean> = {
-        balance: faker.finance.amount(),
         isActive: !account.isActive
       }
       await supertest(server.app)
         .patch(path(account._id))
         .set('Authorization', `Bearer ${token}`)
-        .send({
-          [param]: params[param]
-        })
+        .send(params)
         .expect(200)
     })
   })

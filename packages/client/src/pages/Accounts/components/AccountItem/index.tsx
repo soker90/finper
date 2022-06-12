@@ -29,7 +29,7 @@ const AccountItem: FC<AccountItemProps> = ({ account }) => {
                 </section>
                 <Collapse in={expand} timeout="auto" unmountOnExit>
                     <Divider className={styles.divider} />
-                    <AccountEdit />
+                    <AccountEdit account={account} />
 
                 </Collapse>
             </Paper>
