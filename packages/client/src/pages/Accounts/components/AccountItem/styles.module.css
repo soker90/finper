@@ -5,19 +5,26 @@
 }
 
 .container {
-    padding: 15px;
     margin: 15px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-}
-
-.container:hover {
-    background-color: rgba(0, 0, 0, 0.04);
 }
 
 .logoName {
     display: flex;
     align-items: center;
     justify-content: space-between;
+}
+
+.currency {
+    font-weight: bold;
+}
+
+section {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 15px;
+}
+
+section:hover {
+    background-color: rgba(0, 0, 0, 0.04);
 }
