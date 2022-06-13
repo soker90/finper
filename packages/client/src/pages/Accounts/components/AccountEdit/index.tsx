@@ -8,12 +8,12 @@ import {
 import { mutate } from 'swr'
 
 import InputForm from './InputForm'
-import { editAccount } from 'services/apiService'
+import { addAccount, editAccount } from 'services/apiService'
 import { ACCOUNTS } from 'constants/api-paths'
 import { Account } from '../../../../types'
 import './style.module.css'
 
-const AccountEdit = ({ account, hideForm }: { account: Account, hideForm: () => void }) => {
+const AccountEdit = ({ account, hideForm, isNew }: { account: Account, hideForm: () => void, isNew?: boolean }) => {
   const [error, setError] = useState<string | undefined>(undefined)
   const { register, handleSubmit, formState: { errors } } = useForm({
     defaultValues: {
@@ -23,15 +23,19 @@ const AccountEdit = ({ account, hideForm }: { account: Account, hideForm: () => 
     }
   })
   const onSubmit = handleSubmit(async (params) => {
-    const { error } = await editAccount(account._id, params)
+    const { error } = account._id ? await editAccount(account._id, params) : await addAccount(params)
     if (!error) {
       mutate(ACCOUNTS)
+      hideForm()
     }
     setError(error)
   })
 
   const handleDeactivateButton = async () => {
-    await editAccount(account._id, { isActive: false })
+    if (!isNew) {
+      await editAccount(account._id as string, { isActive: false })
+    }
+    mutate(ACCOUNTS)
     hideForm()
   }
 
@@ -60,13 +64,12 @@ const AccountEdit = ({ account, hideForm }: { account: Account, hideForm: () => 
                         disableElevation
                         fullWidth
                         size="large"
-                        type="submit"
                         variant="contained"
                         color="error"
                         onClick={handleDeactivateButton}
                         hidden={!account._id}
                     >
-                        Desactivar
+                        {isNew ? 'Cancelar' : 'Desactivar'}
                     </Button>
 
                 </Grid>

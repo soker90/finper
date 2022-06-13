@@ -15,6 +15,7 @@ const Icons: Record<string, FC<any>> = {
 
 const BankIcon: FC<BankIconsProps> = ({ name, ...props }) => {
   const Icon = useMemo(() => Icons[name] || Fragment, [name])
+  if (!name) return null
   return <Icon {...props} />
 }
 

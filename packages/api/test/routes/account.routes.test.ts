@@ -55,7 +55,8 @@ describe('Account', () => {
         .set('Authorization', `Bearer ${token}`)
         .send({
           name: faker.finance.accountName(),
-          bank: faker.lorem.word()
+          bank: faker.lorem.word(),
+          balance: faker.random.numeric()
         })
         .expect(200)
     })
@@ -129,7 +130,7 @@ describe('Account', () => {
       const params: Record<string, string> = {
         name: faker.finance.accountName(),
         bank: faker.lorem.word(),
-        balance: faker.finance.amount(),
+        balance: faker.finance.amount()
       }
 
       delete params[param]

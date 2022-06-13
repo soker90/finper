@@ -4,7 +4,8 @@ import Boom from '@hapi/boom'
 export const validateAccountCreateParams = (input: Record<string, string>) => {
   const schema = Joi.object({
     name: Joi.string().required(),
-    bank: Joi.string().required()
+    bank: Joi.string().required(),
+    balance: Joi.number()
   })
 
   const { error, value } = schema.validate(input)

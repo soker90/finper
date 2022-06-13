@@ -2,11 +2,11 @@ import { useEffect, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 
 import MuiBreadcrumbs from '@mui/material/Breadcrumbs'
-import { Box, Button, Grid, Stack, Typography } from '@mui/material'
+import { Grid, Stack, Typography } from '@mui/material'
 
 import MainCard from '../MainCard'
 
-const Breadcrumbs = ({ navigation, title, buttons, ...others }: any) => {
+const Breadcrumbs = ({ navigation, title, ...others }: any) => {
   const location = useLocation()
   const [main, setMain] = useState<any>()
   const [item, setItem] = useState<any>()
@@ -76,9 +76,6 @@ const Breadcrumbs = ({ navigation, title, buttons, ...others }: any) => {
                             <Grid item sx={{ mt: 2, width: '100%' }}>
                                 <Stack direction='row' sx={{ display: 'flex', justifyContent: 'space-between' }}>
                                     <Typography variant="h5">{item.title}</Typography>
-                                    {false && <Box>
-                                        <Button variant='outlined'>Test</Button>
-                                    </Box>}
                                 </Stack>
                             </Grid>
                         )}

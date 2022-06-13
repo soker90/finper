@@ -1,2 +1,2 @@
 export { default as LoadingBanks } from './LoadingBanks'
-export { default as AccountsList } from './AccountsList'
+export { default as AccountItem } from './AccountItem'
