@@ -1,4 +1,4 @@
-import { FormHelperText, Grid, InputLabel, OutlinedInput, Stack } from '@mui/material'
+import { FormHelperText, Grid, InputLabel, InputBaseComponentProps, OutlinedInput, Stack } from '@mui/material'
 import { forwardRef, Ref } from 'react'
 
 interface Props {
@@ -8,6 +8,7 @@ interface Props {
     error: boolean
     errorText: string
     type?: string
+    inputProps?: InputBaseComponentProps
 }
 
 const InputForm = ({ id, label, errorText, ...others }: Props, ref: Ref<HTMLInputElement>) => (

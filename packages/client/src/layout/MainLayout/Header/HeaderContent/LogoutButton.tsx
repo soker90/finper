@@ -8,13 +8,14 @@ import {
 } from '@mui/material'
 
 import { LogoutOutlined } from '@ant-design/icons'
+import useAuth from 'hooks/useAuth'
 
 const Profile = () => {
   const anchorRef = useRef<any>(null)
+  const { handleLogout } = useAuth()
 
   const handleClose = () => {
-    localStorage.removeItem('token')
-    // Todo redirect to login page
+    handleLogout()
   }
 
   return (

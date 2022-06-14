@@ -51,7 +51,7 @@ const AccountEdit = ({ account, hideForm, isNew }: { account: Account, hideForm:
 
                 <InputForm id='balance' label='Balance' placeholder='Balance'
                            error={!!errors.balance} {...register('balance', { required: true, valueAsNumber: true })}
-                           errorText='Introduce un número válido' type='number' />
+                           errorText='Introduce un número válido' type='number' inputProps={{ step: 'any' }} />
 
                 {error && (
                     <Grid item xs={12}>

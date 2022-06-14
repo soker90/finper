@@ -8,12 +8,13 @@ interface ButtonProps {
     disabled?: boolean
 }
 
-const HeaderButtons = ({ buttons }: { buttons: ButtonProps[] }) => {
+const HeaderButtons = ({ buttons, desktopSx }: { buttons: ButtonProps[], desktopSx: {} }) => {
   const theme = useTheme()
   const isMobile: boolean = useMediaQuery(theme.breakpoints.only('xs'))
 
   return (
-        <Stack spacing={1} direction={isMobile ? 'column' : 'row'} sx={{ display: 'flex', justifyContent: 'end' }}>
+        <Stack spacing={1} direction={isMobile ? 'column' : 'row'}
+               sx={[!isMobile && desktopSx, { display: 'flex', justifyContent: 'end' }]}>
             {buttons.map(({ Icon, title, onClick, disabled }: ButtonProps) => (
                 <Button
                     key={title}

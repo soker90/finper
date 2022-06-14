@@ -1,4 +1,5 @@
 import { createContext, useState, ReactNode } from 'react'
+import authService from 'services/authService'
 
 export type AuthContextParams = {
     hasToken: () => boolean;
@@ -28,6 +29,7 @@ export const AuthProvider = ({ children }: ProviderProps) => {
   const [token, setToken] = useState<string | undefined>(undefined)
 
   const handleLogout = () => {
+    authService.logout()
     setToken(undefined)
   }
 

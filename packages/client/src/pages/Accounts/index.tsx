@@ -26,7 +26,9 @@ const Accounts = () => {
 
   return (<>
             <HeaderButtons
-                buttons={[{ Icon: PlusOutlined, title: 'Nueva', onClick: handleClickNew, disabled: newAccount }]} />
+                buttons={[{ Icon: PlusOutlined, title: 'Nueva', onClick: handleClickNew, disabled: newAccount }]}
+                desktopSx={{ marginTop: -7 }}
+            />
 
             <ListContainer>
                 {newAccount &&
