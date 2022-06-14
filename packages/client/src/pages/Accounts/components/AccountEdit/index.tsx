@@ -6,11 +6,11 @@ import {
   Grid
 } from '@mui/material'
 import { mutate } from 'swr'
+import { Account } from '@soker90/finper-types'
 
 import InputForm from './InputForm'
 import { addAccount, editAccount } from 'services/apiService'
 import { ACCOUNTS } from 'constants/api-paths'
-import { Account } from '../../../../types'
 import './style.module.css'
 
 const AccountEdit = ({ account, hideForm, isNew }: { account: Account, hideForm: () => void, isNew?: boolean }) => {

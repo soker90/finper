@@ -2,9 +2,11 @@
   "name": "@soker90/finper-types",
   "version": "0.0.1",
   "description": "Types for finper",
-  "main": "index.ts",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+  "main": "src/index.ts",
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/",
+    "disttag": "latest"
   },
   "keywords": [
     "types"

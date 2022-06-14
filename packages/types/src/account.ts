@@ -1,7 +1,6 @@
-export interface IAccount {
+export interface Account {
+    _id?: string;
     name: string
-    bank: string,
-    balance: number,
-    isActive: boolean,
-    user: string,
+    bank: string
+    balance: number
 }
