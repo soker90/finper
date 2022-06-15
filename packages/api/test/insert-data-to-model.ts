@@ -1,5 +1,13 @@
 import { faker } from '@faker-js/faker'
-import { AccountModel, IAccount, IUser, UserModel } from '@soker90/finper-models'
+import {
+  AccountModel,
+  CategoryModel,
+  IAccount,
+  ICategory,
+  IUser,
+  TransactionType,
+  UserModel
+} from '@soker90/finper-models'
 
 import {
   MAX_USERNAME_LENGTH,
@@ -31,5 +39,12 @@ export const insertAccount = async (params: Record<string, string | number | boo
     balance: params.balance ?? faker.finance.amount(),
     isActive: params.isActive ?? faker.datatype.boolean(),
     user: params.user ?? faker.internet.userName().slice(0, MAX_USERNAME_LENGTH).toLowerCase()
+  })
+}
+
+export const insertCategory = async (params: Record<string, string> = {}): Promise<ICategory> => {
+  return CategoryModel.create({
+    name: params.name ?? faker.commerce.department(),
+    type: params.type ?? Math.random() > 0.5 ? TransactionType.Expense : TransactionType.Income
   })
 }
