@@ -3,7 +3,7 @@ import Boom from '@hapi/boom'
 
 export const validateCategoryCreateParams = (input: Record<string, string>) => {
   const schema = Joi.object({
-    name: Joi.string().required(),
+    name: Joi.string().required()
   })
 
   const { error, value } = schema.validate(input)

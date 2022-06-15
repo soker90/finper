@@ -3,6 +3,10 @@
   "version": "0.0.1",
   "description": "Types for finper",
   "main": "src/index.ts",
+  "scripts": {
+    "lint": "eslint . --ext .ts",
+    "lint:fix": "eslint . --fix --ext .ts"
+  },
   "publishConfig": {
     "access": "public",
     "registry": "https://registry.npmjs.org/",

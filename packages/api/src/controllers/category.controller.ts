@@ -1,14 +1,8 @@
 import { NextFunction, Request, Response } from 'express'
 
-import { IAccountService } from '../services/account.service'
-
-import { validateAccountEditParams, validateAccountExist } from '../validators/account'
 import '../auth/local-strategy-passport-handler'
-import extractUser from '../helpers/extract-user'
-import { RequestUser } from '../types'
-import { validateCategoryCreateParams, validateCategoryEditParams } from '../validators/category'
+import { validateCategoryCreateParams, validateCategoryEditParams, validateCategoryExist } from '../validators/category'
 import { ICategoryService } from '../services/category.service'
-import { validateCategoryExist } from '../validators/category/validate-category-exist'
 
 type ICategoryController = {
     loggerHandler: any,
