@@ -20,6 +20,14 @@ const dashboard = {
       url: '/cuentas',
       icon: TeamOutlined,
       breadcrumbs: true
+    },
+    {
+      id: 'categories',
+      title: 'Categorías',
+      type: 'item',
+      url: '/categorias',
+      icon: TeamOutlined,
+      breadcrumbs: true
     }
   ]
 }

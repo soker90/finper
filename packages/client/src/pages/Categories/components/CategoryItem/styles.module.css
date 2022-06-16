@@ -1,0 +1,26 @@
+.bankLogo {
+    height: 32px;
+    width: auto;
+    margin-right: 1rem;
+}
+
+.logoName {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.currency {
+    font-weight: bold;
+}
+
+section {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 15px;
+}
+
+section:hover {
+    background-color: rgba(0, 0, 0, 0.04);
+}

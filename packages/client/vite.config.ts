@@ -14,8 +14,9 @@ export default defineConfig({
       { find: 'guards', replacement: path.resolve(__dirname, '/src/guards') },
       { find: 'hooks', replacement: path.resolve(__dirname, '/src/hooks') },
       { find: 'services', replacement: path.resolve(__dirname, '/src/services') },
+      { find: 'types', replacement: path.resolve(__dirname, '/src/types') },
       { find: 'themes', replacement: path.resolve(__dirname, '/src/themes') },
-      { find: 'utils', replacement: path.resolve(__dirname, '/src/utils') },
+      { find: 'utils', replacement: path.resolve(__dirname, '/src/utils') }
     ]
   },
   plugins: [react()]

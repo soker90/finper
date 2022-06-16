@@ -25,6 +25,7 @@
       "guards/*": ["./guards/*"],
       "hooks/*": ["./hooks/*"],
       "services/*": ["./services/*"],
+      "types/*": ["./types/*"],
       "themes/*": ["./themes/*"],
       "utils/*": ["./utils/*"],
     },
