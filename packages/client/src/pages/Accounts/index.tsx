@@ -13,10 +13,6 @@ const Accounts = () => {
     return <LoadingBanks />
   }
 
-  if (!accounts.length) {
-    return <p>No hay datos</p>
-  }
-
   const handleClickNew = () => {
     setNewAccount(true)
   }
@@ -29,11 +25,13 @@ const Accounts = () => {
                 desktopSx={{ marginTop: -7 }}
             />
 
-            <ListContainer>
+            {!!accounts.length && <ListContainer>
                 {newAccount &&
                   <AccountItem account={{ name: '', bank: '', balance: 0 }} forceExpand cancelCreate={cancelCreate} />}
                 {accounts.map((account) => <AccountItem key={account._id} account={account} />)}
-            </ListContainer>
+            </ListContainer>}
+
+            {!accounts.length && <p>No hay datos</p>}
         </>
   )
 }

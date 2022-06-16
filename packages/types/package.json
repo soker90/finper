@@ -1,6 +1,6 @@
 {
   "name": "@soker90/finper-types",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Types for finper",
   "main": "src/index.ts",
   "scripts": {

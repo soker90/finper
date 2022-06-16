@@ -4,11 +4,14 @@ import {
 } from '../../src'
 import createCategory from '../helpers/create-category'
 import testDb from '../test-db'
+
 const testDatabase = testDb(mongoose)
 
 const testCategory = (expected: ICategory, received: ICategory) => {
   expect(expected.type).toBe(received.type)
   expect(expected.name).toBe(received.name)
+  expect(expected.root).toBe(received.root)
+  expect(expected.parent?.toString()).toBe(received.parent?.toString())
 }
 
 describe('Category', () => {
@@ -19,14 +22,15 @@ describe('Category', () => {
   describe('when there is a new category', () => {
     let categoryData: ICategory
 
-    beforeAll(() => createCategory().then((category) => {
-      categoryData = category
-    }))
+    beforeAll(async () => {
+      const parent = await createCategory()
+      categoryData = await createCategory({ parent: parent._id })
+    })
 
     afterAll(() => testDatabase.clear())
 
-    test('it should contain all the defined properties', async () => {
-      const categoryDocument: ICategory = await CategoryModel.findOne() as ICategory
+    test('it should contain all the defined properties with parent category', async () => {
+      const categoryDocument: ICategory = await CategoryModel.findOne({ _id: categoryData._id })
 
       testCategory(categoryDocument, categoryData)
     })
@@ -44,15 +48,13 @@ describe('Category', () => {
       ])
     })
 
-    afterAll(() => testDatabase.clear())
-
     test('it should be 3 account stored', async () => {
       const categoryCounter = await CategoryModel.count()
       expect(categoryCounter).toBe(3)
     })
 
     test('it should contain all the defined properties of the first category', async () => {
-      const categoryDocument: ICategory = await CategoryModel.findOne({ _id: firstCategory._id }) as ICategory
+      const categoryDocument: ICategory = await CategoryModel.findOne({ _id: firstCategory._id })
 
       testCategory(categoryDocument, firstCategory)
     })
