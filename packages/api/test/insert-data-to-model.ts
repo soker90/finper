@@ -45,6 +45,7 @@ export const insertAccount = async (params: Record<string, string | number | boo
 export const insertCategory = async (params: Record<string, string> = {}): Promise<ICategory> => {
   return CategoryModel.create({
     name: params.name ?? faker.commerce.department(),
-    type: params.type ?? Math.random() > 0.5 ? TransactionType.Expense : TransactionType.Income
+    type: params.type ?? Math.random() > 0.5 ? TransactionType.Expense : TransactionType.Income,
+    root: params.root ?? Math.random() > 0.5
   })
 }

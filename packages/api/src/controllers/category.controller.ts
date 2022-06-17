@@ -49,7 +49,7 @@ export class CategoryController {
       .tap(({ body }) => this.logger.logInfo(`/edit - category: ${body.name}`))
       .then(validateCategoryEditParams)
       .then(this.categoryService.editCategory.bind(this.categoryService))
-      .tap(({ id }) => this.logger.logInfo(`Category ${id} has been succesfully edited`))
+      .tap(({ _id }) => this.logger.logInfo(`Category ${_id} has been succesfully edited`))
       .then((response) => {
         res.send(response)
       })

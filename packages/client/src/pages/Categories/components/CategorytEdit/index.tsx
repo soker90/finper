@@ -12,14 +12,21 @@ import { addCategory, editCategory } from 'services/apiService'
 import { CATEGORIES } from 'constants/api-paths'
 import './style.module.css'
 import { Category } from 'types'
+import { SelectForm } from 'components/forms'
+import { TYPES_TRANSACTIONS_ENTRIES } from 'constants/transactions'
 
-const CategoryEdit = ({ category, hideForm, isNew }: { category: Category, hideForm: () => void, isNew?: boolean }) => {
+const CategoryEdit = ({
+  rootCategories,
+  category,
+  hideForm,
+  isNew
+}: { rootCategories: Category[], category: Category, hideForm: () => void, isNew?: boolean }) => {
   const [error, setError] = useState<string | undefined>(undefined)
   const { register, handleSubmit, formState: { errors } } = useForm({
     defaultValues: {
       name: category.name,
-      type: category.type
-      // todo paren
+      type: category.type,
+      parent: category.parent?._id
     }
   })
   const onSubmit = handleSubmit(async (params) => {
@@ -41,9 +48,21 @@ const CategoryEdit = ({ category, hideForm, isNew }: { category: Category, hideF
                 <InputForm id='name' label='Nombre' placeholder='Nombre de la cuenta'
                            error={!!errors.name} {...register('name', { required: true, minLength: 3 })}
                            errorText='Introduce un nombre de cuenta válido' />
-                <InputForm id='bank' label='Banco' placeholder='Nombre del banco'
-                           error={!!errors.type} {...register('type', { required: true, minLength: 3 })}
-                           errorText='Introduce un nombre de banco válido' />
+                <SelectForm id='type' label='Tipo'
+                            error={!!errors.type} {...register('type', { required: true })}
+                            errorText='Introduce un tipo de gasto válido'
+                            options={TYPES_TRANSACTIONS_ENTRIES}
+                            optionValue={0}
+                            optionLabel={1}
+                />
+                <SelectForm id='parent' label='Categoría padre' placeholder='Ninguna'
+                            error={!!errors.parent} {...register('parent', { required: true })}
+                            errorText='Introduce un tipo de cuenta válido'
+                            helperText='Solo si no es una categoría padre'
+                            options={[{ _id: '', name: 'Ninguna' }, ...rootCategories]}
+                            optionValue='_id'
+                            optionLabel='name'
+                />
 
                 {error && (
                     <Grid item xs={12}>
@@ -65,6 +84,7 @@ const CategoryEdit = ({ category, hideForm, isNew }: { category: Category, hideF
                     </Button>
 
                 </Grid>
+
                 <Grid item xs={12} md={6}>
                     <Button
                         disableElevation

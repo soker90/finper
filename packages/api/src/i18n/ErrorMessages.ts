@@ -6,6 +6,7 @@ export const ERROR_MESSAGE = {
     NOT_VALID: 'Uno o más datos introducidos no son válidos'
   },
   CATEGORY: {
-    NOT_FOUND: 'La categoría no existe'
+    NOT_FOUND: 'La categoría no existe',
+    PARENT_NOT_FOUND: 'La categoría padre no existe'
   }
 }

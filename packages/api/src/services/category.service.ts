@@ -13,7 +13,7 @@ export interface ICategoryService {
 
 export default class CategoryService implements ICategoryService {
   public async getCategories (): Promise<ICategory[]> {
-    return CategoryModel.find({}, 'name type')
+    return CategoryModel.find({}).populate('parent', '_id')
   }
 
   public async addCategory (category: ICategory): Promise<ICategory> {

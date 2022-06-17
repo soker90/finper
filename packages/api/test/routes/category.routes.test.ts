@@ -84,7 +84,8 @@ describe('Category', () => {
       await supertest(server.app).get(path).auth(token, { type: 'bearer' }).expect(200, [{
         _id: category._id.toString(),
         name: category.name,
-        type: category.type
+        type: category.type,
+        root: category.root
       }])
     })
   })

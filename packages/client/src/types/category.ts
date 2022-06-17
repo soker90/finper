@@ -5,4 +5,5 @@ export interface Category {
     name: string,
     type: TransactionType,
     root?: boolean,
+    parent?: { _id?: string, name?: string },
 }

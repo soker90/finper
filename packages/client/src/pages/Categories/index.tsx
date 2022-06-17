@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useCategories } from './hooks'
 import { CategoryItem, LoadingBanks } from './components'
 import { PlusOutlined } from '@ant-design/icons'
@@ -10,10 +10,13 @@ const Accounts = () => {
   const { categories, isLoading } = useCategories()
   const [newAccount, setNewAccount] = useState(false)
 
+  const rootCategories = useMemo(() => {
+    return categories?.filter(category => Boolean(category.root))
+  }, [categories])
+
   if (isLoading) {
     return <LoadingBanks />
   }
-
   const handleClickNew = () => {
     setNewAccount(true)
   }
@@ -28,8 +31,10 @@ const Accounts = () => {
 
             <ListContainer>
                 {newAccount &&
-                  <CategoryItem category={{ name: '', type: TransactionType.Expense }} forceExpand cancelCreate={cancelCreate} />}
-                {categories.map((category) => <CategoryItem key={category._id} category={category} />)}
+                  <CategoryItem category={{ name: '', type: TransactionType.Expense }} forceExpand
+                                cancelCreate={cancelCreate} rootCategories={rootCategories} />}
+                {categories.map((category) => <CategoryItem key={category._id} category={category}
+                                                            rootCategories={rootCategories} />)}
             </ListContainer>
 
             {!categories.length && <p>No hay datos</p>}
