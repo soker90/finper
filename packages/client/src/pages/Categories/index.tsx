@@ -11,7 +11,7 @@ const Accounts = () => {
   const [newAccount, setNewAccount] = useState(false)
 
   const rootCategories = useMemo(() => {
-    return categories?.filter(category => Boolean(category.root))
+    return categories?.filter(category => !category.parent)
   }, [categories])
 
   if (isLoading) {

@@ -18,3 +18,7 @@ export const editCategory = (id: string, params: { name: string, type: string })
 export const addCategory = (params: { name?: string, type: string, balance?: number }): Promise<{ data?: Category, error?: string | undefined }> => {
   return axios.post(CATEGORIES, params).then((data: any) => ({ data: data as Category })).catch((error) => ({ error: error.message }))
 }
+
+export const deleteCategory = (id: string): Promise<{ data?: Category, error?: string | undefined }> => {
+  return axios.delete(`${CATEGORIES}/${id}`).then((data: any) => ({ data: data as Category })).catch((error) => ({ error: error.message }))
+}

@@ -1,4 +1,4 @@
-import { DashboardOutlined, TeamOutlined } from '@ant-design/icons'
+import { DashboardOutlined, TeamOutlined, ShoppingCartOutlined } from '@ant-design/icons'
 
 const dashboard = {
   id: 'group-dashboard',
@@ -26,7 +26,7 @@ const dashboard = {
       title: 'Categorías',
       type: 'item',
       url: '/categorias',
-      icon: TeamOutlined,
+      icon: ShoppingCartOutlined,
       breadcrumbs: true
     }
   ]

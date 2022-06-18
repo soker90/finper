@@ -58,6 +58,7 @@ export class CategoryController {
       })
   }
 
+  // TODO validar que no es padre de ninguna categoria
   public async delete (req: Request, res: Response, next: NextFunction): Promise<void> {
     Promise.resolve(req.params as { id: string })
       .tap(({ id }) => this.logger.logInfo(`/delete - category: ${id}`))

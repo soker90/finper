@@ -8,7 +8,7 @@ import {
 import { mutate } from 'swr'
 
 import InputForm from 'components/forms/InputForm'
-import { addCategory, editCategory } from 'services/apiService'
+import { addCategory, deleteCategory, editCategory } from 'services/apiService'
 import { CATEGORIES } from 'constants/api-paths'
 import './style.module.css'
 import { Category } from 'types'
@@ -30,7 +30,13 @@ const CategoryEdit = ({
     }
   })
   const onSubmit = handleSubmit(async (params) => {
-    const { error } = category._id ? await editCategory(category._id, params) : await addCategory(params)
+    const sendParams = {
+      name: params.name,
+      type: params.type,
+      ...(params.parent && { parent: params.parent })
+    }
+
+    const { error } = category._id ? await editCategory(category._id, sendParams) : await addCategory(sendParams)
     if (!error) {
       mutate(CATEGORIES)
       hideForm()
@@ -38,7 +44,11 @@ const CategoryEdit = ({
     setError(error)
   })
 
-  const handleDeactivateButton = async () => {
+  const handleDeleteButton = async () => {
+    if (category._id) {
+      await deleteCategory(category._id)
+      mutate(CATEGORIES)
+    }
     hideForm()
   }
 
@@ -56,7 +66,7 @@ const CategoryEdit = ({
                             optionLabel={1}
                 />
                 <SelectForm id='parent' label='Categoría padre' placeholder='Ninguna'
-                            error={!!errors.parent} {...register('parent', { required: true })}
+                            error={!!errors.parent} {...register('parent')}
                             errorText='Introduce un tipo de cuenta válido'
                             helperText='Solo si no es una categoría padre'
                             options={[{ _id: '', name: 'Ninguna' }, ...rootCategories]}
@@ -77,10 +87,10 @@ const CategoryEdit = ({
                         size="large"
                         variant="contained"
                         color="error"
-                        onClick={handleDeactivateButton}
+                        onClick={handleDeleteButton}
                         hidden={!category._id}
                     >
-                        {isNew ? 'Cancelar' : 'Desactivar'}
+                        {isNew ? 'Cancelar' : 'Eliminar'}
                     </Button>
 
                 </Grid>

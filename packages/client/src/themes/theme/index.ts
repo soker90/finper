@@ -1,5 +1,3 @@
-// ==============================|| PRESET THEME - THEME SELECTOR ||============================== //
-
 import { PalettesProps } from '@ant-design/colors'
 
 const Theme = (colors: PalettesProps) => {
