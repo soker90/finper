@@ -1,20 +1,19 @@
 import { faker } from '@faker-js/faker'
 
 import { ITransaction, TransactionModel, TransactionType } from '../../src'
+import createCategory from './create-category'
+import createAccount from './create-account'
+import createStore from './create-store'
 
-export default (params = {}): Promise<ITransaction> => (
+export default async (params = {}): Promise<ITransaction> => (
   TransactionModel.create({
     date: faker.datatype.number(),
-    category: faker.finance.transactionDescription(),
-    categoryId: faker.datatype.uuid(),
+    category: (await createCategory())._id,
     amount: faker.finance.amount(),
     type: Math.random() > 0.5 ? TransactionType.Expense : TransactionType.Income,
-    account: faker.finance.accountName(),
-    accountId: faker.datatype.uuid(),
-    bank: faker.finance.accountName(),
+    account: (await createAccount())._id,
     note: faker.lorem.sentence(),
-    storeId: faker.datatype.uuid(),
-    store: faker.company.companyName(),
+    store: (await createStore())._id,
     ...params
   })
 )

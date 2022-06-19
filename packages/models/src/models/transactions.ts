@@ -1,4 +1,4 @@
-import { Schema, model, Document } from 'mongoose'
+import { Schema, model, ObjectId } from 'mongoose'
 
 export enum TransactionType {
     Expense = 'expense',
@@ -6,28 +6,25 @@ export enum TransactionType {
     NotComputable = 'not_computable',
 }
 
-export interface ITransaction extends Document {
+export interface ITransaction {
+    _id: ObjectId,
     date: number,
     category: string,
     amount: number,
     type: TransactionType,
     account: string,
-    accountId: string,
-    bank: string,
     note: string,
     store?: string,
 }
 
 const transactionSchema = new Schema<ITransaction>({
   date: { type: Number, required: true },
-  category: { type: String, required: true },
+  category: { type: Schema.Types.ObjectId, required: true, ref: 'Category' },
   amount: { type: Number, required: true },
-  bank: { type: String, required: true },
   type: { type: String, required: true },
-  account: { type: String, required: true },
-  accountId: { type: String, required: true },
+  account: { type: Schema.Types.ObjectId, required: true, ref: 'Account' },
   note: { type: String },
-  store: { type: String }
+  store: { type: Schema.Types.ObjectId, ref: 'Store' }
 }, { versionKey: false })
 
 export const TransactionModel = model<ITransaction>('Transaction', transactionSchema)

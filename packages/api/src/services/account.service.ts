@@ -18,7 +18,6 @@ export default class AccountService implements IAccountService {
   }
 
   public async editAccount ({ id, value }: { id: string, value: IAccount }): Promise<IAccount> {
-    console.log(JSON.stringify(value))
     return AccountModel.findByIdAndUpdate(id, value, { new: true }) as unknown as IAccount
   }
 

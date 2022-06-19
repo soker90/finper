@@ -2,11 +2,13 @@ import { faker } from '@faker-js/faker'
 
 import { CategoryModel, ICategory, TransactionType } from '../../src'
 
-export default (params = {}): Promise<ICategory> => (
+const createCategory = async (params = {}): Promise<ICategory> => (
   CategoryModel.create({
     name: faker.commerce.department(),
     type: Math.random() > 0.5 ? TransactionType.Expense : TransactionType.Income,
-    root: !(params as ICategory).parent,
+    parent: Math.random() > 0.5 ? undefined : (await createCategory({ name: 'root' }))._id,
     ...params
   })
 )
+
+export default createCategory

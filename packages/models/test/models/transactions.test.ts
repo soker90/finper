@@ -8,16 +8,12 @@ const testDatabase = require('../test-db')(mongoose)
 
 const testTransactions = (expected: ITransaction, received: ITransaction) => {
   expect(expected.date).toBe(received.date)
-  expect(expected.category).toBe(received.category)
-  expect(expected.categoryId).toBe(received.categoryId)
+  expect(expected.category.toString()).toBe(received.category.toString())
   expect(expected.amount).toBe(received.amount)
   expect(expected.type).toBe(received.type)
-  expect(expected.account).toBe(received.account)
-  expect(expected.accountId).toBe(received.accountId)
-  expect(expected.bank).toBe(received.bank)
+  expect(expected.account.toString()).toBe(received.account.toString())
   expect(expected.note).toBe(received.note)
-  expect(expected.storeId).toBe(received.storeId)
-  expect(expected.store).toBe(received.store)
+  expect(expected.store?.toString()).toBe(received.store?.toString())
 }
 
 describe('Transaction', () => {

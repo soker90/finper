@@ -10,7 +10,6 @@ const testDatabase = testDb(mongoose)
 const testCategory = (expected: ICategory, received: ICategory) => {
   expect(expected.type).toBe(received.type)
   expect(expected.name).toBe(received.name)
-  expect(expected.root).toBe(received.root)
   expect(expected.parent?.toString()).toBe(received.parent?.toString())
 }
 
@@ -49,7 +48,7 @@ describe('Category', () => {
     })
 
     test('it should be 3 account stored', async () => {
-      const categoryCounter = await CategoryModel.count()
+      const categoryCounter = await CategoryModel.count({ name: { $ne: 'root' } })
       expect(categoryCounter).toBe(3)
     })
 

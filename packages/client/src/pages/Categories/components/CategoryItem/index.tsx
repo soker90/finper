@@ -37,7 +37,7 @@ const CategoryItem: FC<CategoryItemProps> = ({ category, forceExpand, cancelCrea
                     <div className={styles.logoName}>
                         {/* <BankIcon name={category.bank} className={styles.bankLogo} /> */}
                         <span>{category.name}</span>
-                        {category.root && <Chip
+                        {!category.parent && <Chip
                             label='Principal'
                             size="small"
                             color="success"
