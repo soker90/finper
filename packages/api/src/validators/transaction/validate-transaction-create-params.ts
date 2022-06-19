@@ -5,9 +5,6 @@ import { validateCategoryExist } from '../category'
 import { validateAccountExist } from '../account'
 
 export const validateTransactionCreateParams = async (params: Record<string, string>) => {
-  await validateCategoryExist({ id: params.category })
-  await validateAccountExist(params.account, params.user)
-
   const schema = Joi.object({
     date: Joi.number().required(),
     category: Joi.string().required(),
@@ -15,7 +12,8 @@ export const validateTransactionCreateParams = async (params: Record<string, str
     type: Joi.string().valid(TransactionType.Income, TransactionType.Expense, TransactionType.NotComputable).required(),
     account: Joi.string().required(),
     note: Joi.string(),
-    store: Joi.string()
+    store: Joi.string(),
+    user: Joi.string()
   })
 
   const { error, value } = schema.validate(params)
@@ -23,6 +21,9 @@ export const validateTransactionCreateParams = async (params: Record<string, str
   if (error) {
     throw Boom.badData(error.message).output
   }
+
+  await validateCategoryExist({ id: params.category })
+  await validateAccountExist(params.account, params.user)
 
   return value
 }

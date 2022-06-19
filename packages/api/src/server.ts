@@ -12,6 +12,7 @@ import handleError from './middlewares/handle-error'
 import { AuthRoutes } from './routes/auth.routes'
 import { AccountRoutes } from './routes/account.routes'
 import { CategoryRoutes } from './routes/category.routes'
+import { TransactionRoutes } from './routes/transaction.routes'
 
 global.Promise = require('bluebird')
 
@@ -31,6 +32,7 @@ class Server {
     this.app.use('/api/auth', new AuthRoutes().router)
     this.app.use('/api/accounts', new AccountRoutes().router)
     this.app.use('/api/categories', new CategoryRoutes().router)
+    this.app.use('/api/transactions', new TransactionRoutes().router)
   }
 
   public preMiddlewareConfig (): void {

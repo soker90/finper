@@ -2,12 +2,12 @@ import {
   FormHelperText,
   Grid,
   InputLabel,
-  InputBaseComponentProps,
   OutlinedInput,
   Stack,
   NativeSelect
 } from '@mui/material'
 import { forwardRef, Ref } from 'react'
+import { NativeSelectInputProps } from '@mui/material/NativeSelect/NativeSelectInput'
 
 interface Props {
     id: string
@@ -16,13 +16,13 @@ interface Props {
     error: boolean
     errorText: string
     type?: string
-    inputProps?: InputBaseComponentProps
+    inputProps?: NativeSelectInputProps
     size?: number
     helperText?: string
     options: any[]
     optionValue: string | number
     optionLabel: string | number
-    inputRef?: Ref<HTMLInputElement>
+    inputRef?: Ref<any>
 }
 
 const SelectForm = ({ id, label, size = 4, errorText, helperText, options, optionValue, optionLabel, ...others }: Props, ref: Ref<HTMLInputElement>) => (
@@ -32,10 +32,10 @@ const SelectForm = ({ id, label, size = 4, errorText, helperText, options, optio
             <NativeSelect
                 id={id}
                 fullWidth
-                {...others}
                 defaultValue={30}
                 input={<OutlinedInput />}
                 inputRef={ref}
+                {...others}
             >
                 {options.map((option: any) => (
                     <option key={option[optionValue]} value={option[optionValue]}>

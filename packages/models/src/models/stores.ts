@@ -6,6 +6,9 @@ export interface IStore extends Document {
 
 const storeSchema = new Schema<IStore>({
   name: { type: String, required: true }
-}, { versionKey: false })
+}, {
+  collation: { locale: 'es', strength: 2 },
+  versionKey: false
+})
 
 export const StoreModel = model<IStore>('Store', storeSchema)

@@ -3,6 +3,7 @@ import {
   mongoose
 } from '../../src'
 import createStore from '../helpers/create-store'
+import { faker } from '@faker-js/faker'
 
 const testDatabase = require('../test-db')(mongoose)
 
@@ -54,6 +55,20 @@ describe('Store', () => {
       const storeDocument: IStore = await StoreModel.findOne({ _id: firstStore._id }) as IStore
 
       testDebt(storeDocument, firstStore)
+    })
+  })
+
+  describe('when not match case sensitive', () => {
+    let store: IStore
+
+    beforeAll(async () => {
+      store = await createStore({ name: faker.company.companyName().toUpperCase() })
+    })
+
+    test('it should find the store', async () => {
+      const storeDocument: IStore = await StoreModel.findOne({ name: store.name.toLowerCase() }) as IStore
+
+      testDebt(storeDocument, store)
     })
   })
 })
