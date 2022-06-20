@@ -29,7 +29,7 @@ jobs:
           cache: 'npm'
           node-version: '16'
       - name: Install dependencies
-        run: npm ci
+        run: npm i
       - name: Lint
         run: npm run lint --workspaces
 
@@ -45,6 +45,6 @@ jobs:
           cache: 'npm'
           node-version: '16'
       - name: Install dependencies
-        run: npm ci
+        run: npm i
       - name: Test
         run: npm test --workspaces -- --coverage
