@@ -3,8 +3,8 @@ import {
   AccountModel,
   CategoryModel,
   IAccount,
-  ICategory, ITransaction,
-  IUser, TransactionModel,
+  ICategory, IStore, ITransaction,
+  IUser, StoreModel, TransactionModel,
   TransactionType,
   UserModel
 } from '@soker90/finper-models'
@@ -50,14 +50,20 @@ export const insertCategory = async (params: Record<string, string> = {}): Promi
   })
 }
 
+export const insertStore = async (params: Record<string, string> = {}): Promise<IStore> => {
+  return StoreModel.create({
+    name: params.name ?? faker.company.companyName()
+  })
+}
+
 export const insertTransaction = async (params: Record<string, string | number> = {}): Promise<ITransaction> => {
   return TransactionModel.create({
     date: params.date ?? faker.date.past().getTime(),
-    category: params.category ?? (await insertCategory())._id,
+    category: params.category ?? (await insertCategory()),
     amount: params.amount ?? faker.finance.amount(),
     type: params.type ?? Math.random() > 0.5 ? TransactionType.Expense : TransactionType.Income,
-    account: params.account ?? (await insertAccount())._id,
+    account: params.account ?? (await insertAccount()),
     note: params.note ?? faker.lorem.sentence(),
-    store: params.store ?? faker.company.companyName()
+    store: params.store ?? (await insertStore())
   })
 }

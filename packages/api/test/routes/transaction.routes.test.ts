@@ -7,7 +7,7 @@ import { faker } from '@faker-js/faker'
 import { server } from '../../src/server'
 
 import { requestLogin } from '../request-login'
-import { insertAccount, insertCategory } from '../insert-data-to-model'
+import { insertAccount, insertCategory, insertTransaction } from '../insert-data-to-model'
 import { generateUsername } from '../generate-values'
 
 const testDatabase = require('../test-db')(mongoose)
@@ -102,6 +102,41 @@ describe('Transaction', () => {
       }
 
       expect(await StoreModel.count({ name: store })).toBe(1)
+    })
+  })
+
+  describe('GET /', () => {
+    const path = '/api/transactions'
+    let token: string
+    const user: string = generateUsername()
+
+    beforeAll(async () => {
+      token = await requestLogin(server.app, { username: user })
+    })
+
+    test('when token is not provided, it should response an error with status code 401', async () => {
+      await supertest(server.app).get(path).expect(401)
+    })
+
+    test('when then user have no transactions, it should return an empty array', async () => {
+      await supertest(server.app).get(path).auth(token, { type: 'bearer' }).expect(200, [])
+    })
+
+    test('when the user have transactions, it should return the transactions', async () => {
+      const transaction: any = await insertTransaction({
+        user
+      })
+
+      const response = await supertest(server.app).get(path).auth(token, { type: 'bearer' })
+      expect(response.statusCode).toBe(200)
+      expect(response.body[0]._id).toEqual(transaction._id.toString())
+      expect(response.body[0].date).toEqual(transaction.date)
+      expect(response.body[0].category._id).toEqual(transaction.category._id.toString())
+      expect(response.body[0].amount).toEqual(transaction.amount)
+      expect(response.body[0].type).toEqual(transaction.type)
+      expect(response.body[0].account._id).toEqual(transaction.account._id.toString())
+      expect(response.body[0].note).toEqual(transaction.note)
+      expect(response.body[0].store._id).toEqual(transaction.store._id.toString())
     })
   })
 })

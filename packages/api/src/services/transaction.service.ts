@@ -43,11 +43,18 @@ export default class TransactionService implements ITransactionService {
         page?: number,
     }): Promise<ITransaction[]> {
     const query = {
-      ...(startDate && { startDate: { $gte: startDate } }),
-      ...(endDate && { endDate: { $lte: endDate } }),
+      ...((startDate || endDate) && {
+        date: {
+          ...(startDate && { $gte: startDate }),
+          ...(endDate && { $lte: endDate })
+        }
+      }),
       ...params
     }
 
-    return TransactionModel.find(query).skip(page * limit).limit(limit).populate('category account store', 'name')
+    return TransactionModel.find(query)
+      .populate('category account store', 'name')
+      .sort({ date: -1 })
+      .skip(page * limit).limit(limit)
   }
 }
