@@ -25,5 +25,11 @@ export class TransactionRoutes {
       authMiddleware,
       this.accountController.create.bind(this.accountController)
     )
+
+    this.router.get(
+      '/',
+      authMiddleware,
+      this.accountController.transactions.bind(this.accountController)
+    )
   }
 }

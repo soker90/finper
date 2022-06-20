@@ -7,7 +7,7 @@ import { faker } from '@faker-js/faker'
 import { server } from '../../src/server'
 
 import { requestLogin } from '../request-login'
-import { insertAccount, insertCategory, insertTransaction } from '../insert-data-to-model'
+import { insertAccount, insertCategory } from '../insert-data-to-model'
 import { generateUsername } from '../generate-values'
 
 const testDatabase = require('../test-db')(mongoose)

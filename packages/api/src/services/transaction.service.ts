@@ -32,15 +32,22 @@ export default class TransactionService implements ITransactionService {
     await TransactionModel.deleteOne({ _id: id })
   }
 
-  public async getTransactions (params: {
+  public async getTransactions ({ page = 0, limit = 50, startDate, endDate, ...params }: {
+        user: string,
         accountId?: string,
         categoryId?: string,
         startDate?: number,
         endDate?: number,
         type?: string,
         limit?: number,
-        skip?: number,
+        page?: number,
     }): Promise<ITransaction[]> {
-    return TransactionModel.find(params)
+    const query = {
+      ...(startDate && { startDate: { $gte: startDate } }),
+      ...(endDate && { endDate: { $lte: endDate } }),
+      ...params
+    }
+
+    return TransactionModel.find(query).skip(page * limit).limit(limit).populate('category account store', 'name')
   }
 }
