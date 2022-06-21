@@ -6,6 +6,7 @@ import { Navigate } from 'react-router-dom'
 const DashboardDefault = lazy(() => import('../pages/Dashboard'))
 const Accounts = lazy(() => import('../pages/Accounts'))
 const Categories = lazy(() => import('../pages/Categories'))
+const Transactions = lazy(() => import('../pages/Transactions'))
 
 // ==============================|| MAIN ROUTING ||============================== //
 
@@ -33,6 +34,10 @@ const MainRoutes = {
     {
       path: 'categorias',
       element: <Categories />
+    },
+    {
+      path: 'movimientos',
+      element: <Transactions />
     }
   ]
 }

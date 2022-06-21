@@ -53,7 +53,8 @@ export default class TransactionService implements ITransactionService {
     }
 
     return TransactionModel.find(query)
-      .populate('category account store', 'name')
+      .populate('category store', 'name')
+      .populate('account', 'name bank')
       .sort({ date: -1 })
       .skip(page * limit).limit(limit)
   }

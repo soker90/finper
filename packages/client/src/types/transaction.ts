@@ -4,3 +4,17 @@ export enum TransactionType {
     Income = 'income',
     NotComputable = 'not_computable',
 }
+
+export interface Transaction {
+    _id?: string,
+    date: number,
+    category: string,
+    amount: number,
+    type: TransactionType,
+    account: {
+        name: string,
+        bank: string,
+    },
+    note: string,
+    store?: string,
+}

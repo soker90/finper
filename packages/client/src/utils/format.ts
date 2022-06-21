@@ -8,3 +8,11 @@ export const euro = (cell: number, options = {}) => {
   })
   return n.format(cell)
 }
+
+export const dateShort = (cell: number) => {
+  const d = new Date(cell)
+  return d.toLocaleDateString('es-ES', {
+    month: 'short',
+    day: 'numeric'
+  })
+}
