@@ -1,11 +1,12 @@
 import { FC, useState } from 'react'
-import { Collapse, Divider, Paper, Typography } from '@mui/material'
+import { Collapse, Divider, Paper, Stack, Typography, useMediaQuery, useTheme } from '@mui/material'
 import { Transaction } from 'types'
 import { format } from 'utils'
 
-import styles from './styles.module.css'
 import { BankIcon } from 'components/icons'
-import {dateShort} from "utils/format";
+import { AMOUNT_COLORS, TRANSACTION_SYMBOL } from './constans'
+import styles from './styles.module.css'
+import { ItemContent } from 'components'
 
 interface TransactionItemProps {
     transaction: Transaction
@@ -15,6 +16,9 @@ interface TransactionItemProps {
 
 const TransactionItem: FC<TransactionItemProps> = ({ transaction, forceExpand, cancelCreate }) => {
   const [expand, setExpand] = useState(forceExpand)
+  const theme = useTheme()
+
+  const isDesktop = useMediaQuery(theme.breakpoints.up('md'))
 
   // const hideForm = useCallback(() => {
   //   cancelCreate?.()
@@ -24,14 +28,18 @@ const TransactionItem: FC<TransactionItemProps> = ({ transaction, forceExpand, c
   return (
         <>
             <Paper component='li'>
-                <section onClick={() => setExpand(toggle => !toggle)}>
+                <ItemContent onClick={() => setExpand(toggle => !toggle)}>
                     <div className={styles.logoName}>
                         <BankIcon name={transaction.account.bank} className={styles.bankLogo} />
                         <span>{format.dateShort(transaction.date)}</span>
                     </div>
+                    <Stack spacing={1} direction='row' pr={isDesktop ? '50%' : undefined}>
+                        <Typography variant='body1'>{transaction.category.name}</Typography>
+                        {transaction.store && <Typography variant='body1'>({transaction.store?.name})</Typography>}
+                    </Stack>
                     <Typography variant='h4'
-                                color='primary.main'>{format.euro(transaction.amount)}</Typography>
-                </section>
+                                color={AMOUNT_COLORS[transaction.type]}>{TRANSACTION_SYMBOL[transaction.type]}{format.euro(transaction.amount)}</Typography>
+                </ItemContent>
                 <Collapse in={expand} timeout="auto" unmountOnExit>
                     <Divider className={styles.divider} />
                     expand

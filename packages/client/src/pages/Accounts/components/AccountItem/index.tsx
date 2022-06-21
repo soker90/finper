@@ -2,7 +2,7 @@ import { FC, useCallback, useState } from 'react'
 import { Collapse, Divider, Paper, Typography, useTheme } from '@mui/material'
 import { Account } from '@soker90/finper-types'
 
-import { BankIcon } from 'components'
+import { BankIcon, ItemContent } from 'components'
 import { format } from 'utils'
 
 import styles from './styles.module.css'
@@ -26,14 +26,14 @@ const AccountItem: FC<AccountItemProps> = ({ account, forceExpand, cancelCreate 
   return (
         <>
             <Paper component='li'>
-                <section onClick={() => setExpand(toggle => !toggle)}>
+                <ItemContent onClick={() => setExpand(toggle => !toggle)}>
                     <div className={styles.logoName}>
                         <BankIcon name={account.bank} className={styles.bankLogo} />
                         <span>{account.name}</span>
                     </div>
                     <Typography variant='h4'
                                 color={theme.palette.primary.main}>{format.euro(account.balance)}</Typography>
-                </section>
+                </ItemContent>
                 <Collapse in={expand} timeout="auto" unmountOnExit>
                     <Divider className={styles.divider} />
                     <AccountEdit account={account} hideForm={hideForm} isNew={forceExpand} />

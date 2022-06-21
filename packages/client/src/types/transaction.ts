@@ -8,7 +8,9 @@ export enum TransactionType {
 export interface Transaction {
     _id?: string,
     date: number,
-    category: string,
+    category: {
+        name: string,
+    },
     amount: number,
     type: TransactionType,
     account: {
@@ -16,5 +18,7 @@ export interface Transaction {
         bank: string,
     },
     note: string,
-    store?: string,
+    store?: {
+        name: string,
+    },
 }
