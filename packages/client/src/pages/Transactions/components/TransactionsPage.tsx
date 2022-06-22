@@ -2,8 +2,8 @@ import { useTransactions } from '../hooks'
 import TransactionItem from './TransactionItem'
 import { LoadingList } from 'components'
 
-export const TransactionsPage = ({ index }: { index: number }) => {
-  const { transactions, isLoading } = useTransactions(index)
+export const TransactionsPage = ({ index, filters }: { index: number, filters: any }) => {
+  const { transactions, isLoading } = useTransactions({ index, filters })
 
   if (isLoading) {
     return <LoadingList />

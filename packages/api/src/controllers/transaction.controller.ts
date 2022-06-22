@@ -41,7 +41,7 @@ export class TransactionController {
   }
 
   public async transactions (req: Request, res: Response, next: NextFunction): Promise<void> {
-    Promise.resolve(req.params)
+    Promise.resolve(req.query)
       .tap(() => this.logger.logInfo(`/transactions - list transactions of ${req.user}`))
       .then(validateTransactionGetParams)
       .then(extractUser(req))

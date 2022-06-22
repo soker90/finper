@@ -6,15 +6,15 @@ import {
   Stack,
   NativeSelect
 } from '@mui/material'
-import { forwardRef, Ref } from 'react'
+import { ChangeEvent, forwardRef, Ref } from 'react'
 import { NativeSelectInputProps } from '@mui/material/NativeSelect/NativeSelectInput'
 
 interface Props {
     id: string
     label: string
     placeholder?: string
-    error: boolean
-    errorText: string
+    error?: boolean
+    errorText?: string
     type?: string
     inputProps?: NativeSelectInputProps
     size?: number
@@ -23,9 +23,26 @@ interface Props {
     optionValue: string | number
     optionLabel: string | number
     inputRef?: Ref<any>
+    onChange?: (e: ChangeEvent<HTMLInputElement>) => void
+    voidLabel?: string
+    voidValue?: string
+    voidOption?: boolean
 }
 
-const SelectForm = ({ id, label, size = 4, errorText, helperText, options, optionValue, optionLabel, ...others }: Props, ref: Ref<HTMLInputElement>) => (
+const SelectForm = ({
+  id,
+  label,
+  size = 4,
+  errorText,
+  helperText,
+  options,
+  optionValue,
+  optionLabel,
+  voidLabel = ' --- ',
+  voidValue = '',
+  voidOption,
+  ...others
+}: Props, ref: Ref<HTMLInputElement>) => (
     <Grid item md={size} xs={12}>
         <Stack spacing={1}>
             <InputLabel htmlFor={id}>{label}</InputLabel>
@@ -37,6 +54,7 @@ const SelectForm = ({ id, label, size = 4, errorText, helperText, options, optio
                 inputRef={ref}
                 {...others}
             >
+                {voidOption && <option value={voidValue}>{voidLabel}</option>}
                 {options.map((option: any) => (
                     <option key={option[optionValue]} value={option[optionValue]}>
                         {option[optionLabel]}
