@@ -9,7 +9,7 @@ import styles from './styles.module.css'
 import { ItemContent } from 'components'
 
 interface TransactionItemProps {
-    transaction: Transaction
+    transaction?: Transaction
     forceExpand?: boolean
     cancelCreate?: () => void
 }
@@ -28,18 +28,18 @@ const TransactionItem: FC<TransactionItemProps> = ({ transaction, forceExpand, c
   return (
         <>
             <Paper component='li'>
-                <ItemContent onClick={() => setExpand(toggle => !toggle)}>
+                {transaction && <ItemContent onClick={() => setExpand(toggle => !toggle)}>
                     <div className={styles.logoName}>
-                        <BankIcon name={transaction.account.bank} className={styles.bankLogo} />
+                        <BankIcon name={transaction.account?.bank} className={styles.bankLogo} />
                         <span>{format.dateShort(transaction.date)}</span>
                     </div>
                     <Stack spacing={1} direction='row' pr={isDesktop ? '50%' : undefined}>
-                        <Typography variant='body1'>{transaction.category.name}</Typography>
+                        <Typography variant='body1'>{transaction.category?.name}</Typography>
                         {transaction.store && <Typography variant='body1'>({transaction.store?.name})</Typography>}
                     </Stack>
                     <Typography variant='h4'
                                 color={AMOUNT_COLORS[transaction.type]}>{TRANSACTION_SYMBOL[transaction.type]}{format.euro(transaction.amount)}</Typography>
-                </ItemContent>
+                </ItemContent>}
                 <Collapse in={expand} timeout="auto" unmountOnExit>
                     <Divider className={styles.divider} />
                     expand

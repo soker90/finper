@@ -22,3 +22,14 @@ export interface Transaction {
         name: string,
     },
 }
+
+export interface TransactionInput {
+    _id?: string,
+    date: number,
+    category: string,
+    amount: number,
+    type: TransactionType,
+    account: string,
+    note: string,
+    store?: string,
+}
