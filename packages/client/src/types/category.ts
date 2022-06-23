@@ -7,3 +7,9 @@ export interface Category {
     root?: boolean,
     parent?: { _id?: string, name?: string },
 }
+
+export interface CategoryGrouped {
+    _id: string;
+    name: string,
+    children: { _id: string, name: string }[],
+}

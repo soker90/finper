@@ -9,11 +9,42 @@ export interface ICategoryService {
 
     getCategories(): Promise<ICategory[]>
 
+    getGroupedCategories(): Promise<any[]>
+
 }
 
 export default class CategoryService implements ICategoryService {
   public async getCategories (): Promise<ICategory[]> {
-    return CategoryModel.find({}).populate('parent', '_id')
+    return CategoryModel.find({}).populate('parent', '_id').sort('name')
+  }
+
+  public async getGroupedCategories (): Promise<any[]> {
+    return CategoryModel.aggregate([
+      {
+        $match: {
+          parent: { $exists: false }
+        }
+      },
+      {
+        $lookup: {
+          from: 'categories',
+          localField: '_id',
+          foreignField: 'parent',
+          as: 'children'
+        }
+      },
+      {
+        $project: {
+          _id: 1,
+          name: 1,
+          children: {
+            _id: 1,
+            name: 1
+          }
+        }
+      },
+      { $sort: { name: 1, children: 1 } }
+    ])
   }
 
   public async addCategory (category: ICategory): Promise<ICategory> {

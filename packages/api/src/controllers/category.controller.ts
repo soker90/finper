@@ -1,7 +1,11 @@
 import { NextFunction, Request, Response } from 'express'
 
 import '../auth/local-strategy-passport-handler'
-import { validateCategoryCreateParams, validateCategoryEditParams, validateCategoryExist } from '../validators/category'
+import {
+  validateCategoryCreateParams,
+  validateCategoryEditParams,
+  validateCategoryExist
+} from '../validators/category'
 import { ICategoryService } from '../services/category.service'
 
 type ICategoryController = {
@@ -37,6 +41,17 @@ export class CategoryController {
     Promise.resolve(req)
       .tap(() => this.logger.logInfo('/categories - list categories'))
       .then(this.categoryService.getCategories.bind(this.categoryService))
+      .then(response => {
+        res.send(response)
+      }).catch(error => {
+        next(error)
+      })
+  }
+
+  public async categoriesGrouped (req: Request, res: Response, next: NextFunction): Promise<void> {
+    Promise.resolve(req)
+      .tap(() => this.logger.logInfo('/categories - list categories'))
+      .then(this.categoryService.getGroupedCategories.bind(this.categoryService))
       .then(response => {
         res.send(response)
       }).catch(error => {

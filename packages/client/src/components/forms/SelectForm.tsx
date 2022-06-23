@@ -23,7 +23,7 @@ interface Props {
     optionValue: string | number
     optionLabel: string | number
     inputRef?: Ref<any>
-    onChange?: (e: ChangeEvent<HTMLInputElement>) => void
+    onChange?: (e: ChangeEvent<HTMLSelectElement>) => void
     voidLabel?: string
     voidValue?: string
     voidOption?: boolean

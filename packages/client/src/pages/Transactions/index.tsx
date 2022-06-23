@@ -7,7 +7,6 @@ import { TransactionsPage } from './components/TransactionsPage'
 import { TransactionType } from 'types/transaction'
 import { useFilters } from './hooks'
 import TransacionsFilter from './components/TransacionsFilter'
-import { useCategories } from '../Categories/hooks'
 
 const Transactions = () => {
   const [newTransaction, setNewTransaction] = useState(false)
@@ -34,12 +33,12 @@ const Transactions = () => {
                     account: '',
                     _id: '',
                     amount: 0,
-                    date: Date.now(),
+                    date: null,
                     category: '',
                     note: '',
                     store: '',
-                    type: TransactionType.Expense
-                  }} forceExpand cancelCreate={cancelCreate} />}
+                    type: TransactionType.NotComputable
+                  } as any} forceExpand cancelCreate={cancelCreate} />}
                 <TransactionsPage index={0} filters={filters} />
             </ListContainer>
         </>

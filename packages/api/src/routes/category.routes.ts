@@ -31,6 +31,12 @@ export class CategoryRoutes {
       this.categoryController.categories.bind(this.categoryController)
     )
 
+    this.router.get(
+      '/grouped',
+      authMiddleware,
+      this.categoryController.categoriesGrouped.bind(this.categoryController)
+    )
+
     this.router.patch(
       '/:id',
       authMiddleware,
