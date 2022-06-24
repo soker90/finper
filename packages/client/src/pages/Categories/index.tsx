@@ -1,9 +1,9 @@
 import { useMemo, useState } from 'react'
 import { useCategories } from './hooks'
-import { CategoryItem, LoadingBanks } from './components'
+import { CategoryItem } from './components'
 import { PlusOutlined } from '@ant-design/icons'
 import { ListContainer } from './components/ListContainer'
-import { HeaderButtons } from 'components'
+import { HeaderButtons, LoadingList } from 'components'
 import { TransactionType } from 'types/transaction'
 
 const Accounts = () => {
@@ -15,7 +15,7 @@ const Accounts = () => {
   }, [categories])
 
   if (isLoading) {
-    return <LoadingBanks />
+    return <LoadingList />
   }
   const handleClickNew = () => {
     setNewAccount(true)

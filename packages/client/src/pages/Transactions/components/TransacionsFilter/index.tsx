@@ -2,7 +2,7 @@ import { ChangeEvent } from 'react'
 import { FilterParams } from '../../hooks'
 import { Button, Stack, Typography } from '@mui/material'
 import { ClearOutlined } from '@ant-design/icons'
-import { SelectForm } from 'components/forms'
+import { SelectForm, SelectGroupForm } from 'components/forms'
 import { TYPES_TRANSACTIONS_ENTRIES } from 'constants/transactions'
 import { useGroupedCategories } from 'hooks'
 
@@ -21,7 +21,7 @@ const TransacionsFilter = ({ filters, setFilter, resetFilter }: FilterParams) =>
                         voidLabel=' --- '
                         voidValue=''
             />
-            <SelectForm id='category' label='Categoria'
+            <SelectGroupForm id='category' label='Categoria'
                         options={categories}
                         optionValue='_id'
                         optionLabel='name'

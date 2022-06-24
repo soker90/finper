@@ -1,16 +1,16 @@
 import { useState } from 'react'
 import { useAccounts } from './hooks'
-import { LoadingBanks, AccountItem } from './components'
+import { AccountItem } from './components'
 import { PlusOutlined } from '@ant-design/icons'
 import { ListContainer } from './components/ListContainer'
-import { HeaderButtons } from 'components'
+import { HeaderButtons, LoadingList } from 'components'
 
 const Accounts = () => {
   const { accounts, isLoading } = useAccounts()
   const [newAccount, setNewAccount] = useState(false)
 
   if (isLoading) {
-    return <LoadingBanks />
+    return <LoadingList />
   }
 
   const handleClickNew = () => {
