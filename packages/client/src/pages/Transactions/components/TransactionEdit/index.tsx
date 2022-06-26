@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { ChangeEvent, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import {
   Button,
@@ -13,6 +13,7 @@ import { TRANSACTIONS } from 'constants/api-paths'
 import { Transaction } from 'types/transaction'
 import { useGroupedCategories, useAccounts } from 'hooks'
 import './style.module.css'
+import { TYPES_TRANSACTIONS_ENTRIES } from 'constants/transactions'
 
 const TransactionEdit = ({
   transaction,
@@ -23,8 +24,8 @@ const TransactionEdit = ({
   const { register, handleSubmit, formState: { errors } } = useForm({
     defaultValues: {
       note: transaction?.note || '',
-      account: transaction?.account,
-      category: transaction?.category
+      account: transaction?.account?._id,
+      category: transaction?.category?._id
     }
   })
   const { categories } = useGroupedCategories()
@@ -50,9 +51,18 @@ const TransactionEdit = ({
   return (
         <form onSubmit={onSubmit}>
             <Grid container spacing={3}>
-                <InputForm id='note' label='Nombre' placeholder='Nombre de la cuenta'
-                           error={!!errors.note} {...register('note', { required: true, minLength: 3 })}
-                           errorText='Introduce un nombre de cuenta válido' />
+                <SelectForm id='account' label='Cuenta'
+                            options={accounts}
+                            optionValue='_id'
+                            optionLabel='name'
+                            error={!!errors.account} {...register('account', { required: true })}
+                            errorText='Introduce una cuenta válida' />
+
+                <SelectForm id='type' label='Tipo'
+                            options={TYPES_TRANSACTIONS_ENTRIES}
+                            optionValue={0}
+                            optionLabel={1}
+                />
 
                 <SelectGroupForm id='category' label='Categoria'
                                  options={categories}
@@ -61,12 +71,9 @@ const TransactionEdit = ({
                                  error={!!errors.category} {...register('category', { required: true })}
                                  errorText='Introduce una categoria válida' />
 
-                <SelectForm id='account' label='Cuenta'
-                            options={accounts}
-                            optionValue='_id'
-                            optionLabel='name'
-                            error={!!errors.account} {...register('account', { required: true })}
-                            errorText='Introduce una cuenta válida' />
+                <InputForm id='note' label='Nota' placeholder='Nota'
+                           error={!!errors.note} {...register('note', { required: true, minLength: 3 })}
+                           errorText='Introduce una nota válida' />
 
                 {error && (
                     <Grid item xs={12}>
