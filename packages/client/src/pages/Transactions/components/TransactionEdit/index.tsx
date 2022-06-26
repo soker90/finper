@@ -1,17 +1,13 @@
-import { ChangeEvent, useState } from 'react'
+import { useState } from 'react'
 import { useForm } from 'react-hook-form'
-import {
-  Button,
-  FormHelperText,
-  Grid
-} from '@mui/material'
+import { Button, FormHelperText, Grid } from '@mui/material'
 import { mutate } from 'swr'
 
-import { InputForm, SelectForm, SelectGroupForm } from 'components'
-import { addTransaction, editTransaction, deleteTransaction } from 'services/apiService'
+import { DateForm, InputForm, SelectForm, SelectGroupForm } from 'components'
+import { addTransaction, deleteTransaction, editTransaction } from 'services/apiService'
 import { TRANSACTIONS } from 'constants/api-paths'
-import { Transaction } from 'types/transaction'
-import { useGroupedCategories, useAccounts } from 'hooks'
+import { Transaction, TransactionType } from 'types/transaction'
+import { useAccounts, useGroupedCategories } from 'hooks'
 import './style.module.css'
 import { TYPES_TRANSACTIONS_ENTRIES } from 'constants/transactions'
 
@@ -21,18 +17,25 @@ const TransactionEdit = ({
   isNew
 }: { transaction?: Transaction, hideForm: () => void, isNew?: boolean }) => {
   const [error, setError] = useState<string | undefined>(undefined)
-  const { register, handleSubmit, formState: { errors } } = useForm({
+  const { register, handleSubmit, formState: { errors }, control } = useForm({
     defaultValues: {
       note: transaction?.note || '',
       account: transaction?.account?._id,
-      category: transaction?.category?._id
+      category: transaction?.category?._id,
+      date: transaction?.date || null,
+      amount: transaction?.amount,
+      type: transaction?.type || TransactionType.Expense
     }
   })
   const { categories } = useGroupedCategories()
   const { accounts } = useAccounts()
 
   const onSubmit = handleSubmit(async (params) => {
-    const { error } = transaction?._id ? await editTransaction(transaction._id, params as any) : await addTransaction(params as any)
+    const formattedParams = {
+      ...params,
+      date: params.date ? new Date(params.date).getTime() : null
+    }
+    const { error } = transaction?._id ? await editTransaction(transaction._id, formattedParams as any) : await addTransaction(formattedParams as any)
     if (!error) {
       mutate(TRANSACTIONS)
       hideForm()
@@ -51,17 +54,25 @@ const TransactionEdit = ({
   return (
         <form onSubmit={onSubmit}>
             <Grid container spacing={3}>
+                <DateForm placeholder={'Introduce una fecha'} id='date' label='Fecha'
+                          error={!!errors.date}
+                          control={control}
+                />
+
                 <SelectForm id='account' label='Cuenta'
                             options={accounts}
                             optionValue='_id'
                             optionLabel='name'
                             error={!!errors.account} {...register('account', { required: true })}
-                            errorText='Introduce una cuenta válida' />
+                            errorText='Introduce una cuenta válida'
+                            size={2} />
 
                 <SelectForm id='type' label='Tipo'
                             options={TYPES_TRANSACTIONS_ENTRIES}
                             optionValue={0}
                             optionLabel={1}
+                            size={2}
+                            error={!!errors.type} {...register('type', { required: true })}
                 />
 
                 <SelectGroupForm id='category' label='Categoria'
@@ -69,11 +80,20 @@ const TransactionEdit = ({
                                  optionValue='_id'
                                  optionLabel='name'
                                  error={!!errors.category} {...register('category', { required: true })}
-                                 errorText='Introduce una categoria válida' />
+                                 errorText='Introduce una categoria válida'
+                                 size={2} />
+
+                <InputForm id='amount' label='Cantidad' placeholder='Introduce la cantidad'
+                           error={!!errors.amount} {...register('amount', { required: true, valueAsNumber: true })}
+                           errorText='Introduce una cantidad válida'
+                           type='number' inputProps={{ step: 'any' }}
+                           size={2}
+                />
 
                 <InputForm id='note' label='Nota' placeholder='Nota'
-                           error={!!errors.note} {...register('note', { required: true, minLength: 3 })}
-                           errorText='Introduce una nota válida' />
+                           error={!!errors.note} {...register('note')}
+                           errorText='Introduce una nota válida'
+                           size={12} />
 
                 {error && (
                     <Grid item xs={12}>
