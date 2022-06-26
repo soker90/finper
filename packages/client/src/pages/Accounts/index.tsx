@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useAccounts } from './hooks'
+import { useAccounts } from 'hooks'
 import { AccountItem } from './components'
 import { PlusOutlined } from '@ant-design/icons'
 import { ListContainer } from './components/ListContainer'

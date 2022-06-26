@@ -1,4 +1,4 @@
-import { FC, useState } from 'react'
+import { FC, useCallback, useState } from 'react'
 import { Collapse, Divider, Paper, Stack, Typography, useMediaQuery, useTheme } from '@mui/material'
 import { Transaction } from 'types'
 import { format } from 'utils'
@@ -7,6 +7,7 @@ import { BankIcon } from 'components/icons'
 import { AMOUNT_COLORS, TRANSACTION_SYMBOL } from './constans'
 import styles from './styles.module.css'
 import { ItemContent } from 'components'
+import TransactionEdit from '../TransactionEdit'
 
 interface TransactionItemProps {
     transaction?: Transaction
@@ -20,10 +21,10 @@ const TransactionItem: FC<TransactionItemProps> = ({ transaction, forceExpand, c
 
   const isDesktop = useMediaQuery(theme.breakpoints.up('md'))
 
-  // const hideForm = useCallback(() => {
-  //   cancelCreate?.()
-  //   setExpand(false)
-  // }, [transaction._id])
+  const hideForm = useCallback(() => {
+    cancelCreate?.()
+    setExpand(false)
+  }, [transaction?._id])
 
   return (
         <>
@@ -42,7 +43,7 @@ const TransactionItem: FC<TransactionItemProps> = ({ transaction, forceExpand, c
                 </ItemContent>}
                 <Collapse in={expand} timeout="auto" unmountOnExit>
                     <Divider className={styles.divider} />
-                    expand
+                    <TransactionEdit transaction={transaction} hideForm={hideForm} />
 
                 </Collapse>
             </Paper>

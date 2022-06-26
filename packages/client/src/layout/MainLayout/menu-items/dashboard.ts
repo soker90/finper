@@ -14,6 +14,14 @@ const dashboard = {
       breadcrumbs: true
     },
     {
+      id: 'transactions',
+      title: 'Movimientos',
+      type: 'item',
+      url: '/movimientos',
+      icon: CreditCardOutlined,
+      breadcrumbs: true
+    },
+    {
       id: 'accounts',
       title: 'Cuentas',
       type: 'item',
@@ -27,14 +35,6 @@ const dashboard = {
       type: 'item',
       url: '/categorias',
       icon: ShoppingCartOutlined,
-      breadcrumbs: true
-    },
-    {
-      id: 'transactions',
-      title: 'Movimientos',
-      type: 'item',
-      url: '/movimientos',
-      icon: CreditCardOutlined,
       breadcrumbs: true
     }
   ]
