@@ -1,4 +1,4 @@
-import { Schema, model, ObjectId } from 'mongoose'
+import { model, ObjectId, Schema } from 'mongoose'
 import { TransactionType } from './transactions'
 
 export interface ICategory {
@@ -10,7 +10,11 @@ export interface ICategory {
 
 const categorySchema = new Schema<ICategory>({
   name: { type: String, required: true },
-  type: { type: String, required: true },
+  type: {
+    type: String,
+    required: true,
+    enum: [TransactionType.Income, TransactionType.Expense, TransactionType.NotComputable]
+  },
   parent: { type: Schema.Types.ObjectId, ref: 'Category' }
 }, { versionKey: false })
 

@@ -1,11 +1,12 @@
-import { Schema, model, Document } from 'mongoose'
+import { Schema, model, ObjectId } from 'mongoose'
 
 export enum DebtType {
     FROM = 'from',
     TO = 'to',
 }
 
-export interface IDebt extends Document {
+export interface IDebt {
+    _id: ObjectId,
     from: string
     date: number,
     amount: number,
@@ -20,7 +21,7 @@ const debtSchema = new Schema<IDebt>({
   amount: { type: Number, required: true },
   paymentDate: { type: Number },
   concept: { type: String },
-  type: { type: String, required: true }
+  type: { type: String, required: true, enum: [DebtType.FROM, DebtType.TO] }
 }, { versionKey: false })
 
 export const DebtModel = model<IDebt>('Debt', debtSchema)
