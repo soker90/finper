@@ -3,14 +3,14 @@ import {
   AccountModel,
   CategoryModel,
   IAccount,
-  ICategory, IStore, ITransaction,
+  ICategory, IStore,
   IUser, StoreModel, TransactionModel,
   TransactionType,
   UserModel
 } from '@soker90/finper-models'
 
 import {
-  MAX_USERNAME_LENGTH,
+  MAX_USERNAME_LENGTH, MIN_LENGTH_USERNAME,
   MIN_PASSWORD_LENGTH
 } from '../src/config/inputs'
 
@@ -32,13 +32,13 @@ export async function insertCredentials (params: Record<string, string | boolean
   })
 }
 
-export const insertAccount = async (params: Record<string, string | number | boolean> = {}): Promise<IAccount> => {
+export const insertAccount = async (params?: IAccount = {} as IAccount): Promise<IAccount> => {
   return AccountModel.create({
     name: params.name ?? faker.finance.accountName(),
     bank: params.bank ?? faker.lorem.word(),
-    balance: params.balance ?? faker.finance.amount(),
+    balance: params.balance ?? faker.datatype.number(),
     isActive: params.isActive ?? faker.datatype.boolean(),
-    user: params.user ?? faker.internet.userName().slice(0, MAX_USERNAME_LENGTH).toLowerCase()
+    user: params.user ?? faker.internet.userName().slice(MIN_LENGTH_USERNAME, MAX_USERNAME_LENGTH).toLowerCase()
   })
 }
 
@@ -56,11 +56,11 @@ export const insertStore = async (params: Record<string, string> = {}): Promise<
   })
 }
 
-export const insertTransaction = async (params: Record<string, string | number> = {}): Promise<ITransaction> => {
+export const insertTransaction = async (params: Record<string, string | number> = {}): Promise<any> => {
   return TransactionModel.create({
     date: params.date ?? faker.date.past().getTime(),
     category: params.category ?? (await insertCategory()),
-    amount: params.amount ?? faker.finance.amount(),
+    amount: params.amount ?? faker.datatype.number(),
     type: params.type ?? Math.random() > 0.5 ? TransactionType.Expense : TransactionType.Income,
     account: params.account ?? (await insertAccount()),
     note: params.note ?? faker.lorem.sentence(),

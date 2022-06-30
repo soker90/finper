@@ -1,3 +1,4 @@
+
 define help
 
   Usage: make <command>
@@ -17,11 +18,11 @@ install:
 	@npm i
 
 build-models:
-	@npm test --workspace=packages/models run build
+	@npm run build --workspace=@soker90/finper-models
 
 start-api:
-	cd packages/api && npm start
+	@npm run start --workspace=@soker90/finper-api
 
 test-api:
-	@npm test --workspace=packages/api
+	@npm test --workspace=@soker90/finper-api
 

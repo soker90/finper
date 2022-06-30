@@ -1,6 +1,7 @@
-import { Schema, model, Document } from 'mongoose'
+import { Schema, model, ObjectId } from 'mongoose'
 
-export interface IAccount extends Document {
+export interface IAccount {
+    _id: ObjectId,
     name: string
     bank: string,
     balance: number,

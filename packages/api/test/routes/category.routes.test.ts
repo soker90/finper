@@ -111,7 +111,7 @@ describe('Category', () => {
 
     test('when no params provided, it should response an error with status code 422', async () => {
       const category: ICategory = await insertCategory()
-      await supertest(server.app).patch(path(category._id)).auth(token, { type: 'bearer' }).expect(422)
+      await supertest(server.app).patch(path(category._id.toString())).auth(token, { type: 'bearer' }).expect(422)
     })
 
     test.each(['name', 'type'])('when no %s param provided, it should response an error with status code 422', async (param: string) => {
@@ -123,7 +123,7 @@ describe('Category', () => {
 
       delete params[param]
       await supertest(server.app)
-        .patch(path(category._id))
+        .patch(path(category._id.toString()))
         .set('Authorization', `Bearer ${token}`)
         .send(params)
         .expect(422)
@@ -136,7 +136,7 @@ describe('Category', () => {
         type: Math.random() > 0.5 ? TransactionType.Expense : TransactionType.Income
       }
       await supertest(server.app)
-        .patch(path(category._id))
+        .patch(path(category._id.toString()))
         .set('Authorization', `Bearer ${token}`)
         .send(params)
         .expect(200)
@@ -165,7 +165,7 @@ describe('Category', () => {
     test('when exist the category, it should response with status code 200', async () => {
       const category: ICategory = await insertCategory()
 
-      await supertest(server.app).delete(path(category._id)).set('Authorization', `Bearer ${token}`).expect(200)
+      await supertest(server.app).delete(path(category._id.toString())).set('Authorization', `Bearer ${token}`).expect(200)
     })
   })
 })
