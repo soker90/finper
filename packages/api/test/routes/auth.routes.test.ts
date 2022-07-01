@@ -7,7 +7,7 @@ import { faker } from '@faker-js/faker'
 
 import { server } from '../../src/server'
 import { insertCredentials } from '../insert-data-to-model'
-import {MAX_USERNAME_LENGTH, MIN_LENGTH_USERNAME, MIN_PASSWORD_LENGTH} from '../../src/config/inputs'
+import { MAX_USERNAME_LENGTH, MIN_PASSWORD_LENGTH } from '../../src/config/inputs'
 import { requestLogin } from '../request-login'
 
 const testDatabase = require('../test-db')(mongoose)

@@ -76,7 +76,7 @@ describe('Transaction', () => {
           category: (await insertCategory())._id.toString(),
           amount: faker.finance.amount(),
           type: Math.random() > 0.5 ? TransactionType.Expense : TransactionType.Income,
-          account: (await insertAccount({user}))._id.toString(),
+          account: (await insertAccount({ user }))._id.toString(),
           note: faker.lorem.sentence(),
           store: faker.company.companyName()
         })
@@ -94,7 +94,7 @@ describe('Transaction', () => {
             category: (await insertCategory())._id.toString(),
             amount: faker.finance.amount(),
             type: Math.random() > 0.5 ? TransactionType.Expense : TransactionType.Income,
-            account: (await insertAccount({user}))._id.toString(),
+            account: (await insertAccount({ user }))._id.toString(),
             note: faker.lorem.sentence(),
             store
           })
