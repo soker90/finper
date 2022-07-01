@@ -13,7 +13,7 @@ export interface ITransaction {
     amount: number,
     type: TransactionType,
     account: ObjectId,
-    note: string,
+    note?: string,
     store?: ObjectId,
 }
 

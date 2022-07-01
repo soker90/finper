@@ -16,7 +16,11 @@ export const useFilters = (): FilterParams => {
   const [filters, setFilters] = useReducer(
     (state: any, { type, key, value }: FilterAction) => ({
       set: { ...state, [key as string]: value },
-      reset: {}
+      reset: {
+        category: '',
+        type: '',
+        account: ''
+      }
     }[type]),
     {})
 

@@ -27,6 +27,7 @@ interface Props {
     voidLabel?: string
     voidValue?: string
     voidOption?: boolean
+    value?: any
 }
 
 const SelectForm = ({
@@ -49,7 +50,7 @@ const SelectForm = ({
             <NativeSelect
                 id={id}
                 fullWidth
-                defaultValue={30}
+                defaultValue={''}
                 input={<OutlinedInput />}
                 inputRef={ref}
                 {...others}

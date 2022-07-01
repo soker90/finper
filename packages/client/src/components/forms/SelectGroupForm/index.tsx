@@ -30,6 +30,7 @@ interface Props {
     voidValue?: string
     voidOption?: boolean
     childrenName?: string
+    value?: any
 }
 
 const SelectGroupForm = ({
@@ -53,7 +54,7 @@ const SelectGroupForm = ({
             <NativeSelect
                 id={id}
                 fullWidth
-                defaultValue={30}
+                defaultValue={''}
                 input={<OutlinedInput />}
                 inputRef={ref}
                 {...others}
