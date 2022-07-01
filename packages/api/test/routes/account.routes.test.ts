@@ -122,7 +122,7 @@ describe('Account', () => {
 
     test('when no params provided, it should response an error with status code 422', async () => {
       const account: IAccount = await insertAccount({ user: username })
-      await supertest(server.app).patch(path(account._id)).auth(token, { type: 'bearer' }).expect(422)
+      await supertest(server.app).patch(path(account._id.toString())).auth(token, { type: 'bearer' }).expect(422)
     })
 
     test.each(['name', 'bank', 'balance'])('when no %s param provided and other is name or bank, it should response an error with status code 422', async (param: string) => {
@@ -135,7 +135,7 @@ describe('Account', () => {
 
       delete params[param]
       await supertest(server.app)
-        .patch(path(account._id))
+        .patch(path(account._id.toString()))
         .set('Authorization', `Bearer ${token}`)
         .send(params)
         .expect(422)
@@ -147,7 +147,7 @@ describe('Account', () => {
         isActive: !account.isActive
       }
       await supertest(server.app)
-        .patch(path(account._id))
+        .patch(path(account._id.toString()))
         .set('Authorization', `Bearer ${token}`)
         .send(params)
         .expect(200)
@@ -174,13 +174,13 @@ describe('Account', () => {
 
     test('when account is of other user, it should response an error with status code 404', async () => {
       const account: IAccount = await insertAccount()
-      await supertest(server.app).get(path(account._id)).auth(token, { type: 'bearer' }).expect(404)
+      await supertest(server.app).get(path(account._id.toString())).auth(token, { type: 'bearer' }).expect(404)
     })
 
     test('when exist account for the user bank, it should response with status code 200', async () => {
       const account: IAccount = await insertAccount({ user: username })
 
-      await supertest(server.app).get(path(account._id)).set('Authorization', `Bearer ${token}`)
+      await supertest(server.app).get(path(account._id.toString())).set('Authorization', `Bearer ${token}`)
         .expect(200, {
           _id: account._id.toString(),
           name: account.name,

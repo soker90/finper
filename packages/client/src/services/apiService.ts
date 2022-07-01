@@ -1,7 +1,6 @@
 import axios from 'axios'
-import { Account } from '@soker90/finper-types'
 import { ACCOUNTS, CATEGORIES, TRANSACTIONS } from 'constants/api-paths'
-import { Category, Transaction, TransactionType } from 'types'
+import { Category, Transaction, TransactionType, Account } from 'types'
 
 export const editAccount = (id: string, params: { name?: string, bank?: string, balance?: number, isActive?: boolean }): Promise<{ data?: Account, error?: string | undefined }> => {
   return axios.patch(`${ACCOUNTS}/${id}`, params).then((data: any) => ({ data: data as Account })).catch((error) => ({ error: error.message }))

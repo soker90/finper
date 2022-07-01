@@ -26,6 +26,8 @@ describe('Transaction', () => {
       token = await requestLogin(server.app, { username: user })
     })
 
+    afterAll(() => testDatabase.cleanAll())
+
     test('when token is not provided, it should response an error with status code 401', async () => {
       await supertest(server.app).post(path).expect(401)
     })

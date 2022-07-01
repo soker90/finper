@@ -32,7 +32,7 @@ export async function insertCredentials (params: Record<string, string | boolean
   })
 }
 
-export const insertAccount = async (params?: IAccount = {} as IAccount): Promise<IAccount> => {
+export const insertAccount = async (params: { name?: string, bank?: string, balance?: number, isActive?: boolean, user?: string } = {}): Promise<IAccount> => {
   return AccountModel.create({
     name: params.name ?? faker.finance.accountName(),
     bank: params.bank ?? faker.lorem.word(),

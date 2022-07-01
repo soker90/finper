@@ -1,6 +1,6 @@
 import { FC, useCallback, useState } from 'react'
 import { Collapse, Divider, Paper, Typography, useTheme } from '@mui/material'
-import { Account } from '@soker90/finper-types'
+import { Account } from 'types'
 
 import { BankIcon, ItemContent } from 'components'
 import { format } from 'utils'

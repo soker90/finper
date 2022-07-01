@@ -6,7 +6,7 @@ import {
   Grid
 } from '@mui/material'
 import { mutate } from 'swr'
-import { Account } from '@soker90/finper-types'
+import { Account } from 'types'
 
 import InputForm from './InputForm'
 import { addAccount, editAccount } from 'services/apiService'

@@ -10,8 +10,13 @@ module.exports = (mongoose) => {
     await mongoose.connection.close()
   }
 
+  async function cleanAll () {
+    await mongoose.connection.db.dropDatabase()
+  }
+
   return {
     close,
-    connect
+    connect,
+    cleanAll
   }
 }

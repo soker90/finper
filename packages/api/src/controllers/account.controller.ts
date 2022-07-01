@@ -53,7 +53,7 @@ export class AccountController {
       .tap(({ body }) => this.logger.logInfo(`/edit - account: ${body.name?.toLowerCase()}`))
       .then(validateAccountEditParams)
       .then(this.accountService.editAccount.bind(this.accountService))
-      .tap(({ id }) => this.logger.logInfo(`Account ${id} has been succesfully edited`))
+      .tap(({ _id }) => this.logger.logInfo(`Account ${_id} has been succesfully edited`))
       .then((response) => {
         res.send(response)
       })
