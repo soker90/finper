@@ -7,14 +7,14 @@ export interface ICategoryService {
 
     deleteCategory({ id }: { id: string }): Promise<void>
 
-    getCategories({ user }: { user: string }): Promise<ICategory[]>
+    getCategories(user: string): Promise<ICategory[]>
 
     getGroupedCategories(): Promise<any[]>
 
 }
 
 export default class CategoryService implements ICategoryService {
-  public async getCategories ({ user }: { user: string }): Promise<ICategory[]> {
+  public async getCategories (user: string): Promise<ICategory[]> {
     return CategoryModel.find({ user }).populate('parent', '_id').sort('name')
   }
 

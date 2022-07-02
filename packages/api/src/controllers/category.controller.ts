@@ -40,8 +40,8 @@ export class CategoryController {
   }
 
   public async categories (req: Request, res: Response, next: NextFunction): Promise<void> {
-    Promise.resolve(req)
-      .tap(() => this.logger.logInfo('/categories - list categories'))
+    Promise.resolve(req.user as string)
+      .tap((user: string) => this.logger.logInfo(`/categories - list categories of ${user}`))
       .then(this.categoryService.getCategories.bind(this.categoryService))
       .then(response => {
         res.send(response)
