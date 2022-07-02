@@ -16,45 +16,61 @@ interface Props {
     options: any[]
     optionValue: string | number
     optionLabel: string | number
-    inputRef?: Ref<any>
-    onChange?: (event: SyntheticEvent, value: any | Array<any>, reason: string, details?: string) => void
-    voidLabel?: string
-    voidValue?: string
-    voidOption?: boolean
-    value?: any
-    onKeyDown?: any
+    // onChange?: (event: SyntheticEvent, value: any | Array<any>, reason: string, details?: string) => void
+    value?: string
+    // onKeyDown?: any
+    error?: boolean
+    errorText?: string
 }
 
-const SelectForm = ({
+const AutocompleteForm = ({
   id,
   label,
   size = 4,
   options,
   optionValue,
   optionLabel,
-  voidLabel = ' --- ',
-  voidValue = '',
-  voidOption,
+  errorText,
+  placeholder,
+  value,
   ...others
-}: Props, ref: Ref<HTMLInputElement>) => (
-    <Grid item md={size} xs={12}>
-        <Stack spacing={1}>
-            <InputLabel htmlFor={id}>{label}</InputLabel>
-            <Autocomplete
-                autoSelect
-                options={[{ _id: 'test', name: 'Test' }]}
-                getOptionLabel={(option) => option.name}
-                id={id}
-                fullWidth
-                {...others}
-                renderInput={(params: any) => (
-                    <OutlinedInput
-                        ref={ref}
-                        sx={{ height: 40 }}
-                        {...params} />)}
-            />
-        </Stack>
-    </Grid>
-)
+}: Props, ref: Ref<HTMLInputElement>) => {
+  console.log(others, value)
+  return (
+        <Grid item md={size} xs={12}>
+            <Stack spacing={1}>
+                <InputLabel htmlFor={id}>{label}</InputLabel>
+                <Autocomplete
+                    freeSolo
+                    // autoComplete
+                    // autoSelect
+                    selectOnFocus
+                    options={options}
+                    getOptionLabel={(option: any) => {
+                        console.log(option)
+                        return option[optionLabel]
+                    }}
+                    fullWidth
+                    inputValue={value}
+                    noOptionsText=''
+                    ref={ref}
+                    renderInput={(params: any) => (
+                        <OutlinedInput
+                            id={id}
+                            ref={params.InputProps.ref}
+                            sx={{ height: 40 }}
+                            placeholder={placeholder}
+                            {...params} />)}
+                    {...others}
+                />
+                {others.error && (
+                    <FormHelperText error>
+                        {errorText}
+                    </FormHelperText>
+                )}
+            </Stack>
+        </Grid>
+  )
+}
 
-export default forwardRef(SelectForm)
+export default forwardRef(AutocompleteForm)

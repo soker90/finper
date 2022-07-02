@@ -7,9 +7,11 @@ import { DateForm, InputForm, SelectForm, SelectGroupForm } from 'components'
 import { addTransaction, deleteTransaction, editTransaction } from 'services/apiService'
 import { TRANSACTIONS } from 'constants/api-paths'
 import { Transaction, TransactionType } from 'types/transaction'
-import { useAccounts, useGroupedCategories } from 'hooks'
+import { useAccounts, useGroupedCategories, useStores } from 'hooks'
 import './style.module.css'
 import { TYPES_TRANSACTIONS_ENTRIES } from 'constants/transactions'
+import AutocompleteForm from 'components/forms/AutocompleteForm'
+import transactions from '../../index'
 
 const TransactionEdit = ({
   transaction,
@@ -30,6 +32,7 @@ const TransactionEdit = ({
   })
   const { categories } = useGroupedCategories()
   const { accounts } = useAccounts()
+  const { stores } = useStores()
 
   const onSubmit = handleSubmit(async (params) => {
     const formattedParams = {
@@ -39,11 +42,13 @@ const TransactionEdit = ({
       amount: params.amount,
       type: params.type,
       ...(params.note && { note: params.note }),
-      ...(params.store && { note: params.store })
+      ...(params.store && { store: params.store })
     }
     const { error } = transaction?._id ? await editTransaction(transaction._id, formattedParams as any) : await addTransaction(formattedParams as any)
     if (!error) {
-      mutate(TRANSACTIONS)
+      mutate(TRANSACTIONS, async (transactions: Transaction[]) => {
+        return [...transactions, formattedParams]
+      })
       hideForm()
     }
     setError(error)
@@ -71,7 +76,7 @@ const TransactionEdit = ({
                             optionLabel='name'
                             error={!!errors.account} {...register('account', { required: true })}
                             errorText='Introduce una cuenta válida'
-                            size={2} />
+                            size={2}/>
 
                 <SelectForm id='type' label='Tipo'
                             options={TYPES_TRANSACTIONS_ENTRIES}
@@ -87,7 +92,7 @@ const TransactionEdit = ({
                                  optionLabel='name'
                                  error={!!errors.category} {...register('category', { required: true })}
                                  errorText='Introduce una categoria válida'
-                                 size={2} />
+                                 size={2}/>
 
                 <InputForm id='amount' label='Cantidad' placeholder='Introduce la cantidad'
                            error={!!errors.amount} {...register('amount', { required: true, valueAsNumber: true })}
@@ -96,10 +101,20 @@ const TransactionEdit = ({
                            size={2}
                 />
 
+                <AutocompleteForm
+                    options={stores} optionValue='_id'
+                    optionLabel='name' id='store' label='Tienda'
+                    placeholder='Tienda'
+                    error={!!errors.store}
+                    errorText='Introduce una tienda válida'
+                    size={2}
+                    {...register('store')}
+                />
+
                 <InputForm id='note' label='Nota' placeholder='Nota'
                            error={!!errors.note} {...register('note')}
                            errorText='Introduce una nota válida'
-                           size={12} />
+                           size={12}/>
 
                 {error && (
                     <Grid item xs={12}>
