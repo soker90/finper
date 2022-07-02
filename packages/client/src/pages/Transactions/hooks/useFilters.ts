@@ -19,7 +19,8 @@ export const useFilters = (): FilterParams => {
       reset: {
         category: '',
         type: '',
-        account: ''
+        account: '',
+        store: ''
       }
     }[type]),
     {})

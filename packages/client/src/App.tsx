@@ -7,11 +7,12 @@ import { SwrProvider } from './contexts'
 import 'utils/axios'
 import Auth from 'components/Auth'
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
+import esLocale from 'dayjs/locale/es'
 
 function App () {
   return (
         <ThemeCustomization>
-            <LocalizationProvider dateAdapter={AdapterDayjs}>
+            <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale={esLocale}>
                 <SwrProvider>
                     <Auth>
                         <Suspense fallback={<Loader />}>

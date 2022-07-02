@@ -38,7 +38,12 @@ const CategoryEdit = ({
 
     const { error } = category._id ? await editCategory(category._id, sendParams) : await addCategory(sendParams)
     if (!error) {
-      mutate(CATEGORIES)
+      mutate(CATEGORIES, async (categories: Category[]) => {
+        if (isNew) {
+          return [...categories, sendParams]
+        }
+        return categories.map(c => c._id === category._id ? sendParams : c)
+      })
       hideForm()
     }
     setError(error)
@@ -47,7 +52,9 @@ const CategoryEdit = ({
   const handleDeleteButton = async () => {
     if (category._id) {
       await deleteCategory(category._id)
-      mutate(CATEGORIES)
+      mutate(CATEGORIES, async (categories: Category[]) => {
+        return categories.filter(c => c._id !== category._id)
+      })
     }
     hideForm()
   }

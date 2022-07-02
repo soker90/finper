@@ -7,6 +7,7 @@ import {
   validateCategoryExist
 } from '../validators/category'
 import { ICategoryService } from '../services/category.service'
+import extractUser from '../helpers/extract-user'
 
 type ICategoryController = {
     loggerHandler: any,
@@ -27,6 +28,7 @@ export class CategoryController {
     Promise.resolve(req.body)
       .tap(({ name }) => this.logger.logInfo(`/create - category: ${name?.toLowerCase()}`))
       .then(validateCategoryCreateParams)
+      .then(extractUser(req))
       .then(this.categoryService.addCategory.bind(this.categoryService))
       .tap(({ name }) => this.logger.logInfo(`Category ${name} has been succesfully created`))
       .then((response) => {

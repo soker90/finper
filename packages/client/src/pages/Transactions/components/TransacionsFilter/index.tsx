@@ -1,15 +1,15 @@
 import { ChangeEvent } from 'react'
 import { FilterParams } from '../../hooks'
-import { Button, debounce, Grid } from '@mui/material'
+import { Button, Grid } from '@mui/material'
 import { ClearOutlined } from '@ant-design/icons'
 import { SelectForm, SelectGroupForm } from 'components/forms'
 import { TYPES_TRANSACTIONS_ENTRIES } from 'constants/transactions'
-import { useAccounts, useGroupedCategories } from 'hooks'
-import AutocompleteForm from 'components/forms/AutocompleteForm'
+import { useAccounts, useGroupedCategories, useStores } from 'hooks'
 
 const TransacionsFilter = ({ filters, setFilter, resetFilter }: FilterParams) => {
   const { categories } = useGroupedCategories()
   const { accounts } = useAccounts()
+  const { stores } = useStores()
   return (
         <Grid container spacing={1} mt={1} mb={1}>
             <SelectForm
@@ -49,14 +49,18 @@ const TransacionsFilter = ({ filters, setFilter, resetFilter }: FilterParams) =>
                 value={filters.category}
                 size={2}
             />
-            <AutocompleteForm
-                label='Tienda' id='store' value={filters.store}
-                onChange={(e: ChangeEvent<HTMLInputElement>) => {
-                  debounce(() => {
-                    setFilter('store', e.target?.value)
-                  }, 500)
-                }}
-                size={2} options={[]} optionValue='_id' optionLabel='name' />
+            <SelectForm
+                id='store' label='Tienda'
+                options={stores}
+                optionValue='_id'
+                optionLabel='name'
+                onChange={(e: ChangeEvent<HTMLSelectElement>) => setFilter('store', e.target?.value)}
+                voidOption
+                voidLabel=' --- '
+                voidValue=''
+                size={2}
+                value={filters.store}
+            />
             <Grid item xs={12} md={1.5} sx={{ display: 'flex', justifyContent: 'center' }}>
                 <Button startIcon={<ClearOutlined />} size='small' onClick={resetFilter}>Limpiar</Button>
             </Grid>

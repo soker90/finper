@@ -19,7 +19,7 @@ export interface Transaction {
         name: string,
         bank: string,
     },
-    note: string,
+    note?: string,
     store?: {
         name: string,
     },
@@ -32,6 +32,6 @@ export interface TransactionInput {
     amount: number,
     type: TransactionType,
     account: string,
-    note: string,
+    note?: string,
     store?: string,
 }

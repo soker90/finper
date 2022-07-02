@@ -15,6 +15,7 @@ export interface ITransaction {
     account: ObjectId,
     note?: string,
     store?: ObjectId,
+    user: string,
 }
 
 const transactionSchema = new Schema<ITransaction>({
@@ -28,7 +29,8 @@ const transactionSchema = new Schema<ITransaction>({
   },
   account: { type: Schema.Types.ObjectId, required: true, ref: 'Account' },
   note: { type: String },
-  store: { type: Schema.Types.ObjectId, ref: 'Store' }
+  store: { type: Schema.Types.ObjectId, ref: 'Store' },
+  user: { type: String, required: true }
 }, { versionKey: false })
 
 export const TransactionModel = model<ITransaction>('Transaction', transactionSchema)

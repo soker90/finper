@@ -31,6 +31,10 @@ const DateForm = ({ id, label, control, error, size = 2, ...others }: Props) => 
                                        {...params} />}
                         value={field.value}
                         onChange={field.onChange}
+                        inputFormat="DD/MM/YYYY"
+                        okLabel='Aceptar'
+                        clearLabel="Futa"
+                        cancelLabel="Hairisha"
                         {...others} />
                 )}
             />

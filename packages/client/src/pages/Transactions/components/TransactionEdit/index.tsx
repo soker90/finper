@@ -24,7 +24,8 @@ const TransactionEdit = ({
       category: transaction?.category?._id,
       date: transaction?.date || null,
       amount: transaction?.amount,
-      type: transaction?.type || TransactionType.Expense
+      type: transaction?.type || TransactionType.Expense,
+      store: ''
     }
   })
   const { categories } = useGroupedCategories()
@@ -32,8 +33,13 @@ const TransactionEdit = ({
 
   const onSubmit = handleSubmit(async (params) => {
     const formattedParams = {
-      ...params,
-      date: params.date ? new Date(params.date).getTime() : null
+      date: params.date ? new Date(params.date).getTime() : null,
+      account: params.account,
+      category: params.category,
+      amount: params.amount,
+      type: params.type,
+      ...(params.note && { note: params.note }),
+      ...(params.store && { note: params.store })
     }
     const { error } = transaction?._id ? await editTransaction(transaction._id, formattedParams as any) : await addTransaction(formattedParams as any)
     if (!error) {
@@ -47,7 +53,7 @@ const TransactionEdit = ({
     if (!isNew && transaction?._id) {
       await deleteTransaction(transaction._id)
     }
-    mutate(TRANSACTIONS)
+    await mutate(TRANSACTIONS)
     hideForm()
   }
 

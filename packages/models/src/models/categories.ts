@@ -6,6 +6,7 @@ export interface ICategory {
     name: string,
     type: TransactionType,
     parent?: ObjectId,
+    user: string,
 }
 
 const categorySchema = new Schema<ICategory>({
@@ -15,7 +16,8 @@ const categorySchema = new Schema<ICategory>({
     required: true,
     enum: [TransactionType.Income, TransactionType.Expense, TransactionType.NotComputable]
   },
-  parent: { type: Schema.Types.ObjectId, ref: 'Category' }
+  parent: { type: Schema.Types.ObjectId, ref: 'Category' },
+  user: { type: String, required: true }
 }, { versionKey: false })
 
 export const CategoryModel = model<ICategory>('Category', categorySchema)

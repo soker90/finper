@@ -6,7 +6,7 @@ import {
   Stack,
   NativeSelect, Autocomplete, TextField
 } from '@mui/material'
-import { ChangeEvent, forwardRef, Ref } from 'react'
+import { forwardRef, Ref, SyntheticEvent } from 'react'
 
 interface Props {
     id: string
@@ -17,11 +17,12 @@ interface Props {
     optionValue: string | number
     optionLabel: string | number
     inputRef?: Ref<any>
-    onChange?: (e: ChangeEvent<HTMLInputElement>) => void
+    onChange?: (event: SyntheticEvent, value: any | Array<any>, reason: string, details?: string) => void
     voidLabel?: string
     voidValue?: string
     voidOption?: boolean
     value?: any
+    onKeyDown?: any
 }
 
 const SelectForm = ({
@@ -40,15 +41,16 @@ const SelectForm = ({
         <Stack spacing={1}>
             <InputLabel htmlFor={id}>{label}</InputLabel>
             <Autocomplete
+                autoSelect
                 options={[{ _id: 'test', name: 'Test' }]}
                 getOptionLabel={(option) => option.name}
-                clearOnEscape
                 id={id}
                 fullWidth
                 {...others}
-                renderInput={(params) => (
+                renderInput={(params: any) => (
                     <OutlinedInput
                         ref={ref}
+                        sx={{ height: 40 }}
                         {...params} />)}
             />
         </Stack>
