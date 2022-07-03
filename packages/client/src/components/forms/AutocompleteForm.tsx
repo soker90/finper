@@ -2,9 +2,8 @@ import {
   FormHelperText,
   Grid,
   InputLabel,
-  OutlinedInput,
   Stack,
-  NativeSelect, Autocomplete, TextField
+  Autocomplete, TextField
 } from '@mui/material'
 import { forwardRef, Ref, SyntheticEvent } from 'react'
 
@@ -14,13 +13,14 @@ interface Props {
     placeholder?: string
     size?: number
     options: any[]
-    optionValue: string | number
     optionLabel: string | number
-    // onChange?: (event: SyntheticEvent, value: any | Array<any>, reason: string, details?: string) => void
+    onChange?: (event: SyntheticEvent, value: any | Array<any>, reason: string, details?: string) => void
     value?: string
-    // onKeyDown?: any
     error?: boolean
     errorText?: string
+    name?: string
+    onBlur?: any
+    defaultValue?: any
 }
 
 const AutocompleteForm = ({
@@ -28,40 +28,28 @@ const AutocompleteForm = ({
   label,
   size = 4,
   options,
-  optionValue,
   optionLabel,
   errorText,
-  placeholder,
   value,
+  defaultValue,
   ...others
 }: Props, ref: Ref<HTMLInputElement>) => {
-  console.log(others, value)
   return (
         <Grid item md={size} xs={12}>
             <Stack spacing={1}>
                 <InputLabel htmlFor={id}>{label}</InputLabel>
                 <Autocomplete
+                    disableClearable
+                    sx={{ input: { height: 8 } }}
                     freeSolo
-                    // autoComplete
-                    // autoSelect
                     selectOnFocus
                     options={options}
-                    getOptionLabel={(option: any) => {
-                        console.log(option)
-                        return option[optionLabel]
-                    }}
+                    getOptionLabel={(option: any) => option[optionLabel]}
                     fullWidth
-                    inputValue={value}
                     noOptionsText=''
-                    ref={ref}
+                    defaultValue={defaultValue}
                     renderInput={(params: any) => (
-                        <OutlinedInput
-                            id={id}
-                            ref={params.InputProps.ref}
-                            sx={{ height: 40 }}
-                            placeholder={placeholder}
-                            {...params} />)}
-                    {...others}
+                        <TextField id={id} {...params} inputRef={ref} {...others}/>)}
                 />
                 {others.error && (
                     <FormHelperText error>

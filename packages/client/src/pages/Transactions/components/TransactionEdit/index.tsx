@@ -11,7 +11,6 @@ import { useAccounts, useGroupedCategories, useStores } from 'hooks'
 import './style.module.css'
 import { TYPES_TRANSACTIONS_ENTRIES } from 'constants/transactions'
 import AutocompleteForm from 'components/forms/AutocompleteForm'
-import transactions from '../../index'
 
 const TransactionEdit = ({
   transaction,
@@ -27,7 +26,7 @@ const TransactionEdit = ({
       date: transaction?.date || null,
       amount: transaction?.amount,
       type: transaction?.type || TransactionType.Expense,
-      store: ''
+      store: transaction?.store?.name || ''
     }
   })
   const { categories } = useGroupedCategories()
@@ -46,9 +45,7 @@ const TransactionEdit = ({
     }
     const { error } = transaction?._id ? await editTransaction(transaction._id, formattedParams as any) : await addTransaction(formattedParams as any)
     if (!error) {
-      mutate(TRANSACTIONS, async (transactions: Transaction[]) => {
-        return [...transactions, formattedParams]
-      })
+      mutate(TRANSACTIONS)
       hideForm()
     }
     setError(error)
@@ -102,12 +99,13 @@ const TransactionEdit = ({
                 />
 
                 <AutocompleteForm
-                    options={stores} optionValue='_id'
+                    options={stores}
                     optionLabel='name' id='store' label='Tienda'
                     placeholder='Tienda'
                     error={!!errors.store}
                     errorText='Introduce una tienda válida'
                     size={2}
+                    defaultValue={transaction?.store}
                     {...register('store')}
                 />
 
