@@ -1,4 +1,4 @@
-const models = require('@soker90/finper-models')
+import models from '@soker90/finper-models'
 
 interface IConnect {
     user: string,
