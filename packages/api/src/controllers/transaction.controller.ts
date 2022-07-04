@@ -3,8 +3,14 @@ import { NextFunction, Request, Response } from 'express'
 import '../auth/local-strategy-passport-handler'
 import { ITransactionService } from '../services/transaction.service'
 import extractUser from '../helpers/extract-user'
-import { validateTransactionCreateParams, validateTransactionGetParams } from '../validators/transaction'
+import {
+  validateTransactionCreateParams,
+  validateTransactionGetParams,
+  validateTransactionEditParams,
+  validateTransactionExist
+} from '../validators/transaction'
 import { IStoreService } from '../services/stores.service'
+import { RequestUser } from '../types'
 
 type ITransactionController = {
     loggerHandler: any,
@@ -49,6 +55,33 @@ export class TransactionController {
       .then(response => {
         res.send(response)
       }).catch(error => {
+        next(error)
+      })
+  }
+
+  public async edit (req: Request, res: Response, next: NextFunction): Promise<void> {
+    Promise.resolve(req as RequestUser)
+      .tap(({ params }) => this.logger.logInfo(`/edit - transaction: ${params.id}`))
+      .then(validateTransactionEditParams)
+      .then(this.transactionService.editTransaction.bind(this.transactionService))
+      .tap(({ _id }) => this.logger.logInfo(`Transaction ${_id} has been succesfully edited`))
+      .then((response) => {
+        res.send(response)
+      })
+      .catch((error) => {
+        next(error)
+      })
+  }
+
+  public async delete (req: Request, res: Response, next: NextFunction): Promise<void> {
+    Promise.resolve(req.params?.id)
+      .tap((id) => this.logger.logInfo(`/delete - transaction: ${id}`))
+      .tap((id) => validateTransactionExist(id, req.user as string))
+      .then(this.transactionService.deleteTransaction.bind(this.transactionService))
+      .then(() => {
+        res.status(204).send()
+      })
+      .catch((error) => {
         next(error)
       })
   }

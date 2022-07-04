@@ -6,14 +6,15 @@ import { ERROR_MESSAGE } from '../../i18n'
 
 export const validateCategoryEditParams = async ({
   params,
-  body
-}: { params: Record<string, string>, body: Record<string, string> }): Promise<{ id: string, value: ICategory }> => {
+  body,
+  user
+}: { params: Record<string, string>, body: Record<string, string>, user: string }): Promise<{ id: string, value: ICategory }> => {
   if (params.id) {
-    await validateCategoryExist({ id: params.id })
+    await validateCategoryExist({ id: params.id, user })
   }
 
   if (params.parent) {
-    await validateCategoryExist({ id: params.parent, message: ERROR_MESSAGE.CATEGORY.PARENT_NOT_FOUND })
+    await validateCategoryExist({ id: params.parent, message: ERROR_MESSAGE.CATEGORY.PARENT_NOT_FOUND, user })
   }
 
   const schema = Joi.object({

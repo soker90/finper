@@ -15,7 +15,7 @@ export interface ICategoryService {
 
 export default class CategoryService implements ICategoryService {
   public async getCategories (user: string): Promise<ICategory[]> {
-    return CategoryModel.find({ user }).populate('parent', '_id').sort('name')
+    return CategoryModel.find({ user }, '_id name type').populate('parent', '_id').sort('name')
   }
 
   public async getGroupedCategories (): Promise<any[]> {

@@ -22,7 +22,7 @@ export const validateTransactionCreateParams = async (params: Record<string, str
     throw Boom.badData(error.message).output
   }
 
-  await validateCategoryExist({ id: params.category })
+  await validateCategoryExist({ id: params.category, user: params.user })
   await validateAccountExist(params.account, params.user)
 
   return value

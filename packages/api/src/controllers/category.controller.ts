@@ -8,6 +8,7 @@ import {
 } from '../validators/category'
 import { ICategoryService } from '../services/category.service'
 import extractUser from '../helpers/extract-user'
+import { RequestUser } from '../types'
 
 type ICategoryController = {
     loggerHandler: any,
@@ -27,7 +28,7 @@ export class CategoryController {
   public async create (req: Request, res: Response, next: NextFunction): Promise<void> {
     Promise.resolve(req.body)
       .tap(({ name }) => this.logger.logInfo(`/create - category: ${name?.toLowerCase()}`))
-      .then(validateCategoryCreateParams)
+      .then(validateCategoryCreateParams.bind(null, { user: req.user as string, body: req.body }))
       .then(extractUser(req))
       .then(this.categoryService.addCategory.bind(this.categoryService))
       .tap(({ name }) => this.logger.logInfo(`Category ${name} has been succesfully created`))
@@ -62,7 +63,7 @@ export class CategoryController {
   }
 
   public async edit (req: Request, res: Response, next: NextFunction): Promise<void> {
-    Promise.resolve(req)
+    Promise.resolve(req as RequestUser)
       .tap(({ body }) => this.logger.logInfo(`/edit - category: ${body.name}`))
       .then(validateCategoryEditParams)
       .then(this.categoryService.editCategory.bind(this.categoryService))
@@ -79,7 +80,7 @@ export class CategoryController {
   public async delete (req: Request, res: Response, next: NextFunction): Promise<void> {
     Promise.resolve(req.params as { id: string })
       .tap(({ id }) => this.logger.logInfo(`/delete - category: ${id}`))
-      .tap(validateCategoryExist)
+      .tap(validateCategoryExist.bind(null, { id: req.params.id, user: req.user as string }))
       .then(this.categoryService.deleteCategory.bind(this.categoryService))
       .then((response) => {
         res.send(response)

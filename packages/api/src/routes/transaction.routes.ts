@@ -8,7 +8,7 @@ import { TransactionController } from '../controllers/transaction.controller'
 export class TransactionRoutes {
   router: Router
 
-  public accountController: TransactionController = new TransactionController({
+  public transactionController: TransactionController = new TransactionController({
     transactionService,
     storeService,
     loggerHandler: loggerHandler('TransactionController')
@@ -23,13 +23,25 @@ export class TransactionRoutes {
     this.router.post(
       '/',
       authMiddleware,
-      this.accountController.create.bind(this.accountController)
+      this.transactionController.create.bind(this.transactionController)
     )
 
     this.router.get(
       '/',
       authMiddleware,
-      this.accountController.transactions.bind(this.accountController)
+      this.transactionController.transactions.bind(this.transactionController)
+    )
+
+    this.router.put(
+      '/:id',
+      authMiddleware,
+      this.transactionController.edit.bind(this.transactionController)
+    )
+
+    this.router.delete(
+      '/:id',
+      authMiddleware,
+      this.transactionController.delete.bind(this.transactionController)
     )
   }
 }

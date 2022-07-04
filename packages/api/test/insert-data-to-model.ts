@@ -46,7 +46,8 @@ export const insertCategory = async (params: Record<string, string> = {}): Promi
   return CategoryModel.create({
     name: params.name ?? faker.commerce.department(),
     type: params.type ?? Math.random() > 0.5 ? TransactionType.Expense : TransactionType.Income,
-    root: params.root ?? Math.random() > 0.5
+    root: params.root ?? Math.random() > 0.5,
+    user: params.user ?? faker.internet.userName().slice(MIN_LENGTH_USERNAME, MAX_USERNAME_LENGTH).toLowerCase()
   })
 }
 

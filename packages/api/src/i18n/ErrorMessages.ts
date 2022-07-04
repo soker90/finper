@@ -8,5 +8,8 @@ export const ERROR_MESSAGE = {
   CATEGORY: {
     NOT_FOUND: 'La categoría no existe',
     PARENT_NOT_FOUND: 'La categoría padre no existe'
+  },
+  TRANSACTION: {
+    NOT_FOUND: 'No existe el movimiento'
   }
 }

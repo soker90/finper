@@ -4,9 +4,9 @@ import { TransactionType } from '@soker90/finper-models'
 import { validateCategoryExist } from './validate-category-exist'
 import { ERROR_MESSAGE } from '../../i18n'
 
-export const validateCategoryCreateParams = async (params: Record<string, string>) => {
-  if (params.parent) {
-    await validateCategoryExist({ id: params.parent, message: ERROR_MESSAGE.CATEGORY.PARENT_NOT_FOUND })
+export const validateCategoryCreateParams = async ({ body, user }: { user: string, body: Record<string, string> }) => {
+  if (body.parent) {
+    await validateCategoryExist({ id: body.parent, message: ERROR_MESSAGE.CATEGORY.PARENT_NOT_FOUND, user })
   }
 
   const schema = Joi.object({
@@ -15,7 +15,7 @@ export const validateCategoryCreateParams = async (params: Record<string, string
     parent: Joi.string()
   })
 
-  const { error, value } = schema.validate(params)
+  const { error, value } = schema.validate(body)
 
   if (error) {
     throw Boom.badData(error.message).output

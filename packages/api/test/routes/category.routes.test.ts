@@ -11,6 +11,7 @@ import { server } from '../../src/server'
 import { requestLogin } from '../request-login'
 import { insertCategory } from '../insert-data-to-model'
 import { ERROR_MESSAGE } from '../../src/i18n'
+import { generateUsername } from '../generate-values'
 
 const testDatabase = require('../test-db')(mongoose)
 
@@ -64,9 +65,10 @@ describe('Category', () => {
   describe('GET /', () => {
     const path = '/api/categories'
     let token: string
+    const user = generateUsername()
 
     beforeAll(async () => {
-      token = await requestLogin(server.app)
+      token = await requestLogin(server.app, { username: user })
     })
 
     afterEach(() => CategoryModel.deleteMany({}))
@@ -80,7 +82,7 @@ describe('Category', () => {
     })
 
     test('when there are categories, it should return the accounts', async () => {
-      const category = await insertCategory()
+      const category = await insertCategory({ user })
       await supertest(server.app).get(path).auth(token, { type: 'bearer' }).expect(200, [{
         _id: category._id.toString(),
         name: category.name,
@@ -92,9 +94,10 @@ describe('Category', () => {
   describe('PATCH /:id', () => {
     const path = (id: string) => `/api/categories/${id}`
     let token: string
+    const user = generateUsername()
 
     beforeAll(async () => {
-      token = await requestLogin(server.app)
+      token = await requestLogin(server.app, { username: user })
     })
 
     test('when token is not provided, it should response an error with status code 401', async () => {
@@ -109,13 +112,13 @@ describe('Category', () => {
         })
     })
 
-    test('when no params provided, it should response an error with status code 422', async () => {
+    test('when user is distinct, it should response an error with status code 404', async () => {
       const category: ICategory = await insertCategory()
-      await supertest(server.app).patch(path(category._id.toString())).auth(token, { type: 'bearer' }).expect(422)
+      await supertest(server.app).patch(path(category._id.toString())).auth(token, { type: 'bearer' }).expect(404)
     })
 
     test.each(['name', 'type'])('when no %s param provided, it should response an error with status code 422', async (param: string) => {
-      const category: ICategory = await insertCategory()
+      const category: ICategory = await insertCategory({ user })
       const params: Record<string, string> = {
         name: faker.commerce.department(),
         type: Math.random() > 0.5 ? TransactionType.Expense : TransactionType.Income
@@ -130,7 +133,7 @@ describe('Category', () => {
     })
 
     test('when fields are successfully edited', async () => {
-      const category: ICategory = await insertCategory()
+      const category: ICategory = await insertCategory({ user })
       const params: Record<string, string | boolean> = {
         name: faker.commerce.department(),
         type: Math.random() > 0.5 ? TransactionType.Expense : TransactionType.Income
@@ -146,9 +149,10 @@ describe('Category', () => {
   describe('DELETE /:id', () => {
     const path = (id: string) => `/api/categories/${id}`
     let token: string
+    const user = generateUsername()
 
     beforeAll(async () => {
-      token = await requestLogin(server.app)
+      token = await requestLogin(server.app, { username: user })
     })
 
     afterEach(() => CategoryModel.deleteMany({}))
@@ -163,9 +167,15 @@ describe('Category', () => {
     })
 
     test('when exist the category, it should response with status code 200', async () => {
-      const category: ICategory = await insertCategory()
+      const category: ICategory = await insertCategory({ user })
 
       await supertest(server.app).delete(path(category._id.toString())).set('Authorization', `Bearer ${token}`).expect(200)
+    })
+
+    test('when exist the category, but belongs to another user it should response with status code 404', async () => {
+      const category: ICategory = await insertCategory()
+
+      await supertest(server.app).delete(path(category._id.toString())).set('Authorization', `Bearer ${token}`).expect(404)
     })
   })
 })
