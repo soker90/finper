@@ -53,18 +53,21 @@ export const insertCategory = async (params: Record<string, string> = {}): Promi
 
 export const insertStore = async (params: Record<string, string> = {}): Promise<IStore> => {
   return StoreModel.create({
-    name: params.name ?? faker.company.companyName()
+    name: params.name ?? faker.company.companyName(),
+    user: params.user ?? faker.internet.userName().slice(MIN_LENGTH_USERNAME, MAX_USERNAME_LENGTH).toLowerCase()
   })
 }
 
 export const insertTransaction = async (params: Record<string, string | number> = {}): Promise<any> => {
+  const user = (params.user ?? faker.internet.userName().slice(MIN_LENGTH_USERNAME, MAX_USERNAME_LENGTH).toLowerCase()) as string
   return TransactionModel.create({
     date: params.date ?? faker.date.past().getTime(),
-    category: params.category ?? (await insertCategory()),
+    category: params.category ?? (await insertCategory({ user })),
     amount: params.amount ?? faker.datatype.number(),
     type: params.type ?? Math.random() > 0.5 ? TransactionType.Expense : TransactionType.Income,
-    account: params.account ?? (await insertAccount()),
+    account: params.account ?? (await insertAccount({ user })),
     note: params.note ?? faker.lorem.sentence(),
-    store: params.store ?? (await insertStore())
+    store: params.store ?? (await insertStore({ user })),
+    user
   })
 }

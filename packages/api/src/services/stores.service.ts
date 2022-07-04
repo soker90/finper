@@ -9,7 +9,10 @@ export interface IStoreService {
 export default class StoreService implements IStoreService {
   public async getAndReplaceStore (transaction: ITransaction): Promise<ITransaction> {
     if (transaction.store) {
-      const store = await StoreModel.findOneAndUpdate({ name: transaction.store }, { name: transaction.store }, {
+      const store = await StoreModel.findOneAndUpdate({
+        name: transaction.store,
+        user: transaction.user
+      }, { name: transaction.store, user: transaction.user }, {
         new: true,
         upsert: true
       }) as unknown as IStore

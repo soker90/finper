@@ -39,10 +39,10 @@ describe('Transaction', () => {
     test.each(['date', 'category', 'amount', 'type', 'account'])('when no %s param provided, it should response an error with status code 422', async (param: string) => {
       const params: Record<string, string | number> = {
         date: faker.date.past().getTime(),
-        category: (await insertCategory())._id.toString(),
+        category: (await insertCategory({ user }))._id.toString(),
         amount: faker.finance.amount(),
         type: Math.random() > 0.5 ? TransactionType.Expense : TransactionType.Income,
-        account: (await insertAccount())._id.toString()
+        account: (await insertAccount({ user }))._id.toString()
       }
 
       delete params[param]
@@ -59,7 +59,7 @@ describe('Transaction', () => {
         .set('Authorization', `Bearer ${token}`)
         .send({
           date: faker.date.past().getTime(),
-          category: (await insertCategory())._id.toString(),
+          category: (await insertCategory({ user }))._id.toString(),
           amount: faker.finance.amount(),
           type: Math.random() > 0.5 ? TransactionType.Expense : TransactionType.Income,
           account: (await insertAccount())._id.toString(),
@@ -75,7 +75,7 @@ describe('Transaction', () => {
         .set('Authorization', `Bearer ${token}`)
         .send({
           date: faker.date.past().getTime(),
-          category: (await insertCategory())._id.toString(),
+          category: (await insertCategory({ user }))._id.toString(),
           amount: faker.finance.amount(),
           type: Math.random() > 0.5 ? TransactionType.Expense : TransactionType.Income,
           account: (await insertAccount({ user }))._id.toString(),
@@ -93,7 +93,7 @@ describe('Transaction', () => {
           .set('Authorization', `Bearer ${token}`)
           .send({
             date: faker.date.past().getTime(),
-            category: (await insertCategory())._id.toString(),
+            category: (await insertCategory({ user }))._id.toString(),
             amount: faker.finance.amount(),
             type: Math.random() > 0.5 ? TransactionType.Expense : TransactionType.Income,
             account: (await insertAccount({ user }))._id.toString(),
