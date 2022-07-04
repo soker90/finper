@@ -13,6 +13,7 @@ const testDebt = (expected: IDebt, received: IDebt) => {
   expect(expected.paymentDate).toBe(received.paymentDate)
   expect(expected.concept).toBe(received.concept)
   expect(expected.type).toBe(received.type)
+  expect(expected.user).toBe(received.user)
 }
 
 describe('Debt', () => {

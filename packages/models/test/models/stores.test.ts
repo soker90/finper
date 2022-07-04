@@ -9,6 +9,7 @@ const testDatabase = require('../test-db')(mongoose)
 
 const testDebt = (expected: IStore, received: IStore) => {
   expect(expected.name).toBe(received.name)
+  expect(expected.user).toBe(received.user)
 }
 
 describe('Store', () => {

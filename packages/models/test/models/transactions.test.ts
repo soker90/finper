@@ -14,6 +14,7 @@ const testTransactions = (expected: ITransaction, received: ITransaction) => {
   expect(expected.account.toString()).toBe(received.account.toString())
   expect(expected.note).toBe(received.note)
   expect(expected.store?.toString()).toBe(received.store?.toString())
+  expect(expected.user).toBe(received.user)
 }
 
 describe('Transaction', () => {
