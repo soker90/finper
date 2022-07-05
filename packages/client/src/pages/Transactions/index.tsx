@@ -1,6 +1,7 @@
 import { useState } from 'react'
-import { TransactionItem } from './components'
+import { Button } from '@mui/material'
 import { PlusOutlined } from '@ant-design/icons'
+import { TransactionItem } from './components'
 import { ListContainer } from './components/ListContainer'
 import { HeaderButtons } from 'components'
 import { TransactionsPage } from './components/TransactionsPage'
@@ -10,7 +11,7 @@ import TransacionsFilter from './components/TransacionsFilter'
 
 const Transactions = () => {
   const [newTransaction, setNewTransaction] = useState(false)
-  // const [pages, setPages] = useState(0)
+  const [numPages, setNumPages] = useState(1)
   const { filters, setFilter, resetFilter } = useFilters()
 
   const handleClickNew = () => {
@@ -18,6 +19,12 @@ const Transactions = () => {
   }
 
   const cancelCreate = () => setNewTransaction(false)
+
+  // TODO: Refactor this
+  const pages: any = []
+  for (let i = 0; i < numPages; i++) {
+    pages.push(<TransactionsPage index={i} filters={filters} key={i} />)
+  }
 
   return (<>
             <HeaderButtons
@@ -38,9 +45,10 @@ const Transactions = () => {
                     note: '',
                     store: '',
                     type: TransactionType.NotComputable
-                  } as any} forceExpand cancelCreate={cancelCreate} />}
-                <TransactionsPage index={0} filters={filters} />
+                  } as any} forceExpand cancelCreate={cancelCreate} query={''} />}
+                {pages}
             </ListContainer>
+          <Button variant='outlined' fullWidth onClick={() => setNumPages(numPages + 1)}>Cargar más</Button>
         </>
   )
 }

@@ -4,6 +4,8 @@ export interface IStoreService {
     getAndReplaceStore(transaction: ITransaction): Promise<ITransaction>
 
     getStores(user: string): Promise<IAccount[]>;
+
+    replaceShopValue(transaction: { value: ITransaction }): Promise<any>
 }
 
 export default class StoreService implements IStoreService {
@@ -19,6 +21,13 @@ export default class StoreService implements IStoreService {
       transaction.store = store._id
     }
     return transaction
+  }
+
+  public async replaceShopValue ({ value, ...rest }: { value: ITransaction }): Promise<any> {
+    return {
+      ...rest,
+      value: await this.getAndReplaceStore(value)
+    }
   }
 
   public async getStores (user: string): Promise<IAccount[]> {

@@ -63,6 +63,7 @@ export class TransactionController {
     Promise.resolve(req as RequestUser)
       .tap(({ params }) => this.logger.logInfo(`/edit - transaction: ${params.id}`))
       .then(validateTransactionEditParams)
+      .then(this.storeService.replaceShopValue.bind(this.storeService))
       .then(this.transactionService.editTransaction.bind(this.transactionService))
       .tap(({ _id }) => this.logger.logInfo(`Transaction ${_id} has been succesfully edited`))
       .then((response) => {

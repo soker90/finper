@@ -11,8 +11,9 @@ interface UseTransactions {
 export const useTransactions = ({
   index,
   filters
-}: UseTransactions): { transactions: Transaction[], isLoading: boolean, error: any } => {
-  const { data, error } = useSWR(`${TRANSACTIONS}${objectToParams({ page: index, ...filters })}`)
+}: UseTransactions): { transactions: Transaction[], isLoading: boolean, error: any, query: string } => {
+  const query = `${TRANSACTIONS}${objectToParams({ page: index, ...filters })}`
+  const { data, error } = useSWR(query)
 
-  return { transactions: data, isLoading: !data, error }
+  return { transactions: data, isLoading: !data, error, query }
 }

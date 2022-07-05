@@ -13,9 +13,10 @@ interface TransactionItemProps {
     transaction?: Transaction
     forceExpand?: boolean
     cancelCreate?: () => void
+    query: string
 }
 
-const TransactionItem: FC<TransactionItemProps> = ({ transaction, forceExpand, cancelCreate }) => {
+const TransactionItem: FC<TransactionItemProps> = ({ transaction, forceExpand, cancelCreate, query }) => {
   const [expand, setExpand] = useState(forceExpand)
   const theme = useTheme()
 
@@ -43,7 +44,7 @@ const TransactionItem: FC<TransactionItemProps> = ({ transaction, forceExpand, c
                 </ItemContent>}
                 <Collapse in={expand} timeout="auto" unmountOnExit>
                     <Divider className={styles.divider} />
-                    <TransactionEdit transaction={transaction} hideForm={hideForm} />
+                    <TransactionEdit transaction={transaction} hideForm={hideForm} query={query} />
 
                 </Collapse>
             </Paper>

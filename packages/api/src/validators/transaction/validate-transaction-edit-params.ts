@@ -28,5 +28,7 @@ export const validateTransactionEditParams = async ({
     throw Boom.badData(error.message).output
   }
 
-  return { id: params.id, value }
+  return {
+    id: params.id, value: { ...value, user }
+  }
 }
