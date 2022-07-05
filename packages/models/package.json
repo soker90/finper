@@ -1,6 +1,6 @@
 {
   "name": "@soker90/finper-models",
-  "version": "0.0.10",
+  "version": "0.0.11",
   "description": "Models for finper",
   "main": "dist/index.js",
   "types": "dist/index",

@@ -14,7 +14,7 @@ import { IUser, UserModel } from './models/users'
 
 mongoose.Promise = Promise
 
-export function connect (uri: string, options: Record<string, unknown>): void {
+function connect (uri: string, options: Record<string, unknown>): void {
   if (isNil(mongoose)) {
     throw new Error('Specify `mongoose` as the first argument')
   }
@@ -26,6 +26,10 @@ export function connect (uri: string, options: Record<string, unknown>): void {
   }
 
   mongooseConnect(mongoose, uri, options)
+}
+
+export default {
+  connect
 }
 
 export {
