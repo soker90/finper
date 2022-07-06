@@ -40,10 +40,6 @@ jobs:
         run: npm ci
       - name: Build
         run: make build-models
-      - uses: actions/upload-artifact@v3
-        with:
-          name: dist
-          path: packages/models/dist
 
   test:
     needs: [ lint, build ]

@@ -1,7 +1,7 @@
 # This workflow will do a clean install of node dependencies, build the source code and run tests across different versions of node
 # For more information see: https://help.github.com/actions/language-and-framework-guides/using-nodejs-with-github-actions
 
-name: Models CI
+name: API CI
 
 on:
   push:
@@ -36,10 +36,6 @@ jobs:
         with:
           cache: 'npm'
           node-version: '16'
-      - uses: actions/download-artifact@v3
-        with:
-          name: dist
-          path: packages/models/dist
       - name: Install dependencies
         run: npm ci
       - name: Build

@@ -39,6 +39,9 @@ test-api:
 build-api:
 	@npm run build --workspace=@soker90/finper-api
 
+lint-apis:
+	@npm run lint --workspace=@soker90/finper-api
+
 start-client:
 	@npm run dev --workspace=@soker90/finper-client
 
@@ -48,3 +51,5 @@ test-client:
 build-client:
 	@npm run build --workspace=@soker90/finper-client
 
+lint-client:
+	@npm run lint --workspace=@soker90/finper-client
