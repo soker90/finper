@@ -11,14 +11,18 @@ on:
     types: [opened, synchronize]
 
 jobs:
-  avoid_reduncy:
+  cancel:
+    name: 'Cancel Previous Runs'
     runs-on: ubuntu-latest
+    timeout-minutes: 3
     steps:
-      - name: Cancel Previous Redundant Builds
-        uses: styfle/cancel-workflow-action@0.9.1
+      - uses: styfle/cancel-workflow-action@0.9.1
         with:
+          workflow_id: all
           access_token: ${{ github.token }}
-  lint:
+
+  ## Models ##
+  lint-models:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -31,9 +35,9 @@ jobs:
       - name: Install dependencies
         run: npm ci
       - name: Lint
-        run: npm run lint --workspaces
+        run: make lint-models
 
-  build:
+  build-models:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -46,14 +50,14 @@ jobs:
       - name: Install dependencies
         run: npm ci
       - name: Build
-        run: npm run build
-      - uses: actions/upload-artifact@v2
+        run: make build-models
+      - uses: actions/upload-artifact@v3
         with:
-          name: dist
-          path: dist
+          name: models
+          path: packages/models/dist
 
-  test:
-    needs: [lint, build]
+  test-models:
+    needs: [ lint-models, build-models ]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -65,15 +69,15 @@ jobs:
           node-version: '16'
       - name: Install dependencies
         run: npm ci
-      - uses: actions/download-artifact@v2
-        with:
-          name: dist
-          path: dist
       - name: Test
-        run: npm test
+        run: make test-models
+      - name: Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          flags: models
 
-  test:
-    needs: [lint]
+  ## API ##
+  lint-api:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -84,6 +88,46 @@ jobs:
           cache: 'npm'
           node-version: '16'
       - name: Install dependencies
-        run: npm i
+        run: npm i --workspace=@soker90/finper-api
+      - name: Lint
+        run: make lint-api
+
+  build-api:
+    needs: [ build-models ]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v3
+        with:
+          cache: 'npm'
+          node-version: '16'
+      - uses: actions/download-artifact@v3
+        with:
+          name: models
+          path: packages/models/dist
+      - name: Install dependencies
+        run: npm i --workspace=@soker90/finper-api
+      - name: Build
+        run: make build-api
+
+  test-api:
+    needs: [ lint-api, build-api ]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v3
+        with:
+          cache: 'npm'
+          node-version: '16'
+      - name: Install dependencies
+        run: npm i --workspace=@soker90/finper-api
       - name: Test
-        run: npm test --workspaces -- --coverage
+        run: make test-api
+      - name: Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          flags: api
