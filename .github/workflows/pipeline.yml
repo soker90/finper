@@ -123,6 +123,10 @@ jobs:
         with:
           cache: 'npm'
           node-version: '16'
+      - uses: actions/download-artifact@v3
+        with:
+          name: models
+          path: packages/models/dist
       - name: Install dependencies
         run: npm i --workspace=@soker90/finper-api
       - name: Test
@@ -131,3 +135,54 @@ jobs:
         uses: codecov/codecov-action@v3
         with:
           flags: api
+
+  ## Frontend ##
+  lint-client:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v3
+        with:
+          cache: 'npm'
+          node-version: '16'
+      - name: Install dependencies
+        run: npm i --workspace=@soker90/finper-client
+      - name: Lint
+        run: make lint-client
+
+  build-client:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v3
+        with:
+          cache: 'npm'
+          node-version: '16'
+      - name: Install dependencies
+        run: npm i --workspace=@soker90/finper-client
+      - name: Build
+        run: make build-client
+
+  test-client:
+    needs: [ lint-client, build-client ]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v3
+        with:
+          cache: 'npm'
+          node-version: '16'
+      - name: Install dependencies
+        run: npm i --workspace=@soker90/finper-client
+      - name: Test
+        run: make test-client
+      - name: Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          flags: client

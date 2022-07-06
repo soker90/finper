@@ -30,6 +30,7 @@ test-models:
 lint-models:
 	@npm run lint --workspace=@soker90/finper-models
 
+## API ##
 start-api:
 	@npm run start --workspace=@soker90/finper-api
 
@@ -42,6 +43,7 @@ build-api: build-models
 lint-api:
 	@npm run lint --workspace=@soker90/finper-api
 
+## Frontend ##
 start-client:
 	@npm run dev --workspace=@soker90/finper-client
 
