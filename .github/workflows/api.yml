@@ -24,7 +24,7 @@ jobs:
       - name: Install dependencies
         run: npm ci
       - name: Lint
-        run: make lint-models
+        run: make lint-api
 
   build:
     runs-on: ubuntu-latest
@@ -36,14 +36,14 @@ jobs:
         with:
           cache: 'npm'
           node-version: '16'
-      - name: Install dependencies
-        run: npm ci
-      - name: Build
-        run: make build-models
-      - uses: actions/upload-artifact@v3
+      - uses: actions/download-artifact@v3
         with:
           name: dist
           path: packages/models/dist
+      - name: Install dependencies
+        run: npm ci
+      - name: Build
+        run: make build-api
 
   test:
     needs: [ lint, build ]
@@ -59,8 +59,8 @@ jobs:
       - name: Install dependencies
         run: npm ci
       - name: Test
-        run: make test-models
+        run: make test-api
       - name: Codecov
         uses: codecov/codecov-action@v3
         with:
-          flags: models
+          flags: api
