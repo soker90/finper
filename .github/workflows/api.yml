@@ -23,8 +23,6 @@ jobs:
           node-version: '16'
       - name: Install dependencies
         run: npm i --workspace=@soker90/finper-api
-      - name: Install models
-        run: npm install @soker90/finper-models@latest --force --workspace=@soker90/finper-api
       - name: Lint
         run: make lint-api
 
@@ -40,8 +38,6 @@ jobs:
           node-version: '16'
       - name: Install dependencies
         run: npm i --workspace=@soker90/finper-api
-      - name: Install models
-        run: npm install @soker90/finper-models@latest --force --workspace=@soker90/finper-api
       - name: Build
         run: make build-api
 

@@ -36,7 +36,7 @@ start-api:
 test-api:
 	@npm test --workspace=@soker90/finper-api
 
-build-api:
+build-api: build-models
 	@npm run build --workspace=@soker90/finper-api
 
 lint-api:
