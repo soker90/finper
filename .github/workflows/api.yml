@@ -52,6 +52,8 @@ jobs:
         with:
           cache: 'npm'
           node-version: '16'
+      - name: Build models
+        run: make build-models
       - name: Install dependencies
         run: npm i --workspace=@soker90/finper-api
       - name: Test
