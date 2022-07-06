@@ -24,7 +24,7 @@ jobs:
       - name: Install models
         run: npm install @soker90/finper-models
       - name: Install dependencies
-        run: npm ci
+        run: npm ci --workspace=@soker90/finper-api
       - name: Lint
         run: make lint-api
 
@@ -39,7 +39,7 @@ jobs:
           cache: 'npm'
           node-version: '16'
       - name: Install dependencies
-        run: npm ci
+        run: npm ci --workspace=@soker90/finper-api
       - name: Build
         run: make build-api
 
@@ -55,7 +55,7 @@ jobs:
           cache: 'npm'
           node-version: '16'
       - name: Install dependencies
-        run: npm ci
+        run: npm ci --workspace=@soker90/finper-api
       - name: Test
         run: make test-api
       - name: Codecov
