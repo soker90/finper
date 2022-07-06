@@ -19,5 +19,10 @@ export default defineConfig({
       { find: 'utils', replacement: path.resolve(__dirname, '/src/utils') }
     ]
   },
-  plugins: [react()]
+  plugins: [react()],
+  test: {
+    coverage: {
+      reporter: ['json', 'html']
+    }
+  }
 })
