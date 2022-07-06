@@ -39,7 +39,7 @@ test-api:
 build-api:
 	@npm run build --workspace=@soker90/finper-api
 
-lint-apis:
+lint-api:
 	@npm run lint --workspace=@soker90/finper-api
 
 start-client:
