@@ -17,12 +17,34 @@ help:
 install:
 	@npm i
 
+test:
+	@npm test
+
+ ## Models ##
 build-models:
 	@npm run build --workspace=@soker90/finper-models
+
+test-models:
+	@npm run test --workspace=@soker90/finper-models
+
+lint-models:
+	@npm run lint --workspace=@soker90/finper-models
 
 start-api:
 	@npm run start --workspace=@soker90/finper-api
 
 test-api:
 	@npm test --workspace=@soker90/finper-api
+
+build-api:
+	@npm run build --workspace=@soker90/finper-api
+
+start-client:
+	@npm run dev --workspace=@soker90/finper-client
+
+test-client:
+	@npm test --workspace=@soker90/finper-client
+
+build-client:
+	@npm run build --workspace=@soker90/finper-client
 

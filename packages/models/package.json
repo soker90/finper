@@ -6,7 +6,7 @@
   "types": "dist/index",
   "scripts": {
     "build": "tsc",
-    "test": "jest --maxWorkers=50%",
+    "test": "jest --maxWorkers=50% --coverage",
     "lint": "eslint . --ext .ts",
     "lint:fix": "eslint . —-fix --ext .ts"
   },

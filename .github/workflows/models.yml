@@ -1,7 +1,7 @@
 # This workflow will do a clean install of node dependencies, build the source code and run tests across different versions of node
 # For more information see: https://help.github.com/actions/language-and-framework-guides/using-nodejs-with-github-actions
 
-name: Node.js CI
+name: Models CI
 
 on:
   push:
@@ -11,13 +11,6 @@ on:
     types: [opened, synchronize]
 
 jobs:
-  avoid_reduncy:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Cancel Previous Redundant Builds
-        uses: styfle/cancel-workflow-action@0.9.1
-        with:
-          access_token: ${{ github.token }}
   lint:
     runs-on: ubuntu-latest
     steps:
@@ -31,7 +24,7 @@ jobs:
       - name: Install dependencies
         run: npm ci
       - name: Lint
-        run: npm run lint --workspaces
+        run: make lint-models
 
   build:
     runs-on: ubuntu-latest
@@ -53,7 +46,7 @@ jobs:
           path: dist
 
   test:
-    needs: [lint, build]
+    needs: [ lint, build ]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -70,20 +63,8 @@ jobs:
           name: dist
           path: dist
       - name: Test
-        run: npm test
-
-  test:
-    needs: [lint]
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
+        run: make test-models
+      - name: Codecov
+        uses: codecov/codecov-action@v3
         with:
-          fetch-depth: 0
-      - uses: actions/setup-node@v3
-        with:
-          cache: 'npm'
-          node-version: '16'
-      - name: Install dependencies
-        run: npm i
-      - name: Test
-        run: npm test --workspaces -- --coverage
+          flags: models
