@@ -1,7 +1,7 @@
 import supertest from 'supertest'
 import {
   ITransaction,
-  mongoose, StoreModel, TransactionType
+  mongoose, StoreModel, TransactionModel, TransactionType
 } from '@soker90/finper-models'
 import { faker } from '@faker-js/faker'
 
@@ -205,6 +205,39 @@ describe('Transaction', () => {
         .set('Authorization', `Bearer ${token}`)
         .send(params)
         .expect(200)
+    })
+  })
+
+  describe('DELETE /:id', () => {
+    const path = (id: string) => `/api/transactions/${id}`
+    let token: string
+    const user = generateUsername()
+
+    beforeAll(async () => {
+      token = await requestLogin(server.app, { username: user })
+    })
+
+    afterEach(() => TransactionModel.deleteMany({}))
+
+    test('when token is not provided, it should response an error with status code 401', async () => {
+      await supertest(server.app).delete(path('any')).expect(401)
+    })
+
+    test('when the transaction does not exist, it should response an error with status code 404', async () => {
+      await supertest(server.app).delete(path('62a39498c4497e1fe3c2bf35')).auth(token, { type: 'bearer' })
+        .expect(404)
+    })
+
+    test('when exist the transaction, but belongs to another user it should response with status code 404', async () => {
+      const transaction: ITransaction = await insertTransaction()
+
+      await supertest(server.app).delete(path(transaction._id.toString())).set('Authorization', `Bearer ${token}`).expect(404)
+    })
+
+    test('when exist the transaction, it should response with status code 204', async () => {
+      const transaction: ITransaction = await insertTransaction({ user })
+
+      await supertest(server.app).delete(path(transaction._id.toString())).set('Authorization', `Bearer ${token}`).expect(204)
     })
   })
 })
