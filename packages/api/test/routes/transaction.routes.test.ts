@@ -1,5 +1,6 @@
 import supertest from 'supertest'
 import {
+  ITransaction,
   mongoose, StoreModel, TransactionType
 } from '@soker90/finper-models'
 import { faker } from '@faker-js/faker'
@@ -9,6 +10,7 @@ import { server } from '../../src/server'
 import { requestLogin } from '../request-login'
 import { insertAccount, insertCategory, insertTransaction } from '../insert-data-to-model'
 import { generateUsername } from '../generate-values'
+import { ERROR_MESSAGE } from '../../src/i18n'
 
 const testDatabase = require('../test-db')(mongoose)
 
@@ -139,6 +141,70 @@ describe('Transaction', () => {
       expect(response.body[0].account._id).toEqual(transaction.account._id.toString())
       expect(response.body[0].note).toEqual(transaction.note)
       expect(response.body[0].store._id).toEqual(transaction.store._id.toString())
+    })
+  })
+
+  describe('PUT /:id', () => {
+    const path = (id: string) => `/api/transactions/${id}`
+    let token: string
+    const username: string = generateUsername()
+
+    beforeAll(async () => {
+      token = await requestLogin(server.app, { username })
+    })
+
+    test('when token is not provided, it should response an error with status code 401', async () => {
+      await supertest(server.app).put(path('any')).expect(401)
+    })
+
+    test('when the transaction does not exist, it should response an error with status code 404', async () => {
+      await supertest(server.app).put(path('62a39498c4497e1fe3c2bf35')).auth(token, { type: 'bearer' })
+        .expect(404)
+        .expect((res) => {
+          expect(res.body.message).toBe(ERROR_MESSAGE.TRANSACTION.NOT_FOUND)
+        })
+    })
+
+    test('when no params provided, it should response an error with status code 422', async () => {
+      const transaction: ITransaction = await insertTransaction({ user: username })
+      await supertest(server.app).put(path(transaction._id.toString())).auth(token, { type: 'bearer' }).expect(422)
+    })
+
+    test.each(['date', 'category', 'amount', 'type', 'account'])('when no %s param provided, it should response an error with status code 422', async (param: string) => {
+      const transaction: ITransaction = await insertTransaction({ user: username })
+      const params: Record<string, string | number> = {
+        date: faker.date.past().getTime(),
+        category: (await insertCategory({ user: username }))._id.toString(),
+        amount: faker.datatype.number(),
+        type: Math.random() > 0.5 ? TransactionType.Expense : TransactionType.Income,
+        account: (await insertAccount({ user: username }))._id.toString()
+
+      }
+
+      delete params[param]
+      await supertest(server.app)
+        .put(path(transaction._id.toString()))
+        .set('Authorization', `Bearer ${token}`)
+        .send(params)
+        .expect(422)
+    })
+
+    test('when transaction is successfully edited', async () => {
+      const transaction: ITransaction = await insertTransaction({ user: username })
+
+      const params: Record<string, string | number> = {
+        date: faker.date.past().getTime(),
+        category: (await insertCategory({ user: username }))._id.toString(),
+        amount: faker.datatype.number(),
+        type: Math.random() > 0.5 ? TransactionType.Expense : TransactionType.Income,
+        account: (await insertAccount({ user: username }))._id.toString()
+
+      }
+      await supertest(server.app)
+        .put(path(transaction._id.toString()))
+        .set('Authorization', `Bearer ${token}`)
+        .send(params)
+        .expect(200)
     })
   })
 })
