@@ -75,7 +75,7 @@ const Breadcrumbs = ({ navigation, title, ...others }: any) => {
                         {title && (
                             <Grid item sx={{ mt: 2, width: '100%' }}>
                                 <Stack direction='row' sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                                    <Typography variant="h5">{item.title}</Typography>
+                                    <Typography data-testid='breadcrumbTitle' variant="h5">{item.title}</Typography>
                                 </Stack>
                             </Grid>
                         )}
