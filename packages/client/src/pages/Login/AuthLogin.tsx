@@ -16,7 +16,12 @@ import { SendLoginParams, useLogin } from './hooks'
 
 const AuthLogin = () => {
   const [showPassword, setShowPassword] = useState(false)
-  const { register, handleSubmit, formState: { errors } } = useForm()
+  const { register, handleSubmit, formState: { errors } } = useForm({
+    defaultValues: {
+      username: '',
+      password: ''
+    }
+  })
   const { sendLogin, error, loading } = useLogin()
 
   const onSubmit = handleSubmit(data => {
@@ -63,26 +68,26 @@ const AuthLogin = () => {
                                         edge="end"
                                         size="large"
                                     >
-                                        {showPassword ? <EyeOutlined/> : <EyeInvisibleOutlined/>}
+                                        {showPassword ? <EyeOutlined /> : <EyeInvisibleOutlined />}
                                     </IconButton>
                                 </InputAdornment>
                             }
                             placeholder="Introduce la contraseña"
                             {...register('password', { required: true, minLength: 5 })}
                         />
-                         {errors.password && (
+                        {errors.password && (
                             <FormHelperText error>
                                 Introduce una contraseña válida
                             </FormHelperText>
-                         )}
+                        )}
                     </Stack>
                 </Grid>
 
-                 {error && (
+                {error && (
                     <Grid item xs={12}>
                         <FormHelperText error>{error}</FormHelperText>
                     </Grid>
-                 )}
+                )}
 
                 <Grid item xs={12}>
                     <Button

@@ -1,6 +1,7 @@
+// @vitest-environment happy-dom
 import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest'
-import { render } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import { render } from '../../test/testUtils'
 
 import Login from './index'
 import { LoginUsernames } from '../../mock/handlers/auth/login'
@@ -13,7 +14,7 @@ describe('Login', () => {
   afterAll(() => server.close())
   afterEach(() => server.resetHandlers())
 
-  it.only('should redirect to dashboard', async () => {
+  it.skip('should redirect to dashboard', async () => {
     const { getByPlaceholderText, findByTestId, getByRole } = render(<Login/>)
     const inputUsername = getByPlaceholderText('Introduce tu nombre de usuario')
     const inputPassword = getByPlaceholderText('Introduce tu contraseña')
