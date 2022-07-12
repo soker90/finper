@@ -22,9 +22,14 @@ export default defineConfig({
   },
   plugins: [react()],
   test: {
+    globals: true,
     environment: 'happy-dom',
+    setupFiles: './src/test/setup.ts',
     coverage: {
-      reporter: ['json', 'html']
+      reporter: ['json', 'html'],
+      exclude: [
+        'node_modules/'
+      ]
     }
   }
 })

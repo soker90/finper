@@ -1,23 +1,30 @@
 // @vitest-environment happy-dom
-import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import userEvent from '@testing-library/user-event'
+
 import { render } from '../../test/testUtils'
 
 import Login from './index'
 import { LoginUsernames } from '../../mock/handlers/auth/login'
-import { server } from '../../mock/server'
+
+vi.mock('react-hook-form', () => ({
+  useForm: vi.fn(() => ({
+    register: vi.fn(),
+    handleSubmit: vi.fn(),
+    formState: {
+      errors: {}
+    }
+  }))
+}))
 
 const user = userEvent.setup()
 
 describe('Login', () => {
-  beforeAll(() => server.listen({ onUnhandledRequest: 'error' }))
-  afterAll(() => server.close())
-  afterEach(() => server.resetHandlers())
-
+  // https://github.com/capricorn86/happy-dom/issues/467
   it.skip('should redirect to dashboard', async () => {
-    const { getByPlaceholderText, findByTestId, getByRole } = render(<Login/>)
+    const { getByPlaceholderText, findByTestId, getByRole } = render(<Login />)
     const inputUsername = getByPlaceholderText('Introduce tu nombre de usuario')
-    const inputPassword = getByPlaceholderText('Introduce tu contraseña')
+    const inputPassword = getByPlaceholderText('Introduce la contraseña')
 
     await user.type(inputUsername, LoginUsernames.success)
     await user.type(inputPassword, 'password')
@@ -26,6 +33,6 @@ describe('Login', () => {
     await user.click(button)
 
     const dashboardBreadcrumb = await findByTestId('breadcrumbTitle')
-    expect(dashboardBreadcrumb).toBe('dd')
+    expect(dashboardBreadcrumb).toBe('Dashboard')
   })
 })
