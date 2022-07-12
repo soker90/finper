@@ -1,6 +1,7 @@
 import { rest, RestContext, RestRequest } from 'msw'
 
 export enum LoginUsernames {
+    // eslint-disable-next-line no-unused-vars
     success = 'success',
 }
 
