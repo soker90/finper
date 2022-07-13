@@ -35,4 +35,9 @@ describe('Login', () => {
     const dashboardBreadcrumb = await findByTestId('breadcrumbTitle')
     expect(dashboardBreadcrumb).toBe('Dashboard')
   })
+
+  it('snapshot', () => {
+    const { container } = render(<Login />)
+    expect(container).toMatchSnapshot()
+  })
 })
