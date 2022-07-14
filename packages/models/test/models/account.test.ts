@@ -3,6 +3,7 @@ import {
   mongoose
 } from '../../src'
 import createAccount from '../helpers/create-account'
+import { faker } from '@faker-js/faker'
 
 const testDatabase = require('../test-db')(mongoose)
 
@@ -59,5 +60,12 @@ describe('Account', () => {
       expect(accountDocument.isActive).toBe(firstAccount.isActive)
       expect(accountDocument.user).toBe(firstAccount.user)
     })
+  })
+
+  test('it should save balance with 2 decimal places', async () => {
+    const account = await createAccount({ balance: faker.datatype.number({ precision: 0.001 }) })
+    const accountDocument: IAccount = await AccountModel.findOne({ _id: account._id }) as IAccount
+
+    expect(accountDocument.balance).toBe(account.balance)
   })
 })

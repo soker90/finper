@@ -1,7 +1,11 @@
 import supertest from 'supertest'
 import {
+  AccountModel, IAccount,
   ITransaction,
-  mongoose, StoreModel, TransactionModel, TransactionType
+  mongoose,
+  StoreModel,
+  TransactionModel,
+  TransactionType
 } from '@soker90/finper-models'
 import { faker } from '@faker-js/faker'
 
@@ -11,6 +15,7 @@ import { requestLogin } from '../request-login'
 import { insertAccount, insertCategory, insertTransaction } from '../insert-data-to-model'
 import { generateUsername } from '../generate-values'
 import { ERROR_MESSAGE } from '../../src/i18n'
+import { roundNumber } from '../../src/utils'
 
 const testDatabase = require('../test-db')(mongoose)
 
@@ -107,6 +112,35 @@ describe('Transaction', () => {
 
       expect(await StoreModel.count({ name: store })).toBe(1)
     })
+
+    test.each([TransactionType.Income, TransactionType.Expense, TransactionType.NotComputable])(
+      'when success creating an transaction of %s and balance is updated', async (type) => {
+        const balance = faker.datatype.number({ precision: 0.01, max: 10000, min: 0 })
+        const account = await insertAccount({ user, balance })
+        const transactionAmount = faker.datatype.number({ precision: 0.01, max: 100, min: 0 })
+
+        await supertest(server.app)
+          .post(path)
+          .set('Authorization', `Bearer ${token}`)
+          .send({
+            date: faker.date.past().getTime(),
+            category: (await insertCategory({ user }))._id.toString(),
+            amount: transactionAmount,
+            type,
+            account: account._id.toString(),
+            note: faker.lorem.sentence(),
+            store: faker.company.companyName()
+          })
+
+        const accountAfter = await AccountModel.findById(account._id) as IAccount
+        const balanceAfter = type === TransactionType.Income
+          ? account.balance + transactionAmount
+          : type === TransactionType.Expense
+            ? account.balance - transactionAmount
+            : account.balance
+
+        expect(accountAfter?.balance).toBe(roundNumber(balanceAfter))
+      })
   })
 
   describe('GET /', () => {

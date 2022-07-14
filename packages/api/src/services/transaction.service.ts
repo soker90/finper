@@ -1,4 +1,4 @@
-import { TransactionModel, ITransaction } from '@soker90/finper-models'
+import { TransactionModel, ITransaction, AccountModel, TransactionType } from '@soker90/finper-models'
 
 export interface ITransactionService {
     addTransaction(transaction: ITransaction): Promise<ITransaction>
@@ -21,7 +21,15 @@ export interface ITransactionService {
 
 export default class TransactionService implements ITransactionService {
   public async addTransaction (params: ITransaction): Promise<ITransaction> {
-    return TransactionModel.create(params)
+    return TransactionModel.create(params).then(async transaction => {
+      const amount = transaction.type === TransactionType.Expense ? -transaction.amount : transaction.amount
+      if (transaction.type !== TransactionType.NotComputable) {
+        await AccountModel.findByIdAndUpdate(transaction.account, {
+          $inc: { balance: amount }
+        })
+      }
+      return transaction
+    })
   }
 
   public async editTransaction ({ id, value }: { id: string, value: ITransaction }): Promise<ITransaction> {

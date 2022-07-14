@@ -12,7 +12,7 @@ export interface IAccount {
 const accountSchema = new Schema<IAccount>({
   name: { type: String, required: true },
   bank: { type: String, required: true },
-  balance: { type: Number, default: 0 },
+  balance: { type: Number, default: 0, set: (num: number) => Math.round(num * 100) / 100 },
   isActive: { type: Boolean, default: true },
   user: { type: String, required: true }
 }, { versionKey: false })
