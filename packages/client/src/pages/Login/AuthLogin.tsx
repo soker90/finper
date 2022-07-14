@@ -98,6 +98,7 @@ const AuthLogin = () => {
                         type="submit"
                         variant="contained"
                         color="primary"
+                        data-testid="login-button"
                     >
                         {loading ? 'Iniciando...' : 'Iniciar sesión'}
                     </Button>

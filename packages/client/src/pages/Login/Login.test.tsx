@@ -1,39 +1,43 @@
 // @vitest-environment happy-dom
 import { describe, expect, it, vi } from 'vitest'
-import userEvent from '@testing-library/user-event'
+// import userEvent from '@testing-library/user-event'
 
-import { render } from '../../test/testUtils'
+import { render, fireEvent } from '../../test/testUtils'
 
 import Login from './index'
 import { LoginUsernames } from '../../mock/handlers/auth/login'
 
-vi.mock('react-hook-form', () => ({
-  useForm: vi.fn(() => ({
-    register: vi.fn(),
-    handleSubmit: vi.fn(),
-    formState: {
-      errors: {}
-    }
+it('button login works', async () => {
+  const handleSubmit = vi.fn()
+  vi.mock('react-hook-form', () => ({
+    useForm: vi.fn(() => ({
+      register: vi.fn(),
+      handleSubmit,
+      formState: {
+        errors: {}
+      }
+    }))
   }))
-}))
 
-const user = userEvent.setup()
+  // const user = userEvent.setup()
 
-describe('Login', () => {
+  describe('Login', async () => {
   // https://github.com/capricorn86/happy-dom/issues/467
-  it.skip('should redirect to dashboard', async () => {
-    const { getByPlaceholderText, findByTestId, getByRole } = render(<Login />)
+
+    const { getByPlaceholderText, getByTestId } = render(<Login />)
     const inputUsername = getByPlaceholderText('Introduce tu nombre de usuario')
     const inputPassword = getByPlaceholderText('Introduce la contraseña')
 
-    await user.type(inputUsername, LoginUsernames.success)
-    await user.type(inputPassword, 'password')
+    // await user.type(inputUsername, LoginUsernames.success)
+    // await user.type(inputPassword, 'password')
+    fireEvent.change(inputUsername, { target: { value: LoginUsernames.success } })
+    fireEvent.change(inputPassword, { target: { value: 'password' } })
 
-    const button = getByRole('button')
-    await user.click(button)
+    const button = getByTestId('login-button')
+    fireEvent.click(button)
+    // await user.click(button)
 
-    const dashboardBreadcrumb = await findByTestId('breadcrumbTitle')
-    expect(dashboardBreadcrumb).toBe('Dashboard')
+    expect(handleSubmit).toHaveBeenCalled()
   })
 
   it('snapshot', () => {
