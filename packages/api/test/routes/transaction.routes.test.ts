@@ -16,6 +16,7 @@ import { insertAccount, insertCategory, insertTransaction } from '../insert-data
 import { generateUsername } from '../generate-values'
 import { ERROR_MESSAGE } from '../../src/i18n'
 import { roundNumber } from '../../src/utils'
+import { getTransactionAmount } from '../../src/services/utils'
 
 const testDatabase = require('../test-db')(mongoose)
 
@@ -240,6 +241,61 @@ describe('Transaction', () => {
         .send(params)
         .expect(200)
     })
+
+    test.each([{
+      old: TransactionType.Income,
+      updated: TransactionType.Expense
+    }, {
+      old: TransactionType.Expense,
+      updated: TransactionType.NotComputable
+    },
+    {
+      old: TransactionType.NotComputable,
+      updated: TransactionType.Income
+    }, {
+      old: TransactionType.Expense,
+      updated: TransactionType.Income
+    },
+    {
+      old: TransactionType.Income,
+      updated: TransactionType.NotComputable
+    }, {
+      old: TransactionType.NotComputable,
+      updated: TransactionType.Expense
+    }])(
+      'when success editing an transaction of %s and balance is updated', async ({ old, updated }) => {
+        const balance = faker.datatype.number({ precision: 0.01, max: 10000, min: 0 })
+        const amountOld = faker.datatype.number({ precision: 0.01, max: 100, min: 0 })
+        const amountNew = faker.datatype.number({ precision: 0.01, max: 100, min: 0 })
+        const amountOldSign = getTransactionAmount({ amount: amountOld, type: old } as unknown as ITransaction)
+
+        const account = await insertAccount({ user: username, balance: roundNumber(balance + amountOldSign) })
+
+        const transaction = await insertTransaction({
+          user: username,
+          type: old,
+          amount: amountOld,
+          account: account._id.toString()
+        })
+
+        await supertest(server.app)
+          .put(path(transaction._id.toString()))
+          .set('Authorization', `Bearer ${token}`)
+          .send({
+            type: updated,
+            amount: amountNew,
+            account: account._id.toString(),
+            note: transaction.note,
+            store: transaction.store._id.toString(),
+            date: transaction.date,
+            category: transaction.category._id.toString()
+          })
+
+        const balanceAfter = balance + getTransactionAmount({ amount: amountNew, type: updated } as any)
+        const accountAfter = await AccountModel.findById(account._id) as IAccount
+
+        expect(accountAfter?.balance).toBe(roundNumber(balanceAfter))
+      })
   })
 
   describe('DELETE /:id', () => {

@@ -1,4 +1,5 @@
-import { TransactionModel, ITransaction, AccountModel, TransactionType } from '@soker90/finper-models'
+import { AccountModel, ITransaction, TransactionModel } from '@soker90/finper-models'
+import { getTransactionAmount } from './utils'
 
 export interface ITransactionService {
     addTransaction(transaction: ITransaction): Promise<ITransaction>
@@ -19,21 +20,35 @@ export interface ITransactionService {
 
 }
 
+const updateAcoountBalance = async (account: string, amount: number) => {
+  if (amount !== 0) {
+    await AccountModel.findByIdAndUpdate(account, {
+      $inc: { balance: amount }
+    })
+  }
+}
+
 export default class TransactionService implements ITransactionService {
   public async addTransaction (params: ITransaction): Promise<ITransaction> {
     return TransactionModel.create(params).then(async transaction => {
-      const amount = transaction.type === TransactionType.Expense ? -transaction.amount : transaction.amount
-      if (transaction.type !== TransactionType.NotComputable) {
-        await AccountModel.findByIdAndUpdate(transaction.account, {
-          $inc: { balance: amount }
-        })
-      }
+      const amount = getTransactionAmount(transaction)
+      await updateAcoountBalance(transaction.account.toString(), amount)
+
       return transaction
     })
   }
 
   public async editTransaction ({ id, value }: { id: string, value: ITransaction }): Promise<ITransaction> {
-    return TransactionModel.findByIdAndUpdate(id, value, { new: true }) as unknown as ITransaction
+    const oldTransaction = await TransactionModel.findById(id) as unknown as ITransaction
+    const oldAmount = getTransactionAmount(oldTransaction)
+
+    const transaction = await TransactionModel.findByIdAndUpdate(id, value, { new: true }) as unknown as ITransaction
+    const newAmount = getTransactionAmount(transaction)
+
+    const amount = newAmount - oldAmount
+    await updateAcoountBalance(transaction.account.toString(), amount)
+
+    return transaction
   }
 
   public async deleteTransaction (id: string): Promise<void> {
