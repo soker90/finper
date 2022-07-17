@@ -12,11 +12,12 @@ import { faker } from '@faker-js/faker'
 import { server } from '../../src/server'
 
 import { requestLogin } from '../request-login'
-import { insertAccount, insertCategory, insertTransaction } from '../insert-data-to-model'
+import { insertAccount, insertCategory, insertStore, insertTransaction } from '../insert-data-to-model'
 import { generateUsername } from '../generate-values'
 import { ERROR_MESSAGE } from '../../src/i18n'
 import { roundNumber } from '../../src/utils'
 import { getTransactionAmount } from '../../src/services/utils'
+import { use } from 'passport'
 
 const testDatabase = require('../test-db')(mongoose)
 
@@ -267,16 +268,24 @@ describe('Transaction', () => {
         const balance = faker.datatype.number({ precision: 0.01, max: 10000, min: 0 })
         const amountOld = faker.datatype.number({ precision: 0.01, max: 100, min: 0 })
         const amountNew = faker.datatype.number({ precision: 0.01, max: 100, min: 0 })
-        const amountOldSign = getTransactionAmount({ amount: amountOld, type: old } as unknown as ITransaction)
 
-        const account = await insertAccount({ user: username, balance: roundNumber(balance + amountOldSign) })
+        const account = await insertAccount({ user: username, balance: roundNumber(balance) })
 
-        const transaction = await insertTransaction({
-          user: username,
-          type: old,
+        const params = {
+          date: faker.date.past().getTime(),
+          category: (await insertCategory({ user: username }))._id.toString(),
           amount: amountOld,
-          account: account._id.toString()
-        })
+          type: old,
+          account: account._id.toString(),
+          note: faker.lorem.sentence()
+        }
+
+        const responseCreated = await supertest(server.app)
+          .post('/api/transactions')
+          .set('Authorization', `Bearer ${token}`)
+          .send(params)
+
+        const transaction = responseCreated.body
 
         await supertest(server.app)
           .put(path(transaction._id.toString()))
@@ -284,17 +293,17 @@ describe('Transaction', () => {
           .send({
             type: updated,
             amount: amountNew,
-            account: account._id.toString(),
+            account: transaction.account,
             note: transaction.note,
-            store: transaction.store._id.toString(),
             date: transaction.date,
-            category: transaction.category._id.toString()
+            category: transaction.category
           })
 
         const balanceAfter = balance + getTransactionAmount({ amount: amountNew, type: updated } as any)
+        const balanceAfterRound = Math.round(balanceAfter * 100) / 100
         const accountAfter = await AccountModel.findById(account._id) as IAccount
 
-        expect(accountAfter?.balance).toBe(roundNumber(balanceAfter))
+        expect(accountAfter?.balance).toBe(roundNumber(balanceAfterRound))
       })
   })
 
