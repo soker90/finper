@@ -1,6 +1,7 @@
 import supertest from 'supertest'
 import {
-  AccountModel, IAccount,
+  AccountModel,
+  IAccount,
   ITransaction,
   mongoose,
   StoreModel,
@@ -12,12 +13,11 @@ import { faker } from '@faker-js/faker'
 import { server } from '../../src/server'
 
 import { requestLogin } from '../request-login'
-import { insertAccount, insertCategory, insertStore, insertTransaction } from '../insert-data-to-model'
+import { insertAccount, insertCategory, insertTransaction } from '../insert-data-to-model'
 import { generateUsername } from '../generate-values'
 import { ERROR_MESSAGE } from '../../src/i18n'
 import { roundNumber } from '../../src/utils'
 import { getTransactionAmount } from '../../src/services/utils'
-import { use } from 'passport'
 
 const testDatabase = require('../test-db')(mongoose)
 
@@ -337,6 +337,30 @@ describe('Transaction', () => {
       const transaction: ITransaction = await insertTransaction({ user })
 
       await supertest(server.app).delete(path(transaction._id.toString())).set('Authorization', `Bearer ${token}`).expect(204)
+    })
+
+    test.each([TransactionType.Income, TransactionType.Expense, TransactionType.NotComputable])('when delete the transaction of type %s, it should decrease the account balance', async (type) => {
+      const balance = faker.datatype.number({ precision: 0.01, max: 10000, min: 0 })
+      const account = await insertAccount({ user, balance })
+
+      const params = {
+        date: faker.date.past().getTime(),
+        category: (await insertCategory({ user }))._id.toString(),
+        amount: faker.datatype.number({ precision: 0.01, max: 100, min: 0 }),
+        type,
+        account: account._id.toString(),
+        note: faker.lorem.sentence()
+      }
+
+      const responseCreated = await supertest(server.app)
+        .post('/api/transactions')
+        .set('Authorization', `Bearer ${token}`)
+        .send(params)
+
+      const transaction = responseCreated.body
+
+      await supertest(server.app).delete(path(transaction._id.toString())).set('Authorization', `Bearer ${token}`).expect(204)
+      expect(await AccountModel.findById(account._id)).toHaveProperty('balance', roundNumber(balance))
     })
   })
 })

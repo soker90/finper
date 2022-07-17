@@ -52,7 +52,11 @@ export default class TransactionService implements ITransactionService {
   }
 
   public async deleteTransaction (id: string): Promise<void> {
-    await TransactionModel.deleteOne({ _id: id })
+    const transaction = await TransactionModel.findByIdAndDelete(id) as unknown as ITransaction
+    const amount = getTransactionAmount(transaction)
+    if (amount !== 0) {
+      await updateAcoountBalance(transaction.account.toString(), -amount)
+    }
   }
 
   public async getTransactions ({ page = 0, limit = 50, startDate, endDate, ...params }: {
