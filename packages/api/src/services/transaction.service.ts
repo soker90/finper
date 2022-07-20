@@ -1,5 +1,6 @@
-import { AccountModel, ITransaction, TransactionModel } from '@soker90/finper-models'
+import { AccountModel, IAccount, ITransaction, TransactionModel } from '@soker90/finper-models'
 import { getTransactionAmount } from './utils'
+import { roundNumber } from '../utils'
 
 export interface ITransactionService {
     addTransaction(transaction: ITransaction): Promise<ITransaction>
@@ -22,8 +23,9 @@ export interface ITransactionService {
 
 const updateAcoountBalance = async (account: string, amount: number) => {
   if (amount !== 0) {
-    await AccountModel.findByIdAndUpdate(account, {
-      $inc: { balance: amount }
+    const accountModel = await AccountModel.findById(account) as IAccount // Problems with round...
+    await AccountModel.updateOne({ _id: account }, {
+      balance: roundNumber(accountModel.balance + amount)
     })
   }
 }
