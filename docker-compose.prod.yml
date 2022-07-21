@@ -1,0 +1,44 @@
+version: "3.9"
+services:
+  database:
+    image: mongo:4.4
+    container_name: finper-mongo
+    env_file: .env
+    environment:
+      MONGO_INITDB_DATABASE: ${DATABASE_NAME}
+      MONGO_INITDB_ROOT_USERNAME: ${DATABASE_ROOT_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${DATABASE_ROOT_PASSWORD}
+    volumes:
+      - finperdb:/data/db
+    ports:
+      - 27017:27017
+    networks:
+      - finper-network
+
+  api:
+    image: soker90/finper-api:daily
+    container_name: finper-api
+    env_file: .env
+    environment:
+      DATABASE_NAME: ${DATABASE_NAME}
+      MONGODB_USER: ${DATABASE_ROOT_USERNAME}
+      MONGODB_PASS: ${DATABASE_ROOT_PASSWORD}
+      DATABASE_HOST: database
+      JWT_SECRET: ${JWT_SECRET}
+      SALT_ROUNDS: ${SALT_ROUNDS}
+      LOKI_USER: ${LOKI_USER}
+      LOKI_PASSWORD: ${LOKI_PASSWORD}
+    depends_on:
+      - database
+    ports:
+      - 3008:3008
+    networks:
+      - finper-network
+
+volumes:
+  finperdb:
+    driver: local
+
+networks:
+  finper-network:
+    driver: bridge

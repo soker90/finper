@@ -7,6 +7,7 @@ interface IConnect {
     databaseName: string,
     options: Record<string, unknown>,
     mongoUri?: string;
+    port: string;
 }
 
 export default {

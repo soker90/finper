@@ -1,4 +1,21 @@
-FROM node:16
+FROM node:16-alpine as builder
+
+RUN mkdir -p /home/node/app/node_modules && chown -R node:node /home/node/app
+
+WORKDIR /home/node/app
+RUN npm config set unsafe-perm true
+
+USER node
+ENV TZ Europe/Madrid
+
+COPY package*.json ./
+RUN npm install
+
+COPY --chown=node:node . .
+CMD ["npm","run","build"]
+
+# STAGE 2
+FROM node:16-alpine
 
 ARG MONGODB_USER
 ARG MONGODB_PASS
@@ -8,19 +25,16 @@ ARG LOKI_USER
 ARG LOKI_PASSWORD
 
 ENV NPM_CONFIG_LOGLEVEL info
-ENV NODE_ENV production
+ENV NODE_ENV prod
 
-ADD dist /home/node/app/dist
-ADD package.json /home/node/app/package.json
+RUN mkdir -p /home/node/app/node_modules && chown -R node:node /home/node/app
 
-RUN chown -R node:node /home/node/app
-
-USER node
-ENV TZ Europe/Madrid
 WORKDIR /home/node/app
-RUN npm install --save
+COPY package.json ./
+USER node
 
-EXPOSE 3000
+RUN npm install --production
+COPY --from=builder /home/node/app/dist ./dist
 
-# CMD ["npm", "start:pro"]
-CMD npm run start:pro
+EXPOSE 3008
+CMD ["npm","run","start:pro"]
