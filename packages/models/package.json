@@ -33,7 +33,7 @@
   "homepage": "https://github.com/soker90/finpers#readme",
   "devDependencies": {
     "@faker-js/faker": "^7.1.0",
-    "@shelf/jest-mongodb": "^3.0.1",
+    "@shelf/jest-mongodb": "^4.0.0",
     "@tsconfig/node16": "^1.0.2",
     "@types/bcrypt": "^5.0.0",
     "@types/bluebird": "^3.5.36",

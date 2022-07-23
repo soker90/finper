@@ -3,8 +3,6 @@ name: Docker Image CI
 on:
   push:
     branches: [ "master" ]
-  pull_request:
-    branches: [ "master" ]
 
 jobs:
 
@@ -31,7 +29,8 @@ jobs:
     - name: Build and push Docker image
       uses: docker/build-push-action@v3
       with:
-        context: "{{defaultContext}}:packages/api/"
+        context: ./packages/api
+        file: ./packages/api/Dockerfile
         push: true
         tags: soker90/finper-api:daily
       
