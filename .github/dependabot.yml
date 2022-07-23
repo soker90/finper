@@ -5,6 +5,14 @@
 
 version: 2
 updates:
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "daily"
+    labels:
+      - "github-actions"
+      - "dependencies"
+      
   - package-ecosystem: "npm" # See documentation for possible values
     directory: "/packages/api" # Location of package manifests
     schedule:
