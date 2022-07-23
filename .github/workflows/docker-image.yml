@@ -25,7 +25,7 @@ jobs:
     - name: Build and push Docker image
       uses: docker/build-push-action@v3
       with:
-        context: ./packages/api/
+        context: "{{defaultContext}}:packages/api/"
         push: true
         tags: soker90/finper-api:daily
       
