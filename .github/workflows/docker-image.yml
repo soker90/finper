@@ -11,9 +11,6 @@ jobs:
   build:
 
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: packages/api
 
     steps:
     - name: Check out the repo
@@ -28,7 +25,7 @@ jobs:
     - name: Build and push Docker image
       uses: docker/build-push-action@v3
       with:
-        context: .
+        context: ./packages/api/
         push: true
         tags: soker90/finper-api:daily
       
