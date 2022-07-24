@@ -9,24 +9,18 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      -
-        name: Checkout 
-        uses: actions/checkout@v2
-      -
-        name: Login to Docker Hub
-        uses: docker/login-action@v1
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-      -
-        name: Build and push
-        uses: docker/build-push-action@v2
-        with:
-          context: ./packages/api
-          file: ./packages/api/Dockerfile
-          builder: ${{ steps.buildx.outputs.name }}
-          push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/finper:daily
-          cache-from: type=registry,ref=${{ secrets.DOCKERHUB_USERNAME }}/finper:buildcache
-          cache-to: type=registry,ref=${{ secrets.DOCKERHUB_USERNAME }}/finper:buildcache,mode=max
+        - uses: actions/checkout@v1
+        - name: Login to DockerHub Registry
+          run: echo ${{ secrets.DOCKERHUB_PASSWORD }} | docker login -u ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
+        - name: Get the version
+          id: vars
+          run: echo ::set-output name=tag::$(echo ${GITHUB_REF:10})
+        - name: Build the tagged Docker image
+          run: docker build . --file Dockerfile --tag soker90/finper-api:${{steps.vars.outputs.tag}}
+        - name: Push the tagged Docker image
+          run: docker push soker90/finper-api:${{steps.vars.outputs.tag}}
+        - name: Build the latest Docker image
+          run: docker build . --file Dockerfile --tag soker90/finper-api:latest
+        - name: Push the latest Docker image
+          run: docker push soker90/finper-api:latest
 
