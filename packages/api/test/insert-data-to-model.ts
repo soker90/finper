@@ -1,9 +1,9 @@
 import { faker } from '@faker-js/faker'
 import {
   AccountModel,
-  CategoryModel,
+  CategoryModel, DebtModel, DebtType,
   IAccount,
-  ICategory, IStore,
+  ICategory, IDebt, IStore,
   IUser, StoreModel, TransactionModel,
   TransactionType,
   UserModel
@@ -69,5 +69,17 @@ export const insertTransaction = async (params: Record<string, string | number> 
     note: params.note ?? faker.lorem.sentence(),
     store: params.store ?? (await insertStore({ user })),
     user
+  })
+}
+
+export const insertDebt = async (params: Record<string, string | number> = {}): Promise<IDebt> => {
+  return DebtModel.create({
+    from: params.from ?? faker.name.firstName(),
+    date: params.date ?? faker.datatype.number(),
+    amount: params.amount ?? faker.datatype.number(),
+    paymentDate: params.paymentDate ?? faker.datatype.number(),
+    concept: params.concept ?? faker.lorem.words(4),
+    type: params.type ?? Math.random() > 0.5 ? DebtType.TO : DebtType.FROM,
+    user: params.user ?? faker.internet.userName().slice(MIN_LENGTH_USERNAME, MAX_USERNAME_LENGTH).toLowerCase()
   })
 }

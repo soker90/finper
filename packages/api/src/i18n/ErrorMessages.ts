@@ -11,5 +11,8 @@ export const ERROR_MESSAGE = {
   },
   TRANSACTION: {
     NOT_FOUND: 'No existe el movimiento'
+  },
+  DEBT: {
+    NOT_FOUND: 'La deuda no existe'
   }
 }
