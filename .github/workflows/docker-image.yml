@@ -14,6 +14,8 @@ jobs:
           with:
             username: ${{ secrets.DOCKERHUB_USERNAME }}
             password: ${{ secrets.DOCKERHUB_TOKEN }}
+        - name: ls
+          run: ls -a
         - name: Build the tagged Docker image
           run: docker build ./packages/api --file packages/api/Dockerfile --tag soker90/finper-api:daily
         - name: Push the tagged Docker image
