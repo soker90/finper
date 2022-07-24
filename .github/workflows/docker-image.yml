@@ -26,7 +26,7 @@ jobs:
           file: ./packages/api/Dockerfile
           builder: ${{ steps.buildx.outputs.name }}
           push: true
-          tags: ${{ secrets.DOCKER_HUB_USERNAME }}/finper:daily
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/finper:daily
           cache-from: type=registry,ref=${{ secrets.DOCKERHUB_USERNAME }}/finper:buildcache
           cache-to: type=registry,ref=${{ secrets.DOCKERHUB_USERNAME }}/finper:buildcache,mode=max
 
