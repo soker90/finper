@@ -21,4 +21,3 @@ jobs:
           run: ls -a
         - name: Build and push docker image
           run: make build-image-api-daily
-        
