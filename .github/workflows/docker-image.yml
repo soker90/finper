@@ -14,13 +14,10 @@ jobs:
           with:
             username: ${{ secrets.DOCKERHUB_USERNAME }}
             password: ${{ secrets.DOCKERHUB_TOKEN }}
-        - name: Get the version
-          id: vars
-          run: echo ::set-output name=tag::$(echo ${GITHUB_REF:10})
         - name: Build the tagged Docker image
-          run: docker build . --file Dockerfile --tag soker90/finper-api:${{steps.vars.outputs.tag}}
+          run: docker build . --file Dockerfile --tag soker90/finper-api:daily
         - name: Push the tagged Docker image
-          run: docker push soker90/finper-api:${{steps.vars.outputs.tag}}
+          run: docker push soker90/finper-api:daily
         - name: Build the latest Docker image
           run: docker build . --file Dockerfile --tag soker90/finper-api:latest
         - name: Push the latest Docker image
