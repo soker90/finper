@@ -5,8 +5,21 @@ define help
 
   Commands:
 
+	build-api:	                build the API
+	build-client:	            build the client
+	build-image-api-daily:	    build the API image dev
+	build-image-api-latest:	    build the API image latest
+	build-models:				build the models
     install:                    install all dependencies.
+    lint-api:                   lint the API
+    lint-client:                lint the client
+    lint-models:                lint the models.
+    test:                       run all tests.
+    test-api:                   run all tests for the API.
+    test-client:                run all tests for the client
+    test-models:                run all tests for the models.
     start-api:                  launch api
+    start-client:               launch client
 
 endef
 export help

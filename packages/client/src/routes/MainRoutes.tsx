@@ -3,8 +3,9 @@ import { lazy } from 'react'
 import MainLayout from '../layout/MainLayout'
 import { Navigate } from 'react-router-dom'
 
-const DashboardDefault = lazy(() => import('../pages/Dashboard'))
 const Accounts = lazy(() => import('../pages/Accounts'))
+const DashboardDefault = lazy(() => import('../pages/Dashboard'))
+const Debts = lazy(() => import('../pages/Debts'))
 const Categories = lazy(() => import('../pages/Categories'))
 const Transactions = lazy(() => import('../pages/Transactions'))
 
@@ -38,6 +39,10 @@ const MainRoutes = {
     {
       path: 'movimientos',
       element: <Transactions />
+    },
+    {
+      path: 'deudas',
+      element: <Debts />
     }
   ]
 }

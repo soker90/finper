@@ -1,0 +1,850 @@
+// Vitest Snapshot v1
+
+exports[`Debts > renders without crashing 1`] = `
+<div>
+  <div
+    class="MuiGrid-root MuiGrid-container MuiGrid-spacing-xs-3 css-zow5z4-MuiGrid-root"
+  >
+    <div
+      class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-12 MuiGrid-grid-md-6 css-pwpilw-MuiGrid-root"
+    >
+      <div
+        class="MuiBox-root css-0"
+      >
+        <div
+          class="MuiTableContainer-root css-1hmt0ej-MuiTableContainer-root"
+        >
+          <table
+            aria-labelledby="tableTitle"
+            class="MuiTable-root css-1r0k8ux-MuiTable-root"
+          >
+            <thead
+              class="MuiTableHead-root css-15wwp11-MuiTableHead-root"
+            >
+              <tr
+                class="MuiTableRow-root MuiTableRow-head css-nmu7bk-MuiTableRow-root"
+              >
+                <th
+                  aria-sort="ascending"
+                  class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-15kh76s-MuiTableCell-root"
+                  scope="col"
+                >
+                  Tracking No.
+                </th>
+                <th
+                  class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-paddingNone MuiTableCell-sizeMedium css-cm9j2h-MuiTableCell-root"
+                  scope="col"
+                >
+                  Product Name
+                </th>
+                <th
+                  class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignRight MuiTableCell-sizeMedium css-64yknp-MuiTableCell-root"
+                  scope="col"
+                >
+                  Total Order
+                </th>
+                <th
+                  class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-15kh76s-MuiTableCell-root"
+                  scope="col"
+                >
+                  Status
+                </th>
+                <th
+                  class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignRight MuiTableCell-sizeMedium css-64yknp-MuiTableCell-root"
+                  scope="col"
+                >
+                  Total Amount
+                </th>
+              </tr>
+            </thead>
+            <tbody
+              class="MuiTableBody-root css-apqrd9-MuiTableBody-root"
+            >
+              <tr
+                class="MuiTableRow-root MuiTableRow-hover css-6h9tkn-MuiTableRow-root"
+                role="checkbox"
+                tabindex="-1"
+              >
+                <th
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-162n1xm-MuiTableCell-root"
+                  id="enhanced-table-checkbox-0"
+                  scope="row"
+                >
+                  <a
+                    class="MuiTypography-root MuiTypography-inherit MuiLink-root MuiLink-underlineHover css-18wl5e4-MuiTypography-root-MuiLink-root"
+                    href="/"
+                  >
+                    13256498
+                  </a>
+                </th>
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-162n1xm-MuiTableCell-root"
+                >
+                  Keyboard
+                </td>
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight MuiTableCell-sizeMedium css-10ttkdn-MuiTableCell-root"
+                >
+                  125
+                </td>
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-162n1xm-MuiTableCell-root"
+                />
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight MuiTableCell-sizeMedium css-10ttkdn-MuiTableCell-root"
+                >
+                  70999
+                </td>
+              </tr>
+              <tr
+                class="MuiTableRow-root MuiTableRow-hover css-6h9tkn-MuiTableRow-root"
+                role="checkbox"
+                tabindex="-1"
+              >
+                <th
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-162n1xm-MuiTableCell-root"
+                  id="enhanced-table-checkbox-1"
+                  scope="row"
+                >
+                  <a
+                    class="MuiTypography-root MuiTypography-inherit MuiLink-root MuiLink-underlineHover css-18wl5e4-MuiTypography-root-MuiLink-root"
+                    href="/"
+                  >
+                    13286564
+                  </a>
+                </th>
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-162n1xm-MuiTableCell-root"
+                >
+                  Computer Accessories
+                </td>
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight MuiTableCell-sizeMedium css-10ttkdn-MuiTableCell-root"
+                >
+                  100
+                </td>
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-162n1xm-MuiTableCell-root"
+                />
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight MuiTableCell-sizeMedium css-10ttkdn-MuiTableCell-root"
+                >
+                  83348
+                </td>
+              </tr>
+              <tr
+                class="MuiTableRow-root MuiTableRow-hover css-6h9tkn-MuiTableRow-root"
+                role="checkbox"
+                tabindex="-1"
+              >
+                <th
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-162n1xm-MuiTableCell-root"
+                  id="enhanced-table-checkbox-2"
+                  scope="row"
+                >
+                  <a
+                    class="MuiTypography-root MuiTypography-inherit MuiLink-root MuiLink-underlineHover css-18wl5e4-MuiTypography-root-MuiLink-root"
+                    href="/"
+                  >
+                    84564564
+                  </a>
+                </th>
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-162n1xm-MuiTableCell-root"
+                >
+                  Camera Lens
+                </td>
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight MuiTableCell-sizeMedium css-10ttkdn-MuiTableCell-root"
+                >
+                  40
+                </td>
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-162n1xm-MuiTableCell-root"
+                />
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight MuiTableCell-sizeMedium css-10ttkdn-MuiTableCell-root"
+                >
+                  40570
+                </td>
+              </tr>
+              <tr
+                class="MuiTableRow-root MuiTableRow-hover css-6h9tkn-MuiTableRow-root"
+                role="checkbox"
+                tabindex="-1"
+              >
+                <th
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-162n1xm-MuiTableCell-root"
+                  id="enhanced-table-checkbox-3"
+                  scope="row"
+                >
+                  <a
+                    class="MuiTypography-root MuiTypography-inherit MuiLink-root MuiLink-underlineHover css-18wl5e4-MuiTypography-root-MuiLink-root"
+                    href="/"
+                  >
+                    86739658
+                  </a>
+                </th>
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-162n1xm-MuiTableCell-root"
+                >
+                  TV
+                </td>
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight MuiTableCell-sizeMedium css-10ttkdn-MuiTableCell-root"
+                >
+                  99
+                </td>
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-162n1xm-MuiTableCell-root"
+                />
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight MuiTableCell-sizeMedium css-10ttkdn-MuiTableCell-root"
+                >
+                  410780
+                </td>
+              </tr>
+              <tr
+                class="MuiTableRow-root MuiTableRow-hover css-6h9tkn-MuiTableRow-root"
+                role="checkbox"
+                tabindex="-1"
+              >
+                <th
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-162n1xm-MuiTableCell-root"
+                  id="enhanced-table-checkbox-4"
+                  scope="row"
+                >
+                  <a
+                    class="MuiTypography-root MuiTypography-inherit MuiLink-root MuiLink-underlineHover css-18wl5e4-MuiTypography-root-MuiLink-root"
+                    href="/"
+                  >
+                    98652366
+                  </a>
+                </th>
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-162n1xm-MuiTableCell-root"
+                >
+                  Handset
+                </td>
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight MuiTableCell-sizeMedium css-10ttkdn-MuiTableCell-root"
+                >
+                  50
+                </td>
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-162n1xm-MuiTableCell-root"
+                />
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight MuiTableCell-sizeMedium css-10ttkdn-MuiTableCell-root"
+                >
+                  10239
+                </td>
+              </tr>
+              <tr
+                class="MuiTableRow-root MuiTableRow-hover css-6h9tkn-MuiTableRow-root"
+                role="checkbox"
+                tabindex="-1"
+              >
+                <th
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-162n1xm-MuiTableCell-root"
+                  id="enhanced-table-checkbox-5"
+                  scope="row"
+                >
+                  <a
+                    class="MuiTypography-root MuiTypography-inherit MuiLink-root MuiLink-underlineHover css-18wl5e4-MuiTypography-root-MuiLink-root"
+                    href="/"
+                  >
+                    98753263
+                  </a>
+                </th>
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-162n1xm-MuiTableCell-root"
+                >
+                  Mouse
+                </td>
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight MuiTableCell-sizeMedium css-10ttkdn-MuiTableCell-root"
+                >
+                  89
+                </td>
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-162n1xm-MuiTableCell-root"
+                />
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight MuiTableCell-sizeMedium css-10ttkdn-MuiTableCell-root"
+                >
+                  10570
+                </td>
+              </tr>
+              <tr
+                class="MuiTableRow-root MuiTableRow-hover css-6h9tkn-MuiTableRow-root"
+                role="checkbox"
+                tabindex="-1"
+              >
+                <th
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-162n1xm-MuiTableCell-root"
+                  id="enhanced-table-checkbox-6"
+                  scope="row"
+                >
+                  <a
+                    class="MuiTypography-root MuiTypography-inherit MuiLink-root MuiLink-underlineHover css-18wl5e4-MuiTypography-root-MuiLink-root"
+                    href="/"
+                  >
+                    98753275
+                  </a>
+                </th>
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-162n1xm-MuiTableCell-root"
+                >
+                  Desktop
+                </td>
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight MuiTableCell-sizeMedium css-10ttkdn-MuiTableCell-root"
+                >
+                  185
+                </td>
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-162n1xm-MuiTableCell-root"
+                />
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight MuiTableCell-sizeMedium css-10ttkdn-MuiTableCell-root"
+                >
+                  98063
+                </td>
+              </tr>
+              <tr
+                class="MuiTableRow-root MuiTableRow-hover css-6h9tkn-MuiTableRow-root"
+                role="checkbox"
+                tabindex="-1"
+              >
+                <th
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-162n1xm-MuiTableCell-root"
+                  id="enhanced-table-checkbox-7"
+                  scope="row"
+                >
+                  <a
+                    class="MuiTypography-root MuiTypography-inherit MuiLink-root MuiLink-underlineHover css-18wl5e4-MuiTypography-root-MuiLink-root"
+                    href="/"
+                  >
+                    98753291
+                  </a>
+                </th>
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-162n1xm-MuiTableCell-root"
+                >
+                  Chair
+                </td>
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight MuiTableCell-sizeMedium css-10ttkdn-MuiTableCell-root"
+                >
+                  100
+                </td>
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-162n1xm-MuiTableCell-root"
+                />
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight MuiTableCell-sizeMedium css-10ttkdn-MuiTableCell-root"
+                >
+                  14001
+                </td>
+              </tr>
+              <tr
+                class="MuiTableRow-root MuiTableRow-hover css-6h9tkn-MuiTableRow-root"
+                role="checkbox"
+                tabindex="-1"
+              >
+                <th
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-162n1xm-MuiTableCell-root"
+                  id="enhanced-table-checkbox-8"
+                  scope="row"
+                >
+                  <a
+                    class="MuiTypography-root MuiTypography-inherit MuiLink-root MuiLink-underlineHover css-18wl5e4-MuiTypography-root-MuiLink-root"
+                    href="/"
+                  >
+                    98756325
+                  </a>
+                </th>
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-162n1xm-MuiTableCell-root"
+                >
+                  Mobile
+                </td>
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight MuiTableCell-sizeMedium css-10ttkdn-MuiTableCell-root"
+                >
+                  355
+                </td>
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-162n1xm-MuiTableCell-root"
+                />
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight MuiTableCell-sizeMedium css-10ttkdn-MuiTableCell-root"
+                >
+                  90989
+                </td>
+              </tr>
+              <tr
+                class="MuiTableRow-root MuiTableRow-hover css-6h9tkn-MuiTableRow-root"
+                role="checkbox"
+                tabindex="-1"
+              >
+                <th
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-162n1xm-MuiTableCell-root"
+                  id="enhanced-table-checkbox-9"
+                  scope="row"
+                >
+                  <a
+                    class="MuiTypography-root MuiTypography-inherit MuiLink-root MuiLink-underlineHover css-18wl5e4-MuiTypography-root-MuiLink-root"
+                    href="/"
+                  >
+                    98764564
+                  </a>
+                </th>
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-162n1xm-MuiTableCell-root"
+                >
+                  Laptop
+                </td>
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight MuiTableCell-sizeMedium css-10ttkdn-MuiTableCell-root"
+                >
+                  300
+                </td>
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-162n1xm-MuiTableCell-root"
+                />
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight MuiTableCell-sizeMedium css-10ttkdn-MuiTableCell-root"
+                >
+                  180139
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    <div
+      class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-12 MuiGrid-grid-md-6 css-pwpilw-MuiGrid-root"
+    >
+      <div
+        class="MuiBox-root css-0"
+      >
+        <div
+          class="MuiTableContainer-root css-1hmt0ej-MuiTableContainer-root"
+        >
+          <table
+            aria-labelledby="tableTitle"
+            class="MuiTable-root css-1r0k8ux-MuiTable-root"
+          >
+            <thead
+              class="MuiTableHead-root css-15wwp11-MuiTableHead-root"
+            >
+              <tr
+                class="MuiTableRow-root MuiTableRow-head css-nmu7bk-MuiTableRow-root"
+              >
+                <th
+                  aria-sort="ascending"
+                  class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-15kh76s-MuiTableCell-root"
+                  scope="col"
+                >
+                  Tracking No.
+                </th>
+                <th
+                  class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-paddingNone MuiTableCell-sizeMedium css-cm9j2h-MuiTableCell-root"
+                  scope="col"
+                >
+                  Product Name
+                </th>
+                <th
+                  class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignRight MuiTableCell-sizeMedium css-64yknp-MuiTableCell-root"
+                  scope="col"
+                >
+                  Total Order
+                </th>
+                <th
+                  class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-15kh76s-MuiTableCell-root"
+                  scope="col"
+                >
+                  Status
+                </th>
+                <th
+                  class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignRight MuiTableCell-sizeMedium css-64yknp-MuiTableCell-root"
+                  scope="col"
+                >
+                  Total Amount
+                </th>
+              </tr>
+            </thead>
+            <tbody
+              class="MuiTableBody-root css-apqrd9-MuiTableBody-root"
+            >
+              <tr
+                class="MuiTableRow-root MuiTableRow-hover css-6h9tkn-MuiTableRow-root"
+                role="checkbox"
+                tabindex="-1"
+              >
+                <th
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-162n1xm-MuiTableCell-root"
+                  id="enhanced-table-checkbox-0"
+                  scope="row"
+                >
+                  <a
+                    class="MuiTypography-root MuiTypography-inherit MuiLink-root MuiLink-underlineHover css-18wl5e4-MuiTypography-root-MuiLink-root"
+                    href="/"
+                  >
+                    13256498
+                  </a>
+                </th>
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-162n1xm-MuiTableCell-root"
+                >
+                  Keyboard
+                </td>
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight MuiTableCell-sizeMedium css-10ttkdn-MuiTableCell-root"
+                >
+                  125
+                </td>
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-162n1xm-MuiTableCell-root"
+                />
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight MuiTableCell-sizeMedium css-10ttkdn-MuiTableCell-root"
+                >
+                  70999
+                </td>
+              </tr>
+              <tr
+                class="MuiTableRow-root MuiTableRow-hover css-6h9tkn-MuiTableRow-root"
+                role="checkbox"
+                tabindex="-1"
+              >
+                <th
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-162n1xm-MuiTableCell-root"
+                  id="enhanced-table-checkbox-1"
+                  scope="row"
+                >
+                  <a
+                    class="MuiTypography-root MuiTypography-inherit MuiLink-root MuiLink-underlineHover css-18wl5e4-MuiTypography-root-MuiLink-root"
+                    href="/"
+                  >
+                    13286564
+                  </a>
+                </th>
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-162n1xm-MuiTableCell-root"
+                >
+                  Computer Accessories
+                </td>
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight MuiTableCell-sizeMedium css-10ttkdn-MuiTableCell-root"
+                >
+                  100
+                </td>
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-162n1xm-MuiTableCell-root"
+                />
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight MuiTableCell-sizeMedium css-10ttkdn-MuiTableCell-root"
+                >
+                  83348
+                </td>
+              </tr>
+              <tr
+                class="MuiTableRow-root MuiTableRow-hover css-6h9tkn-MuiTableRow-root"
+                role="checkbox"
+                tabindex="-1"
+              >
+                <th
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-162n1xm-MuiTableCell-root"
+                  id="enhanced-table-checkbox-2"
+                  scope="row"
+                >
+                  <a
+                    class="MuiTypography-root MuiTypography-inherit MuiLink-root MuiLink-underlineHover css-18wl5e4-MuiTypography-root-MuiLink-root"
+                    href="/"
+                  >
+                    84564564
+                  </a>
+                </th>
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-162n1xm-MuiTableCell-root"
+                >
+                  Camera Lens
+                </td>
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight MuiTableCell-sizeMedium css-10ttkdn-MuiTableCell-root"
+                >
+                  40
+                </td>
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-162n1xm-MuiTableCell-root"
+                />
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight MuiTableCell-sizeMedium css-10ttkdn-MuiTableCell-root"
+                >
+                  40570
+                </td>
+              </tr>
+              <tr
+                class="MuiTableRow-root MuiTableRow-hover css-6h9tkn-MuiTableRow-root"
+                role="checkbox"
+                tabindex="-1"
+              >
+                <th
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-162n1xm-MuiTableCell-root"
+                  id="enhanced-table-checkbox-3"
+                  scope="row"
+                >
+                  <a
+                    class="MuiTypography-root MuiTypography-inherit MuiLink-root MuiLink-underlineHover css-18wl5e4-MuiTypography-root-MuiLink-root"
+                    href="/"
+                  >
+                    86739658
+                  </a>
+                </th>
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-162n1xm-MuiTableCell-root"
+                >
+                  TV
+                </td>
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight MuiTableCell-sizeMedium css-10ttkdn-MuiTableCell-root"
+                >
+                  99
+                </td>
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-162n1xm-MuiTableCell-root"
+                />
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight MuiTableCell-sizeMedium css-10ttkdn-MuiTableCell-root"
+                >
+                  410780
+                </td>
+              </tr>
+              <tr
+                class="MuiTableRow-root MuiTableRow-hover css-6h9tkn-MuiTableRow-root"
+                role="checkbox"
+                tabindex="-1"
+              >
+                <th
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-162n1xm-MuiTableCell-root"
+                  id="enhanced-table-checkbox-4"
+                  scope="row"
+                >
+                  <a
+                    class="MuiTypography-root MuiTypography-inherit MuiLink-root MuiLink-underlineHover css-18wl5e4-MuiTypography-root-MuiLink-root"
+                    href="/"
+                  >
+                    98652366
+                  </a>
+                </th>
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-162n1xm-MuiTableCell-root"
+                >
+                  Handset
+                </td>
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight MuiTableCell-sizeMedium css-10ttkdn-MuiTableCell-root"
+                >
+                  50
+                </td>
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-162n1xm-MuiTableCell-root"
+                />
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight MuiTableCell-sizeMedium css-10ttkdn-MuiTableCell-root"
+                >
+                  10239
+                </td>
+              </tr>
+              <tr
+                class="MuiTableRow-root MuiTableRow-hover css-6h9tkn-MuiTableRow-root"
+                role="checkbox"
+                tabindex="-1"
+              >
+                <th
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-162n1xm-MuiTableCell-root"
+                  id="enhanced-table-checkbox-5"
+                  scope="row"
+                >
+                  <a
+                    class="MuiTypography-root MuiTypography-inherit MuiLink-root MuiLink-underlineHover css-18wl5e4-MuiTypography-root-MuiLink-root"
+                    href="/"
+                  >
+                    98753263
+                  </a>
+                </th>
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-162n1xm-MuiTableCell-root"
+                >
+                  Mouse
+                </td>
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight MuiTableCell-sizeMedium css-10ttkdn-MuiTableCell-root"
+                >
+                  89
+                </td>
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-162n1xm-MuiTableCell-root"
+                />
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight MuiTableCell-sizeMedium css-10ttkdn-MuiTableCell-root"
+                >
+                  10570
+                </td>
+              </tr>
+              <tr
+                class="MuiTableRow-root MuiTableRow-hover css-6h9tkn-MuiTableRow-root"
+                role="checkbox"
+                tabindex="-1"
+              >
+                <th
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-162n1xm-MuiTableCell-root"
+                  id="enhanced-table-checkbox-6"
+                  scope="row"
+                >
+                  <a
+                    class="MuiTypography-root MuiTypography-inherit MuiLink-root MuiLink-underlineHover css-18wl5e4-MuiTypography-root-MuiLink-root"
+                    href="/"
+                  >
+                    98753275
+                  </a>
+                </th>
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-162n1xm-MuiTableCell-root"
+                >
+                  Desktop
+                </td>
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight MuiTableCell-sizeMedium css-10ttkdn-MuiTableCell-root"
+                >
+                  185
+                </td>
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-162n1xm-MuiTableCell-root"
+                />
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight MuiTableCell-sizeMedium css-10ttkdn-MuiTableCell-root"
+                >
+                  98063
+                </td>
+              </tr>
+              <tr
+                class="MuiTableRow-root MuiTableRow-hover css-6h9tkn-MuiTableRow-root"
+                role="checkbox"
+                tabindex="-1"
+              >
+                <th
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-162n1xm-MuiTableCell-root"
+                  id="enhanced-table-checkbox-7"
+                  scope="row"
+                >
+                  <a
+                    class="MuiTypography-root MuiTypography-inherit MuiLink-root MuiLink-underlineHover css-18wl5e4-MuiTypography-root-MuiLink-root"
+                    href="/"
+                  >
+                    98753291
+                  </a>
+                </th>
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-162n1xm-MuiTableCell-root"
+                >
+                  Chair
+                </td>
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight MuiTableCell-sizeMedium css-10ttkdn-MuiTableCell-root"
+                >
+                  100
+                </td>
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-162n1xm-MuiTableCell-root"
+                />
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight MuiTableCell-sizeMedium css-10ttkdn-MuiTableCell-root"
+                >
+                  14001
+                </td>
+              </tr>
+              <tr
+                class="MuiTableRow-root MuiTableRow-hover css-6h9tkn-MuiTableRow-root"
+                role="checkbox"
+                tabindex="-1"
+              >
+                <th
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-162n1xm-MuiTableCell-root"
+                  id="enhanced-table-checkbox-8"
+                  scope="row"
+                >
+                  <a
+                    class="MuiTypography-root MuiTypography-inherit MuiLink-root MuiLink-underlineHover css-18wl5e4-MuiTypography-root-MuiLink-root"
+                    href="/"
+                  >
+                    98756325
+                  </a>
+                </th>
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-162n1xm-MuiTableCell-root"
+                >
+                  Mobile
+                </td>
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight MuiTableCell-sizeMedium css-10ttkdn-MuiTableCell-root"
+                >
+                  355
+                </td>
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-162n1xm-MuiTableCell-root"
+                />
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight MuiTableCell-sizeMedium css-10ttkdn-MuiTableCell-root"
+                >
+                  90989
+                </td>
+              </tr>
+              <tr
+                class="MuiTableRow-root MuiTableRow-hover css-6h9tkn-MuiTableRow-root"
+                role="checkbox"
+                tabindex="-1"
+              >
+                <th
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-162n1xm-MuiTableCell-root"
+                  id="enhanced-table-checkbox-9"
+                  scope="row"
+                >
+                  <a
+                    class="MuiTypography-root MuiTypography-inherit MuiLink-root MuiLink-underlineHover css-18wl5e4-MuiTypography-root-MuiLink-root"
+                    href="/"
+                  >
+                    98764564
+                  </a>
+                </th>
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-162n1xm-MuiTableCell-root"
+                >
+                  Laptop
+                </td>
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight MuiTableCell-sizeMedium css-10ttkdn-MuiTableCell-root"
+                >
+                  300
+                </td>
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-162n1xm-MuiTableCell-root"
+                />
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight MuiTableCell-sizeMedium css-10ttkdn-MuiTableCell-root"
+                >
+                  180139
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;

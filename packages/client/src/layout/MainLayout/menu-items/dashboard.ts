@@ -36,6 +36,14 @@ const dashboard = {
       url: '/categorias',
       icon: ShoppingCartOutlined,
       breadcrumbs: true
+    },
+    {
+      id: 'debts',
+      title: 'Deudas',
+      type: 'item',
+      url: '/deudas',
+      icon: ShoppingCartOutlined,
+      breadcrumbs: true
     }
   ]
 }
