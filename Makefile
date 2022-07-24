@@ -43,6 +43,15 @@ build-api:
 lint-api:
 	@npm run lint --workspace=@soker90/finper-api
 
+# temporal
+build-image-api-daily:
+	@docker build ./packages/api -t soker90/finper-api:daily -f ./packages/api/Dockerfile
+	@docker push soker90/finper-api:daily
+
+build-image-api-latest:
+	@docker build ./packages/api -t soker90/finper-api:latest -f ./packages/api/Dockerfile
+	@docker push soker90/finper-api:latest
+
 ## Frontend ##
 start-client:
 	@npm run dev --workspace=@soker90/finper-client
