@@ -21,7 +21,7 @@ npm install -S @soker90/finper-models
 ## Dev Dependencies
 
 * [eslint](https://npmjs.com/package/eslint)
-* [eslint-config-airbnb](https://npmjs.com/package/eslint-config-airbnb)
+* [eslint-config-standard](https://npmjs.com/package/eslint-config-standard)
 * [eslint-plugin-import](https://npmjs.com/package/eslint-plugin-import)
 * [eslint-plugin-jest](https://www.npmjs.com/package/eslint-plugin-jest)
 * [jest](https://www.npmjs.com/package/jest)
