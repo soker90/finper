@@ -15,11 +15,11 @@ jobs:
             username: ${{ secrets.DOCKERHUB_USERNAME }}
             password: ${{ secrets.DOCKERHUB_TOKEN }}
         - name: Build the tagged Docker image
-          run: docker build . --file Dockerfile --tag soker90/finper-api:daily
+          run: docker build packages/api --file packages/api/Dockerfile --tag soker90/finper-api:daily
         - name: Push the tagged Docker image
           run: docker push soker90/finper-api:daily
         - name: Build the latest Docker image
-          run: docker build . --file Dockerfile --tag soker90/finper-api:latest
+          run: docker build packages/api --file packages/api/Dockerfile --tag soker90/finper-api:latest
         - name: Push the latest Docker image
           run: docker push soker90/finper-api:latest
 
