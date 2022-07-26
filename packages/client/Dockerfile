@@ -4,9 +4,9 @@ WORKDIR /app
 
 ENV PATH /app/node_modules/.bin:$PATH
 
-COPY package.json package-lock.json ./
+COPY package.json ./
 
-RUN npm ci --silent
+RUN npm i --silent
 
 COPY . ./
 
