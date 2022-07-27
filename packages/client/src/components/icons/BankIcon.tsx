@@ -9,6 +9,8 @@ const imagin = lazy(() => import('./ImaginIcon'))
 type BankIconsProps = {
     name: string
     className?: string
+    width?: number
+    height?: number
 }
 
 const Icons: Record<string, FC<any>> = {

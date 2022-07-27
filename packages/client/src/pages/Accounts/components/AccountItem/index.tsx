@@ -28,7 +28,7 @@ const AccountItem: FC<AccountItemProps> = ({ account, forceExpand, cancelCreate 
             <Paper component='li'>
                 <ItemContent onClick={() => setExpand(toggle => !toggle)}>
                     <div className={styles.logoName}>
-                        <BankIcon name={account.bank} className={styles.bankLogo} />
+                        <BankIcon name={account.bank} className={styles.bankLogo} width={32} height={32} />
                         <span>{account.name}</span>
                     </div>
                     <Typography variant='h4'
