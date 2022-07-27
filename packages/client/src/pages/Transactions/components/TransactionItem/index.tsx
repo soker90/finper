@@ -32,7 +32,7 @@ const TransactionItem: FC<TransactionItemProps> = ({ transaction, forceExpand, c
             <Paper component='li'>
                 {transaction && <ItemContent onClick={() => setExpand(toggle => !toggle)}>
                   <div className={styles.logoName}>
-                    <BankIcon name={transaction.account?.bank} className={styles.bankLogo} />
+                    <BankIcon name={transaction.account?.bank} className={styles.bankLogo} height={32} width={32} />
                     <span>{format.dateShort(transaction.date)}</span>
                   </div>
                   <Stack spacing={1} direction='row' pr={isDesktop ? '50%' : undefined}>
