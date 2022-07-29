@@ -9,8 +9,6 @@ const Debts = lazy(() => import('../pages/Debts'))
 const Categories = lazy(() => import('../pages/Categories'))
 const Transactions = lazy(() => import('../pages/Transactions'))
 
-// ==============================|| MAIN ROUTING ||============================== //
-
 const MainRoutes = {
   path: '/',
   element: <MainLayout />,

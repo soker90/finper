@@ -17,7 +17,8 @@ export default defineConfig({
       { find: 'services', replacement: path.resolve(__dirname, '/src/services') },
       { find: 'types', replacement: path.resolve(__dirname, '/src/types') },
       { find: 'themes', replacement: path.resolve(__dirname, '/src/themes') },
-      { find: 'utils', replacement: path.resolve(__dirname, '/src/utils') }
+      { find: 'utils', replacement: path.resolve(__dirname, '/src/utils') },
+      { find: 'MuiTable', replacement: path.resolve(__dirname, '/src/external/MuiTable') }
     ]
   },
   plugins: [react()],

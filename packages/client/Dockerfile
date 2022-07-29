@@ -2,6 +2,8 @@ FROM node:16 as build
 
 WORKDIR /app
 
+ARG VITE_API_HOST
+
 ENV PATH /app/node_modules/.bin:$PATH
 
 COPY package.json ./

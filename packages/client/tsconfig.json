@@ -28,8 +28,10 @@
       "types/*": ["./types/*"],
       "themes/*": ["./themes/*"],
       "utils/*": ["./utils/*"],
+      "MuiTable/*": ["./external/MuiTable/*"]
     },
-    "types": ["@emotion/react/types/css-prop"]
+    "types": ["@emotion/react/types/css-prop"],
+
   },
   "include": ["src"],
   "references": [{ "path": "./tsconfig.node.json" }]
