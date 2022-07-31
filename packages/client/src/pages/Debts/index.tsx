@@ -1,6 +1,6 @@
 import { Grid } from '@mui/material'
 import { useDebts } from './hooks'
-import MuiTable from 'MuiTable/index'
+import MuiTable from '@soker90/react-mui-table'
 import { format } from 'utils'
 
 const DashboardDefault = () => {
