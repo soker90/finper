@@ -22,7 +22,7 @@ export interface TableMaterialProps {
     actions?: Action[]
     data: object[];
     title?: string;
-    refresh: ({ offset, limit }: { offset?: number, limit?: number }) => void;
+    refresh?: ({ offset, limit }: { offset?: number, limit?: number }) => void;
     count?: number;
     onRowClick?: (row: object) => void;
     withCard?: boolean;
@@ -55,7 +55,7 @@ const TableMaterial = (
 
   const handlePageChange = (event: any, newPage: any) => {
     setPage(newPage)
-    refresh({
+    refresh?.({
       offset: newPage * limit,
       limit
     })
@@ -63,7 +63,7 @@ const TableMaterial = (
 
   const handleLimitChange = (event: any) => {
     setLimit(event.target.value)
-    refresh({
+    refresh?.({
       offset: page * event.target.value,
       limit: event.target.value
     })
