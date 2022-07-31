@@ -10,6 +10,9 @@ export const euro = (cell: number, options = {}) => {
 }
 
 export const dateShort = (cell: number) => {
+  if (!cell) {
+    return null
+  }
   const d = new Date(cell)
   return d.toLocaleDateString('es-ES', {
     month: 'short',
