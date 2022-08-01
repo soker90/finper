@@ -1,5 +1,6 @@
 import supertest from 'supertest'
 import {
+  DebtModel,
   DebtType,
   IDebt,
   mongoose
@@ -12,6 +13,7 @@ import { requestLogin } from '../request-login'
 import { insertDebt } from '../insert-data-to-model'
 import { ERROR_MESSAGE } from '../../src/i18n'
 import { generateUsername } from '../generate-values'
+import { Debt } from '@soker90/finper-client/src/types'
 
 const testDatabase = require('../test-db')(mongoose)
 
@@ -82,17 +84,29 @@ describe('Debt', () => {
     })
 
     test('when there are debts, it should return the debts', async () => {
-      const debt = await insertDebt({ user })
-      await supertest(server.app).get(path).auth(token, { type: 'bearer' }).expect(200, [{
+      const name = `a${faker.name.firstName()}`
+      const name2 = `b${faker.name.firstName()}`
+      const from = await insertDebt({ user, type: DebtType.FROM, from: name, paymentDate: 0 })
+      const to = await insertDebt({ user, type: DebtType.TO, from: name2, paymentDate: 0 })
+      const to2 = await insertDebt({ user, type: DebtType.TO, from: name, paymentDate: 0 })
+      const getResponseDebt = (debt: any) => ({
         _id: debt._id.toString(),
         from: debt.from,
         date: debt.date,
         amount: debt.amount,
-        paymentDate: debt.paymentDate,
+        ...(debt.paymentDate && { paymentDate: debt.paymentDate }),
         concept: debt.concept,
         type: debt.type,
         user: debt.user
-      }])
+      })
+      await supertest(server.app).get(path).auth(token, { type: 'bearer' }).expect(200, {
+        from: [getResponseDebt(from)],
+        to: [getResponseDebt(to), getResponseDebt(to2)],
+        debtsByPerson: [
+          { _id: name, total: from.amount - to2.amount },
+          { _id: name2, total: -to.amount }
+        ]
+      })
     })
   })
 
