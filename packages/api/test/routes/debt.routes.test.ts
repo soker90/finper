@@ -1,6 +1,5 @@
 import supertest from 'supertest'
 import {
-  DebtModel,
   DebtType,
   IDebt,
   mongoose
@@ -13,7 +12,6 @@ import { requestLogin } from '../request-login'
 import { insertDebt } from '../insert-data-to-model'
 import { ERROR_MESSAGE } from '../../src/i18n'
 import { generateUsername } from '../generate-values'
-import { Debt } from '@soker90/finper-client/src/types'
 
 const testDatabase = require('../test-db')(mongoose)
 
