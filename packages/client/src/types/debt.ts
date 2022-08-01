@@ -1,5 +1,7 @@
 export enum DebtType {
+    // eslint-disable-next-line no-unused-vars
     FROM = 'from',
+    // eslint-disable-next-line no-unused-vars
     TO = 'to',
 }
 
