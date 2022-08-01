@@ -1,6 +1,6 @@
 const DashboardDefault = () => {
   return (
-        <p>Dashboard</p>
+        <p>dashboard</p>
   )
 }
 
