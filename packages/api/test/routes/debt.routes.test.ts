@@ -78,7 +78,11 @@ describe('Debt', () => {
     })
 
     test('when there are no debts, it should return an empty array', async () => {
-      await supertest(server.app).get(path).auth(token, { type: 'bearer' }).expect(200, [])
+      await supertest(server.app).get(path).auth(token, { type: 'bearer' }).expect(200, {
+        from: [],
+        to: [],
+        debtsByPerson: []
+      })
     })
 
     test('when there are debts, it should return the debts', async () => {
