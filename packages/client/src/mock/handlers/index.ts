@@ -1,7 +1,7 @@
 import { loginHandlers } from './auth/login'
-import * as debtsHandlers from './debts'
+import { debtsHandlers } from './debts'
 
 export const handlers = [
   ...loginHandlers,
-  debtsHandlers
+  ...debtsHandlers
 ]
