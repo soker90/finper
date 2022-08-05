@@ -21,7 +21,7 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
       -
-        run: cd ./packages/client
+        run: ls -R
       -
         name: Build and push
         uses: docker/build-push-action@v3
