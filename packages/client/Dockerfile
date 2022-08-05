@@ -6,11 +6,11 @@ ARG VITE_API_HOST
 
 ENV PATH /app/node_modules/.bin:$PATH
 
-COPY package.json ./
+COPY --chown=node:node package.json ./
 
 RUN npm i --silent
 
-COPY . ./
+COPY --chown=node:node . ./
 
 RUN npm run build
 
