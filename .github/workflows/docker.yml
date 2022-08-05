@@ -28,3 +28,5 @@ jobs:
         with:
           push: true
           tags: soker90/finper-client:daily
+          context: packages/client
+          file: packages/client/Dockerfile
