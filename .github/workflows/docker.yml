@@ -22,4 +22,9 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
       -
         name: Build and push
-        run: make build-image-client-daily
+        uses: docker/build-push-action@v3
+        with:
+          push: true
+          tags: soker90/finper-client:daily
+          context: ./packages/client
+          file: ./packages/client/Dockerfile
