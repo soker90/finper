@@ -1,6 +1,7 @@
 import config from '../config'
 import AccountService from './account.service'
 import AuthService from './auth.service'
+import BudgetService from './budget.service'
 import CategoryService from './category.service'
 import DebtService from './debt.service'
 import StoreService from './stores.service'
@@ -9,6 +10,7 @@ import UserService from './user.service'
 
 export const accountService = new AccountService()
 export const authService = new AuthService(config.jwt)
+export const budgetService = new BudgetService()
 export const debtService = new DebtService()
 export const categoryService = new CategoryService()
 export const storeService = new StoreService()
