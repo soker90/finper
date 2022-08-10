@@ -1,8 +1,9 @@
 import { faker } from '@faker-js/faker'
 import {
   AccountModel,
+  BudgetModel,
   CategoryModel, DebtModel, DebtType,
-  IAccount,
+  IAccount, IBudget,
   ICategory, IDebt, IStore,
   IUser, StoreModel, TransactionModel,
   TransactionType,
@@ -80,6 +81,28 @@ export const insertDebt = async (params: Record<string, string | number> = {}): 
     ...(params.paymentDate !== 0 && { paymentDate: params.paymentDate ?? faker.datatype.number() }),
     concept: params.concept ?? faker.lorem.words(4),
     type: params.type ?? (Math.random() > 0.5 ? DebtType.TO : DebtType.FROM),
+    user: params.user ?? faker.internet.userName().slice(MIN_LENGTH_USERNAME, MAX_USERNAME_LENGTH).toLowerCase()
+  })
+}
+
+const generateCategories = () => Promise.all(Array.from({
+  length: faker.datatype.number({ min: 1, max: 5 })
+},
+() => insertCategory()
+))
+
+export const insertBudget = async (params: Record<string, string | number> = {}): Promise<any> => {
+  let budget: any[] = []
+  await generateCategories().then(categories => {
+    budget = categories.map(category => ({
+      category,
+      amount: faker.datatype.number()
+    }))
+  })
+  return BudgetModel.create({
+    year: params.year ?? faker.date.past().getFullYear(),
+    month: params.month ?? faker.date.past().getMonth(),
+    budget: params.budget ?? budget,
     user: params.user ?? faker.internet.userName().slice(MIN_LENGTH_USERNAME, MAX_USERNAME_LENGTH).toLowerCase()
   })
 }
