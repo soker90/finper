@@ -38,3 +38,4 @@ jobs:
           tags: soker90/finper-api:latest
           context: ./packages/api
           file: ./packages/client/Dockerfile
+          build-args: API_HOST=${{ secrets.API_HOST }}
