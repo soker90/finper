@@ -3,6 +3,7 @@ FROM node:16 as build
 WORKDIR /app
 
 ARG API_HOST
+ENV VITE_API_HOST=$API_HOST
 
 ENV PATH /app/node_modules/.bin:$PATH
 
@@ -12,7 +13,7 @@ RUN npm i --silent
 
 COPY --chown=node:node . ./
 
-RUN VITE_API_HOST=$API_HOST && npm run build
+RUN npm run build
 
 # production environment
 FROM nginx:stable
