@@ -30,12 +30,12 @@ jobs:
           tags: soker90/finper-client:latest
           context: ./packages/client
           file: ./packages/client/Dockerfile
+          build-args: API_HOST=${{ secrets.API_HOST }}
       
-      - name: Build and push client
+      - name: Build and push api
         uses: docker/build-push-action@v3
         with:
           push: true
           tags: soker90/finper-api:latest
           context: ./packages/api
           file: ./packages/client/Dockerfile
-          build-args: API_HOST=${{ secrets.API_HOST }}
