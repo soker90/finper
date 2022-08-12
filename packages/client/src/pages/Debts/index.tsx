@@ -1,8 +1,6 @@
 import { Grid } from '@mui/material'
 import { useDebts } from './hooks'
-import { TableMaterial } from '@soker90/react-mui-table'
-import { format } from 'utils'
-import { DebtCard } from './components'
+import { DebtCard, DebtTable } from './components'
 
 const Debts = () => {
   const { from, to, debtsByPerson } = useDebts()
@@ -16,32 +14,8 @@ const Debts = () => {
                 ))}
             </Grid>
             <Grid container spacing={3}>
-                <Grid item xs={12} lg={6}>
-                    <TableMaterial
-                        columns={[
-                          { title: 'De', field: 'from' },
-                          { title: 'Fecha', render: ({ date }) => format.dateShort(date) },
-                          { title: 'Cantidad', render: ({ amount }) => format.euro(amount) },
-                          { title: 'Concepto', field: 'concept' },
-                          { title: 'F. Pago', render: ({ paymentDate }) => format.dateShort(paymentDate) || 'Pendiente' }
-                        ]}
-                        data={from}
-                        title='Me deben'
-                    />
-                </Grid>
-                <Grid item xs={12} lg={6}>
-                    <TableMaterial
-                        columns={[
-                          { title: 'A', field: 'from' },
-                          { title: 'Fecha', render: ({ date }) => format.dateShort(date) },
-                          { title: 'Cantidad', render: ({ amount }) => format.euro(amount) },
-                          { title: 'Concepto', field: 'concept' },
-                          { title: 'F. Pago', render: ({ paymentDate }) => format.dateShort(paymentDate) }
-                        ]}
-                        data={to}
-                        title='Debo'
-                    />
-                </Grid>
+                <DebtTable debts={from} title='Me deben' fromTitle='De'/>
+                <DebtTable debts={to} title='Debo' fromTitle='A'/>
             </Grid>
         </>
   )

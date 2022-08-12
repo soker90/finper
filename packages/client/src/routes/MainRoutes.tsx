@@ -4,6 +4,7 @@ import MainLayout from '../layout/MainLayout'
 import { Navigate } from 'react-router-dom'
 
 const Accounts = lazy(() => import('../pages/Accounts'))
+const Budgets = lazy(() => import('../pages/Budgets'))
 const DashboardDefault = lazy(() => import('../pages/Dashboard'))
 const Debts = lazy(() => import('../pages/Debts'))
 const Categories = lazy(() => import('../pages/Categories'))
@@ -11,36 +12,40 @@ const Transactions = lazy(() => import('../pages/Transactions'))
 
 const MainRoutes = {
   path: '/',
-  element: <MainLayout />,
+  element: <MainLayout/>,
   children: [
     {
       path: '/',
-      element: <Navigate to='/dashboard/default' />
+      element: <Navigate to='/dashboard/default'/>
     },
     {
       path: 'dashboard',
       children: [
         {
           path: 'default',
-          element: <DashboardDefault />
+          element: <DashboardDefault/>
         }
       ]
     },
     {
       path: 'cuentas',
-      element: <Accounts />
+      element: <Accounts/>
     },
     {
       path: 'categorias',
-      element: <Categories />
+      element: <Categories/>
     },
     {
       path: 'movimientos',
-      element: <Transactions />
+      element: <Transactions/>
     },
     {
       path: 'deudas',
-      element: <Debts />
+      element: <Debts/>
+    },
+    {
+      path: 'presupuestos/:year/:month',
+      element: <Budgets/>
     }
   ]
 }

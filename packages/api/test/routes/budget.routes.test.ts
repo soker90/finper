@@ -9,10 +9,7 @@ import { server } from '../../src/server'
 
 import { requestLogin } from '../request-login'
 import { insertBudget } from '../insert-data-to-model'
-import { ERROR_MESSAGE } from '../../src/i18n'
 import { generateUsername } from '../generate-values'
-import { expectCt } from 'helmet'
-import { deepEqual } from 'assert'
 
 const testDatabase = require('../test-db')(mongoose)
 
@@ -23,7 +20,7 @@ describe('Budget', () => {
 
   describe('GET /', () => {
     const path = '/api/budgets'
-    const pathWithParams = (year: number, month: number) => `${path}?${year ? `year=${year}` : ''}${month ? `&month=${month}` : ''}`
+    const pathWithParams = (year: number, month?: number) => `${path}?${year ? `year=${year}` : ''}${month ? `&month=${month}` : ''}`
 
     let token: string
     const user = generateUsername()
@@ -31,6 +28,8 @@ describe('Budget', () => {
     beforeAll(async () => {
       token = await requestLogin(server.app, { username: user })
     })
+
+    afterEach(() => BudgetModel.deleteMany({}))
 
     test('when token is not provided, it should response an error with status code 401', async () => {
       await supertest(server.app).get(path).expect(401)
@@ -57,6 +56,22 @@ describe('Budget', () => {
       })
     })
 
-    // TODO: check without month
+    test('when there are budgets and month is not provided, it should return the budgets', async () => {
+      const year = faker.date.recent().getFullYear()
+      const budget1 = await insertBudget({ user, year })
+      const budget2 = await insertBudget({ user, year })
+      const response = await supertest(server.app).get(pathWithParams(year)).auth(token, { type: 'bearer' }).expect(200)
+
+      expect(response.body.length).toBe(2)
+
+      ;[budget1, budget2].forEach((budget: any) => {
+        const budgetResponse = response.body.find((budgetResponse: any) => budgetResponse._id === budget._id.toString())
+        budget.budget.forEach((categoryBudget: any, index: number) => {
+          expect(categoryBudget._id.toString()).toBe(budgetResponse.budget[index]._id)
+          expect(categoryBudget.amount).toBe(budgetResponse.budget[index].amount)
+          expect(categoryBudget.category._id.toString()).toBe(budgetResponse.budget[index].category)
+        })
+      })
+    })
   })
 })
