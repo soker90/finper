@@ -10,7 +10,7 @@ export class BudgetRoutes {
 
   public budgetController: BudgetController = new BudgetController({
     budgetService,
-    loggerHandler: loggerHandler('CategoryController')
+    loggerHandler: loggerHandler('BudgetController')
   })
 
   constructor () {

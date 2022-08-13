@@ -18,23 +18,63 @@ export default class BudgetService implements IBudgetService {
     // }, 'name type').populate('parent', 'name type root').then(categories => {
     // }
 
-    await BudgetModel.find({})
-    return CategoryModel.aggregate([
+    console.log(typeof year)
+    return BudgetModel.aggregate([
       {
         $match: {
-          user,
-          parent: { $exists: false }
+          user
+          // year,
+          // ...(month && { month })
         }
       },
       {
         $lookup: {
-          from: 'budgets',
-          localField: '_id',
-          foreignField: 'budget.category',
-          as: 'budget'
+          from: 'categories',
+          localField: 'budget.category',
+          foreignField: '_id',
+          as: 'categoriesList'
         }
       },
-      { $sort: { name: 1, children: 1 } }
+      {
+        $project: {
+          user: 1,
+          month: 1,
+          budget: {
+            $map: {
+              input: '$budget',
+              as: 'budget',
+              in: {
+                $mergeObjects: [
+                  '$$budget',
+                  {
+                    $first: {
+                      $filter: {
+                        input: '$categoriesList',
+                        cond: {
+                          $eq: [
+                            '$$this._id',
+                            '$$budget.category'
+                          ]
+                        }
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+
+      // {
+      //   $lookup: {
+      //     from: 'transactions',
+      //     localField: 'budget.category',
+      //     foreignField: 'category',
+      //     as: 'transactions'
+      //   }
+      // }
+      // { $sort: { name: 1, children: 1 } }
     ])
   }
 }
