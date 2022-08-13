@@ -13,5 +13,8 @@ export const validateBudgetGet = async (query: { year?: number, month?: number }
     throw Boom.badData(error.message).output
   }
 
-  return value
+  return {
+    year: Number(value.year),
+    month: Number(value.month)
+  }
 }
