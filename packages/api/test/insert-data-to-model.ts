@@ -91,7 +91,7 @@ const generateCategories = () => Promise.all(Array.from({
 () => insertCategory()
 ))
 
-export const insertBudget = async (params: Record<string, string | number> = {}): Promise<any> => {
+export const insertBudget = async (params: Record<string, string | number> = {}): Promise<IBudget> => {
   let budget: any[] = []
   await generateCategories().then(categories => {
     budget = categories.map(category => ({
