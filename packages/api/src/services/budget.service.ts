@@ -6,6 +6,10 @@ export interface IBudgetService {
 
 export default class BudgetService implements IBudgetService {
   public async getBudgets ({ user, year, month }: { user: string, year: number, month?: number }): Promise<IBudget[]> {
-    return BudgetModel.find({ user, year, ...(month && [month]) }, '_id budget')
+    return (await BudgetModel.find({
+      user,
+      year,
+      ...(month && [month])
+    }, 'month budget').populate('budget.category', 'name type')) as IBudget[]
   }
 }
