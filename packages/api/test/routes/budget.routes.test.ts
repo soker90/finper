@@ -52,7 +52,8 @@ describe('Budget', () => {
       budget.budget.forEach((categoryBudget: any, index: number) => {
         expect(categoryBudget._id.toString()).toBe(budgetResponse.budget[index]._id)
         expect(categoryBudget.amount).toBe(budgetResponse.budget[index].amount)
-        expect(categoryBudget.category._id.toString()).toBe(budgetResponse.budget[index].category)
+        expect(categoryBudget.category.name).toBe(budgetResponse.budget[index].category.name)
+        expect(categoryBudget.category.type).toBe(budgetResponse.budget[index].category.type)
       })
     })
 
@@ -69,7 +70,8 @@ describe('Budget', () => {
         budget.budget.forEach((categoryBudget: any, index: number) => {
           expect(categoryBudget._id.toString()).toBe(budgetResponse.budget[index]._id)
           expect(categoryBudget.amount).toBe(budgetResponse.budget[index].amount)
-          expect(categoryBudget.category._id.toString()).toBe(budgetResponse.budget[index].category)
+          expect(categoryBudget.category.name).toBe(budgetResponse.budget[index].category.name)
+          expect(categoryBudget.category.type).toBe(budgetResponse.budget[index].category.type)
         })
       })
     })
