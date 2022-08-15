@@ -23,7 +23,7 @@ export class BudgetController {
   public async budgets (req: Request, res: Response, next: NextFunction): Promise<void> {
     Promise.resolve(req.query)
       .tap(() => this.logger.logInfo(`/budgets - list budgets of ${req.user} ${req.query?.month}/${req.query?.year}`))
-      .tap(validateBudgetGet)
+      .then(validateBudgetGet)
       .then(extractUser(req))
       .then(this.budgetService.getBudgets.bind(this.budgetService))
       .then(response => {
