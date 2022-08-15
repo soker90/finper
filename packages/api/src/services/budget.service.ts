@@ -1,4 +1,4 @@
-import { BudgetModel, CategoryModel } from '@soker90/finper-models'
+import { BudgetModel, CategoryModel, TransactionModel } from '@soker90/finper-models'
 
 export interface IBudgetService {
     getBudgets({ user, year, month }: { user: string, year: number, month: number }): Promise<any[]>
@@ -6,25 +6,35 @@ export interface IBudgetService {
 
 export default class BudgetService implements IBudgetService {
   public async getBudgets ({ user, year, month }: { user: string, year: number, month?: number }): Promise<any[]> {
-    // return (await BudgetModel.find({
-    //   user,
-    //   year,
-    //   ...(month && [month])
-    // }, 'month budget').populate('budget.category', 'name type')) as IBudget[]
-
-    // const c =  CategoryModel.find({
-    //     user,
-    //     parent: {$exists: false}
-    // }, 'name type').populate('parent', 'name type root').then(categories => {
-    // }
-
-    console.log(typeof year)
-    return BudgetModel.aggregate([
+    const transactionsSum = await TransactionModel.aggregate([
       {
         $match: {
-          user
-          // year,
-          // ...(month && { month })
+          user,
+          date: {
+            $gte: new Date(year, month || 0).getTime(),
+            $lt: new Date(Number(month ? year : year + 1), Number(month ? month + 1 : 0)).getTime()
+          }
+        }
+      },
+      {
+        $group: {
+          _id: {
+            month: {
+              $month: { date: { $toDate: '$date' }, timezone: 'Europe/Madrid' }
+            },
+            category: '$category'
+          },
+          total: { $sum: '$amount' }
+        }
+      }
+    ])
+
+    const budgets = await BudgetModel.aggregate([
+      {
+        $match: {
+          user,
+          year,
+          ...(month && { month })
         }
       },
       {
@@ -64,17 +74,19 @@ export default class BudgetService implements IBudgetService {
             }
           }
         }
-      }
-
-      // {
-      //   $lookup: {
-      //     from: 'transactions',
-      //     localField: 'budget.category',
-      //     foreignField: 'category',
-      //     as: 'transactions'
-      //   }
-      // }
-      // { $sort: { name: 1, children: 1 } }
+      },
+      { $sort: { month: 1 } }
     ])
+    //
+    // const incomes = []
+    // const expenses = []
+    // return budgets.map(item => {
+    //     const income
+    //   return item.budget.map(budget => ({
+    //     name: budget.name,
+    //     id: budget._id
+    //
+    //   }))
+    // })
   }
 }
