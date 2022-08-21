@@ -1,14 +1,14 @@
 import supertest from 'supertest'
 import {
-  BudgetModel,
-  mongoose
+  BudgetModel, CategoryModel,
+  mongoose, TransactionModel, TransactionType
 } from '@soker90/finper-models'
 import { faker } from '@faker-js/faker'
 
 import { server } from '../../src/server'
 
 import { requestLogin } from '../request-login'
-import { insertBudget } from '../insert-data-to-model'
+import { insertBudget, insertTransaction } from '../insert-data-to-model'
 import { generateUsername } from '../generate-values'
 
 const testDatabase = require('../test-db')(mongoose)
@@ -29,7 +29,11 @@ describe('Budget', () => {
       token = await requestLogin(server.app, { username: user })
     })
 
-    afterEach(() => BudgetModel.deleteMany({}))
+    afterEach(async () => {
+      await BudgetModel.deleteMany({})
+      await TransactionModel.deleteMany({})
+      await CategoryModel.deleteMany({})
+    })
 
     test('when token is not provided, it should response an error with status code 401', async () => {
       await supertest(server.app).get(path).expect(401)
@@ -39,40 +43,94 @@ describe('Budget', () => {
       await supertest(server.app).get(path).auth(token, { type: 'bearer' }).expect(422)
     })
 
-    test('when there are no budgets, it should return an empty array', async () => {
-      await supertest(server.app).get(pathWithParams(2000, 1)).auth(token, { type: 'bearer' }).expect(200, [])
-    })
-
-    test('when there are budgets, it should return the budgets', async () => {
-      const budget = await insertBudget({ user })
-      const reponse = await supertest(server.app).get(pathWithParams(budget.year, budget.month)).auth(token, { type: 'bearer' }).expect(200)
-
-      const budgetResponse = reponse.body[0]
-      expect(budgetResponse._id).toBe(budget._id.toString())
-      budget.budget.forEach((categoryBudget: any, index: number) => {
-        expect(categoryBudget._id.toString()).toBe(budgetResponse.budget[index]._id)
-        expect(categoryBudget.amount).toBe(budgetResponse.budget[index].amount)
-        expect(categoryBudget.category.name).toBe(budgetResponse.budget[index].category.name)
-        expect(categoryBudget.category.type).toBe(budgetResponse.budget[index].category.type)
+    test('when there are no budgets, it should return an empty array of incomes and other of expenses', async () => {
+      await supertest(server.app).get(pathWithParams(2000, 1)).auth(token, { type: 'bearer' }).expect(200, {
+        incomes: [],
+        expenses: []
       })
     })
 
-    test('when there are budgets and month is not provided, it should return the budgets', async () => {
-      const year = faker.date.recent().getFullYear()
-      const budget1 = await insertBudget({ user, year })
-      const budget2 = await insertBudget({ user, year })
+    const testBudgetsResponse = ({
+      budgetResponse,
+      budgetValid,
+      real,
+      months = [0]
+    }: { budgetResponse: any, budgetValid: any, real: number, months?: number[] }) => {
+      expect(budgetResponse.id).toBe(budgetValid.category._id.toString())
+      expect(budgetResponse.name).toBe(budgetValid.category.name)
+      months.forEach(month => {
+        expect(budgetResponse.budgets[month].amount).toBe(budgetValid.amount)
+        expect(budgetResponse.budgets[month].budgetId).toBe(budgetValid._id.toString())
+        expect(budgetResponse.budgets[month].real).toBe(real)
+      })
+    }
+    test('when there are budgets and month is provided, it should return the budgets', async () => {
+      const year = faker.date.past().getFullYear()
+      const month = faker.date.past().getMonth()
+      const budgetIncome = await insertBudget({ user, type: TransactionType.Income, year, month })
+      const budgetExpense = await insertBudget({ user, type: TransactionType.Expense, year, month })
+      const transaction = await insertTransaction({
+        user,
+        category: budgetIncome.category._id,
+        type: TransactionType.Income,
+        date: new Date(year, month, faker.datatype.number({
+          min: 1, max: 28
+        })).getTime()
+      })
+      const transaction2 = await insertTransaction({
+        user,
+        category: budgetIncome.category._id,
+        type: TransactionType.Income,
+        date: new Date(year, month, faker.datatype.number({
+          min: 1, max: 28
+        })).getTime()
+      })
+      const response = await supertest(server.app).get(pathWithParams(year, month)).auth(token, { type: 'bearer' }).expect(200)
+
+      testBudgetsResponse({ budgetResponse: response.body.expenses[0], budgetValid: budgetExpense, real: 0 })
+      testBudgetsResponse({
+        budgetResponse: response.body.incomes[0],
+        budgetValid: budgetIncome,
+        real: transaction.amount + transaction2.amount
+      })
+    })
+
+    test('when there are budgets and month is not provided, it should return the budgets of all year', async () => {
+      const year = faker.date.past().getFullYear()
+      const month = faker.datatype.number({
+        min: 0, max: 11
+      })
+      const budgetIncome = await insertBudget({ user, type: TransactionType.Income, year, month: month + 1 })
+      const budgetExpense = await insertBudget({ user, type: TransactionType.Expense, year })
+      const transaction = await insertTransaction({
+        user,
+        category: budgetIncome.category._id.toString(),
+        type: TransactionType.Income,
+        date: new Date(year, month, faker.datatype.number({
+          min: 1, max: 28
+        })).getTime()
+      })
+      const transaction2 = await insertTransaction({
+        user,
+        category: budgetIncome.category._id.toString(),
+        type: TransactionType.Income,
+        date: new Date(year, month, faker.datatype.number({
+          min: 1, max: 28
+        })).getTime()
+      })
       const response = await supertest(server.app).get(pathWithParams(year)).auth(token, { type: 'bearer' }).expect(200)
 
-      expect(response.body.length).toBe(2)
-
-      ;[budget1, budget2].forEach((budget: any) => {
-        const budgetResponse = response.body.find((budgetResponse: any) => budgetResponse._id === budget._id.toString())
-        budget.budget.forEach((categoryBudget: any, index: number) => {
-          expect(categoryBudget._id.toString()).toBe(budgetResponse.budget[index]._id)
-          expect(categoryBudget.amount).toBe(budgetResponse.budget[index].amount)
-          expect(categoryBudget.category.name).toBe(budgetResponse.budget[index].category.name)
-          expect(categoryBudget.category.type).toBe(budgetResponse.budget[index].category.type)
-        })
+      testBudgetsResponse({
+        budgetResponse: response.body.expenses[0],
+        budgetValid: budgetExpense,
+        real: 0,
+        months: [budgetExpense.month - 1]
+      })
+      testBudgetsResponse({
+        budgetResponse: response.body.incomes[0],
+        budgetValid: budgetIncome,
+        real: transaction.amount + transaction2.amount,
+        months: [month]
       })
     })
   })
