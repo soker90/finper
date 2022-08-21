@@ -1,12 +1,11 @@
-import { Category } from 'types/category'
-
 export interface BudgetItem {
-    _id: string,
-    category: Category,
     amount: number,
+    real: number,
+    budgetId: string,
 }
 
 export interface Budget {
-    month: number;
+    _id: string,
+    name: string;
     budget: BudgetItem[];
 }
