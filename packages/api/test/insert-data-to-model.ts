@@ -3,8 +3,8 @@ import {
   AccountModel,
   BudgetModel,
   CategoryModel, DebtModel, DebtType,
-  IAccount, IBudget,
-  ICategory, IDebt, IStore,
+  IAccount,
+  IDebt, IStore,
   IUser, StoreModel, TransactionModel,
   TransactionType,
   UserModel

@@ -1,4 +1,4 @@
-import { CategoryModel, TransactionModel, TransactionType, mongoose } from '@soker90/finper-models'
+import { CategoryModel, TransactionType, mongoose } from '@soker90/finper-models'
 import { calcBudgetByMonths, getTransactionsSumByMonth } from './utils'
 
 interface CategoriesWithBudgets {
