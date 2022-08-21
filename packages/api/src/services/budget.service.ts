@@ -100,14 +100,6 @@ export default class BudgetService implements IBudgetService {
 
     const categories = await CategoryModel.find({ user }, '_id name type').sort('name')
 
-    const expenses = categories.filter(category => category.type === TransactionType.Expense).map(category => {
-      return ({
-        name: category.name,
-        id: category._id
-        // values:
-      })
-    })
-
     const incomes = categories.filter(category => category.type === TransactionType.Income).map(category => {
       const values = month ? [] : Array(12).fill(0)
       return ({
@@ -116,7 +108,79 @@ export default class BudgetService implements IBudgetService {
       })
     })
 
+    const pruebas = await CategoryModel.aggregate([
+      {
+        $match: {
+          parent: { $exists: true }
+        }
+      },
+      {
+        $lookup: {
+          from: 'budgets',
+          let: { categoryId: '$_id' },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $and: [
+                    { $eq: ['$category', '$$categoryId'] },
+                    { $eq: ['$year', year] },
+                    ...(month ? [{ $eq: ['$month', month] }] : [])
+                  ]
+                }
+              }
+            }
+          ],
+          as: 'budgetsList'
+        }
+      },
+      {
+        $project: {
+          name: 1,
+          type: 1,
+          _id: 1,
+          budgets: {
+            $map: {
+              input: '$budgetsList',
+              as: 'budgets',
+              in: {
+                month: '$$budgets.month',
+                amount: '$$budgets.amount',
+                budgetId: '$$budgets._id'
+              }
+            }
+          }
+        }
+      },
+      { $sort: { 'budgets.month': 1 } }
+    ])
+
+    const expenses = pruebas.filter(({ type }) => type === TransactionType.Expense).map(category => {
+      const a = { amount: 0, real: 0 }
+      const budgets = month ? [{ amount: 0, real: 0 }] : Array.from({ length: 12 }, () => ({ amount: 0, real: 0 } as any))
+
+      category.budgets.forEach(({ month: monthCategory, amount, budgetId }: any) => {
+        const budgetIndex = month ? 0 : monthCategory - 1
+        budgets[budgetIndex].amount = amount
+        budgets[budgetIndex].budgetId = budgetId
+      })
+
+      transactionsSum.filter(({ _id }) => _id.category.toString() === category._id.toString()).forEach(({
+        total,
+        _id
+      }) => {
+        const budgetIndex = month ? 0 : _id.month - 1
+        budgets[budgetIndex].real = total
+      })
+
+      return ({
+        name: category.name,
+        id: category._id,
+        budgets
+      })
+    })
     return {
+      pruebas,
       expenses,
       incomes,
       categories,
@@ -136,8 +200,19 @@ export default class BudgetService implements IBudgetService {
  *   {
  *     $lookup: {
  *       from: "budgets",
- *       localField: "_id",
- *       foreignField: "category",
+ *       let: { categoryId: '$_id' },
+ *       pipeline: [
+ *         {
+ *           $match: {
+ *             $expr: {
+ *               $and: [
+ *                 { $eq: ['$category', '$$categoryId'] },
+ *                 { $eq: ['$year', year] }
+ *               ]
+ *             }
+ *           }
+ *         }
+ *       ],
  *       as: "budgetsList",
  *     }
  *   },
