@@ -81,13 +81,14 @@ describe('Category', () => {
       await supertest(server.app).get(path).auth(token, { type: 'bearer' }).expect(200, [])
     })
 
-    test('when there are categories, it should return the accounts', async () => {
+    test('when there are categories, it should return the categories', async () => {
       const category = await insertCategory({ user })
-      await supertest(server.app).get(path).auth(token, { type: 'bearer' }).expect(200, [{
-        _id: category._id.toString(),
-        name: category.name,
-        type: category.type
-      }])
+      const response = await supertest(server.app).get(path).auth(token, { type: 'bearer' }).expect(200)
+      const responseCategory = response.body.find((iCategory: ICategory) => iCategory._id === category._id.toString())
+      expect(responseCategory._id).toBe(category._id.toString())
+      expect(responseCategory.name).toBe(category.name)
+      expect(responseCategory.type).toBe(category.type)
+      expect(responseCategory.parent._id).toBe(category.parent._id.toString())
     })
   })
 

@@ -46,14 +46,16 @@ export const insertAccount = async (params: { name?: string, bank?: string, bala
 
 export const insertCategory = async (params: Record<string, any> = {}): Promise<any> => {
   const user = params.user ?? generateUsername()
-  const parent = params.root ? false : (await insertCategory({ user, root: true, type: params.type }))._id
+  const parent = params.parent ?? params.root ? false : (await insertCategory({ user, root: true, type: params.type }))._id
 
-  return CategoryModel.create({
+  const category = await CategoryModel.create({
     name: params.name ?? faker.commerce.department(),
     type: params.type ?? (Math.random() > 0.5 ? TransactionType.Expense : TransactionType.Income),
     ...(parent && { parent }),
     user
   })
+
+  return category.populate('parent')
 }
 
 export const insertStore = async (params: Record<string, string> = {}): Promise<IStore> => {
