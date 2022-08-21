@@ -13,9 +13,9 @@ const Budgets = () => {
             <Grid item xs={12} lg={6}>
                 <TableMaterial
                     columns={[
-                      { title: 'Categoría', render: ({ category }) => category.name },
-                      { title: 'Real', render: ({ amount }) => format.euro(amount) },
-                      { title: 'Estimado', render: ({ amount }) => format.euro(amount) }
+                      { title: 'Categoría', render: ({ name }) => name },
+                      { title: 'Real', render: ({ budgets }) => format.euro(budgets[0].real) },
+                      { title: 'Estimado', render: ({ budgets }) => format.euro(budgets[0].amount) }
                     ]}
                     data={expenses}
                     title={'Gastos'}
@@ -24,9 +24,9 @@ const Budgets = () => {
             <Grid item xs={12} lg={6}>
                 <TableMaterial
                     columns={[
-                      { title: 'Categoría', render: ({ category }) => category.name },
-                      { title: 'Real', render: ({ amount }) => format.euro(amount) },
-                      { title: 'Estimado', render: ({ amount }) => format.euro(amount) }
+                      { title: 'Categoría', render: ({ name }) => name },
+                      { title: 'Real', render: ({ budgets }) => format.euro(budgets[0].real) },
+                      { title: 'Estimado', render: ({ budgets }) => format.euro(budgets[0].amount) }
                     ]}
                     data={incomes}
                     title={'Ingresos'}
