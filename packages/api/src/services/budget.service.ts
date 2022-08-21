@@ -1,5 +1,5 @@
 import { CategoryModel, TransactionModel, TransactionType, mongoose } from '@soker90/finper-models'
-import { calcBudgetByMonths } from './utils'
+import { calcBudgetByMonths, getTransactionsSumByMonth } from './utils'
 
 interface CategoriesWithBudgets {
     _id: mongoose.ObjectId,
@@ -95,30 +95,7 @@ export default class BudgetService implements IBudgetService {
     year,
     month
   }: { user: string; year: number; month: number }): Promise<any> {
-    const transactionsSum = await TransactionModel.aggregate([
-      {
-        $match: {
-          user
-          // date: {
-          //   $gte: new Date(year, month || 0).getTime(),
-          //   $lt: new Date(Number(month ? year : year + 1), Number(month ? month + 1 : 0)).getTime()
-          // }
-        }
-      },
-      {
-        $group: {
-          _id: {
-            month: {
-              $month: { date: { $toDate: '$date' }, timezone: 'Europe/Madrid' }
-            },
-            category: '$category'
-          },
-          total: { $sum: '$amount' }
-        }
-      },
-      { $sort: { '_id.month': 1 } }
-    ])
-
+    const transactionsSum = await getTransactionsSumByMonth({ user, year, month })
     const categoriesWithBudgets = await this.getCategoriesWithBudgets({ user, year, month })
 
     const expenses = this.getBudgetsByType({

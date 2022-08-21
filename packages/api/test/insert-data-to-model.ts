@@ -14,6 +14,7 @@ import {
   MAX_USERNAME_LENGTH, MIN_LENGTH_USERNAME,
   MIN_PASSWORD_LENGTH
 } from '../src/config/inputs'
+import { generateUsername } from './generate-values'
 
 export async function insertCredentials (params: Record<string, string | boolean> = {}): Promise<IUser> {
   const parsedParams: Record<string, string | boolean> = {}
@@ -43,12 +44,15 @@ export const insertAccount = async (params: { name?: string, bank?: string, bala
   })
 }
 
-export const insertCategory = async (params: Record<string, string> = {}): Promise<ICategory> => {
+export const insertCategory = async (params: Record<string, any> = {}): Promise<any> => {
+  const user = params.user ?? generateUsername()
+  const parent = params.root ? false : (await insertCategory({ user, root: true, type: params.type }))._id
+
   return CategoryModel.create({
     name: params.name ?? faker.commerce.department(),
-    type: params.type ?? Math.random() > 0.5 ? TransactionType.Expense : TransactionType.Income,
-    root: params.root ?? Math.random() > 0.5,
-    user: params.user ?? faker.internet.userName().slice(MIN_LENGTH_USERNAME, MAX_USERNAME_LENGTH).toLowerCase()
+    type: params.type ?? (Math.random() > 0.5 ? TransactionType.Expense : TransactionType.Income),
+    ...(parent && { parent }),
+    user
   })
 }
 
@@ -85,24 +89,15 @@ export const insertDebt = async (params: Record<string, string | number> = {}): 
   })
 }
 
-const generateCategories = () => Promise.all(Array.from({
-  length: faker.datatype.number({ min: 1, max: 5 })
-},
-() => insertCategory()
-))
-
-export const insertBudget = async (params: Record<string, string | number> = {}): Promise<IBudget> => {
-  let budget: any[] = []
-  await generateCategories().then(categories => {
-    budget = categories.map(category => ({
-      category,
-      amount: faker.datatype.number()
-    }))
-  })
-  return BudgetModel.create({
+export const insertBudget = async (params: Record<string, any> = {}): Promise<any> => {
+  const user = (params.user ?? generateUsername()) as string
+  const budget = await BudgetModel.create({
     year: params.year ?? faker.date.past().getFullYear(),
     month: params.month ?? faker.date.past().getMonth(),
-    budget: params.budget ?? budget,
-    user: params.user ?? faker.internet.userName().slice(MIN_LENGTH_USERNAME, MAX_USERNAME_LENGTH).toLowerCase()
+    category: params.category ?? (await insertCategory({ user, ...(params.type && { type: params.type }) }))._id,
+    amount: faker.datatype.number(),
+    user
   })
+
+  return budget.populate('category')
 }

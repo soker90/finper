@@ -8,11 +8,8 @@ const testDatabase = require('../test-db')(mongoose)
 const testBudget = (expected: IBudget, received: IBudget) => {
   expect(expected.year).toBe(received.year)
   expect(expected.month).toBe(received.month)
-  expected.budget.forEach((expectedCategory, index) => {
-    const receivedCategory = received.budget[index]
-    expect(expectedCategory.category.toString()).toBe(receivedCategory.category.toString())
-    expect(expectedCategory.amount).toBe(receivedCategory.amount)
-  })
+  expect(expected.category.toString()).toBe(received.category.toString())
+  expect(expected.amount).toBe(received.amount)
   expect(expected.user).toBe(received.user)
 }
 
