@@ -6,6 +6,8 @@ import {
   EuroOutlined
 } from '@ant-design/icons'
 
+const date = new Date()
+
 const dashboard = {
   id: 'group-dashboard',
   title: 'Navegación',
@@ -24,6 +26,14 @@ const dashboard = {
       title: 'Movimientos',
       type: 'item',
       url: '/movimientos',
+      icon: CreditCardOutlined,
+      breadcrumbs: true
+    },
+    {
+      id: 'budgets',
+      title: 'Presupuesto',
+      type: 'item',
+      url: `/presupuestos/${date.getFullYear()}/${date.getMonth()}`,
       icon: CreditCardOutlined,
       breadcrumbs: true
     },
