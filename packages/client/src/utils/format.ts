@@ -1,3 +1,5 @@
+import { capitalize } from 'utils/index'
+
 export const euro = (cell: number, options = {}) => {
   const n = new Intl.NumberFormat('es-ES', {
     style: 'currency',
@@ -18,4 +20,16 @@ export const dateShort = (cell: number) => {
     month: 'short',
     day: 'numeric'
   })
+}
+
+export const monthToNumber = (month?: number | string): string => {
+  if (!month) return ''
+  const date = new Date()
+  date.setMonth(+month)
+
+  const monthString = date.toLocaleString('es-ES', {
+    month: 'long'
+  })
+
+  return capitalize(monthString)
 }
