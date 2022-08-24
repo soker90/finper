@@ -2,7 +2,7 @@ import Joi from 'joi'
 import Boom from '@hapi/boom'
 import { IBudget } from '@soker90/finper-models'
 import { validateCategoryExist } from '../category'
-import {ERROR_MESSAGE} from "../../i18n";
+import { ERROR_MESSAGE } from '../../i18n'
 
 export const validateBudgetEditParams = async ({
   params,
