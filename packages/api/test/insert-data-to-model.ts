@@ -44,7 +44,7 @@ export const insertAccount = async (params: { name?: string, bank?: string, bala
   })
 }
 
-export const insertCategory = async (params: Record<string, any> = {}): Promise<ICategory> => {
+export const insertCategory = async (params: Record<string, any> = {}): Promise<any> => {
   const user = params.user ?? generateUsername()
   const parent = params.parent ?? params.root ? false : (await insertCategory({ user, root: true, type: params.type }))._id
 
