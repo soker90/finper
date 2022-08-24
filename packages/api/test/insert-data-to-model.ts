@@ -3,7 +3,7 @@ import {
   AccountModel,
   BudgetModel,
   CategoryModel, DebtModel, DebtType,
-  IAccount, ICategory,
+  IAccount,
   IDebt, IStore,
   IUser, StoreModel, TransactionModel,
   TransactionType,
@@ -46,7 +46,13 @@ export const insertAccount = async (params: { name?: string, bank?: string, bala
 
 export const insertCategory = async (params: Record<string, any> = {}): Promise<any> => {
   const user = params.user ?? generateUsername()
-  const parent = params.parent ?? params.root ? false : (await insertCategory({ user, root: true, type: params.type }))._id
+  const parent = params.parent ?? params.root
+    ? false
+    : (await insertCategory({
+        user,
+        root: true,
+        type: params.type
+      }))._id
 
   const category = await CategoryModel.create({
     name: params.name ?? faker.commerce.department(),
