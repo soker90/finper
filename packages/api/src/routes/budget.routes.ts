@@ -24,5 +24,11 @@ export class BudgetRoutes {
       authMiddleware,
       this.budgetController.budgets.bind(this.budgetController)
     )
+
+    this.router.patch(
+      '/:category/:year/:month',
+      authMiddleware,
+      this.budgetController.edit.bind(this.budgetController)
+    )
   }
 }

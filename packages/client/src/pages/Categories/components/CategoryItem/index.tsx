@@ -36,7 +36,6 @@ const CategoryItem: FC<CategoryItemProps> = ({ category, forceExpand, cancelCrea
             <Paper component='li'>
                 <ItemContent onClick={() => setExpand(toggle => !toggle)}>
                     <div className={styles.logoName}>
-                        {/* <BankIcon name={category.bank} className={styles.bankLogo} /> */}
                         <span>{category.name}</span>
                         {!category.parent && <Chip
                             label='Principal'

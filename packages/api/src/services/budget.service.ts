@@ -1,4 +1,4 @@
-import { CategoryModel, TransactionType, mongoose } from '@soker90/finper-models'
+import { CategoryModel, TransactionType, mongoose, IBudget, BudgetModel } from '@soker90/finper-models'
 import { calcBudgetByMonths, getTransactionsSumByMonth } from './utils'
 
 interface CategoriesWithBudgets {
@@ -18,6 +18,8 @@ export interface IBudgetService {
       year,
       month
     }: { user: string; year: number; month: number }): Promise<any>
+
+    editBudget({ category, year, month, user, amount }: IBudget): Promise<IBudget>
 }
 
 export default class BudgetService implements IBudgetService {
@@ -116,5 +118,12 @@ export default class BudgetService implements IBudgetService {
       expenses,
       incomes
     }
+  }
+
+  async editBudget ({ category, year, month, user, amount }: IBudget): Promise<IBudget> {
+    return BudgetModel.findOneAndUpdate({ category, year, month, user }, { amount }, {
+      new: true,
+      upsert: true
+    }) as unknown as IBudget
   }
 }

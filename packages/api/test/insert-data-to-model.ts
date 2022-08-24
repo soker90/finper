@@ -3,7 +3,7 @@ import {
   AccountModel,
   BudgetModel,
   CategoryModel, DebtModel, DebtType,
-  IAccount,
+  IAccount, ICategory,
   IDebt, IStore,
   IUser, StoreModel, TransactionModel,
   TransactionType,
@@ -44,7 +44,7 @@ export const insertAccount = async (params: { name?: string, bank?: string, bala
   })
 }
 
-export const insertCategory = async (params: Record<string, any> = {}): Promise<any> => {
+export const insertCategory = async (params: Record<string, any> = {}): Promise<ICategory> => {
   const user = params.user ?? generateUsername()
   const parent = params.parent ?? params.root ? false : (await insertCategory({ user, root: true, type: params.type }))._id
 

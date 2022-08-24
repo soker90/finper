@@ -3,7 +3,8 @@ import { NextFunction, Request, Response } from 'express'
 import '../auth/local-strategy-passport-handler'
 import { IBudgetService } from '../services/budget.service'
 import extractUser from '../helpers/extract-user'
-import { validateBudgetGet } from '../validators/budget'
+import { validateBudgetGet, validateBudgetEditParams } from '../validators/budget'
+import { RequestUser } from '../types'
 
 type IBudgetController = {
     loggerHandler: any,
@@ -29,6 +30,20 @@ export class BudgetController {
       .then(response => {
         res.send(response)
       }).catch(error => {
+        next(error)
+      })
+  }
+
+  public async edit (req: Request, res: Response, next: NextFunction): Promise<void> {
+    Promise.resolve(req as RequestUser)
+      .tap(({ params }) => this.logger.logInfo(`/edit - category: ${params.category}`))
+      .then(validateBudgetEditParams)
+      .then(this.budgetService.editBudget.bind(this.budgetService))
+      .tap(({ category }) => this.logger.logInfo(`Budget for category ${category} has been succesfully edited`))
+      .then((response) => {
+        res.send(response)
+      })
+      .catch((error) => {
         next(error)
       })
   }
