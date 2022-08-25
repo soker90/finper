@@ -3,7 +3,7 @@ import { NextFunction, Request, Response } from 'express'
 import '../auth/local-strategy-passport-handler'
 import { IBudgetService } from '../services/budget.service'
 import extractUser from '../helpers/extract-user'
-import { validateBudgetGet, validateBudgetEditParams } from '../validators/budget'
+import { validateBudgetGet, validateBudgetEditParams, validateBudgetCopy } from '../validators/budget'
 import { RequestUser } from '../types'
 
 type IBudgetController = {
@@ -40,6 +40,20 @@ export class BudgetController {
       .then(validateBudgetEditParams)
       .then(this.budgetService.editBudget.bind(this.budgetService))
       .tap(({ category }) => this.logger.logInfo(`Budget for category ${category} has been succesfully edited`))
+      .then((response) => {
+        res.send(response)
+      })
+      .catch((error) => {
+        next(error)
+      })
+  }
+
+  public async copy (req: Request, res: Response, next: NextFunction): Promise<void> {
+    Promise.resolve(req as RequestUser)
+      .tap(() => this.logger.logInfo('/copy - badget'))
+      .then(validateBudgetCopy)
+      .then(this.budgetService.copy.bind(this.budgetService))
+      .tap(() => this.logger.logInfo('Budget has been succesfully copied'))
       .then((response) => {
         res.send(response)
       })

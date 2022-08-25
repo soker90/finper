@@ -30,5 +30,11 @@ export class BudgetRoutes {
       authMiddleware,
       this.budgetController.edit.bind(this.budgetController)
     )
+
+    this.router.post(
+      '/',
+      authMiddleware,
+      this.budgetController.copy.bind(this.budgetController)
+    )
   }
 }
