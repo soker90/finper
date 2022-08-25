@@ -1,13 +1,20 @@
 import { Grid } from '@mui/material'
 import { TableMaterial } from '@soker90/react-mui-table'
 import { EditOutlined } from '@ant-design/icons'
+import { useState } from 'react'
 
 import { format } from 'utils/index'
+import ModalEdit from './ModalEdit'
 
 const BudgetTable = ({ budgets, title }: { budgets: any, title: string }) => {
+  const [show, setShow] = useState(false)
   const handleEdit = () => {
-
+    setShow(true)
   }
+  const handleCloseEdit = () => {
+    setShow(false)
+  }
+
   return (
         <Grid item xs={12} lg={6}>
             <TableMaterial
@@ -26,6 +33,7 @@ const BudgetTable = ({ budgets, title }: { budgets: any, title: string }) => {
                   }
                 ]}
             />
+            <ModalEdit onClose={handleCloseEdit} show={show}/>
         </Grid>
   )
 }
