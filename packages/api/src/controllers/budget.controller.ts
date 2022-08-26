@@ -55,7 +55,11 @@ export class BudgetController {
       .then(this.budgetService.copy.bind(this.budgetService))
       .tap(() => this.logger.logInfo('Budget has been succesfully copied'))
       .then((response) => {
-        res.send(response)
+        if (response === null) {
+          res.status(204).send()
+        } else {
+          res.status(201).send()
+        }
       })
       .catch((error) => {
         next(error)

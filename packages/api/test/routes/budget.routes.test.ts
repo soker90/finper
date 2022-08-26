@@ -243,4 +243,89 @@ describe('Budget', () => {
         })
     })
   })
+
+  describe('POST /', () => {
+    const path = '/api/budgets'
+    let token: string
+    const user = generateUsername()
+
+    beforeAll(async () => {
+      token = await requestLogin(server.app, { username: user })
+    })
+
+    afterEach(() => BudgetModel.deleteMany({}))
+
+    test('when token is not provided, it should response an error with status code 401', async () => {
+      await supertest(server.app).post(path).expect(401)
+    })
+
+    test.each(['month', 'year', 'monthOrigin', 'yearOrigin'])('when %s is not valid, it should response an error with status code 422', async (param: string) => {
+      const body = {
+        month: faker.datatype.number({ min: 0, max: 11 }),
+        year: faker.datatype.number({ min: 2000, max: 2100 }),
+        monthOrigin: faker.datatype.number({ min: 0, max: 11 }),
+        yearOrigin: faker.datatype.number({ min: 2000, max: 2100 }),
+        [param]: 'novalid'
+      }
+      await supertest(server.app).post(path).auth(token, { type: 'bearer' })
+        .send(body)
+        .expect(422)
+    })
+
+    test('when budget not exists, it should response with status code 204', async () => {
+      const body = {
+        month: faker.datatype.number({ min: 0, max: 11 }),
+        year: faker.datatype.number({ min: 2000, max: 2100 }),
+        monthOrigin: faker.datatype.number({ min: 0, max: 11 }),
+        yearOrigin: faker.datatype.number({ min: 2000, max: 2100 })
+      }
+      await supertest(server.app).post(path).auth(token, { type: 'bearer' })
+        .send(body)
+        .expect(204)
+    })
+
+    test('when has budgets, it should response with status code 201', async () => {
+      const monthOrigin = faker.datatype.number({ min: 0, max: 11 })
+      const yearOrigin = faker.datatype.number({ min: 2000, max: 2100 })
+      await insertBudget({ user, month: monthOrigin, year: yearOrigin })
+      const body = {
+        month: faker.datatype.number({ min: 0, max: 11 }),
+        year: faker.datatype.number({ min: 2000, max: 2100 }),
+        monthOrigin,
+        yearOrigin
+      }
+      await supertest(server.app).post(path).auth(token, { type: 'bearer' })
+        .send(body)
+        .expect(201)
+    })
+
+    // Devolver nuevos budget con populate de category?
+    // test('when has budgets, it should copy them', async () => {
+    //   const monthOrigin = faker.datatype.number({ min: 0, max: 11 })
+    //   const yearOrigin = faker.datatype.number({ min: 2000, max: 2100 })
+    //   const numBudgets = faker.datatype.number({ min: 1, max: 4 })
+    //   const oldBudgets = Array.from({ length: numBudgets }, () => insertBudget({
+    //     user,
+    //     month: monthOrigin,
+    //     year: yearOrigin
+    //   }))
+    //
+    //   await Promise.all(oldBudgets)
+    //
+    //   const body = {
+    //     month: faker.datatype.number({ min: 0, max: 11 }),
+    //     year: faker.datatype.number({ min: 2000, max: 2100 }),
+    //     monthOrigin,
+    //     yearOrigin
+    //   }
+    //   await supertest(server.app).post(path).auth(token, { type: 'bearer' }).send(body)
+    //
+    //   const newBudgets = await BudgetModel.find({ year: body.year, month: body.month, user })
+    //   expect(oldBudgets.length).toBe(newBudgets.length)
+    //   for (const budget of oldBudgets) {
+    //     const newBudget = newBudgets.find(newBudget => newBudget.month === budget.month )
+    //     expect(newBudget).toBe(3)
+    //   }
+    // })
+  })
 })

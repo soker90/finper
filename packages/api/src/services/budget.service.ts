@@ -21,7 +21,13 @@ export interface IBudgetService {
 
     editBudget({ category, year, month, user, amount }: IBudget): Promise<IBudget>
 
-    copy({ monthOrigin, yearOrigin, month, year, user }: { monthOrigin: number, yearOrigin: number, month: number, year: number, user: string }) : Promise<IBudget[]>
+    copy({
+      monthOrigin,
+      yearOrigin,
+      month,
+      year,
+      user
+    }: { monthOrigin: number, yearOrigin: number, month: number, year: number, user: string }): Promise<IBudget[] | null>
 }
 
 export default class BudgetService implements IBudgetService {
@@ -129,7 +135,13 @@ export default class BudgetService implements IBudgetService {
     }) as unknown as IBudget
   }
 
-  async copy ({ monthOrigin, yearOrigin, month, year, user }: { monthOrigin: number, yearOrigin: number, month: number, year: number, user: string }): Promise<IBudget[]> {
+  async copy ({
+    monthOrigin,
+    yearOrigin,
+    month,
+    year,
+    user
+  }: { monthOrigin: number, yearOrigin: number, month: number, year: number, user: string }): Promise<IBudget[] | null> {
     const budgets = await BudgetModel.find({ user, month: monthOrigin, year: yearOrigin })
     const copyBudgets = budgets.map(budget => ({
       year,
@@ -138,6 +150,11 @@ export default class BudgetService implements IBudgetService {
       amount: budget.amount,
       user
     }))
+
+    if (!copyBudgets.length) {
+      return null
+    }
+
     return BudgetModel.insertMany(copyBudgets)
   }
 }

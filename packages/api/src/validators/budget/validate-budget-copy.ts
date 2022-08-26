@@ -10,9 +10,9 @@ export const validateBudgetCopy = async ({
 }) => {
   const schema = Joi.object({
     year: Joi.number().min(2000).max(2100).required(),
-    month: Joi.number().min(2000).max(2100).required(),
+    month: Joi.number().min(0).max(11).required(),
     yearOrigin: Joi.number().min(2000).max(2100).required(),
-    monthOrigin: Joi.number().min(2000).max(2100).required()
+    monthOrigin: Joi.number().min(0).max(11).required()
   })
 
   const { error, value } = schema.validate(body)
