@@ -9,7 +9,9 @@ interface Props {
     errorText: string
     type?: string
     inputProps?: InputBaseComponentProps
-    size?: number
+    size?: number,
+    defaultValue?: number | string
+    autoFocus?: boolean
 }
 
 const InputForm = ({ id, label, errorText, size = 4, ...others }: Props, ref: Ref<HTMLInputElement>) => (

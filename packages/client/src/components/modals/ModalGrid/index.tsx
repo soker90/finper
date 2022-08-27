@@ -1,3 +1,4 @@
+import { ReactNode } from 'react'
 import {
   Modal,
   Card,
@@ -8,7 +9,6 @@ import {
   Divider,
   Button
 } from '@mui/material'
-import { useState } from 'react'
 
 interface Props {
     show: boolean
@@ -35,7 +35,7 @@ const ModalGrid = ({
         </>
   )
 
-  const _renderButton = ({ value, ...rest }: any, index: number): Button => (
+  const _renderButton = ({ value, ...rest }: any, index: number): ReactNode => (
         <Button key={index} {...rest}>
             {value}
         </Button>
@@ -43,26 +43,24 @@ const ModalGrid = ({
 
   return (
         <Modal
-            onClose={close || onClose}
+            onClose={onClose}
             open={show}
         >
             <Card>
-                <form>
-                    <CardHeader title={title}/>
-                    <Divider/>
-                    <CardContent>
-                        <Grid
-                            container
-                            spacing={3}
-                        >
-                            {children}
-                        </Grid>
-                    </CardContent>
-                    <Divider/>
-                    <CardActions>
-                        {actions?.map(_renderButton) || _renderButtons()}
-                    </CardActions>
-                </form>
+                <CardHeader title={title}/>
+                <Divider/>
+                <CardContent>
+                    <Grid
+                        container
+                        spacing={3}
+                    >
+                        {children}
+                    </Grid>
+                </CardContent>
+                <Divider/>
+                <CardActions>
+                    {actions?.map(_renderButton) || _renderButtons()}
+                </CardActions>
             </Card>
         </Modal>
   )
