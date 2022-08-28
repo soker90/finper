@@ -1,5 +1,5 @@
 import axios from 'axios'
-import {ACCOUNTS, BUDGETS, CATEGORIES, TRANSACTIONS} from 'constants/api-paths'
+import { ACCOUNTS, BUDGETS, CATEGORIES, TRANSACTIONS } from 'constants/api-paths'
 import { Category, Transaction, TransactionType, Account } from 'types'
 
 export const editAccount = (id: string, params: { name?: string, bank?: string, balance?: number, isActive?: boolean }): Promise<{ data?: Account, error?: string | undefined }> => {
@@ -18,8 +18,17 @@ export const addCategory = (params: { name?: string, type: string, balance?: num
   return axios.post(CATEGORIES, params).then((data: any) => ({ data: data as Category })).catch((error) => ({ error: error.message }))
 }
 
-export const copyBudgets = async (params: {month: number, year: number, monthOrigin: number, yearOrigin: number}): Promise<void> => {
+export const copyBudgets = async (params: { month: number, year: number, monthOrigin: number, yearOrigin: number }): Promise<void> => {
   await axios.post(BUDGETS, params).catch((error) => ({ error: error.message }))
+}
+
+export const editBudget = async ({
+  category,
+  year,
+  month,
+  amount
+}: { category: number, year: number, month: number, amount: number }): Promise<any> => {
+  return axios.patch(`${BUDGETS}/${category}/${year}/${month}`, { amount }).catch((error) => ({ error: error.message }))
 }
 
 export const deleteCategory = (id: string): Promise<{ data?: Category, error?: string | undefined }> => {
