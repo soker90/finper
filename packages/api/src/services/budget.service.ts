@@ -76,7 +76,7 @@ export default class BudgetService implements IBudgetService {
               in: {
                 month: '$$budgets.month',
                 amount: '$$budgets.amount',
-                budgetId: '$$budgets._id'
+                year: '$$budgets.year'
               }
             }
           }

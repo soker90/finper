@@ -1,11 +1,12 @@
 export interface BudgetItem {
     amount: number,
     real: number,
-    budgetId: string,
+    month: number,
+    year: number
 }
 
 export interface Budget {
-    _id: string,
+    id: string,
     name: string;
-    budget: BudgetItem[];
+    budgets: BudgetItem[];
 }

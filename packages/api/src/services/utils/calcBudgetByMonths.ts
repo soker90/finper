@@ -4,10 +4,11 @@ const getBudgetIndex = (monthValue: number, requestMonth?: number) => requestMon
 export const calcBudgetByMonths = ({ category, transactionsSum, month }: any) => {
   const budgets = month ? [{ amount: 0, real: 0 }] : Array.from({ length: 12 }, () => ({ amount: 0, real: 0 } as any))
 
-  category.budgets.forEach(({ month: monthCategory, amount, budgetId }: any) => {
+  category.budgets.forEach(({ month: monthCategory, amount, year }: any) => {
     const budgetIndex = getBudgetIndex(monthCategory, month)
     budgets[budgetIndex].amount = amount
-    budgets[budgetIndex].budgetId = budgetId
+    budgets[budgetIndex].month = monthCategory
+    budgets[budgetIndex].year = year
   })
 
   transactionsSum.filter(({ _id }: any) => _id.category.toString() === category._id.toString()).forEach(({

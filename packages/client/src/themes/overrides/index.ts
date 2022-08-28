@@ -1,12 +1,11 @@
-// third-party
 import { Theme } from '@mui/material'
 
-// project import
 import Badge from './Badge'
 import Button from './Button'
 import CardContent from './CardContent'
 import Checkbox from './Checkbox'
 import Chip from './Chip'
+import Dialog from './Dialog'
 import IconButton from './IconButton'
 import InputLabel from './InputLabel'
 import LinearProgress from './LinearProgress'
@@ -18,8 +17,6 @@ import TableCell from './TableCell'
 import Tabs from './Tabs'
 import Typography from './Typography'
 
-// ==============================|| OVERRIDES - MAIN ||============================== //
-
 export default function ComponentsOverrides (theme: Theme): any {
   return {
     ...Button(theme),
@@ -27,6 +24,7 @@ export default function ComponentsOverrides (theme: Theme): any {
     ...CardContent(),
     ...Checkbox(theme),
     ...Chip(theme),
+    ...Dialog(),
     ...IconButton(theme),
     ...InputLabel(theme),
     ...LinearProgress(),

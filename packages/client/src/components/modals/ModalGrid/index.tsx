@@ -28,7 +28,7 @@ const ModalGrid = ({
                 {action ? 'Cancelar' : 'Cerrar'}
             </Button>
             {action && (
-                <Button onClick={action} color='primary' variant='contained'>
+                <Button color='primary' variant='contained' type='submit'>
                     Aceptar
                 </Button>
             )}
@@ -46,22 +46,24 @@ const ModalGrid = ({
             onClose={onClose}
             open={show}
         >
-            <Card>
-                <CardHeader title={title}/>
-                <Divider/>
-                <CardContent>
-                    <Grid
-                        container
-                        spacing={3}
-                    >
-                        {children}
-                    </Grid>
-                </CardContent>
-                <Divider/>
-                <CardActions>
-                    {actions?.map(_renderButton) || _renderButtons()}
-                </CardActions>
-            </Card>
+            <form onSubmit={action}>
+                <Card>
+                    <CardHeader title={title}/>
+                    <Divider/>
+                    <CardContent>
+                        <Grid
+                            container
+                            spacing={3}
+                        >
+                            {children}
+                        </Grid>
+                    </CardContent>
+                    <Divider/>
+                    <CardActions>
+                        {actions?.map(_renderButton) || _renderButtons()}
+                    </CardActions>
+                </Card>
+            </form>
         </Modal>
   )
 }
