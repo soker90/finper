@@ -1,6 +1,6 @@
 import { Theme } from '@mui/material'
 
-export default function TableBody (theme: Theme) {
+export default function TableBody (theme: Theme | any) {
   const hoverStyle = {
     '&:hover': {
       backgroundColor: theme.palette.secondary.lighter
