@@ -10,7 +10,7 @@ export const getTransactionsSumByMonth = async ({
       $match: {
         user,
         date: {
-          $gte: new Date(year, month || 0).getTime(),
+          $gte: new Date(year, month || 0, 1).getTime(),
           $lt: new Date(Number(month ? year : year + 1), Number(month ? month + 1 : 0)).getTime()
         }
       }

@@ -11,8 +11,8 @@ const Budgets = () => {
   const { expenses, incomes } = useBudgets({ year, month })
 
   const expensesTotal = useMemo(() => {
-    const total = expenses?.[0]?.budgets?.reduce((sum, expense) => sum + expense.real, 0) ?? 0
-    const estimated = expenses?.[0]?.budgets?.reduce((sum, expense) => sum + expense.amount, 0) ?? 0
+    const total = expenses?.reduce((sum, { budgets }) => sum + budgets?.[0]?.real, 0) ?? 0
+    const estimated = expenses?.reduce((sum, { budgets }) => sum + budgets?.[0]?.amount, 0) ?? 0
     return {
       total,
       estimated,
@@ -22,8 +22,8 @@ const Budgets = () => {
   }, [expenses])
 
   const incomesTotal = useMemo(() => {
-    const total = incomes?.[0]?.budgets?.reduce((sum, expense) => sum + expense.real, 0) ?? 0
-    const estimated = incomes?.[0]?.budgets?.reduce((sum, expense) => sum + expense.amount, 0) ?? 0
+    const total = incomes?.reduce((sum, { budgets }) => sum + budgets?.[0]?.real, 0) ?? 0
+    const estimated = incomes?.reduce((sum, { budgets }) => sum + budgets?.[0]?.amount, 0) ?? 0
     return {
       total,
       estimated,
