@@ -1,10 +1,10 @@
 import useSWR from 'swr'
 import { BUDGETS } from 'constants/api-paths'
 import { objectToParams } from 'utils/objectToParams'
-import { BudgetItem } from 'types/budget'
+import { Budget } from 'types/budget'
 
 export const useBudgets = (filters: { year?: string, month?: string }): {
-    expenses: BudgetItem[], incomes: BudgetItem[], isLoading: boolean, error: any,
+    expenses: Budget[], incomes: Budget[], isLoading: boolean, error: any,
 } => {
   const { data, error } = useSWR(`${BUDGETS}${objectToParams(filters)}`)
 

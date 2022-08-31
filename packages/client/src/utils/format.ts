@@ -11,6 +11,16 @@ export const euro = (cell: number, options = {}) => {
   return n.format(cell)
 }
 
+export const number = (cell: number, options = {}) => {
+  const n = new Intl.NumberFormat('es-ES', {
+    currency: 'EUR',
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 2,
+    ...options
+  })
+  return n.format(cell)
+}
+
 export const dateShort = (cell: number) => {
   if (!cell) {
     return null
@@ -25,7 +35,7 @@ export const dateShort = (cell: number) => {
 export const monthToNumber = (month?: number | string): string => {
   if (!month) return ''
   const date = new Date()
-  date.setMonth(+month)
+  date.setMonth(+month, 1)
 
   const monthString = date.toLocaleString('es-ES', {
     month: 'long'
