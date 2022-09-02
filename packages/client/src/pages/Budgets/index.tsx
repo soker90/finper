@@ -55,8 +55,8 @@ const Budgets = () => {
                                 estimated={incomesTotal.estimated - expensesTotal.estimated}
                                 percentage={balancePercentage} isPositive={balancePercentage <= 100}/>
                 </Grid>
-                <BudgetTable budgets={expenses} title={'Gastos'}/>
-                <BudgetTable budgets={incomes} title={'Ingresos'}/>
+                <BudgetTable budgets={expenses} title={'Gastos'} year={year} month={month}/>
+                <BudgetTable budgets={incomes} title={'Ingresos'} year={year} month={month}/>
             </Grid>
         </>
   )

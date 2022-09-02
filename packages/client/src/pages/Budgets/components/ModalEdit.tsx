@@ -4,7 +4,14 @@ import { editBudget } from 'services/apiService'
 import { mutate } from 'swr'
 import { BUDGETS } from 'constants/api-paths'
 
-const ModalEdit = ({ onClose, budget }: any) => {
+interface Props {
+    onClose: () => void
+    budget: { category: string, amount: number }
+    year: string
+    month: string
+}
+
+const ModalEdit = ({ onClose, budget, year, month }: Props) => {
   const { register, handleSubmit, formState: { errors } } = useForm({
     defaultValues: {
       amount: budget.amount
@@ -12,9 +19,9 @@ const ModalEdit = ({ onClose, budget }: any) => {
   })
 
   const onSubmit = handleSubmit(async (params) => {
-    const { error } = await editBudget({ ...budget, ...params })
+    const { error } = await editBudget({ category: budget.category, ...params, month, year })
     if (!error) {
-      mutate(`${BUDGETS}?year=${budget.year}&month=${budget.month}`)
+      mutate(`${BUDGETS}?year=${year}&month=${month}`)
       onClose()
     }
   })

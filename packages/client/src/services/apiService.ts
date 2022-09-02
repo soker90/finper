@@ -27,7 +27,7 @@ export const editBudget = async ({
   year,
   month,
   amount
-}: { category: number, year: number, month: number, amount: number }): Promise<any> => {
+}: { category: string, year: number | string, month: number | string, amount: number }): Promise<any> => {
   return axios.patch(`${BUDGETS}/${category}/${year}/${month}`, { amount }).catch((error) => ({ error: error.message }))
 }
 
