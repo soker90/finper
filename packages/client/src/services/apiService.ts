@@ -18,8 +18,8 @@ export const addCategory = (params: { name?: string, type: string, balance?: num
   return axios.post(CATEGORIES, params).then((data: any) => ({ data: data as Category })).catch((error) => ({ error: error.message }))
 }
 
-export const copyBudgets = async (params: { month: number, year: number, monthOrigin: number, yearOrigin: number }): Promise<void> => {
-  await axios.post(BUDGETS, params).catch((error) => ({ error: error.message }))
+export const copyBudgets = async (params: { month: number | string, year: number | string, monthOrigin: number, yearOrigin: number }): Promise<{ error?: string } | any> => {
+  return axios.post(BUDGETS, params).catch((error) => ({ error: error.message }))
 }
 
 export const editBudget = async ({

@@ -1,7 +1,26 @@
-// material-ui
-import { Theme, alpha } from '@mui/material'
+import { Theme } from '@emotion/react'
 
-// ==============================|| OVERRIDES - OUTLINED INPUT ||============================== //
+import getColors from 'utils/getColors'
+import getShadow from 'utils/getShadow'
+
+function getColor ({ variant, theme }: { variant: string, theme: Theme }) {
+  const colors = getColors(theme, variant)
+  const { light } = colors
+
+  const shadows = getShadow(theme, `${variant}`)
+
+  return {
+    '&:hover .MuiOutlinedInput-notchedOutline': {
+      borderColor: light
+    },
+    '&.Mui-focused': {
+      boxShadow: shadows,
+      '& .MuiOutlinedInput-notchedOutline': {
+        border: `1px solid ${light}`
+      }
+    }
+  }
+}
 
 export default function OutlinedInput (theme: Theme) {
   return {
@@ -11,28 +30,12 @@ export default function OutlinedInput (theme: Theme) {
           padding: '10.5px 14px 10.5px 12px'
         },
         notchedOutline: {
-          borderColor: theme.palette.grey[300]
+          borderColor: theme.palette.mode === 'dark' ? theme.palette.grey[200] : theme.palette.grey[300]
         },
         root: {
-          '&:hover .MuiOutlinedInput-notchedOutline': {
-            borderColor: theme.palette.primary.light
-          },
-          '&.Mui-focused': {
-            boxShadow: `0 0 0 2px ${alpha(theme.palette.primary.main, 0.2)}`,
-            '& .MuiOutlinedInput-notchedOutline': {
-              border: `1px solid ${theme.palette.primary.light}`
-            }
-          },
+          ...getColor({ variant: 'primary', theme }),
           '&.Mui-error': {
-            '&:hover .MuiOutlinedInput-notchedOutline': {
-              borderColor: theme.palette.error.light
-            },
-            '&.Mui-focused': {
-              boxShadow: `0 0 0 2px ${alpha(theme.palette.error.main, 0.2)}`,
-              '& .MuiOutlinedInput-notchedOutline': {
-                border: `1px solid ${theme.palette.error.light}`
-              }
-            }
+            ...getColor({ variant: 'error', theme })
           }
         },
         inputSizeSmall: {
@@ -40,7 +43,12 @@ export default function OutlinedInput (theme: Theme) {
         },
         inputMultiline: {
           padding: 0
-        }
+        },
+        colorSecondary: getColor({ variant: 'secondary', theme }),
+        colorError: getColor({ variant: 'error', theme }),
+        colorWarning: getColor({ variant: 'warning', theme }),
+        colorInfo: getColor({ variant: 'info', theme }),
+        colorSuccess: getColor({ variant: 'success', theme })
       }
     }
   }

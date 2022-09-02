@@ -1,7 +1,5 @@
 import { Theme } from '@mui/material'
 
-// ==============================|| OVERRIDES - ICON BUTTON ||============================== //
-
 export default function IconButton (theme: Theme) {
   return {
     MuiIconButton: {

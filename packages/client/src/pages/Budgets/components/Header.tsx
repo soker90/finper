@@ -1,10 +1,14 @@
+import { useMemo, useState } from 'react'
 import { Button, Grid, IconButton, Typography } from '@mui/material'
-import { InlineCenter } from 'components/index'
 import { Link } from 'react-router-dom'
 import { LeftOutlined, RightOutlined } from '@ant-design/icons'
+
+import { InlineCenter } from 'components/index'
 import { monthToNumber } from 'utils/format'
-import { useMemo } from 'react'
 import { getUrlMonth, isSameDate } from '../utils'
+import { copyBudgets } from 'services/apiService'
+import { mutate } from 'swr'
+import { getPreviousMonthYear } from 'utils'
 
 interface Props {
     month?: string
@@ -12,13 +16,20 @@ interface Props {
 }
 
 const Header = ({ month = '', year }: Props) => {
+  const [copyInProgress, setCopyInProgress] = useState(false)
   const urlToday = useMemo(() => {
     const now = new Date()
     return `/presupuestos/${now.getFullYear()}/${now.getMonth()}`
   }, [])
 
-  const handleCopy = () => {
-
+  const handleCopy = async () => {
+    setCopyInProgress(true)
+    const lastMonth = getPreviousMonthYear(month, year)
+    const { error } = await copyBudgets({ month, year, monthOrigin: lastMonth.month, yearOrigin: lastMonth.year })
+    if (!error) {
+      await mutate(getUrlMonth(year, parseInt(month)))
+    }
+    setCopyInProgress(false)
   }
 
   return (
@@ -41,7 +52,7 @@ const Header = ({ month = '', year }: Props) => {
                 </InlineCenter>
             </Grid>
             <Grid item>
-                <Button variant='outlined' onClick={handleCopy}>Copiar mes anterior </Button>
+                <Button variant='outlined' onClick={handleCopy} disabled={copyInProgress}>Copiar mes anterior </Button>
             </Grid>
         </Grid>
   )

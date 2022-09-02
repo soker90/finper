@@ -16,6 +16,10 @@ declare module '@emotion/react' {
         grey: Color
         primary: PaletteColor
         error: PaletteColor
+        secondary: PaletteColor
+        warning: PaletteColor
+        info: PaletteColor
+        success: PaletteColor
     }
 
     export interface Theme extends MaterialUITheme {
