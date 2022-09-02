@@ -24,8 +24,8 @@ const Header = ({ month = '', year }: Props) => {
 
   const handleCopy = async () => {
     setCopyInProgress(true)
-    const lastMonth = getPreviousMonthYear(month, year)
-    const { error } = await copyBudgets({ month, year, monthOrigin: lastMonth.month, yearOrigin: lastMonth.year })
+    const lastMonth = getPreviousMonthYear(month, year as string)
+    const { error } = await copyBudgets({ month, year: year as string, monthOrigin: lastMonth.month, yearOrigin: lastMonth.year })
     if (!error) {
       await mutate(getUrlMonth(year, parseInt(month)))
     }

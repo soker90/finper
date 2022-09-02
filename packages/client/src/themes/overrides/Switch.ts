@@ -34,13 +34,13 @@ function switchStyle (theme: Theme, size: string) {
   }
 }
 
-export default function Switch (theme) {
+export default function Switch (theme: Theme) {
   return {
     MuiSwitch: {
       styleOverrides: {
         track: {
           opacity: 1,
-          backgroundColor: theme.palette.secondary[400],
+          backgroundColor: (theme.palette.secondary as any)[400],
           boxSizing: 'border-box'
         },
         thumb: {
