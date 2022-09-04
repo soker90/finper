@@ -129,7 +129,7 @@ export default class BudgetService implements IBudgetService {
   }
 
   async editBudget ({ category, year, month, user, amount }: IBudget): Promise<IBudget> {
-    return BudgetModel.findOneAndUpdate({ category, year, month, user }, { amount }, {
+    return await BudgetModel.findOneAndUpdate({ category, year, month, user }, { amount }, {
       new: true,
       upsert: true
     }) as unknown as IBudget
