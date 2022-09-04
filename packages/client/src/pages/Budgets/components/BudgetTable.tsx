@@ -1,13 +1,25 @@
 import { Grid } from '@mui/material'
 import { TableMaterial } from '@soker90/react-mui-table'
 import { EditOutlined } from '@ant-design/icons'
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 
 import { format } from 'utils/index'
 import ModalEdit from './ModalEdit'
 import { Budget } from 'types/budget'
 
 const BudgetTable = ({ budgets, title, year, month }: { budgets: any, title: string, year: string, month: string }) => {
+  const orderBudgets = useMemo(() => {
+    return [...budgets].sort((a: Budget, b: Budget) => {
+      if (a.name < b.name) {
+        return -1
+      }
+      if (a.name > b.name) {
+        return 1
+      }
+      return 0
+    })
+  }, [budgets])
+
   const [selectedBudget, setSelectedBudget] = useState<{ category: string, amount: number } | null>(null)
   const handleEdit = (item: Budget) => {
     setSelectedBudget({
@@ -28,7 +40,7 @@ const BudgetTable = ({ budgets, title, year, month }: { budgets: any, title: str
                       { title: 'Real', render: ({ budgets }) => format.euro(budgets[0].real) },
                       { title: 'Estimado', render: ({ budgets }) => format.euro(budgets[0].amount) }
                     ]}
-                    data={budgets}
+                    data={orderBudgets}
                     title={title}
                     actions={[
                       {
