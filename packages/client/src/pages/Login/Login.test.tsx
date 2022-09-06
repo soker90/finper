@@ -8,10 +8,9 @@ import Login from './index'
 import { LoginUsernames } from '../../mock/handlers/auth/login'
 
 const user = userEvent.setup()
+let handleSubmit: any
 
 describe('Login', async () => {
-  let handleSubmit: any
-
   beforeEach(() => {
     handleSubmit = vi.fn()
     vi.mock('react-hook-form', () => ({

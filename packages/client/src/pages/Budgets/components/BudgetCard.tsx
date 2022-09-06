@@ -10,9 +10,10 @@ interface Props {
     percentage: number
     color?: string
     isPositive: boolean
+    testId?: string
 }
 
-const BudgetCard = ({ title, total, estimated, percentage, color, isPositive }: Props) => {
+const BudgetCard = ({ title, total, estimated, percentage, color, isPositive, testId }: Props) => {
   const isWin = total > estimated
   return (
         <MainCard contentSX={{ p: 2.25 }}>
@@ -22,7 +23,7 @@ const BudgetCard = ({ title, total, estimated, percentage, color, isPositive }: 
                 </Typography>
                 <Grid container alignItems="center">
                     <Grid item>
-                        <Typography variant="h4" color="inherit">
+                        <Typography variant="h4" color="inherit" data-testId={`total-${testId}`}>
                             {format.euro(total)}
                         </Typography>
                     </Grid>

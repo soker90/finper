@@ -46,7 +46,7 @@ const Header = ({ month = '', year }: Props) => {
                     </IconButton>
                     <Typography typography='h3'>{monthToNumber(month)} {year} </Typography>
                     <IconButton color="primary" aria-label='derecha' size='large' component={Link}
-                                to={getUrlMonth(year, parseInt(month) + 1)} disabled={!month}>
+                                to={getUrlMonth(year, parseInt(month) + 1)} disabled={!month} data-testid='right-arrow'>
                         <RightOutlined/>
                     </IconButton>
                 </InlineCenter>

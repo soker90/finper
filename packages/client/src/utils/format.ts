@@ -33,7 +33,7 @@ export const dateShort = (cell: number) => {
 }
 
 export const monthToNumber = (month?: number | string): string => {
-  if (!month) return ''
+  if (!month && month !== 0) return ''
   const date = new Date()
   date.setMonth(+month, 1)
 
