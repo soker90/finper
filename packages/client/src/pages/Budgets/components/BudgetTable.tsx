@@ -6,19 +6,15 @@ import { useMemo, useState } from 'react'
 import { format } from 'utils/index'
 import ModalEdit from './ModalEdit'
 import { Budget } from 'types/budget'
+import { sortByAmountAndName } from '../utils'
 
-const BudgetTable = ({ budgets, title, year, month }: { budgets: any, title: string, year: string, month: string }) => {
-  const orderBudgets = useMemo(() => {
-    return [...budgets].sort((a: Budget, b: Budget) => {
-      if (a.name < b.name) {
-        return -1
-      }
-      if (a.name > b.name) {
-        return 1
-      }
-      return 0
-    })
-  }, [budgets])
+const BudgetTable = ({
+  budgets,
+  title,
+  year,
+  month
+}: { budgets: Budget[], title: string, year: string, month: string }) => {
+  const orderBudgets = useMemo(() => [...budgets].sort(sortByAmountAndName), [budgets])
 
   const [selectedBudget, setSelectedBudget] = useState<{ category: string, amount: number } | null>(null)
   const handleEdit = (item: Budget) => {
