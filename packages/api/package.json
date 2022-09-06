@@ -34,7 +34,7 @@
   },
   "dependencies": {
     "@hapi/boom": "^10.0.0",
-    "@soker90/finper-models": "^0.0.12",
+    "@soker90/finper-models": "^1.1.0",
     "bcrypt": "^5.0.1",
     "bluebird": "^3.7.2",
     "compression": "^1.7.3",
@@ -48,7 +48,7 @@
     "passport-jwt": "^4.0.0",
     "passport-local": "^1.0.0",
     "ts-node": "^10.9.1",
-    "uuid": "^8.3.2",
+    "uuid": "^9.0.0",
     "winston": "^3.8.1",
     "winston-loki": "^6.0.5",
     "winston-transport": "^4.5.0"
@@ -62,7 +62,7 @@
     "@types/compression": "^1.7.2",
     "@types/cors": "^2.8.12",
     "@types/express": "^4.17.13",
-    "@types/jest": "^28.1.5",
+    "@types/jest": "^29.0.0",
     "@types/morgan": "^1.9.3",
     "@types/node": "^18.0.4",
     "@types/passport": "^1.0.8",
