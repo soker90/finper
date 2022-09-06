@@ -34,37 +34,37 @@ exports[`Debts > renders without crashing 1`] = `
             class="MuiTable-root css-d7ymjm-MuiTable-root"
           >
             <thead
-              class="MuiTableHead-root css-1dtzcc9-MuiTableHead-root"
+              class="MuiTableHead-root css-110l8om-MuiTableHead-root"
             >
               <tr
-                class="MuiTableRow-root MuiTableRow-head css-nmu7bk-MuiTableRow-root"
+                class="MuiTableRow-root MuiTableRow-head css-1j77n0n-MuiTableRow-root"
               >
                 <th
-                  class="MuiTableCell-root MuiTableCell-head MuiTableCell-sizeMedium css-15kh76s-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-head MuiTableCell-sizeMedium css-tvar7v-MuiTableCell-root"
                   scope="col"
                 >
                   De
                 </th>
                 <th
-                  class="MuiTableCell-root MuiTableCell-head MuiTableCell-sizeMedium css-15kh76s-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-head MuiTableCell-sizeMedium css-tvar7v-MuiTableCell-root"
                   scope="col"
                 >
                   Fecha
                 </th>
                 <th
-                  class="MuiTableCell-root MuiTableCell-head MuiTableCell-sizeMedium css-15kh76s-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-head MuiTableCell-sizeMedium css-tvar7v-MuiTableCell-root"
                   scope="col"
                 >
                   Cantidad
                 </th>
                 <th
-                  class="MuiTableCell-root MuiTableCell-head MuiTableCell-sizeMedium css-15kh76s-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-head MuiTableCell-sizeMedium css-tvar7v-MuiTableCell-root"
                   scope="col"
                 >
                   Concepto
                 </th>
                 <th
-                  class="MuiTableCell-root MuiTableCell-head MuiTableCell-sizeMedium css-15kh76s-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-head MuiTableCell-sizeMedium css-tvar7v-MuiTableCell-root"
                   scope="col"
                 >
                   F. Pago
@@ -72,7 +72,7 @@ exports[`Debts > renders without crashing 1`] = `
               </tr>
             </thead>
             <tbody
-              class="MuiTableBody-root css-apqrd9-MuiTableBody-root"
+              class="MuiTableBody-root css-1geald0-MuiTableBody-root"
             />
           </table>
           <div
@@ -113,37 +113,37 @@ exports[`Debts > renders without crashing 1`] = `
             class="MuiTable-root css-d7ymjm-MuiTable-root"
           >
             <thead
-              class="MuiTableHead-root css-1dtzcc9-MuiTableHead-root"
+              class="MuiTableHead-root css-110l8om-MuiTableHead-root"
             >
               <tr
-                class="MuiTableRow-root MuiTableRow-head css-nmu7bk-MuiTableRow-root"
+                class="MuiTableRow-root MuiTableRow-head css-1j77n0n-MuiTableRow-root"
               >
                 <th
-                  class="MuiTableCell-root MuiTableCell-head MuiTableCell-sizeMedium css-15kh76s-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-head MuiTableCell-sizeMedium css-tvar7v-MuiTableCell-root"
                   scope="col"
                 >
                   A
                 </th>
                 <th
-                  class="MuiTableCell-root MuiTableCell-head MuiTableCell-sizeMedium css-15kh76s-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-head MuiTableCell-sizeMedium css-tvar7v-MuiTableCell-root"
                   scope="col"
                 >
                   Fecha
                 </th>
                 <th
-                  class="MuiTableCell-root MuiTableCell-head MuiTableCell-sizeMedium css-15kh76s-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-head MuiTableCell-sizeMedium css-tvar7v-MuiTableCell-root"
                   scope="col"
                 >
                   Cantidad
                 </th>
                 <th
-                  class="MuiTableCell-root MuiTableCell-head MuiTableCell-sizeMedium css-15kh76s-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-head MuiTableCell-sizeMedium css-tvar7v-MuiTableCell-root"
                   scope="col"
                 >
                   Concepto
                 </th>
                 <th
-                  class="MuiTableCell-root MuiTableCell-head MuiTableCell-sizeMedium css-15kh76s-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-head MuiTableCell-sizeMedium css-tvar7v-MuiTableCell-root"
                   scope="col"
                 >
                   F. Pago
@@ -151,7 +151,7 @@ exports[`Debts > renders without crashing 1`] = `
               </tr>
             </thead>
             <tbody
-              class="MuiTableBody-root css-apqrd9-MuiTableBody-root"
+              class="MuiTableBody-root css-1geald0-MuiTableBody-root"
             />
           </table>
           <div

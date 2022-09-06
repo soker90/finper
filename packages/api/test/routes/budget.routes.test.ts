@@ -61,7 +61,6 @@ describe('Budget', () => {
       expect(budgetResponse.name).toBe(budgetValid.category.name)
       months.forEach(month => {
         expect(budgetResponse.budgets[month].amount).toBe(budgetValid.amount)
-        expect(budgetResponse.budgets[month].budgetId).toBe(budgetValid._id.toString())
         expect(budgetResponse.budgets[month].real).toBe(real)
       })
     }
