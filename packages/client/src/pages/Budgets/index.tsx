@@ -28,7 +28,7 @@ const Budgets = () => {
       total,
       estimated,
       percentage: (total / estimated) * 100,
-      isPositive: total <= estimated
+      isPositive: total >= estimated
     }
   }, [incomes])
 
@@ -53,7 +53,7 @@ const Budgets = () => {
                 <Grid item xs={12} md={4}>
                     <BudgetCard title='Balance' total={incomesTotal.total - expensesTotal.total}
                                 estimated={incomesTotal.estimated - expensesTotal.estimated}
-                                percentage={balancePercentage} isPositive={balancePercentage <= 100}/>
+                                percentage={balancePercentage} isPositive={balancePercentage >= 100}/>
                 </Grid>
 
                 {year &&
