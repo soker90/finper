@@ -21,7 +21,7 @@ export const budgetsHandlers = [
     console.log(req.url)
     return res(
       ctx.status(200),
-      ctx.json(req.url) // (month === '8' ? BUDGETS_LIST : BUDGETS_LIST_EMPTY)
+      ctx.json(month === '8' ? BUDGETS_LIST : BUDGETS_LIST_EMPTY)
     )
   })
 ]
