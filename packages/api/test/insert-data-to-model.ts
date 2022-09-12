@@ -1,9 +1,10 @@
 import { faker } from '@faker-js/faker'
 import {
   AccountModel,
+  BudgetModel,
   CategoryModel, DebtModel, DebtType,
   IAccount,
-  ICategory, IDebt, IStore,
+  IDebt, IStore,
   IUser, StoreModel, TransactionModel,
   TransactionType,
   UserModel
@@ -13,6 +14,7 @@ import {
   MAX_USERNAME_LENGTH, MIN_LENGTH_USERNAME,
   MIN_PASSWORD_LENGTH
 } from '../src/config/inputs'
+import { generateUsername } from './generate-values'
 
 export async function insertCredentials (params: Record<string, string | boolean> = {}): Promise<IUser> {
   const parsedParams: Record<string, string | boolean> = {}
@@ -42,13 +44,24 @@ export const insertAccount = async (params: { name?: string, bank?: string, bala
   })
 }
 
-export const insertCategory = async (params: Record<string, string> = {}): Promise<ICategory> => {
-  return CategoryModel.create({
+export const insertCategory = async (params: Record<string, any> = {}): Promise<any> => {
+  const user = params.user ?? generateUsername()
+  const parent = params.parent ?? params.root
+    ? false
+    : (await insertCategory({
+        user,
+        root: true,
+        type: params.type
+      }))._id
+
+  const category = await CategoryModel.create({
     name: params.name ?? faker.commerce.department(),
-    type: params.type ?? Math.random() > 0.5 ? TransactionType.Expense : TransactionType.Income,
-    root: params.root ?? Math.random() > 0.5,
-    user: params.user ?? faker.internet.userName().slice(MIN_LENGTH_USERNAME, MAX_USERNAME_LENGTH).toLowerCase()
+    type: params.type ?? (Math.random() > 0.5 ? TransactionType.Expense : TransactionType.Income),
+    ...(parent && { parent }),
+    user
   })
+
+  return category.populate('parent')
 }
 
 export const insertStore = async (params: Record<string, string> = {}): Promise<IStore> => {
@@ -82,4 +95,17 @@ export const insertDebt = async (params: Record<string, string | number> = {}): 
     type: params.type ?? (Math.random() > 0.5 ? DebtType.TO : DebtType.FROM),
     user: params.user ?? faker.internet.userName().slice(MIN_LENGTH_USERNAME, MAX_USERNAME_LENGTH).toLowerCase()
   })
+}
+
+export const insertBudget = async (params: Record<string, any> = {}): Promise<any> => {
+  const user = (params.user ?? generateUsername()) as string
+  const budget = await BudgetModel.create({
+    year: params.year ?? faker.date.past().getFullYear(),
+    month: params.month ?? faker.date.past().getMonth(),
+    category: params.category ?? (await insertCategory({ user, ...(params.type && { type: params.type }) }))._id,
+    amount: faker.datatype.number(),
+    user
+  })
+
+  return budget.populate('category')
 }

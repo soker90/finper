@@ -62,9 +62,9 @@ const CategoryEdit = ({
   return (
         <form onSubmit={onSubmit}>
             <Grid container spacing={3}>
-                <InputForm id='name' label='Nombre' placeholder='Nombre de la cuenta'
+                <InputForm id='name' label='Nombre' placeholder='Nombre de la categoría'
                            error={!!errors.name} {...register('name', { required: true, minLength: 3 })}
-                           errorText='Introduce un nombre de cuenta válido' />
+                           errorText='Introduce un nombre de categoría válido' />
                 <SelectForm id='type' label='Tipo'
                             error={!!errors.type} {...register('type', { required: true })}
                             errorText='Introduce un tipo de gasto válido'

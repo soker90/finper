@@ -6,6 +6,7 @@ import mongoose from 'mongoose'
 import mongooseConnect from './mongoose-connect'
 
 import { IAccount, AccountModel } from './models/accounts'
+import { IBudget, BudgetModel } from './models/budgets'
 import { ICategory, CategoryModel } from './models/categories'
 import { IDebt, DebtModel, DebtType } from './models/debts'
 import { IStore, StoreModel } from './models/stores'
@@ -39,6 +40,7 @@ export {
   TransactionType,
 
   IAccount,
+  IBudget,
   ICategory,
   IDebt,
   IStore,
@@ -46,6 +48,7 @@ export {
   IUser,
 
   AccountModel,
+  BudgetModel,
   CategoryModel,
   DebtModel,
   StoreModel,

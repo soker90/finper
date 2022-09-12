@@ -14,5 +14,9 @@ export const ERROR_MESSAGE = {
   },
   DEBT: {
     NOT_FOUND: 'La deuda no existe'
+  },
+  BUDGET: {
+    INVALID_AMOUNT: 'La cantidad no es válida',
+    YEAR_MONTH_INVALID: 'El año y/o el mes no son válidos'
   }
 }

@@ -1,17 +1,16 @@
 import { useMemo } from 'react'
 
-// material-ui
 import { CssBaseline, StyledEngineProvider } from '@mui/material'
 import {
   createTheme,
   ThemeProvider
 } from '@mui/material/styles'
 
-// project import
 import Palette from './palette'
 import Typography from './typography'
 import CustomShadows from './shadows'
 import componentsOverride from './overrides'
+import { Theme } from '@emotion/react'
 
 // ==============================|| DEFAULT THEME - MAIN  ||============================== //
 
@@ -48,7 +47,7 @@ export default function ThemeCustomization ({ children }: { children: JSX.Elemen
   )
 
   const themes = createTheme(themeOptions)
-  themes.components = componentsOverride(themes)
+  themes.components = componentsOverride(themes as Theme)
 
   return (
         <StyledEngineProvider injectFirst>

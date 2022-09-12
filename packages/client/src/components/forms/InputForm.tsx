@@ -4,12 +4,14 @@ import { forwardRef, Ref } from 'react'
 interface Props {
     id: string
     label: string
-    placeholder: string
+    placeholder?: string
     error: boolean
     errorText: string
     type?: string
     inputProps?: InputBaseComponentProps
-    size?: number
+    size?: number,
+    defaultValue?: number | string
+    autoFocus?: boolean
 }
 
 const InputForm = ({ id, label, errorText, size = 4, ...others }: Props, ref: Ref<HTMLInputElement>) => (
