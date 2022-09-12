@@ -14,7 +14,7 @@ const BudgetTable = ({
   year,
   month
 }: { budgets: Budget[], title: string, year: string, month: string }) => {
-  const orderBudgets = useMemo(() => structuredClone(budgets).sort(sortByAmountAndName), [budgets])
+  const orderBudgets = useMemo(() => window.structuredClone(budgets).sort(sortByAmountAndName), [budgets])
 
   const [selectedBudget, setSelectedBudget] = useState<{ category: string, amount: number } | null>(null)
   const handleEdit = (item: Budget) => {
