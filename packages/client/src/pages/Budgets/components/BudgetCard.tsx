@@ -23,7 +23,7 @@ const BudgetCard = ({ title, total, estimated, percentage, color, isPositive, te
                 </Typography>
                 <Grid container alignItems="center">
                     <Grid item>
-                        <Typography variant="h4" color="inherit" data-testId={`total-${testId}`}>
+                        <Typography variant="h4" color="inherit" data-testid={`total-${testId}`}>
                             {format.euro(total)}
                         </Typography>
                     </Grid>
