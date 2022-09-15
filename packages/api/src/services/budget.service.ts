@@ -86,6 +86,29 @@ export default class BudgetService implements IBudgetService {
     ])
   }
 
+  private getTotalsByMonth = (categories: any[]): { name: string, id: string, budgets: { amount: number, real: number, month?: number, year?: number }[] } => {
+    const totals: { name: string, id: string, budgets: { amount: number, real: number }[] } = {
+      name: 'Totales',
+      id: 'totals',
+      budgets: []
+    }
+
+    categories.forEach(({ budgets }) => {
+      if (totals.budgets.length > 0) {
+        budgets.forEach((budget: { amount: number, real: number }, index: number) => {
+          totals.budgets[index].amount += budget.amount
+          totals.budgets[index].real += budget.real
+        })
+      } else {
+        budgets.forEach((budget: { amount: number, real: number }) => {
+          totals.budgets.push({ amount: budget.amount, real: budget.real })
+        })
+      }
+    })
+
+    return totals
+  }
+
   private getBudgetsByType ({
     filterType,
     categoriesWithBudgets,
@@ -93,11 +116,17 @@ export default class BudgetService implements IBudgetService {
     month
 
   }: { filterType: TransactionType; categoriesWithBudgets: CategoriesWithBudgets[]; transactionsSum: any; month?: number }): any {
-    return categoriesWithBudgets.filter(({ type }) => type === filterType).map(category => calcBudgetByMonths({
+    const categoriesByType = categoriesWithBudgets.filter(({ type }) => type === filterType).map(category => calcBudgetByMonths({
       category,
       transactionsSum,
       month
     }))
+
+    if (categoriesByType.length > 0) {
+      categoriesByType.push(this.getTotalsByMonth(categoriesByType))
+    }
+
+    return categoriesByType
   }
 
   public async getBudgets ({
