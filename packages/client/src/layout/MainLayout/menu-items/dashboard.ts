@@ -3,7 +3,9 @@ import {
   TeamOutlined,
   ShoppingCartOutlined,
   CreditCardOutlined,
-  EuroOutlined
+  EuroOutlined,
+  CalendarOutlined,
+  ProfileOutlined
 } from '@ant-design/icons'
 
 const date = new Date()
@@ -34,7 +36,15 @@ const dashboard = {
       title: 'Presupuesto',
       type: 'item',
       url: `/presupuestos/${date.getFullYear()}/${date.getMonth()}`,
-      icon: CreditCardOutlined,
+      icon: ProfileOutlined,
+      breadcrumbs: true
+    },
+    {
+      id: 'year',
+      title: 'Mi año',
+      type: 'item',
+      url: `/presupuestos/${date.getFullYear()}`,
+      icon: CalendarOutlined,
       breadcrumbs: true
     },
     {

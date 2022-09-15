@@ -5,10 +5,11 @@ import { Navigate } from 'react-router-dom'
 
 const Accounts = lazy(() => import('../pages/Accounts'))
 const Budgets = lazy(() => import('../pages/Budgets'))
+const Categories = lazy(() => import('../pages/Categories'))
 const DashboardDefault = lazy(() => import('../pages/Dashboard'))
 const Debts = lazy(() => import('../pages/Debts'))
-const Categories = lazy(() => import('../pages/Categories'))
 const Transactions = lazy(() => import('../pages/Transactions'))
+const Year = lazy(() => import('../pages/Year'))
 
 const MainRoutes = {
   path: '/',
@@ -46,6 +47,10 @@ const MainRoutes = {
     {
       path: 'presupuestos/:year/:month',
       element: <Budgets/>
+    },
+    {
+      path: 'presupuestos/:year',
+      element: <Year/>
     }
   ]
 }
