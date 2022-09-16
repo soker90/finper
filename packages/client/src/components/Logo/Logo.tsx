@@ -14,20 +14,12 @@ const Logo = (props: PropsWithoutRef<any>) => {
             {...props}
         >
             <path
-                d="m4.636 15.864 2.312-2.312.002-.002h4.35l-1.73 1.73-.447.447L7.35 17.5l.22.22 9.93 9.93L27.65 17.5l-1.773-1.773-.125-.125-2.053-2.052h4.35l.003.002 1.812 1.812L32 17.5 17.5 32 3 17.5l1.636-1.636ZM17.5 3l8.378 8.378h-4.35L17.5 7.35l-4.028 4.028h-4.35L17.5 3Z"
-                fill={theme.palette.primary.dark}
-            />
-            <path
                 d="m7.35 17.5 1.773-1.773.447-.447-1.73-1.73h-.89l-.002.002-2.312 2.312 2.22 2.209.494-.573Z"
                 fill="url(#paint0_linear)"
             />
             <path
                 d="M25.877 15.727 27.65 17.5l-.176.175v.001l2.39-2.312-1.812-1.812-.002-.002h-.176l-2.122 2.052.125.125Z"
                 fill="url(#paint1_linear)"
-            />
-            <path
-                d="m6.945 13.55.003.002 2.175 2.175 8.377 8.377L28.054 13.55H6.945Z"
-                fill={theme.palette.primary.main}
             />
             <defs>
                 <linearGradient
@@ -82,8 +74,31 @@ const Logo = (props: PropsWithoutRef<any>) => {
                     {'finper'}
                 </tspan>
             </text>
+            <text
+                xmlSpace="preserve"
+                style={{
+                  fontStyle: 'italic',
+                  fontWeight: 300,
+                  fontSize: '40px',
+                  fontFamily: "'Public Sans'",
+                  fill: theme.palette.primary.main,
+                  strokeWidth: 0.553158
+                }}
+                x={-0.627}
+                y={47.977}
+                transform="scale(1.8 .53382)"
+            >
+                <tspan
+                    x={0}
+                    y={45}
+                    style={{
+                      strokeWidth: 0.553158
+                    }}
+                >
+                    {'f'}
+                </tspan>
+            </text>
         </svg>
-
   )
 }
 
