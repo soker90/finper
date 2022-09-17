@@ -10,14 +10,14 @@ exports[`Year > renders without crashing 1`] = `
     >
       <a
         class="MuiButton-root MuiButton-outlined MuiButton-outlinedPrimary MuiButton-sizeMedium MuiButton-outlinedSizeMedium MuiButton-disableElevation MuiButtonBase-root  css-oqu2pi-MuiButtonBase-root-MuiButton-root"
-        href="/presupuestos/2022"
+        href="/anual/2022"
         tabindex="0"
       >
          ACTUAL
       </a>
     </div>
     <div
-      class="MuiGrid-root MuiGrid-item css-13i4rnv-MuiGrid-root"
+      class="MuiGrid-root MuiGrid-item css-1l0hcb1-MuiGrid-root"
     >
       <div
         class="css-1p1m4ay"
@@ -26,7 +26,7 @@ exports[`Year > renders without crashing 1`] = `
           aria-disabled="true"
           aria-label="izquierda"
           class="MuiButtonBase-root Mui-disabled MuiIconButton-root Mui-disabled MuiIconButton-colorPrimary MuiIconButton-sizeLarge css-172ns19-MuiButtonBase-root-MuiIconButton-root"
-          href="/presupuestos/-1"
+          href="/anual/-1"
           tabindex="-1"
         >
           <span
@@ -59,7 +59,7 @@ exports[`Year > renders without crashing 1`] = `
           aria-label="derecha"
           class="MuiButtonBase-root Mui-disabled MuiIconButton-root Mui-disabled MuiIconButton-colorPrimary MuiIconButton-sizeLarge css-172ns19-MuiButtonBase-root-MuiIconButton-root"
           data-testid="right-arrow"
-          href="/presupuestos/1"
+          href="/anual/1"
           tabindex="-1"
         >
           <span
@@ -187,10 +187,16 @@ exports[`Year > renders without crashing 1`] = `
             >
               Diciembre
             </th>
+            <th
+              class="MuiTableCell-root MuiTableCell-head MuiTableCell-stickyHeader MuiTableCell-sizeMedium css-2ziqjn-MuiTableCell-root"
+              scope="col"
+            >
+              Totales
+            </th>
           </tr>
         </thead>
         <tbody
-          class="MuiTableBody-root css-1geald0-MuiTableBody-root"
+          class="MuiTableBody-root css-rdmsxo-MuiTableBody-root"
         />
       </table>
     </div>
@@ -294,10 +300,16 @@ exports[`Year > renders without crashing 1`] = `
             >
               Diciembre
             </th>
+            <th
+              class="MuiTableCell-root MuiTableCell-head MuiTableCell-stickyHeader MuiTableCell-sizeMedium css-2ziqjn-MuiTableCell-root"
+              scope="col"
+            >
+              Totales
+            </th>
           </tr>
         </thead>
         <tbody
-          class="MuiTableBody-root css-1geald0-MuiTableBody-root"
+          class="MuiTableBody-root css-rdmsxo-MuiTableBody-root"
         />
       </table>
     </div>
