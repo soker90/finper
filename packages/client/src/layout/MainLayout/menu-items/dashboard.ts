@@ -41,9 +41,9 @@ const dashboard = {
     },
     {
       id: 'year',
-      title: 'Mi año',
+      title: 'Años',
       type: 'item',
-      url: `/presupuestos/${date.getFullYear()}`,
+      url: `/anual/${date.getFullYear()}`,
       icon: CalendarOutlined,
       breadcrumbs: true
     },

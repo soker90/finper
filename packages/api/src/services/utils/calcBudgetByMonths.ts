@@ -5,7 +5,7 @@ export const calcBudgetByMonths = ({
   category,
   transactionsSum,
   month
-}: any): { name: string, id: string, budgets: { amount: number, real: number, month?: number, year?: number }[] } => {
+}: any): { name: string, id: string, budgets: { amount: number, real: number, month?: number, year?: number }[], total?: number } => {
   const budgets = month ? [{ amount: 0, real: 0 }] : Array.from({ length: 12 }, () => ({ amount: 0, real: 0 } as any))
 
   category.budgets.forEach(({ month: monthCategory, amount, year }: any) => {
@@ -15,17 +15,20 @@ export const calcBudgetByMonths = ({
     budgets[budgetIndex].year = year
   })
 
+  let totalCategory = 0
   transactionsSum.filter(({ _id }: any) => _id.category.toString() === category._id.toString()).forEach(({
     total,
     _id
   }: any) => {
     const budgetIndex = getBudgetIndex(_id.month, month)
     budgets[budgetIndex].real = total
+    totalCategory += total
   })
 
   return {
     name: category.name,
     id: category._id,
-    budgets
+    budgets,
+    total: totalCategory
   }
 }

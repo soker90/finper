@@ -45,12 +45,12 @@ const MainRoutes = {
       element: <Debts/>
     },
     {
-      path: 'presupuestos/:year/:month',
-      element: <Budgets/>
+      path: 'anual/:year',
+      element: <Year/>
     },
     {
-      path: 'presupuestos/:year',
-      element: <Year/>
+      path: 'presupuestos/:year/:month',
+      element: <Budgets/>
     }
   ]
 }

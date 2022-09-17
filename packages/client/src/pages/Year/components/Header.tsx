@@ -16,7 +16,7 @@ const Header = ({ year }: Props) => {
                 <Button variant='outlined' disableElevation component={Link}
                         to={getUrlYear()} disabled={isSameDate(year)}> ACTUAL</Button>
             </Grid>
-            <Grid item>
+            <Grid item sx={{ marginRight: { md: 30 } }}>
                 <InlineCenter>
                     <IconButton color="primary" aria-label='izquierda' size='large' component={Link}
                                 to={getUrlYear(+year - 1)} disabled={!year}>

@@ -1,13 +1,15 @@
-import { Table, TableBody, TableCell, TableContainer, TableRow } from '@mui/material'
+import { Table, TableBody, TableCell, TableContainer, TableRow, useTheme } from '@mui/material'
 import TableHeaderMonths from './TableHeaderMonths'
 import { format } from 'utils'
 import { Budget } from 'types/budget'
+import { Theme } from '@emotion/react'
 
 interface Props {
     data?: Budget[]
 }
 
 const YearTable = ({ data }: Props) => {
+  const theme = useTheme() as Theme
   return (
         <TableContainer
             sx={{
@@ -32,14 +34,14 @@ const YearTable = ({ data }: Props) => {
                 }}
             >
                 <TableHeaderMonths/>
-                <TableBody>
+                <TableBody sx={{ 'tr:last-child': { backgroundColor: theme.palette.primary.lighter } }}>
                     {data?.map((row: Budget) => (
                         <TableRow
                             hover
                             sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
                             key={row.name}
                         >
-                            <TableCell component="th" id={row.name} scope="row" align="left">
+                            <TableCell component="td" id={row.name} scope="row" align="left">
                                 {row.name}
                             </TableCell>
                             {
@@ -49,6 +51,10 @@ const YearTable = ({ data }: Props) => {
                                     </TableCell>
                                 ))
                             }
+                            <TableCell component="td" id={row.name} scope="row" align="left"
+                                       sx={{ backgroundColor: theme.palette.primary.lighter }}>
+                                {format.euro(row.total)}
+                            </TableCell>
 
                         </TableRow>
                     ))}

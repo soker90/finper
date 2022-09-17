@@ -87,24 +87,33 @@ export default class BudgetService implements IBudgetService {
   }
 
   private getTotalsByMonth = (categories: any[]): { name: string, id: string, budgets: { amount: number, real: number, month?: number, year?: number }[] } => {
-    const totals: { name: string, id: string, budgets: { amount: number, real: number }[] } = {
-      name: 'Totales',
-      id: 'totals',
-      budgets: []
-    }
+    const totals: {
+            name: string, id: string, budgets: { amount: number, real: number }[], total: number
+        } = {
+          name: 'Totales',
+          id: 'totals',
+          budgets: [],
+          total: 0
+        }
+
+    let totalYear = 0
 
     categories.forEach(({ budgets }) => {
       if (totals.budgets.length > 0) {
         budgets.forEach((budget: { amount: number, real: number }, index: number) => {
           totals.budgets[index].amount += budget.amount
           totals.budgets[index].real += budget.real
+          totalYear += budget.real
         })
       } else {
         budgets.forEach((budget: { amount: number, real: number }) => {
           totals.budgets.push({ amount: budget.amount, real: budget.real })
+          totalYear += budget.real
         })
       }
     })
+
+    totals.total = totalYear
 
     return totals
   }
