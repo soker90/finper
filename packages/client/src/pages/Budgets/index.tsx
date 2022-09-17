@@ -7,8 +7,8 @@ import Header from './components/Header'
 
 const Budgets = () => {
   const { year, month } = useParams()
-  const { expenses, incomes } = useBudgets({ year, month })
-  const { expensesTotal, incomesTotal, balancePercentage } = useBudgetDataCard({ expenses, incomes })
+  const { expenses, incomes, totalsIncomes, totalsExpenses } = useBudgets({ year, month })
+  const { expensesTotal, incomesTotal, balancePercentage } = useBudgetDataCard({ totalsIncomes, totalsExpenses })
 
   return (
         <>
