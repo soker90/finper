@@ -8,13 +8,17 @@ const testDatabase = require('../test-db')(mongoose)
 
 const testDebt = (expected: ILoan, received: ILoan) => {
   expect(expected.date).toBe(received.date)
-  expect(expected.amount).toBe(received.amount)
-  expect(expected.accumulated).toBe(received.accumulated)
-  expect(expected.amortization).toBe(received.amortization)
-  expect(expected.interests).toBe(received.interests)
-  expect(expected.pending).toBe(received.pending)
-  expect(expected.type).toBe(received.type)
+  expect(expected.name).toBe(received.name)
+  expect(expected.interest).toBe(received.interest)
   expect(expected.user).toBe(received.user)
+  expected.saving.forEach((saving, index) => {
+    expect(saving.cost).toBe(received.saving[index].cost)
+    expect(saving.date).toBe(received.saving[index].date)
+    expect(saving.saving).toBe(received.saving[index].saving)
+    expect(saving.accumulated).toBe(received.saving[index].accumulated)
+    expect(saving.pending).toBe(received.saving[index].pending)
+    expect(saving.finishDate).toBe(received.saving[index].finishDate)
+  })
 }
 
 describe('Loan', () => {

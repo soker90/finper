@@ -1,16 +1,23 @@
 import { faker } from '@faker-js/faker'
 
-import { LoanModel, LoanType, ILoan } from '../../src'
+import { LoanModel, ILoan } from '../../src'
+
+const saving = Array.from({ length: (Math.random() * 3) + 1 }).map(() => ({
+  cost: faker.datatype.number(),
+  date: faker.datatype.number(),
+  saving: faker.datatype.number(),
+  accumulated: faker.datatype.number(),
+  pending: faker.datatype.number(),
+  finishDate: faker.datatype.number()
+}))
 
 const createLoan = async (params = {}): Promise<ILoan> => (
   LoanModel.create({
     date: faker.datatype.number(),
+    name: faker.finance.accountName(),
     amount: faker.datatype.number(),
-    interests: faker.datatype.number(),
-    amortization: faker.datatype.number(),
-    accumulated: faker.datatype.number(),
-    pending: faker.datatype.number(),
-    type: Math.random() > 0.5 ? LoanType.quota : LoanType.amortization,
+    interest: faker.datatype.number(),
+    saving,
     user: faker.internet.userName(),
     ...params
   })

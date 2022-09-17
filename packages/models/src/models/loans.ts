@@ -1,30 +1,39 @@
 import { Schema, model, ObjectId } from 'mongoose'
+import InputLabel from '@soker90/finper-client/src/themes/overrides/InputLabel'
+import type = Mocha.utils.type;
 
-export enum LoanType {
-    quota,
-    amortization,
+export interface ILoanSaving {
+    cost: number,
+    date: number,
+    saving: number,
+    accumulated: number,
+    pending: number,
+    finishDate: number
 }
 
 export interface ILoan {
     _id: ObjectId,
     date: number,
-    amount: number,
-    interests: number,
-    amortization: number,
-    accumulated: number,
-    pending: number,
-    type: LoanType,
+    name: string,
+    interest: number,
+    saving: ILoanSaving[],
     user: string,
 }
 
-const loanSchema = new Schema<ILoan>({
-  date: { type: Number },
-  amount: { type: Number, required: true },
-  interests: { type: Number, required: true },
-  amortization: { type: Number, required: true },
+const loanSavingSchema = new Schema<ILoanSaving>({
+  cost: { type: Number, required: true },
+  date: { type: Number, required: true },
+  saving: { type: Number, required: true },
   accumulated: { type: Number, required: true },
   pending: { type: Number, required: true },
-  type: { type: Number, required: true, enum: [LoanType.quota, LoanType.amortization] },
+  finishDate: { type: Number, required: true }
+})
+
+const loanSchema = new Schema<ILoan>({
+  date: { type: Number },
+  name: { type: String, required: true },
+  interest: { type: Number, required: true },
+  saving: { type: [loanSavingSchema], required: true, default: [] },
   user: { type: String, required: true }
 }, { versionKey: false })
 
