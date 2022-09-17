@@ -13,7 +13,8 @@ const MONTHS = [
   'Septiembre',
   'Octubre',
   'Noviembre',
-  'Diciembre'
+  'Diciembre',
+  'Totales'
 ]
 
 const TableHeaderMonths = () => {

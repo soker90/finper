@@ -4,5 +4,5 @@ export const isSameDate = (year?: string): boolean => {
 }
 
 export const getUrlYear = (year?: number): string => {
-    return `/presupuestos/${year || new Date().getFullYear()}`
+    return `/anual/${year || new Date().getFullYear()}`
 }

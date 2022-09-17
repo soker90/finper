@@ -9,4 +9,5 @@ export interface Budget {
     id: string,
     name: string;
     budgets: BudgetItem[];
+    total: number;
 }
