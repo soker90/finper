@@ -1,6 +1,4 @@
 import { Schema, model, ObjectId } from 'mongoose'
-import InputLabel from '@soker90/finper-client/src/themes/overrides/InputLabel'
-import type = Mocha.utils.type;
 
 export interface ILoanSaving {
     cost: number,
