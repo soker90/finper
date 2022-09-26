@@ -3,7 +3,7 @@ import express from 'express'
 
 import cors from 'cors'
 import compression from 'compression'
-
+console.log(')
 import db from './config/db'
 import config from './config'
 
