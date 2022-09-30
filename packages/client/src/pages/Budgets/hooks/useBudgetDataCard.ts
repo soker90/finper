@@ -8,30 +8,30 @@ interface TotalReturn {
     isPositive: boolean
 }
 
-export const useBudgetDataCard = ({ expenses, incomes }: { expenses: Budget[], incomes: Budget[] }): {
+export const useBudgetDataCard = ({ totalsIncomes, totalsExpenses }: { totalsIncomes: Budget, totalsExpenses: Budget }): {
     expensesTotal: TotalReturn, incomesTotal: TotalReturn, balancePercentage: number,
 } => {
   const expensesTotal = useMemo(() => {
-    const total = expenses?.reduce((sum, { budgets }) => sum + budgets?.[0]?.real, 0) ?? 0
-    const estimated = expenses?.reduce((sum, { budgets }) => sum + budgets?.[0]?.amount, 0) ?? 0
+    const total = totalsExpenses?.budgets?.[0]?.real ?? 0
+    const estimated = totalsExpenses?.budgets?.[0]?.amount ?? 0
     return {
       total,
       estimated,
       percentage: (total / estimated) * 100,
       isPositive: total <= estimated
     }
-  }, [expenses])
+  }, [totalsExpenses])
 
   const incomesTotal = useMemo(() => {
-    const total = incomes?.reduce((sum, { budgets }) => sum + budgets?.[0]?.real, 0) ?? 0
-    const estimated = incomes?.reduce((sum, { budgets }) => sum + budgets?.[0]?.amount, 0) ?? 0
+    const total = totalsIncomes?.budgets?.[0]?.real ?? 0
+    const estimated = totalsIncomes?.budgets?.[0]?.amount ?? 0
     return {
       total,
       estimated,
       percentage: (total / estimated) * 100,
       isPositive: total >= estimated
     }
-  }, [incomes])
+  }, [totalsIncomes])
 
   const balanceTotal = incomesTotal.total - expensesTotal.total
   const balanceEstimated = incomesTotal.estimated - expensesTotal.estimated
