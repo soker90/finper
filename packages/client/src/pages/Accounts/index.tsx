@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useAccounts } from 'hooks'
-import { AccountItem } from './components'
+import { AccountItem, TotalCard } from './components'
 import { PlusOutlined } from '@ant-design/icons'
 import { ListContainer } from './components/ListContainer'
 import { HeaderButtons, LoadingList } from 'components'
@@ -10,7 +10,7 @@ const Accounts = () => {
   const [newAccount, setNewAccount] = useState(false)
 
   if (isLoading) {
-    return <LoadingList />
+    return <LoadingList/>
   }
 
   const handleClickNew = () => {
@@ -24,11 +24,12 @@ const Accounts = () => {
                 buttons={[{ Icon: PlusOutlined, title: 'Nueva', onClick: handleClickNew, disabled: newAccount }]}
                 desktopSx={{ marginTop: -7 }}
             />
+            <TotalCard value={accounts.reduce((sum, account) => sum + account.balance, 0)}/>
 
             <ListContainer>
                 {newAccount &&
-                  <AccountItem account={{ name: '', bank: '', balance: 0 }} forceExpand cancelCreate={cancelCreate} />}
-                {accounts.map((account) => <AccountItem key={account._id} account={account} />)}
+                  <AccountItem account={{ name: '', bank: '', balance: 0 }} forceExpand cancelCreate={cancelCreate}/>}
+                {accounts.map((account) => <AccountItem key={account._id} account={account}/>)}
             </ListContainer>
 
             {!accounts.length && <p>No hay datos</p>}

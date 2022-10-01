@@ -88,6 +88,112 @@ exports[`Year > renders without crashing 1`] = `
       class="MuiGrid-root MuiGrid-item css-13i4rnv-MuiGrid-root"
     />
   </div>
+  <div
+    class="MuiGrid-root MuiGrid-container MuiGrid-spacing-xs-3 css-18lu0av-MuiGrid-root"
+  >
+    <div
+      class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-12 MuiGrid-grid-md-4 css-1lwnmxi-MuiGrid-root"
+    >
+      <div
+        class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root css-13mu4hp-MuiPaper-root-MuiCard-root"
+      >
+        <div
+          class="MuiCardContent-root css-1uvcgxq-MuiCardContent-root"
+        >
+          <div
+            class="css-zgbp5c-MuiStack-root"
+          >
+            <h6
+              class="MuiTypography-root MuiTypography-h6 css-oym2bt-MuiTypography-root"
+            >
+              Ingresos
+            </h6>
+            <div
+              class="MuiGrid-root MuiGrid-container css-1vam7s3-MuiGrid-root"
+            >
+              <div
+                class="MuiGrid-root MuiGrid-item css-13i4rnv-MuiGrid-root"
+              >
+                <h4
+                  class="MuiTypography-root MuiTypography-h4 css-p7gs2c-MuiTypography-root"
+                >
+                  0 €
+                </h4>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div
+      class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-12 MuiGrid-grid-md-4 css-1lwnmxi-MuiGrid-root"
+    >
+      <div
+        class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root css-13mu4hp-MuiPaper-root-MuiCard-root"
+      >
+        <div
+          class="MuiCardContent-root css-1uvcgxq-MuiCardContent-root"
+        >
+          <div
+            class="css-zgbp5c-MuiStack-root"
+          >
+            <h6
+              class="MuiTypography-root MuiTypography-h6 css-oym2bt-MuiTypography-root"
+            >
+              Gastos
+            </h6>
+            <div
+              class="MuiGrid-root MuiGrid-container css-1vam7s3-MuiGrid-root"
+            >
+              <div
+                class="MuiGrid-root MuiGrid-item css-13i4rnv-MuiGrid-root"
+              >
+                <h4
+                  class="MuiTypography-root MuiTypography-h4 css-ysl4mw-MuiTypography-root"
+                >
+                  0 €
+                </h4>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div
+      class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-12 MuiGrid-grid-md-4 css-1lwnmxi-MuiGrid-root"
+    >
+      <div
+        class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root css-13mu4hp-MuiPaper-root-MuiCard-root"
+      >
+        <div
+          class="MuiCardContent-root css-1uvcgxq-MuiCardContent-root"
+        >
+          <div
+            class="css-zgbp5c-MuiStack-root"
+          >
+            <h6
+              class="MuiTypography-root MuiTypography-h6 css-oym2bt-MuiTypography-root"
+            >
+              Balance
+            </h6>
+            <div
+              class="MuiGrid-root MuiGrid-container css-1vam7s3-MuiGrid-root"
+            >
+              <div
+                class="MuiGrid-root MuiGrid-item css-13i4rnv-MuiGrid-root"
+              >
+                <h4
+                  class="MuiTypography-root MuiTypography-h4 css-ah5xzx-MuiTypography-root"
+                >
+                  0 €
+                </h4>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
   <h5
     class="MuiTypography-root MuiTypography-h5 css-1rit3o0-MuiTypography-root"
   >

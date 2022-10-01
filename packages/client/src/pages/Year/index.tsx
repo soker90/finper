@@ -2,17 +2,30 @@ import { useParams } from 'react-router-dom'
 
 import { useBudgetsYear } from './hooks'
 
-import { Header, YearTable } from './components'
-import { Typography } from '@mui/material'
+import { Header, YearCard, YearTable } from './components'
+import { Grid, Typography } from '@mui/material'
 import { MainCard } from 'components'
 
 const Budgets = () => {
   const { year } = useParams()
   const { expenses, incomes } = useBudgetsYear({ year })
 
+  const balance = (incomes?.at?.(-1)?.total ?? 0) - (expenses?.at?.(-1)?.total ?? 0)
+
   return (
         <>
             <Header year={year ?? ''}/>
+            <Grid container spacing={3} mb={3}>
+                <Grid item xs={12} md={4}>
+                    <YearCard title='Ingresos' data={incomes?.at?.(-1)?.total} color='info'/>
+                </Grid>
+                <Grid item xs={12} md={4}>
+                    <YearCard title='Gastos' data={expenses?.at?.(-1)?.total} color='error'/>
+                </Grid>
+                <Grid item xs={12} md={4}>
+                    <YearCard title='Balance' data={balance} color={balance < 0 ? 'warning' : 'success'}/>
+                </Grid>
+            </Grid>
             <Typography variant="h5">GASTOS</Typography>
             <MainCard sx={{ mt: 2 }} content={false}>
                 <YearTable data={expenses}/>
