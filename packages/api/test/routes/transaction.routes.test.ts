@@ -73,7 +73,7 @@ describe('Transaction', () => {
           type: Math.random() > 0.5 ? TransactionType.Expense : TransactionType.Income,
           account: (await insertAccount())._id.toString(),
           note: faker.lorem.sentence(),
-          store: faker.company.companyName()
+          store: faker.company.name()
         })
         .expect(404)
     })
@@ -89,13 +89,13 @@ describe('Transaction', () => {
           type: Math.random() > 0.5 ? TransactionType.Expense : TransactionType.Income,
           account: (await insertAccount({ user }))._id.toString(),
           note: faker.lorem.sentence(),
-          store: faker.company.companyName()
+          store: faker.company.name()
         })
         .expect(200)
     })
 
     test('when success creating an transaction with same store, it should was create only one store', async () => {
-      const store = faker.company.companyName()
+      const store = faker.company.name()
       for (let i = 0; i < 2; i++) {
         await supertest(server.app)
           .post(path)
@@ -131,7 +131,7 @@ describe('Transaction', () => {
             type,
             account: account._id.toString(),
             note: faker.lorem.sentence(),
-            store: faker.company.companyName()
+            store: faker.company.name()
           })
 
         const accountAfter = await AccountModel.findById(account._id) as IAccount

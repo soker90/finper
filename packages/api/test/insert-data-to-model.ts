@@ -66,7 +66,7 @@ export const insertCategory = async (params: Record<string, any> = {}): Promise<
 
 export const insertStore = async (params: Record<string, string> = {}): Promise<IStore> => {
   return StoreModel.create({
-    name: params.name ?? faker.company.companyName(),
+    name: params.name ?? faker.company.name(),
     user: params.user ?? faker.internet.userName().slice(MIN_LENGTH_USERNAME, MAX_USERNAME_LENGTH).toLowerCase()
   })
 }
