@@ -63,7 +63,7 @@ describe('Store', () => {
     let store: IStore
 
     beforeAll(async () => {
-      store = await createStore({ name: faker.company.companyName().toUpperCase() })
+      store = await createStore({ name: faker.company.name().toUpperCase() })
     })
 
     test('it should find the store', async () => {
