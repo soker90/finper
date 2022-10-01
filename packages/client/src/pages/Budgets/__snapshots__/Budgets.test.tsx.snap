@@ -9,10 +9,9 @@ exports[`Budgets > Snapshot empty case 1`] = `
       class="MuiGrid-root MuiGrid-item css-13i4rnv-MuiGrid-root"
     >
       <a
-        aria-disabled="true"
-        class="MuiButton-root MuiButton-outlined MuiButton-outlinedPrimary MuiButton-sizeMedium MuiButton-outlinedSizeMedium MuiButton-disableElevation MuiButtonBase-root Mui-disabled  css-oqu2pi-MuiButtonBase-root-MuiButton-root"
-        href="/presupuestos/2022/8"
-        tabindex="-1"
+        class="MuiButton-root MuiButton-outlined MuiButton-outlinedPrimary MuiButton-sizeMedium MuiButton-outlinedSizeMedium MuiButton-disableElevation MuiButtonBase-root  css-oqu2pi-MuiButtonBase-root-MuiButton-root"
+        href="/presupuestos/2022/9"
+        tabindex="0"
       >
          ACTUAL
       </a>
