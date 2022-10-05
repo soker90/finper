@@ -2,6 +2,7 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import * as path from 'path'
+import { VitePWA } from 'vite-plugin-pwa'
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -20,7 +21,7 @@ export default defineConfig({
       { find: 'utils', replacement: path.resolve(__dirname, '/src/utils') }
     ]
   },
-  plugins: [react()],
+  plugins: [react(), VitePWA({ registerType: 'autoUpdate' })],
   test: {
     globals: true,
     environment: 'happy-dom',
