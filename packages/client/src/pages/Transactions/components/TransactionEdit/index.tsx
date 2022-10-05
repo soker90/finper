@@ -44,14 +44,11 @@ const TransactionEdit = ({
       ...(params.note && { note: params.note }),
       ...(params.store && { store: params.store })
     }
-    const { error } = transaction?._id ? await editTransaction(transaction._id, formattedParams as any) : await addTransaction(formattedParams as any)
+    const {
+      error
+    } = transaction?._id ? await editTransaction(transaction._id, formattedParams as any) : await addTransaction(formattedParams as any)
     if (!error) {
-      mutate(query, async (transactions: Transaction[]) => {
-        if (!transaction?._id) {
-          return [...transactions, formattedParams]
-        }
-        return transactions // TODO: update transaction
-      })
+      await mutate(query)
       hideForm()
     }
     setError(error)
@@ -82,7 +79,7 @@ const TransactionEdit = ({
                             optionLabel='name'
                             error={!!errors.account} {...register('account', { required: true })}
                             errorText='Introduce una cuenta válida'
-                            size={2} />
+                            size={2}/>
 
                 <SelectForm id='type' label='Tipo'
                             options={TYPES_TRANSACTIONS_ENTRIES}
@@ -98,7 +95,7 @@ const TransactionEdit = ({
                                  optionLabel='name'
                                  error={!!errors.category} {...register('category', { required: true })}
                                  errorText='Introduce una categoria válida'
-                                 size={2} />
+                                 size={2}/>
 
                 <InputForm id='amount' label='Cantidad' placeholder='Introduce la cantidad'
                            error={!!errors.amount} {...register('amount', { required: true, valueAsNumber: true })}
@@ -114,14 +111,14 @@ const TransactionEdit = ({
                     error={!!errors.store}
                     errorText='Introduce una tienda válida'
                     size={2}
-                    defaultValue={transaction?.store}
                     {...register('store')}
+                    {...(transaction?.store && { defaultValue: transaction?.store })}
                 />
 
                 <InputForm id='note' label='Nota' placeholder='Nota'
                            error={!!errors.note} {...register('note')}
                            errorText='Introduce una nota válida'
-                           size={12} />
+                           size={12}/>
 
                 {error && (
                     <Grid item xs={12}>
