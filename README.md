@@ -5,7 +5,7 @@ Finper es una herramienta para la gestión de las finanzas personales. Lleva el 
 [![js-standard-style](https://img.shields.io/badge/code%20style-standard-brightgreen.svg)](http://standardjs.com)
 [![codecov](https://codecov.io/gh/soker90/finper/branch/master/graph/badge.svg?token=gWKDyCALuU)](https://codecov.io/gh/soker90/finper)
 
-## Característica
+## Características
 
 - Movimientos categorizados
 - Presupuestos mensuales
