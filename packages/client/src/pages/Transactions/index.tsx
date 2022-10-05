@@ -44,7 +44,7 @@ const Transactions = () => {
                     category: '',
                     note: '',
                     store: '',
-                    type: TransactionType.NotComputable
+                    type: TransactionType.Expense
                   } as any} forceExpand cancelCreate={cancelCreate} query={''} />}
                 {pages}
             </ListContainer>
