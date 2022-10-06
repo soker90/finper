@@ -8,7 +8,7 @@ axios.defaults.baseURL = API_HOST
 axios.interceptors.response.use(
   response => {
     const { token } = response.headers
-    localStorage.setItem(FINPER_TOKEN, token)
+    localStorage.setItem(FINPER_TOKEN, token as string)
     axios.defaults.headers.common.Authorization = `Bearer ${token}`
     return response
   }
