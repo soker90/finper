@@ -1,1 +1,1 @@
-export { useDebts } from './useDebts'
+export { useLoans } from './useLoans'

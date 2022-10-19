@@ -1,9 +1,9 @@
 import { Grid } from '@mui/material'
-import { useDebts } from './hooks'
+import { useLoans } from './hooks'
 import { DebtCard, DebtTable } from './components'
 
 const Debts = () => {
-  const { from, to, debtsByPerson } = useDebts()
+  const { from, to, debtsByPerson } = useLoans()
   return (
         <>
             <Grid container spacing={3} mb={2}>

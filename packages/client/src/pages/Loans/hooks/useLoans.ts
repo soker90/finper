@@ -1,12 +1,12 @@
 import useSWR from 'swr'
-import { DEBTS } from 'constants/api-paths'
+import { LOANS } from 'constants/api-paths'
 import { Debt } from 'types'
 
-export const useDebts = (): {
+export const useLoans = (): {
     from: Debt[], to: Debt[], isLoading: boolean, error: any,
     debtsByPerson: { _id: string, total: number }[]
 } => {
-  const { data, error } = useSWR(DEBTS)
+  const { data, error } = useSWR(LOANS)
 
   return {
     from: data?.from || [],
