@@ -1,5 +1,6 @@
 import { FC, Fragment, lazy, useMemo } from 'react'
 
+const amazon = lazy(() => import('./AmazonIcon'))
 const openbank = lazy(() => import('./OpenBankIcon'))
 const unicaja = lazy(() => import('./UnicajaIcon'))
 const efectivo = lazy(() => import('./MoneyIcon'))
@@ -18,7 +19,8 @@ const Icons: Record<string, FC<any>> = {
   unicaja,
   efectivo,
   n26,
-  imagin
+  imagin,
+  amazon
 }
 
 const BankIcon: FC<BankIconsProps> = ({ name, ...props }) => {
