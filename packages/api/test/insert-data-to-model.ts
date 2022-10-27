@@ -107,5 +107,5 @@ export const insertBudget = async (params: Record<string, any> = {}): Promise<an
     user
   })
 
-  return budget.populate('category')
+  return params.category ? budget.populate('category') : budget
 }
