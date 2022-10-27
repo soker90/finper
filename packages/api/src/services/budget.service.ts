@@ -55,7 +55,7 @@ export default class BudgetService implements IBudgetService {
                     { $eq: ['$category', '$$categoryId'] },
                     { $eq: ['$year', year] },
                     { $eq: ['$user', user] },
-                    ...(month ? [{ $eq: ['$month', month] }] : [])
+                    ...(!isNaN(month) ? [{ $eq: ['$month', month] }] : [])
                   ]
                 }
               }

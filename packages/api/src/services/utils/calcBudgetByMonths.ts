@@ -6,7 +6,7 @@ export const calcBudgetByMonths = ({
   transactionsSum,
   month
 }: any): { name: string, id: string, budgets: { amount: number, real: number, month?: number, year?: number }[], total?: number } => {
-  const budgets = month ? [{ amount: 0, real: 0 }] : Array.from({ length: 12 }, () => ({ amount: 0, real: 0 } as any))
+  const budgets = isNaN(month) ? Array.from({ length: 12 }, () => ({ amount: 0, real: 0 } as any)) : [{ amount: 0, real: 0 }]
 
   category.budgets.forEach(({ month: monthCategory, amount, year }: any) => {
     const budgetIndex = getBudgetIndex(monthCategory, month)

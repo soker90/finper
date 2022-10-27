@@ -63,6 +63,8 @@ describe('Budget', () => {
         expect(budgetResponse.budgets[month].amount).toBe(budgetValid.amount)
         expect(budgetResponse.budgets[month].real).toBe(real)
       })
+
+      expect(months.length).toBe(budgetResponse.budgets.length)
     }
     test('when there are budgets and month is provided, it should return the budgets', async () => {
       const year = faker.date.past().getFullYear()
