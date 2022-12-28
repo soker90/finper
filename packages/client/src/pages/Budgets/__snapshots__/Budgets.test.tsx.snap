@@ -10,7 +10,7 @@ exports[`Budgets > Snapshot empty case 1`] = `
     >
       <a
         class="MuiButtonBase-root MuiButton-root MuiButton-outlined MuiButton-outlinedPrimary MuiButton-sizeMedium MuiButton-outlinedSizeMedium MuiButton-disableElevation MuiButton-root MuiButton-outlined MuiButton-outlinedPrimary MuiButton-sizeMedium MuiButton-outlinedSizeMedium MuiButton-disableElevation css-oqu2pi-MuiButtonBase-root-MuiButton-root"
-        href="/presupuestos/2022/9"
+        href="/presupuestos/2022/11"
         tabindex="0"
       >
          ACTUAL
