@@ -51,14 +51,15 @@ describe('Budget', () => {
       })
     })
 
-    const testBudgetsResponse = ({
+    const testBudgetsResponse = async ({
       budgetResponse,
       budgetValid,
       real,
       months = [0]
     }: { budgetResponse: any, budgetValid: any, real: number, months?: number[] }) => {
-      expect(budgetResponse.id).toBe(budgetValid.category._id.toString())
-      expect(budgetResponse.name).toBe(budgetValid.category.name)
+      const category = await CategoryModel.findOne({ _id: budgetValid.category }) as ICategory
+      expect(budgetResponse.id).toBe(category._id.toString())
+      expect(budgetResponse.name).toBe(category.name)
       months.forEach(month => {
         expect(budgetResponse.budgets[month].amount).toBe(budgetValid.amount)
         expect(budgetResponse.budgets[month].real).toBe(real)
@@ -89,8 +90,8 @@ describe('Budget', () => {
       })
       const response = await supertest(server.app).get(pathWithParams(year, month)).auth(token, { type: 'bearer' }).expect(200)
 
-      testBudgetsResponse({ budgetResponse: response.body.expenses[0], budgetValid: budgetExpense, real: 0 })
-      testBudgetsResponse({
+      await testBudgetsResponse({ budgetResponse: response.body.expenses[0], budgetValid: budgetExpense, real: 0 })
+      await testBudgetsResponse({
         budgetResponse: response.body.incomes[0],
         budgetValid: budgetIncome,
         real: transaction.amount + transaction2.amount
@@ -120,15 +121,18 @@ describe('Budget', () => {
           min: 1, max: 28
         })).getTime()
       })
+
       const response = await supertest(server.app).get(pathWithParams(year)).auth(token, { type: 'bearer' }).expect(200)
 
-      testBudgetsResponse({
+      expect(budgetExpense.month - 1).toBe(response.body.expenses[0].budgets.length)
+
+      await testBudgetsResponse({
         budgetResponse: response.body.expenses[0],
         budgetValid: budgetExpense,
         real: 0,
         months: [budgetExpense.month - 1]
       })
-      testBudgetsResponse({
+      await testBudgetsResponse({
         budgetResponse: response.body.incomes[0],
         budgetValid: budgetIncome,
         real: transaction.amount + transaction2.amount,
