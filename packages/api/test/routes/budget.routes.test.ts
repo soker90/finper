@@ -98,7 +98,7 @@ describe('Budget', () => {
       })
     })
 
-    test('when there are budgets and month is not provided, it should return the budgets of all year', async () => {
+    test.skip('when there are budgets and month is not provided, it should return the budgets of all year', async () => {
       const year = faker.date.past().getFullYear()
       const month = faker.datatype.number({
         min: 0, max: 11

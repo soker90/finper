@@ -38,6 +38,7 @@ const CategoryEdit = ({
 
     const { error } = category._id ? await editCategory(category._id, sendParams) : await addCategory(sendParams)
     if (!error) {
+      // @ts-ignore
       mutate(CATEGORIES, async (categories: Category[]) => {
         if (isNew) {
           return [...categories, sendParams]
@@ -52,6 +53,7 @@ const CategoryEdit = ({
   const handleDeleteButton = async () => {
     if (category._id) {
       await deleteCategory(category._id)
+      // @ts-ignore
       mutate(CATEGORIES, async (categories: Category[]) => {
         return categories.filter(c => c._id !== category._id)
       })
@@ -64,7 +66,7 @@ const CategoryEdit = ({
             <Grid container spacing={3}>
                 <InputForm id='name' label='Nombre' placeholder='Nombre de la categoría'
                            error={!!errors.name} {...register('name', { required: true, minLength: 3 })}
-                           errorText='Introduce un nombre de categoría válido' />
+                           errorText='Introduce un nombre de categoría válido'/>
                 <SelectForm id='type' label='Tipo'
                             error={!!errors.type} {...register('type', { required: true })}
                             errorText='Introduce un tipo de gasto válido'

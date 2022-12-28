@@ -57,6 +57,7 @@ const TransactionEdit = ({
   const handleDeleteButton = async () => {
     if (!isNew && transaction?._id) {
       await deleteTransaction(transaction._id)
+      // @ts-ignore
       await mutate(TRANSACTIONS, async (transactions: Transaction[]) => {
         return transactions.filter(t => t._id !== transaction?._id)
       })
