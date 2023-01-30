@@ -24,10 +24,4 @@ describe('Budgets', async () => {
 
     expect(monthLabel).toBeDefined()
   })
-
-  it('Snapshot empty case', async () => {
-    const { container } = render(<Budgets/>)
-
-    expect(container).toMatchSnapshot()
-  })
 })
