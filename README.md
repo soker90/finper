@@ -70,6 +70,15 @@ Puedes ver el resto de comandos en el menú de ayuda:
 make
 ```
 
+## Capturas de pantalla
+
+![imagen](https://user-images.githubusercontent.com/8345188/220207754-a890756d-243a-4e10-815a-df1a597512fc.png)
+
+![imagen](https://user-images.githubusercontent.com/8345188/220208160-9d14644b-dd7c-4875-9edf-6ec7f4604b52.png)
+
+![imagen](https://user-images.githubusercontent.com/8345188/220208380-0d1ff108-1c1d-4bc0-9784-bb114b1add81.png)
+
+
 ## Licencia
 
 [GPLv3 o Superior](https://github.com/soker90/finper/blob/master/LICENSE)
