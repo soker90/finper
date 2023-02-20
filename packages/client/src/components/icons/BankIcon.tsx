@@ -1,4 +1,5 @@
 import { FC, Fragment, lazy, useMemo } from 'react'
+import gourmet from 'assets/img/banks/up_spain.png'
 
 const amazon = lazy(() => import('./AmazonIcon'))
 const openbank = lazy(() => import('./OpenBankIcon'))
@@ -7,7 +8,6 @@ const efectivo = lazy(() => import('./MoneyIcon'))
 const n26 = lazy(() => import('./N26Icon'))
 const imagin = lazy(() => import('./ImaginIcon'))
 const waylet = lazy(() => import('./WayletIcon'))
-const gourmet = lazy(() => import('assets/img/banks/up_spain.png'))
 
 type BankIconsProps = {
     name: string
