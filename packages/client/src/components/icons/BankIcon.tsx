@@ -24,7 +24,7 @@ const Icons: Record<string, FC<any>> = {
   imagin,
   amazon,
   waylet,
-  gourmet: () => <img src={gourmet} alt='goutmet' />
+  gourmet: (props) => <img src={gourmet} alt='goutmet' {...props} />
 }
 
 const BankIcon: FC<BankIconsProps> = ({ name, ...props }) => {
