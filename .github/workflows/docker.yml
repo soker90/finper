@@ -27,7 +27,9 @@ jobs:
         uses: docker/build-push-action@v4
         with:
           push: true
-          tags: soker90/finper-client:latest
+          tags: |
+            soker90/finper-client:latest
+            soker90/finper-client:${{ github.event.release.tag_name }}
           context: ./packages/client
           file: ./packages/client/Dockerfile
           build-args: API_HOST=${{ secrets.API_HOST }}
@@ -36,6 +38,8 @@ jobs:
         uses: docker/build-push-action@v4
         with:
           push: true
-          tags: soker90/finper-api:latest
+          tags: |
+            soker90/finper-api:latest
+            soker90/finper-api:${{ github.event.release.tag_name }}
           context: ./packages/api
           file: ./packages/api/Dockerfile
