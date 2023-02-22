@@ -84,9 +84,10 @@ make
 
 ![imagen](https://user-images.githubusercontent.com/8345188/220208380-0d1ff108-1c1d-4bc0-9784-bb114b1add81.png)
 
-![imagen](https://user-images.githubusercontent.com/8345188/220721852-6ba9a65c-3b76-40ad-b3a0-5457cd28a6f7.png)
+![220721852-6ba9a65c-3b76-40ad-b3a0-5457cd28a6f7](https://user-images.githubusercontent.com/8345188/220723111-9a8f4dd8-07bc-4090-a738-fcc8317c1535.png)
 
-![imagen](https://user-images.githubusercontent.com/8345188/220721972-da101b9f-aa5a-4c74-9a7b-d34f096b3393.png)
+![220721972-da101b9f-aa5a-4c74-9a7b-d34f096b3393](https://user-images.githubusercontent.com/8345188/220722791-bea8c0cc-24ff-4a5f-8bff-b2a382bc9bcc.png)
+
 
 
 ## Licencia
