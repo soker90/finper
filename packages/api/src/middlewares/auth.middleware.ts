@@ -1,6 +1,7 @@
 import passport from 'passport'
 import Boom from '@hapi/boom'
 import { NextFunction, Request, Response } from 'express'
+import { IUser } from '@soker90/finper-models'
 
 import signToken from '../helpers/sign-token'
 import '../auth/jwt-strategy-passport-handler'
@@ -27,7 +28,7 @@ const refreshToken = (res: Response, username: string) => {
  * @param {function} next
  */
 const checkAuthorization = (req: Request, res: Response, next: NextFunction) => {
-  passport.authenticate('jwt', (err, user) => {
+  passport.authenticate('jwt', (err: any, user: IUser) => {
     if (err) {
       return next(err)
     }
