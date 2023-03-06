@@ -1,4 +1,5 @@
 import Boom from '@hapi/boom'
+import { IUser } from '@soker90/finper-models'
 import passport from 'passport'
 import { NextFunction, Request, Response } from 'express'
 
@@ -49,7 +50,7 @@ export class AuthController {
       .tap(({ username }) => this.logger.logInfo(`/login - user: ${username && username.toLowerCase()}`))
       .then(validateLoginInputParams)
       .then(() => {
-        passport.authenticate('local', function (error, user) {
+        passport.authenticate('local', function (error: any, user: IUser) {
           if (error) {
             return next(error)
           }
