@@ -16,8 +16,9 @@ export default (mongoose: Mongoose, uri: string, options: Record<string, unknown
     console.log('[finper-models] Mongoose disconnected')
   })
 
-  process.once('SIGINT', () => mongoose.connection.close(() => {
+  process.once('SIGINT', () => mongoose.connection.close().then(() => {
     console.error('[finper-models] Mongoose disconnected')
     process.exit(0)
-  }))
+  })
+  )
 }
