@@ -34,13 +34,19 @@ describe('Pension', () => {
     })
 
     test('when there are no pensions, it should return an empty array', async () => {
-      await supertest(server.app).get(path).auth(token, { type: 'bearer' }).expect(200, [])
+      await supertest(server.app).get(path).auth(token, { type: 'bearer' }).expect(200, {
+        amount: 0,
+        units: 0,
+        employeeAmount: 0,
+        companyAmount: 0,
+        transactions: []
+      })
     })
 
     test('when there are pensions, it should return the pensions', async () => {
       const pension = await insertPension({ user })
       const response = await supertest(server.app).get(path).auth(token, { type: 'bearer' }).expect(200)
-      const responsePension: IPension = response.body.find((iPension: IPension) => iPension._id.toString() === pension._id.toString())
+      const responsePension: IPension = response.body.transactions[0]
       expect(responsePension._id).toBe(pension._id.toString())
       expect(responsePension.date).toBe(pension.date)
       expect(responsePension.employeeUnits).toBe(pension.employeeUnits)
@@ -48,6 +54,11 @@ describe('Pension', () => {
       expect(responsePension.companyAmount).toBe(pension.companyAmount)
       expect(responsePension.companyUnits).toBe(pension.companyUnits)
       expect(responsePension.value).toBe(pension.value)
+      expect(response.body.amount).toBe(pension.employeeAmount + pension.companyAmount)
+      expect(response.body.units).toBe(pension.employeeUnits + pension.companyUnits)
+      expect(response.body.employeeAmount).toBe(pension.employeeAmount)
+      expect(response.body.companyAmount).toBe(pension.companyAmount)
+      expect(response.body.total).toBe(response.body.amount * response.body.units)
     })
   })
 })
