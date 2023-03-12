@@ -4,8 +4,8 @@ import {
   BudgetModel,
   CategoryModel, DebtModel, DebtType,
   IAccount,
-  IDebt, IStore,
-  IUser, StoreModel, TransactionModel,
+  IDebt, IPension, IStore,
+  IUser, PensionModel, StoreModel, TransactionModel,
   TransactionType,
   UserModel
 } from '@soker90/finper-models'
@@ -108,4 +108,16 @@ export const insertBudget = async (params: Record<string, any> = {}): Promise<an
   })
 
   return params.category ? budget.populate('category') : budget
+}
+
+export const insertPension = async (params: Record<string, string | number> = {}): Promise<IPension> => {
+  return PensionModel.create({
+    date: params.date ?? faker.datatype.number(),
+    value: params.value ?? faker.datatype.number(),
+    companyAmount: params.companyAmount ?? faker.datatype.number(),
+    companyUnits: params.companyUnits ?? faker.datatype.number(),
+    employeeUnits: params.employeeUnits ?? faker.datatype.number(),
+    employeeAmount: params.employeeAmount ?? faker.datatype.number(),
+    user: params.user ?? faker.internet.userName().slice(MIN_LENGTH_USERNAME, MAX_USERNAME_LENGTH).toLowerCase()
+  })
 }
