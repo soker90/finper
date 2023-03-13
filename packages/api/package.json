@@ -34,7 +34,7 @@
   },
   "dependencies": {
     "@hapi/boom": "^10.0.0",
-    "@soker90/finper-models": "^1.1.0",
+    "@soker90/finper-models": "^1.2.0",
     "bcrypt": "^5.1.0",
     "bluebird": "^3.7.2",
     "compression": "^1.7.4",
@@ -72,7 +72,7 @@
     "@types/uuid": "^9.0.1",
     "@typescript-eslint/eslint-plugin": "^5.54.1",
     "@typescript-eslint/parser": "^5.54.1",
-    "eslint": "^8.35.0",
+    "eslint": "^8.36.0",
     "eslint-config-standard": "^17.0.0",
     "eslint-plugin-import": "^2.27.5",
     "eslint-plugin-jest": "^27.2.1",

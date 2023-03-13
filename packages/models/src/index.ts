@@ -9,6 +9,7 @@ import { IAccount, AccountModel } from './models/accounts'
 import { IBudget, BudgetModel } from './models/budgets'
 import { ICategory, CategoryModel } from './models/categories'
 import { IDebt, DebtModel, DebtType } from './models/debts'
+import { IPension, PensionModel } from './models/pensions'
 import { IStore, StoreModel } from './models/stores'
 import { ITransaction, TransactionModel, TransactionType } from './models/transactions'
 import { IUser, UserModel } from './models/users'
@@ -43,6 +44,7 @@ export {
   IBudget,
   ICategory,
   IDebt,
+  IPension,
   IStore,
   ITransaction,
   IUser,
@@ -51,6 +53,7 @@ export {
   BudgetModel,
   CategoryModel,
   DebtModel,
+  PensionModel,
   StoreModel,
   TransactionModel,
   UserModel
