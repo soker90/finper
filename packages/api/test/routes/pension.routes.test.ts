@@ -111,7 +111,7 @@ describe('Pension', () => {
       expect(response.body.units).toBe(pension.employeeUnits + pension.companyUnits)
       expect(response.body.employeeAmount).toBe(pension.employeeAmount)
       expect(response.body.companyAmount).toBe(pension.companyAmount)
-      expect(response.body.total).toBe(response.body.amount * response.body.units)
+      expect(response.body.total).toBe(pension.value * response.body.units)
     })
   })
 })

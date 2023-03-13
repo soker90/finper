@@ -14,6 +14,7 @@ interface PensionsResponse {
 
 export interface IPensionService {
     getPensions(user: string): Promise<PensionsResponse>
+
     addPension(pension: IPension): Promise<IPension>
 
     // editPension({ date, value, companyAmount, employeeAmount, employeeUnits, companyUnits }: IPension): Promise<IPension>
@@ -53,8 +54,9 @@ export default class PensionService implements IPensionService {
         }
       })
     const transactions = await PensionModel.find({ user }).sort({ date: -1 })
+    const lastValueTotal = (transactions?.[0]?.value ?? 0) * stats.units
 
-    return { ...stats, transactions, total: stats.amount * stats.units }
+    return { ...stats, transactions, total: lastValueTotal }
   }
 
   public async addPension (pension: IPension): Promise<IPension> {
