@@ -54,7 +54,7 @@ export default class PensionService implements IPensionService {
       })
     const transactions = await PensionModel.find({ user }).sort({ date: -1 })
 
-    return { ...stats, transactions, total: stats.amount * stats.units }
+    return { ...stats, transactions, total: transactions?.[0]?.value * stats.units }
   }
 
   public async addPension (pension: IPension): Promise<IPension> {
