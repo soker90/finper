@@ -5,6 +5,8 @@ import {
   createTheme,
   ThemeProvider
 } from '@mui/material/styles'
+import { esES as coreEsES } from '@mui/material/locale'
+import { esES } from '@mui/x-date-pickers'
 
 import Palette from './palette'
 import Typography from './typography'
@@ -46,7 +48,7 @@ export default function ThemeCustomization ({ children }: { children: JSX.Elemen
     [theme, themeTypography, themeCustomShadows]
   )
 
-  const themes = createTheme(themeOptions)
+  const themes = createTheme(themeOptions, esES, coreEsES)
   themes.components = componentsOverride(themes as Theme)
 
   return (
