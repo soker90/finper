@@ -49,11 +49,11 @@ export default function ThemeCustomization ({ children }: { children: JSX.Elemen
   )
 
   const themes = createTheme(themeOptions, esES, coreEsES)
-  themes.components = componentsOverride(themes as Theme)
+  const components = componentsOverride(themes as Theme)
 
   return (
         <StyledEngineProvider injectFirst>
-            <ThemeProvider theme={themes}>
+            <ThemeProvider theme={{ ...themes, components }}>
                 <CssBaseline/>
                 {children}
             </ThemeProvider>
