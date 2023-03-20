@@ -1,5 +1,5 @@
 export interface PensionTransaction {
-    _id: String;
+    _id?: String;
     date: number;
     employeeAmount: number;
     employeeUnits: number;

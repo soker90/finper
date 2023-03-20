@@ -8,10 +8,11 @@ import { PensionTransactionsTable, PensionStatCard } from './components'
 import { STATS } from './constants'
 import { usePensions } from './hooks'
 import TransactionModal from './components/TransactionModal'
+import { PensionTransaction } from 'types/pension'
 
 const Pension = () => {
-  const { pension } = usePensions()
-  const [showModal, setShowModal] = useState(false)
+  const { pension, editPension, addPension } = usePensions()
+  const [selectedTransaction, setSelectedTransaction] = useState<PensionTransaction>()
 
   if (!pension) return null
   return (
@@ -20,7 +21,7 @@ const Pension = () => {
                 buttons={[{
                   Icon: PlusOutlined,
                   title: 'Nueva',
-                  onClick: () => setShowModal(true)
+                  onClick: () => setSelectedTransaction({} as PensionTransaction)
                 }]}
                 desktopSx={{ marginTop: -7 }}
             />
@@ -32,7 +33,12 @@ const Pension = () => {
                 ))}
             </Grid>
             <PensionTransactionsTable transactions={pension.transactions}/>
-            <TransactionModal show={showModal} onClose={() => setShowModal(false)}/>
+            <TransactionModal
+                transaction={selectedTransaction}
+                show={Boolean(selectedTransaction)}
+                onClose={() => setSelectedTransaction(undefined)}
+                editPension={editPension}
+                addPension={addPension}/>
         </>
   )
 }

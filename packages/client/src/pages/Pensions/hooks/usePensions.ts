@@ -4,12 +4,23 @@ import { Pension } from 'types'
 
 export const usePensions = (): {
     error: any,
-    pension?: Pension
+    pension?: Pension,
+    addPension: (pension: Pension) => void,
+    editPension: (pension: Pension) => void,
 } => {
   const { data, error } = useSWR<Pension>(PENSIONS)
 
+  const addPension = (pension: Pension) => {
+
+  }
+  const editPension = (pension: Pension) => {
+    //
+  }
+
   return {
     pension: data,
-    error
+    error,
+    addPension,
+    editPension
   }
 }

@@ -47,10 +47,10 @@ export const deleteTransaction = (id: string): Promise<{ data?: any, error?: str
   return axios.delete(`${TRANSACTIONS}/${id}`).then((data: any) => ({ data: data as Transaction })).catch((error) => ({ error: error.message }))
 }
 
-export const addPension = (params: { amount: number, category: string, account: string }): Promise<{ data?: any, error?: string }> => {
+export const addPensionApi = (params: { amount: number, category: string, account: string }): Promise<{ data?: any, error?: string }> => {
   return axios.post(PENSIONS, params).then((data: any) => ({ data: data as Pension })).catch((error) => ({ error: error.message }))
 }
 
-export const editPension = () => {
+export const editPensionApi = () => {
 
 }
