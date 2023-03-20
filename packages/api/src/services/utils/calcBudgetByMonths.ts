@@ -8,12 +8,15 @@ export const calcBudgetByMonths = ({
 }: any): { name: string, id: string, budgets: { amount: number, real: number, month?: number, year?: number }[], total?: number } => {
   const budgets = isNaN(month) ? Array.from({ length: 12 }, () => ({ amount: 0, real: 0 } as any)) : [{ amount: 0, real: 0 }]
 
-  category.budgets.forEach(({ month: monthCategory, amount, year }: any) => {
-    const budgetIndex = getBudgetIndex(monthCategory, month)
-    budgets[budgetIndex].amount = amount
-    budgets[budgetIndex].month = monthCategory
-    budgets[budgetIndex].year = year
-  })
+  // Investigar luego por que necesita este if en 2023 solo
+  if (!isNaN(month)) {
+    category.budgets.forEach(({ month: monthCategory, amount, year }: any) => {
+      const budgetIndex = getBudgetIndex(monthCategory, month)
+      budgets[budgetIndex].amount = amount
+      budgets[budgetIndex].month = monthCategory
+      budgets[budgetIndex].year = year
+    })
+  }
 
   let totalCategory = 0
   transactionsSum.filter(({ _id }: any) => _id.category.toString() === category._id.toString()).forEach(({
