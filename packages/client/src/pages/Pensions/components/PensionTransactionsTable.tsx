@@ -8,7 +8,7 @@ const PensionTransactionsTable = ({ transactions }: { transactions: PensionTrans
     <MainCard sx={{ mt: 2 }} content={false}>
         <TableMaterial
             columns={[
-              { title: 'Fecha', render: ({ date }) => format.dateShort(date) },
+              { title: 'Fecha', render: ({ date }) => format.date(date) },
               { title: 'Empresa (€)', render: ({ companyAmount }) => format.euro(companyAmount) },
               { title: 'Empresa (uds)', field: 'companyUnits' },
               { title: 'Empleado (€)', render: ({ employeeAmount }) => format.euro(employeeAmount) },
