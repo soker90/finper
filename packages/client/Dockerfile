@@ -1,4 +1,4 @@
-FROM node:16 as build
+FROM node:18 as build
 
 WORKDIR /app
 
@@ -9,7 +9,7 @@ ENV PATH /app/node_modules/.bin:$PATH
 
 COPY --chown=node:node package.json ./
 
-RUN npm i --silent
+RUN npm i --silent --legacy-peer-deps
 
 COPY --chown=node:node . ./
 
