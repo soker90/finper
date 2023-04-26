@@ -3,7 +3,7 @@ FROM node:18-alpine as builder
 RUN mkdir -p /home/node/app/node_modules && chown -R node:node /home/node/app
 
 WORKDIR /home/node/app
-RUN npm config set unsafe-perm true
+# RUN npm config set unsafe-perm true
 
 USER node
 ENV TZ Europe/Madrid
