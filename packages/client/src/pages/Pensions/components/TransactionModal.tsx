@@ -10,8 +10,8 @@ interface Props {
     show: boolean;
     onClose: () => void;
     transaction?: PensionTransaction;
-    editTransaction: (id: string, pension: PensionTransaction) => void;
-    addTransaction: (pension: PensionTransaction) => void;
+    editTransaction?: (id: string, pension: PensionTransaction) => void;
+    addTransaction?: (pension: PensionTransaction) => void;
 }
 
 const TransactionModal = ({ show, onClose, transaction, editTransaction, addTransaction }: Props) => {
@@ -36,10 +36,9 @@ const TransactionModal = ({ show, onClose, transaction, editTransaction, addTran
       employeeAmount: transaction?.employeeAmount,
       employeeUnits: transaction?.employeeUnits
     }
-    const {
-      error
-    } = transaction?._id ? await editTransaction(transaction._id, formattedParams as any) : await addTransaction(formattedParams as PensionTransaction)
-    if (!error) {
+    // transaction?._id ? await editTransaction(transaction._id, formattedParams as any) : await addTransaction(formattedParams as PensionTransaction)
+    const error = false
+    if (error) {
       await mutate(PENSIONS)
       onClose()
     }

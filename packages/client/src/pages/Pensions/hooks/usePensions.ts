@@ -6,14 +6,14 @@ export const usePensions = (): {
     error: any,
     pension?: Pension,
     addPension: (pension: Pension) => void,
-    editPension: (pension: Pension) => void,
+    editPension: (id: string, pension: Pension) => void,
 } => {
   const { data, error } = useSWR<Pension>(PENSIONS)
 
   const addPension = (pension: Pension) => {
 
   }
-  const editPension = (pension: Pension) => {
+  const editPension = (id: string, pension: Pension) => {
     //
   }
 
