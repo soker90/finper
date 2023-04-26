@@ -9,7 +9,7 @@ ENV PATH /app/node_modules/.bin:$PATH
 
 COPY --chown=node:node package.json ./
 
-RUN npm i --silent --legacy-peer-deps
+RUN npm i --legacy-peer-deps
 
 COPY --chown=node:node . ./
 
