@@ -8,17 +8,20 @@ interface PensionsResponse {
     units: number;
     employeeAmount: number;
     companyAmount: number;
+    total: number;
     transactions: IPension[]
 }
 
 export interface IPensionService {
-    getPensions(user: string): Promise<any>
+    getPensions(user: string): Promise<PensionsResponse>
+
+    addPension(pension: IPension): Promise<IPension>
 
     // editPension({ date, value, companyAmount, employeeAmount, employeeUnits, companyUnits }: IPension): Promise<IPension>
 }
 
 export default class PensionService implements IPensionService {
-  public async getPensions (user: string): Promise<any> {
+  public async getPensions (user: string): Promise<PensionsResponse> {
     const stats = await PensionModel.aggregate([
       {
         $match: {
@@ -51,7 +54,12 @@ export default class PensionService implements IPensionService {
         }
       })
     const transactions = await PensionModel.find({ user }).sort({ date: -1 })
+    const lastValueTotal = (transactions?.[0]?.value ?? 0) * stats.units
 
-    return { ...stats, transactions, total: stats.amount * stats.units }
+    return { ...stats, transactions, total: lastValueTotal }
+  }
+
+  public async addPension (pension: IPension): Promise<IPension> {
+    return await PensionModel.create(pension)
   }
 }

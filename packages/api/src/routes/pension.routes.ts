@@ -19,6 +19,12 @@ export class PensionRoutes {
   }
 
   routes () {
+    this.router.post(
+      '/',
+      authMiddleware,
+      this.pensionController.create.bind(this.pensionController)
+    )
+
     this.router.get(
       '/',
       authMiddleware,

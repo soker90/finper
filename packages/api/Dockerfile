@@ -1,9 +1,9 @@
-FROM node:16-alpine as builder
+FROM node:18-alpine as builder
 
 RUN mkdir -p /home/node/app/node_modules && chown -R node:node /home/node/app
 
 WORKDIR /home/node/app
-RUN npm config set unsafe-perm true
+# RUN npm config set unsafe-perm true
 
 USER node
 ENV TZ Europe/Madrid
@@ -15,7 +15,7 @@ COPY --chown=node:node . .
 CMD ["npm","run","build"]
 
 # STAGE 2
-FROM node:16-alpine
+FROM node:18-alpine
 
 ARG MONGODB_USER
 ARG MONGODB_PASS

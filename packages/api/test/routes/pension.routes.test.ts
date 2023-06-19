@@ -1,3 +1,4 @@
+// @ts-ignore
 import supertest from 'supertest'
 import {
   PensionModel,
@@ -10,6 +11,7 @@ import { server } from '../../src/server'
 import { requestLogin } from '../request-login'
 import { insertPension } from '../insert-data-to-model'
 import { generateUsername } from '../generate-values'
+import { faker } from '@faker-js/faker'
 
 const testDatabase = require('../test-db')(mongoose)
 
@@ -17,6 +19,56 @@ describe('Pension', () => {
   beforeAll(() => testDatabase.connect())
 
   afterAll(() => testDatabase.close())
+
+  describe('POST /', () => {
+    const path = '/api/pensions'
+    let token: string
+
+    beforeAll(async () => {
+      token = await requestLogin(server.app)
+    })
+
+    test('when token is not provided, it should response an error with status code 401', async () => {
+      await supertest(server.app).post(path).expect(401)
+    })
+
+    test('when no params provided, it should response an error with status code 422', async () => {
+      await supertest(server.app).post(path).auth(token, { type: 'bearer' }).expect(422)
+    })
+
+    test.each(['date', 'employeeAmount', 'employeeUnits', 'companyAmount', 'companyUnits', 'value'])('when no %s param provided, it should response an error with status code 422', async (param: string) => {
+      const params: Record<string, number> = {
+        date: faker.date.recent().getTime(),
+        employeeAmount: faker.datatype.number({ min: 1, max: 100, precision: 2 }),
+        employeeUnits: faker.datatype.number({ min: 1, max: 100, precision: 5 }),
+        companyAmount: faker.datatype.number({ min: 1, max: 100, precision: 2 }),
+        companyUnits: faker.datatype.number({ min: 1, max: 100, precision: 5 }),
+        value: faker.datatype.number({ precision: 2 })
+      }
+
+      delete params[param]
+      await supertest(server.app)
+        .post(path)
+        .set('Authorization', `Bearer ${token}`)
+        .send(params)
+        .expect(422)
+    })
+
+    test('when success creating an account', async () => {
+      await supertest(server.app)
+        .post(path)
+        .set('Authorization', `Bearer ${token}`)
+        .send({
+          date: faker.date.recent().getTime(),
+          employeeAmount: faker.datatype.number({ min: 1, max: 100, precision: 2 }),
+          employeeUnits: faker.datatype.number({ min: 1, max: 100, precision: 5 }),
+          companyAmount: faker.datatype.number({ min: 1, max: 100, precision: 2 }),
+          companyUnits: faker.datatype.number({ min: 1, max: 100, precision: 5 }),
+          value: faker.datatype.number({ precision: 2 })
+        })
+        .expect(200)
+    })
+  })
 
   describe('GET /', () => {
     const path = '/api/pensions'
@@ -39,7 +91,8 @@ describe('Pension', () => {
         units: 0,
         employeeAmount: 0,
         companyAmount: 0,
-        transactions: []
+        transactions: [],
+        total: 0
       })
     })
 
@@ -58,7 +111,7 @@ describe('Pension', () => {
       expect(response.body.units).toBe(pension.employeeUnits + pension.companyUnits)
       expect(response.body.employeeAmount).toBe(pension.employeeAmount)
       expect(response.body.companyAmount).toBe(pension.companyAmount)
-      expect(response.body.total).toBe(response.body.amount * response.body.units)
+      expect(response.body.total).toBe(pension.value * response.body.units)
     })
   })
 })

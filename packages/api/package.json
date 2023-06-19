@@ -1,6 +1,6 @@
 {
   "name": "@soker90/finper-api",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Finper API that stores endpoints consumed by a Finper client",
   "main": "src/server",
   "scripts": {
@@ -30,11 +30,11 @@
   },
   "homepage": "https://github.com/soker90/finper#readme",
   "engines": {
-    "node": "16.x"
+    "node": "18.x"
   },
   "dependencies": {
-    "@hapi/boom": "^10.0.0",
-    "@soker90/finper-models": "^1.1.0",
+    "@hapi/boom": "^10.0.1",
+    "@soker90/finper-models": "^1.2.0",
     "bcrypt": "^5.1.0",
     "bluebird": "^3.7.2",
     "compression": "^1.7.4",
@@ -42,7 +42,7 @@
     "dotenv": "^16.0.3",
     "express": "^4.18.2",
     "helmet": "^6.0.1",
-    "joi": "^17.7.0",
+    "joi": "^17.9.0",
     "morgan": "^1.10.0",
     "passport": "^0.6.0",
     "passport-jwt": "^4.0.1",
@@ -62,16 +62,16 @@
     "@types/compression": "^1.7.2",
     "@types/cors": "^2.8.13",
     "@types/express": "^4.17.17",
-    "@types/jest": "^29.4.0",
+    "@types/jest": "^29.5.0",
     "@types/morgan": "^1.9.4",
-    "@types/node": "^18.14.6",
+    "@types/node": "^18.15.3",
     "@types/passport": "^1.0.12",
     "@types/passport-jwt": "^3.0.8",
     "@types/passport-local": "^1.0.35",
     "@types/supertest": "^2.0.12",
     "@types/uuid": "^9.0.1",
-    "@typescript-eslint/eslint-plugin": "^5.54.1",
-    "@typescript-eslint/parser": "^5.54.1",
+    "@typescript-eslint/eslint-plugin": "^5.55.0",
+    "@typescript-eslint/parser": "^5.55.0",
     "eslint": "^8.36.0",
     "eslint-config-standard": "^17.0.0",
     "eslint-plugin-import": "^2.27.5",
@@ -82,6 +82,6 @@
     "nock": "^13.3.0",
     "supertest": "^6.3.3",
     "ts-jest": "^29.0.5",
-    "typescript": "^4.9.5"
+    "typescript": "^5.0.2"
   }
 }
