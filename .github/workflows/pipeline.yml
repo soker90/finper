@@ -10,17 +10,11 @@ on:
     branches: [ master ]
     types: [opened, synchronize]
 
-jobs:
-  cancel:
-    name: 'Cancel Previous Runs'
-    runs-on: ubuntu-latest
-    timeout-minutes: 3
-    steps:
-      - uses: styfle/cancel-workflow-action@0.11.0
-        with:
-          workflow_id: all
-          access_token: ${{ github.token }}
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/master' }}
 
+jobs:
   ## Models ##
   lint-models:
     runs-on: ubuntu-latest
