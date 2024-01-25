@@ -19,5 +19,5 @@ models:
 
 project:
   - changed-files:
-    - all-glob-to-any-file: ['¡.github/workflows/**','!packages/api/**', '!packages/client/**','!packages/models/**']
+    - all-globs-to-all-files: ['¡.github/workflows/**','!packages/api/**', '!packages/client/**','!packages/models/**']
   
