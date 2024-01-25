@@ -38,8 +38,8 @@ describe('Debt', () => {
 
     test.each(['from', 'amount', 'type'])('when no %s param provided, it should response an error with status code 422', async (param: string) => {
       const params: Record<string, string | number> = {
-        from: faker.name.firstName(),
-        amount: faker.datatype.number(),
+        from: faker.person.firstName(),
+        amount: faker.number.int(),
         type: Math.random() > 0.5 ? DebtType.TO : DebtType.FROM
       }
 
@@ -56,8 +56,8 @@ describe('Debt', () => {
         .post(path)
         .set('Authorization', `Bearer ${token}`)
         .send({
-          from: faker.name.firstName(),
-          amount: faker.datatype.number(),
+          from: faker.person.firstName(),
+          amount: faker.number.int(),
           type: Math.random() > 0.5 ? DebtType.TO : DebtType.FROM
         })
         .expect(200)
@@ -86,8 +86,8 @@ describe('Debt', () => {
     })
 
     test('when there are debts, it should return the debts', async () => {
-      const name = `a${faker.name.firstName()}`
-      const name2 = `b${faker.name.firstName()}`
+      const name = `a${faker.person.firstName()}`
+      const name2 = `b${faker.person.firstName()}`
       const from = await insertDebt({ user, type: DebtType.FROM, from: name, paymentDate: 0 })
       const to = await insertDebt({ user, type: DebtType.TO, from: name2, paymentDate: 0 })
       const to2 = await insertDebt({ user, type: DebtType.TO, from: name, paymentDate: 0 })
@@ -116,7 +116,7 @@ describe('Debt', () => {
     const path = (from: string) => `/api/debts/from/${from}`
     let token: string
     const user = generateUsername()
-    const from = faker.name.firstName()
+    const from = faker.person.firstName()
 
     beforeAll(async () => {
       token = await requestLogin(server.app, { username: user })
@@ -175,8 +175,8 @@ describe('Debt', () => {
     test.each(['from', 'amount', 'type'])('when no %s param provided, it should response an error with status code 422', async (param: string) => {
       const debt: IDebt = await insertDebt({ user })
       const params: Record<string, string | number> = {
-        from: faker.name.firstName(),
-        amount: faker.datatype.number(),
+        from: faker.person.firstName(),
+        amount: faker.number.int(),
         type: Math.random() > 0.5 ? DebtType.TO : DebtType.FROM
       }
 
@@ -191,8 +191,8 @@ describe('Debt', () => {
     test('when fields are successfully edited', async () => {
       const debt: IDebt = await insertDebt({ user })
       const params: Record<string, string | number> = {
-        from: faker.name.firstName(),
-        amount: faker.datatype.number(),
+        from: faker.person.firstName(),
+        amount: faker.number.int(),
         type: Math.random() > 0.5 ? DebtType.TO : DebtType.FROM
       }
       await supertest(server.app)

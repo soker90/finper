@@ -5,12 +5,12 @@ export const BUDGETS_LIST = {
   expenses: Array.from({ length: 3 }, () => ({
     name: faker.commerce.department(),
     id: faker.database.mongodbObjectId(),
-    budgets: [{ amount: faker.datatype.float({ precision: 0.01 }), real: faker.datatype.float({ precision: 0.01 }) }]
+    budgets: [{ amount: faker.number.float({ precision: 0.01 }), real: faker.number.float({ precision: 0.01 }) }]
   })),
   incomes: Array.from({ length: 3 }, () => ({
     name: faker.commerce.department(),
     id: faker.database.mongodbObjectId(),
-    budgets: [{ amount: faker.datatype.float({ precision: 0.01 }), real: faker.datatype.float({ precision: 0.01 }) }]
+    budgets: [{ amount: faker.number.float({ precision: 0.01 }), real: faker.number.float({ precision: 0.01 }) }]
   }))
 }
 

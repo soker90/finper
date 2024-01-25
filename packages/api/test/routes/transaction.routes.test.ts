@@ -117,9 +117,9 @@ describe('Transaction', () => {
 
     test.each([TransactionType.Income, TransactionType.Expense, TransactionType.NotComputable])(
       'when success creating an transaction of %s and balance is updated', async (type) => {
-        const balance = faker.datatype.number({ precision: 0.01, max: 10000, min: 0 })
+        const balance = faker.number.float({ precision: 0.01, max: 10000, min: 0 })
         const account = await insertAccount({ user, balance })
-        const transactionAmount = faker.datatype.number({ precision: 0.01, max: 100, min: 0 })
+        const transactionAmount = faker.number.float({ precision: 0.01, max: 100, min: 0 })
 
         await supertest(server.app)
           .post(path)
@@ -211,7 +211,7 @@ describe('Transaction', () => {
       const params: Record<string, string | number> = {
         date: faker.date.past().getTime(),
         category: (await insertCategory({ user: username }))._id.toString(),
-        amount: faker.datatype.number(),
+        amount: faker.number.int(),
         type: Math.random() > 0.5 ? TransactionType.Expense : TransactionType.Income,
         account: (await insertAccount({ user: username }))._id.toString()
 
@@ -231,7 +231,7 @@ describe('Transaction', () => {
       const params: Record<string, string | number> = {
         date: faker.date.past().getTime(),
         category: (await insertCategory({ user: username }))._id.toString(),
-        amount: faker.datatype.number(),
+        amount: faker.number.int(),
         type: Math.random() > 0.5 ? TransactionType.Expense : TransactionType.Income,
         account: (await insertAccount({ user: username }))._id.toString()
 
@@ -265,9 +265,9 @@ describe('Transaction', () => {
       updated: TransactionType.Expense
     }])(
       'when success editing an transaction of %s and balance is updated', async ({ old, updated }) => {
-        const balance = faker.datatype.number({ precision: 0.01, max: 10000, min: 0 })
-        const amountOld = faker.datatype.number({ precision: 0.01, max: 100, min: 0 })
-        const amountNew = faker.datatype.number({ precision: 0.01, max: 100, min: 0 })
+        const balance = faker.number.float({ precision: 0.01, max: 10000, min: 0 })
+        const amountOld = faker.number.float({ precision: 0.01, max: 100, min: 0 })
+        const amountNew = faker.number.float({ precision: 0.01, max: 100, min: 0 })
 
         const account = await insertAccount({ user: username, balance: roundNumber(balance) })
 
@@ -340,13 +340,13 @@ describe('Transaction', () => {
     })
 
     test.each([TransactionType.Income, TransactionType.Expense, TransactionType.NotComputable])('when delete the transaction of type %s, it should decrease the account balance', async (type) => {
-      const balance = faker.datatype.number({ precision: 0.01, max: 10000, min: 0 })
+      const balance = faker.number.float({ precision: 0.01, max: 10000, min: 0 })
       const account = await insertAccount({ user, balance })
 
       const params = {
         date: faker.date.past().getTime(),
         category: (await insertCategory({ user }))._id.toString(),
-        amount: faker.datatype.number({ precision: 0.01, max: 100, min: 0 }),
+        amount: faker.number.float({ precision: 0.01, max: 100, min: 0 }),
         type,
         account: account._id.toString(),
         note: faker.lorem.sentence()
