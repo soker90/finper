@@ -1,16 +1,23 @@
 # See https://github.com/actions/labeler
 
 '🚨 action':
-  - .github/workflows/**
+  - changed-files:
+    - any-glob-to-any-file: '.github/workflows/**'
+  - head-branch: ['action']
 
 api:
-  - any: ['packages/api/**']
+  - changed-files:
+    - any-glob-to-any-file: 'packages/api/**'
 
 ui:
-  - any: ['packages/client/**']
+  - changed-files:
+    - any-glob-to-any-file: 'packages/client/**'
 
 models:
-  - any: ['packages/models/**']
+  - changed-files:
+    - any-glob-to-any-file: 'packages/models/**'
 
 project:
-  - all: ['¡.github/workflows/**','!packages/api/**', '!packages/client/**','!packages/models/**']
+  - changed-files:
+    - all-glob-to-any-file: ['¡.github/workflows/**','!packages/api/**', '!packages/client/**','!packages/models/**']
+  
