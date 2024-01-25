@@ -11,7 +11,7 @@ import TransactionModal from './components/TransactionModal'
 import { PensionTransaction } from 'types/pension'
 
 const Pension = () => {
-  const { pension, editPension, addPension } = usePensions()
+  const { pension } = usePensions()
   const [selectedTransaction, setSelectedTransaction] = useState<PensionTransaction>()
 
   if (!pension) return null
