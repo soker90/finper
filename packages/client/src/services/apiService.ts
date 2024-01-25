@@ -1,6 +1,6 @@
 import axios from 'axios'
 import { ACCOUNTS, BUDGETS, CATEGORIES, PENSIONS, TRANSACTIONS } from 'constants/api-paths'
-import { Category, Transaction, TransactionType, Account, Pension } from 'types'
+import { Category, Transaction, TransactionType, Account, Pension, PensionTransaction } from 'types'
 
 export const editAccount = (id: string, params: {
     name?: string,
@@ -85,16 +85,16 @@ export const deleteTransaction = (id: string): Promise<{ data?: any, error?: str
   return axios.delete(`${TRANSACTIONS}/${id}`).then((data: any) => ({ data: data as Transaction })).catch((error) => ({ error: error.message }))
 }
 
-export const addPensionApi = (params: { amount: number, category: string, account: string }): Promise<{
+export const addPensionApi = (params: PensionTransaction): Promise<{
     data?: any,
     error?: string
 }> => {
   return axios.post(PENSIONS, params).then((data: any) => ({ data: data as Pension })).catch((error) => ({ error: error.message }))
 }
 
-export const editPensionApi = (id: string, params: { amount: number, category: string, account: string }): Promise<{
+export const editPensionApi = (id: string, params: PensionTransaction): Promise<{
     data?: any,
     error?: string
 }> => {
-  return axios.put(PENSIONS, params).then((data: any) => ({ data: data as Pension })).catch((error) => ({ error: error.message }))
+  return axios.put(`${PENSIONS}/${id}`, params).then((data: any) => ({ data: data as Pension })).catch((error) => ({ error: error.message }))
 }

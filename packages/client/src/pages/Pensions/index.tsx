@@ -37,8 +37,6 @@ const Pension = () => {
                 transaction={selectedTransaction}
                 show={Boolean(selectedTransaction)}
                 onClose={() => setSelectedTransaction(undefined)}
-                // editPension={editPension as any}
-                // addPension={addPension}
             />
         </>
   )
