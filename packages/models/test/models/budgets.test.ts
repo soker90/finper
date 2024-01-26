@@ -49,7 +49,7 @@ describe('Budgets', () => {
     afterAll(() => testDatabase.clear())
 
     test('it should be 3 transactions stored', async () => {
-      const budgetsCounter = await BudgetModel.count()
+      const budgetsCounter = await BudgetModel.countDocuments()
       expect(budgetsCounter).toBe(3)
     })
 

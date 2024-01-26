@@ -47,7 +47,7 @@ describe('Category', () => {
     })
 
     test('it should be 3 account stored', async () => {
-      const categoryCounter = await CategoryModel.count({ name: { $ne: 'root' } })
+      const categoryCounter = await CategoryModel.countDocuments({ name: { $ne: 'root' } })
       expect(categoryCounter).toBe(3)
     })
 
