@@ -48,7 +48,7 @@ describe('Store', () => {
     afterAll(() => testDatabase.clear())
 
     test('it should be 3 account stored', async () => {
-      const storeCounter = await StoreModel.count()
+      const storeCounter = await StoreModel.countDocuments()
       expect(storeCounter).toBe(3)
     })
 

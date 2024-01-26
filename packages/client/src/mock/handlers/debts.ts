@@ -1,13 +1,11 @@
-import { rest, RestContext, RestRequest } from 'msw'
+import { http, HttpResponse } from 'msw'
 
 export const debtsHandlers = [
-  rest.post('/debts', (req: RestRequest, res: any, ctx: RestContext) => {
-    return res(
-      ctx.status(200),
-      ctx.json({
-        to: [],
-        from: [],
-        debtsByPerson: []
-      }))
+  http.post('/debts', () => {
+    return HttpResponse.json({
+      to: [],
+      from: [],
+      debtsByPerson: []
+    })
   })
 ]

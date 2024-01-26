@@ -52,7 +52,7 @@ describe('Debt', () => {
     afterAll(() => testDatabase.clear())
 
     test('it should be 3 account stored', async () => {
-      const debtCounter = await DebtModel.count()
+      const debtCounter = await DebtModel.countDocuments()
       expect(debtCounter).toBe(3)
     })
 

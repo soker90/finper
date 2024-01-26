@@ -10,9 +10,9 @@ const DrawerHeader = ({ open }: { open: boolean }) => {
   return (
         <DrawerHeaderStyled theme={theme} open={open}>
             <Stack direction="row" spacing={1} alignItems="center">
-                <Logo />
+                <Logo/>
                 <Chip
-                    label={'v0.0.1'}
+                    label={'v1.3.0'}
                     size="small"
                     sx={{ height: 16, '& .MuiChip-label': { fontSize: '0.625rem', py: 0.25 } }}
                 />
