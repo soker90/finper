@@ -112,7 +112,7 @@ describe('Transaction', () => {
           .expect(200)
       }
 
-      expect(await StoreModel.count({ name: store })).toBe(1)
+      expect(await StoreModel.countDocuments({ name: store })).toBe(1)
     })
 
     test.each([TransactionType.Income, TransactionType.Expense, TransactionType.NotComputable])(
