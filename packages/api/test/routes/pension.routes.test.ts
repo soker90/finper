@@ -1,5 +1,5 @@
-// @ts-ignore
 import supertest from 'supertest'
+import { faker } from '@faker-js/faker'
 import {
   PensionModel,
   IPension,
@@ -7,11 +7,11 @@ import {
 } from '@soker90/finper-models'
 
 import { server } from '../../src/server'
+import { ERROR_MESSAGE } from '../../src/i18n'
 
 import { requestLogin } from '../request-login'
 import { insertPension } from '../insert-data-to-model'
 import { generateUsername } from '../generate-values'
-import { faker } from '@faker-js/faker'
 
 const testDatabase = require('../test-db')(mongoose)
 
@@ -112,6 +112,79 @@ describe('Pension', () => {
       expect(response.body.employeeAmount).toBe(pension.employeeAmount)
       expect(response.body.companyAmount).toBe(pension.companyAmount)
       expect(response.body.total).toBe(pension.value * response.body.units)
+    })
+  })
+
+  describe('PUT /:id', () => {
+    const path = (id: string) => `/api/pensions/${id}`
+    let token: string
+    const user = generateUsername()
+
+    beforeAll(async () => {
+      token = await requestLogin(server.app, { username: user })
+    })
+
+    test('when token is not provided, it should response an error with status code 401', async () => {
+      await supertest(server.app).put(path('62a39498c4497e1fe3c2bf35')).expect(401)
+    })
+
+    test('when the pension does not exist, it should response an error with status code 404', async () => {
+      await supertest(server.app).put(path('62a39498c4497e1fe3c2bf35')).auth(token, { type: 'bearer' })
+        .expect(404)
+        .expect((res) => {
+          expect(res.body.message).toBe(ERROR_MESSAGE.PENSION.NOT_FOUND)
+        })
+    })
+
+    test('when user is distinct, it should response an error with status code 404', async () => {
+      const pension: IPension = await insertPension()
+      await supertest(server.app).patch(path(pension._id.toString())).auth(token, { type: 'bearer' }).expect(404)
+    })
+
+    test('when no params provided, it should response an error with status code 422', async () => {
+      const pension: IPension = await insertPension({ user })
+      await supertest(server.app).put(path(pension._id.toString())).auth(token, { type: 'bearer' }).expect(422)
+    })
+
+    test.each(['date', 'employeeAmount', 'employeeUnits', 'companyAmount', 'companyUnits', 'value'])('when no %s param provided, it should response an error with status code 422', async (param: string) => {
+      const pension: IPension = await insertPension({ user })
+      const params: Record<string, number> = {
+        date: faker.date.recent().getTime(),
+        employeeAmount: faker.number.float({ min: 1, max: 100, precision: 2 }),
+        employeeUnits: faker.number.float({ min: 1, max: 100, precision: 5 }),
+        companyAmount: faker.number.float({ min: 1, max: 100, precision: 2 }),
+        companyUnits: faker.number.float({ min: 1, max: 100, precision: 5 }),
+        value: faker.number.float({ precision: 2 })
+      }
+
+      delete params[param]
+      await supertest(server.app)
+        .put(path(pension._id.toString()))
+        .set('Authorization', `Bearer ${token}`)
+        .send(params)
+        .expect(422)
+    })
+
+    test('when fields are successfully edited', async () => {
+      const pension: IPension = await insertPension({ user })
+
+      const params = {
+        date: faker.date.recent().getTime(),
+        employeeAmount: faker.number.float({ min: 1, max: 100, precision: 2 }),
+        employeeUnits: faker.number.float({ min: 1, max: 100, precision: 5 }),
+        companyAmount: faker.number.float({ min: 1, max: 100, precision: 2 }),
+        companyUnits: faker.number.float({ min: 1, max: 100, precision: 5 }),
+        value: faker.number.float({ precision: 2 })
+      }
+      await supertest(server.app)
+        .put(path(pension._id.toString()))
+        .set('Authorization', `Bearer ${token}`)
+        .send(params)
+        .expect(200, {
+          _id: pension._id.toString(),
+          ...params,
+          user
+        })
     })
   })
 })

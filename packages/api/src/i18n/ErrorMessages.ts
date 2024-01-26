@@ -18,5 +18,8 @@ export const ERROR_MESSAGE = {
   BUDGET: {
     INVALID_AMOUNT: 'La cantidad no es válida',
     YEAR_MONTH_INVALID: 'El año y/o el mes no son válidos'
+  },
+  PENSION: {
+    NOT_FOUND: 'El movimiento de la pensión no existe'
   }
 }

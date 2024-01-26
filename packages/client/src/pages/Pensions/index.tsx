@@ -15,6 +15,11 @@ const Pension = () => {
   const [selectedTransaction, setSelectedTransaction] = useState<PensionTransaction>()
 
   if (!pension) return null
+
+  const handleEdit = (transaction: PensionTransaction) => {
+    setSelectedTransaction(transaction)
+  }
+
   return (
         <>
             <HeaderButtons
@@ -32,12 +37,11 @@ const Pension = () => {
                     </Grid>
                 ))}
             </Grid>
-            <PensionTransactionsTable transactions={pension.transactions}/>
-            <TransactionModal
+            <PensionTransactionsTable transactions={pension.transactions} onEdit={handleEdit}/>
+            {Boolean(selectedTransaction) && <TransactionModal
                 transaction={selectedTransaction}
-                show={Boolean(selectedTransaction)}
                 onClose={() => setSelectedTransaction(undefined)}
-            />
+            />}
         </>
   )
 }

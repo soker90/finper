@@ -1,4 +1,3 @@
-import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { useSWRConfig } from 'swr'
 
@@ -8,12 +7,12 @@ import { PENSIONS } from 'constants/api-paths'
 import { addPensionApi, editPensionApi } from 'services/apiService'
 
 interface Props {
-    show: boolean;
+
     onClose: () => void;
     transaction?: PensionTransaction;
 }
 
-const TransactionModal = ({ show, onClose, transaction }: Props) => {
+const TransactionModal = ({ onClose, transaction }: Props) => {
   const { mutate } = useSWRConfig()
   const { register, handleSubmit, formState: { errors, isSubmitSuccessful }, control, setError, reset } = useForm({
     defaultValues: {
@@ -25,10 +24,6 @@ const TransactionModal = ({ show, onClose, transaction }: Props) => {
       employeeUnits: transaction?.employeeUnits || ''
     }
   })
-
-  useEffect(() => {
-    reset()
-  }, [isSubmitSuccessful])
 
   const onSubmit = handleSubmit(async (params) => {
     if (!params.date) {
@@ -54,7 +49,7 @@ const TransactionModal = ({ show, onClose, transaction }: Props) => {
 
   return (
         <ModalGrid
-            show={show} onClose={onClose} title='Nuevo Movimiento' action={onSubmit}>
+            show onClose={onClose} title='Nuevo Movimiento' action={onSubmit}>
             <DateForm placeholder={'Introduce una fecha'} id='date' label='Fecha'
                       error={!!errors.date}
                       control={control}

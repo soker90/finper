@@ -17,7 +17,7 @@ export interface IPensionService {
 
     addPension(pension: IPension): Promise<IPension>
 
-    // editPension({ date, value, companyAmount, employeeAmount, employeeUnits, companyUnits }: IPension): Promise<IPension>
+    editPension({ id, value }: { id: string, value: IPension }): Promise<IPension>
 }
 
 export default class PensionService implements IPensionService {
@@ -61,5 +61,9 @@ export default class PensionService implements IPensionService {
 
   public async addPension (pension: IPension): Promise<IPension> {
     return await PensionModel.create(pension)
+  }
+
+  public async editPension ({ id, value }: { id: string, value: IPension }): Promise<IPension> {
+    return await PensionModel.findByIdAndUpdate(id, value, { new: true }) as unknown as IPension
   }
 }
