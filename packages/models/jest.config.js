@@ -7,5 +7,9 @@ module.exports = {
   collectCoverageFrom: [
     'src/models/**',
     'test/**'
+  ],
+  roots: [
+    'src',
+    'test'
   ]
 }
