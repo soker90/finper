@@ -1,9 +1,5 @@
-import { afterAll, afterEach, beforeAll, vi } from 'vitest'
+import { afterAll, afterEach, beforeAll } from 'vitest'
 import { server } from '../mock/server'
-
-global.structuredClone = vi.fn(val => {
-  return JSON.parse(JSON.stringify(val))
-})
 
 beforeAll(() => server.listen({ onUnhandledRequest: 'error' }))
 afterAll(() => server.close())
