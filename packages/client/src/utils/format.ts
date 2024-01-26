@@ -32,6 +32,19 @@ export const dateShort = (cell: number) => {
   })
 }
 
+/* xD */
+export const date = (cell: number) => {
+  if (!cell) {
+    return null
+  }
+
+  return new Date(cell).toLocaleDateString('es-ES', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric'
+  })
+}
+
 export const monthToNumber = (month?: number | string): string => {
   if (!month && month !== 0) return ''
   const date = new Date()

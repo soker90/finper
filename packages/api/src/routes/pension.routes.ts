@@ -30,5 +30,11 @@ export class PensionRoutes {
       authMiddleware,
       this.pensionController.pensions.bind(this.pensionController)
     )
+
+    this.router.put(
+      '/:id',
+      authMiddleware,
+      this.pensionController.edit.bind(this.pensionController)
+    )
   }
 }

@@ -63,7 +63,7 @@ describe('Account', () => {
   })
 
   test('it should save balance with 2 decimal places', async () => {
-    const account = await createAccount({ balance: faker.datatype.number({ precision: 0.001 }) })
+    const account = await createAccount({ balance: faker.number.float({ precision: 0.001 }) })
     const accountDocument: IAccount = await AccountModel.findOne({ _id: account._id }) as IAccount
 
     expect(accountDocument.balance).toBe(account.balance)

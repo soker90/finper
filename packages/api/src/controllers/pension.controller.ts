@@ -3,7 +3,7 @@ import { NextFunction, Request, Response } from 'express'
 import '../auth/local-strategy-passport-handler'
 import { IPensionService } from '../services/pension.service'
 import extractUser from '../helpers/extract-user'
-import { validatePensionCreateParams } from '../validators/pension'
+import { validatePensionCreateParams, validatePensionEditParams } from '../validators/pension'
 
 type IPensionController = {
     loggerHandler: any,
@@ -26,6 +26,20 @@ export class PensionController {
       .then(validatePensionCreateParams)
       .then(extractUser(req))
       .then(this.pensionService.addPension.bind(this.pensionService))
+      .tap(({ date }) => this.logger.logInfo(`Pension ${new Date(date).toISOString()} has been succesfully created`))
+      .then((response) => {
+        res.send(response)
+      })
+      .catch((error) => {
+        next(error)
+      })
+  }
+
+  public async edit (req: Request, res: Response, next: NextFunction): Promise<void> {
+    Promise.resolve(req as any)
+      .tap(() => this.logger.logInfo('/pensions edit'))
+      .then(validatePensionEditParams)
+      .then(this.pensionService.editPension.bind(this.pensionService))
       .tap(({ date }) => this.logger.logInfo(`Pension ${new Date(date).toISOString()} has been succesfully created`))
       .then((response) => {
         res.send(response)

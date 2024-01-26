@@ -5,7 +5,7 @@ import { getTransactionAmount } from '../../src/services/utils'
 describe('getTransactionsAmount', () => {
   test('should return the amount without the sign', () => {
     const transaction = {
-      amount: faker.datatype.number(),
+      amount: faker.number.int(),
       type: TransactionType.Income
     } as ITransaction
 
@@ -15,7 +15,7 @@ describe('getTransactionsAmount', () => {
   })
   test('should return the amount with minus sign', () => {
     const transaction = {
-      amount: faker.datatype.number(),
+      amount: faker.number.int(),
       type: TransactionType.Expense
     } as ITransaction
 
@@ -26,7 +26,7 @@ describe('getTransactionsAmount', () => {
 
   test('should return the amount equal to 0', () => {
     const transaction = {
-      amount: faker.datatype.number(),
+      amount: faker.number.int(),
       type: TransactionType.NotComputable
     } as ITransaction
 
