@@ -30,7 +30,7 @@
   },
   "homepage": "https://github.com/soker90/finper#readme",
   "engines": {
-    "node": "18.x"
+    "node": "20.x"
   },
   "dependencies": {
     "@hapi/boom": "^10.0.1",
