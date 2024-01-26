@@ -24,6 +24,7 @@ export default defineConfig({
   test: {
     globals: true,
     environment: 'happy-dom',
+    // TODO: No cargar este archivo al hacer la build, problemas con docker
     setupFiles: './src/test/setup.ts',
     coverage: {
       reporter: ['json', 'html'],

@@ -79,5 +79,5 @@ lint-client:
 	@npm run lint --workspace=@soker90/finper-client
 
 build-image-client-daily:
-	@docker build ./packages/client -t soker90/finper-client:daily -f ./packages/client/Dockerfile
-	@docker push soker90/finper-client:daily
+	@docker build ./packages/client -t soker90/finper-client:latest -f ./packages/client/Dockerfile
+	@docker push soker90/finper-client:latest
