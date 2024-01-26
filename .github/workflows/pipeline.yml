@@ -25,7 +25,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           cache: 'npm'
-          node-version: '16'
+          node-version-file: '.nvmrc'
       - name: Install dependencies
         run: npm i
       - name: Lint
@@ -40,7 +40,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           cache: 'npm'
-          node-version: '16'
+          node-version-file: '.nvmrc'
       - name: Install dependencies
         run: npm i
       - name: Build
@@ -60,7 +60,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           cache: 'npm'
-          node-version: '16'
+          node-version-file: '.nvmrc'
       - name: Install dependencies
         run: npm i
       - name: Test
@@ -80,7 +80,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           cache: 'npm'
-          node-version: '16'
+          node-version-file: '.nvmrc'
       - name: Install dependencies
         run: npm i --workspace=@soker90/finper-api
       - name: Lint
@@ -96,7 +96,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           cache: 'npm'
-          node-version: '16'
+          node-version-file: '.nvmrc'
       - uses: actions/download-artifact@v4
         with:
           name: models
@@ -116,7 +116,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           cache: 'npm'
-          node-version: '16'
+          node-version-file: '.nvmrc'
       - uses: actions/download-artifact@v4
         with:
           name: models
@@ -140,7 +140,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           cache: 'npm'
-          node-version: '16'
+          node-version-file: '.nvmrc'
       - name: Install dependencies
         run: npm i --workspace=@soker90/finper-client
       - name: Lint
@@ -155,7 +155,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           cache: 'npm'
-          node-version: '16'
+          node-version-file: '.nvmrc'
       - name: Install dependencies
         run: npm i --workspace=@soker90/finper-client
       - name: Build
@@ -171,7 +171,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           cache: 'npm'
-          node-version: '16'
+          node-version-file: '.nvmrc'
       - name: Install dependencies
         run: npm i --workspace=@soker90/finper-client
       - name: Test

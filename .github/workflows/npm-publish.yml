@@ -14,7 +14,8 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 16
+          cache: 'npm'
+          node-version-file: '.nvmrc'
       - run: npm ci --workspaces=models
       - run: npm test --workspaces=models
 
@@ -25,7 +26,8 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 16
+          cache: 'npm'
+          node-version-file: '.nvmrc'
           registry-url: https://registry.npmjs.org/
       - run: npm ci --workspaces=models
       - run: npm publish --workspaces=models
