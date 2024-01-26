@@ -14,7 +14,7 @@ interface Props {
 
 const TransactionModal = ({ onClose, transaction }: Props) => {
   const { mutate } = useSWRConfig()
-  const { register, handleSubmit, formState: { errors, isSubmitSuccessful }, control, setError, reset } = useForm({
+  const { register, handleSubmit, formState: { errors }, control, setError } = useForm({
     defaultValues: {
       date: transaction?.date || null,
       value: transaction?.value || '',
