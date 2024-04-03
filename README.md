@@ -13,6 +13,7 @@ Finper es una herramienta para la gestión de las finanzas personales. Lleva el 
 - Control de deudas contraidas y pendientes de cobrar
 - Balance de todas las cuentas bancarias o en metálico
 - Control de préstamos (En progreso)
+- Plan de jubilación
 
 ## Demo
 
