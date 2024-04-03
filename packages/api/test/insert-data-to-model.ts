@@ -6,7 +6,7 @@ import {
   IAccount,
   IDebt, IStore,
   IUser, LoanModel, StoreModel, TransactionModel,
-  PensionModel, IPension, PensionModel,
+  PensionModel, IPension,
   TransactionType,
   UserModel
 } from '@soker90/finper-models'
