@@ -8,6 +8,7 @@ const Budgets = lazy(() => import('../pages/Budgets'))
 const Categories = lazy(() => import('../pages/Categories'))
 const DashboardDefault = lazy(() => import('../pages/Dashboard'))
 const Debts = lazy(() => import('../pages/Debts'))
+const Pensions = lazy(() => import('../pages/Pensions'))
 const Transactions = lazy(() => import('../pages/Transactions'))
 const Year = lazy(() => import('../pages/Year'))
 
@@ -51,6 +52,10 @@ const MainRoutes = {
     {
       path: 'presupuestos/:year/:month',
       element: <Budgets/>
+    },
+    {
+      path: 'pension',
+      element: <Pensions/>
     }
   ]
 }

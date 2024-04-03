@@ -1,6 +1,7 @@
-import { Grid, InputBaseComponentProps, InputLabel, Stack, TextField } from '@mui/material'
+import { Grid, InputBaseComponentProps, InputLabel, Stack } from '@mui/material'
 import { DatePicker } from '@mui/x-date-pickers'
 import { Controller } from 'react-hook-form'
+import dayjs from 'dayjs'
 
 interface Props {
     id: string
@@ -25,13 +26,15 @@ const DateForm = ({ id, label, control, error, size = 2, ...others }: Props) => 
                 rules={{ required: true }}
                 render={({ field }) => (
                     <DatePicker
-                        renderInput={(params) =>
-                            <TextField variant='outlined'
-                                       error={error}
-                                       {...params} />}
-                        value={field.value}
+                        slotProps={{
+                          textField: {
+                            variant: 'outlined',
+                            error
+                          }
+                        }}
+                        value={dayjs(field.value)}
                         onChange={field.onChange}
-                        inputFormat="DD/MM/YYYY"
+                        format="DD/MM/YYYY"
                         {...others} />
                 )}
             />

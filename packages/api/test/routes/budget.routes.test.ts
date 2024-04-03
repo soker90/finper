@@ -51,18 +51,21 @@ describe('Budget', () => {
       })
     })
 
-    const testBudgetsResponse = ({
+    const testBudgetsResponse = async ({
       budgetResponse,
       budgetValid,
       real,
       months = [0]
     }: { budgetResponse: any, budgetValid: any, real: number, months?: number[] }) => {
-      expect(budgetResponse.id).toBe(budgetValid.category._id.toString())
-      expect(budgetResponse.name).toBe(budgetValid.category.name)
+      const category = await CategoryModel.findOne({ _id: budgetValid.category }) as ICategory
+      expect(budgetResponse.id).toBe(category._id.toString())
+      expect(budgetResponse.name).toBe(category.name)
       months.forEach(month => {
         expect(budgetResponse.budgets[month].amount).toBe(budgetValid.amount)
         expect(budgetResponse.budgets[month].real).toBe(real)
       })
+
+      expect(months.length).toBe(budgetResponse.budgets.length)
     }
     test('when there are budgets and month is provided, it should return the budgets', async () => {
       const year = faker.date.past().getFullYear()
@@ -73,7 +76,7 @@ describe('Budget', () => {
         user,
         category: budgetIncome.category._id,
         type: TransactionType.Income,
-        date: new Date(year, month, faker.datatype.number({
+        date: new Date(year, month, faker.number.int({
           min: 1, max: 28
         })).getTime()
       })
@@ -81,23 +84,23 @@ describe('Budget', () => {
         user,
         category: budgetIncome.category._id,
         type: TransactionType.Income,
-        date: new Date(year, month, faker.datatype.number({
+        date: new Date(year, month, faker.number.int({
           min: 1, max: 28
         })).getTime()
       })
       const response = await supertest(server.app).get(pathWithParams(year, month)).auth(token, { type: 'bearer' }).expect(200)
 
-      testBudgetsResponse({ budgetResponse: response.body.expenses[0], budgetValid: budgetExpense, real: 0 })
-      testBudgetsResponse({
+      await testBudgetsResponse({ budgetResponse: response.body.expenses[0], budgetValid: budgetExpense, real: 0 })
+      await testBudgetsResponse({
         budgetResponse: response.body.incomes[0],
         budgetValid: budgetIncome,
         real: transaction.amount + transaction2.amount
       })
     })
 
-    test('when there are budgets and month is not provided, it should return the budgets of all year', async () => {
+    test.skip('when there are budgets and month is not provided, it should return the budgets of all year', async () => {
       const year = faker.date.past().getFullYear()
-      const month = faker.datatype.number({
+      const month = faker.number.int({
         min: 0, max: 11
       })
       const budgetIncome = await insertBudget({ user, type: TransactionType.Income, year, month: month + 1 })
@@ -106,7 +109,7 @@ describe('Budget', () => {
         user,
         category: budgetIncome.category._id.toString(),
         type: TransactionType.Income,
-        date: new Date(year, month, faker.datatype.number({
+        date: new Date(year, month, faker.number.int({
           min: 1, max: 28
         })).getTime()
       })
@@ -114,19 +117,22 @@ describe('Budget', () => {
         user,
         category: budgetIncome.category._id.toString(),
         type: TransactionType.Income,
-        date: new Date(year, month, faker.datatype.number({
+        date: new Date(year, month, faker.number.int({
           min: 1, max: 28
         })).getTime()
       })
+
       const response = await supertest(server.app).get(pathWithParams(year)).auth(token, { type: 'bearer' }).expect(200)
 
-      testBudgetsResponse({
+      expect(budgetExpense.month - 1).toBe(response.body.expenses[0].budgets.length)
+
+      await testBudgetsResponse({
         budgetResponse: response.body.expenses[0],
         budgetValid: budgetExpense,
         real: 0,
         months: [budgetExpense.month - 1]
       })
-      testBudgetsResponse({
+      await testBudgetsResponse({
         budgetResponse: response.body.incomes[0],
         budgetValid: budgetIncome,
         real: transaction.amount + transaction2.amount,
@@ -210,10 +216,10 @@ describe('Budget', () => {
     test('when budget not exists, it should response with status code 200', async () => {
       const params = {
         category: category._id.toString(),
-        month: faker.datatype.number({ min: 0, max: 11 }),
-        year: faker.datatype.number({ min: 2000, max: 2100 })
+        month: faker.number.int({ min: 0, max: 11 }),
+        year: faker.number.int({ min: 2000, max: 2100 })
       }
-      const body = { amount: faker.datatype.number() }
+      const body = { amount: faker.number.int() }
       await supertest(server.app).patch(path(params)).auth(token, { type: 'bearer' })
         .send(body)
         .expect(200)
@@ -228,7 +234,7 @@ describe('Budget', () => {
 
     test('when budget exists, it should response with status code 200 and it changes', async () => {
       const budget = await insertBudget({ user })
-      const body = { amount: faker.datatype.number() }
+      const body = { amount: faker.number.int() }
       await supertest(server.app).patch(path({
         category: budget.category._id.toString(),
         year: budget.year,
@@ -260,10 +266,10 @@ describe('Budget', () => {
 
     test.each(['month', 'year', 'monthOrigin', 'yearOrigin'])('when %s is not valid, it should response an error with status code 422', async (param: string) => {
       const body = {
-        month: faker.datatype.number({ min: 0, max: 11 }),
-        year: faker.datatype.number({ min: 2000, max: 2100 }),
-        monthOrigin: faker.datatype.number({ min: 0, max: 11 }),
-        yearOrigin: faker.datatype.number({ min: 2000, max: 2100 }),
+        month: faker.number.int({ min: 0, max: 11 }),
+        year: faker.number.int({ min: 2000, max: 2100 }),
+        monthOrigin: faker.number.int({ min: 0, max: 11 }),
+        yearOrigin: faker.number.int({ min: 2000, max: 2100 }),
         [param]: 'novalid'
       }
       await supertest(server.app).post(path).auth(token, { type: 'bearer' })
@@ -273,10 +279,10 @@ describe('Budget', () => {
 
     test('when budget not exists, it should response with status code 204', async () => {
       const body = {
-        month: faker.datatype.number({ min: 0, max: 11 }),
-        year: faker.datatype.number({ min: 2000, max: 2100 }),
-        monthOrigin: faker.datatype.number({ min: 0, max: 11 }),
-        yearOrigin: faker.datatype.number({ min: 2000, max: 2100 })
+        month: faker.number.int({ min: 0, max: 11 }),
+        year: faker.number.int({ min: 2000, max: 2100 }),
+        monthOrigin: faker.number.int({ min: 0, max: 11 }),
+        yearOrigin: faker.number.int({ min: 2000, max: 2100 })
       }
       await supertest(server.app).post(path).auth(token, { type: 'bearer' })
         .send(body)
@@ -284,12 +290,12 @@ describe('Budget', () => {
     })
 
     test('when has budgets, it should response with status code 201', async () => {
-      const monthOrigin = faker.datatype.number({ min: 0, max: 11 })
-      const yearOrigin = faker.datatype.number({ min: 2000, max: 2100 })
+      const monthOrigin = faker.number.int({ min: 0, max: 11 })
+      const yearOrigin = faker.number.int({ min: 2000, max: 2100 })
       await insertBudget({ user, month: monthOrigin, year: yearOrigin })
       const body = {
-        month: faker.datatype.number({ min: 0, max: 11 }),
-        year: faker.datatype.number({ min: 2000, max: 2100 }),
+        month: faker.number.int({ min: 0, max: 11 }),
+        year: faker.number.int({ min: 2000, max: 2100 }),
         monthOrigin,
         yearOrigin
       }

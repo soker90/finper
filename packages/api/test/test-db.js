@@ -1,9 +1,6 @@
 module.exports = (mongoose) => {
   async function connect () {
-    await mongoose.connect(global.__MONGO_URI__, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true
-    })
+    await mongoose.connect(global.__MONGO_URI__)
   }
 
   async function close () {

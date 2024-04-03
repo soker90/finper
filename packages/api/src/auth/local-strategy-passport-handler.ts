@@ -11,11 +11,7 @@ passport.use(new LocalStrategy({ usernameField: 'username' }, function (user, pa
 
   const query = { username: lowercaseUser }
 
-  UserModel.findOne(query, (err: Error, userDocument: Record<string, string>) => {
-    if (err) {
-      return done(err)
-    }
-
+  UserModel.findOne(query).then((userDocument: Record<string, string>) => {
     if (!userDocument) {
       return done(null, false)
     }
@@ -27,6 +23,11 @@ passport.use(new LocalStrategy({ usernameField: 'username' }, function (user, pa
     }
 
     return done(null, userDocument)
+  }).catch((err: Error) => {
+    if (err) {
+      return done(err)
+    }
+    return done(null)
   })
 }
 ))

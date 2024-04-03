@@ -7,6 +7,7 @@ import {
   CalendarOutlined,
   ProfileOutlined
 } from '@ant-design/icons'
+import { BeachIcon } from 'components'
 
 const date = new Date()
 
@@ -69,6 +70,14 @@ const dashboard = {
       type: 'item',
       url: '/deudas',
       icon: EuroOutlined,
+      breadcrumbs: true
+    },
+    {
+      id: 'pensions',
+      title: 'Pensión',
+      type: 'item',
+      url: '/pension',
+      icon: BeachIcon,
       breadcrumbs: true
     }
   ]

@@ -4,14 +4,14 @@ export const getTransactionsSumByMonth = async ({
   user,
   year,
   month
-}: { user: string, year: number, month?: number }) => {
+}: { user: string, year: number, month: number }) => {
   return TransactionModel.aggregate([
     {
       $match: {
         user,
         date: {
           $gte: new Date(year, month || 0, 1).getTime(),
-          $lt: new Date(Number(month ? year : year + 1), Number(month ? month + 1 : 0)).getTime()
+          $lt: new Date(Number(isNaN(month) ? year + 1 : year), Number(isNaN(month) ? 0 : month + 1)).getTime()
         }
       }
     },

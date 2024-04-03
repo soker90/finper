@@ -7,9 +7,9 @@ import createStore from './create-store'
 
 export default async (params = {}): Promise<ITransaction> => (
   TransactionModel.create({
-    date: faker.datatype.number(),
+    date: faker.number.int(),
     category: (await createCategory())._id,
-    amount: faker.datatype.number(),
+    amount: faker.number.float({ min: 0.2, max: 1000, fractionDigits: 2 }),
     type: Math.random() > 0.5 ? TransactionType.Expense : TransactionType.Income,
     account: (await createAccount())._id,
     note: faker.lorem.sentence(),

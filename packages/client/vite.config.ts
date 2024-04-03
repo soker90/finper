@@ -1,6 +1,6 @@
 /// <reference types="vitest" />
 import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
+import react from '@vitejs/plugin-react-swc'
 import * as path from 'path'
 
 // https://vitejs.dev/config/
@@ -24,6 +24,7 @@ export default defineConfig({
   test: {
     globals: true,
     environment: 'happy-dom',
+    // TODO: No cargar este archivo al hacer la build, problemas con docker
     setupFiles: './src/test/setup.ts',
     coverage: {
       reporter: ['json', 'html'],

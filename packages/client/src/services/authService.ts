@@ -1,5 +1,5 @@
 /* eslint-disable class-methods-use-this */
-import jwtDecode from 'jwt-decode'
+import { jwtDecode } from 'jwt-decode'
 import axios from 'axios'
 import { FINPER_TOKEN } from 'config'
 

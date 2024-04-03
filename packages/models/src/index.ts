@@ -11,6 +11,7 @@ import { ICategory, CategoryModel } from './models/categories'
 import { IDebt, DebtModel, DebtType } from './models/debts'
 import { ILoan, LoanModel } from './models/loans'
 import { ILoanHistory, LoanHistoryType, LoanHistoryModel } from './models/loans-history'
+import { IPension, PensionModel } from './models/pensions'
 import { IStore, StoreModel } from './models/stores'
 import { ITransaction, TransactionModel, TransactionType } from './models/transactions'
 import { IUser, UserModel } from './models/users'
@@ -48,6 +49,7 @@ export {
   IDebt,
   ILoan,
   ILoanHistory,
+  IPension,
   IStore,
   ITransaction,
   IUser,
@@ -58,6 +60,7 @@ export {
   DebtModel,
   LoanModel,
   LoanHistoryModel,
+  PensionModel,
   StoreModel,
   TransactionModel,
   UserModel
