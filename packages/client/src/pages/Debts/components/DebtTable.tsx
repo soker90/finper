@@ -1,5 +1,6 @@
 import { TableMaterial } from '@soker90/react-mui-table'
 import { Grid } from '@mui/material'
+import { EditOutlined } from '@ant-design/icons'
 
 import { format } from 'utils'
 import { Debt } from 'types/debt'
@@ -8,9 +9,10 @@ interface Props {
     debts: Debt[]
     title: string
     fromTitle: string
+    onEdit: (debt: Debt) => void
 }
 
-const DebtTable = ({ debts, title, fromTitle }: Props) => (
+const DebtTable = ({ debts, title, fromTitle, onEdit }: Props) => (
     <Grid item xs={12} lg={6}>
         <TableMaterial
             columns={[
@@ -22,6 +24,11 @@ const DebtTable = ({ debts, title, fromTitle }: Props) => (
             ]}
             data={debts}
             title={title}
+            actions={[{
+              icon: EditOutlined,
+              tooltip: 'Editar',
+              onClick: onEdit
+            }]}
         />
     </Grid>
 )

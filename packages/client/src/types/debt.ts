@@ -6,11 +6,12 @@ export enum DebtType {
 }
 
 export interface Debt {
+    _id?: string;
     from: string
     date: number,
     amount: number,
     paymentDate: number,
     concept: string,
     type: DebtType,
-    user: string,
+    // user: string,
 }
