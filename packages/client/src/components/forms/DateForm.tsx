@@ -32,9 +32,9 @@ const DateForm = ({ id, label, control, error, size = 2, ...others }: Props) => 
                             error
                           }
                         }}
-                        value={dayjs(field.value)}
                         onChange={field.onChange}
                         format="DD/MM/YYYY"
+                        {...(field.value && { value: dayjs(field.value) })}
                         {...others} />
                 )}
             />
