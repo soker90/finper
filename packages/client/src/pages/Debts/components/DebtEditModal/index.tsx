@@ -1,15 +1,13 @@
-import { useState } from 'react'
 import { useForm } from 'react-hook-form'
-import { Button, FormHelperText, Grid } from '@mui/material'
 import { mutate } from 'swr'
 
 import { DateForm, InputForm, ModalGrid, SelectForm } from 'components'
-import { addDebt, deleteDebt, editDebt } from 'services/apiService'
-
-import { Debt, DebtType } from 'types'
-import './style.module.css'
-import { TYPES_DEBTS } from '../../constants'
 import { DEBTS } from 'constants/api-paths'
+import { addDebt, editDebt } from 'services/apiService'
+import { Debt, DebtType } from 'types'
+
+import { TYPES_DEBTS } from '../../constants'
+import './style.module.css'
 
 const DebtEditModal = ({
   debt,
@@ -48,18 +46,6 @@ const DebtEditModal = ({
       onClose()
     }
   })
-
-  const handleDeleteButton = async () => {
-    if (debt?._id) {
-      await deleteDebt(debt._id)
-      // @ts-ignore
-      await mutate(DEBTS, async (debts: Debt[]) => {
-        return debts.filter(d => d._id !== debt?._id)
-      })
-    }
-
-    onClose()
-  }
 
   return (
         <ModalGrid show onClose={onClose} title='Nuevo Movimiento' action={onSubmit}>

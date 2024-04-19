@@ -5,17 +5,22 @@ import { useState } from 'react'
 import { HeaderButtons } from 'components'
 import { Debt } from 'types'
 
-import { DebtCard, DebtTable, DebtEditModal } from './components'
+import { DebtCard, DebtTable, DebtEditModal, DebtRemoveModal } from './components'
 import { useDebts } from './hooks'
 
 const Debts = () => {
   const { from, to, debtsByPerson } = useDebts()
   const [selectedDebt, setSelectedDebt] = useState<Debt>()
+  const [selectedForRemove, setSelectedForRemove] = useState<Debt>()
 
   const handleClickNew = () => setSelectedDebt({} as Debt)
 
   const handleEdit = (debt: Debt) => {
     setSelectedDebt(debt)
+  }
+
+  const handleDelete = (debt: Debt) => {
+    setSelectedForRemove(debt)
   }
 
   return (
@@ -32,13 +37,15 @@ const Debts = () => {
                 ))}
             </Grid>
             <Grid container spacing={3}>
-                <DebtTable debts={from} title='Me deben' fromTitle='De' onEdit={handleEdit}/>
-                <DebtTable debts={to} title='Debo' fromTitle='A' onEdit={handleEdit}/>
+                <DebtTable debts={from} title='Me deben' fromTitle='De' onEdit={handleEdit} onRemove={handleDelete}/>
+                <DebtTable debts={to} title='Debo' fromTitle='A' onEdit={handleEdit} onRemove={handleDelete}/>
             </Grid>
             {Boolean(selectedDebt) && <DebtEditModal
               debt={selectedDebt}
               onClose={() => setSelectedDebt(undefined)}
             />}
+            {!!selectedForRemove &&
+              <DebtRemoveModal debt={selectedForRemove} onClose={() => setSelectedForRemove(undefined)}/>}
         </>
   )
 }
