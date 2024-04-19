@@ -1,6 +1,6 @@
 import axios from 'axios'
-import { ACCOUNTS, BUDGETS, CATEGORIES, PENSIONS, TRANSACTIONS } from 'constants/api-paths'
-import { Category, Transaction, TransactionType, Account, Pension, PensionTransaction } from 'types'
+import { ACCOUNTS, BUDGETS, CATEGORIES, DEBTS, PENSIONS, TRANSACTIONS } from 'constants/api-paths'
+import { Category, Transaction, TransactionType, Account, Pension, PensionTransaction, Debt } from 'types'
 
 export const editAccount = (id: string, params: {
     name?: string,
@@ -97,4 +97,22 @@ export const editPensionApi = (id: string, params: PensionTransaction): Promise<
     error?: string
 }> => {
   return axios.put(`${PENSIONS}/${id}`, params).then((data: any) => ({ data: data as Pension })).catch((error) => ({ error: error.message }))
+}
+
+export const editDebt = (id: string, params: Debt): Promise<{
+    data?: Debt,
+    error?: string | undefined
+}> => {
+  return axios.put(`${DEBTS}/${id}`, params).then((data: any) => ({ data: data as Debt })).catch((error) => ({ error: error.message }))
+}
+
+export const addDebt = (params: Debt): Promise<{
+    data?: Debt,
+    error?: string | undefined
+}> => {
+  return axios.post(DEBTS, params).then((data: any) => ({ data: data as Debt })).catch((error) => ({ error: error.message }))
+}
+
+export const deleteDebt = (id: string): Promise<{ data?: any, error?: string }> => {
+  return axios.delete(`${DEBTS}/${id}`).then((data: any) => ({ data: data as Debt })).catch((error) => ({ error: error.message }))
 }

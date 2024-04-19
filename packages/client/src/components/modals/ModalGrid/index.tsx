@@ -45,6 +45,7 @@ const ModalGrid = ({
         <Modal
             onClose={onClose}
             open={show}
+            sx={{ margin: 'auto', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
         >
             <form onSubmit={action}>
                 <Card>
