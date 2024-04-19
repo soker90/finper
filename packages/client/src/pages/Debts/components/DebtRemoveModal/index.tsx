@@ -10,9 +10,9 @@ import './style.module.css'
 const DebtRemoveModal = ({
   debt,
   onClose
-}: { debt: Debt & { _id: string }, onClose: () => void }) => {
+}: { debt: Debt, onClose: () => void }) => {
   const handleDeleteButton = async () => {
-    await deleteDebt(debt._id)
+    await deleteDebt(debt._id as string)
     onClose()
     // @ts-ignore
     await mutate(DEBTS, async (debts: Debt[]) => {
