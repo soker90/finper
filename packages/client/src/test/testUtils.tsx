@@ -1,5 +1,5 @@
 /* eslint-disable import/export */
-import React, { ReactNode } from 'react'
+import { ReactNode } from 'react'
 import { render, RenderOptions } from '@testing-library/react'
 import { AuthProvider } from 'contexts/AuthContext'
 import { BrowserRouter } from 'react-router-dom'
