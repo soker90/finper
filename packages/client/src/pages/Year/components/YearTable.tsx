@@ -35,7 +35,7 @@ const YearTable = ({ data }: Props) => {
             >
                 <TableHeaderMonths/>
                 <TableBody sx={{ 'tr:last-child': { backgroundColor: theme.palette.primary.lighter } }}>
-                    {data?.map((row: Budget) => (
+                    {data?.filter(({ total }) => Boolean(total))?.map((row: Budget) => (
                         <TableRow
                             hover
                             sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
