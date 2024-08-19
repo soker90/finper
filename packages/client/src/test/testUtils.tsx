@@ -1,4 +1,3 @@
-/* eslint-disable import/export */
 import React, { ReactNode } from 'react'
 import { render, RenderOptions } from '@testing-library/react'
 import { AuthProvider } from 'contexts/AuthContext'
