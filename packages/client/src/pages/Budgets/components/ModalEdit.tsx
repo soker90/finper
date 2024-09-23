@@ -30,7 +30,9 @@ const ModalEdit = ({ onClose, budget, year, month }: Props) => {
         <ModalGrid title='Editar cantidad' onClose={onClose} show={Boolean(budget)} action={onSubmit}>
             <InputForm label='Cantidad' id='amount'
                        error={!!errors.amount} {...register('amount', { required: true, valueAsNumber: true })}
-                       errorText='Introduce un número válido' type='number' inputProps={{ step: 'any' }}/>
+                       errorText='Introduce un número válido' type='number' inputProps={{ step: 'any' }}
+                       size={12}
+            />
 
         </ModalGrid>
     </form>
