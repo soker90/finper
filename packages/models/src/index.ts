@@ -9,6 +9,8 @@ import { IAccount, AccountModel } from './models/accounts'
 import { IBudget, BudgetModel } from './models/budgets'
 import { ICategory, CategoryModel } from './models/categories'
 import { IDebt, DebtModel, DebtType } from './models/debts'
+import { ILoan, LoanModel } from './models/loans'
+import { ILoanHistory, LoanHistoryType, LoanHistoryModel } from './models/loans-history'
 import { IPension, PensionModel } from './models/pensions'
 import { IStore, StoreModel } from './models/stores'
 import { ITransaction, TransactionModel, TransactionType } from './models/transactions'
@@ -38,12 +40,15 @@ export {
   mongoose,
 
   DebtType,
+  LoanHistoryType,
   TransactionType,
 
   IAccount,
   IBudget,
   ICategory,
   IDebt,
+  ILoan,
+  ILoanHistory,
   IPension,
   IStore,
   ITransaction,
@@ -53,6 +58,8 @@ export {
   BudgetModel,
   CategoryModel,
   DebtModel,
+  LoanModel,
+  LoanHistoryModel,
   PensionModel,
   StoreModel,
   TransactionModel,
