@@ -17,7 +17,7 @@ concurrency:
 jobs:
   ## Models ##
   lint-models:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
@@ -32,7 +32,7 @@ jobs:
         run: make lint-models
 
   build-models:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
@@ -52,8 +52,12 @@ jobs:
 
   test-models:
     needs: [ lint-models, build-models ]
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     steps:
+      - name: Install Openssl
+        run: |
+          wget http://archive.ubuntu.com/ubuntu/pool/main/o/openssl/libssl1.1_1.1.1f-1ubuntu2_amd64.deb
+          dpkg -i libssl1.1_1.1.1f-1ubuntu2_amd64.deb
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
@@ -72,7 +76,7 @@ jobs:
 
   ## API ##
   lint-api:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
@@ -88,7 +92,7 @@ jobs:
 
   build-api:
     needs: [ build-models ]
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
@@ -108,8 +112,12 @@ jobs:
 
   test-api:
     needs: [ lint-api, build-api ]
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     steps:
+      - name: Install Openssl
+        run: |
+          wget http://archive.ubuntu.com/ubuntu/pool/main/o/openssl/libssl1.1_1.1.1f-1ubuntu2_amd64.deb
+          dpkg -i libssl1.1_1.1.1f-1ubuntu2_amd64.deb
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
@@ -132,7 +140,7 @@ jobs:
 
   ## Frontend ##
   lint-client:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
@@ -147,7 +155,7 @@ jobs:
         run: make lint-client
 
   build-client:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
@@ -163,7 +171,7 @@ jobs:
 
   test-client:
     needs: [ lint-client, build-client ]
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
