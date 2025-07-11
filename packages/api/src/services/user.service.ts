@@ -31,6 +31,6 @@ export default class UserService {
 
     const { _id } = await this.UserModel.create(query)
 
-    return { username, _id }
+    return { username, _id: _id as any }
   }
 }
