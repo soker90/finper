@@ -9,6 +9,7 @@ const n26 = lazy(() => import('./N26Icon'))
 const imagin = lazy(() => import('./ImaginIcon'))
 const waylet = lazy(() => import('./WayletIcon'))
 const revolut = lazy(() => import('./RevolutIcon'))
+const bankinter = lazy(() => import('./BankinterIcon'))
 
 type BankIconsProps = {
     name: string
@@ -26,7 +27,8 @@ const Icons: Record<string, FC<any>> = {
   amazon,
   waylet,
   gourmet: (props) => <img src={gourmet} alt='goutmet' {...props} />,
-  revolut
+  revolut,
+  bankinter
 }
 
 const BankIcon: FC<BankIconsProps> = ({ name, ...props }) => {
