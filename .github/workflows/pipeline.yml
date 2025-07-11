@@ -57,7 +57,7 @@ jobs:
       - name: Install Openssl
         run: |
           wget http://archive.ubuntu.com/ubuntu/pool/main/o/openssl/libssl1.1_1.1.1f-1ubuntu2_amd64.deb
-          dpkg -i libssl1.1_1.1.1f-1ubuntu2_amd64.deb
+          sudo dpkg -i libssl1.1_1.1.1f-1ubuntu2_amd64.deb
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
@@ -117,7 +117,7 @@ jobs:
       - name: Install Openssl
         run: |
           wget http://archive.ubuntu.com/ubuntu/pool/main/o/openssl/libssl1.1_1.1.1f-1ubuntu2_amd64.deb
-          dpkg -i libssl1.1_1.1.1f-1ubuntu2_amd64.deb
+          sudo dpkg -i libssl1.1_1.1.1f-1ubuntu2_amd64.deb
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
