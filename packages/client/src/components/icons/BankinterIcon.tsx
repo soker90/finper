@@ -4,6 +4,7 @@ const BankinterIcon = (props: SVGProps<SVGSVGElement>) => (
     <svg
         xmlns="http://www.w3.org/2000/svg"
         viewBox="0 0 170.25 170.25"
+        aria-hidden="true"
         {...props}
     >
         <g>
