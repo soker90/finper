@@ -17,7 +17,7 @@
     "@emotion/react": "^11.11.4",
     "@emotion/styled": "^11.11.5",
     "@mui/material": "^5.15.15",
-    "@mui/x-date-pickers": "^7.2.0",
+    "@mui/x-date-pickers": "^8.9.0",
     "@soker90/react-mui-table": "^1.0.4",
     "axios": "^1.7.4",
     "dayjs": "^1.11.10",
