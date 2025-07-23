@@ -47,9 +47,9 @@
     "eslint-plugin-promise": "^7.0.0",
     "eslint-plugin-react": "^7.34.1",
     "happy-dom": "^15.0.0",
-    "msw": "^2.2.14",
-    "typescript": "^5.4.5",
-    "vite": "^7.0.4",
+    "msw": "^2.10.4",
+    "typescript": "^5.8.3",
+    "vite": "^7.0.5",
     "vitest": "^1.5.0"
   }
 }
