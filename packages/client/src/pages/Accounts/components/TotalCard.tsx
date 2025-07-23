@@ -15,9 +15,7 @@ const TotalCard = ({ value = 0 }: Props) => (
             <Typography variant="h4" sx={{ color: 'info.main' }}>
                 {format.euro(value)}
             </Typography>
-
         </Stack>
     </MainCard>
 )
-
 export default TotalCard

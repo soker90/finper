@@ -1,4 +1,4 @@
-import { useParams } from 'react-router-dom'
+import { useParams } from 'react-router'
 
 import { useBudgetsYear } from './hooks'
 
@@ -16,13 +16,13 @@ const Budgets = () => {
         <>
             <Header year={year ?? ''}/>
             <Grid container spacing={3} mb={3}>
-                <Grid item xs={12} md={4}>
+                <Grid size={{ xs: 12, md: 4 }}>
                     <YearCard title='Ingresos' data={incomes?.at?.(-1)?.total} color='info'/>
                 </Grid>
-                <Grid item xs={12} md={4}>
+                <Grid size={{ xs: 12, md: 4 }}>
                     <YearCard title='Gastos' data={expenses?.at?.(-1)?.total} color='error'/>
                 </Grid>
-                <Grid item xs={12} md={4}>
+                <Grid size={{ xs: 12, md: 4 }}>
                     <YearCard title='Balance' data={balance} color={balance < 0 ? 'warning' : 'success'}/>
                 </Grid>
             </Grid>

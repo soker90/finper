@@ -28,9 +28,7 @@ const HeaderButtons = ({ buttons, desktopSx }: { buttons: ButtonProps[], desktop
                     {title}
                 </Button>
             ))}
-
         </Stack>
   )
 }
-
 export default HeaderButtons

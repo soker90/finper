@@ -1,5 +1,5 @@
 import { Box, Grid } from '@mui/material'
-import { Outlet } from 'react-router-dom'
+import { Outlet } from 'react-router'
 
 import { Logo } from 'components'
 import { AuthCard, AuthBackground } from './components'
@@ -17,19 +17,18 @@ const AuthLayout = () => (
                   minHeight: '100vh'
                 }}
             >
-                <Grid item xs={12} sx={{ ml: 3, mt: 3 }}>
+                <Grid size={12} sx={{ ml: 3, mt: 3 }}>
                     <Logo/>
                 </Grid>
-                <Grid item xs={12}>
+                <Grid size={12}>
                     <Grid
-                        item
-                        xs={12}
+                        size={12}
                         container
                         justifyContent="center"
                         alignItems="center"
                         sx={{ minHeight: 'calc(100vh - 60px)' }}
                     >
-                        <Grid item>
+                        <Grid>
                             <AuthCard><Outlet/></AuthCard>
                         </Grid>
                     </Grid>

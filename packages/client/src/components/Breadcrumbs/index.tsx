@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Link, useLocation } from 'react-router-dom'
+import { Link, useLocation } from 'react-router'
 
 import MuiBreadcrumbs from '@mui/material/Breadcrumbs'
 import { Grid, Stack, Typography } from '@mui/material'
@@ -62,7 +62,7 @@ const Breadcrumbs = ({ navigation, title, ...others }: any) => {
       breadcrumbContent = (
                 <MainCard border={false} sx={{ mb: 3, bgcolor: 'transparent' }} {...others} content={false}>
                     <Grid container direction="column" justifyContent="flex-start" alignItems="flex-start" spacing={1}>
-                        <Grid item>
+                        <Grid>
                             <MuiBreadcrumbs aria-label="breadcrumb">
                                 <Typography component={Link} to="/" color="textSecondary" variant="h6"
                                             sx={{ textDecoration: 'none' }}>
@@ -73,7 +73,7 @@ const Breadcrumbs = ({ navigation, title, ...others }: any) => {
                             </MuiBreadcrumbs>
                         </Grid>
                         {title && (
-                            <Grid item sx={{ mt: 2, width: '100%' }}>
+                            <Grid sx={{ mt: 2, width: '100%' }}>
                                 <Stack direction='row' sx={{ display: 'flex', justifyContent: 'space-between' }}>
                                     <Typography data-testid='breadcrumbTitle' variant="h5">{item.title}</Typography>
                                 </Stack>

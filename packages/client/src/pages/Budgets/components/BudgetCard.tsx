@@ -22,13 +22,13 @@ const BudgetCard = ({ title, total, estimated, percentage, color, isPositive, te
                     {title}
                 </Typography>
                 <Grid container alignItems="center">
-                    <Grid item>
+                    <Grid>
                         <Typography variant="h4" color="inherit" data-testid={`total-${testId}`}>
                             {format.euro(total)}
                         </Typography>
                     </Grid>
                     {!!percentage && (
-                        <Grid item>
+                        <Grid>
                             <Chip
                                 variant="filled"
                                 color={isPositive ? 'success' : 'error'}
@@ -59,5 +59,4 @@ const BudgetCard = ({ title, total, estimated, percentage, color, isPositive, te
         </MainCard>
   )
 }
-
 export default BudgetCard

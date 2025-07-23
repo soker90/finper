@@ -20,5 +20,4 @@ const DrawerHeader = ({ open }: { open: boolean }) => {
         </DrawerHeaderStyled>
   )
 }
-
 export default DrawerHeader

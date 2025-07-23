@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Outlet } from 'react-router-dom'
+import { Outlet } from 'react-router'
 import { useTheme } from '@mui/material/styles'
 import { Box, Toolbar, useMediaQuery } from '@mui/material'
 
@@ -38,5 +38,4 @@ const MainLayout = () => {
         </AuthGuard>
   )
 }
-
 export default MainLayout

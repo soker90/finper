@@ -51,13 +51,9 @@ const CategoryItem: FC<CategoryItemProps> = ({ category, forceExpand, cancelCrea
                     <Divider className={styles.divider} />
                     <CategorytEdit category={category} hideForm={hideForm} isNew={forceExpand}
                                    rootCategories={rootCategories} />
-
                 </Collapse>
             </Paper>
-
         </>
-
   )
 }
-
 export default CategoryItem

@@ -35,7 +35,7 @@ const AuthLogin = () => {
   return (
         <form onSubmit={onSubmit}>
             <Grid container spacing={3}>
-                <Grid item xs={12}>
+                <Grid size={12}>
                     <Stack spacing={1}>
                         <InputLabel htmlFor="username">Usuario</InputLabel>
                         <OutlinedInput
@@ -52,7 +52,7 @@ const AuthLogin = () => {
                         )}
                     </Stack>
                 </Grid>
-                <Grid item xs={12}>
+                <Grid size={12}>
                     <Stack spacing={1}>
                         <InputLabel htmlFor="password">Contraseña</InputLabel>
                         <OutlinedInput
@@ -84,12 +84,12 @@ const AuthLogin = () => {
                 </Grid>
 
                 {error && (
-                    <Grid item xs={12}>
+                    <Grid size={12}>
                         <FormHelperText error>{error}</FormHelperText>
                     </Grid>
                 )}
 
-                <Grid item xs={12}>
+                <Grid size={12}>
                     <Button
                         disableElevation
                         disabled={loading}

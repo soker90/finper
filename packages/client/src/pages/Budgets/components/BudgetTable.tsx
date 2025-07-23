@@ -29,7 +29,7 @@ const BudgetTable = ({
 
   return (
         <>
-            <Grid item xs={12} lg={6}>
+            <Grid size={{ xs: 12, lg: 6 }} >
                 <TableMaterial
                     columns={[
                       { title: 'Categoría', field: 'name' },

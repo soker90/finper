@@ -1,4 +1,4 @@
-import { Link, To } from 'react-router-dom'
+import { Link, To } from 'react-router'
 import { ButtonBase, SxProps } from '@mui/material'
 
 import Logo from './Logo'

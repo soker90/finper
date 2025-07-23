@@ -54,12 +54,12 @@ const AccountEdit = ({ account, hideForm, isNew }: { account: Account, hideForm:
                            errorText='Introduce un número válido' type='number' inputProps={{ step: 'any' }} />
 
                 {error && (
-                    <Grid item xs={12}>
+                    <Grid size={12}>
                         <FormHelperText error>{error}</FormHelperText>
                     </Grid>
                 )}
 
-                <Grid item xs={12} md={6}>
+                <Grid size={{ xs: 12, md: 6 }} >
                     <Button
                         disableElevation
                         fullWidth
@@ -73,7 +73,7 @@ const AccountEdit = ({ account, hideForm, isNew }: { account: Account, hideForm:
                     </Button>
 
                 </Grid>
-                <Grid item xs={12} md={6}>
+                <Grid size={{ xs: 12, md: 6 }}>
                     <Button
                         disableElevation
                         fullWidth

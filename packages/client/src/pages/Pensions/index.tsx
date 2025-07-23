@@ -32,7 +32,7 @@ const Pension = () => {
             />
             <Grid container spacing={3} mb={2}>
                 {STATS.map((stat) => (
-                    <Grid item xs={6} sm={4} md={3} lg={2} key={stat.title}>
+                    <Grid size={{ xs: 6, sm: 4, md: 3, lg: 2 }} key={stat.title}>
                         <PensionStatCard title={stat.title} amount={pension[stat.value]} currency={stat.currency}/>
                     </Grid>
                 ))}

@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { JSX, useMemo } from 'react'
 
 import { CssBaseline, StyledEngineProvider } from '@mui/material'
 import {

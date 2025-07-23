@@ -35,7 +35,7 @@ const AutocompleteForm = ({
   ...others
 }: Props, ref: Ref<HTMLInputElement>) => {
   return (
-        <Grid item md={size} xs={12}>
+        <Grid size={{ md: size, xs: 12 }}>
             <Stack spacing={1}>
                 <InputLabel htmlFor={id}>{label}</InputLabel>
                 <Autocomplete

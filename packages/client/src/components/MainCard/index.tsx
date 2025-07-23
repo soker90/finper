@@ -26,48 +26,62 @@ const MainCard = (
     codeHighlight,
     ...others
   }: any): any => {
-  const theme = useTheme() as Theme
+  const theme = useTheme<Theme>()
   boxShadow = theme.palette.mode === 'dark' ? boxShadow || true : boxShadow
 
   return (
         <Card
             elevation={elevation || 0}
             {...others}
-            sx={{
+            sx={[theme => ({
               ...sx,
-              border: border ? '1px solid' : 'none',
               borderRadius: 2,
-              borderColor: theme.palette.mode === 'dark' ? theme.palette.divider : theme.palette.grey.A800,
+              // @ts-ignore
+              borderColor: theme.palette.grey.A800,
+              // @ts-ignore
               boxShadow: boxShadow && (!border || theme.palette.mode === 'dark') ? shadow || theme.customShadows.z1 : 'inherit',
-              ':hover': {
-                boxShadow: boxShadow ? shadow || theme.customShadows.z1 : 'inherit'
-              },
               '& pre': {
                 m: 0,
                 p: '16px !important',
                 fontFamily: theme.typography.fontFamily,
                 fontSize: '0.75rem'
-              }
-            }}
+              },
+              ...theme.applyStyles('dark', {
+                borderColor: theme.palette.divider
+              })
+            }), border
+              ? {
+                  border: '1px solid'
+                }
+              : {
+                  border: 'none'
+                }, boxShadow
+              ? {
+                  ':hover': {
+                    boxShadow: shadow || theme.customShadows.z1
+                  }
+                }
+              : {
+                  ':hover': {
+                    boxShadow: 'inherit'
+                  }
+                }]}
         >
             {!darkTitle && title && (
                 <CardHeader sx={headerSX} titleTypographyProps={{ variant: 'subtitle1' }} title={title}
-                            action={secondary}/>
+                            action={secondary} />
             )}
             {darkTitle && title && (
-                <CardHeader sx={headerSX} title={<Typography variant="h3">{title}</Typography>} action={secondary}/>
+                <CardHeader sx={headerSX} title={<Typography variant="h3">{title}</Typography>} action={secondary} />
             )}
-
-            {title && divider && <Divider/>}
-
+            {title && divider && <Divider />}
             {/* card content */}
             {content && <CardContent sx={contentSX}>{children}</CardContent>}
             {!content && children}
-
             {codeHighlight && (
                 <>
-                    <Divider sx={{ borderStyle: 'dashed' }}/>
-                    <Highlighter/>
+                    <Divider sx={{ borderStyle: 'dashed' }} />
+                    <Highlighter />
                 </>
             )}
         </Card>

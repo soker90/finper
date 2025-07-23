@@ -7,8 +7,8 @@ import Budgets from './index'
 
 describe('Budgets', async () => {
   beforeEach(() => {
-    vi.mock('react-router-dom', async () => {
-      const reactRouterDom = await vi.importActual('react-router-dom')
+    vi.mock('react-router', async () => {
+      const reactRouterDom = await vi.importActual('react-router')
       return ({
         ...reactRouterDom as any,
         useParams: vi.fn(() => ({

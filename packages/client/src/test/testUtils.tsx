@@ -2,7 +2,7 @@
 import { ReactNode } from 'react'
 import { render, RenderOptions } from '@testing-library/react'
 import { AuthProvider } from 'contexts/AuthContext'
-import { BrowserRouter } from 'react-router-dom'
+import { BrowserRouter } from 'react-router'
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
 import ThemeCustomization from 'themes/index'
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider'

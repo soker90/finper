@@ -15,7 +15,7 @@ interface Props {
 }
 
 const InputForm = ({ id, label, errorText, size = 4, ...others }: Props, ref: Ref<HTMLInputElement>) => (
-    <Grid item md={size} xs={12}>
+    <Grid size={{ md: size, xs: 12 }}>
         <Stack spacing={1}>
             <InputLabel htmlFor={id}>{label}</InputLabel>
             <OutlinedInput

@@ -15,7 +15,7 @@ const YearCard = ({ title, data = 0, color }: Props) => (
                 {title}
             </Typography>
             <Grid container alignItems="center">
-                <Grid item>
+                <Grid>
                     <Typography variant="h4" sx={{ color: `${color || 'primary'}.main` }}>
                         {format.euro(data)}
                     </Typography>
@@ -24,5 +24,4 @@ const YearCard = ({ title, data = 0, color }: Props) => (
         </Stack>
     </MainCard>
 )
-
 export default YearCard

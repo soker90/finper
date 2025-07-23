@@ -1,5 +1,5 @@
 import { Button, Grid, IconButton, Typography } from '@mui/material'
-import { Link } from 'react-router-dom'
+import { Link } from 'react-router'
 import { LeftOutlined, RightOutlined } from '@ant-design/icons'
 
 import { InlineCenter } from 'components/index'
@@ -12,11 +12,11 @@ interface Props {
 const Header = ({ year }: Props) => {
   return (
         <Grid container spacing={3} sx={{ alignItems: 'center', justifyContent: 'space-between', paddingBottom: 3 }}>
-            <Grid item>
+            <Grid>
                 <Button variant='outlined' disableElevation component={Link}
                         to={getUrlYear()} disabled={isSameDate(year)}> ACTUAL</Button>
             </Grid>
-            <Grid item sx={{ marginRight: { md: 30 } }}>
+            <Grid sx={{ marginRight: { md: 30 } }}>
                 <InlineCenter>
                     <IconButton color="primary" aria-label='izquierda' size='large' component={Link}
                                 to={getUrlYear(+year - 1)} disabled={!year}>
@@ -29,10 +29,9 @@ const Header = ({ year }: Props) => {
                     </IconButton>
                 </InlineCenter>
             </Grid>
-            <Grid item>
+            <Grid>
             </Grid>
         </Grid>
   )
 }
-
 export default Header

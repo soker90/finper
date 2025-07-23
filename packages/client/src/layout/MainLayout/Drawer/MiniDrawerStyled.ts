@@ -29,21 +29,33 @@ const closedMixin = (theme: Theme) => ({
 // ==============================|| DRAWER - MINI STYLED ||============================== //
 
 const MiniDrawerStyled: any = styled(Drawer, { shouldForwardProp: (prop) => prop !== 'open' })(({
-  theme,
-  open
+  theme
 }: any) => ({
   width: drawerWidth,
   flexShrink: 0,
   whiteSpace: 'nowrap',
   boxSizing: 'border-box',
-  ...(open && {
-    ...openedMixin(theme),
-    '& .MuiDrawer-paper': openedMixin(theme)
-  }),
-  ...(!open && {
-    ...closedMixin(theme),
-    '& .MuiDrawer-paper': closedMixin(theme)
-  })
+  variants: [{
+    props: (
+      {
+        open
+      }
+    ) => open,
+    style: {
+      ...openedMixin(theme),
+      '& .MuiDrawer-paper': openedMixin(theme)
+    }
+  }, {
+    props: (
+      {
+        open
+      }
+    ) => !open,
+    style: {
+      ...closedMixin(theme),
+      '& .MuiDrawer-paper': closedMixin(theme)
+    }
+  }]
 }))
 
 export default MiniDrawerStyled

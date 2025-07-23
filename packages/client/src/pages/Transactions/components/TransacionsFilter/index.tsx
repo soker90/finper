@@ -61,7 +61,7 @@ const TransacionsFilter = ({ filters, setFilter, resetFilter }: FilterParams) =>
                 size={2}
                 value={filters.store}
             />
-            <Grid item xs={12} md={1.5} sx={{ display: 'flex', justifyContent: 'center' }}>
+            <Grid size={{ xs: 12, md: 1.5 }} sx={{ display: 'flex', justifyContent: 'center' }}>
                 <Button startIcon={<ClearOutlined />} size='small' onClick={resetFilter}>Limpiar</Button>
             </Grid>
         </Grid>
