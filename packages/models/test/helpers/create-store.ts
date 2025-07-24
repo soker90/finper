@@ -5,7 +5,7 @@ import { StoreModel, IStore } from '../../src'
 export default (params = {}): Promise<IStore> => (
   StoreModel.create({
     name: faker.company.name(),
-    user: faker.internet.userName(),
+    user: faker.internet.username(),
     ...params
   })
 )
