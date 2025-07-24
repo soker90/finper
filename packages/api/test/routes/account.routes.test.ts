@@ -56,7 +56,7 @@ describe('Account', () => {
         .send({
           name: faker.finance.accountName(),
           bank: faker.lorem.word(),
-          balance: faker.random.numeric()
+          balance: faker.string.numeric()
         })
         .expect(200)
     })

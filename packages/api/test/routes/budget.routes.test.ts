@@ -305,9 +305,9 @@ describe('Budget', () => {
     })
 
     test('when has budgets, it should copy them', async () => {
-      const monthOrigin = faker.datatype.number({ min: 0, max: 11 })
-      const yearOrigin = faker.datatype.number({ min: 2000, max: 2100 })
-      const numBudgets = faker.datatype.number({ min: 1, max: 4 })
+      const monthOrigin = faker.number.int({ min: 0, max: 11 })
+      const yearOrigin = faker.number.int({ min: 2000, max: 2100 })
+      const numBudgets = faker.number.int({ min: 1, max: 4 })
       const oldBudgets = await Promise.all(Array.from({ length: numBudgets }, () => insertBudget({
         user,
         month: monthOrigin,
@@ -315,8 +315,8 @@ describe('Budget', () => {
       })))
 
       const body = {
-        month: faker.datatype.number({ min: 0, max: 11 }),
-        year: faker.datatype.number({ min: 2000, max: 2100 }),
+        month: faker.number.int({ min: 0, max: 11 }),
+        year: faker.number.int({ min: 2000, max: 2100 }),
         monthOrigin,
         yearOrigin
       }
