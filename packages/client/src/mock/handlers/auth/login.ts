@@ -1,13 +1,13 @@
 import { http, HttpResponse } from 'msw'
 
 export enum LoginUsernames {
-    // eslint-disable-next-line no-unused-vars
-    success = 'success',
+  // eslint-disable-next-line no-unused-vars
+  success = 'success',
 }
 
 interface LoginRequest {
-    username: LoginUsernames,
-    password: string
+  username: LoginUsernames,
+  password: string
 }
 
 const LOGIN_RESPONSE: Record<LoginUsernames, { token: string }> = {

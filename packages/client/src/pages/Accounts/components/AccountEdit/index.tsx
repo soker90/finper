@@ -40,53 +40,59 @@ const AccountEdit = ({ account, hideForm, isNew }: { account: Account, hideForm:
   }
 
   return (
-        <form onSubmit={onSubmit}>
-            <Grid container spacing={3}>
-                <InputForm id='name' label='Nombre' placeholder='Nombre de la cuenta'
-                           error={!!errors.name} {...register('name', { required: true, minLength: 3 })}
-                           errorText='Introduce un nombre de cuenta válido' />
-                <InputForm id='bank' label='Banco' placeholder='Nombre del banco'
-                           error={!!errors.bank} {...register('bank', { required: true, minLength: 3 })}
-                           errorText='Introduce un nombre de banco válido' />
+    <form onSubmit={onSubmit}>
+      <Grid container spacing={3}>
+        <InputForm
+          id='name' label='Nombre' placeholder='Nombre de la cuenta'
+          error={!!errors.name} {...register('name', { required: true, minLength: 3 })}
+          errorText='Introduce un nombre de cuenta válido'
+        />
+        <InputForm
+          id='bank' label='Banco' placeholder='Nombre del banco'
+          error={!!errors.bank} {...register('bank', { required: true, minLength: 3 })}
+          errorText='Introduce un nombre de banco válido'
+        />
 
-                <InputForm id='balance' label='Balance' placeholder='Balance'
-                           error={!!errors.balance} {...register('balance', { required: true, valueAsNumber: true })}
-                           errorText='Introduce un número válido' type='number' inputProps={{ step: 'any' }} />
+        <InputForm
+          id='balance' label='Balance' placeholder='Balance'
+          error={!!errors.balance} {...register('balance', { required: true, valueAsNumber: true })}
+          errorText='Introduce un número válido' type='number' inputProps={{ step: 'any' }}
+        />
 
-                {error && (
-                    <Grid size={12}>
-                        <FormHelperText error>{error}</FormHelperText>
-                    </Grid>
-                )}
+        {error && (
+          <Grid size={12}>
+            <FormHelperText error>{error}</FormHelperText>
+          </Grid>
+        )}
 
-                <Grid size={{ xs: 12, md: 6 }} >
-                    <Button
-                        disableElevation
-                        fullWidth
-                        size="large"
-                        variant="contained"
-                        color="error"
-                        onClick={handleDeactivateButton}
-                        hidden={!account._id}
-                    >
-                        {isNew ? 'Cancelar' : 'Desactivar'}
-                    </Button>
+        <Grid size={{ xs: 12, md: 6 }}>
+          <Button
+            disableElevation
+            fullWidth
+            size='large'
+            variant='contained'
+            color='error'
+            onClick={handleDeactivateButton}
+            hidden={!account._id}
+          >
+            {isNew ? 'Cancelar' : 'Desactivar'}
+          </Button>
 
-                </Grid>
-                <Grid size={{ xs: 12, md: 6 }}>
-                    <Button
-                        disableElevation
-                        fullWidth
-                        size="large"
-                        type="submit"
-                        variant="contained"
-                        color="primary"
-                    >
-                        Guardar
-                    </Button>
-                </Grid>
-            </Grid>
-        </form>
+        </Grid>
+        <Grid size={{ xs: 12, md: 6 }}>
+          <Button
+            disableElevation
+            fullWidth
+            size='large'
+            type='submit'
+            variant='contained'
+            color='primary'
+          >
+            Guardar
+          </Button>
+        </Grid>
+      </Grid>
+    </form>
   )
 }
 

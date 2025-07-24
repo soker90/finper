@@ -4,7 +4,7 @@ import useAuth from 'hooks/useAuth'
 const AuthGuard = ({ children }: any) => {
   const { hasToken } = useAuth()
 
-  if (!hasToken()) return <Navigate to='/login' replace/>
+  if (!hasToken()) return <Navigate to='/login' replace />
 
   return children
 }

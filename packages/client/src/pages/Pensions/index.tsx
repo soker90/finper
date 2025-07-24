@@ -21,28 +21,28 @@ const Pension = () => {
   }
 
   return (
-        <>
-            <HeaderButtons
-                buttons={[{
-                  Icon: PlusOutlined,
-                  title: 'Nueva',
-                  onClick: () => setSelectedTransaction({} as PensionTransaction)
-                }]}
-                desktopSx={{ marginTop: -7 }}
-            />
-            <Grid container spacing={3} mb={2}>
-                {STATS.map((stat) => (
-                    <Grid size={{ xs: 6, sm: 4, md: 3, lg: 2 }} key={stat.title}>
-                        <PensionStatCard title={stat.title} amount={pension[stat.value]} currency={stat.currency}/>
-                    </Grid>
-                ))}
-            </Grid>
-            <PensionTransactionsTable transactions={pension.transactions} onEdit={handleEdit}/>
-            {Boolean(selectedTransaction) && <TransactionModal
-                transaction={selectedTransaction}
-                onClose={() => setSelectedTransaction(undefined)}
-            />}
-        </>
+    <>
+      <HeaderButtons
+        buttons={[{
+          Icon: PlusOutlined,
+          title: 'Nueva',
+          onClick: () => setSelectedTransaction({} as PensionTransaction)
+        }]}
+        desktopSx={{ marginTop: -7 }}
+      />
+      <Grid container spacing={3} mb={2}>
+        {STATS.map((stat) => (
+          <Grid size={{ xs: 6, sm: 4, md: 3, lg: 2 }} key={stat.title}>
+            <PensionStatCard title={stat.title} amount={pension[stat.value]} currency={stat.currency} />
+          </Grid>
+        ))}
+      </Grid>
+      <PensionTransactionsTable transactions={pension.transactions} onEdit={handleEdit} />
+      {Boolean(selectedTransaction) && <TransactionModal
+        transaction={selectedTransaction}
+        onClose={() => setSelectedTransaction(undefined)}
+                                       />}
+    </>
   )
 }
 

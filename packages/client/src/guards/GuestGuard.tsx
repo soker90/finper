@@ -6,7 +6,7 @@ const GuestGuard = ({ children }: any) => {
 
   // TODO: check localStorage token previously in Auth component
 
-  if (hasToken()) return <Navigate to='/' replace/>
+  if (hasToken()) return <Navigate to='/' replace />
 
   return children
 }

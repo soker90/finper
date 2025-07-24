@@ -11,34 +11,39 @@ const Budgets = () => {
   const { expensesTotal, incomesTotal, balancePercentage } = useBudgetDataCard({ totalsIncomes, totalsExpenses })
 
   return (
-        <>
-            <Header month={month} year={year}/>
-            <Grid container spacing={3}>
-                <Grid size={{ xs: 12, md: 4 }}>
-                    <BudgetCard title='Gastos' total={expensesTotal.total} estimated={expensesTotal.estimated}
-                                percentage={expensesTotal.percentage} color='warning'
-                                isPositive={expensesTotal.isPositive} testId='expenses'/>
-                </Grid>
-                <Grid size={{ xs: 12, md: 4 }}>
-                    <BudgetCard title='Ingresos' total={incomesTotal.total} estimated={incomesTotal.estimated}
-                                percentage={incomesTotal.percentage} color='success'
-                                isPositive={incomesTotal.isPositive} testId='incomes'/>
-                </Grid>
-                <Grid size={{ xs: 12, md: 4 }}>
-                    <BudgetCard title='Balance' total={incomesTotal.total - expensesTotal.total}
-                                estimated={incomesTotal.estimated - expensesTotal.estimated}
-                                percentage={balancePercentage} isPositive={balancePercentage >= 100}
-                                testId='total'/>
-                </Grid>
+    <>
+      <Header month={month} year={year} />
+      <Grid container spacing={3}>
+        <Grid size={{ xs: 12, md: 4 }}>
+          <BudgetCard
+            title='Gastos' total={expensesTotal.total} estimated={expensesTotal.estimated}
+            percentage={expensesTotal.percentage} color='warning'
+            isPositive={expensesTotal.isPositive} testId='expenses'
+          />
+        </Grid>
+        <Grid size={{ xs: 12, md: 4 }}>
+          <BudgetCard
+            title='Ingresos' total={incomesTotal.total} estimated={incomesTotal.estimated}
+            percentage={incomesTotal.percentage} color='success'
+            isPositive={incomesTotal.isPositive} testId='incomes'
+          />
+        </Grid>
+        <Grid size={{ xs: 12, md: 4 }}>
+          <BudgetCard
+            title='Balance' total={incomesTotal.total - expensesTotal.total}
+            estimated={incomesTotal.estimated - expensesTotal.estimated}
+            percentage={balancePercentage} isPositive={balancePercentage >= 100}
+            testId='total'
+          />
+        </Grid>
 
-                {year &&
-                  <>
-                    <BudgetTable budgets={expenses} title={'Gastos'} year={year} month={month as string}/>
-                    <BudgetTable budgets={incomes} title={'Ingresos'} year={year} month={month as string}/>
-                  </>
-                }
-            </Grid>
-        </>
+        {year &&
+          <>
+            <BudgetTable budgets={expenses} title='Gastos' year={year} month={month as string} />
+            <BudgetTable budgets={incomes} title='Ingresos' year={year} month={month as string} />
+          </>}
+      </Grid>
+    </>
   )
 }
 

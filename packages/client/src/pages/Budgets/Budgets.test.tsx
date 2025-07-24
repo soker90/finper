@@ -19,7 +19,7 @@ describe('Budgets', async () => {
     })
   })
   it('Show title success', async () => {
-    const { findByText } = render(<Budgets/>)
+    const { findByText } = render(<Budgets />)
     const monthLabel = await findByText('Septiembre 2022')
 
     expect(monthLabel).toBeDefined()

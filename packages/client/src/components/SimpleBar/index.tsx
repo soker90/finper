@@ -37,17 +37,17 @@ const SimpleBarStyle = styled(SimpleBar)(({ theme }) => ({
 
 export default function SimpleBarScroll ({ children, sx, ...other }: any) {
   return (
-        <>
-            <RootStyle>
-                <SimpleBarStyle timeout={500} clickOnTrack={false} sx={sx} {...other}>
-                    {children}
-                </SimpleBarStyle>
-            </RootStyle>
-            <MobileView>
-                <Box sx={{ overflowX: 'auto', ...sx }} {...other}>
-                    {children}
-                </Box>
-            </MobileView>
-        </>
+    <>
+      <RootStyle>
+        <SimpleBarStyle timeout={500} clickOnTrack={false} sx={sx} {...other}>
+          {children}
+        </SimpleBarStyle>
+      </RootStyle>
+      <MobileView>
+        <Box sx={{ overflowX: 'auto', ...sx }} {...other}>
+          {children}
+        </Box>
+      </MobileView>
+    </>
   )
 }

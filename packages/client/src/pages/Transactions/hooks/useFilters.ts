@@ -1,15 +1,15 @@
 import { useReducer } from 'react'
 
 interface FilterAction {
-    type: 'set' | 'reset';
-    key?: string;
-    value?: string
+  type: 'set' | 'reset';
+  key?: string;
+  value?: string
 }
 
 export interface FilterParams {
-    setFilter: (key: string, value: string) => void,
-    resetFilter: () => void,
-    filters: any,
+  setFilter: (key: string, value: string) => void,
+  resetFilter: () => void,
+  filters: any,
 }
 
 export const useFilters = (): FilterParams => {

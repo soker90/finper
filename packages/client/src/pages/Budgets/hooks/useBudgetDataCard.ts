@@ -2,14 +2,14 @@ import { Budget } from 'types/budget'
 import { useMemo } from 'react'
 
 interface TotalReturn {
-    total: number,
-    estimated: number,
-    percentage: number,
-    isPositive: boolean
+  total: number,
+  estimated: number,
+  percentage: number,
+  isPositive: boolean
 }
 
 export const useBudgetDataCard = ({ totalsIncomes, totalsExpenses }: { totalsIncomes: Budget, totalsExpenses: Budget }): {
-    expensesTotal: TotalReturn, incomesTotal: TotalReturn, balancePercentage: number,
+  expensesTotal: TotalReturn, incomesTotal: TotalReturn, balancePercentage: number,
 } => {
   const expensesTotal = useMemo(() => {
     const total = totalsExpenses?.budgets?.[0]?.real ?? 0

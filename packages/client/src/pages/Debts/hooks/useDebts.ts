@@ -3,8 +3,11 @@ import { DEBTS } from 'constants/api-paths'
 import { Debt } from 'types'
 
 export const useDebts = (): {
-    from: Debt[], to: Debt[], isLoading: boolean, error: any,
-    debtsByPerson: { _id: string, total: number }[]
+  from: Debt[],
+  to: Debt[],
+  isLoading: boolean,
+  error: any,
+  debtsByPerson: { _id: string, total: number }[]
 } => {
   const { data, error } = useSWR(DEBTS)
 

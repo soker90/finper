@@ -1,6 +1,6 @@
 export interface Account {
-    _id?: string;
-    name: string
-    bank: string
-    balance: number
+  _id?: string;
+  name: string
+  bank: string
+  balance: number
 }

@@ -23,22 +23,27 @@ const Accounts = () => {
 
   const cancelCreate = () => setNewAccount(false)
 
-  return (<>
-            <HeaderButtons
-                buttons={[{ Icon: PlusOutlined, title: 'Nueva', onClick: handleClickNew, disabled: newAccount }]}
-                desktopSx={{ marginTop: -7 }}
-            />
+  return (
+    <>
+      <HeaderButtons
+        buttons={[{ Icon: PlusOutlined, title: 'Nueva', onClick: handleClickNew, disabled: newAccount }]}
+        desktopSx={{ marginTop: -7 }}
+      />
 
-            <ListContainer>
-                {newAccount &&
-                  <CategoryItem category={{ name: '', type: TransactionType.Expense }} forceExpand
-                                cancelCreate={cancelCreate} rootCategories={rootCategories} />}
-                {categories.map((category) => <CategoryItem key={category._id} category={category}
-                                                            rootCategories={rootCategories} />)}
-            </ListContainer>
+      <ListContainer>
+        {newAccount &&
+          <CategoryItem
+            category={{ name: '', type: TransactionType.Expense }} forceExpand
+            cancelCreate={cancelCreate} rootCategories={rootCategories}
+          />}
+        {categories.map((category) => <CategoryItem
+          key={category._id} category={category}
+          rootCategories={rootCategories}
+                                      />)}
+      </ListContainer>
 
-            {!categories.length && <p>No hay datos</p>}
-        </>
+      {!categories.length && <p>No hay datos</p>}
+    </>
   )
 }
 

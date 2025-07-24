@@ -5,5 +5,8 @@
     "packages/models",
     "packages/api",
     "packages/types"
-  ]
+  ],
+  "devDependencies": {
+    "neostandard": "^0.12.2"
+  }
 }

@@ -24,29 +24,29 @@ const Debts = () => {
   }
 
   return (
-        <>
-            <HeaderButtons
-                buttons={[{ Icon: PlusOutlined, title: 'Nueva', onClick: handleClickNew }]}
-                desktopSx={{ marginTop: -7 }}
-            />
-            <Grid container spacing={3} mb={2} mt={2}>
-                {debtsByPerson.map((debt) => (
-                    <Grid size={{ xs: 6, sm: 4, md: 3, lg: 2 }} key={debt._id}>
-                        <DebtCard person={debt._id} amount={debt.total} />
-                    </Grid>
-                ))}
-            </Grid>
-            <Grid container spacing={3}>
-                <DebtTable debts={from} title='Me deben' fromTitle='De' onEdit={handleEdit} onRemove={handleDelete} />
-                <DebtTable debts={to} title='Debo' fromTitle='A' onEdit={handleEdit} onRemove={handleDelete} />
-            </Grid>
-            {Boolean(selectedDebt) && <DebtEditModal
-              debt={selectedDebt}
-              onClose={() => setSelectedDebt(undefined)}
-            />}
-            {!!selectedForRemove &&
-              <DebtRemoveModal debt={selectedForRemove} onClose={() => setSelectedForRemove(undefined)} />}
-        </>
+    <>
+      <HeaderButtons
+        buttons={[{ Icon: PlusOutlined, title: 'Nueva', onClick: handleClickNew }]}
+        desktopSx={{ marginTop: -7 }}
+      />
+      <Grid container spacing={3} mb={2} mt={2}>
+        {debtsByPerson.map((debt) => (
+          <Grid size={{ xs: 6, sm: 4, md: 3, lg: 2 }} key={debt._id}>
+            <DebtCard person={debt._id} amount={debt.total} />
+          </Grid>
+        ))}
+      </Grid>
+      <Grid container spacing={3}>
+        <DebtTable debts={from} title='Me deben' fromTitle='De' onEdit={handleEdit} onRemove={handleDelete} />
+        <DebtTable debts={to} title='Debo' fromTitle='A' onEdit={handleEdit} onRemove={handleDelete} />
+      </Grid>
+      {Boolean(selectedDebt) && <DebtEditModal
+        debt={selectedDebt}
+        onClose={() => setSelectedDebt(undefined)}
+                                />}
+      {!!selectedForRemove &&
+        <DebtRemoveModal debt={selectedForRemove} onClose={() => setSelectedForRemove(undefined)} />}
+    </>
   )
 }
 

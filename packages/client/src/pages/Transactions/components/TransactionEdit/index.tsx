@@ -67,94 +67,103 @@ const TransactionEdit = ({
   }
 
   return (
-        <form onSubmit={onSubmit}>
-            <Grid container spacing={3}>
-                <DateForm placeholder={'Introduce una fecha'} id='date' label='Fecha'
-                          error={!!errors.date}
-                          control={control}
-                />
+    <form onSubmit={onSubmit}>
+      <Grid container spacing={3}>
+        <DateForm
+          placeholder='Introduce una fecha' id='date' label='Fecha'
+          error={!!errors.date}
+          control={control}
+        />
 
-                <SelectForm id='account' label='Cuenta'
-                            options={accounts}
-                            optionValue='_id'
-                            optionLabel='name'
-                            error={!!errors.account} {...register('account', { required: true })}
-                            errorText='Introduce una cuenta válida'
-                            size={2}/>
+        <SelectForm
+          id='account' label='Cuenta'
+          options={accounts}
+          optionValue='_id'
+          optionLabel='name'
+          error={!!errors.account} {...register('account', { required: true })}
+          errorText='Introduce una cuenta válida'
+          size={2}
+        />
 
-                <SelectForm id='type' label='Tipo'
-                            options={TYPES_TRANSACTIONS_ENTRIES}
-                            optionValue={0}
-                            optionLabel={1}
-                            size={2}
-                            error={!!errors.type} {...register('type', { required: true })}
-                />
+        <SelectForm
+          id='type' label='Tipo'
+          options={TYPES_TRANSACTIONS_ENTRIES}
+          optionValue={0}
+          optionLabel={1}
+          size={2}
+          error={!!errors.type} {...register('type', { required: true })}
+        />
 
-                <SelectGroupForm id='category' label='Categoria'
-                                 options={categories}
-                                 optionValue='_id'
-                                 optionLabel='name'
-                                 error={!!errors.category} {...register('category', { required: true })}
-                                 errorText='Introduce una categoria válida'
-                                 size={2}/>
+        <SelectGroupForm
+          id='category' label='Categoria'
+          options={categories}
+          optionValue='_id'
+          optionLabel='name'
+          error={!!errors.category} {...register('category', { required: true })}
+          errorText='Introduce una categoria válida'
+          size={2}
+        />
 
-                <InputForm id='amount' label='Cantidad' placeholder='Introduce la cantidad'
-                           error={!!errors.amount} {...register('amount', { required: true, valueAsNumber: true })}
-                           errorText='Introduce una cantidad válida'
-                           type='number' inputProps={{ step: 'any' }}
-                           size={2}
-                />
+        <InputForm
+          id='amount' label='Cantidad' placeholder='Introduce la cantidad'
+          error={!!errors.amount} {...register('amount', { required: true, valueAsNumber: true })}
+          errorText='Introduce una cantidad válida'
+          type='number' inputProps={{ step: 'any' }}
+          size={2}
+        />
 
-                <AutocompleteForm
-                    options={stores}
-                    optionLabel='name' id='store' label='Tienda'
-                    placeholder='Tienda'
-                    error={!!errors.store}
-                    errorText='Introduce una tienda válida'
-                    size={2}
-                    {...register('store')}
-                    {...(transaction?.store && { defaultValue: transaction?.store })}
-                />
+        <AutocompleteForm
+          options={stores}
+          optionLabel='name' id='store' label='Tienda'
+          placeholder='Tienda'
+          error={!!errors.store}
+          errorText='Introduce una tienda válida'
+          size={2}
+          {...register('store')}
+          {...(transaction?.store && { defaultValue: transaction?.store })}
+        />
 
-                <InputForm id='note' label='Nota' placeholder='Nota'
-                           error={!!errors.note} {...register('note')}
-                           errorText='Introduce una nota válida'
-                           size={12}/>
+        <InputForm
+          id='note' label='Nota' placeholder='Nota'
+          error={!!errors.note} {...register('note')}
+          errorText='Introduce una nota válida'
+          size={12}
+        />
 
-                {error && (
-                    <Grid size={12}>
-                        <FormHelperText error>{error}</FormHelperText>
-                    </Grid>
-                )}
+        {error && (
+          <Grid size={12}>
+            <FormHelperText error>{error}</FormHelperText>
+          </Grid>
+        )}
 
-                <Grid size={{ xs: 12, md: 6 }}>
-                    <Button
-                        disableElevation
-                        fullWidth
-                        size="large"
-                        variant="contained"
-                        color="error"
-                        onClick={handleDeleteButton}
-                        hidden={!transaction?._id}
-                    >
-                        {isNew ? 'Cancelar' : 'Eliminar'}
-                    </Button>
+        <Grid size={{ xs: 12, md: 6 }}>
+          <Button
+            disableElevation
+            fullWidth
+            size='large'
+            variant='contained'
+            color='error'
+            onClick={handleDeleteButton}
+            hidden={!transaction?._id}
+          >
+            {isNew ? 'Cancelar' : 'Eliminar'}
+          </Button>
 
-                </Grid>
-                <Grid size={{ xs: 12, md: 6 }}>
-                    <Button
-                        disableElevation
-                        fullWidth
-                        size="large"
-                        type="submit"
-                        variant="contained"
-                        color="primary"
-                    >
-                        Guardar
-                    </Button>
-                </Grid>
-            </Grid>
-        </form>
+        </Grid>
+        <Grid size={{ xs: 12, md: 6 }}>
+          <Button
+            disableElevation
+            fullWidth
+            size='large'
+            type='submit'
+            variant='contained'
+            color='primary'
+          >
+            Guardar
+          </Button>
+        </Grid>
+      </Grid>
+    </form>
   )
 }
 

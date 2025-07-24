@@ -7,8 +7,8 @@ import HeaderContent from './HeaderContent'
 import { MenuFoldOutlined, MenuUnfoldOutlined } from '@ant-design/icons'
 
 type HeaderProps = {
-    open: boolean,
-    handleDrawerToggle: () => void,
+  open: boolean,
+  handleDrawerToggle: () => void,
 }
 
 const Header = ({ open, handleDrawerToggle }: HeaderProps) => {
@@ -19,28 +19,28 @@ const Header = ({ open, handleDrawerToggle }: HeaderProps) => {
   const iconBackColorOpen = 'grey.200'
 
   const mainHeader = (
-        <Toolbar>
-            <IconButton
-                disableRipple
-                aria-label="open drawer"
-                onClick={handleDrawerToggle}
-                edge="start"
-                color="secondary"
-                sx={[{
-                  color: 'text.primary',
-                  ml: { xs: 0, lg: -2 }
-                }, open
-                  ? {
-                      bgcolor: iconBackColorOpen
-                    }
-                  : {
-                      bgcolor: iconBackColor
-                    }]}
-            >
-                {!open ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
-            </IconButton>
-            <HeaderContent />
-        </Toolbar>
+    <Toolbar>
+      <IconButton
+        disableRipple
+        aria-label='open drawer'
+        onClick={handleDrawerToggle}
+        edge='start'
+        color='secondary'
+        sx={[{
+          color: 'text.primary',
+          ml: { xs: 0, lg: -2 }
+        }, open
+          ? {
+              bgcolor: iconBackColorOpen
+            }
+          : {
+              bgcolor: iconBackColor
+            }]}
+      >
+        {!open ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
+      </IconButton>
+      <HeaderContent />
+    </Toolbar>
   )
 
   const appBar: any = {
@@ -53,17 +53,17 @@ const Header = ({ open, handleDrawerToggle }: HeaderProps) => {
   }
 
   return (
-        <>
-            {!matchDownMD
-              ? (
-                    <AppBarStyled open={open} {...appBar}>
-                        {mainHeader}
-                    </AppBarStyled>
-                )
-              : (
-                    <AppBar {...appBar}>{mainHeader}</AppBar>
-                )}
-        </>
+    <>
+      {!matchDownMD
+        ? (
+          <AppBarStyled open={open} {...appBar}>
+            {mainHeader}
+          </AppBarStyled>
+          )
+        : (
+          <AppBar {...appBar}>{mainHeader}</AppBar>
+          )}
+    </>
   )
 }
 

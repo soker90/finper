@@ -4,14 +4,14 @@ import axios from 'axios'
 
 const SwrProvider = ({ children }: { children: ReactNode }) => {
   return (
-        <SWRConfig
-            value={{
-              // refreshInterval: 30000,
-              fetcher: (url) => axios.get(url).then(res => res.data)
-            }}
-        >
-            {children}
-        </SWRConfig>
+    <SWRConfig
+      value={{
+        // refreshInterval: 30000,
+        fetcher: (url) => axios.get(url).then(res => res.data)
+      }}
+    >
+      {children}
+    </SWRConfig>
   )
 }
 

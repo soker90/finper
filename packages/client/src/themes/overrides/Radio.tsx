@@ -56,38 +56,40 @@ export default function Radio (theme: Theme) {
     MuiRadio: {
       defaultProps: {
         className: 'size-small',
-        icon: <Box className="icon" sx={{
-          width: 16,
-          height: 16,
-          border: '1px solid',
-          borderColor: 'inherit',
-          borderRadius: '50%'
-        }}/>,
+        icon: <Box
+          className='icon' sx={{
+            width: 16,
+            height: 16,
+            border: '1px solid',
+            borderColor: 'inherit',
+            borderRadius: '50%'
+          }}
+              />,
         checkedIcon: (
-                    <Box
-                        className="icon"
-                        sx={{
-                          width: 16,
-                          height: 16,
-                          border: '1px solid',
-                          borderColor: 'inherit',
-                          borderRadius: '50%',
-                          position: 'relative'
-                        }}
-                    >
-                        <Box
-                            className="dot"
-                            sx={{
-                              width: 8,
-                              height: 8,
-                              backgroundColor: 'inherit',
-                              borderRadius: '50%',
-                              position: 'absolute',
-                              top: 3,
-                              left: 3
-                            }}
-                        />
-                    </Box>
+          <Box
+            className='icon'
+            sx={{
+              width: 16,
+              height: 16,
+              border: '1px solid',
+              borderColor: 'inherit',
+              borderRadius: '50%',
+              position: 'relative'
+            }}
+          >
+            <Box
+              className='dot'
+              sx={{
+                width: 8,
+                height: 8,
+                backgroundColor: 'inherit',
+                borderRadius: '50%',
+                position: 'absolute',
+                top: 3,
+                left: 3
+              }}
+            />
+          </Box>
         )
       },
       styleOverrides: {

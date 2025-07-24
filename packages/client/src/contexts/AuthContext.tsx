@@ -2,10 +2,10 @@ import { createContext, useState, ReactNode } from 'react'
 import authService from 'services/authService'
 
 export type AuthContextParams = {
-    hasToken: () => boolean;
-    setAccessToken: (accessToken: string) => void;
-    handleLogout: () => void;
-};
+  hasToken: () => boolean;
+  setAccessToken: (accessToken: string) => void;
+  handleLogout: () => void;
+}
 
 const defaultParams = {
   hasToken: () => {
@@ -22,8 +22,8 @@ const AuthContext = createContext<AuthContextParams>(defaultParams)
 export default AuthContext
 
 type ProviderProps = {
-    children: ReactNode;
-};
+  children: ReactNode;
+}
 
 export const AuthProvider = ({ children }: ProviderProps) => {
   const [token, setToken] = useState<string | undefined>(undefined)
@@ -46,8 +46,8 @@ export const AuthProvider = ({ children }: ProviderProps) => {
   }
 
   return (
-        <AuthContext.Provider value={stateValues}>
-            {children}
-        </AuthContext.Provider>
+    <AuthContext.Provider value={stateValues}>
+      {children}
+    </AuthContext.Provider>
   )
 }

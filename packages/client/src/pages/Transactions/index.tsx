@@ -26,30 +26,33 @@ const Transactions = () => {
     pages.push(<TransactionsPage index={i} filters={filters} key={i} />)
   }
 
-  return (<>
-            <HeaderButtons
-                buttons={[{ Icon: PlusOutlined, title: 'Nueva', onClick: handleClickNew, disabled: newTransaction }]}
-                desktopSx={{ marginTop: -7 }}
-            />
+  return (
+    <>
+      <HeaderButtons
+        buttons={[{ Icon: PlusOutlined, title: 'Nueva', onClick: handleClickNew, disabled: newTransaction }]}
+        desktopSx={{ marginTop: -7 }}
+      />
 
-            <TransacionsFilter filters={filters} setFilter={setFilter} resetFilter={resetFilter} />
+      <TransacionsFilter filters={filters} setFilter={setFilter} resetFilter={resetFilter} />
 
-            <ListContainer>
-                {newTransaction &&
-                  <TransactionItem transaction={{
-                    account: '',
-                    _id: '',
-                    amount: 0,
-                    date: null,
-                    category: '',
-                    note: '',
-                    store: '',
-                    type: TransactionType.Expense
-                  } as any} forceExpand cancelCreate={cancelCreate} query={''} />}
-                {pages}
-            </ListContainer>
-          <Button variant='outlined' fullWidth onClick={() => setNumPages(numPages + 1)}>Cargar más</Button>
-        </>
+      <ListContainer>
+        {newTransaction &&
+          <TransactionItem
+            transaction={{
+              account: '',
+              _id: '',
+              amount: 0,
+              date: null,
+              category: '',
+              note: '',
+              store: '',
+              type: TransactionType.Expense
+            } as any} forceExpand cancelCreate={cancelCreate} query=''
+          />}
+        {pages}
+      </ListContainer>
+      <Button variant='outlined' fullWidth onClick={() => setNumPages(numPages + 1)}>Cargar más</Button>
+    </>
   )
 }
 

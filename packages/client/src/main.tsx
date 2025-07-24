@@ -8,11 +8,11 @@ import 'themes/types'
 import { AuthProvider } from 'contexts/AuthContext'
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
-    <StrictMode>
-        <AuthProvider>
-            <BrowserRouter basename="/">
-                <App/>
-            </BrowserRouter>
-        </AuthProvider>
-    </StrictMode>
+  <StrictMode>
+    <AuthProvider>
+      <BrowserRouter basename='/'>
+        <App />
+      </BrowserRouter>
+    </AuthProvider>
+  </StrictMode>
 )

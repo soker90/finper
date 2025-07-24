@@ -14,48 +14,48 @@ const Year = lazy(() => import('../pages/Year'))
 
 const MainRoutes = {
   path: '/',
-  element: <MainLayout/>,
+  element: <MainLayout />,
   children: [
     {
       path: '/',
-      element: <Navigate to='/dashboard/default'/>
+      element: <Navigate to='/dashboard/default' />
     },
     {
       path: 'dashboard',
       children: [
         {
           path: 'default',
-          element: <DashboardDefault/>
+          element: <DashboardDefault />
         }
       ]
     },
     {
       path: 'cuentas',
-      element: <Accounts/>
+      element: <Accounts />
     },
     {
       path: 'categorias',
-      element: <Categories/>
+      element: <Categories />
     },
     {
       path: 'movimientos',
-      element: <Transactions/>
+      element: <Transactions />
     },
     {
       path: 'deudas',
-      element: <Debts/>
+      element: <Debts />
     },
     {
       path: 'anual/:year',
-      element: <Year/>
+      element: <Year />
     },
     {
       path: 'presupuestos/:year/:month',
-      element: <Budgets/>
+      element: <Budgets />
     },
     {
       path: 'pension',
-      element: <Pensions/>
+      element: <Pensions />
     }
   ]
 }

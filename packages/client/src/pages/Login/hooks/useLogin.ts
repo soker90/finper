@@ -4,8 +4,8 @@ import useAuth from 'hooks/useAuth'
 import authService from 'services/authService'
 
 export type SendLoginParams = {
-    username: string
-    password: string
+  username: string
+  password: string
 }
 
 const ERROR_MESSAGES: Record<number | string, string> = {

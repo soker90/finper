@@ -3,7 +3,7 @@ import AppBar from '@mui/material/AppBar'
 import { drawerWidth } from 'config'
 
 interface AppBarStyledProps {
-    open?: boolean
+  open?: boolean
 }
 
 const AppBarStyled = styled(AppBar, {
