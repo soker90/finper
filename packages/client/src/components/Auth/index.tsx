@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { type JSX, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router'
 
 import SplashScreen from 'components/SplashScreen'
@@ -33,7 +33,7 @@ const Auth = ({ children }: { children: any }): JSX.Element => {
     initAuth()
   }, [])
 
-  if (isLoading) return <SplashScreen/>
+  if (isLoading) return <SplashScreen />
 
   return children
 }
