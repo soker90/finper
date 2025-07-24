@@ -3,21 +3,21 @@ import { getTransactionAmount } from './utils'
 import { roundNumber } from '../utils'
 
 export interface ITransactionService {
-    addTransaction(transaction: ITransaction): Promise<ITransaction>
+  addTransaction(transaction: ITransaction): Promise<ITransaction>
 
-    editTransaction({ id, value }: { id: string, value: ITransaction }): Promise<ITransaction>
+  editTransaction({ id, value }: { id: string, value: ITransaction }): Promise<ITransaction>
 
-    deleteTransaction(id: string): Promise<void>
+  deleteTransaction(id: string): Promise<void>
 
-    getTransactions(params: {
-        accountId?: string,
-        categoryId?: string,
-        startDate?: number,
-        endDate?: number,
-        type?: string,
-        limit?: number,
-        skip?: number,
-    }): Promise<ITransaction[]>
+  getTransactions(params: {
+    accountId?: string,
+    categoryId?: string,
+    startDate?: number,
+    endDate?: number,
+    type?: string,
+    limit?: number,
+    skip?: number,
+  }): Promise<ITransaction[]>
 
 }
 
@@ -62,15 +62,15 @@ export default class TransactionService implements ITransactionService {
   }
 
   public async getTransactions ({ page = 0, limit = 50, startDate, endDate, ...params }: {
-        user: string,
-        accountId?: string,
-        categoryId?: string,
-        startDate?: number,
-        endDate?: number,
-        type?: string,
-        limit?: number,
-        page?: number,
-    }): Promise<ITransaction[]> {
+    user: string,
+    accountId?: string,
+    categoryId?: string,
+    startDate?: number,
+    endDate?: number,
+    type?: string,
+    limit?: number,
+    page?: number,
+  }): Promise<ITransaction[]> {
     const query = {
       ...((startDate || endDate) && {
         date: {

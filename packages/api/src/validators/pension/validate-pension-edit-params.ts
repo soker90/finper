@@ -4,9 +4,9 @@ import { IPension } from '@soker90/finper-models'
 import { validatePensionExist } from '.'
 
 export const validatePensionEditParams = async ({ params, body, user }: {
-    params: { id: string },
-    body: Record<string, string>,
-    user: string
+  params: { id: string },
+  body: Record<string, string>,
+  user: string
 }): Promise<{ id: string, value: IPension }> => {
   if (params.id) {
     await validatePensionExist(params.id, user)

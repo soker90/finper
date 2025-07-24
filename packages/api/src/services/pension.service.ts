@@ -4,20 +4,20 @@ import {
 } from '@soker90/finper-models'
 
 interface PensionsResponse {
-    amount: number;
-    units: number;
-    employeeAmount: number;
-    companyAmount: number;
-    total: number;
-    transactions: IPension[]
+  amount: number;
+  units: number;
+  employeeAmount: number;
+  companyAmount: number;
+  total: number;
+  transactions: IPension[]
 }
 
 export interface IPensionService {
-    getPensions(user: string): Promise<PensionsResponse>
+  getPensions(user: string): Promise<PensionsResponse>
 
-    addPension(pension: IPension): Promise<IPension>
+  addPension(pension: IPension): Promise<IPension>
 
-    editPension({ id, value }: { id: string, value: IPension }): Promise<IPension>
+  editPension({ id, value }: { id: string, value: IPension }): Promise<IPension>
 }
 
 export default class PensionService implements IPensionService {

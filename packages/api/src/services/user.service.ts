@@ -4,7 +4,7 @@ import {
 import Boom from '@hapi/boom'
 
 export interface IUserService {
-    createUser({ username, password }: Record<string, string>): Promise<Record<string, string>>
+  createUser({ username, password }: Record<string, string>): Promise<Record<string, string>>
 }
 
 export default class UserService {

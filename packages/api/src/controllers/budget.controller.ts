@@ -7,8 +7,8 @@ import { validateBudgetGet, validateBudgetEditParams, validateBudgetCopy } from 
 import { RequestUser } from '../types'
 
 type IBudgetController = {
-    loggerHandler: any,
-    budgetService: IBudgetService,
+  loggerHandler: any,
+  budgetService: IBudgetService,
 }
 
 export class BudgetController {

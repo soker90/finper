@@ -2,11 +2,11 @@ import { IAccount, IStore, ITransaction, StoreModel } from '@soker90/finper-mode
 import { ObjectId } from 'mongoose'
 
 export interface IStoreService {
-    getAndReplaceStore(transaction: ITransaction): Promise<ITransaction>
+  getAndReplaceStore(transaction: ITransaction): Promise<ITransaction>
 
-    getStores(user: string): Promise<IAccount[]>;
+  getStores(user: string): Promise<IAccount[]>;
 
-    replaceShopValue(transaction: { value: ITransaction }): Promise<any>
+  replaceShopValue(transaction: { value: ITransaction }): Promise<any>
 }
 
 export default class StoreService implements IStoreService {

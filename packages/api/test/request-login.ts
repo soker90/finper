@@ -9,8 +9,8 @@ const defaultCredentials = {
 }
 
 type CredentialsTYpe = {
-    username: string
-    password?: string
+  username: string
+  password?: string
 }
 
 const defaultApp = require('../src/server').app

@@ -11,9 +11,9 @@ import validateRegisterInputParams from '../validators/validate-register-input-p
 import '../auth/local-strategy-passport-handler'
 
 type IAccountController = {
-    loggerHandler: any,
-    userService: IUserService,
-    authService: IAuthService,
+  loggerHandler: any,
+  userService: IUserService,
+  authService: IAuthService,
 }
 
 export class AuthController {

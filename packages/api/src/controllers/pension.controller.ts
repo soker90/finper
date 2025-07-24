@@ -6,8 +6,8 @@ import extractUser from '../helpers/extract-user'
 import { validatePensionCreateParams, validatePensionEditParams } from '../validators/pension'
 
 type IPensionController = {
-    loggerHandler: any,
-    pensionService: IPensionService,
+  loggerHandler: any,
+  pensionService: IPensionService,
 }
 
 export class PensionController {
