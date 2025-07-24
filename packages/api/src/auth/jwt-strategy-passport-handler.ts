@@ -4,6 +4,7 @@ import passportJwt from 'passport-jwt'
 import config from '../config'
 
 const {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   IUser,
   UserModel
 } = require('@soker90/finper-models')
