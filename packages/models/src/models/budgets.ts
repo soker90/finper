@@ -1,12 +1,12 @@
 import { model, ObjectId, Schema } from 'mongoose'
 
 export interface IBudget {
-    _id: ObjectId,
-    year: number,
-    month: number,
-    category: ObjectId,
-    amount: number,
-    user: string,
+  _id: ObjectId,
+  year: number,
+  month: number,
+  category: ObjectId,
+  amount: number,
+  user: string,
 }
 
 const budgetSchema = new Schema<IBudget>({

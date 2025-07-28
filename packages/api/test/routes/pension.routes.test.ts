@@ -33,17 +33,17 @@ describe('Pension', () => {
     })
 
     test('when no params provided, it should response an error with status code 422', async () => {
-      await supertest(server.app).post(path).auth(token, { type: 'bearer' }).expect(422)
+      await supertest(server.app).post(path).auth(token, { type: 'bearer' }).send({}).expect(422)
     })
 
     test.each(['date', 'employeeAmount', 'employeeUnits', 'companyAmount', 'companyUnits', 'value'])('when no %s param provided, it should response an error with status code 422', async (param: string) => {
       const params: Record<string, number> = {
         date: faker.date.recent().getTime(),
-        employeeAmount: faker.number.float({ min: 1, max: 100, precision: 2 }),
-        employeeUnits: faker.number.float({ min: 1, max: 100, precision: 5 }),
-        companyAmount: faker.number.float({ min: 1, max: 100, precision: 2 }),
-        companyUnits: faker.number.float({ min: 1, max: 100, precision: 5 }),
-        value: faker.number.float({ precision: 2 })
+        employeeAmount: faker.number.float({ min: 1, max: 100, multipleOf: 2 }),
+        employeeUnits: faker.number.float({ min: 1, max: 100, multipleOf: 5 }),
+        companyAmount: faker.number.float({ min: 1, max: 100, multipleOf: 2 }),
+        companyUnits: faker.number.float({ min: 1, max: 100, multipleOf: 5 }),
+        value: faker.number.float({ multipleOf: 2 })
       }
 
       delete params[param]
@@ -60,11 +60,11 @@ describe('Pension', () => {
         .set('Authorization', `Bearer ${token}`)
         .send({
           date: faker.date.recent().getTime(),
-          employeeAmount: faker.number.float({ min: 1, max: 100, precision: 2 }),
-          employeeUnits: faker.number.float({ min: 1, max: 100, precision: 5 }),
-          companyAmount: faker.number.float({ min: 1, max: 100, precision: 2 }),
-          companyUnits: faker.number.float({ min: 1, max: 100, precision: 5 }),
-          value: faker.number.float({ precision: 2 })
+          employeeAmount: faker.number.float({ min: 1, max: 100, multipleOf: 2 }),
+          employeeUnits: faker.number.float({ min: 1, max: 100, multipleOf: 5 }),
+          companyAmount: faker.number.float({ min: 1, max: 100, multipleOf: 2 }),
+          companyUnits: faker.number.float({ min: 1, max: 100, multipleOf: 5 }),
+          value: faker.number.float({ multipleOf: 2 })
         })
         .expect(200)
     })
@@ -143,18 +143,18 @@ describe('Pension', () => {
 
     test('when no params provided, it should response an error with status code 422', async () => {
       const pension: IPension = await insertPension({ user })
-      await supertest(server.app).put(path(pension._id.toString())).auth(token, { type: 'bearer' }).expect(422)
+      await supertest(server.app).put(path(pension._id.toString())).auth(token, { type: 'bearer' }).send({}).expect(422)
     })
 
     test.each(['date', 'employeeAmount', 'employeeUnits', 'companyAmount', 'companyUnits', 'value'])('when no %s param provided, it should response an error with status code 422', async (param: string) => {
       const pension: IPension = await insertPension({ user })
       const params: Record<string, number> = {
         date: faker.date.recent().getTime(),
-        employeeAmount: faker.number.float({ min: 1, max: 100, precision: 2 }),
-        employeeUnits: faker.number.float({ min: 1, max: 100, precision: 5 }),
-        companyAmount: faker.number.float({ min: 1, max: 100, precision: 2 }),
-        companyUnits: faker.number.float({ min: 1, max: 100, precision: 5 }),
-        value: faker.number.float({ precision: 2 })
+        employeeAmount: faker.number.float({ min: 1, max: 100, multipleOf: 2 }),
+        employeeUnits: faker.number.float({ min: 1, max: 100, multipleOf: 5 }),
+        companyAmount: faker.number.float({ min: 1, max: 100, multipleOf: 2 }),
+        companyUnits: faker.number.float({ min: 1, max: 100, multipleOf: 5 }),
+        value: faker.number.float({ multipleOf: 2 })
       }
 
       delete params[param]
@@ -170,11 +170,11 @@ describe('Pension', () => {
 
       const params = {
         date: faker.date.recent().getTime(),
-        employeeAmount: faker.number.float({ min: 1, max: 100, precision: 2 }),
-        employeeUnits: faker.number.float({ min: 1, max: 100, precision: 5 }),
-        companyAmount: faker.number.float({ min: 1, max: 100, precision: 2 }),
-        companyUnits: faker.number.float({ min: 1, max: 100, precision: 5 }),
-        value: faker.number.float({ precision: 2 })
+        employeeAmount: faker.number.float({ min: 1, max: 100, multipleOf: 2 }),
+        employeeUnits: faker.number.float({ min: 1, max: 100, multipleOf: 5 }),
+        companyAmount: faker.number.float({ min: 1, max: 100, multipleOf: 2 }),
+        companyUnits: faker.number.float({ min: 1, max: 100, multipleOf: 5 }),
+        value: faker.number.float({ multipleOf: 2 })
       }
       await supertest(server.app)
         .put(path(pension._id.toString()))

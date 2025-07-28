@@ -10,7 +10,7 @@ const Accounts = () => {
   const [newAccount, setNewAccount] = useState(false)
 
   if (isLoading) {
-    return <LoadingList/>
+    return <LoadingList />
   }
 
   const handleClickNew = () => {
@@ -19,21 +19,22 @@ const Accounts = () => {
 
   const cancelCreate = () => setNewAccount(false)
 
-  return (<>
-            <HeaderButtons
-                buttons={[{ Icon: PlusOutlined, title: 'Nueva', onClick: handleClickNew, disabled: newAccount }]}
-                desktopSx={{ marginTop: -7 }}
-            />
-            <TotalCard value={accounts.reduce((sum, account) => sum + account.balance, 0)}/>
+  return (
+    <>
+      <HeaderButtons
+        buttons={[{ Icon: PlusOutlined, title: 'Nueva', onClick: handleClickNew, disabled: newAccount }]}
+        desktopSx={{ marginTop: -7 }}
+      />
+      <TotalCard value={accounts.reduce((sum, account) => sum + account.balance, 0)} />
 
-            <ListContainer>
-                {newAccount &&
-                  <AccountItem account={{ name: '', bank: '', balance: 0 }} forceExpand cancelCreate={cancelCreate}/>}
-                {accounts.map((account) => <AccountItem key={account._id} account={account}/>)}
-            </ListContainer>
+      <ListContainer>
+        {newAccount &&
+          <AccountItem account={{ name: '', bank: '', balance: 0 }} forceExpand cancelCreate={cancelCreate} />}
+        {accounts.map((account) => <AccountItem key={account._id} account={account} />)}
+      </ListContainer>
 
-            {!accounts.length && <p>No hay datos</p>}
-        </>
+      {!accounts.length && <p>No hay datos</p>}
+    </>
   )
 }
 

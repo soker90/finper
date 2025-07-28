@@ -10,17 +10,17 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
 
 function App () {
   return (
-        <ThemeCustomization>
-            <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale='es'>
-                <SwrProvider>
-                    <Auth>
-                        <Suspense fallback={<Loader />}>
-                            <Routes />
-                        </Suspense>
-                    </Auth>
-                </SwrProvider>
-            </LocalizationProvider>
-        </ThemeCustomization>
+    <ThemeCustomization>
+      <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale='es'>
+        <SwrProvider>
+          <Auth>
+            <Suspense fallback={<Loader />}>
+              <Routes />
+            </Suspense>
+          </Auth>
+        </SwrProvider>
+      </LocalizationProvider>
+    </ThemeCustomization>
   )
 }
 

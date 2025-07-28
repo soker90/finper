@@ -33,7 +33,7 @@ describe('Debt', () => {
     })
 
     test('when no params provided, it should response an error with status code 422', async () => {
-      await supertest(server.app).post(path).auth(token, { type: 'bearer' }).expect(422)
+      await supertest(server.app).post(path).auth(token, { type: 'bearer' }).send({}).expect(422)
     })
 
     test.each(['from', 'amount', 'type'])('when no %s param provided, it should response an error with status code 422', async (param: string) => {

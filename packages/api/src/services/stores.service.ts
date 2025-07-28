@@ -1,11 +1,12 @@
 import { IAccount, IStore, ITransaction, StoreModel } from '@soker90/finper-models'
+import { ObjectId } from 'mongoose'
 
 export interface IStoreService {
-    getAndReplaceStore(transaction: ITransaction): Promise<ITransaction>
+  getAndReplaceStore(transaction: ITransaction): Promise<ITransaction>
 
-    getStores(user: string): Promise<IAccount[]>;
+  getStores(user: string): Promise<IAccount[]>;
 
-    replaceShopValue(transaction: { value: ITransaction }): Promise<any>
+  replaceShopValue(transaction: { value: ITransaction }): Promise<any>
 }
 
 export default class StoreService implements IStoreService {
@@ -18,7 +19,7 @@ export default class StoreService implements IStoreService {
         new: true,
         upsert: true
       }) as unknown as IStore
-      transaction.store = store._id
+      transaction.store = store._id as ObjectId
     }
     return transaction
   }

@@ -8,8 +8,8 @@ import extractUser from '../helpers/extract-user'
 import { RequestUser } from '../types'
 
 type IAccountController = {
-    loggerHandler: any,
-    accountService: IAccountService,
+  loggerHandler: any,
+  accountService: IAccountService,
 }
 
 export class AccountController {

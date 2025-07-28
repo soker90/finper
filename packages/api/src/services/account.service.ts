@@ -1,15 +1,15 @@
 import { AccountModel, IAccount } from '@soker90/finper-models'
 
 export interface IAccountService {
-    addAccount(account: IAccount): Promise<IAccount>;
+  addAccount(account: IAccount): Promise<IAccount>;
 
-    editAccount({ id, value }: { id: string, value: IAccount }): Promise<IAccount>;
+  editAccount({ id, value }: { id: string, value: IAccount }): Promise<IAccount>;
 
-    deleteAccount(account: IAccount): Promise<IAccount>;
+  deleteAccount(account: IAccount): Promise<IAccount>;
 
-    getAccounts(user: string): Promise<IAccount[]>;
+  getAccounts(user: string): Promise<IAccount[]>;
 
-    getAccount({ id }: { id: string }): Promise<IAccount | null>;
+  getAccount({ id }: { id: string }): Promise<IAccount | null>;
 }
 
 export default class AccountService implements IAccountService {

@@ -29,7 +29,7 @@ export async function insertCredentials (params: Record<string, string | boolean
   }
 
   return await UserModel.create({
-    password: faker.internet.password(MIN_PASSWORD_LENGTH),
+    password: faker.internet.password({ length: MIN_PASSWORD_LENGTH }),
     username: faker.internet.userName().slice(0, MAX_USERNAME_LENGTH).toLowerCase(),
     ...parsedParams
   })
@@ -94,7 +94,7 @@ export const insertDebt = async (params: Record<string, string | number> = {}): 
     ...(params.paymentDate !== 0 && { paymentDate: params.paymentDate ?? faker.number.int() }),
     concept: params.concept ?? faker.lorem.words(4),
     type: params.type ?? (Math.random() > 0.5 ? DebtType.TO : DebtType.FROM),
-    user: params.user ?? faker.internet.userName().slice(MIN_LENGTH_USERNAME, MAX_USERNAME_LENGTH).toLowerCase()
+    user: params.user ?? faker.internet.username().slice(MIN_LENGTH_USERNAME, MAX_USERNAME_LENGTH).toLowerCase()
   })
 }
 
@@ -119,7 +119,7 @@ export const insertPension = async (params: Record<string, string | number> = {}
     companyUnits: params.companyUnits ?? faker.number.int(),
     employeeUnits: params.employeeUnits ?? faker.number.int(),
     employeeAmount: params.employeeAmount ?? faker.number.int(),
-    user: params.user ?? faker.internet.userName().slice(MIN_LENGTH_USERNAME, MAX_USERNAME_LENGTH).toLowerCase()
+    user: params.user ?? faker.internet.username().slice(MIN_LENGTH_USERNAME, MAX_USERNAME_LENGTH).toLowerCase()
   })
 }
 

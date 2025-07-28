@@ -62,62 +62,66 @@ const CategoryEdit = ({
   }
 
   return (
-        <form onSubmit={onSubmit}>
-            <Grid container spacing={3}>
-                <InputForm id='name' label='Nombre' placeholder='Nombre de la categoría'
-                           error={!!errors.name} {...register('name', { required: true, minLength: 3 })}
-                           errorText='Introduce un nombre de categoría válido'/>
-                <SelectForm id='type' label='Tipo'
-                            error={!!errors.type} {...register('type', { required: true })}
-                            errorText='Introduce un tipo de gasto válido'
-                            options={TYPES_TRANSACTIONS_ENTRIES}
-                            optionValue={0}
-                            optionLabel={1}
-                />
-                <SelectForm id='parent' label='Categoría padre' placeholder='Ninguna'
-                            error={!!errors.parent} {...register('parent')}
-                            errorText='Introduce un tipo de cuenta válido'
-                            helperText='Solo si no es una categoría padre'
-                            options={[{ _id: '', name: 'Ninguna' }, ...rootCategories]}
-                            optionValue='_id'
-                            optionLabel='name'
-                />
+    <form onSubmit={onSubmit}>
+      <Grid container spacing={3}>
+        <InputForm
+          id='name' label='Nombre' placeholder='Nombre de la categoría'
+          error={!!errors.name} {...register('name', { required: true, minLength: 3 })}
+          errorText='Introduce un nombre de categoría válido'
+        />
+        <SelectForm
+          id='type' label='Tipo'
+          error={!!errors.type} {...register('type', { required: true })}
+          errorText='Introduce un tipo de gasto válido'
+          options={TYPES_TRANSACTIONS_ENTRIES}
+          optionValue={0}
+          optionLabel={1}
+        />
+        <SelectForm
+          id='parent' label='Categoría padre' placeholder='Ninguna'
+          error={!!errors.parent} {...register('parent')}
+          errorText='Introduce un tipo de cuenta válido'
+          helperText='Solo si no es una categoría padre'
+          options={[{ _id: '', name: 'Ninguna' }, ...rootCategories]}
+          optionValue='_id'
+          optionLabel='name'
+        />
 
-                {error && (
-                    <Grid item xs={12}>
-                        <FormHelperText error>{error}</FormHelperText>
-                    </Grid>
-                )}
+        {error && (
+          <Grid size={12}>
+            <FormHelperText error>{error}</FormHelperText>
+          </Grid>
+        )}
 
-                <Grid item xs={12} md={6}>
-                    <Button
-                        disableElevation
-                        fullWidth
-                        size="large"
-                        variant="contained"
-                        color="error"
-                        onClick={handleDeleteButton}
-                        hidden={!category._id}
-                    >
-                        {isNew ? 'Cancelar' : 'Eliminar'}
-                    </Button>
+        <Grid size={{ xs: 12, md: 6 }}>
+          <Button
+            disableElevation
+            fullWidth
+            size='large'
+            variant='contained'
+            color='error'
+            onClick={handleDeleteButton}
+            hidden={!category._id}
+          >
+            {isNew ? 'Cancelar' : 'Eliminar'}
+          </Button>
 
-                </Grid>
+        </Grid>
 
-                <Grid item xs={12} md={6}>
-                    <Button
-                        disableElevation
-                        fullWidth
-                        size="large"
-                        type="submit"
-                        variant="contained"
-                        color="primary"
-                    >
-                        Guardar
-                    </Button>
-                </Grid>
-            </Grid>
-        </form>
+        <Grid size={{ xs: 12, md: 6 }}>
+          <Button
+            disableElevation
+            fullWidth
+            size='large'
+            type='submit'
+            variant='contained'
+            color='primary'
+          >
+            Guardar
+          </Button>
+        </Grid>
+      </Grid>
+    </form>
   )
 }
 

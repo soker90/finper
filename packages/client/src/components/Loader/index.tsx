@@ -12,9 +12,9 @@ const Content = styled('div')(({ theme }) => ({
 }))
 
 const Loader = () => (
-    <Content>
-        <LinearProgress color="primary"/>
-    </Content>
+  <Content>
+    <LinearProgress color='primary' />
+  </Content>
 )
 
 export default Loader

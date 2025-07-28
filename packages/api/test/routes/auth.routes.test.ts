@@ -25,14 +25,14 @@ describe('Auth', () => {
     const path = '/api/auth/register'
 
     test('when no params provided, it should response an error with status code 422', async () => {
-      await supertest(server.app).post(path).expect(422)
+      await supertest(server.app).post(path).send({}).expect(422)
     })
 
     test('when no username param provided, it should response an error with status code 422', async () => {
       await supertest(server.app)
         .post(path)
         .send({
-          password: faker.internet.password(MIN_PASSWORD_LENGTH)
+          password: faker.internet.password({ length: MIN_PASSWORD_LENGTH })
         })
         .expect(422)
     })
@@ -42,7 +42,7 @@ describe('Auth', () => {
         .post(path)
         .send({
           username: 't',
-          password: faker.internet.password(MIN_PASSWORD_LENGTH)
+          password: faker.internet.password({ length: MIN_PASSWORD_LENGTH })
         })
         .expect(422)
     })
@@ -52,7 +52,7 @@ describe('Auth', () => {
         .post(path)
         .send({
           username: 'aaaaaaaaaaaaaaaa',
-          password: faker.internet.password(MIN_PASSWORD_LENGTH)
+          password: faker.internet.password({ length: MIN_PASSWORD_LENGTH })
         })
         .expect(422)
     })
@@ -71,7 +71,7 @@ describe('Auth', () => {
         .post(path)
         .send({
           username: faker.internet.userName(),
-          password: faker.internet.password(MIN_PASSWORD_LENGTH - 1)
+          password: faker.internet.password({ length: MIN_PASSWORD_LENGTH - 1 })
         })
         .expect(422)
     })
@@ -82,13 +82,13 @@ describe('Auth', () => {
       const username = faker.internet.userName().slice(0, MAX_USERNAME_LENGTH)
 
       beforeAll(async () => {
-        await insertCredentials({ username, password: faker.internet.password(MIN_PASSWORD_LENGTH - 1) })
+        await insertCredentials({ username, password: faker.internet.password({ length: MIN_PASSWORD_LENGTH - 1 }) })
 
         response = await supertest(server.app)
           .post(path)
           .send({
             username,
-            password: faker.internet.password(MIN_PASSWORD_LENGTH)
+            password: faker.internet.password({ length: MIN_PASSWORD_LENGTH })
           })
       })
 
@@ -109,7 +109,7 @@ describe('Auth', () => {
           .post(path)
           .send({
             username: getUsername(),
-            password: faker.internet.password(MIN_PASSWORD_LENGTH)
+            password: faker.internet.password({ length: MIN_PASSWORD_LENGTH })
           })
       })
 
@@ -136,13 +136,13 @@ describe('Auth', () => {
     const path = '/api/auth/login'
 
     test('when no params provided, it should response with a status code of 422', async () => {
-      await supertest(server.app).post(path).expect(422)
+      await supertest(server.app).post(path).send({}).expect(422)
     })
 
     test('when no user param provided, it should response an error with status code 422', async () => {
       await supertest(server.app)
         .post(path)
-        .send({ password: faker.internet.password(MIN_PASSWORD_LENGTH) })
+        .send({ password: faker.internet.password({ length: MIN_PASSWORD_LENGTH }) })
         .expect(422)
     })
 
@@ -163,7 +163,7 @@ describe('Auth', () => {
           .post(path)
           .send({
             username: faker.internet.userName(),
-            password: faker.internet.password(MIN_PASSWORD_LENGTH)
+            password: faker.internet.password({ length: MIN_PASSWORD_LENGTH })
           })
       })
 
@@ -178,7 +178,7 @@ describe('Auth', () => {
       let response: supertest.Response
 
       const username = getUsername()
-      const password = faker.internet.password(MIN_PASSWORD_LENGTH)
+      const password = faker.internet.password({ length: MIN_PASSWORD_LENGTH })
 
       beforeAll(async () => {
         await insertCredentials({ username })
@@ -196,7 +196,7 @@ describe('Auth', () => {
       let response: supertest.Response
 
       const username = getUsername()
-      const password = faker.internet.password(MIN_PASSWORD_LENGTH)
+      const password = faker.internet.password({ length: MIN_PASSWORD_LENGTH })
 
       beforeAll(async () => {
         await insertCredentials({

@@ -1,19 +1,19 @@
 import { Schema, model, ObjectId } from 'mongoose'
 
 export enum DebtType {
-    FROM = 'from',
-    TO = 'to',
+  FROM = 'from',
+  TO = 'to',
 }
 
 export interface IDebt {
-    _id: ObjectId,
-    from: string
-    date: number,
-    amount: number,
-    paymentDate: number,
-    concept: string,
-    type: DebtType,
-    user: string,
+  _id: ObjectId,
+  from: string
+  date: number,
+  amount: number,
+  paymentDate: number,
+  concept: string,
+  type: DebtType,
+  user: string,
 }
 
 const debtSchema = new Schema<IDebt>({

@@ -19,25 +19,25 @@ const Profile = () => {
   }
 
   return (
-        <Box sx={{ flexShrink: 0, ml: 0.75 }}>
-            <ButtonBase
-                sx={{
-                  p: 0.25,
-                  borderRadius: 1,
-                  '&:hover': { bgcolor: 'secondary.lighter' }
-                }}
-                aria-label="open profile"
-                ref={anchorRef}
-                aria-haspopup="true"
-                onClick={handleClose}
-            >
-                <Stack direction="row" spacing={2} alignItems="center" sx={{ p: 0.5 }}>
-                    <Typography variant="subtitle1">Salir</Typography>
-                    <LogoutOutlined />
-                </Stack>
-            </ButtonBase>
+    <Box sx={{ flexShrink: 0, ml: 0.75 }}>
+      <ButtonBase
+        sx={{
+          p: 0.25,
+          borderRadius: 1,
+          '&:hover': { bgcolor: 'secondary.lighter' }
+        }}
+        aria-label='open profile'
+        ref={anchorRef}
+        aria-haspopup='true'
+        onClick={handleClose}
+      >
+        <Stack direction='row' spacing={2} alignItems='center' sx={{ p: 0.5 }}>
+          <Typography variant='subtitle1'>Salir</Typography>
+          <LogoutOutlined />
+        </Stack>
+      </ButtonBase>
 
-        </Box>
+    </Box>
   )
 }
 

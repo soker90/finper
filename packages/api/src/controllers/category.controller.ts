@@ -11,8 +11,8 @@ import extractUser from '../helpers/extract-user'
 import { RequestUser } from '../types'
 
 type ICategoryController = {
-    loggerHandler: any,
-    categoryService: ICategoryService,
+  loggerHandler: any,
+  categoryService: ICategoryService,
 }
 
 export class CategoryController {

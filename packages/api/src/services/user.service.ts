@@ -4,7 +4,7 @@ import {
 import Boom from '@hapi/boom'
 
 export interface IUserService {
-    createUser({ username, password }: Record<string, string>): Promise<Record<string, string>>
+  createUser({ username, password }: Record<string, string>): Promise<Record<string, string>>
 }
 
 export default class UserService {
@@ -31,6 +31,6 @@ export default class UserService {
 
     const { _id } = await this.UserModel.create(query)
 
-    return { username, _id }
+    return { username, _id: _id as any }
   }
 }

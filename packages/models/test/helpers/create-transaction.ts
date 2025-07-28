@@ -14,7 +14,7 @@ export default async (params = {}): Promise<ITransaction> => (
     account: (await createAccount())._id,
     note: faker.lorem.sentence(),
     store: (await createStore())._id,
-    user: faker.internet.userName(),
+    user: faker.internet.username(),
     ...params
   })
 )

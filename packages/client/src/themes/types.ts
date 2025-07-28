@@ -3,29 +3,29 @@ import {
 } from '@mui/material'
 
 declare module '@emotion/react' {
-    interface PaletteColor extends MaterialPaletteColor {
-        darker: string
-        lighter: string
-    }
+  interface PaletteColor extends MaterialPaletteColor {
+    darker: string
+    lighter: string
+  }
 
-    interface Color extends MaterialColor {
-        A800: string
-    }
+  interface Color extends MaterialColor {
+    A800: string
+  }
 
-    interface Palette extends MaterialPalette {
-        grey: Color
-        primary: PaletteColor
-        error: PaletteColor
-        secondary: PaletteColor
-        warning: PaletteColor
-        info: PaletteColor
-        success: PaletteColor
-    }
+  interface Palette extends MaterialPalette {
+    grey: Color
+    primary: PaletteColor
+    error: PaletteColor
+    secondary: PaletteColor
+    warning: PaletteColor
+    info: PaletteColor
+    success: PaletteColor
+  }
 
-    export interface Theme extends MaterialUITheme {
-        customShadows: {
-            z1: string
-        }
-        palette: Palette
+  export interface Theme extends MaterialUITheme {
+    customShadows: {
+      z1: string
     }
+    palette: Palette
+  }
 }

@@ -5,10 +5,10 @@ import { mutate } from 'swr'
 import { BUDGETS } from 'constants/api-paths'
 
 interface Props {
-    onClose: () => void
-    budget: { category: string, amount: number }
-    year: string
-    month: string
+  onClose: () => void
+  budget: { category: string, amount: number }
+  year: string
+  month: string
 }
 
 const ModalEdit = ({ onClose, budget, year, month }: Props) => {
@@ -26,14 +26,19 @@ const ModalEdit = ({ onClose, budget, year, month }: Props) => {
     }
   })
 
-  return <form onSubmit={onSubmit}>
-        <ModalGrid title='Editar cantidad' onClose={onClose} show={Boolean(budget)} action={onSubmit}>
-            <InputForm label='Cantidad' id='amount'
-                       error={!!errors.amount} {...register('amount', { required: true, valueAsNumber: true })}
-                       errorText='Introduce un número válido' type='number' inputProps={{ step: 'any' }}/>
+  return (
+    <form onSubmit={onSubmit}>
+      <ModalGrid title='Editar cantidad' onClose={onClose} show={Boolean(budget)} action={onSubmit}>
+        <InputForm
+          label='Cantidad' id='amount'
+          error={!!errors.amount} {...register('amount', { required: true, valueAsNumber: true })}
+          errorText='Introduce un número válido' type='number' inputProps={{ step: 'any' }}
+          size={12}
+        />
 
-        </ModalGrid>
+      </ModalGrid>
     </form>
+  )
 }
 
 export default ModalEdit

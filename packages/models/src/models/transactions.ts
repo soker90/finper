@@ -1,21 +1,21 @@
 import { Schema, model, ObjectId } from 'mongoose'
 
 export enum TransactionType {
-    Expense = 'expense',
-    Income = 'income',
-    NotComputable = 'not_computable',
+  Expense = 'expense',
+  Income = 'income',
+  NotComputable = 'not_computable',
 }
 
 export interface ITransaction {
-    _id: ObjectId,
-    date: number,
-    category: ObjectId,
-    amount: number,
-    type: TransactionType,
-    account: ObjectId,
-    note?: string,
-    store?: ObjectId,
-    user: string,
+  _id: ObjectId,
+  date: number,
+  category: ObjectId,
+  amount: number,
+  type: TransactionType,
+  account: ObjectId,
+  note?: string,
+  store?: ObjectId,
+  user: string,
 }
 
 const transactionSchema = new Schema<ITransaction>({

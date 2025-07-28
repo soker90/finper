@@ -1,13 +1,13 @@
 import models from '@soker90/finper-models'
 
 interface IConnect {
-    user: string,
-    pass: string,
-    host: string[],
-    databaseName: string,
-    options: Record<string, unknown>,
-    mongoUri?: string;
-    port: string;
+  user: string,
+  pass: string,
+  host: string[],
+  databaseName: string,
+  options: Record<string, unknown>,
+  mongoUri?: string;
+  port: string;
 }
 
 export default {

@@ -32,7 +32,7 @@ describe('Account', () => {
     })
 
     test('when no params provided, it should response an error with status code 422', async () => {
-      await supertest(server.app).post(path).auth(token, { type: 'bearer' }).expect(422)
+      await supertest(server.app).post(path).auth(token, { type: 'bearer' }).send({}).expect(422)
     })
 
     test.each(['name', 'bank'])('when no %s param provided, it should response an error with status code 422', async (param: string) => {
@@ -56,7 +56,7 @@ describe('Account', () => {
         .send({
           name: faker.finance.accountName(),
           bank: faker.lorem.word(),
-          balance: faker.random.numeric()
+          balance: faker.string.numeric()
         })
         .expect(200)
     })
@@ -114,6 +114,7 @@ describe('Account', () => {
 
     test('when the account does not exist, it should response an error with status code 404', async () => {
       await supertest(server.app).patch(path('62a39498c4497e1fe3c2bf35')).auth(token, { type: 'bearer' })
+        .send({})
         .expect(404)
         .expect((res) => {
           expect(res.body.message).toBe(ERROR_MESSAGE.ACCOUNT.NOT_FOUND)
@@ -122,7 +123,7 @@ describe('Account', () => {
 
     test('when no params provided, it should response an error with status code 422', async () => {
       const account: IAccount = await insertAccount({ user: username })
-      await supertest(server.app).patch(path(account._id.toString())).auth(token, { type: 'bearer' }).expect(422)
+      await supertest(server.app).patch(path(account._id.toString())).auth(token, { type: 'bearer' }).send({}).expect(422)
     })
 
     test.each(['name', 'bank', 'balance'])('when no %s param provided and other is name or bank, it should response an error with status code 422', async (param: string) => {

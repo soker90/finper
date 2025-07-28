@@ -1,15 +1,15 @@
 import { IDebt, DebtModel, DebtType } from '@soker90/finper-models'
 
 export interface IDebtService {
-    addDebt(debt: IDebt): Promise<IDebt>
+  addDebt(debt: IDebt): Promise<IDebt>
 
-    editDebt({ id, value }: { id: string, value: IDebt }): Promise<IDebt>
+  editDebt({ id, value }: { id: string, value: IDebt }): Promise<IDebt>
 
-    getDebts(userId: string): Promise<{ to: IDebt[], from: IDebt[], debtsByPerson: { _id: string, amount: number }[] }>
+  getDebts(userId: string): Promise<{ to: IDebt[], from: IDebt[], debtsByPerson: { _id: string, amount: number }[] }>
 
-    getDebtsFrom({ user, from }: { user: string, from: string }): Promise<IDebt[]>
+  getDebtsFrom({ user, from }: { user: string, from: string }): Promise<IDebt[]>
 
-    deleteDebt(id: string): Promise<void>
+  deleteDebt(id: string): Promise<void>
 
 }
 
