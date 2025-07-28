@@ -33,7 +33,7 @@ describe('Category', () => {
     })
 
     test('when no params provided, it should response an error with status code 422', async () => {
-      await supertest(server.app).post(path).auth(token, { type: 'bearer' }).expect(422)
+      await supertest(server.app).post(path).auth(token, { type: 'bearer' }).send({}).expect(422)
     })
 
     test.each(['name', 'type'])('when no %s param provided, it should response an error with status code 422', async (param: string) => {
@@ -107,6 +107,7 @@ describe('Category', () => {
 
     test('when the category does not exist, it should response an error with status code 404', async () => {
       await supertest(server.app).patch(path('62a39498c4497e1fe3c2bf35')).auth(token, { type: 'bearer' })
+        .send({})
         .expect(404)
         .expect((res) => {
           expect(res.body.message).toBe(ERROR_MESSAGE.CATEGORY.NOT_FOUND)
@@ -115,7 +116,7 @@ describe('Category', () => {
 
     test('when user is distinct, it should response an error with status code 404', async () => {
       const category: ICategory = await insertCategory()
-      await supertest(server.app).patch(path(category._id.toString())).auth(token, { type: 'bearer' }).expect(404)
+      await supertest(server.app).patch(path(category._id.toString())).auth(token, { type: 'bearer' }).send({}).expect(404)
     })
 
     test.each(['name', 'type'])('when no %s param provided, it should response an error with status code 422', async (param: string) => {
