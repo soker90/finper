@@ -194,6 +194,7 @@ describe('Budget', () => {
         month: 1,
         year: 3
       })).auth(token, { type: 'bearer' })
+          .send({})
         .expect(422)
         .expect((res) => {
           expect(res.body.message).toBe(ERROR_MESSAGE.BUDGET.INVALID_AMOUNT)

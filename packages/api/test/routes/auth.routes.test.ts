@@ -25,7 +25,7 @@ describe('Auth', () => {
     const path = '/api/auth/register'
 
     test('when no params provided, it should response an error with status code 422', async () => {
-      await supertest(server.app).post(path).expect(422)
+      await supertest(server.app).post(path).send({}).expect(422)
     })
 
     test('when no username param provided, it should response an error with status code 422', async () => {
@@ -136,7 +136,7 @@ describe('Auth', () => {
     const path = '/api/auth/login'
 
     test('when no params provided, it should response with a status code of 422', async () => {
-      await supertest(server.app).post(path).expect(422)
+      await supertest(server.app).post(path).send({}).expect(422)
     })
 
     test('when no user param provided, it should response an error with status code 422', async () => {
