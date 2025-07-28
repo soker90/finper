@@ -45,7 +45,7 @@
     "@vitest/coverage-v8": "^1.5.0",
     "eslint": "^9.31.0",
     "eslint-plugin-react": "^7.37.5",
-    "happy-dom": "^15.0.0",
+    "happy-dom": "^18.0.1",
     "msw": "^2.10.4",
     "neostandard": "^0.12.2",
     "typescript": "^5.8.3",
