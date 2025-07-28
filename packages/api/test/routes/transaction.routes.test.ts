@@ -204,8 +204,8 @@ describe('Transaction', () => {
     test('when no params provided, it should response an error with status code 422', async () => {
       const transaction: ITransaction = await insertTransaction({ user: username })
       await supertest(server.app).put(path(transaction._id.toString())).auth(token, { type: 'bearer' })
-          .send({})
-          .expect(422)
+        .send({})
+        .expect(422)
     })
 
     test.each(['date', 'category', 'amount', 'type', 'account'])('when no %s param provided, it should response an error with status code 422', async (param: string) => {

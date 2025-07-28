@@ -107,7 +107,7 @@ describe('Category', () => {
 
     test('when the category does not exist, it should response an error with status code 404', async () => {
       await supertest(server.app).patch(path('62a39498c4497e1fe3c2bf35')).auth(token, { type: 'bearer' })
-          .send({})
+        .send({})
         .expect(404)
         .expect((res) => {
           expect(res.body.message).toBe(ERROR_MESSAGE.CATEGORY.NOT_FOUND)
