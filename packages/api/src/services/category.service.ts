@@ -1,15 +1,15 @@
 import { CategoryModel, ICategory } from '@soker90/finper-models'
 
 export interface ICategoryService {
-    addCategory(category: ICategory): Promise<ICategory>
+  addCategory(category: ICategory): Promise<ICategory>
 
-    editCategory({ id, value }: { id: string, value: ICategory }): Promise<ICategory>
+  editCategory({ id, value }: { id: string, value: ICategory }): Promise<ICategory>
 
-    deleteCategory({ id }: { id: string }): Promise<void>
+  deleteCategory({ id }: { id: string }): Promise<void>
 
-    getCategories(user: string): Promise<ICategory[]>
+  getCategories(user: string): Promise<ICategory[]>
 
-    getGroupedCategories(): Promise<any[]>
+  getGroupedCategories(): Promise<any[]>
 
 }
 

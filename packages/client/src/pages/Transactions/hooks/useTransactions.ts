@@ -4,8 +4,8 @@ import { Transaction } from 'types'
 import { objectToParams } from 'utils/objectToParams'
 
 interface UseTransactions {
-    index: number,
-    filters: any,
+  index: number,
+  filters: any,
 }
 
 export const useTransactions = ({

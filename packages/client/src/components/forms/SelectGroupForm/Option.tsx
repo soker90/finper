@@ -3,13 +3,13 @@ const Option = ({
   optionValue,
   optionLabel
 }: {
-    child: any
-    optionValue: string | number
-    optionLabel: string | number
+  child: any
+  optionValue: string | number
+  optionLabel: string | number
 }) => (
-    <option key={child[optionValue]} value={child[optionValue]}>
-        {child[optionLabel]}
-    </option>
+  <option key={child[optionValue]} value={child[optionValue]}>
+    {child[optionLabel]}
+  </option>
 )
 
 export default Option

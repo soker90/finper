@@ -16,7 +16,7 @@ describe('Users', () => {
 
   describe('when there is a new user', () => {
     const accountData = {
-      username: faker.internet.userName(),
+      username: faker.internet.username(),
       password: faker.internet.password()
     }
 

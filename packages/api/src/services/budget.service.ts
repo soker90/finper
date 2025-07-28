@@ -2,32 +2,32 @@ import { CategoryModel, TransactionType, mongoose, IBudget, BudgetModel } from '
 import { calcBudgetByMonths, getTransactionsSumByMonth } from './utils'
 
 interface CategoriesWithBudgets {
-    _id: mongoose.ObjectId,
-    name: string,
-    type: string,
-    budgets: {
-        month: number,
-        amount: number,
-        budgetId: mongoose.ObjectId
-    }[]
+  _id: mongoose.ObjectId,
+  name: string,
+  type: string,
+  budgets: {
+    month: number,
+    amount: number,
+    budgetId: mongoose.ObjectId
+  }[]
 }
 
 export interface IBudgetService {
-    getBudgets({
-      user,
-      year,
-      month
-    }: { user: string; year: number; month: number }): Promise<any>
+  getBudgets({
+    user,
+    year,
+    month
+  }: { user: string; year: number; month: number }): Promise<any>
 
-    editBudget({ category, year, month, user, amount }: IBudget): Promise<IBudget>
+  editBudget({ category, year, month, user, amount }: IBudget): Promise<IBudget>
 
-    copy({
-      monthOrigin,
-      yearOrigin,
-      month,
-      year,
-      user
-    }: { monthOrigin: number, yearOrigin: number, month: number, year: number, user: string }): Promise<IBudget[] | null>
+  copy({
+    monthOrigin,
+    yearOrigin,
+    month,
+    year,
+    user
+  }: { monthOrigin: number, yearOrigin: number, month: number, year: number, user: string }): Promise<IBudget[] | null>
 }
 
 export default class BudgetService implements IBudgetService {
@@ -88,13 +88,13 @@ export default class BudgetService implements IBudgetService {
 
   private getTotalsByMonth = (categories: any[]): { name: string, id: string, budgets: { amount: number, real: number, month?: number, year?: number }[] } => {
     const totals: {
-            name: string, id: string, budgets: { amount: number, real: number }[], total: number
-        } = {
-          name: 'Totales',
-          id: 'totals',
-          budgets: [],
-          total: 0
-        }
+      name: string, id: string, budgets: { amount: number, real: number }[], total: number
+    } = {
+      name: 'Totales',
+      id: 'totals',
+      budgets: [],
+      total: 0
+    }
 
     let totalYear = 0
 

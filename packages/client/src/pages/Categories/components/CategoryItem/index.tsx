@@ -16,10 +16,10 @@ const CATEGORY_TYPE = {
 }
 
 interface CategoryItemProps {
-    category: Category
-    forceExpand?: boolean
-    cancelCreate?: () => void
-    rootCategories: Category[]
+  category: Category
+  forceExpand?: boolean
+  cancelCreate?: () => void
+  rootCategories: Category[]
 }
 
 const CategoryItem: FC<CategoryItemProps> = ({ category, forceExpand, cancelCreate, rootCategories }) => {
@@ -32,32 +32,33 @@ const CategoryItem: FC<CategoryItemProps> = ({ category, forceExpand, cancelCrea
   }, [category._id])
 
   return (
-        <>
-            <Paper component='li'>
-                <ItemContent onClick={() => setExpand(toggle => !toggle)}>
-                    <div className={styles.logoName}>
-                        <span>{category.name}</span>
-                        {!category.parent && <Chip
-                            label='Principal'
-                            size="small"
-                            color="success"
-                            sx={{ height: 16, '& .MuiChip-label': { fontSize: '0.75rem', py: 0.25 }, ml: 1 }}
-                        />}
-                    </div>
-                    <Typography variant='h4'
-                                color={theme.palette.primary.main}>{CATEGORY_TYPE[category.type]}</Typography>
-                </ItemContent>
-                <Collapse in={expand} timeout="auto" unmountOnExit>
-                    <Divider className={styles.divider} />
-                    <CategorytEdit category={category} hideForm={hideForm} isNew={forceExpand}
-                                   rootCategories={rootCategories} />
-
-                </Collapse>
-            </Paper>
-
-        </>
-
+    <>
+      <Paper component='li'>
+        <ItemContent onClick={() => setExpand(toggle => !toggle)}>
+          <div className={styles.logoName}>
+            <span>{category.name}</span>
+            {!category.parent && <Chip
+              label='Principal'
+              size='small'
+              color='success'
+              sx={{ height: 16, '& .MuiChip-label': { fontSize: '0.75rem', py: 0.25 }, ml: 1 }}
+                                 />}
+          </div>
+          <Typography
+            variant='h4'
+            color={theme.palette.primary.main}
+          >{CATEGORY_TYPE[category.type]}
+          </Typography>
+        </ItemContent>
+        <Collapse in={expand} timeout='auto' unmountOnExit>
+          <Divider className={styles.divider} />
+          <CategorytEdit
+            category={category} hideForm={hideForm} isNew={forceExpand}
+            rootCategories={rootCategories}
+          />
+        </Collapse>
+      </Paper>
+    </>
   )
 }
-
 export default CategoryItem

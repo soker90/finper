@@ -7,8 +7,8 @@ import { IDebtService } from '../services/debt.service'
 import { validateDebtCreateParams, validateDebtEditParams, validateDebtExist } from '../validators/debt'
 
 type IDebtController = {
-    loggerHandler: any,
-    debtService: IDebtService,
+  loggerHandler: any,
+  debtService: IDebtService,
 }
 
 export class DebtController {

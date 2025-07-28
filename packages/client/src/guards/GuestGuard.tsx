@@ -1,4 +1,4 @@
-import { Navigate } from 'react-router-dom'
+import { Navigate } from 'react-router'
 import useAuth from 'hooks/useAuth'
 
 const GuestGuard = ({ children }: any) => {
@@ -6,7 +6,7 @@ const GuestGuard = ({ children }: any) => {
 
   // TODO: check localStorage token previously in Auth component
 
-  if (hasToken()) return <Navigate to='/' replace/>
+  if (hasToken()) return <Navigate to='/' replace />
 
   return children
 }

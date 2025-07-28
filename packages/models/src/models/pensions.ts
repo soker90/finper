@@ -1,14 +1,14 @@
 import { model, ObjectId, Schema } from 'mongoose'
 
 export interface IPension {
-    _id: ObjectId,
-    date: number,
-    employeeAmount: number,
-    employeeUnits: number,
-    companyAmount: number,
-    companyUnits: number,
-    value: number,
-    user: string,
+  _id: ObjectId,
+  date: number,
+  employeeAmount: number,
+  employeeUnits: number,
+  companyAmount: number,
+  companyUnits: number,
+  value: number,
+  user: string,
 }
 
 const pensionSchema = new Schema<IPension>({

@@ -1,3 +1,4 @@
+/** @type {import('jest').Config} */
 module.exports = {
   preset: '@shelf/jest-mongodb',
   transform: {
@@ -5,7 +6,9 @@ module.exports = {
   },
   collectCoverage: true,
   collectCoverageFrom: [
-    'src/**',
-    'test/**'
+    'src/**/*.{ts,js}',
+    'test/**/*.{ts,js}',
+    '!**/node_modules/**',
+    '!**/dist/**'
   ]
 }

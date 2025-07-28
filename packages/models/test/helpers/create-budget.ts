@@ -10,7 +10,7 @@ export default async (params = {}): Promise<IBudget> => {
       month: faker.date.recent().getMonth(),
       category: (await createCategory())._id,
       amount: faker.number.int(),
-      user: faker.internet.userName(),
+      user: faker.internet.username(),
       ...params
     })
   )

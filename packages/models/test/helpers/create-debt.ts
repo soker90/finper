@@ -10,7 +10,7 @@ const createDebt = async (params = {}): Promise<IDebt> => (
     paymentDate: faker.number.int(),
     concept: faker.lorem.words(4),
     type: Math.random() > 0.5 ? DebtType.TO : DebtType.FROM,
-    user: faker.internet.userName(),
+    user: faker.internet.username(),
     ...params
   })
 )

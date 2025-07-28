@@ -8,8 +8,8 @@ import { addPensionApi, editPensionApi } from 'services/apiService'
 
 interface Props {
 
-    onClose: () => void;
-    transaction?: PensionTransaction;
+  onClose: () => void;
+  transaction?: PensionTransaction;
 }
 
 const TransactionModal = ({ onClose, transaction }: Props) => {
@@ -48,40 +48,52 @@ const TransactionModal = ({ onClose, transaction }: Props) => {
   })
 
   return (
-        <ModalGrid
-            show onClose={onClose} title='Nuevo Movimiento' action={onSubmit}>
-            <DateForm placeholder={'Introduce una fecha'} id='date' label='Fecha'
-                      error={!!errors.date}
-                      control={control}
-            />
-            <InputForm id='value' label='Importe Empresa' placeholder='0'
-                       error={!!errors.companyAmount} {...register('companyAmount', {
-                         required: true,
-                         valueAsNumber: true
-                       })}
-                       errorText='Introduce un número válido'/>
-            <InputForm id='value' label='Unidades Empresa' placeholder='0'
-                       error={!!errors.companyUnits} {...register('companyUnits', {
-                         required: true,
-                         valueAsNumber: true
-                       })}
-                       errorText='Introduce un número válido'/>
-            <InputForm id='value' label='Importe Empleado' placeholder='0'
-                       error={!!errors.employeeAmount} {...register('employeeAmount', {
-                         required: true,
-                         valueAsNumber: true
-                       })}
-                       errorText='Introduce un número válido'/>
-            <InputForm id='value' label='Unidades Empleado' placeholder='0'
-                       error={!!errors.employeeUnits} {...register('employeeUnits', {
-                         required: true,
-                         valueAsNumber: true
-                       })}
-                       errorText='Introduce un número válido'/>
-            <InputForm id='value' label='Valor Unidad' placeholder='0'
-                       error={!!errors.value} {...register('value', { required: true, valueAsNumber: true })}
-                       errorText='Introduce un número válido'/>
-        </ModalGrid>
+    <ModalGrid
+      show onClose={onClose} title='Nuevo Movimiento' action={onSubmit}
+    >
+      <DateForm
+        placeholder='Introduce una fecha' id='date' label='Fecha'
+        error={!!errors.date}
+        control={control}
+      />
+      <InputForm
+        id='value' label='Importe Empresa' placeholder='0'
+        error={!!errors.companyAmount} {...register('companyAmount', {
+          required: true,
+          valueAsNumber: true
+        })}
+        errorText='Introduce un número válido'
+      />
+      <InputForm
+        id='value' label='Unidades Empresa' placeholder='0'
+        error={!!errors.companyUnits} {...register('companyUnits', {
+          required: true,
+          valueAsNumber: true
+        })}
+        errorText='Introduce un número válido'
+      />
+      <InputForm
+        id='value' label='Importe Empleado' placeholder='0'
+        error={!!errors.employeeAmount} {...register('employeeAmount', {
+          required: true,
+          valueAsNumber: true
+        })}
+        errorText='Introduce un número válido'
+      />
+      <InputForm
+        id='value' label='Unidades Empleado' placeholder='0'
+        error={!!errors.employeeUnits} {...register('employeeUnits', {
+          required: true,
+          valueAsNumber: true
+        })}
+        errorText='Introduce un número válido'
+      />
+      <InputForm
+        id='value' label='Valor Unidad' placeholder='0'
+        error={!!errors.value} {...register('value', { required: true, valueAsNumber: true })}
+        errorText='Introduce un número válido'
+      />
+    </ModalGrid>
   )
 }
 

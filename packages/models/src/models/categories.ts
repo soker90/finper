@@ -2,11 +2,11 @@ import { model, ObjectId, Schema } from 'mongoose'
 import { TransactionType } from './transactions'
 
 export interface ICategory {
-    _id: ObjectId,
-    name: string,
-    type: TransactionType,
-    parent?: ObjectId,
-    user: string,
+  _id: ObjectId,
+  name: string,
+  type: TransactionType,
+  parent?: ObjectId,
+  user: string,
 }
 
 const categorySchema = new Schema<ICategory>({

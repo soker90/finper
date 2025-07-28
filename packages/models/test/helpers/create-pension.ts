@@ -11,7 +11,7 @@ export default async (params = {}): Promise<IPension> => {
       companyAmount: faker.number.float({ min: 1, max: 100, fractionDigits: 2 }),
       companyUnits: faker.number.float({ min: 1, max: 100, fractionDigits: 5 }),
       value: faker.number.float({ fractionDigits: 2 }),
-      user: faker.internet.userName(),
+      user: faker.internet.username(),
       ...params
     })
   )

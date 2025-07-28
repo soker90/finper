@@ -13,9 +13,9 @@ import { IStoreService } from '../services/stores.service'
 import { RequestUser } from '../types'
 
 type ITransactionController = {
-    loggerHandler: any,
-    transactionService: ITransactionService,
-    storeService: IStoreService,
+  loggerHandler: any,
+  transactionService: ITransactionService,
+  storeService: IStoreService,
 }
 
 export class TransactionController {

@@ -5,8 +5,8 @@ import { IStoreService } from '../services/stores.service'
 import '../auth/local-strategy-passport-handler'
 
 type IStoreController = {
-    loggerHandler: any,
-    storeService: IStoreService,
+  loggerHandler: any,
+  storeService: IStoreService,
 }
 
 export class StoreController {

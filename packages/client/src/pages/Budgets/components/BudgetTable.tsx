@@ -28,27 +28,27 @@ const BudgetTable = ({
   }
 
   return (
-        <>
-            <Grid item xs={12} lg={6}>
-                <TableMaterial
-                    columns={[
-                      { title: 'Categoría', field: 'name' },
-                      { title: 'Real', render: ({ budgets }) => format.euro(budgets[0].real) },
-                      { title: 'Estimado', render: ({ budgets }) => format.euro(budgets[0].amount) }
-                    ]}
-                    data={orderBudgets}
-                    title={title}
-                    actions={[
-                      {
-                        onClick: handleEdit,
-                        tooltip: 'Editar',
-                        icon: EditOutlined
-                      }
-                    ]}
-                />
-            </Grid>
-            {selectedBudget && <ModalEdit onClose={handleCloseEdit} budget={selectedBudget} month={month} year={year}/>}
-        </>
+    <>
+      <Grid size={{ xs: 12, lg: 6 }}>
+        <TableMaterial
+          columns={[
+            { title: 'Categoría', field: 'name' },
+            { title: 'Real', render: ({ budgets }) => format.euro(budgets[0].real) },
+            { title: 'Estimado', render: ({ budgets }) => format.euro(budgets[0].amount) }
+          ]}
+          data={orderBudgets}
+          title={title}
+          actions={[
+            {
+              onClick: handleEdit,
+              tooltip: 'Editar',
+              icon: EditOutlined
+            }
+          ]}
+        />
+      </Grid>
+      {selectedBudget && <ModalEdit onClose={handleCloseEdit} budget={selectedBudget} month={month} year={year} />}
+    </>
   )
 }
 

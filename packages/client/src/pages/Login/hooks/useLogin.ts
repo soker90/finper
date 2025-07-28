@@ -1,11 +1,11 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router'
 import useAuth from 'hooks/useAuth'
 import authService from 'services/authService'
 
 export type SendLoginParams = {
-    username: string
-    password: string
+  username: string
+  password: string
 }
 
 const ERROR_MESSAGES: Record<number | string, string> = {

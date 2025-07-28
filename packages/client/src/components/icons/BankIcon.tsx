@@ -12,10 +12,10 @@ const revolut = lazy(() => import('./RevolutIcon'))
 const bankinter = lazy(() => import('./BankinterIcon'))
 
 type BankIconsProps = {
-    name: string
-    className?: string
-    width?: number
-    height?: number
+  name: string
+  className?: string
+  width?: number
+  height?: number
 }
 
 const Icons: Record<string, FC<any>> = {

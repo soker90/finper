@@ -10,12 +10,14 @@ export const TransactionsPage = ({ index, filters }: { index: number, filters: a
   }
 
   return (
-        <>
-            {transactions.map((transaction) =>
-                <TransactionItem key={transaction._id} transaction={transaction}
-                                 query={query} />)}
+    <>
+      {transactions.map((transaction) =>
+        <TransactionItem
+          key={transaction._id} transaction={transaction}
+          query={query}
+        />)}
 
-            {!transactions.length && !index && <p>No hay datos</p>}
-        </>
+      {!transactions.length && !index && <p>No hay datos</p>}
+    </>
   )
 }

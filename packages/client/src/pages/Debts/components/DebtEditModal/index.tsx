@@ -48,39 +48,44 @@ const DebtEditModal = ({
   })
 
   return (
-        <ModalGrid show onClose={onClose} title='Nuevo Movimiento' action={onSubmit}>
+    <ModalGrid show onClose={onClose} title='Nuevo Movimiento' action={onSubmit}>
 
-            <SelectForm id='type' label='Tipo'
-                        options={TYPES_DEBTS}
-                        optionValue='value'
-                        optionLabel='title'
-                        size={4}
-                        error={!!errors.type} {...register('type', { required: true })}
-            />
+      <SelectForm
+        id='type' label='Tipo'
+        options={TYPES_DEBTS}
+        optionValue='value'
+        optionLabel='title'
+        size={4}
+        error={!!errors.type} {...register('type', { required: true })}
+      />
 
-            <InputForm id='from' label='De/A' placeholder='Introduce la persona'
-                       error={!!errors.from} {...register('from', { required: true, minLength: 3 })}
-                       errorText='Introduce una persona'
-            />
+      <InputForm
+        id='from' label='De/A' placeholder='Introduce la persona'
+        error={!!errors.from} {...register('from', { required: true, minLength: 3 })}
+        errorText='Introduce una persona'
+      />
 
-            <DateForm placeholder={'Introduce una fecha'} id='date' label='Fecha'
-                      error={!!errors.date}
-                      control={control}
-            />
+      <DateForm
+        placeholder='Introduce una fecha' id='date' label='Fecha'
+        error={!!errors.date}
+        control={control}
+      />
 
-            <InputForm id='amount' label='Cantidad' placeholder='Introduce la cantidad'
-                       error={!!errors.amount} {...register('amount', { required: true, valueAsNumber: true })}
-                       errorText='Introduce una cantidad válida'
-                       type='number' inputProps={{ step: 'any' }}
-                       size={4}
-            />
+      <InputForm
+        id='amount' label='Cantidad' placeholder='Introduce la cantidad'
+        error={!!errors.amount} {...register('amount', { required: true, valueAsNumber: true })}
+        errorText='Introduce una cantidad válida'
+        type='number' inputProps={{ step: 'any' }}
+        size={4}
+      />
 
-            <InputForm id='concept' label='Concepto' placeholder='Introduce el concepto'
-                       error={!!errors.concept} {...register('concept', { required: true, minLength: 6 })}
-                       errorText='Introduce un concept válido'
-            />
+      <InputForm
+        id='concept' label='Concepto' placeholder='Introduce el concepto'
+        error={!!errors.concept} {...register('concept', { required: true, minLength: 6 })}
+        errorText='Introduce un concept válido'
+      />
 
-        </ModalGrid>
+    </ModalGrid>
   )
 }
 

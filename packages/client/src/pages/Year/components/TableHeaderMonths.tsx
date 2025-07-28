@@ -19,15 +19,15 @@ const MONTHS = [
 
 const TableHeaderMonths = () => {
   return (
-        <TableHead>
-            <TableRow>
-                {MONTHS.map((name) => (
-                    <TableCell key={name}>
-                        {name}
-                    </TableCell>
-                ))}
-            </TableRow>
-        </TableHead>
+    <TableHead>
+      <TableRow>
+        {MONTHS.map((name) => (
+          <TableCell key={name}>
+            {name}
+          </TableCell>
+        ))}
+      </TableRow>
+    </TableHead>
   )
 }
 

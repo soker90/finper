@@ -1,8 +1,8 @@
 import { Schema, model, Document } from 'mongoose'
 
 export interface IStore extends Document {
-    name: string,
-    user: string,
+  name: string,
+  user: string,
 }
 
 const storeSchema = new Schema<IStore>({

@@ -5,8 +5,8 @@ export const validateBudgetCopy = async ({
   body,
   user
 }: {
-    body: { year: number, month: number, yearOrigin: number, monthOrigin: number },
-    user: string
+  body: { year: number, month: number, yearOrigin: number, monthOrigin: number },
+  user: string
 }) => {
   const schema = Joi.object({
     year: Joi.number().min(2000).max(2100).required(),

@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { JSX, useMemo } from 'react'
 
 import { CssBaseline, StyledEngineProvider } from '@mui/material'
 import {
@@ -52,11 +52,11 @@ export default function ThemeCustomization ({ children }: { children: JSX.Elemen
   const components = componentsOverride(themes as Theme)
 
   return (
-        <StyledEngineProvider injectFirst>
-            <ThemeProvider theme={{ ...themes, components }}>
-                <CssBaseline/>
-                {children}
-            </ThemeProvider>
-        </StyledEngineProvider>
+    <StyledEngineProvider injectFirst>
+      <ThemeProvider theme={{ ...themes, components }}>
+        <CssBaseline />
+        {children}
+      </ThemeProvider>
+    </StyledEngineProvider>
   )
 }

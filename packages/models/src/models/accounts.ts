@@ -1,12 +1,12 @@
 import { Schema, model, ObjectId } from 'mongoose'
 
 export interface IAccount {
-    _id: ObjectId,
-    name: string
-    bank: string,
-    balance: number,
-    isActive: boolean,
-    user: string,
+  _id: ObjectId,
+  name: string
+  bank: string,
+  balance: number,
+  isActive: boolean,
+  user: string,
 }
 
 const accountSchema = new Schema<IAccount>({

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Outlet } from 'react-router-dom'
+import { Outlet } from 'react-router'
 import { useTheme } from '@mui/material/styles'
 import { Box, Toolbar, useMediaQuery } from '@mui/material'
 
@@ -25,18 +25,17 @@ const MainLayout = () => {
   }, [matchDownLG])
 
   return (
-        <AuthGuard>
-            <Box className={styles.container}>
-                <Header open={open} handleDrawerToggle={handleDrawerToggle} />
-                <Drawer open={open} handleDrawerToggle={handleDrawerToggle} />
-                <Box component="main" sx={{ p: { xs: 2, sm: 3 } }}>
-                    <Toolbar />
-                    <Breadcrumbs navigation={navigation} title divider={false} />
-                    <Outlet />
-                </Box>
-            </Box>
-        </AuthGuard>
+    <AuthGuard>
+      <Box className={styles.container}>
+        <Header open={open} handleDrawerToggle={handleDrawerToggle} />
+        <Drawer open={open} handleDrawerToggle={handleDrawerToggle} />
+        <Box component='main' sx={{ p: { xs: 2, sm: 3 } }}>
+          <Toolbar />
+          <Breadcrumbs navigation={navigation} title divider={false} />
+          <Outlet />
+        </Box>
+      </Box>
+    </AuthGuard>
   )
 }
-
 export default MainLayout

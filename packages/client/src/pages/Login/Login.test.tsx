@@ -25,7 +25,7 @@ describe('Login', async () => {
   })
 
   it('button login works', async () => {
-    const { getByPlaceholderText, getByTestId } = render(<Login/>)
+    const { getByPlaceholderText, getByTestId } = render(<Login />)
     const inputUsername = getByPlaceholderText('Introduce tu nombre de usuario')
     const inputPassword = getByPlaceholderText('Introduce la contraseña')
 

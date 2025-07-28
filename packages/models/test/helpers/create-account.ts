@@ -8,7 +8,7 @@ export default async (params = {}): Promise<IAccount> => (
     bank: faker.lorem.word(),
     balance: faker.number.int(),
     isActive: faker.datatype.boolean(),
-    user: faker.internet.userName(),
+    user: faker.internet.username(),
     ...params
   })
 )
