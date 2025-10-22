@@ -4,10 +4,10 @@ import { render } from '../../test/testUtils'
 import Dashboard from './index'
 
 describe('Dashboard', () => {
-  it('renders without crashing', () => {
+  it('renders loading state initially', () => {
     const { getByText } = render(<Dashboard />)
 
-    const dashboardText = getByText('dashboard')
-    expect(dashboardText).toBeDefined()
+    const loadingText = getByText('Cargando dashboard...')
+    expect(loadingText).toBeDefined()
   })
 })

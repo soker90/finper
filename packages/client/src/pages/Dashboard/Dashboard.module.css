@@ -1,0 +1,224 @@
+.dashboard {
+  padding: 24px;
+  max-width: 1400px;
+  margin: 0 auto;
+  background: #f9fafb;
+  min-height: 100vh;
+}
+
+.header {
+  margin-bottom: 32px;
+}
+
+.header h1 {
+  font-size: 32px;
+  font-weight: 800;
+  color: #111827;
+  margin: 0 0 8px 0;
+}
+
+.header p {
+  font-size: 16px;
+  color: #6b7280;
+  margin: 0;
+}
+
+.mainCards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 24px;
+  margin-bottom: 32px;
+}
+
+.secondaryCards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 24px;
+  margin-bottom: 32px;
+}
+
+.chartsSection {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  gap: 24px;
+  margin-bottom: 32px;
+}
+
+.chartCard {
+  min-height: 380px;
+}
+
+.transactionsSection {
+  margin-bottom: 32px;
+}
+
+.fullWidth {
+  width: 100%;
+}
+
+.transactionsList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.transactionItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 16px;
+  background: #f8fafc;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  transition: background-color 0.2s ease;
+}
+
+.transactionItem:hover {
+  background: #f1f5f9;
+}
+
+.transactionInfo {
+  flex: 1;
+}
+
+.transactionCategory {
+  font-weight: 600;
+  color: #374151;
+  font-size: 14px;
+  margin-bottom: 4px;
+}
+
+.transactionDate {
+  font-size: 12px;
+  color: #6b7280;
+  margin-bottom: 4px;
+}
+
+.transactionNote {
+  font-size: 12px;
+  color: #9ca3af;
+  font-style: italic;
+}
+
+.transactionAmount {
+  font-weight: 700;
+  font-size: 16px;
+  text-align: right;
+}
+
+.transactionAmount.income {
+  color: #059669;
+}
+
+.transactionAmount.expense {
+  color: #dc2626;
+}
+
+.loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  gap: 16px;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #f3f4f6;
+  border-top: 4px solid #3b82f6;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.loading p {
+  font-size: 16px;
+  color: #6b7280;
+  margin: 0;
+}
+
+.error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  text-align: center;
+  gap: 12px;
+}
+
+.error h2 {
+  font-size: 24px;
+  color: #dc2626;
+  margin: 0;
+}
+
+.error p {
+  font-size: 16px;
+  color: #6b7280;
+  margin: 0;
+}
+
+.noData {
+  text-align: center;
+  color: #6b7280;
+  font-style: italic;
+  margin: 20px 0;
+}
+
+@media (max-width: 768px) {
+  .dashboard {
+    padding: 16px;
+  }
+  
+  .header h1 {
+    font-size: 24px;
+  }
+  
+  .mainCards,
+  .secondaryCards {
+    grid-template-columns: 1fr;
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+  
+  .chartsSection {
+    grid-template-columns: 1fr;
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+  
+  .chartCard {
+    min-height: 320px;
+  }
+  
+  .transactionItem {
+    flex-direction: column;
+    gap: 12px;
+    align-items: flex-start;
+  }
+  
+  .transactionAmount {
+    align-self: flex-end;
+  }
+}
+
+@media (max-width: 480px) {
+  .dashboard {
+    padding: 12px;
+  }
+  
+  .chartsSection {
+    grid-template-columns: 1fr;
+  }
+  
+  .chartCard {
+    min-height: 280px;
+  }
+}
