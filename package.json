@@ -3,9 +3,11 @@
   "private": true,
   "packageManager": "pnpm@10.29.3",
   "scripts": {
-    "preinstall": "npx only-allow pnpm"
+    "preinstall": "npx only-allow pnpm",
+    "prepare": "husky"
   },
   "devDependencies": {
+    "husky": "^9.1.7",
     "neostandard": "^0.12.2"
   }
 }
