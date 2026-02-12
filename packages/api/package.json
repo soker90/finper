@@ -1,13 +1,13 @@
 {
   "name": "@soker90/finper-api",
-  "version": "1.3.0",
+  "version": "1.4.0",
   "description": "Finper API that stores endpoints consumed by a Finper client",
   "main": "src/server",
   "scripts": {
-    "start": "npm run build-ts && npm run serve",
-    "start:pro": "LOG=1 NODE_ENV=prod npm run serve",
-    "start:dev": "NODE_ENV=dev npm run serve",
-    "build": "npm run build-ts",
+    "start": "pnpm run build-ts && pnpm run serve",
+    "start:pro": "LOG=1 NODE_ENV=prod pnpm run serve",
+    "start:dev": "NODE_ENV=dev pnpm run serve",
+    "build": "pnpm run build-ts",
     "serve": "node dist/server.js",
     "build-ts": "tsc",
     "test": "NODE_ENV=test jest --maxWorkers=50% --silent",
@@ -30,7 +30,7 @@
   },
   "homepage": "https://github.com/soker90/finper#readme",
   "engines": {
-    "node": "22.x"
+    "node": ">=24.x"
   },
   "dependencies": {
     "@hapi/boom": "10.0.1",

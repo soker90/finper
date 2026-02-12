@@ -1,25 +1,30 @@
-FROM node:20 as build
+FROM node:24-alpine as build
 
-WORKDIR /app
+RUN corepack enable && corepack prepare pnpm@latest --activate
+RUN mkdir -p /home/node/app && chown -R node:node /home/node/app
+
+WORKDIR /home/node/app
+
+USER node
 
 ARG API_HOST
 ENV VITE_API_HOST=$API_HOST
+ENV TZ=Europe/Madrid
 
-ENV PATH /app/node_modules/.bin:$PATH
+COPY --chown=node:node pnpm-workspace.yaml pnpm-lock.yaml package.json ./
+COPY --chown=node:node .npmrc* ./
+COPY --chown=node:node packages/client/package.json ./packages/client/
 
-COPY --chown=node:node package.json ./
+RUN pnpm install --frozen-lockfile --filter @soker90/finper-client...
+COPY --chown=node:node packages/client ./packages/client
 
-RUN npm i --legacy-peer-deps
+RUN pnpm --filter @soker90/finper-client build
 
-COPY --chown=node:node . ./
+# STAGE 2 - Producción con nginx
+FROM nginx:stable-alpine
 
-RUN npm run build
-
-# production environment
-FROM nginx:stable
-
-COPY --from=build /app/dist /usr/share/nginx/html
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+COPY --from=build /home/node/app/packages/client/dist /usr/share/nginx/html
+COPY packages/client/nginx.conf /etc/nginx/conf.d/default.conf
 
 EXPOSE 3009
 

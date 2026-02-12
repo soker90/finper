@@ -1,11 +1,10 @@
 {
   "name": "finper",
-  "workspaces": [
-    "packages/client",
-    "packages/models",
-    "packages/api",
-    "packages/types"
-  ],
+  "private": true,
+  "packageManager": "pnpm@10.29.3",
+  "scripts": {
+    "preinstall": "npx only-allow pnpm"
+  },
   "devDependencies": {
     "neostandard": "^0.12.2"
   }
