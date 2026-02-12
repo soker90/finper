@@ -4,6 +4,7 @@
   "description": "Models for finper",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "type": "module",
   "scripts": {
     "build": "tsc",
     "test": "jest --maxWorkers=50% --coverage",
@@ -41,14 +42,18 @@
     "@types/lodash.isnil": "^4.0.9",
     "@types/lodash.isplainobject": "^4.0.9",
     "@types/mocha": "^10.0.10",
+    "@typescript-eslint/eslint-plugin": "^8.55.0",
+    "@typescript-eslint/parser": "^8.55.0",
     "eslint": "^9.31.0",
     "eslint-plugin-import": "^2.32.0",
     "eslint-plugin-jest": "^29.0.1",
+    "globals": "^17.3.0",
     "jest": "^30.0.5",
     "jsdoc": "^4.0.4",
     "neostandard": "^0.12.2",
     "pre-push": "^0.1.4",
-    "ts-jest": "^29.4.0"
+    "ts-jest": "^29.4.0",
+    "typescript-eslint": "^8.55.0"
   },
   "dependencies": {
     "bcrypt": "^6.0.0",
