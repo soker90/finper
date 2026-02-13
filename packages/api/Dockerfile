@@ -43,7 +43,8 @@ USER node
 COPY --chown=node:node pnpm-workspace.yaml pnpm-lock.yaml package.json .npmrc ./
 COPY --chown=node:node packages/api/package.json ./packages/api/
 
-RUN pnpm install --frozen-lockfile --filter @soker90/finper-api... --prod
+RUN npm pkg delete scripts.prepare && \
+    pnpm install --frozen-lockfile --filter @soker90/finper-api... --prod
 
 COPY --from=builder --chown=node:node /home/node/app/packages/api/dist ./packages/api/dist
 
