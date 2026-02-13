@@ -1,13 +1,13 @@
 {
   "name": "@soker90/finper-api",
-  "version": "1.3.0",
+  "version": "1.4.0",
   "description": "Finper API that stores endpoints consumed by a Finper client",
   "main": "src/server",
   "scripts": {
-    "start": "npm run build-ts && npm run serve",
-    "start:pro": "LOG=1 NODE_ENV=prod npm run serve",
-    "start:dev": "NODE_ENV=dev npm run serve",
-    "build": "npm run build-ts",
+    "start": "pnpm run build-ts && pnpm run serve",
+    "start:pro": "LOG=1 NODE_ENV=prod pnpm run serve",
+    "start:dev": "NODE_ENV=dev pnpm run serve",
+    "build": "pnpm run build-ts",
     "serve": "node dist/server.js",
     "build-ts": "tsc",
     "test": "NODE_ENV=test jest --maxWorkers=50% --silent",
@@ -30,7 +30,7 @@
   },
   "homepage": "https://github.com/soker90/finper#readme",
   "engines": {
-    "node": "22.x"
+    "node": ">=24.x"
   },
   "dependencies": {
     "@hapi/boom": "10.0.1",
@@ -71,15 +71,20 @@
     "@types/passport-local": "1.0.38",
     "@types/supertest": "6.0.3",
     "@types/uuid": "10.0.0",
+    "@typescript-eslint/eslint-plugin": "^8.55.0",
+    "@typescript-eslint/parser": "^8.55.0",
     "eslint": "9.33.0",
+    "eslint-import-resolver-typescript": "^4.4.4",
     "eslint-plugin-import": "2.32.0",
     "eslint-plugin-jest": "29.0.1",
+    "globals": "^17.3.0",
     "jest": "30.0.5",
     "neostandard": "^0.12.2",
     "nock": "14.0.10",
     "supertest": "7.1.4",
     "ts-jest": "29.4.1",
     "ts-node": "10.9.2",
-    "typescript": "5.9.2"
+    "typescript": "5.9.2",
+    "typescript-eslint": "^8.48.1"
   }
 }

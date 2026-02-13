@@ -30,16 +30,15 @@ export default [
       'import/no-unresolved': [
         'error',
         {
-          ignore: ['^@soker90/finper-models']
+          ignore: ['^@soker90/finper-models', '^mongoose$', '^@typescript-eslint/', '^eslint-plugin-']
         }
       ]
     },
     settings: {
       'import/resolver': {
-        typescript: {
-          alwaysTryTypes: true,
-          project: './tsconfig.json',
-        },
+        node: {
+          extensions: ['.js', '.ts']
+        }
       },
     },
   },
@@ -59,6 +58,6 @@ export default [
   },
 
   {
-    ignores: ['dist', 'build', 'node_modules'],
+    ignores: ['dist', 'build', 'node_modules', 'eslint.config.js'],
   },
 ]
