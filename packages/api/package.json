@@ -3,7 +3,6 @@
   "version": "1.4.0",
   "description": "Finper API that stores endpoints consumed by a Finper client",
   "main": "src/server",
-  "type": "module",
   "scripts": {
     "start": "pnpm run build-ts && pnpm run serve",
     "start:pro": "LOG=1 NODE_ENV=prod pnpm run serve",
