@@ -21,7 +21,7 @@ importers:
         specifier: 10.0.1
         version: 10.0.1
       '@soker90/finper-models':
-        specifier: latest
+        specifier: 1.3.0
         version: 1.3.0(snappy@7.3.3)
       bcrypt:
         specifier: 6.0.0
