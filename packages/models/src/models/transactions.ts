@@ -1,4 +1,4 @@
-import { Schema, model, ObjectId } from 'mongoose'
+import { Schema, model, Types } from 'mongoose'
 
 export enum TransactionType {
   Expense = 'expense',
@@ -7,15 +7,14 @@ export enum TransactionType {
 }
 
 export interface ITransaction {
-  _id: ObjectId,
-  date: number,
-  category: ObjectId,
-  amount: number,
-  type: TransactionType,
-  account: ObjectId,
-  note?: string,
-  store?: ObjectId,
-  user: string,
+  date: number
+  category: Types.ObjectId
+  amount: number
+  type: TransactionType
+  account: Types.ObjectId
+  note?: string
+  store?: Types.ObjectId
+  user: string
 }
 
 const transactionSchema = new Schema<ITransaction>({

@@ -1,9 +1,11 @@
-import { Schema, model, Document } from 'mongoose'
+import { Schema, model, HydratedDocument } from 'mongoose'
 
-export interface IStore extends Document {
-  name: string,
-  user: string,
+export interface IStore {
+  name: string
+  user: string
 }
+
+export type StoreDocument = HydratedDocument<IStore>
 
 const storeSchema = new Schema<IStore>({
   name: { type: String, required: true },

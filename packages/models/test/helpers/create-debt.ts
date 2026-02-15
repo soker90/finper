@@ -1,8 +1,9 @@
 import { faker } from '@faker-js/faker'
+import { HydratedDocument } from 'mongoose'
 
 import { DebtModel, DebtType, IDebt } from '../../src'
 
-const createDebt = async (params = {}): Promise<IDebt> => (
+const createDebt = async (params = {}): Promise<HydratedDocument<IDebt>> => (
   DebtModel.create({
     from: faker.person.firstName(),
     date: faker.number.int(),

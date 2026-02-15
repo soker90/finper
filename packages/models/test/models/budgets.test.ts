@@ -1,11 +1,11 @@
 import {
-  mongoose, IBudget, BudgetModel
+  mongoose, BudgetDocument, BudgetModel
 } from '../../src'
 import createBudget from '../helpers/create-budget'
 
 const testDatabase = require('../test-db')(mongoose)
 
-const testBudget = (expected: IBudget, received: IBudget) => {
+const testBudget = (expected: BudgetDocument, received: BudgetDocument) => {
   expect(expected.year).toBe(received.year)
   expect(expected.month).toBe(received.month)
   expect(expected.category.toString()).toBe(received.category.toString())
@@ -19,7 +19,7 @@ describe('Budgets', () => {
   afterAll(() => testDatabase.close())
 
   describe('when there is a new budget', () => {
-    let budgetData: IBudget
+    let budgetData: BudgetDocument
 
     beforeAll(() => createBudget().then((budget) => {
       budgetData = budget
@@ -28,14 +28,14 @@ describe('Budgets', () => {
     afterAll(() => testDatabase.clear())
 
     test('it should contain all the defined properties', async () => {
-      const budgetDocument: IBudget = await BudgetModel.findOne() as IBudget
+      const budgetDocument = await BudgetModel.findOne()
 
-      testBudget(budgetDocument, budgetData)
+      testBudget(budgetDocument!, budgetData)
     })
   })
 
   describe('when there are multiple transactions', () => {
-    let firstBudget: IBudget
+    let firstBudget: BudgetDocument
 
     beforeAll(async () => {
       firstBudget = await createBudget()
@@ -54,9 +54,9 @@ describe('Budgets', () => {
     })
 
     test('it should contain all the defined properties of the first category', async () => {
-      const budgetDocument: IBudget = await BudgetModel.findOne({ _id: firstBudget._id }) as IBudget
+      const budgetDocument = await BudgetModel.findOne({ _id: firstBudget._id })
 
-      testBudget(budgetDocument, firstBudget)
+      testBudget(budgetDocument!, firstBudget)
     })
   })
 })
