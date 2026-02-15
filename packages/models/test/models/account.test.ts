@@ -1,5 +1,5 @@
 import {
-  AccountModel, IAccount,
+  AccountModel, AccountDocument,
   mongoose
 } from '../../src'
 import createAccount from '../helpers/create-account'
@@ -13,7 +13,7 @@ describe('Account', () => {
   afterAll(() => testDatabase.close())
 
   describe('when there is a new account', () => {
-    let accountData: IAccount
+    let accountData: AccountDocument
 
     beforeAll(() => createAccount().then((account) => {
       accountData = account
@@ -22,7 +22,7 @@ describe('Account', () => {
     afterAll(() => testDatabase.clear())
 
     test('it should contain all the defined properties', async () => {
-      const accountDocument: IAccount = await AccountModel.findOne() as IAccount
+      const accountDocument: AccountDocument = await AccountModel.findOne()
 
       expect(accountDocument.name).toBe(accountData.name)
       expect(accountDocument.bank).toBe(accountData.bank)
@@ -33,7 +33,7 @@ describe('Account', () => {
   })
 
   describe('when there are multiple accounts', () => {
-    let firstAccount: IAccount
+    let firstAccount: AccountDocument
 
     beforeAll(async () => {
       firstAccount = await createAccount()
@@ -52,7 +52,7 @@ describe('Account', () => {
     })
 
     test('it should contain all the defined properties of the first account', async () => {
-      const accountDocument: IAccount = await AccountModel.findOne({ _id: firstAccount._id }) as IAccount
+      const accountDocument: AccountDocument = await AccountModel.findOne({ _id: firstAccount._id })
 
       expect(accountDocument.name).toBe(firstAccount.name)
       expect(accountDocument.bank).toBe(firstAccount.bank)
@@ -64,7 +64,7 @@ describe('Account', () => {
 
   test('it should save balance with 2 decimal places', async () => {
     const account = await createAccount({ balance: faker.number.float({ multipleOf: 0.001 }) })
-    const accountDocument: IAccount = await AccountModel.findOne({ _id: account._id }) as IAccount
+    const accountDocument: AccountDocument = await AccountModel.findOne({ _id: account._id })
 
     expect(accountDocument.balance).toBe(account.balance)
   })

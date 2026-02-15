@@ -1,11 +1,12 @@
 import { faker } from '@faker-js/faker'
+import { HydratedDocument } from 'mongoose'
 
 import { ITransaction, TransactionModel, TransactionType } from '../../src'
 import createCategory from './create-category'
 import createAccount from './create-account'
 import createStore from './create-store'
 
-export default async (params = {}): Promise<ITransaction> => (
+export default async (params = {}): Promise<HydratedDocument<ITransaction>> => (
   TransactionModel.create({
     date: faker.number.int(),
     category: (await createCategory())._id,

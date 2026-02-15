@@ -1,8 +1,9 @@
 import { faker } from '@faker-js/faker'
+import { HydratedDocument } from 'mongoose'
 
 import { PensionModel, IPension } from '../../src'
 
-export default async (params = {}): Promise<IPension> => {
+export default async (params = {}): Promise<HydratedDocument<IPension>> => {
   return (
     PensionModel.create({
       date: faker.date.recent().getTime(),

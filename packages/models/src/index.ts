@@ -1,7 +1,6 @@
 import isNil from 'lodash.isnil'
 import isPlainObject from 'lodash.isplainobject'
-import Promise from 'bluebird'
-import mongoose from 'mongoose'
+import mongoose, { HydratedDocument } from 'mongoose'
 
 import mongooseConnect from './mongoose-connect'
 
@@ -14,7 +13,14 @@ import { IStore, StoreModel } from './models/stores'
 import { ITransaction, TransactionModel, TransactionType } from './models/transactions'
 import { IUser, UserModel } from './models/users'
 
-mongoose.Promise = Promise
+export type AccountDocument = HydratedDocument<IAccount>
+export type BudgetDocument = HydratedDocument<IBudget>
+export type CategoryDocument = HydratedDocument<ICategory>
+export type DebtDocument = HydratedDocument<IDebt>
+export type PensionDocument = HydratedDocument<IPension>
+export type StoreDocument = HydratedDocument<IStore>
+export type TransactionDocument = HydratedDocument<ITransaction>
+export type UserDocument = HydratedDocument<IUser>
 
 function connect (uri: string, options: Record<string, unknown>): void {
   if (isNil(mongoose)) {
@@ -57,5 +63,4 @@ export {
   StoreModel,
   TransactionModel,
   UserModel
-
 }

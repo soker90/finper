@@ -1,11 +1,11 @@
 import {
-  mongoose, IPension, PensionModel
+  mongoose, PensionDocument, PensionModel
 } from '../../src'
 import createPension from '../helpers/create-pension'
 
 const testDatabase = require('../test-db')(mongoose)
 
-const testBudget = (expected: IPension, received: IPension) => {
+const testBudget = (expected: PensionDocument, received: PensionDocument) => {
   expect(expected.date).toBe(received.date)
   expect(expected.employeeAmount).toBe(received.employeeAmount)
   expect(expected.employeeUnits).toBe(received.employeeUnits)
@@ -21,7 +21,7 @@ describe('Pensions', () => {
   afterAll(() => testDatabase.close())
 
   describe('when there is a new budget', () => {
-    let pensionData: IPension
+    let pensionData: PensionDocument
 
     beforeAll(() => createPension().then((pension) => {
       pensionData = pension
@@ -30,14 +30,14 @@ describe('Pensions', () => {
     afterAll(() => testDatabase.clear())
 
     test('it should contain all the defined properties', async () => {
-      const pensionDocument: IPension = await PensionModel.findOne() as IPension
+      const pensionDocument: PensionDocument = await PensionModel.findOne()
 
       testBudget(pensionDocument, pensionData)
     })
   })
 
   describe('when there are multiple pension transactions', () => {
-    let firstPension: IPension
+    let firstPension: PensionDocument
 
     beforeAll(async () => {
       firstPension = await createPension()
@@ -56,7 +56,7 @@ describe('Pensions', () => {
     })
 
     test('it should contain all the defined properties of the first pension transaction', async () => {
-      const pensionDocument: IPension = await PensionModel.findOne({ _id: firstPension._id }) as IPension
+      const pensionDocument: PensionDocument = await PensionModel.findOne({ _id: firstPension._id })
 
       testBudget(pensionDocument, firstPension)
     })

@@ -1,8 +1,9 @@
 import { faker } from '@faker-js/faker'
+import { HydratedDocument } from 'mongoose'
 
 import { CategoryModel, ICategory, TransactionType } from '../../src'
 
-const createCategory = async (params = {}): Promise<ICategory> => (
+const createCategory = async (params = {}): Promise<HydratedDocument<ICategory>> => (
   CategoryModel.create({
     name: faker.commerce.department(),
     type: Math.random() > 0.5 ? TransactionType.Expense : TransactionType.Income,

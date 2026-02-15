@@ -1,13 +1,14 @@
-import { model, ObjectId, Schema } from 'mongoose'
+import { model, Schema, Types, HydratedDocument } from 'mongoose'
 
 export interface IBudget {
-  _id: ObjectId,
-  year: number,
-  month: number,
-  category: ObjectId,
-  amount: number,
-  user: string,
+  year: number
+  month: number
+  category: Types.ObjectId
+  amount: number
+  user: string
 }
+
+export type BudgetDocument = HydratedDocument<IBudget>
 
 const budgetSchema = new Schema<IBudget>({
   year: { type: Number, required: true },

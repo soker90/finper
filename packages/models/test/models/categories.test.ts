@@ -1,11 +1,11 @@
 import {
-  CategoryModel, ICategory,
+  CategoryModel, CategoryDocument,
   mongoose
 } from '../../src'
 import createCategory from '../helpers/create-category'
 const testDatabase = require('../test-db')(mongoose)
 
-const testCategory = (expected: ICategory, received: ICategory) => {
+const testCategory = (expected: CategoryDocument, received: CategoryDocument) => {
   expect(expected.type).toBe(received.type)
   expect(expected.name).toBe(received.name)
   expect(expected.parent?.toString()).toBe(received.parent?.toString())
@@ -18,7 +18,7 @@ describe('Category', () => {
   afterAll(() => testDatabase.close())
 
   describe('when there is a new category', () => {
-    let categoryData: ICategory
+    let categoryData: CategoryDocument
 
     beforeAll(async () => {
       const parent = await createCategory()
@@ -28,14 +28,14 @@ describe('Category', () => {
     afterAll(() => testDatabase.clear())
 
     test('it should contain all the defined properties with parent category', async () => {
-      const categoryDocument: ICategory = await CategoryModel.findOne({ _id: categoryData._id })
+      const categoryDocument: CategoryDocument = await CategoryModel.findOne({ _id: categoryData._id })
 
       testCategory(categoryDocument, categoryData)
     })
   })
 
   describe('when there are multiple accounts', () => {
-    let firstCategory: ICategory
+    let firstCategory: CategoryDocument
 
     beforeAll(async () => {
       firstCategory = await createCategory()
@@ -52,7 +52,7 @@ describe('Category', () => {
     })
 
     test('it should contain all the defined properties of the first category', async () => {
-      const categoryDocument: ICategory = await CategoryModel.findOne({ _id: firstCategory._id })
+      const categoryDocument: CategoryDocument = await CategoryModel.findOne({ _id: firstCategory._id })
 
       testCategory(categoryDocument, firstCategory)
     })

@@ -1,13 +1,14 @@
-import { model, ObjectId, Schema } from 'mongoose'
+import { model, Schema, Types, HydratedDocument } from 'mongoose'
 import { TransactionType } from './transactions'
 
 export interface ICategory {
-  _id: ObjectId,
-  name: string,
-  type: TransactionType,
-  parent?: ObjectId,
-  user: string,
+  name: string
+  type: TransactionType
+  parent?: Types.ObjectId
+  user: string
 }
+
+export type CategoryDocument = HydratedDocument<ICategory>
 
 const categorySchema = new Schema<ICategory>({
   name: { type: String, required: true },
