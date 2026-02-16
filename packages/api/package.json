@@ -54,7 +54,7 @@
     "winston-transport": "4.9.0"
   },
   "devDependencies": {
-    "@faker-js/faker": "9.9.0",
+    "@faker-js/faker": "10.3.0",
     "@shelf/jest-mongodb": "6.0.2",
     "@tsconfig/node22": "22.0.5",
     "@types/bcrypt": "6.0.0",
