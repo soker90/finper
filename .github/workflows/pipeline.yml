@@ -106,7 +106,7 @@ jobs:
         with:
           cache: 'pnpm'
           node-version-file: '.nvmrc'
-      - uses: actions/download-artifact@v6
+      - uses: actions/download-artifact@v7
         with:
           name: models
           path: packages/models/dist
@@ -131,7 +131,7 @@ jobs:
         with:
           cache: 'pnpm'
           node-version-file: '.nvmrc'
-      - uses: actions/download-artifact@v6
+      - uses: actions/download-artifact@v7
         with:
           name: models
           path: packages/models/dist
