@@ -1,0 +1,171 @@
+// Vitest Snapshot v1
+
+exports[`Debts > renders without crashing 1`] = `
+<div>
+  <div
+    class="MuiGrid-root MuiGrid-container MuiGrid-spacing-xs-3 css-v30tp7-MuiGrid-root"
+  />
+  <div
+    class="MuiGrid-root MuiGrid-container MuiGrid-spacing-xs-3 css-zow5z4-MuiGrid-root"
+  >
+    <div
+      class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-12 MuiGrid-grid-lg-6 css-va0ja1-MuiGrid-root"
+    >
+      <div
+        class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 MuiCard-root css-1908txl-MuiPaper-root-MuiCard-root"
+      >
+        <div
+          class="MuiBox-root css-19midj6"
+        >
+          <div
+            class="MuiBox-root css-70qvj9"
+          >
+            <h4
+              class="MuiTypography-root MuiTypography-h4 css-12orxl-MuiTypography-root"
+            >
+              Me deben
+            </h4>
+          </div>
+        </div>
+        <div
+          class="MuiBox-root css-0"
+        >
+          <table
+            class="MuiTable-root css-d7ymjm-MuiTable-root"
+          >
+            <thead
+              class="MuiTableHead-root css-110l8om-MuiTableHead-root"
+            >
+              <tr
+                class="MuiTableRow-root MuiTableRow-head css-1j77n0n-MuiTableRow-root"
+              >
+                <th
+                  class="MuiTableCell-root MuiTableCell-head MuiTableCell-sizeMedium css-tvar7v-MuiTableCell-root"
+                  scope="col"
+                >
+                  De
+                </th>
+                <th
+                  class="MuiTableCell-root MuiTableCell-head MuiTableCell-sizeMedium css-tvar7v-MuiTableCell-root"
+                  scope="col"
+                >
+                  Fecha
+                </th>
+                <th
+                  class="MuiTableCell-root MuiTableCell-head MuiTableCell-sizeMedium css-tvar7v-MuiTableCell-root"
+                  scope="col"
+                >
+                  Cantidad
+                </th>
+                <th
+                  class="MuiTableCell-root MuiTableCell-head MuiTableCell-sizeMedium css-tvar7v-MuiTableCell-root"
+                  scope="col"
+                >
+                  Concepto
+                </th>
+                <th
+                  class="MuiTableCell-root MuiTableCell-head MuiTableCell-sizeMedium css-tvar7v-MuiTableCell-root"
+                  scope="col"
+                >
+                  F. Pago
+                </th>
+              </tr>
+            </thead>
+            <tbody
+              class="MuiTableBody-root css-1geald0-MuiTableBody-root"
+            />
+          </table>
+          <div
+            class="MuiBox-root css-19midj6"
+          >
+            <p
+              class="MuiTypography-root MuiTypography-body1 MuiTypography-alignCenter css-1br5zzv-MuiTypography-root"
+            >
+              No se han encontrado datos
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div
+      class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-12 MuiGrid-grid-lg-6 css-va0ja1-MuiGrid-root"
+    >
+      <div
+        class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 MuiCard-root css-1908txl-MuiPaper-root-MuiCard-root"
+      >
+        <div
+          class="MuiBox-root css-19midj6"
+        >
+          <div
+            class="MuiBox-root css-70qvj9"
+          >
+            <h4
+              class="MuiTypography-root MuiTypography-h4 css-12orxl-MuiTypography-root"
+            >
+              Debo
+            </h4>
+          </div>
+        </div>
+        <div
+          class="MuiBox-root css-0"
+        >
+          <table
+            class="MuiTable-root css-d7ymjm-MuiTable-root"
+          >
+            <thead
+              class="MuiTableHead-root css-110l8om-MuiTableHead-root"
+            >
+              <tr
+                class="MuiTableRow-root MuiTableRow-head css-1j77n0n-MuiTableRow-root"
+              >
+                <th
+                  class="MuiTableCell-root MuiTableCell-head MuiTableCell-sizeMedium css-tvar7v-MuiTableCell-root"
+                  scope="col"
+                >
+                  A
+                </th>
+                <th
+                  class="MuiTableCell-root MuiTableCell-head MuiTableCell-sizeMedium css-tvar7v-MuiTableCell-root"
+                  scope="col"
+                >
+                  Fecha
+                </th>
+                <th
+                  class="MuiTableCell-root MuiTableCell-head MuiTableCell-sizeMedium css-tvar7v-MuiTableCell-root"
+                  scope="col"
+                >
+                  Cantidad
+                </th>
+                <th
+                  class="MuiTableCell-root MuiTableCell-head MuiTableCell-sizeMedium css-tvar7v-MuiTableCell-root"
+                  scope="col"
+                >
+                  Concepto
+                </th>
+                <th
+                  class="MuiTableCell-root MuiTableCell-head MuiTableCell-sizeMedium css-tvar7v-MuiTableCell-root"
+                  scope="col"
+                >
+                  F. Pago
+                </th>
+              </tr>
+            </thead>
+            <tbody
+              class="MuiTableBody-root css-1geald0-MuiTableBody-root"
+            />
+          </table>
+          <div
+            class="MuiBox-root css-19midj6"
+          >
+            <p
+              class="MuiTypography-root MuiTypography-body1 MuiTypography-alignCenter css-1br5zzv-MuiTypography-root"
+            >
+              No se han encontrado datos
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;
