@@ -10,16 +10,14 @@ import {
   Stack,
   Alert
 } from '@mui/material'
-import { useTickets, useAccounts, useGroupedCategories } from 'hooks'
+import { useTickets } from 'hooks'
 import { Ticket } from 'types'
 import { format } from 'utils'
 import ReviewModal from './components/ReviewModal'
 import DeleteModal from './components/DeleteModal'
 
 const Tickets = () => {
-  const { tickets, isLoading, error, mutate } = useTickets()
-  const { accounts } = useAccounts()
-  const { categories } = useGroupedCategories()
+  const { tickets, isLoading, error } = useTickets()
   const [toReview, setToReview] = useState<Ticket | null>(null)
   const [toDelete, setToDelete] = useState<Ticket | null>(null)
 
@@ -102,9 +100,7 @@ const Tickets = () => {
       {toReview && (
         <ReviewModal
           ticket={toReview}
-          accounts={accounts}
-          categories={categories}
-          onClose={() => { setToReview(null); mutate() }}
+          onClose={() => setToReview(null)}
         />
       )}
 

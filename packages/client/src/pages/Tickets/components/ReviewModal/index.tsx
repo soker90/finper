@@ -6,13 +6,12 @@ import { mutate } from 'swr'
 import { ModalGrid, DateForm, InputForm, SelectForm, SelectGroupForm } from 'components'
 import { addTransaction, reviewTicket } from 'services/apiService'
 import { TICKETS, TRANSACTIONS } from 'constants/api-paths'
-import { Ticket, Account, CategoryGrouped, TransactionType } from 'types'
+import { Ticket, TransactionType } from 'types'
+import { useAccounts, useGroupedCategories } from 'hooks'
 import { TYPES_TRANSACTIONS_ENTRIES } from 'constants/transactions'
 
 interface Props {
   ticket: Ticket
-  accounts: Account[]
-  categories: CategoryGrouped[]
   onClose: () => void
 }
 
@@ -25,7 +24,9 @@ interface FormValues {
   store: string
 }
 
-const ReviewModal = ({ ticket, accounts, categories, onClose }: Props) => {
+const ReviewModal = ({ ticket, onClose }: Props) => {
+  const { accounts } = useAccounts()
+  const { categories } = useGroupedCategories()
   const [error, setError] = useState<string | undefined>(undefined)
 
   const { register, handleSubmit, formState: { errors }, control } = useForm<FormValues>({
