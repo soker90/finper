@@ -19,7 +19,7 @@ const DrawerHeader = ({ open }: { open: boolean }) => {
       <Stack direction='row' spacing={1} alignItems='center'>
         <Logo />
         <Chip
-          label='v1.3.0'
+          label='v1.5.0'
           size='small'
           sx={{ height: 16, '& .MuiChip-label': { fontSize: '0.625rem', py: 0.25 } }}
         />
