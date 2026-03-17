@@ -10,6 +10,7 @@ const DashboardDefault = lazy(() => import('../pages/Dashboard'))
 const Debts = lazy(() => import('../pages/Debts'))
 const Pensions = lazy(() => import('../pages/Pensions'))
 const Transactions = lazy(() => import('../pages/Transactions'))
+const Tickets = lazy(() => import('../pages/Tickets'))
 const Year = lazy(() => import('../pages/Year'))
 
 const MainRoutes = {
@@ -40,6 +41,10 @@ const MainRoutes = {
     {
       path: 'movimientos',
       element: <Transactions />
+    },
+    {
+      path: 'tickets',
+      element: <Tickets />
     },
     {
       path: 'deudas',

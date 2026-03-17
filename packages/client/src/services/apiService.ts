@@ -1,5 +1,5 @@
 import axios from 'axios'
-import { ACCOUNTS, BUDGETS, CATEGORIES, DEBTS, PENSIONS, TRANSACTIONS } from 'constants/api-paths'
+import { ACCOUNTS, BUDGETS, CATEGORIES, DEBTS, PENSIONS, TICKETS, TRANSACTIONS } from 'constants/api-paths'
 import { Category, Transaction, TransactionType, Account, Pension, PensionTransaction, Debt } from 'types'
 
 export const editAccount = (id: string, params: {
@@ -115,4 +115,12 @@ export const addDebt = (params: Debt): Promise<{
 
 export const deleteDebt = (id: string): Promise<{ data?: any, error?: string }> => {
   return axios.delete(`${DEBTS}/${id}`).then((data: any) => ({ data: data as Debt })).catch((error) => ({ error: error.message }))
+}
+
+export const reviewTicket = (id: string): Promise<{ error?: string }> => {
+  return axios.patch(`${TICKETS}/${id}`).then(() => ({})).catch((error: any) => ({ error: error.message }))
+}
+
+export const deleteTicket = (id: string): Promise<{ error?: string }> => {
+  return axios.delete(`${TICKETS}/${id}`).then(() => ({})).catch((error: any) => ({ error: error.message }))
 }

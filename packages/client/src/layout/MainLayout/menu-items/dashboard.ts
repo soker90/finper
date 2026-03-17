@@ -5,7 +5,8 @@ import {
   CreditCardOutlined,
   EuroOutlined,
   CalendarOutlined,
-  ProfileOutlined
+  ProfileOutlined,
+  FileImageOutlined
 } from '@ant-design/icons'
 import { BeachIcon } from 'components'
 
@@ -30,6 +31,14 @@ const dashboard = {
       type: 'item',
       url: '/movimientos',
       icon: CreditCardOutlined,
+      breadcrumbs: true
+    },
+    {
+      id: 'tickets',
+      title: 'Tickets',
+      type: 'item',
+      url: '/tickets',
+      icon: FileImageOutlined,
       breadcrumbs: true
     },
     {
