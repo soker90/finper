@@ -1,0 +1,137 @@
+import { useState } from 'react'
+import { useForm } from 'react-hook-form'
+import { FormHelperText, Grid } from '@mui/material'
+import { mutate } from 'swr'
+
+import { ModalGrid, DateForm, InputForm, SelectForm, SelectGroupForm } from 'components'
+import { addTransaction, reviewTicket } from 'services/apiService'
+import { TICKETS, TRANSACTIONS } from 'constants/api-paths'
+import { Ticket, Account, CategoryGrouped, TransactionType } from 'types'
+import { TYPES_TRANSACTIONS_ENTRIES } from 'constants/transactions'
+
+interface Props {
+  ticket: Ticket
+  accounts: Account[]
+  categories: CategoryGrouped[]
+  onClose: () => void
+}
+
+interface FormValues {
+  date: number | null
+  amount: number
+  account: string
+  category: string
+  type: TransactionType
+  store: string
+}
+
+const ReviewModal = ({ ticket, accounts, categories, onClose }: Props) => {
+  const [error, setError] = useState<string | undefined>(undefined)
+
+  const { register, handleSubmit, formState: { errors }, control } = useForm<FormValues>({
+    defaultValues: {
+      date: ticket.date,
+      amount: ticket.amount ?? 0,
+      account: '',
+      category: '',
+      type: TransactionType.Expense,
+      store: ticket.store ?? ''
+    }
+  })
+
+  const onSubmit = handleSubmit(async (params) => {
+    setError(undefined)
+
+    const transactionParams = {
+      date: params.date ? new Date(params.date).getTime() : Date.now(),
+      amount: params.amount,
+      account: params.account,
+      category: params.category,
+      type: params.type,
+      ...(params.store && { store: params.store })
+    }
+
+    const { error: txError } = await addTransaction(transactionParams as any)
+    if (txError) {
+      setError(txError)
+      return
+    }
+
+    const { error: reviewError } = await reviewTicket(ticket.id)
+    if (reviewError) {
+      setError(reviewError)
+      return
+    }
+
+    await mutate(TRANSACTIONS)
+    await mutate(TICKETS)
+    onClose()
+  })
+
+  return (
+    <ModalGrid
+      show
+      title={`Revisar ticket: ${ticket.store ?? 'Sin comercio'}`}
+      onClose={onClose}
+      action={onSubmit}
+    >
+      <DateForm
+        placeholder='Fecha del ticket' id='date' label='Fecha'
+        error={!!errors.date}
+        control={control}
+      />
+
+      <SelectForm
+        id='account' label='Cuenta'
+        options={accounts}
+        optionValue='_id'
+        optionLabel='name'
+        error={!!errors.account} {...register('account', { required: true })}
+        errorText='Selecciona una cuenta'
+        size={2}
+      />
+
+      <SelectForm
+        id='type' label='Tipo'
+        options={TYPES_TRANSACTIONS_ENTRIES}
+        optionValue={0}
+        optionLabel={1}
+        size={2}
+        error={!!errors.type} {...register('type', { required: true })}
+      />
+
+      <SelectGroupForm
+        id='category' label='Categoría'
+        options={categories}
+        optionValue='_id'
+        optionLabel='name'
+        error={!!errors.category} {...register('category', { required: true })}
+        errorText='Selecciona una categoría'
+        size={2}
+      />
+
+      <InputForm
+        id='amount' label='Total' placeholder='Importe'
+        error={!!errors.amount} {...register('amount', { required: true, valueAsNumber: true })}
+        errorText='Introduce un importe válido'
+        type='number' inputProps={{ step: 'any' }}
+        size={2}
+      />
+
+      <InputForm
+        id='store' label='Comercio' placeholder='Nombre del comercio'
+        error={!!errors.store} {...register('store')}
+        errorText=''
+        size={2}
+      />
+
+      {error && (
+        <Grid size={12}>
+          <FormHelperText error>{error}</FormHelperText>
+        </Grid>
+      )}
+    </ModalGrid>
+  )
+}
+
+export default ReviewModal
