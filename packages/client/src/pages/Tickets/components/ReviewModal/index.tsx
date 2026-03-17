@@ -4,10 +4,10 @@ import { FormHelperText, Grid } from '@mui/material'
 import { mutate } from 'swr'
 
 import { ModalGrid, DateForm, InputForm, SelectForm, SelectGroupForm } from 'components'
-import { addTransaction, reviewTicket } from 'services/apiService'
-import { TICKETS, TRANSACTIONS } from 'constants/api-paths'
+import { addTransaction } from 'services/apiService'
+import { TRANSACTIONS } from 'constants/api-paths'
 import { Ticket, TransactionType } from 'types'
-import { useAccounts, useGroupedCategories } from 'hooks'
+import { useAccounts, useGroupedCategories, useTickets } from 'hooks'
 import { TYPES_TRANSACTIONS_ENTRIES } from 'constants/transactions'
 
 interface Props {
@@ -27,6 +27,7 @@ interface FormValues {
 const ReviewModal = ({ ticket, onClose }: Props) => {
   const { accounts } = useAccounts()
   const { categories } = useGroupedCategories()
+  const { markReviewed } = useTickets()
   const [error, setError] = useState<string | undefined>(undefined)
 
   const { register, handleSubmit, formState: { errors }, control } = useForm<FormValues>({
@@ -58,14 +59,13 @@ const ReviewModal = ({ ticket, onClose }: Props) => {
       return
     }
 
-    const { error: reviewError } = await reviewTicket(ticket.id)
+    const { error: reviewError } = await markReviewed(ticket.id)
     if (reviewError) {
       setError(reviewError)
       return
     }
 
     await mutate(TRANSACTIONS)
-    await mutate(TICKETS)
     onClose()
   })
 

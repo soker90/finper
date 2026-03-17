@@ -1,8 +1,6 @@
 import { Button, Card, CardActions, CardContent, CardHeader, Divider, Modal, Typography } from '@mui/material'
-import { mutate } from 'swr'
 
-import { TICKETS } from 'constants/api-paths'
-import { deleteTicket } from 'services/apiService'
+import { useTickets } from 'hooks'
 import { Ticket } from 'types'
 import { format } from 'utils'
 
@@ -10,15 +8,11 @@ const DeleteModal = ({
   ticket,
   onClose
 }: { ticket: Ticket, onClose: () => void }) => {
+  const { removeTicket } = useTickets()
+
   const handleDelete = async () => {
-    await deleteTicket(ticket.id)
+    await removeTicket(ticket.id)
     onClose()
-    // @ts-ignore
-    await mutate(TICKETS, async (data: { tickets: Ticket[], total: number }) => ({
-      ...data,
-      tickets: data.tickets.filter(t => t.id !== ticket.id),
-      total: data.total - 1
-    }))
   }
 
   return (
