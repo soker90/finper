@@ -7,6 +7,7 @@ export interface Ticket {
   store: string | null
   amount: number | null
   raw_text: string | null
+  payment_method: string | null
   status: 'pending' | 'reviewed'
   created_at: number
   reviewed_at: number | null

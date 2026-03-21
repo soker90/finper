@@ -34,7 +34,20 @@ describe('Ticket', () => {
 
     test('when bot responds ok, it should return the tickets with status code 200', async () => {
       const tickets = [
-        { id: faker.string.uuid(), store: faker.company.name(), amount: faker.number.float(), status: 'pending' }
+        {
+          id: faker.string.uuid(),
+          store: faker.company.name(),
+          amount: faker.number.float(),
+          status: 'pending',
+          payment_method: faker.finance.transactionType(),
+          raw_text: null,
+          image_url: null,
+          date: null,
+          telegram_message_id: faker.number.int(),
+          telegram_chat_id: faker.number.int(),
+          created_at: Date.now(),
+          reviewed_at: null
+        }
       ]
       mockFetch(true, { tickets })
 

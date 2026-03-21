@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
-import { FormHelperText, Grid } from '@mui/material'
+import { Alert, FormHelperText, Grid } from '@mui/material'
 import { mutate } from 'swr'
 
 import { ModalGrid, DateForm, InputForm, SelectForm, SelectGroupForm } from 'components'
@@ -125,6 +125,22 @@ const ReviewModal = ({ ticket, onClose }: Props) => {
         errorText=''
         size={2}
       />
+
+      {ticket.payment_method && (
+        <Grid size={12}>
+          <Alert severity='info' sx={{ py: 0 }}>
+            Método de pago detectado: <strong>{ticket.payment_method}</strong>
+          </Alert>
+        </Grid>
+      )}
+
+      {ticket.raw_text && (
+        <Grid size={12}>
+          <Alert severity='info' icon={false} sx={{ py: 0, fontStyle: 'italic' }}>
+            "{ticket.raw_text}"
+          </Alert>
+        </Grid>
+      )}
 
       {error && (
         <Grid size={12}>
