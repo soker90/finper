@@ -72,6 +72,19 @@ const Tickets = () => {
                     </Typography>
                   </Stack>
 
+                  {ticket.payment_method && (
+                    <Stack direction='row' justifyContent='space-between'>
+                      <Typography variant='body2' color='text.secondary'>Pago:</Typography>
+                      <Typography variant='body2'>{ticket.payment_method}</Typography>
+                    </Stack>
+                  )}
+
+                  {!ticket.image_url && ticket.raw_text && (
+                    <Typography variant='body2' color='text.secondary' sx={{ fontStyle: 'italic', wordBreak: 'break-word' }}>
+                      "{ticket.raw_text}"
+                    </Typography>
+                  )}
+
                   <Stack direction='row' spacing={1} pt={1}>
                     <Button
                       variant='contained'
