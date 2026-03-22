@@ -7,29 +7,33 @@ on:
   release:
     types: [created]
 
+permissions:
+  id-token: write  # Required for OIDC
+  contents: read
+
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
+      - uses: pnpm/action-setup@v5
       - uses: actions/setup-node@v6
         with:
-          cache: 'npm'
+          cache: 'pnpm'
           node-version-file: '.nvmrc'
-      - run: npm ci --workspaces=models
-      - run: npm test --workspaces=models
+      - run: pnpm install --frozen-lockfile --filter @soker90/finper-models...
+      - run: pnpm --filter @soker90/finper-models test
 
   publish-npm:
     needs: build
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
+      - uses: pnpm/action-setup@v5
       - uses: actions/setup-node@v6
         with:
-          cache: 'npm'
+          cache: 'pnpm'
           node-version-file: '.nvmrc'
           registry-url: https://registry.npmjs.org/
-      - run: npm ci --workspaces=models
-      - run: npm publish --workspaces=models
-        env:
-          NODE_AUTH_TOKEN: ${{secrets.npm_token}}
+      - run: pnpm install --frozen-lockfile --filter @soker90/finper-models...
+      - run: pnpm --filter @soker90/finper-models publish --access public --no-git-checks --provenance

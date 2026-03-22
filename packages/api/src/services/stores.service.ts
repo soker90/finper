@@ -19,7 +19,7 @@ export default class StoreService implements IStoreService {
         new: true,
         upsert: true
       }) as unknown as IStore
-      transaction.store = store._id as ObjectId
+      transaction.store = store._id as unknown as ObjectId
     }
     return transaction
   }

@@ -1,15 +1,16 @@
-import { model, ObjectId, Schema } from 'mongoose'
+import { model, Schema, HydratedDocument } from 'mongoose'
 
 export interface IPension {
-  _id: ObjectId,
-  date: number,
-  employeeAmount: number,
-  employeeUnits: number,
-  companyAmount: number,
-  companyUnits: number,
-  value: number,
-  user: string,
+  date: number
+  employeeAmount: number
+  employeeUnits: number
+  companyAmount: number
+  companyUnits: number
+  value: number
+  user: string
 }
+
+export type PensionDocument = HydratedDocument<IPension>
 
 const pensionSchema = new Schema<IPension>({
   date: { type: Number, required: true },

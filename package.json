@@ -1,12 +1,13 @@
 {
   "name": "finper",
-  "workspaces": [
-    "packages/client",
-    "packages/models",
-    "packages/api",
-    "packages/types"
-  ],
+  "private": true,
+  "packageManager": "pnpm@10.29.3",
+  "scripts": {
+    "preinstall": "npx only-allow pnpm",
+    "prepare": "husky"
+  },
   "devDependencies": {
+    "husky": "^9.1.7",
     "neostandard": "^0.12.2"
   }
 }

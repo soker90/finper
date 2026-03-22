@@ -1,0 +1,17 @@
+packages:
+  - packages/api
+  - packages/client
+  - packages/models
+
+ignoredBuiltDependencies:
+  - '@swc/core'
+  - msw
+  - pre-push
+  - protobufjs
+  - spawn-sync
+  - unrs-resolver
+
+onlyBuiltDependencies:
+  - bcrypt
+  - esbuild
+  - mongodb-memory-server

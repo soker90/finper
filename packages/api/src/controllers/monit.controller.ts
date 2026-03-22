@@ -12,8 +12,7 @@ export class MonitController {
   }
 
   public getHealthStatus (req: Request, res: Response): void {
-    Promise.resolve()
-      .tap(() => this.logger.logInfo('Testing'))
-      .then(() => res.status(204).send())
+    this.logger.logInfo('Health check')
+    res.status(200).send({ status: 'ok' })
   }
 }

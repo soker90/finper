@@ -19,33 +19,35 @@ jobs:
   lint-models:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
+      - uses: pnpm/action-setup@v5
       - uses: actions/setup-node@v6
         with:
-          cache: 'npm'
+          cache: 'pnpm'
           node-version-file: '.nvmrc'
       - name: Install dependencies
-        run: npm i
+        run: pnpm install --frozen-lockfile
       - name: Lint
         run: make lint-models
 
   build-models:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
+      - uses: pnpm/action-setup@v5
       - uses: actions/setup-node@v6
         with:
-          cache: 'npm'
+          cache: 'pnpm'
           node-version-file: '.nvmrc'
       - name: Install dependencies
-        run: npm i
+        run: pnpm install --frozen-lockfile
       - name: Build
         run: make build-models
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: models
           path: packages/models/dist
@@ -58,15 +60,16 @@ jobs:
         run: |
           wget http://archive.ubuntu.com/ubuntu/pool/main/o/openssl/libssl1.1_1.1.1f-1ubuntu2_amd64.deb
           sudo dpkg -i libssl1.1_1.1.1f-1ubuntu2_amd64.deb
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
+      - uses: pnpm/action-setup@v5
       - uses: actions/setup-node@v6
         with:
-          cache: 'npm'
+          cache: 'pnpm'
           node-version-file: '.nvmrc'
       - name: Install dependencies
-        run: npm i
+        run: pnpm install --frozen-lockfile
       - name: Test
         run: make test-models
       - name: Codecov
@@ -78,15 +81,16 @@ jobs:
   lint-api:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
+      - uses: pnpm/action-setup@v5
       - uses: actions/setup-node@v6
         with:
-          cache: 'npm'
+          cache: 'pnpm'
           node-version-file: '.nvmrc'
       - name: Install dependencies
-        run: npm i --workspace=@soker90/finper-api
+        run: pnpm install --frozen-lockfile --filter @soker90/finper-api...
       - name: Lint
         run: make lint-api
 
@@ -94,19 +98,20 @@ jobs:
     needs: [ build-models ]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
+      - uses: pnpm/action-setup@v5
       - uses: actions/setup-node@v6
         with:
-          cache: 'npm'
+          cache: 'pnpm'
           node-version-file: '.nvmrc'
-      - uses: actions/download-artifact@v5
+      - uses: actions/download-artifact@v8
         with:
           name: models
           path: packages/models/dist
       - name: Install dependencies
-        run: npm i --workspace=@soker90/finper-api
+        run: pnpm install --frozen-lockfile --filter @soker90/finper-api...
       - name: Build
         run: make build-api
 
@@ -118,19 +123,20 @@ jobs:
         run: |
           wget http://archive.ubuntu.com/ubuntu/pool/main/o/openssl/libssl1.1_1.1.1f-1ubuntu2_amd64.deb
           sudo dpkg -i libssl1.1_1.1.1f-1ubuntu2_amd64.deb
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
+      - uses: pnpm/action-setup@v5
       - uses: actions/setup-node@v6
         with:
-          cache: 'npm'
+          cache: 'pnpm'
           node-version-file: '.nvmrc'
-      - uses: actions/download-artifact@v5
+      - uses: actions/download-artifact@v8
         with:
           name: models
           path: packages/models/dist
       - name: Install dependencies
-        run: npm i --workspace=@soker90/finper-api
+        run: pnpm install --frozen-lockfile --filter @soker90/finper-api...
       - name: Test
         run: make test-api
       - name: Codecov
@@ -142,30 +148,32 @@ jobs:
   lint-client:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
+      - uses: pnpm/action-setup@v5
       - uses: actions/setup-node@v6
         with:
-          cache: 'npm'
+          cache: 'pnpm'
           node-version-file: '.nvmrc'
       - name: Install dependencies
-        run: npm i --workspace=@soker90/finper-client
+        run: pnpm install --frozen-lockfile --filter @soker90/finper-client...
       - name: Lint
         run: make lint-client
 
   build-client:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
+      - uses: pnpm/action-setup@v5
       - uses: actions/setup-node@v6
         with:
-          cache: 'npm'
+          cache: 'pnpm'
           node-version-file: '.nvmrc'
       - name: Install dependencies
-        run: npm i --workspace=@soker90/finper-client
+        run: pnpm install --frozen-lockfile --filter @soker90/finper-client...
       - name: Build
         run: make build-client
 
@@ -173,15 +181,16 @@ jobs:
     needs: [ lint-client, build-client ]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
+      - uses: pnpm/action-setup@v5
       - uses: actions/setup-node@v6
         with:
-          cache: 'npm'
+          cache: 'pnpm'
           node-version-file: '.nvmrc'
       - name: Install dependencies
-        run: npm i --workspace=@soker90/finper-client
+        run: pnpm install --frozen-lockfile --filter @soker90/finper-client...
       - name: Test
         run: make test-client
       - name: Codecov

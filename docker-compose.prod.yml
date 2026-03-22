@@ -28,6 +28,8 @@ services:
       SALT_ROUNDS: ${SALT_ROUNDS}
       LOKI_USER: ${LOKI_USER}
       LOKI_PASSWORD: ${LOKI_PASSWORD}
+      TICKET_BOT_URL: ${TICKET_BOT_URL}
+      TICKET_BOT_API_KEY: ${TICKET_BOT_API_KEY}
     depends_on:
       - database
     ports:

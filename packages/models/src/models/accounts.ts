@@ -1,13 +1,14 @@
-import { Schema, model, ObjectId } from 'mongoose'
+import { Schema, model, HydratedDocument } from 'mongoose'
 
 export interface IAccount {
-  _id: ObjectId,
   name: string
-  bank: string,
-  balance: number,
-  isActive: boolean,
-  user: string,
+  bank: string
+  balance: number
+  isActive: boolean
+  user: string
 }
+
+export type AccountDocument = HydratedDocument<IAccount>
 
 const accountSchema = new Schema<IAccount>({
   name: { type: String, required: true },

@@ -1,12 +1,12 @@
 import {
-  TransactionModel, ITransaction,
+  TransactionModel, TransactionDocument,
   mongoose
 } from '../../src'
 import createTransaction from '../helpers/create-transaction'
 
 const testDatabase = require('../test-db')(mongoose)
 
-const testTransactions = (expected: ITransaction, received: ITransaction) => {
+const testTransactions = (expected: TransactionDocument, received: TransactionDocument) => {
   expect(expected.date).toBe(received.date)
   expect(expected.category.toString()).toBe(received.category.toString())
   expect(expected.amount).toBe(received.amount)
@@ -23,7 +23,7 @@ describe('Transaction', () => {
   afterAll(() => testDatabase.close())
 
   describe('when there is a new transaction', () => {
-    let transactionData: ITransaction
+    let transactionData: TransactionDocument
 
     beforeAll(() => createTransaction().then((transaction) => {
       transactionData = transaction
@@ -32,14 +32,14 @@ describe('Transaction', () => {
     afterAll(() => testDatabase.clear())
 
     test('it should contain all the defined properties', async () => {
-      const debtDocument: ITransaction = await TransactionModel.findOne() as ITransaction
+      const debtDocument: TransactionDocument = await TransactionModel.findOne()
 
       testTransactions(debtDocument, transactionData)
     })
   })
 
   describe('when there are multiple transactions', () => {
-    let firstTransaction: ITransaction
+    let firstTransaction: TransactionDocument
 
     beforeAll(async () => {
       firstTransaction = await createTransaction()
@@ -58,7 +58,7 @@ describe('Transaction', () => {
     })
 
     test('it should contain all the defined properties of the first category', async () => {
-      const transactionDocument: ITransaction = await TransactionModel.findOne({ _id: firstTransaction._id }) as ITransaction
+      const transactionDocument: TransactionDocument = await TransactionModel.findOne({ _id: firstTransaction._id })
 
       testTransactions(transactionDocument, firstTransaction)
     })

@@ -1,12 +1,12 @@
 import {
-  DebtModel, IDebt,
+  DebtModel, DebtDocument,
   mongoose
 } from '../../src'
 import createDebt from '../helpers/create-debt'
 
 const testDatabase = require('../test-db')(mongoose)
 
-const testDebt = (expected: IDebt, received: IDebt) => {
+const testDebt = (expected: DebtDocument, received: DebtDocument) => {
   expect(expected.from).toBe(received.from)
   expect(expected.date).toBe(received.date)
   expect(expected.amount).toBe(received.amount)
@@ -22,7 +22,7 @@ describe('Debt', () => {
   afterAll(() => testDatabase.close())
 
   describe('when there is a new debt', () => {
-    let debtData: IDebt
+    let debtData: DebtDocument
 
     beforeAll(() => createDebt().then((debt) => {
       debtData = debt
@@ -31,14 +31,14 @@ describe('Debt', () => {
     afterAll(() => testDatabase.clear())
 
     test('it should contain all the defined properties', async () => {
-      const debtDocument: IDebt = await DebtModel.findOne() as IDebt
+      const debtDocument: DebtDocument = await DebtModel.findOne()
 
       testDebt(debtDocument, debtData)
     })
   })
 
   describe('when there are multiple accounts', () => {
-    let firstDebt: IDebt
+    let firstDebt: DebtDocument
 
     beforeAll(async () => {
       firstDebt = await createDebt()
@@ -57,7 +57,7 @@ describe('Debt', () => {
     })
 
     test('it should contain all the defined properties of the first category', async () => {
-      const debtDocument: IDebt = await DebtModel.findOne({ _id: firstDebt._id }) as IDebt
+      const debtDocument: DebtDocument = await DebtModel.findOne({ _id: firstDebt._id })
 
       testDebt(debtDocument, firstDebt)
     })

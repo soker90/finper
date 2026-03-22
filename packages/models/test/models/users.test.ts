@@ -2,10 +2,10 @@ import { faker } from '@faker-js/faker'
 import { compare } from 'bcrypt'
 import {
   UserModel,
-  IUser,
   mongoose
 } from '../../src'
 import createUser from '../helpers/create-user'
+import { UserDocument } from '../../src/models/users'
 
 const testDatabase = require('../test-db')(mongoose)
 
@@ -25,7 +25,7 @@ describe('Users', () => {
     afterAll(() => testDatabase.clear())
 
     test('it should contain all the defined properties', async () => {
-      const accountDocument: IUser = await UserModel.findOne() as IUser
+      const accountDocument: UserDocument = await UserModel.findOne()
       const isSamePassword: boolean = await compare(accountData.password, accountDocument.password)
 
       expect(accountDocument.username).toBe(accountData.username)
@@ -34,7 +34,7 @@ describe('Users', () => {
   })
 
   describe('when there are multiple accounts', () => {
-    let firstAccount: IUser
+    let firstAccount: UserDocument
 
     beforeAll(async () => {
       firstAccount = await createUser()
@@ -53,7 +53,7 @@ describe('Users', () => {
     })
 
     test('it should contain all the defined properties of the first account', async () => {
-      const accountDocument: IUser = await UserModel.findOne({ _id: firstAccount._id }) as IUser
+      const accountDocument: UserDocument = await UserModel.findOne({ _id: firstAccount._id })
 
       expect(accountDocument.username).toBe(firstAccount.username)
       expect(accountDocument.password).toBe(firstAccount.password)
