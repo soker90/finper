@@ -1,7 +1,8 @@
 import { useMemo } from 'react'
 import useSWR from 'swr'
 import { Transaction, TransactionType } from 'types'
-import { TRANSACTIONS, DEBTS, ACCOUNTS } from 'constants/api-paths'
+import { TRANSACTIONS, TRANSACTIONS_SUMMARY, DEBTS, ACCOUNTS } from 'constants/api-paths'
+import { objectToParams } from 'utils/objectToParams'
 
 export interface MonthlyData {
   month: string
@@ -54,7 +55,7 @@ const sumIncome = (txs: Transaction[]) =>
   txs.filter(t => t.type === TransactionType.Income).reduce((s, t) => s + t.amount, 0)
 
 const sumExpenses = (txs: Transaction[]) =>
-  Math.abs(txs.filter(t => t.type === TransactionType.Expense).reduce((s, t) => s + t.amount, 0))
+  txs.filter(t => t.type === TransactionType.Expense).reduce((s, t) => s + t.amount, 0)
 
 /**
  * Builds cumulative daily expense arrays for a given month's transactions.
@@ -66,7 +67,7 @@ const buildDailyExpenses = (txs: Transaction[], daysInMonth: number): DailyExpen
     .filter(t => t.type === TransactionType.Expense)
     .forEach(t => {
       const day = new Date(t.date).getDate()
-      dailyMap.set(day, (dailyMap.get(day) || 0) + Math.abs(t.amount))
+      dailyMap.set(day, (dailyMap.get(day) || 0) + t.amount)
     })
 
   const result: DailyExpense[] = []
@@ -87,6 +88,9 @@ export const useDashboardStats = (): {
   const { data: accounts, error: accountsError, mutate: mutateAccounts } = useSWR(ACCOUNTS)
   const { data: transactions, error: transactionsError, mutate: mutateTransactions } = useSWR<Transaction[]>(TRANSACTIONS)
   const { data: debts, error: debtsError, mutate: mutateDebts } = useSWR(DEBTS)
+  const summaryUrl = `${TRANSACTIONS_SUMMARY}${objectToParams({ months: 6 })}`
+  const { data: summaryData, error: summaryError, mutate: mutateSummary } =
+    useSWR<Array<{ year: number; month: number; income: number; expenses: number }>>(summaryUrl)
 
   const stats = useMemo(() => {
     const safeAccounts = Array.isArray(accounts) ? accounts : []
@@ -161,20 +165,19 @@ export const useDashboardStats = (): {
       .sort((a, b) => b.date - a.date)
       .slice(0, 8)
 
-    // Last 6 months
+    // Last 6 months (from server aggregation)
     const last6Months: MonthlyData[] = []
     for (let i = 5; i >= 0; i--) {
       const d = new Date(currentYear, currentMonth - i, 1)
-      const m = d.getMonth()
+      const m = d.getMonth()      // 0-indexed
       const y = d.getFullYear()
-      const monthTxs = safeTransactions.filter(t => {
-        const td = new Date(t.date)
-        return td.getMonth() === m && td.getFullYear() === y
-      })
+      const serverEntry = Array.isArray(summaryData)
+        ? summaryData.find(s => s.year === y && s.month === m + 1)  // API is 1-indexed
+        : undefined
       last6Months.push({
         month: MONTH_NAMES[m],
-        income: sumIncome(monthTxs),
-        expenses: sumExpenses(monthTxs)
+        income: serverEntry?.income ?? 0,
+        expenses: serverEntry?.expenses ?? 0
       })
     }
 
@@ -222,15 +225,16 @@ export const useDashboardStats = (): {
       cashRunwayMonths,
       expenseVelocity
     }
-  }, [accounts, transactions, debts])
+  }, [accounts, transactions, debts, summaryData])
 
-  const loading = accounts === undefined || transactions === undefined || debts === undefined
-  const error = accountsError || transactionsError || debtsError
+  const loading = accounts === undefined || transactions === undefined || debts === undefined || summaryData === undefined
+  const error = accountsError || transactionsError || debtsError || summaryError
 
   const retry = () => {
     mutateAccounts()
     mutateTransactions()
     mutateDebts()
+    mutateSummary()
   }
 
   return { stats, loading, error, retry }

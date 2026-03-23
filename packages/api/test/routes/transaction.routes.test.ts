@@ -145,6 +145,114 @@ describe('Transaction', () => {
       })
   })
 
+  describe('GET /summary', () => {
+    const path = '/api/transactions/summary'
+    let token: string
+    const user: string = generateUsername()
+
+    beforeAll(async () => {
+      token = await requestLogin(server.app, { username: user })
+    })
+
+    afterEach(() => TransactionModel.deleteMany({}))
+
+    test('when token is not provided, it should response an error with status code 401', async () => {
+      await supertest(server.app).get(path).expect(401)
+    })
+
+    test('when months param is invalid, it should response an error with status code 422', async () => {
+      await supertest(server.app).get(`${path}?months=abc`).auth(token, { type: 'bearer' }).expect(422)
+    })
+
+    test('when there are no transactions, it should return an empty array', async () => {
+      await supertest(server.app).get(path).auth(token, { type: 'bearer' }).expect(200, [])
+    })
+
+    test('when there are transactions, it should return monthly totals grouped by month', async () => {
+      const now = new Date()
+      const year = now.getFullYear()
+      const month = now.getMonth()
+
+      // Gastos en el mes actual: 100 + 50 = 150
+      await insertTransaction({ user, date: new Date(year, month, 5).getTime(), amount: 100, type: TransactionType.Expense })
+      await insertTransaction({ user, date: new Date(year, month, 10).getTime(), amount: 50, type: TransactionType.Expense })
+      // Ingreso en el mes actual
+      await insertTransaction({ user, date: new Date(year, month, 3).getTime(), amount: 2000, type: TransactionType.Income })
+      // Gasto en el mes anterior
+      const prevMonth = month === 0 ? 11 : month - 1
+      const prevYear = month === 0 ? year - 1 : year
+      await insertTransaction({ user, date: new Date(prevYear, prevMonth, 15).getTime(), amount: 300, type: TransactionType.Expense })
+
+      const response = await supertest(server.app)
+        .get(`${path}?months=2`)
+        .auth(token, { type: 'bearer' })
+        .expect(200)
+
+      expect(response.body).toHaveLength(2)
+      // Mes anterior: solo gasto
+      expect(response.body[0].expenses).toBe(300)
+      expect(response.body[0].income).toBe(0)
+      // Mes actual: ingreso y gastos
+      expect(response.body[1].income).toBe(2000)
+      expect(response.body[1].expenses).toBe(150)
+    })
+
+    test('when a expense has negative amount (refund), it should subtract from expenses total', async () => {
+      const now = new Date()
+      const year = now.getFullYear()
+      const month = now.getMonth()
+
+      // Gasto de 50 y devolución de 40 → gasto neto 10
+      await insertTransaction({ user, date: new Date(year, month, 5).getTime(), amount: 50, type: TransactionType.Expense })
+      await insertTransaction({ user, date: new Date(year, month, 10).getTime(), amount: -40, type: TransactionType.Expense })
+
+      const response = await supertest(server.app)
+        .get(`${path}?months=1`)
+        .auth(token, { type: 'bearer' })
+        .expect(200)
+
+      expect(response.body).toHaveLength(1)
+      expect(response.body[0].expenses).toBe(10)
+    })
+
+    test('transactions of type not_computable should not be included in totals', async () => {
+      const now = new Date()
+      const year = now.getFullYear()
+      const month = now.getMonth()
+
+      await insertTransaction({ user, date: new Date(year, month, 5).getTime(), amount: 500, type: TransactionType.NotComputable })
+      await insertTransaction({ user, date: new Date(year, month, 6).getTime(), amount: 100, type: TransactionType.Expense })
+
+      const response = await supertest(server.app)
+        .get(`${path}?months=1`)
+        .auth(token, { type: 'bearer' })
+        .expect(200)
+
+      expect(response.body).toHaveLength(1)
+      expect(response.body[0].expenses).toBe(100)
+      expect(response.body[0].income).toBe(0)
+    })
+
+    test('transactions of other users should not be included', async () => {
+      const now = new Date()
+      const year = now.getFullYear()
+      const month = now.getMonth()
+
+      // Transacción de otro usuario
+      await insertTransaction({ date: new Date(year, month, 5).getTime(), amount: 9999, type: TransactionType.Expense })
+      // Transacción del usuario autenticado
+      await insertTransaction({ user, date: new Date(year, month, 5).getTime(), amount: 100, type: TransactionType.Expense })
+
+      const response = await supertest(server.app)
+        .get(`${path}?months=1`)
+        .auth(token, { type: 'bearer' })
+        .expect(200)
+
+      expect(response.body).toHaveLength(1)
+      expect(response.body[0].expenses).toBe(100)
+    })
+  })
+
   describe('GET /', () => {
     const path = '/api/transactions'
     let token: string
