@@ -33,8 +33,8 @@ const BudgetTable = ({
         <TableMaterial
           columns={[
             { title: 'Categoría', field: 'name' },
-            { title: 'Real', render: ({ budgets }) => format.euro(budgets[0].real) },
-            { title: 'Estimado', render: ({ budgets }) => format.euro(budgets[0].amount) }
+            { title: 'Real', field: 'real', render: ({ budgets }) => format.euro(budgets[0].real) },
+            { title: 'Estimado', field: 'estimated', render: ({ budgets }) => format.euro(budgets[0].amount) }
           ]}
           data={orderBudgets}
           title={title}

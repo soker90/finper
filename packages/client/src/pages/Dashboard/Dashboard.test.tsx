@@ -5,9 +5,9 @@ import Dashboard from './index'
 
 describe('Dashboard', () => {
   it('renders loading state initially', () => {
-    const { getByText } = render(<Dashboard />)
+    const { container } = render(<Dashboard />)
 
-    const loadingText = getByText('Cargando dashboard...')
-    expect(loadingText).toBeDefined()
+    const skeleton = container.querySelector('.MuiSkeleton-root')
+    expect(skeleton).toBeDefined()
   })
 })

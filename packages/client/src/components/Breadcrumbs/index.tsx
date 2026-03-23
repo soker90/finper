@@ -62,7 +62,7 @@ const Breadcrumbs = ({ navigation, title, ...others }: any) => {
 
     if (item.breadcrumbs !== false) {
       breadcrumbContent = (
-        <MainCard border={false} sx={{ mb: 3, bgcolor: 'transparent' }} {...others} content={false}>
+        <MainCard border={false} sx={{ mb: 3, bgcolor: 'transparent', boxShadow: 'none' }} {...others} content={false}>
           <Grid container direction='column' justifyContent='flex-start' alignItems='flex-start' spacing={1}>
             <Grid>
               <MuiBreadcrumbs aria-label='breadcrumb'>
