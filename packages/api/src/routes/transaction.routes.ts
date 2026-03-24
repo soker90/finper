@@ -20,12 +20,6 @@ export class TransactionRoutes {
   }
 
   routes () {
-    this.router.get(
-      '/summary',
-      authMiddleware,
-      this.transactionController.summary.bind(this.transactionController)
-    )
-
     this.router.post(
       '/',
       authMiddleware,

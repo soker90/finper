@@ -1,13 +1,6 @@
-import { AccountModel, IAccount, ITransaction, TransactionModel, TransactionType } from '@soker90/finper-models'
+import { AccountModel, IAccount, ITransaction, TransactionModel } from '@soker90/finper-models'
 import { getTransactionAmount } from './utils'
 import { roundNumber } from '../utils'
-
-export interface MonthlySummary {
-  year: number
-  month: number
-  income: number
-  expenses: number
-}
 
 export interface ITransactionService {
   addTransaction(transaction: ITransaction): Promise<ITransaction>
@@ -25,8 +18,6 @@ export interface ITransactionService {
     limit?: number,
     skip?: number,
   }): Promise<ITransaction[]>
-
-  getMonthlySummary(params: { user: string, months?: number }): Promise<MonthlySummary[]>
 }
 
 const updateAcoountBalance = async (account: string, amount: number) => {
@@ -94,50 +85,5 @@ export default class TransactionService implements ITransactionService {
       .populate('account', 'name bank')
       .sort({ date: -1 })
       .skip(page * limit).limit(limit)
-  }
-
-  public async getMonthlySummary ({ user, months = 6 }: { user: string, months?: number }): Promise<MonthlySummary[]> {
-    const now = new Date()
-    const startDate = new Date(now.getFullYear(), now.getMonth() - (months - 1), 1).getTime()
-
-    const results = await TransactionModel.aggregate([
-      {
-        $match: {
-          user,
-          date: { $gte: startDate },
-          type: { $in: [TransactionType.Income, TransactionType.Expense] }
-        }
-      },
-      {
-        $group: {
-          _id: {
-            year: { $year: { date: { $toDate: '$date' }, timezone: 'Europe/Madrid' } },
-            month: { $month: { date: { $toDate: '$date' }, timezone: 'Europe/Madrid' } }
-          },
-          income: {
-            $sum: {
-              $cond: [{ $eq: ['$type', TransactionType.Income] }, '$amount', 0]
-            }
-          },
-          expenses: {
-            $sum: {
-              $cond: [{ $eq: ['$type', TransactionType.Expense] }, '$amount', 0]
-            }
-          }
-        }
-      },
-      { $sort: { '_id.year': 1, '_id.month': 1 } },
-      {
-        $project: {
-          _id: 0,
-          year: '$_id.year',
-          month: '$_id.month',
-          income: 1,
-          expenses: 1
-        }
-      }
-    ])
-
-    return results
   }
 }

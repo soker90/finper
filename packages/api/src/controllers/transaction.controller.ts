@@ -7,8 +7,7 @@ import {
   validateTransactionCreateParams,
   validateTransactionGetParams,
   validateTransactionEditParams,
-  validateTransactionExist,
-  validateTransactionSummaryParams
+  validateTransactionExist
 } from '../validators/transaction'
 import { IStoreService } from '../services/stores.service'
 import { RequestUser } from '../types'
@@ -82,20 +81,6 @@ export class TransactionController {
       .then(this.transactionService.deleteTransaction.bind(this.transactionService))
       .then(() => {
         res.status(204).send()
-      })
-      .catch((error) => {
-        next(error)
-      })
-  }
-
-  public async summary (req: Request, res: Response, next: NextFunction): Promise<void> {
-    Promise.resolve(req.query)
-      .tap(() => this.logger.logInfo(`/summary - monthly summary for ${req.user}`))
-      .then(validateTransactionSummaryParams)
-      .then(extractUser(req))
-      .then(this.transactionService.getMonthlySummary.bind(this.transactionService))
-      .then(response => {
-        res.send(response)
       })
       .catch((error) => {
         next(error)

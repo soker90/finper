@@ -3,6 +3,7 @@ import AccountService from './account.service'
 import AuthService from './auth.service'
 import BudgetService from './budget.service'
 import CategoryService from './category.service'
+import DashboardService from './dashboard.service'
 import DebtService from './debt.service'
 import PensionService from './pension.service'
 import StoreService from './stores.service'
@@ -14,6 +15,7 @@ export const accountService = new AccountService()
 export const authService = new AuthService(config.jwt)
 export const budgetService = new BudgetService()
 export const categoryService = new CategoryService()
+export const dashboardService = new DashboardService()
 export const debtService = new DebtService()
 export const pensionService = new PensionService()
 export const storeService = new StoreService()

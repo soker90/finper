@@ -13,6 +13,7 @@ import { AuthRoutes } from './routes/auth.routes'
 import { AccountRoutes } from './routes/account.routes'
 import { BudgetRoutes } from './routes/budget.routes'
 import { CategoryRoutes } from './routes/category.routes'
+import { DashboardRoutes } from './routes/dashboard.routes'
 import { DebtRoutes } from './routes/debt.routes'
 import { PensionRoutes } from './routes/pension.routes'
 import { TransactionRoutes } from './routes/transaction.routes'
@@ -37,6 +38,7 @@ class Server {
     this.app.use('/api/auth', new AuthRoutes().router)
     this.app.use('/api/accounts', new AccountRoutes().router)
     this.app.use('/api/budgets', new BudgetRoutes().router)
+    this.app.use('/api/dashboard', new DashboardRoutes().router)
     this.app.use('/api/debts', new DebtRoutes().router)
     this.app.use('/api/categories', new CategoryRoutes().router)
     this.app.use('/api/pensions', new PensionRoutes().router)

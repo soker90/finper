@@ -373,6 +373,7 @@ const getScoreLabel = (score: number): string => {
 }
 
 // ── Constantes ──
+const MONTH_NAMES = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic']
 const now = new Date()
 const currentYear = String(now.getFullYear())
 const currentMonth = String(now.getMonth())
@@ -452,6 +453,13 @@ const Dashboard = () => {
   const expensesTrend = stats
     ? trendChip(stats.monthlyTrend.expenses.current, stats.monthlyTrend.expenses.previous, true)
     : null
+
+  // ── Adaptar last6Months al formato { month: string } que usa el BarChart ──
+  const last6MonthsChart = (stats?.last6Months ?? []).map(m => ({
+    month: MONTH_NAMES[m.month - 1],  // month es 1-indexed desde la API
+    income: m.income,
+    expenses: m.expenses
+  }))
 
   // ── Datos PieChart cuentas ──
   const pieData = (accounts || [])
@@ -610,7 +618,7 @@ const Dashboard = () => {
         <Grid size={{ xs: 12, md: 8 }}>
           <MainCard title='Ingresos vs Gastos — últimos 6 meses' sx={hoverCardSx}>
             <ResponsiveContainer width='100%' height={chartHeight}>
-              <BarChart data={stats?.last6Months ?? []} barGap={4}>
+              <BarChart data={last6MonthsChart} barGap={4}>
                 <XAxis dataKey='month' tick={{ fontSize: 12 }} />
                 <YAxis
                   tick={{ fontSize: 12 }}
