@@ -11,8 +11,8 @@ const headerSX = {
 
 const MainCard = (
   {
-    border = true,
-    boxShadow,
+    border = false,
+    boxShadow: boxShadowProp,
     children,
     content = true,
     contentSX = {},
@@ -27,19 +27,17 @@ const MainCard = (
     ...others
   }: any): any => {
   const theme = useTheme<Theme>()
-  boxShadow = theme.palette.mode === 'dark' ? boxShadow || true : boxShadow
+  const resolvedBoxShadow = theme.palette.mode === 'dark' ? (boxShadowProp ?? true) : boxShadowProp
 
   return (
     <Card
       elevation={elevation || 0}
       {...others}
       sx={[theme => ({
-        ...sx,
         borderRadius: 2,
-        // @ts-ignore
-        borderColor: theme.palette.grey.A800,
-        // @ts-ignore
-        boxShadow: boxShadow && (!border || theme.palette.mode === 'dark') ? shadow || theme.customShadows.z1 : 'inherit',
+        // @ts-ignore – customShadows from extended Theme
+        boxShadow: shadow || theme.customShadows?.z1 || '0px 2px 8px rgba(0,0,0,0.15)',
+        transition: 'box-shadow 0.2s ease-in-out, transform 0.2s ease-in-out',
         '& pre': {
           m: 0,
           p: '16px !important',
@@ -48,24 +46,24 @@ const MainCard = (
         },
         ...theme.applyStyles('dark', {
           borderColor: theme.palette.divider
-        })
+        }),
+        ...sx
       }), border
         ? {
-            border: '1px solid'
+            border: '1px solid',
+            // @ts-ignore
+            borderColor: theme.palette.grey.A800
           }
         : {
             border: 'none'
-          }, boxShadow
+          }, resolvedBoxShadow
         ? {
             ':hover': {
-              boxShadow: shadow || theme.customShadows.z1
+              // @ts-ignore – customShadows from extended Theme
+              boxShadow: shadow || theme.customShadows?.z1 || '0px 2px 8px rgba(0,0,0,0.15)'
             }
           }
-        : {
-            ':hover': {
-              boxShadow: 'inherit'
-            }
-          }]}
+        : {}]}
     >
       {!darkTitle && title && (
         <CardHeader

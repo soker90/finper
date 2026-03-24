@@ -1,6 +1,7 @@
 export const ACCOUNTS = 'accounts'
 export const CATEGORIES = 'categories'
 export const GROUPED_CATEGORIES = 'categories/grouped'
+export const DASHBOARD_STATS = 'dashboard/stats'
 export const TRANSACTIONS = 'transactions'
 export const STORES = 'stores'
 export const DEBTS = 'debts'

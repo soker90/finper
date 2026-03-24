@@ -32,7 +32,6 @@ export const dateShort = (cell: number) => {
   })
 }
 
-/* xD */
 export const date = (cell: number) => {
   if (!cell) {
     return null
@@ -43,6 +42,12 @@ export const date = (cell: number) => {
     month: '2-digit',
     year: 'numeric'
   })
+}
+
+export const monthShort = (month: number): string => {
+  const d = new Date()
+  d.setMonth(month, 1)
+  return capitalize(d.toLocaleString('es-ES', { month: 'short' }))
 }
 
 export const monthToNumber = (month?: number | string): string => {

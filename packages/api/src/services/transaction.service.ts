@@ -18,7 +18,6 @@ export interface ITransactionService {
     limit?: number,
     skip?: number,
   }): Promise<ITransaction[]>
-
 }
 
 const updateAcoountBalance = async (account: string, amount: number) => {

@@ -77,7 +77,7 @@ export const insertTransaction = async (params: Record<string, string | number> 
     date: params.date ?? faker.date.past().getTime(),
     category: params.category ?? (await insertCategory({ user })),
     amount: params.amount ?? faker.number.int(),
-    type: params.type ?? Math.random() > 0.5 ? TransactionType.Expense : TransactionType.Income,
+    type: params.type ?? (Math.random() > 0.5 ? TransactionType.Expense : TransactionType.Income),
     account: params.account ?? (await insertAccount({ user })),
     note: params.note ?? faker.lorem.sentence(),
     store: params.store ?? (await insertStore({ user })),

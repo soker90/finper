@@ -4,6 +4,7 @@ import { Pension } from 'types'
 
 export const usePensions = (): {
   error: any,
+  isLoading: boolean,
   pension?: Pension,
   addPension: (pension: Pension) => void,
   editPension: (id: string, pension: Pension) => void,
@@ -19,6 +20,7 @@ export const usePensions = (): {
 
   return {
     pension: data,
+    isLoading: !data && !error,
     error,
     addPension,
     editPension
