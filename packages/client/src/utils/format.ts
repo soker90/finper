@@ -32,7 +32,6 @@ export const dateShort = (cell: number) => {
   })
 }
 
-/* xD */
 export const date = (cell: number) => {
   if (!cell) {
     return null

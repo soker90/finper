@@ -1,10 +1,10 @@
-import React from 'react'
+import { type ReactNode } from 'react'
 import { Stack, Box, Typography, Avatar } from '@mui/material'
 
 interface MiniKpiProps {
   title: string
   value: string
-  icon: React.ReactNode
+  icon: ReactNode
   color?: string
 }
 

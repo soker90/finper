@@ -1,4 +1,4 @@
-import React from 'react'
+import { type ReactNode } from 'react'
 import { Stack, Typography, Avatar } from '@mui/material'
 import MainCard from 'components/MainCard'
 import { hoverCardSx } from './shared'
@@ -7,8 +7,8 @@ export interface KpiCardProps {
   title: string
   value: string
   subtitle: string
-  icon: React.ReactNode
-  trend?: React.ReactNode
+  icon: ReactNode
+  trend?: ReactNode
   color?: string
 }
 

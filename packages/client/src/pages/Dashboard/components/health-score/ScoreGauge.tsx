@@ -1,4 +1,3 @@
-import React from 'react'
 import { useTheme } from '@mui/material/styles'
 import { Stack, Box, Typography, LinearProgress } from '@mui/material'
 import { RadialBarChart, RadialBar, ResponsiveContainer } from 'recharts'

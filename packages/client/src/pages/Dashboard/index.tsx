@@ -1,4 +1,3 @@
-import React from 'react'
 import { useTheme } from '@mui/material/styles'
 import useMediaQuery from '@mui/material/useMediaQuery'
 import { Grid } from '@mui/material'
@@ -15,7 +14,7 @@ import HealthScoreSection from './components/health-score'
 
 const now = new Date()
 const currentYear = String(now.getFullYear())
-const currentMonth = String(now.getMonth())
+const currentMonthIndex = String(now.getMonth()) // 0-indexed, as expected by useBudgets
 
 const Dashboard = () => {
   const theme = useTheme()
@@ -32,7 +31,7 @@ const Dashboard = () => {
     totalsExpenses,
     totalsIncomes,
     isLoading: budgetLoading
-  } = useBudgets({ year: currentYear, month: currentMonth })
+  } = useBudgets({ year: currentYear, month: currentMonthIndex })
 
   const isLoading = loading || ticketsLoading || accountsLoading || budgetLoading
 

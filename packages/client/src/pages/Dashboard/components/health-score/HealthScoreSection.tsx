@@ -1,4 +1,3 @@
-import React from 'react'
 import { Grid, Grow, Chip } from '@mui/material'
 import { DashboardOutlined } from '@ant-design/icons'
 import { type DashboardStats } from 'hooks'

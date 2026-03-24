@@ -1,4 +1,3 @@
-import React from 'react'
 import { Grid, Grow, Chip } from '@mui/material'
 import { format } from 'utils'
 import MainCard from 'components/MainCard'
@@ -11,6 +10,7 @@ interface BudgetCardProps {
   budgetItems: Budget[]
   totals: Budget
   emptyMessage: string
+  allowOver?: boolean
   /** Devuelve el color del chip de totales según real vs estimado */
   chipColor: (real: number, estimated: number) => 'error' | 'warning' | 'success'
   growTimeout: number
@@ -32,10 +32,11 @@ const BudgetCard = ({
   budgetItems,
   totals,
   emptyMessage,
+  allowOver = false,
   chipColor,
   growTimeout
 }: BudgetCardProps) => {
-  const rows = toBudgetRows(budgetItems, title === 'Presupuesto gastos')
+  const rows = toBudgetRows(budgetItems, allowOver)
   const total = {
     real: totals?.budgets?.[0]?.real ?? 0,
     estimated: totals?.budgets?.[0]?.amount ?? 0

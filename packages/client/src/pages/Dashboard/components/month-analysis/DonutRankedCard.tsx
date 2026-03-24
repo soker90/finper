@@ -1,18 +1,18 @@
-import React, { useState } from 'react'
+import { useState, type ReactNode } from 'react'
 import { Grid, Grow, Stack, Box, Typography, Button, LinearProgress } from '@mui/material'
 import { UnorderedListOutlined } from '@ant-design/icons'
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from 'recharts'
 import { format } from 'utils'
 import MainCard from 'components/MainCard'
 import { PieTooltip } from '../chartTooltips'
-import { hoverCardSx } from '../shared'
-import { groupWithOthers, OTHERS_LABEL, OTHERS_COLOR, type RankedItem } from '../../utils/groupWithOthers'
+import { hoverCardSx, ColorDot } from '../shared'
+import { groupWithOthers, rotateColors, OTHERS_LABEL, OTHERS_COLOR, type RankedItem } from '../../utils/groupWithOthers'
 import CategoryBreakdownModal from './CategoryBreakdownModal'
 
 interface DonutRankedCardProps {
   title: string
   modalTitle: string
-  secondary?: React.ReactNode
+  secondary?: ReactNode
   items: RankedItem[]
   chartColors: string[]
   colorOffset?: number
@@ -32,9 +32,7 @@ const DonutRankedCard = ({
 }: DonutRankedCardProps) => {
   const [modalOpen, setModalOpen] = useState(false)
 
-  const colors = colorOffset === 0
-    ? chartColors
-    : [...chartColors.slice(colorOffset), ...chartColors.slice(0, colorOffset)]
+  const colors = rotateColors(chartColors, colorOffset)
 
   const grouped = groupWithOthers(items)
   const max = grouped[0]?.amount ?? 1
@@ -85,7 +83,7 @@ const DonutRankedCard = ({
                         animationDuration={800}
                       >
                         {grouped.map((item, i) => (
-                          <Cell key={i} fill={itemColor(item.name, i)} />
+                          <Cell key={item.name} fill={itemColor(item.name, i)} />
                         ))}
                       </Pie>
                       <Tooltip content={<PieTooltip />} />
@@ -100,7 +98,7 @@ const DonutRankedCard = ({
                         <Box key={item.name}>
                           <Stack direction='row' justifyContent='space-between' sx={{ mb: 0.5 }}>
                             <Stack direction='row' alignItems='center' gap={0.75}>
-                              <Box sx={{ width: 10, height: 10, borderRadius: '50%', bgcolor: color }} />
+                              <ColorDot color={color} size={10} />
                               <Typography variant='body2'>{item.name}</Typography>
                             </Stack>
                             <Typography variant='body2' fontWeight={600}>

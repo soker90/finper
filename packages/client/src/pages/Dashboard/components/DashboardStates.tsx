@@ -1,7 +1,8 @@
-import React from 'react'
 import { Grid, Skeleton, Stack, Box, Fade, Avatar, Typography, Button, Alert } from '@mui/material'
 import { WarningOutlined, ReloadOutlined } from '@ant-design/icons'
 import MainCard from 'components/MainCard'
+
+const BAR_HEIGHTS = [120, 200, 80, 160, 220, 100, 180, 240, 90, 150, 210, 70]
 
 // ── Loading skeleton ──────────────────────────────────────────────────────────
 export const DashboardSkeleton = () => (
@@ -25,7 +26,7 @@ export const DashboardSkeleton = () => (
         <Skeleton variant='text' width='30%' height={20} sx={{ mb: 1 }} />
         <Stack direction='row' alignItems='flex-end' spacing={1} sx={{ height: 260 }}>
           {[...Array(12)].map((_, i) => (
-            <Skeleton key={`bar-${i}`} variant='rounded' width='100%' height={60 + Math.random() * 180} sx={{ borderRadius: 1 }} />
+            <Skeleton key={`bar-${i}`} variant='rounded' width='100%' height={BAR_HEIGHTS[i]} sx={{ borderRadius: 1 }} />
           ))}
         </Stack>
       </MainCard>

@@ -1,4 +1,3 @@
-import React from 'react'
 import { Stack, Typography } from '@mui/material'
 import { ShopOutlined } from '@ant-design/icons'
 import { type DashboardStats } from 'hooks'

@@ -1,4 +1,3 @@
-import React from 'react'
 import { useTheme } from '@mui/material/styles'
 import { Stack, Box, Typography, Chip, Divider } from '@mui/material'
 import { PieChartOutlined, RiseOutlined, FallOutlined } from '@ant-design/icons'
@@ -9,21 +8,11 @@ import { format } from 'utils'
 import MainCard from 'components/MainCard'
 import { type PensionSummary } from 'hooks'
 import { hoverCardSx } from '../shared'
+import { PensionSparklineTooltip } from '../chartTooltips'
 
 interface PensionCardProps {
   pension: PensionSummary | null
   pensionReturnPct: number
-}
-
-const PensionSparklineTooltip = ({ active, payload }: any) => {
-  if (!active || !payload?.length) return null
-  const item = payload[0]
-  return (
-    <Box sx={{ bgcolor: 'background.paper', p: 1, borderRadius: 1, boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
-      <Typography variant='caption' color='textSecondary'>{item.payload.date}</Typography>
-      <Typography variant='body2' fontWeight={600}>{format.euro(Number(item.value))}</Typography>
-    </Box>
-  )
 }
 
 const PensionCard = ({ pension, pensionReturnPct }: PensionCardProps) => {

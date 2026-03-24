@@ -1,4 +1,3 @@
-import React from 'react'
 import { useTheme } from '@mui/material/styles'
 import { Grid, Grow, Typography, Stack } from '@mui/material'
 import { CalendarOutlined, ThunderboltOutlined } from '@ant-design/icons'
@@ -10,7 +9,7 @@ import MainCard from 'components/MainCard'
 import { type DashboardStats } from 'hooks'
 import KpiCard from './KpiCard'
 import SectionTitle from './SectionTitle'
-import { VelocityTooltip } from './chartTooltips'
+import { ChartTooltip } from './chartTooltips'
 import { hoverCardSx } from './shared'
 
 interface SpendingRhythmProps {
@@ -62,7 +61,7 @@ const SpendingRhythm = ({ stats, chartHeight }: SpendingRhythmProps) => {
                     <CartesianGrid strokeDasharray='3 3' stroke={theme.palette.divider} />
                     <XAxis dataKey='day' tick={{ fontSize: 11 }} tickFormatter={v => `${v}`} />
                     <YAxis tick={{ fontSize: 11 }} tickFormatter={v => format.euro(v)} width={75} />
-                    <Tooltip content={<VelocityTooltip />} />
+                    <Tooltip content={<ChartTooltip labelPrefix='Día ' />} />
                     <Legend
                       wrapperStyle={{ fontSize: 13 }}
                       formatter={(value) => (

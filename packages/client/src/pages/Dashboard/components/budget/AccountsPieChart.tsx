@@ -1,4 +1,3 @@
-import React from 'react'
 import { Typography } from '@mui/material'
 import {
   PieChart, Pie, Cell, Tooltip, ResponsiveContainer, Legend
@@ -39,8 +38,8 @@ const AccountsPieChart = ({ accounts, chartColors, isMobile }: AccountsPieChartP
                 animationDuration={800}
                 animationBegin={400}
               >
-                {pieData.map((_, i) => (
-                  <Cell key={i} fill={chartColors[i % chartColors.length]} />
+                {pieData.map((entry, i) => (
+                  <Cell key={entry.name} fill={chartColors[i % chartColors.length]} />
                 ))}
               </Pie>
               <Tooltip content={<PieTooltip />} />

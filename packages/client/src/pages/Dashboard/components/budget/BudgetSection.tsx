@@ -1,4 +1,3 @@
-import React from 'react'
 import { Grid, Grow, Stack } from '@mui/material'
 import { type DashboardStats } from 'hooks'
 import { type Account, type Budget } from 'types'
@@ -36,6 +35,7 @@ const BudgetSection = ({
       budgetItems={budgetExpenses}
       totals={totalsExpenses}
       emptyMessage='Sin presupuesto de gastos'
+      allowOver
       chipColor={(real, estimated) => real > estimated ? 'error' : 'success'}
       growTimeout={1100}
     />

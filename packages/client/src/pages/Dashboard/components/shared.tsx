@@ -1,3 +1,4 @@
+import { Box } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 
 export const hoverCardSx = {
@@ -20,3 +21,7 @@ export const useChartColors = () => {
     theme.palette.primary.dark
   ]
 }
+
+export const ColorDot = ({ color, size = 8 }: { color: string; size?: number }) => (
+  <Box sx={{ width: size, height: size, borderRadius: '50%', bgcolor: color, flexShrink: 0 }} />
+)

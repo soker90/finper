@@ -1,4 +1,3 @@
-import React from 'react'
 import { Grid, Grow } from '@mui/material'
 import {
   WalletOutlined,

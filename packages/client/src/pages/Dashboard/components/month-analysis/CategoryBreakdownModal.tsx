@@ -1,16 +1,15 @@
-import React from 'react'
 import {
   Dialog,
   DialogTitle,
   DialogContent,
   IconButton,
   Stack,
-  Box,
   Typography
 } from '@mui/material'
 import { CloseOutlined } from '@ant-design/icons'
 import { format } from 'utils'
 import { type RankedItem } from '../../utils/groupWithOthers'
+import { ColorDot } from '../shared'
 
 interface CategoryBreakdownModalProps {
   open: boolean
@@ -59,7 +58,7 @@ const CategoryBreakdownModal = ({
                     spacing={1}
                   >
                     <Stack direction='row' alignItems='center' gap={1} sx={{ minWidth: 0 }}>
-                      <Box sx={{ width: 10, height: 10, borderRadius: '50%', bgcolor: color, flexShrink: 0 }} />
+                      <ColorDot color={color} size={10} />
                       <Typography variant='body2' noWrap>{item.name}</Typography>
                     </Stack>
                     <Stack direction='row' alignItems='center' spacing={1.5} sx={{ flexShrink: 0 }}>

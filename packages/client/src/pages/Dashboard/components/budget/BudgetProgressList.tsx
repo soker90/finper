@@ -1,4 +1,3 @@
-import React from 'react'
 import { Stack, Box, Typography, LinearProgress } from '@mui/material'
 import { format } from 'utils'
 

@@ -1,4 +1,3 @@
-import React from 'react'
 import { Stack, Alert } from '@mui/material'
 import { type HealthScore } from 'hooks'
 

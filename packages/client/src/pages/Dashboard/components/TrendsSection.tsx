@@ -1,4 +1,3 @@
-import React from 'react'
 import { useNavigate } from 'react-router'
 import { useTheme } from '@mui/material/styles'
 import { Grid, Grow, Typography, Box, Stack, Avatar, Button, Chip, Divider } from '@mui/material'
@@ -112,7 +111,7 @@ const TrendsSection = ({ stats, tickets, chartHeight }: TrendsSectionProps) => {
               {/* Tasa de ahorro */}
               <MiniKpi
                 title='Tasa de Ahorro'
-                value={`${stats.savingsRate}%`}
+                value={`${stats.savingsRate.toFixed(1)}%`}
                 icon={<DollarOutlined />}
                 color={stats.savingsRate >= 20 ? 'success' : 'warning'}
               />
