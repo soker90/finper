@@ -22,7 +22,8 @@ export default [
       globals: {
         ...globals.browser,
         ...globals.es2025,
-        JSX: "readonly"
+        JSX: "readonly",
+        __APP_VERSION__: "readonly"
       },
     },
     plugins: {
@@ -42,6 +43,6 @@ export default [
     }
   },
   {
-    ignores: ["dist", "node_modules", "build", "public", "src/env.d.ts"]
+    ignores: ["dist", "node_modules", "build", "public", "src/env.d.ts", "src/vite-env.d.ts"]
   }
 ];
