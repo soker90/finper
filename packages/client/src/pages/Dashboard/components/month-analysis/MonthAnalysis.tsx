@@ -3,7 +3,7 @@ import { Stack, Typography } from '@mui/material'
 import { ShopOutlined } from '@ant-design/icons'
 import { type DashboardStats } from 'hooks'
 import SectionTitle from '../SectionTitle'
-import RankedBarList from './RankedBarList'
+import DonutRankedCard from './DonutRankedCard'
 
 interface MonthAnalysisProps {
   stats: DashboardStats
@@ -14,8 +14,9 @@ const MonthAnalysis = ({ stats, chartColors }: MonthAnalysisProps) => (
   <>
     <SectionTitle>Análisis del mes</SectionTitle>
 
-    <RankedBarList
+    <DonutRankedCard
       title='Top gastos por categoría'
+      modalTitle='Categorías — este mes'
       secondary={<Typography variant='body2' color='textSecondary'>Este mes</Typography>}
       items={stats.topExpenseCategories}
       chartColors={chartColors}
@@ -24,8 +25,9 @@ const MonthAnalysis = ({ stats, chartColors }: MonthAnalysisProps) => (
       growTimeout={1300}
     />
 
-    <RankedBarList
+    <DonutRankedCard
       title='Top tiendas'
+      modalTitle='Tiendas — este mes'
       secondary={
         <Stack direction='row' alignItems='center' gap={0.5}>
           <ShopOutlined style={{ fontSize: 14 }} />

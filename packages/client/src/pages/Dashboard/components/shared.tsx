@@ -16,7 +16,7 @@ export const useChartColors = () => {
     theme.palette.warning.main,
     theme.palette.error.main,
     theme.palette.info.main,
-    theme.palette.secondary.main,
+    theme.palette.primary.light,
     theme.palette.primary.dark
   ]
 }

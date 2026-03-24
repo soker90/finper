@@ -307,7 +307,7 @@ export default class DashboardService implements IDashboardService {
         { $sort: { _id: 1 } }
       ]),
 
-      // 8. Top 5 categorías de gasto del mes actual
+      // 8. Categorías de gasto del mes actual (todas, ordenadas por importe)
       TransactionModel.aggregate([
         {
           $match: {
@@ -323,7 +323,6 @@ export default class DashboardService implements IDashboardService {
           }
         },
         { $sort: { amount: -1 } },
-        { $limit: 5 },
         {
           $lookup: {
             from: 'categories',
@@ -341,7 +340,7 @@ export default class DashboardService implements IDashboardService {
         }
       ]),
 
-      // 9. Top 5 tiendas de gasto del mes actual
+      // 9. Tiendas de gasto del mes actual (todas, ordenadas por importe)
       TransactionModel.aggregate([
         {
           $match: {
@@ -358,7 +357,6 @@ export default class DashboardService implements IDashboardService {
           }
         },
         { $sort: { amount: -1 } },
-        { $limit: 5 },
         {
           $lookup: {
             from: 'stores',
