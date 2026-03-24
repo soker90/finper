@@ -9,7 +9,7 @@ export const useBudgets = (filters: { year?: string, month?: string }): {
   const { data, error } = useSWR(`${BUDGETS}${objectToParams(filters)}`)
 
   return {
-    isLoading: !data,
+    isLoading: !data && !error,
     error,
     incomes: data?.incomes?.filter?.(({ id }: Budget) => id !== 'totals') || [],
     expenses: data?.expenses?.filter?.(({ id }: Budget) => id !== 'totals') || [],

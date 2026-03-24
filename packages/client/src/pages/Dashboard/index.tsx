@@ -425,7 +425,7 @@ const Dashboard = () => {
   const { stats, loading, error, retry } = useDashboardStats()
   const { tickets, isLoading: ticketsLoading } = useTickets()
   const { accounts, isLoading: accountsLoading } = useAccounts()
-  const { pension } = usePensions()
+  const { pension, isLoading: pensionsLoading } = usePensions()
   const {
     expenses: budgetExpenses,
     incomes: budgetIncomes,
@@ -437,7 +437,7 @@ const Dashboard = () => {
     month: currentMonth
   })
 
-  const isLoading = loading || ticketsLoading || accountsLoading || budgetLoading
+  const isLoading = loading || ticketsLoading || accountsLoading || budgetLoading || pensionsLoading
 
   if (isLoading) return <DashboardSkeleton />
   if (error) return <DashboardError error={error} onRetry={retry} />
