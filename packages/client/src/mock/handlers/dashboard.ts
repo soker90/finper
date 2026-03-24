@@ -51,6 +51,32 @@ const DASHBOARD_STATS_DATA: DashboardStats = {
       day: i + 1,
       amount: faker.number.float({ min: 0, max: 2000, multipleOf: 0.01 })
     }))
+  },
+  pension: {
+    employeeAmount: faker.number.float({ min: 1000, max: 10000, multipleOf: 0.01 }),
+    companyAmount: faker.number.float({ min: 500, max: 5000, multipleOf: 0.01 }),
+    total: faker.number.float({ min: 2000, max: 20000, multipleOf: 0.01 }),
+    transactions: Array.from({ length: 6 }, (_, i) => {
+      const d = new Date(now.getFullYear(), now.getMonth() - (5 - i), 1)
+      return {
+        date: d.getTime(),
+        employeeAmount: faker.number.float({ min: 100, max: 500, multipleOf: 0.01 }),
+        employeeUnits: faker.number.float({ min: 1, max: 10, multipleOf: 0.0001 }),
+        companyAmount: faker.number.float({ min: 50, max: 250, multipleOf: 0.01 }),
+        companyUnits: faker.number.float({ min: 0.5, max: 5, multipleOf: 0.0001 }),
+        value: faker.number.float({ min: 10, max: 50, multipleOf: 0.01 })
+      }
+    })
+  },
+  pensionReturnPct: faker.number.float({ min: 0, max: 10, multipleOf: 0.01 }),
+  budgetAdherencePct: faker.number.float({ min: 50, max: 100, multipleOf: 0.01 }),
+  healthScore: {
+    total: faker.number.int({ min: 30, max: 95 }),
+    savingsRate: faker.number.int({ min: 0, max: 100 }),
+    debtRatio: faker.number.int({ min: 0, max: 100 }),
+    budgetAdherence: faker.number.int({ min: 0, max: 100 }),
+    cashRunway: faker.number.int({ min: 0, max: 100 }),
+    pensionReturn: faker.number.int({ min: 0, max: 100 })
   }
 }
 

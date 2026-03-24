@@ -4,6 +4,7 @@ import {
   DebtModel,
   DebtType,
   mongoose,
+  PensionModel,
   TransactionModel,
   TransactionType
 } from '@soker90/finper-models'
@@ -11,7 +12,7 @@ import {
 import { server } from '../../src/server'
 
 import { requestLogin } from '../request-login'
-import { insertAccount, insertDebt, insertTransaction } from '../insert-data-to-model'
+import { insertAccount, insertDebt, insertPension, insertTransaction } from '../insert-data-to-model'
 import { generateUsername } from '../generate-values'
 
 const testDatabase = require('../test-db')(mongoose)
@@ -34,6 +35,7 @@ describe('Dashboard', () => {
       await TransactionModel.deleteMany({})
       await AccountModel.deleteMany({})
       await DebtModel.deleteMany({})
+      await PensionModel.deleteMany({})
     })
 
     test('when token is not provided, it should response an error with status code 401', async () => {
@@ -60,6 +62,17 @@ describe('Dashboard', () => {
       expect(response.body).toHaveProperty('dailyAvgExpense')
       expect(response.body).toHaveProperty('projectedMonthlyExpense')
       expect(response.body).toHaveProperty('cashRunwayMonths')
+      // Nuevos campos
+      expect(response.body).toHaveProperty('pension', null)
+      expect(response.body).toHaveProperty('pensionReturnPct', 0)
+      expect(response.body).toHaveProperty('budgetAdherencePct')
+      expect(response.body).toHaveProperty('healthScore')
+      expect(response.body.healthScore).toHaveProperty('total')
+      expect(response.body.healthScore).toHaveProperty('savingsRate')
+      expect(response.body.healthScore).toHaveProperty('debtRatio')
+      expect(response.body.healthScore).toHaveProperty('budgetAdherence')
+      expect(response.body.healthScore).toHaveProperty('cashRunway')
+      expect(response.body.healthScore).toHaveProperty('pensionReturn')
     })
 
     test('should return correct monthly income and expenses for the current month', async () => {
@@ -286,6 +299,59 @@ describe('Dashboard', () => {
 
       // savingsRate = (1000 - 200) / 1000 * 100 = 80%
       expect(response.body.savingsRate).toBe(80)
+    })
+
+    test('should return pension data with pensionReturnPct when pension records exist', async () => {
+      // employeeAmount=600, companyAmount=400 → contributed=1000
+      // value=1.5, units = employeeUnits+companyUnits = 500+500 = 1000
+      // total = 1.5 * 1000 = 1500 → return = (1500-1000)/1000 * 100 = 50%
+      await insertPension({
+        user,
+        employeeAmount: 600,
+        companyAmount: 400,
+        employeeUnits: 500,
+        companyUnits: 500,
+        value: 1.5,
+        date: Date.now()
+      })
+
+      const response = await supertest(server.app)
+        .get(path)
+        .auth(token, { type: 'bearer' })
+        .expect(200)
+
+      expect(response.body.pension).not.toBeNull()
+      expect(response.body.pension).toHaveProperty('employeeAmount', 600)
+      expect(response.body.pension).toHaveProperty('companyAmount', 400)
+      expect(response.body.pension).toHaveProperty('total', 1500)
+      expect(response.body.pension).toHaveProperty('transactions')
+      expect(Array.isArray(response.body.pension.transactions)).toBe(true)
+      expect(response.body.pensionReturnPct).toBe(50)
+    })
+
+    test('should include healthScore with all sub-scores in response', async () => {
+      const now = new Date()
+      const year = now.getFullYear()
+      const month = now.getMonth()
+
+      await insertAccount({ user, balance: 10000, isActive: true })
+      await insertTransaction({ user, date: new Date(year, month, 3).getTime(), amount: 3000, type: TransactionType.Income })
+      await insertTransaction({ user, date: new Date(year, month, 5).getTime(), amount: 1000, type: TransactionType.Expense })
+
+      const response = await supertest(server.app)
+        .get(path)
+        .auth(token, { type: 'bearer' })
+        .expect(200)
+
+      const hs = response.body.healthScore
+      expect(typeof hs.total).toBe('number')
+      expect(hs.total).toBeGreaterThanOrEqual(0)
+      expect(hs.total).toBeLessThanOrEqual(100)
+      expect(typeof hs.savingsRate).toBe('number')
+      expect(typeof hs.debtRatio).toBe('number')
+      expect(typeof hs.budgetAdherence).toBe('number')
+      expect(typeof hs.cashRunway).toBe('number')
+      expect(typeof hs.pensionReturn).toBe('number')
     })
   })
 })

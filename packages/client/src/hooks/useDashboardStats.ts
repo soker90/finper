@@ -22,6 +22,22 @@ export interface HealthScore {
   pensionReturn: number
 }
 
+export interface PensionTransaction {
+  date: number
+  employeeAmount: number
+  employeeUnits: number
+  companyAmount: number
+  companyUnits: number
+  value: number
+}
+
+export interface PensionSummary {
+  employeeAmount: number
+  companyAmount: number
+  total: number
+  transactions: PensionTransaction[]
+}
+
 export interface DashboardStats {
   totalBalance: number
   monthlyIncome: number
@@ -43,6 +59,11 @@ export interface DashboardStats {
     currentMonth: DailyExpense[]
     previousMonth: DailyExpense[]
   }
+  // Nuevos campos del backend
+  pension: PensionSummary | null
+  pensionReturnPct: number
+  budgetAdherencePct: number
+  healthScore: HealthScore
 }
 
 export const useDashboardStats = (): {

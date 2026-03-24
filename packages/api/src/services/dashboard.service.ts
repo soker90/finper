@@ -1,4 +1,4 @@
-import { AccountModel, DebtModel, TransactionModel, TransactionType } from '@soker90/finper-models'
+import { AccountModel, DebtModel, PensionModel, TransactionModel, TransactionType, type IPension } from '@soker90/finper-models'
 
 export interface DailyExpense {
   day: number
@@ -10,6 +10,22 @@ export interface MonthlyData {
   year: number
   income: number
   expenses: number
+}
+
+export interface HealthScore {
+  total: number
+  savingsRate: number
+  debtRatio: number
+  budgetAdherence: number
+  cashRunway: number
+  pensionReturn: number
+}
+
+export interface PensionSummary {
+  employeeAmount: number
+  companyAmount: number
+  total: number
+  transactions: IPension[]
 }
 
 export interface DashboardStatsResult {
@@ -46,10 +62,62 @@ export interface DashboardStatsResult {
   // Rankings del mes
   topExpenseCategories: Array<{ name: string; amount: number }>
   topStores: Array<{ name: string; amount: number }>
+
+  // Pensión
+  pension: PensionSummary | null
+  pensionReturnPct: number
+
+  // Presupuesto del mes
+  budgetAdherencePct: number
+
+  // Health Score
+  healthScore: HealthScore
 }
 
 export interface IDashboardService {
   getStats(params: { user: string }): Promise<DashboardStatsResult>
+}
+
+// ── Health Score ─────────────────────────────────────────────────────────────
+/**
+ * Calcula el health score financiero a partir de 5 sub-scores ponderados.
+ *
+ * Pesos: savingsRate 25%, debtRatio 20%, budgetAdherence 20%,
+ *        cashRunway 20%, pensionReturn 15%.
+ */
+export const computeHealthScore = (
+  savingsRate: number,        // e.g. 15 → 15%
+  totalDebts: number,         // valor absoluto en moneda
+  totalBalance: number,       // valor absoluto en moneda
+  budgetAdherencePct: number, // 0–100
+  cashRunwayMonths: number,   // número de meses
+  pensionReturnPct: number    // e.g. 4.5 → 4.5%
+): HealthScore => {
+  const clamp = (v: number, min: number, max: number): number =>
+    Math.max(min, Math.min(max, v))
+
+  const savingsScore = Math.round(clamp(savingsRate / 20, 0, 1) * 100)
+  const debtScore = Math.round(Math.max(0, 1 - (totalBalance > 0 ? totalDebts / totalBalance : 1)) * 100)
+  const budgetScore = Math.round(Math.min(budgetAdherencePct, 100))
+  const runwayScore = Math.round(Math.min(cashRunwayMonths / 6, 1) * 100)
+  const pensionScore = Math.round(clamp(pensionReturnPct / 5, 0, 1) * 100)
+
+  const total = Math.round(
+    savingsScore * 0.25 +
+    debtScore * 0.20 +
+    budgetScore * 0.20 +
+    runwayScore * 0.20 +
+    pensionScore * 0.15
+  )
+
+  return {
+    total,
+    savingsRate: savingsScore,
+    debtRatio: debtScore,
+    budgetAdherence: budgetScore,
+    cashRunway: runwayScore,
+    pensionReturn: pensionScore
+  }
 }
 
 const TIMEZONE = 'Europe/Madrid'
@@ -83,7 +151,8 @@ export default class DashboardService implements IDashboardService {
     const previousMonthEnd = new Date(currentYear, currentMonth, 1).getTime()
     const last6MonthsStart = new Date(currentYear, currentMonth - 5, 1).getTime()
 
-    // ── Paralelo: balance de cuentas, suma de deudas, agregaciones de transacciones ──
+    // ── Paralelo: balance de cuentas, suma de deudas, agregaciones de transacciones,
+    //             pensión y presupuesto del mes actual ──────────────────────────
     const [
       accountsResult,
       debtsResult,
@@ -93,7 +162,10 @@ export default class DashboardService implements IDashboardService {
       currentVelocityAgg,
       previousVelocityAgg,
       topCategoriesAgg,
-      topStoresAgg
+      topStoresAgg,
+      pensionStatsAgg,
+      pensionTransactions,
+      currentMonthBudgetAgg
     ] = await Promise.all([
       // 1. Suma de saldos de cuentas activas
       AccountModel.aggregate([
@@ -302,6 +374,40 @@ export default class DashboardService implements IDashboardService {
             amount: 1
           }
         }
+      ]),
+
+      // 10. Pensión: totales acumulados
+      PensionModel.aggregate([
+        { $match: { user } },
+        {
+          $group: {
+            _id: '$user',
+            employeeAmount: { $sum: '$employeeAmount' },
+            companyAmount: { $sum: '$companyAmount' },
+            totalUnits: { $sum: { $sum: ['$employeeUnits', '$companyUnits'] } },
+            lastValue: { $last: '$value' }
+          }
+        }
+      ]).sort({ date: -1 }),
+
+      // 11. Pensión: registros individuales (para sparkline)
+      PensionModel.find({ user }).sort({ date: -1 }),
+
+      // 12. Presupuesto de gastos del mes actual (totales)
+      TransactionModel.aggregate([
+        {
+          $match: {
+            user,
+            date: { $gte: currentMonthStart, $lt: currentMonthEnd },
+            type: TransactionType.Expense
+          }
+        },
+        {
+          $group: {
+            _id: null,
+            realExpenses: { $sum: '$amount' }
+          }
+        }
       ])
     ])
 
@@ -364,6 +470,54 @@ export default class DashboardService implements IDashboardService {
     const topStores = (topStoresAgg as Array<{ name: string; amount: number }>)
       .filter(s => s.amount > 0)
 
+    // ── Pensión ──────────────────────────────────────────────────────────────
+    let pension: PensionSummary | null = null
+    let pensionReturnPct = 0
+
+    if (pensionStatsAgg.length > 0) {
+      const ps = pensionStatsAgg[0] as {
+        employeeAmount: number
+        companyAmount: number
+        totalUnits: number
+        lastValue: number
+      }
+      const pensionTotal = Math.round((ps.lastValue ?? 0) * (ps.totalUnits ?? 0) * 100) / 100
+      const pensionContributed = (ps.employeeAmount ?? 0) + (ps.companyAmount ?? 0)
+
+      pensionReturnPct = pensionContributed > 0
+        ? Math.round(((pensionTotal - pensionContributed) / pensionContributed) * 10000) / 100
+        : 0
+
+      pension = {
+        employeeAmount: Math.round((ps.employeeAmount ?? 0) * 100) / 100,
+        companyAmount: Math.round((ps.companyAmount ?? 0) * 100) / 100,
+        total: pensionTotal,
+        transactions: pensionTransactions as IPension[]
+      }
+    }
+
+    // ── Adherencia al presupuesto ────────────────────────────────────────────
+    // Usamos el gasto real del mes actual como numerador.
+    // Si no hay datos de budget configurados devolvemos 100 (sin datos = "en presupuesto").
+    const realExpenses = currentMonthBudgetAgg[0]?.realExpenses ?? 0
+    // budgetAdherencePct: 100 significa "gastado = 0" (perfecto), 0 significa "sin ingresos o sin presupuesto"
+    // Interpretamos: qué % del presupuesto marcado se ha gastado.
+    // Como no tenemos el importe presupuestado en este endpoint, usamos el mes anterior como referencia.
+    // Si monthlyExpenses <= prevExpenses → buena adherencia.
+    const budgetAdherencePct = prevExpenses > 0
+      ? Math.round(Math.max(0, (1 - (realExpenses - prevExpenses) / prevExpenses)) * 100)
+      : (realExpenses === 0 ? 100 : 50)
+
+    // ── Health Score ─────────────────────────────────────────────────────────
+    const healthScore = computeHealthScore(
+      savingsRate,
+      totalDebts,
+      totalBalance,
+      budgetAdherencePct,
+      cashRunwayMonths,
+      pensionReturnPct
+    )
+
     return {
       totalBalance,
       totalDebts,
@@ -381,7 +535,11 @@ export default class DashboardService implements IDashboardService {
       projectedMonthlyExpense,
       cashRunwayMonths,
       topExpenseCategories,
-      topStores
+      topStores,
+      pension,
+      pensionReturnPct,
+      budgetAdherencePct,
+      healthScore
     }
   }
 }
