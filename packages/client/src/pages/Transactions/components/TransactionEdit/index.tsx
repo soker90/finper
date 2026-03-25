@@ -48,7 +48,7 @@ const TransactionEdit = ({
       error
     } = transaction?._id ? await editTransaction(transaction._id, formattedParams as any) : await addTransaction(formattedParams as any)
     if (!error) {
-      await mutate(query)
+      await mutate((key) => typeof key === 'string' && key.startsWith(TRANSACTIONS))
       hideForm()
     }
     setError(error)
@@ -57,10 +57,7 @@ const TransactionEdit = ({
   const handleDeleteButton = async () => {
     if (!isNew && transaction?._id) {
       await deleteTransaction(transaction._id)
-      // @ts-ignore
-      await mutate(TRANSACTIONS, async (transactions: Transaction[]) => {
-        return transactions.filter(t => t._id !== transaction?._id)
-      })
+      await mutate((key) => typeof key === 'string' && key.startsWith(TRANSACTIONS))
     }
 
     hideForm()
