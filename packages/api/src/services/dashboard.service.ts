@@ -179,10 +179,19 @@ export default class DashboardService implements IDashboardService {
         {
           $group: {
             _id: null,
-            total: {
+            totalOwed: {
               $sum: {
                 $cond: {
                   if: { $eq: ['$type', 'to'] },
+                  then: '$amount',
+                  else: 0
+                }
+              }
+            },
+            totalReceivable: {
+              $sum: {
+                $cond: {
+                  if: { $eq: ['$type', 'from'] },
                   then: '$amount',
                   else: 0
                 }
@@ -411,8 +420,9 @@ export default class DashboardService implements IDashboardService {
 
     // ── Extraer escalares ────────────────────────────────────────────────────
     const totalBalance = Math.round((accountsResult[0]?.total ?? 0) * 100) / 100
-    const totalDebts = Math.round((debtsResult[0]?.total ?? 0) * 100) / 100
-    const netWorth = Math.round((totalBalance - totalDebts) * 100) / 100
+    const totalDebts = Math.round((debtsResult[0]?.totalOwed ?? 0) * 100) / 100
+    const totalReceivable = Math.round((debtsResult[0]?.totalReceivable ?? 0) * 100) / 100
+    const netWorth = Math.round((totalBalance - totalDebts + totalReceivable) * 100) / 100
 
     const monthlyIncome = Math.round((currentMonthAgg[0]?.income ?? 0) * 100) / 100
     const monthlyExpenses = Math.round((currentMonthAgg[0]?.expenses ?? 0) * 100) / 100
