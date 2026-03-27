@@ -17,10 +17,11 @@ interface Props {
   children: any
   action?: any
   actions?: any
+  actionDisabled?: boolean
 }
 
 const ModalGrid = ({
-  show, title, children, action, actions, onClose
+  show, title, children, action, actions, onClose, actionDisabled
 }: Props) => {
   const _renderButtons = () => (
     <>
@@ -28,7 +29,7 @@ const ModalGrid = ({
         {action ? 'Cancelar' : 'Cerrar'}
       </Button>
       {action && (
-        <Button color='primary' variant='contained' type='submit'>
+        <Button color='primary' variant='contained' type='submit' disabled={actionDisabled}>
           Aceptar
         </Button>
       )}

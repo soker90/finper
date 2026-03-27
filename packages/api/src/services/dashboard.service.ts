@@ -1,4 +1,4 @@
-import { AccountModel, DebtModel, PensionModel, TransactionModel, TransactionType, type IPension } from '@soker90/finper-models'
+import { AccountModel, DebtModel, LoanModel, PensionModel, TransactionModel, TransactionType, type IPension } from '@soker90/finper-models'
 
 export interface DailyExpense {
   day: number
@@ -32,6 +32,7 @@ export interface DashboardStatsResult {
   // Cuentas y deudas
   totalBalance: number
   totalDebts: number
+  totalLoansPending: number
   netWorth: number
 
   // Mes actual
@@ -156,6 +157,7 @@ export default class DashboardService implements IDashboardService {
     const [
       accountsResult,
       debtsResult,
+      loansResult,
       currentMonthAgg,
       previousMonthAgg,
       last6MonthsAgg,
@@ -201,7 +203,13 @@ export default class DashboardService implements IDashboardService {
         }
       ]),
 
-      // 3. Ingresos y gastos del mes actual
+      // 3. Suma de capital pendiente de préstamos activos
+      LoanModel.aggregate([
+        { $match: { user, pendingAmount: { $gt: 0 } } },
+        { $group: { _id: null, total: { $sum: '$pendingAmount' } } }
+      ]),
+
+      // 4. Ingresos y gastos del mes actual
       TransactionModel.aggregate([
         {
           $match: {
@@ -422,7 +430,8 @@ export default class DashboardService implements IDashboardService {
     const totalBalance = Math.round((accountsResult[0]?.total ?? 0) * 100) / 100
     const totalDebts = Math.round((debtsResult[0]?.totalOwed ?? 0) * 100) / 100
     const totalReceivable = Math.round((debtsResult[0]?.totalReceivable ?? 0) * 100) / 100
-    const netWorth = Math.round((totalBalance - totalDebts + totalReceivable) * 100) / 100
+    const totalLoansPending = Math.round((loansResult[0]?.total ?? 0) * 100) / 100
+    const netWorth = Math.round((totalBalance - totalDebts - totalLoansPending + totalReceivable) * 100) / 100
 
     const monthlyIncome = Math.round((currentMonthAgg[0]?.income ?? 0) * 100) / 100
     const monthlyExpenses = Math.round((currentMonthAgg[0]?.expenses ?? 0) * 100) / 100
@@ -519,7 +528,7 @@ export default class DashboardService implements IDashboardService {
     // ── Health Score ─────────────────────────────────────────────────────────
     const healthScore = computeHealthScore(
       savingsRate,
-      totalDebts,
+      totalDebts + totalLoansPending,
       totalBalance,
       budgetAdherencePct,
       cashRunwayMonths,
@@ -529,6 +538,7 @@ export default class DashboardService implements IDashboardService {
     return {
       totalBalance,
       totalDebts,
+      totalLoansPending,
       netWorth,
       monthlyIncome,
       monthlyExpenses,

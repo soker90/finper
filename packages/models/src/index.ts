@@ -12,11 +12,17 @@ import { IPension, PensionModel } from './models/pensions'
 import { IStore, StoreModel } from './models/stores'
 import { ITransaction, TransactionModel, TransactionType } from './models/transactions'
 import { IUser, UserModel } from './models/users'
+import { ILoan, LoanModel } from './models/loans'
+import { ILoanPayment, LoanPaymentModel, LoanPaymentType } from './models/loan-payments'
+import { ILoanEvent, LoanEventModel } from './models/loan-events'
 
 export type AccountDocument = HydratedDocument<IAccount>
 export type BudgetDocument = HydratedDocument<IBudget>
 export type CategoryDocument = HydratedDocument<ICategory>
 export type DebtDocument = HydratedDocument<IDebt>
+export type LoanDocument = HydratedDocument<ILoan>
+export type LoanPaymentDocument = HydratedDocument<ILoanPayment>
+export type LoanEventDocument = HydratedDocument<ILoanEvent>
 export type PensionDocument = HydratedDocument<IPension>
 export type StoreDocument = HydratedDocument<IStore>
 export type TransactionDocument = HydratedDocument<ITransaction>
@@ -44,12 +50,16 @@ export {
   mongoose,
 
   DebtType,
+  LoanPaymentType,
   TransactionType,
 
   IAccount,
   IBudget,
   ICategory,
   IDebt,
+  ILoan,
+  ILoanPayment,
+  ILoanEvent,
   IPension,
   IStore,
   ITransaction,
@@ -59,6 +69,9 @@ export {
   BudgetModel,
   CategoryModel,
   DebtModel,
+  LoanModel,
+  LoanPaymentModel,
+  LoanEventModel,
   PensionModel,
   StoreModel,
   TransactionModel,

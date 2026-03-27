@@ -8,3 +8,5 @@ export const DEBTS = 'debts'
 export const BUDGETS = 'budgets'
 export const PENSIONS = 'pensions'
 export const TICKETS = 'tickets'
+export const LOANS = 'loans'
+export const LOAN_DETAIL = (id: string) => `loans/${id}`

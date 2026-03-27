@@ -1,0 +1,229 @@
+import { ILoanPayment, LoanPaymentType } from '@soker90/finper-models'
+
+export interface ProjectedPayment extends Omit<ILoanPayment, 'loan' | 'user'> {
+  type: LoanPaymentType
+  period: number
+}
+
+export interface LoanEventInput {
+  date: number
+  newRate: number
+  newPayment: number
+}
+
+interface ProjectionInput {
+  pendingAmount: number
+  interestRate: number
+  monthlyPayment: number
+  /** Date of the last ordinary payment (or startDate - 1 month if none) */
+  lastOrdinaryPaymentDate: number
+  events: LoanEventInput[]
+  startPeriod: number
+}
+
+const round2 = (n: number) => Math.round(n * 100) / 100
+
+/**
+ * Calculates monthly interest rate from annual TIN
+ */
+export const monthlyRate = (annualRate: number): number => annualRate / 100 / 12
+
+/**
+ * French amortization formula: monthly payment for remaining capital
+ * C = P * r(1+r)^n / ((1+r)^n - 1)
+ */
+export const calcMonthlyPayment = (principal: number, annualRate: number, months: number): number => {
+  const r = monthlyRate(annualRate)
+  if (r === 0) return round2(principal / months)
+  return round2(principal * (r * Math.pow(1 + r, months)) / (Math.pow(1 + r, months) - 1))
+}
+
+/**
+ * Calculates remaining months given principal, rate and monthly payment
+ */
+export const calcRemainingMonths = (principal: number, annualRate: number, payment: number): number => {
+  const r = monthlyRate(annualRate)
+  if (r === 0) return Math.ceil(principal / payment)
+  if (payment <= principal * r) return Infinity // payment does not cover interest
+  return Math.ceil(-Math.log(1 - (principal * r) / payment) / Math.log(1 + r))
+}
+
+/**
+ * Calculates extra interest accrued between two dates for an extraordinary payment.
+ * days = calendar days between last payment date and extraordinary payment date
+ * interest = pendingCapital * (dailyRate * days)
+ */
+export const calcExtraInterest = (pendingCapital: number, annualRate: number, days: number): number => {
+  const dailyRate = annualRate / 100 / 365
+  return round2(pendingCapital * dailyRate * days)
+}
+
+/**
+ * Subtracts one month from a timestamp, keeping the same day of month
+ */
+const subtractOneMonth = (timestamp: number): number => {
+  const d = new Date(timestamp)
+  const day = d.getDate()
+  d.setMonth(d.getMonth() - 1)
+  if (d.getDate() !== day) {
+    d.setDate(0)
+  }
+  return d.getTime()
+}
+
+/**
+ * Adds one month to a timestamp, keeping the same day of month
+ */
+const addOneMonth = (timestamp: number): number => {
+  const d = new Date(timestamp)
+  const day = d.getDate()
+  d.setMonth(d.getMonth() + 1)
+  // Handle months with fewer days (e.g. Jan 31 + 1 month = Feb 28)
+  if (d.getDate() !== day) {
+    d.setDate(0) // last day of previous month
+  }
+  return d.getTime()
+}
+
+/**
+ * Days between two timestamps
+ */
+const daysBetween = (a: number, b: number): number =>
+  Math.round(Math.abs(b - a) / (1000 * 60 * 60 * 24))
+
+/**
+ * Projects future ordinary payments using the French amortization system.
+ * Dates are anchored to the last ordinary payment date so that extraordinary
+ * payments do not shift the schedule.
+ * Returns an array of projected (not-yet-paid) rows.
+ */
+export const projectLoanPayments = (input: ProjectionInput): ProjectedPayment[] => {
+  const { startPeriod, events } = input
+  let pending = round2(input.pendingAmount)
+  let rate = input.interestRate
+  let payment = input.monthlyPayment
+  // Anchor dates to the last ORDINARY payment — extraordinary payments don't shift the schedule
+  let lastDate = input.lastOrdinaryPaymentDate
+  let period = startPeriod
+
+  // Sort events ascending by date, filter only future events
+  const futureEvents = [...events]
+    .filter(e => e.date >= lastDate)
+    .sort((a, b) => a.date - b.date)
+
+  const projected: ProjectedPayment[] = []
+  let eventIdx = 0
+  const MAX_PERIODS = 600 // safety cap (50 years)
+
+  while (pending > 0.009 && period <= startPeriod + MAX_PERIODS) {
+    const nextDate = addOneMonth(lastDate)
+
+    // Apply any event that takes effect before or on this payment date
+    while (eventIdx < futureEvents.length && futureEvents[eventIdx].date <= nextDate) {
+      rate = futureEvents[eventIdx].newRate
+      payment = futureEvents[eventIdx].newPayment
+      eventIdx++
+    }
+
+    const r = monthlyRate(rate)
+    const interestPart = round2(pending * r)
+    const principalPart = round2(Math.min(payment - interestPart, pending))
+    const totalAmount = round2(interestPart + principalPart)
+    pending = round2(pending - principalPart)
+
+    projected.push({
+      period,
+      date: nextDate,
+      amount: totalAmount,
+      interest: interestPart,
+      principal: principalPart,
+      accumulatedPrincipal: 0, // filled by caller if needed
+      pendingCapital: pending,
+      type: LoanPaymentType.ORDINARY
+    })
+
+    lastDate = nextDate
+    period++
+  }
+
+  return projected
+}
+
+/**
+ * Builds the complete amortization table merging real payments and projections.
+ * Real payments are returned as-is; projections are calculated from current state.
+ * Dates are anchored to the last ordinary payment so that extraordinary payments
+ * do not shift the schedule.
+ */
+export interface AmortizationRow {
+  _id?: string
+  period: number
+  date: number
+  amount: number
+  interest: number
+  principal: number
+  accumulatedPrincipal: number
+  pendingCapital: number
+  type: LoanPaymentType
+  isProjected: boolean
+}
+
+export const buildAmortizationTable = (
+  realPayments: (ILoanPayment & { _id?: any })[],
+  pendingAmount: number,
+  interestRate: number,
+  monthlyPayment: number,
+  events: LoanEventInput[],
+  startDate: number
+): AmortizationRow[] => {
+  const sorted = [...realPayments].sort((a, b) => a.date - b.date)
+
+  const real: AmortizationRow[] = sorted.map((p, i) => ({
+    _id: p._id?.toString(),
+    period: i + 1,
+    date: p.date,
+    amount: p.amount,
+    interest: p.interest,
+    principal: p.principal,
+    accumulatedPrincipal: p.accumulatedPrincipal,
+    pendingCapital: p.pendingCapital,
+    type: p.type,
+    isProjected: false
+  }))
+
+  // Anchor projection to the last ORDINARY real payment date.
+  // Extraordinary payments must not shift the schedule.
+  const lastOrdinaryReal = [...sorted]
+    .reverse()
+    .find(p => p.type === LoanPaymentType.ORDINARY)
+
+  const lastOrdinaryDate = lastOrdinaryReal?.date ?? subtractOneMonth(startDate)
+  const nextProjectedDate = addOneMonth(lastOrdinaryDate)
+  const startPeriod = real.length + 1
+
+  // Tasa vigente en el momento de la proyección (último evento o tasa del préstamo)
+  const sortedEvents = [...events].sort((a, b) => a.date - b.date)
+  const lastEvent = [...sortedEvents].reverse().find(e => e.date <= nextProjectedDate)
+  const currentRate = lastEvent?.newRate ?? interestRate
+  const currentPayment = lastEvent?.newPayment ?? monthlyPayment
+
+  const projectedRaw = projectLoanPayments({
+    pendingAmount,
+    interestRate: currentRate,
+    monthlyPayment: currentPayment,
+    lastOrdinaryPaymentDate: lastOrdinaryDate,
+    events,
+    startPeriod
+  })
+
+  // Calculate accumulated principal for projected rows
+  let accum = real[real.length - 1]?.accumulatedPrincipal ?? 0
+  const projected: AmortizationRow[] = projectedRaw.map(p => {
+    accum = round2(accum + p.principal)
+    return { ...p, accumulatedPrincipal: accum, isProjected: true }
+  })
+
+  return [...real, ...projected]
+}
+
+export { daysBetween, addOneMonth, round2 }

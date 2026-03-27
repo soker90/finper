@@ -2,6 +2,7 @@ import { model, Schema, Types, HydratedDocument } from 'mongoose'
 import { TransactionType } from './transactions'
 
 export interface ICategory {
+  _id?: Types.ObjectId
   name: string
   type: TransactionType
   parent?: Types.ObjectId
