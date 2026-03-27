@@ -11,6 +11,7 @@ import SpendingRhythm from './components/SpendingRhythm'
 import BudgetSection from './components/budget'
 import MonthAnalysis from './components/month-analysis'
 import HealthScoreSection from './components/health-score'
+import LoansSection from './components/LoansSection'
 
 const now = new Date()
 const currentYear = String(now.getFullYear())
@@ -62,6 +63,8 @@ const Dashboard = () => {
       <MonthAnalysis stats={stats} chartColors={chartColors} />
 
       <HealthScoreSection stats={stats} />
+
+      <LoansSection />
     </Grid>
   )
 }

@@ -7,6 +7,7 @@ export enum TransactionType {
 }
 
 export interface ITransaction {
+  _id?: Types.ObjectId
   date: number
   category: Types.ObjectId
   amount: number

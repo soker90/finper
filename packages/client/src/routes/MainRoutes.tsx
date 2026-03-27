@@ -8,6 +8,8 @@ const Budgets = lazy(() => import('../pages/Budgets'))
 const Categories = lazy(() => import('../pages/Categories'))
 const DashboardDefault = lazy(() => import('../pages/Dashboard'))
 const Debts = lazy(() => import('../pages/Debts'))
+const Loans = lazy(() => import('../pages/Loans'))
+const LoanDetail = lazy(() => import('../pages/Loans/LoanDetail'))
 const Pensions = lazy(() => import('../pages/Pensions'))
 const Transactions = lazy(() => import('../pages/Transactions'))
 const Tickets = lazy(() => import('../pages/Tickets'))
@@ -61,6 +63,14 @@ const MainRoutes = {
     {
       path: 'pension',
       element: <Pensions />
+    },
+    {
+      path: 'prestamos',
+      element: <Loans />
+    },
+    {
+      path: 'prestamos/:id',
+      element: <LoanDetail />
     }
   ]
 }
