@@ -29,6 +29,5 @@ export class LoanRoutes {
     this.router.post('/:id/events', authMiddleware, this.loanController.addEvent.bind(this.loanController))
     this.router.delete('/:id/payments/:paymentId', authMiddleware, this.loanController.deletePayment.bind(this.loanController))
     this.router.put('/:id/payments/:paymentId', authMiddleware, this.loanController.editPayment.bind(this.loanController))
-    this.router.post('/:id/payments/import', authMiddleware, this.loanController.importPayment.bind(this.loanController))
   }
 }

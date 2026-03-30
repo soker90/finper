@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Button, Card, CardActions, CardContent, CardHeader, Divider, Modal, Typography } from '@mui/material'
+import { Button, Card, CardActions, CardContent, CardHeader, Divider, FormHelperText, Modal, Typography } from '@mui/material'
 import { mutate } from 'swr'
 
 import { LOANS } from 'constants/api-paths'
@@ -13,13 +13,19 @@ interface Props {
 
 const LoanRemoveModal = ({ loan, onClose }: Props) => {
   const [isDeleting, setIsDeleting] = useState(false)
+  const [apiError, setApiError] = useState<string | undefined>(undefined)
 
   const handleDelete = async () => {
     setIsDeleting(true)
-    await deleteLoan(loan._id)
-    onClose()
-    // @ts-ignore
-    await mutate(LOANS, async (loans: Loan[]) => loans.filter(l => l._id !== loan._id))
+    try {
+      const { error } = await deleteLoan(loan._id)
+      if (error) { setApiError(error); return }
+      onClose()
+      // @ts-ignore
+      await mutate(LOANS, async (loans: Loan[]) => loans.filter(l => l._id !== loan._id))
+    } finally {
+      setIsDeleting(false)
+    }
   }
 
   return (
@@ -36,6 +42,7 @@ const LoanRemoveModal = ({ loan, onClose }: Props) => {
             ¿Seguro que quieres eliminar el préstamo <b>{loan.name}</b>?
             Se borrarán también todos los pagos y eventos asociados. Esta acción no se puede deshacer.
           </Typography>
+          {apiError && <FormHelperText error>{apiError}</FormHelperText>}
         </CardContent>
         <Divider />
         <CardActions>

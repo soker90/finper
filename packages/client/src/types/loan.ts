@@ -17,26 +17,6 @@ export interface Loan {
   category: string
 }
 
-export interface LoanPayment {
-  _id?: string
-  loan: string
-  date: number
-  amount: number
-  interest: number
-  principal: number
-  accumulatedPrincipal: number
-  pendingCapital: number
-  type: LoanPaymentType
-}
-
-export interface LoanEvent {
-  _id?: string
-  loan: string
-  date: number
-  newRate: number
-  newPayment: number
-}
-
 export interface LoanStats {
   paidPrincipal: number
   paidInterest: number

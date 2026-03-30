@@ -8,8 +8,7 @@ import { Loan } from 'types'
 
 import {
   LoanCard,
-  LoanFormModal,
-  LoanRemoveModal
+  LoanFormModal
 } from './components'
 import { useLoans } from './hooks'
 
@@ -17,7 +16,6 @@ const Loans = () => {
   const { loans, isLoading } = useLoans()
   const navigate = useNavigate()
   const [selectedForEdit, setSelectedForEdit] = useState<Partial<Loan>>()
-  const [selectedForRemove, setSelectedForRemove] = useState<Loan>()
 
   const handleClickNew = () => setSelectedForEdit({})
   const handleClickLoan = (loan: Loan) => navigate(`/prestamos/${loan._id}`)
@@ -50,12 +48,6 @@ const Loans = () => {
         <LoanFormModal
           loan={selectedForEdit}
           onClose={() => setSelectedForEdit(undefined)}
-        />
-      )}
-      {!!selectedForRemove && (
-        <LoanRemoveModal
-          loan={selectedForRemove}
-          onClose={() => setSelectedForRemove(undefined)}
         />
       )}
     </>

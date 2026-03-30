@@ -1,5 +1,7 @@
+import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { mutate } from 'swr'
+import { FormHelperText, Grid } from '@mui/material'
 
 import { DateForm, InputForm, ModalGrid, SelectForm, SelectGroupForm } from 'components'
 import { LOANS, LOAN_DETAIL } from 'constants/api-paths'
@@ -13,6 +15,7 @@ interface Props {
 }
 
 const LoanFormModal = ({ loan, onClose }: Props) => {
+  const [apiError, setApiError] = useState<string | undefined>(undefined)
   const isEdit = Boolean(loan?._id)
   const { accounts } = useAccounts()
   const { categories } = useGroupedCategories()
@@ -41,10 +44,12 @@ const LoanFormModal = ({ loan, onClose }: Props) => {
     }
 
     if (isEdit) {
-      await editLoan(loan!._id!, body)
+      const { error } = await editLoan(loan!._id!, body)
+      if (error) { setApiError(error); return }
       await mutate(LOAN_DETAIL(loan!._id!))
     } else {
-      await addLoan(body)
+      const { error } = await addLoan(body)
+      if (error) { setApiError(error); return }
     }
     await mutate(LOANS)
     onClose()
@@ -101,6 +106,11 @@ const LoanFormModal = ({ loan, onClose }: Props) => {
         errorText='Categoría requerida'
         {...register('category', { required: true })}
       />
+      {apiError && (
+        <Grid size={12}>
+          <FormHelperText error>{apiError}</FormHelperText>
+        </Grid>
+      )}
     </ModalGrid>
   )
 }

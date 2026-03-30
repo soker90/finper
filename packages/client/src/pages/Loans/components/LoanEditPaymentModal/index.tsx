@@ -1,6 +1,8 @@
+import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { mutate } from 'swr'
 import dayjs from 'dayjs'
+import { FormHelperText, Grid } from '@mui/material'
 
 import { DateForm, InputForm, ModalGrid, SelectForm } from 'components'
 import { LOANS, LOAN_DETAIL } from 'constants/api-paths'
@@ -27,6 +29,7 @@ interface Props {
 }
 
 const LoanEditPaymentModal = ({ loanId, payment, onClose }: Props) => {
+  const [apiError, setApiError] = useState<string | undefined>(undefined)
   const { register, handleSubmit, formState: { errors, isSubmitting }, control } = useForm<FormValues>({
     defaultValues: {
       date: dayjs(payment.date).format('YYYY-MM-DD'),
@@ -38,13 +41,14 @@ const LoanEditPaymentModal = ({ loanId, payment, onClose }: Props) => {
   })
 
   const onSubmit = handleSubmit(async (params) => {
-    await editLoanPayment(loanId, payment._id!, {
+    const { error } = await editLoanPayment(loanId, payment._id!, {
       date: params.date ? dayjs(params.date).startOf('day').valueOf() : payment.date,
       amount: Number(params.amount),
       interest: Number(params.interest),
       principal: Number(params.principal),
       type: params.type
     })
+    if (error) { setApiError(error); return }
     await mutate(LOAN_DETAIL(loanId))
     await mutate(LOANS)
     onClose()
@@ -100,6 +104,11 @@ const LoanEditPaymentModal = ({ loanId, payment, onClose }: Props) => {
         error={!!errors.type}
         {...register('type', { required: true })}
       />
+      {apiError && (
+        <Grid size={12}>
+          <FormHelperText error>{apiError}</FormHelperText>
+        </Grid>
+      )}
     </ModalGrid>
   )
 }

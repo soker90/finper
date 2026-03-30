@@ -1,11 +1,12 @@
+import { useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { mutate } from 'swr'
 import dayjs from 'dayjs'
-import { Checkbox, FormControlLabel } from '@mui/material'
+import { Checkbox, FormControlLabel, FormHelperText, Grid } from '@mui/material'
 
 import { DateForm, InputForm, ModalGrid } from 'components'
 import { LOANS, LOAN_DETAIL } from 'constants/api-paths'
-import { payLoanOrdinary, markLoanPaymentAsPaid } from 'services/apiService'
+import { payLoanOrdinary } from 'services/apiService'
 import { AmortizationRow, Loan } from 'types'
 
 interface FormValues {
@@ -21,6 +22,7 @@ interface Props {
 }
 
 const LoanPayModal = ({ loan, row, onClose }: Props) => {
+  const [apiError, setApiError] = useState<string | undefined>(undefined)
   const { register, handleSubmit, formState: { errors, isSubmitting }, control } = useForm<FormValues>({
     defaultValues: {
       date: dayjs(row.date).format('YYYY-MM-DD'),
@@ -33,11 +35,8 @@ const LoanPayModal = ({ loan, row, onClose }: Props) => {
     const date = params.date ? dayjs(params.date).startOf('day').valueOf() : row.date
     const amount = Number(params.amount)
 
-    if (params.addMovement) {
-      await payLoanOrdinary(loan._id, { date, amount })
-    } else {
-      await markLoanPaymentAsPaid(loan._id, { date, amount })
-    }
+    const { error } = await payLoanOrdinary(loan._id, { date, amount, addMovement: params.addMovement })
+    if (error) { setApiError(error); return }
 
     await mutate(LOAN_DETAIL(loan._id))
     await mutate(LOANS)
@@ -79,6 +78,11 @@ const LoanPayModal = ({ loan, row, onClose }: Props) => {
           />
         )}
       />
+      {apiError && (
+        <Grid size={12}>
+          <FormHelperText error>{apiError}</FormHelperText>
+        </Grid>
+      )}
     </ModalGrid>
   )
 }

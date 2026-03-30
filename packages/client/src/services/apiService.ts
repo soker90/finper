@@ -137,7 +137,7 @@ export const deleteLoan = (id: string): Promise<{ error?: string }> => {
   return axios.delete(`${LOANS}/${id}`).then(() => ({})).catch((error: any) => ({ error: error.message }))
 }
 
-export const payLoanOrdinary = (id: string, params?: { date?: number, amount?: number }): Promise<{ error?: string }> => {
+export const payLoanOrdinary = (id: string, params?: { date?: number, amount?: number, addMovement?: boolean }): Promise<{ error?: string }> => {
   return axios.post(`${LOAN_DETAIL(id)}/pay`, params ?? {}).then(() => ({})).catch((error: any) => ({ error: error.message }))
 }
 
@@ -151,13 +151,6 @@ export const addLoanEvent = (id: string, params: { date: number, newRate: number
 
 export const deleteLoanPayment = (loanId: string, paymentId: string): Promise<{ error?: string }> => {
   return axios.delete(`${LOAN_DETAIL(loanId)}/payments/${paymentId}`).then(() => ({})).catch((error: any) => ({ error: error.message }))
-}
-
-export const markLoanPaymentAsPaid = (loanId: string, params: {
-  date: number,
-  amount: number
-}): Promise<{ error?: string }> => {
-  return axios.post(`${LOAN_DETAIL(loanId)}/payments/import`, { ...params, type: 'ordinary' }).then(() => ({})).catch((error: any) => ({ error: error.message }))
 }
 
 export const editLoanPayment = (loanId: string, paymentId: string, params: {

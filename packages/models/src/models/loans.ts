@@ -8,7 +8,6 @@ export interface ILoan {
   startDate: number
   monthlyPayment: number
   initialEstimatedCost: number
-  pendingExtraInterest?: number
   account: Types.ObjectId
   category: Types.ObjectId
   user: string
@@ -24,10 +23,11 @@ const loanSchema = new Schema<ILoan>({
   startDate: { type: Number, required: true },
   monthlyPayment: { type: Number, required: true },
   initialEstimatedCost: { type: Number, required: true },
-  pendingExtraInterest: { type: Number, default: 0 },
   account: { type: Schema.Types.ObjectId, ref: 'Account', required: true },
   category: { type: Schema.Types.ObjectId, ref: 'Category', required: true },
   user: { type: String, required: true }
 }, { versionKey: false })
+
+loanSchema.index({ user: 1 })
 
 export const LoanModel = model<ILoan>('Loan', loanSchema)

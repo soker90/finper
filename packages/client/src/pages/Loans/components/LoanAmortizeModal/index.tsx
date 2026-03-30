@@ -1,6 +1,7 @@
+import { useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { mutate } from 'swr'
-import { Checkbox, FormControlLabel } from '@mui/material'
+import { Checkbox, FormControlLabel, FormHelperText, Grid } from '@mui/material'
 import dayjs from 'dayjs'
 
 import { DateForm, InputForm, ModalGrid, SelectForm } from 'components'
@@ -26,17 +27,19 @@ const MODE_OPTIONS = [
 ]
 
 const LoanAmortizeModal = ({ loan, onClose }: Props) => {
+  const [apiError, setApiError] = useState<string | undefined>(undefined)
   const { register, handleSubmit, control, formState: { errors, isSubmitting } } = useForm<FormValues>({
     defaultValues: { date: dayjs().format('YYYY-MM-DD'), amount: undefined, mode: 'reduceTerm', addMovement: true }
   })
 
   const onSubmit = handleSubmit(async (params) => {
-    await payLoanExtraordinary(loan._id, {
+    const { error } = await payLoanExtraordinary(loan._id, {
       date: params.date ? dayjs(params.date).startOf('day').valueOf() : undefined,
       amount: Number(params.amount),
       mode: params.mode,
       addMovement: params.addMovement
     })
+    if (error) { setApiError(error); return }
     await mutate(LOAN_DETAIL(loan._id))
     await mutate(LOANS)
     onClose()
@@ -86,6 +89,11 @@ const LoanAmortizeModal = ({ loan, onClose }: Props) => {
           />
         )}
       />
+      {apiError && (
+        <Grid size={12}>
+          <FormHelperText error>{apiError}</FormHelperText>
+        </Grid>
+      )}
     </ModalGrid>
   )
 }

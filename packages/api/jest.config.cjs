@@ -2,7 +2,7 @@
 module.exports = {
   preset: '@shelf/jest-mongodb',
   transform: {
-    '^.+\\.ts?$': 'ts-jest'
+    '^.+\\.ts?$': ['ts-jest', { diagnostics: false }]
   },
   collectCoverage: true,
   collectCoverageFrom: [

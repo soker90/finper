@@ -9,13 +9,16 @@ import {
   validateLoanExist,
   validateLoanPaymentParams,
   validateLoanEventParams,
-  validateLoanImportPaymentParams,
   validateLoanEditPaymentParams,
   validateLoanOrdinaryPaymentParams
 } from '../validators/loan'
 
+interface ILogger {
+  logInfo(msg: string): void
+}
+
 type ILoanController = {
-  loggerHandler: any
+  loggerHandler: ILogger
   loanService: ILoanService
 }
 
@@ -117,18 +120,6 @@ export class LoanController {
       .tap(() => validateLoanExist({ id, user }))
       .then(() => this.loanService.deletePayment(id, paymentId, user))
       .then(() => res.status(204).send())
-      .catch(next)
-  }
-
-  public async importPayment (req: Request, res: Response, next: NextFunction): Promise<void> {
-    const { id } = req.params
-    const user = req.user as string
-    Promise.resolve({ ...req.body, user })
-      .tap(() => this.logger.logInfo(`/loans/${id}/payments/import - import historical payment`))
-      .tap(() => validateLoanExist({ id, user }))
-      .then(validateLoanImportPaymentParams)
-      .then((data) => this.loanService.importPayment(id, data, user))
-      .then((response) => res.status(201).send(response))
       .catch(next)
   }
 

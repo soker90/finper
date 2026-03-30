@@ -18,4 +18,6 @@ const loanEventSchema = new Schema<ILoanEvent>({
   user: { type: String, required: true }
 }, { versionKey: false })
 
+loanEventSchema.index({ loan: 1, user: 1 })
+
 export const LoanEventModel = model<ILoanEvent>('LoanEvent', loanEventSchema)

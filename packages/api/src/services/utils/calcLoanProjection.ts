@@ -1,6 +1,23 @@
 import { ILoanPayment, LoanPaymentType } from '@soker90/finper-models'
+import { Types } from 'mongoose'
+import { roundNumber } from '../../utils/roundNumber'
 
-export interface ProjectedPayment extends Omit<ILoanPayment, 'loan' | 'user'> {
+/**
+ * Safety cap: maximum number of projected periods (50 years).
+ * When the monthly payment does not cover the interest, the principal never
+ * decreases and the loop would run forever — this constant prevents that.
+ * In that scenario the projected table will contain exactly MAX_PERIODS rows,
+ * all with pendingCapital >= the original pendingAmount.
+ */
+const MAX_PERIODS = 600
+
+/**
+ * Threshold below which the pending capital is considered fully amortised
+ * (less than 1 cent, accounting for floating-point rounding).
+ */
+const AMORTIZATION_THRESHOLD = 0.009
+
+interface ProjectedPayment extends Omit<ILoanPayment, 'loan' | 'user'> {
   type: LoanPaymentType
   period: number
 }
@@ -21,12 +38,10 @@ interface ProjectionInput {
   startPeriod: number
 }
 
-const round2 = (n: number) => Math.round(n * 100) / 100
-
 /**
  * Calculates monthly interest rate from annual TIN
  */
-export const monthlyRate = (annualRate: number): number => annualRate / 100 / 12
+const monthlyRate = (annualRate: number): number => annualRate / 100 / 12
 
 /**
  * French amortization formula: monthly payment for remaining capital
@@ -34,8 +49,8 @@ export const monthlyRate = (annualRate: number): number => annualRate / 100 / 12
  */
 export const calcMonthlyPayment = (principal: number, annualRate: number, months: number): number => {
   const r = monthlyRate(annualRate)
-  if (r === 0) return round2(principal / months)
-  return round2(principal * (r * Math.pow(1 + r, months)) / (Math.pow(1 + r, months) - 1))
+  if (r === 0) return roundNumber(principal / months)
+  return roundNumber(principal * (r * Math.pow(1 + r, months)) / (Math.pow(1 + r, months) - 1))
 }
 
 /**
@@ -46,16 +61,6 @@ export const calcRemainingMonths = (principal: number, annualRate: number, payme
   if (r === 0) return Math.ceil(principal / payment)
   if (payment <= principal * r) return Infinity // payment does not cover interest
   return Math.ceil(-Math.log(1 - (principal * r) / payment) / Math.log(1 + r))
-}
-
-/**
- * Calculates extra interest accrued between two dates for an extraordinary payment.
- * days = calendar days between last payment date and extraordinary payment date
- * interest = pendingCapital * (dailyRate * days)
- */
-export const calcExtraInterest = (pendingCapital: number, annualRate: number, days: number): number => {
-  const dailyRate = annualRate / 100 / 365
-  return round2(pendingCapital * dailyRate * days)
 }
 
 /**
@@ -86,20 +91,14 @@ const addOneMonth = (timestamp: number): number => {
 }
 
 /**
- * Days between two timestamps
- */
-const daysBetween = (a: number, b: number): number =>
-  Math.round(Math.abs(b - a) / (1000 * 60 * 60 * 24))
-
-/**
  * Projects future ordinary payments using the French amortization system.
  * Dates are anchored to the last ordinary payment date so that extraordinary
  * payments do not shift the schedule.
  * Returns an array of projected (not-yet-paid) rows.
  */
-export const projectLoanPayments = (input: ProjectionInput): ProjectedPayment[] => {
+const projectLoanPayments = (input: ProjectionInput): ProjectedPayment[] => {
   const { startPeriod, events } = input
-  let pending = round2(input.pendingAmount)
+  let pending = roundNumber(input.pendingAmount)
   let rate = input.interestRate
   let payment = input.monthlyPayment
   // Anchor dates to the last ORDINARY payment — extraordinary payments don't shift the schedule
@@ -113,9 +112,8 @@ export const projectLoanPayments = (input: ProjectionInput): ProjectedPayment[] 
 
   const projected: ProjectedPayment[] = []
   let eventIdx = 0
-  const MAX_PERIODS = 600 // safety cap (50 years)
 
-  while (pending > 0.009 && period <= startPeriod + MAX_PERIODS) {
+  while (pending > AMORTIZATION_THRESHOLD && period < startPeriod + MAX_PERIODS) {
     const nextDate = addOneMonth(lastDate)
 
     // Apply any event that takes effect before or on this payment date
@@ -126,10 +124,10 @@ export const projectLoanPayments = (input: ProjectionInput): ProjectedPayment[] 
     }
 
     const r = monthlyRate(rate)
-    const interestPart = round2(pending * r)
-    const principalPart = round2(Math.min(payment - interestPart, pending))
-    const totalAmount = round2(interestPart + principalPart)
-    pending = round2(pending - principalPart)
+    const interestPart = roundNumber(pending * r)
+    const principalPart = roundNumber(Math.min(payment - interestPart, pending))
+    const totalAmount = roundNumber(interestPart + principalPart)
+    pending = roundNumber(pending - principalPart)
 
     projected.push({
       period,
@@ -169,7 +167,7 @@ export interface AmortizationRow {
 }
 
 export const buildAmortizationTable = (
-  realPayments: (ILoanPayment & { _id?: any })[],
+  realPayments: (ILoanPayment & { _id?: string | Types.ObjectId })[],
   pendingAmount: number,
   interestRate: number,
   monthlyPayment: number,
@@ -201,9 +199,9 @@ export const buildAmortizationTable = (
   const nextProjectedDate = addOneMonth(lastOrdinaryDate)
   const startPeriod = real.length + 1
 
-  // Tasa vigente en el momento de la proyección (último evento o tasa del préstamo)
+  // Tasa vigente en el momento de la proyección (último evento cuya fecha ≤ nextProjectedDate)
   const sortedEvents = [...events].sort((a, b) => a.date - b.date)
-  const lastEvent = [...sortedEvents].reverse().find(e => e.date <= nextProjectedDate)
+  const lastEvent = sortedEvents.findLast(e => e.date <= nextProjectedDate)
   const currentRate = lastEvent?.newRate ?? interestRate
   const currentPayment = lastEvent?.newPayment ?? monthlyPayment
 
@@ -219,11 +217,9 @@ export const buildAmortizationTable = (
   // Calculate accumulated principal for projected rows
   let accum = real[real.length - 1]?.accumulatedPrincipal ?? 0
   const projected: AmortizationRow[] = projectedRaw.map(p => {
-    accum = round2(accum + p.principal)
+    accum = roundNumber(accum + p.principal)
     return { ...p, accumulatedPrincipal: accum, isProjected: true }
   })
 
   return [...real, ...projected]
 }
-
-export { daysBetween, addOneMonth, round2 }

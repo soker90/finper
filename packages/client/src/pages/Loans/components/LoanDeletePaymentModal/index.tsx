@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Button, Card, CardActions, CardContent, CardHeader, Divider, Modal, Typography } from '@mui/material'
+import { Button, Card, CardActions, CardContent, CardHeader, Divider, FormHelperText, Modal, Typography } from '@mui/material'
 import { mutate } from 'swr'
 
 import { LOANS, LOAN_DETAIL } from 'constants/api-paths'
@@ -14,13 +14,19 @@ interface Props {
 
 const LoanDeletePaymentModal = ({ loanId, payment, onClose }: Props) => {
   const [isDeleting, setIsDeleting] = useState(false)
+  const [apiError, setApiError] = useState<string | undefined>(undefined)
 
   const handleDelete = async () => {
     setIsDeleting(true)
-    await deleteLoanPayment(loanId, payment._id!)
-    await mutate(LOAN_DETAIL(loanId))
-    await mutate(LOANS)
-    onClose()
+    try {
+      const { error } = await deleteLoanPayment(loanId, payment._id!)
+      if (error) { setApiError(error); return }
+      await mutate(LOAN_DETAIL(loanId))
+      await mutate(LOANS)
+      onClose()
+    } finally {
+      setIsDeleting(false)
+    }
   }
 
   const dateLabel = new Date(payment.date).toLocaleDateString('es-ES')
@@ -39,6 +45,7 @@ const LoanDeletePaymentModal = ({ loanId, payment, onClose }: Props) => {
             ¿Seguro que quieres eliminar la cuota del <b>{dateLabel}</b>?
             Esta acción recalculará el capital pendiente del préstamo y no se puede deshacer.
           </Typography>
+          {apiError && <FormHelperText error>{apiError}</FormHelperText>}
         </CardContent>
         <Divider />
         <CardActions sx={{ justifyContent: 'space-between' }}>

@@ -3,9 +3,9 @@ import {
   AccountModel,
   BudgetModel,
   CategoryModel, DebtModel, DebtType,
-  IAccount,
-  IDebt, IPension, IStore,
-  IUser, PensionModel, StoreModel, TransactionModel,
+  IAccount, ICategory,
+  IDebt, ILoan, ILoanPayment, IPension, IStore,
+  IUser, LoanModel, LoanPaymentModel, LoanPaymentType, PensionModel, StoreModel, TransactionModel,
   TransactionType,
   UserModel
 } from '@soker90/finper-models'
@@ -15,6 +15,8 @@ import {
   MIN_PASSWORD_LENGTH
 } from '../src/config/inputs'
 import { generateUsername } from './generate-values'
+import { buildAmortizationTable } from '../src/services/utils/calcLoanProjection'
+import { roundNumber } from '../src/utils/roundNumber'
 
 export async function insertCredentials (params: Record<string, string | boolean> = {}): Promise<IUser> {
   const parsedParams: Record<string, string | boolean> = {}
@@ -34,17 +36,17 @@ export async function insertCredentials (params: Record<string, string | boolean
   })
 }
 
-export const insertAccount = async (params: { name?: string, bank?: string, balance?: number, isActive?: boolean, user?: string } = {}): Promise<IAccount> => {
+export const insertAccount = async (params: { name?: string, bank?: string, balance?: number, isActive?: boolean, user?: string } = {}): Promise<IAccount & { _id: string }> => {
   return AccountModel.create({
     name: params.name ?? faker.finance.accountName(),
     bank: params.bank ?? faker.lorem.word(),
     balance: params.balance ?? faker.number.int(),
     isActive: params.isActive ?? faker.datatype.boolean(),
     user: params.user ?? faker.internet.userName().slice(MIN_LENGTH_USERNAME, MAX_USERNAME_LENGTH).toLowerCase()
-  })
+  }) as unknown as IAccount & { _id: string }
 }
 
-export const insertCategory = async (params: Record<string, any> = {}): Promise<any> => {
+export const insertCategory = async (params: Record<string, any> = {}): Promise<ICategory & { _id: string }> => {
   const user = params.user ?? generateUsername()
   const parent = params.parent ?? params.root
     ? false
@@ -61,7 +63,7 @@ export const insertCategory = async (params: Record<string, any> = {}): Promise<
     user
   })
 
-  return category.populate('parent')
+  return category.populate('parent') as unknown as ICategory & { _id: string }
 }
 
 export const insertStore = async (params: Record<string, string> = {}): Promise<IStore> => {
@@ -120,4 +122,52 @@ export const insertPension = async (params: Record<string, string | number> = {}
     employeeAmount: params.employeeAmount ?? faker.number.int(),
     user: params.user ?? faker.internet.username().slice(MIN_LENGTH_USERNAME, MAX_USERNAME_LENGTH).toLowerCase()
   })
+}
+
+export const insertLoan = async (params: Record<string, any> = {}): Promise<ILoan & { _id: string }> => {
+  const user = (params.user ?? generateUsername()) as string
+  const account = params.account ?? (await insertAccount({ user }))._id
+  const category = params.category ?? (await insertCategory({ user, type: TransactionType.Expense }))._id
+  const initialAmount = params.initialAmount ?? 10000
+  const interestRate = params.interestRate ?? 3
+  const monthlyPayment = params.monthlyPayment ?? 200
+  const startDate = params.startDate ?? Date.now()
+
+  // Calculate initialEstimatedCost dynamically from the amortization table
+  const initialProjection = buildAmortizationTable([], initialAmount, interestRate, monthlyPayment, [], startDate)
+  const calculatedEstimatedCost = roundNumber(initialProjection.reduce((s, r) => s + r.amount, 0))
+
+  return LoanModel.create({
+    name: params.name ?? faker.lorem.words(2),
+    initialAmount,
+    pendingAmount: params.pendingAmount ?? initialAmount,
+    interestRate,
+    startDate,
+    monthlyPayment,
+    initialEstimatedCost: params.initialEstimatedCost ?? calculatedEstimatedCost,
+    account,
+    category,
+    user
+  }) as unknown as ILoan & { _id: string }
+}
+
+export const insertLoanPayment = async (params: Record<string, any> = {}): Promise<ILoanPayment & { _id: string }> => {
+  const user = (params.user ?? generateUsername()) as string
+  const loan = params.loan ?? (await insertLoan({ user }))._id
+  const principal = params.principal ?? 175
+  const accumulatedPrincipal = params.accumulatedPrincipal ?? principal
+  // pendingCapital = initialAmount(10000) - accumulatedPrincipal, consistent with the defaults
+  const pendingCapital = params.pendingCapital ?? roundNumber(10000 - accumulatedPrincipal)
+
+  return LoanPaymentModel.create({
+    loan,
+    date: params.date ?? Date.now(),
+    amount: params.amount ?? 200,
+    interest: params.interest ?? 25,
+    principal,
+    accumulatedPrincipal,
+    pendingCapital,
+    type: params.type ?? LoanPaymentType.ORDINARY,
+    user
+  }) as unknown as ILoanPayment & { _id: string }
 }

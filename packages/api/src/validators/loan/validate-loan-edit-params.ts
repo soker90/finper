@@ -14,8 +14,6 @@ export const validateLoanEditParams = async ({
 
   const schema = Joi.object({
     name: Joi.string(),
-    initialAmount: Joi.number().positive(),
-    pendingAmount: Joi.number().positive(),
     interestRate: Joi.number().min(0),
     startDate: Joi.number(),
     monthlyPayment: Joi.number().positive(),
