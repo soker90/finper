@@ -1,18 +1,16 @@
 import { Stack, Typography, LinearProgress, Box } from '@mui/material'
 import { MainCard } from 'components'
 import { BankIcon } from 'components/icons'
-import { useAccounts } from 'hooks'
 import { format } from 'utils'
-import { Loan } from 'types'
+import { Account, Loan } from 'types'
 
 interface Props {
   loan: Loan
+  linkedAccount?: Account
   onClick: (loan: Loan) => void
 }
 
-const LoanCard = ({ loan, onClick }: Props) => {
-  const { accounts } = useAccounts()
-  const linkedAccount = accounts.find(a => a._id === loan.account)
+const LoanCard = ({ loan, linkedAccount, onClick }: Props) => {
   const progress = loan.initialAmount > 0
     ? Math.round(((loan.initialAmount - loan.pendingAmount) / loan.initialAmount) * 100)
     : 0

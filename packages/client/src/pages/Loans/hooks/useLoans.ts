@@ -5,13 +5,13 @@ import { Loan } from 'types'
 export const useLoans = (): {
   loans: Loan[]
   isLoading: boolean
-  error: any
+  error: Error | undefined
 } => {
-  const { data, error } = useSWR(LOANS)
+  const { data, error, isLoading } = useSWR<Loan[]>(LOANS)
 
   return {
-    loans: data || [],
-    isLoading: !data && !error,
-    error
+    loans: data ?? [],
+    isLoading,
+    error: error as Error | undefined
   }
 }

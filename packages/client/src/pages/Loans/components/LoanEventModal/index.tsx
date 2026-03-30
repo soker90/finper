@@ -1,12 +1,11 @@
-import { useState } from 'react'
 import { useForm } from 'react-hook-form'
-import { mutate } from 'swr'
-import { FormHelperText, Grid } from '@mui/material'
 
 import { DateForm, InputForm, ModalGrid } from 'components'
-import { LOANS, LOAN_DETAIL } from 'constants/api-paths'
 import { addLoanEvent } from 'services/apiService'
 import { Loan } from 'types'
+
+import { useApiError, useLoanMutate } from '../../hooks'
+import { inputToTimestamp } from '../../utils/date'
 
 interface Props {
   loan: Loan
@@ -20,20 +19,20 @@ interface FormValues {
 }
 
 const LoanEventModal = ({ loan, onClose }: Props) => {
-  const [apiError, setApiError] = useState<string | undefined>(undefined)
+  const { setApiError, ApiErrorMessage } = useApiError()
+  const { revalidate } = useLoanMutate(loan._id)
   const { register, handleSubmit, formState: { errors, isSubmitting }, control } = useForm<FormValues>({
     defaultValues: { date: null, newRate: loan.interestRate, newPayment: loan.monthlyPayment }
   })
 
   const onSubmit = handleSubmit(async (params) => {
     const { error } = await addLoanEvent(loan._id, {
-      date: params.date ? new Date(params.date).getTime() : Date.now(),
+      date: params.date ? inputToTimestamp(params.date) : Date.now(),
       newRate: Number(params.newRate),
       newPayment: Number(params.newPayment)
     })
     if (error) { setApiError(error); return }
-    await mutate(LOAN_DETAIL(loan._id))
-    await mutate(LOANS)
+    await revalidate()
     onClose()
   })
 
@@ -65,11 +64,7 @@ const LoanEventModal = ({ loan, onClose }: Props) => {
         errorText='Cuota requerida'
         {...register('newPayment', { required: true, valueAsNumber: true })}
       />
-      {apiError && (
-        <Grid size={12}>
-          <FormHelperText error>{apiError}</FormHelperText>
-        </Grid>
-      )}
+      {ApiErrorMessage}
     </ModalGrid>
   )
 }

@@ -61,7 +61,7 @@ const LoanStatsPanel = ({ stats }: Props) => (
       <Grid size={{ xs: 6, sm: 4, md: 3 }}>
         <StatItem
           label='Fecha estimada fin'
-          value={stats.estimatedEndDate ? new Date(stats.estimatedEndDate).toLocaleDateString('es-ES') : '-'}
+          value={format.date(stats.estimatedEndDate ?? 0) ?? '-'}
         />
       </Grid>
 

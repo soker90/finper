@@ -1,13 +1,13 @@
-import { useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
-import { mutate } from 'swr'
-import { Checkbox, FormControlLabel, FormHelperText, Grid } from '@mui/material'
+import { Checkbox, FormControlLabel } from '@mui/material'
 import dayjs from 'dayjs'
 
 import { DateForm, InputForm, ModalGrid, SelectForm } from 'components'
-import { LOANS, LOAN_DETAIL } from 'constants/api-paths'
 import { payLoanExtraordinary } from 'services/apiService'
 import { Loan } from 'types'
+
+import { useApiError, useLoanMutate } from '../../hooks'
+import { inputToTimestamp } from '../../utils/date'
 
 interface Props {
   loan: Loan
@@ -27,21 +27,21 @@ const MODE_OPTIONS = [
 ]
 
 const LoanAmortizeModal = ({ loan, onClose }: Props) => {
-  const [apiError, setApiError] = useState<string | undefined>(undefined)
+  const { setApiError, ApiErrorMessage } = useApiError()
+  const { revalidate } = useLoanMutate(loan._id)
   const { register, handleSubmit, control, formState: { errors, isSubmitting } } = useForm<FormValues>({
     defaultValues: { date: dayjs().format('YYYY-MM-DD'), amount: undefined, mode: 'reduceTerm', addMovement: true }
   })
 
   const onSubmit = handleSubmit(async (params) => {
     const { error } = await payLoanExtraordinary(loan._id, {
-      date: params.date ? dayjs(params.date).startOf('day').valueOf() : undefined,
+      date: params.date ? inputToTimestamp(params.date) : undefined,
       amount: Number(params.amount),
       mode: params.mode,
       addMovement: params.addMovement
     })
     if (error) { setApiError(error); return }
-    await mutate(LOAN_DETAIL(loan._id))
-    await mutate(LOANS)
+    await revalidate()
     onClose()
   })
 
@@ -89,11 +89,7 @@ const LoanAmortizeModal = ({ loan, onClose }: Props) => {
           />
         )}
       />
-      {apiError && (
-        <Grid size={12}>
-          <FormHelperText error>{apiError}</FormHelperText>
-        </Grid>
-      )}
+      {ApiErrorMessage}
     </ModalGrid>
   )
 }

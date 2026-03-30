@@ -1,13 +1,12 @@
-import { useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
-import { mutate } from 'swr'
-import dayjs from 'dayjs'
-import { Checkbox, FormControlLabel, FormHelperText, Grid } from '@mui/material'
+import { Checkbox, FormControlLabel } from '@mui/material'
 
 import { DateForm, InputForm, ModalGrid } from 'components'
-import { LOANS, LOAN_DETAIL } from 'constants/api-paths'
 import { payLoanOrdinary } from 'services/apiService'
 import { AmortizationRow, Loan } from 'types'
+
+import { useApiError, useLoanMutate } from '../../hooks'
+import { dateToInput, inputToTimestamp } from '../../utils/date'
 
 interface FormValues {
   date: string | null
@@ -22,24 +21,24 @@ interface Props {
 }
 
 const LoanPayModal = ({ loan, row, onClose }: Props) => {
-  const [apiError, setApiError] = useState<string | undefined>(undefined)
+  const { setApiError, ApiErrorMessage } = useApiError()
+  const { revalidate } = useLoanMutate(loan._id)
   const { register, handleSubmit, formState: { errors, isSubmitting }, control } = useForm<FormValues>({
     defaultValues: {
-      date: dayjs(row.date).format('YYYY-MM-DD'),
+      date: dateToInput(row.date),
       amount: String(row.amount),
       addMovement: true
     }
   })
 
   const onSubmit = handleSubmit(async (params) => {
-    const date = params.date ? dayjs(params.date).startOf('day').valueOf() : row.date
+    const date = params.date ? inputToTimestamp(params.date) : row.date
     const amount = Number(params.amount)
 
     const { error } = await payLoanOrdinary(loan._id, { date, amount, addMovement: params.addMovement })
     if (error) { setApiError(error); return }
 
-    await mutate(LOAN_DETAIL(loan._id))
-    await mutate(LOANS)
+    await revalidate()
     onClose()
   })
 
@@ -78,11 +77,7 @@ const LoanPayModal = ({ loan, row, onClose }: Props) => {
           />
         )}
       />
-      {apiError && (
-        <Grid size={12}>
-          <FormHelperText error>{apiError}</FormHelperText>
-        </Grid>
-      )}
+      {ApiErrorMessage}
     </ModalGrid>
   )
 }

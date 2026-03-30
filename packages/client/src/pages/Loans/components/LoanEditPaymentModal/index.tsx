@@ -1,13 +1,11 @@
-import { useState } from 'react'
 import { useForm } from 'react-hook-form'
-import { mutate } from 'swr'
-import dayjs from 'dayjs'
-import { FormHelperText, Grid } from '@mui/material'
 
 import { DateForm, InputForm, ModalGrid, SelectForm } from 'components'
-import { LOANS, LOAN_DETAIL } from 'constants/api-paths'
 import { editLoanPayment } from 'services/apiService'
 import { AmortizationRow, LoanPaymentType } from 'types'
+
+import { useApiError, useLoanMutate } from '../../hooks'
+import { dateToInput, inputToTimestamp } from '../../utils/date'
 
 const PAYMENT_TYPE_OPTIONS = [
   { value: LoanPaymentType.ORDINARY, label: 'Ordinaria' },
@@ -29,10 +27,11 @@ interface Props {
 }
 
 const LoanEditPaymentModal = ({ loanId, payment, onClose }: Props) => {
-  const [apiError, setApiError] = useState<string | undefined>(undefined)
+  const { setApiError, ApiErrorMessage } = useApiError()
+  const { revalidate } = useLoanMutate(loanId)
   const { register, handleSubmit, formState: { errors, isSubmitting }, control } = useForm<FormValues>({
     defaultValues: {
-      date: dayjs(payment.date).format('YYYY-MM-DD'),
+      date: dateToInput(payment.date),
       amount: String(payment.amount),
       interest: String(payment.interest),
       principal: String(payment.principal),
@@ -42,15 +41,14 @@ const LoanEditPaymentModal = ({ loanId, payment, onClose }: Props) => {
 
   const onSubmit = handleSubmit(async (params) => {
     const { error } = await editLoanPayment(loanId, payment._id!, {
-      date: params.date ? dayjs(params.date).startOf('day').valueOf() : payment.date,
+      date: params.date ? inputToTimestamp(params.date) : payment.date,
       amount: Number(params.amount),
       interest: Number(params.interest),
       principal: Number(params.principal),
       type: params.type
     })
     if (error) { setApiError(error); return }
-    await mutate(LOAN_DETAIL(loanId))
-    await mutate(LOANS)
+    await revalidate()
     onClose()
   })
 
@@ -104,11 +102,7 @@ const LoanEditPaymentModal = ({ loanId, payment, onClose }: Props) => {
         error={!!errors.type}
         {...register('type', { required: true })}
       />
-      {apiError && (
-        <Grid size={12}>
-          <FormHelperText error>{apiError}</FormHelperText>
-        </Grid>
-      )}
+      {ApiErrorMessage}
     </ModalGrid>
   )
 }

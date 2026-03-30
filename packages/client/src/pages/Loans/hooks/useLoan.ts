@@ -5,13 +5,13 @@ import { LoanDetail } from 'types'
 export const useLoan = (id: string): {
   loan: LoanDetail | undefined
   isLoading: boolean
-  error: any
+  error: Error | undefined
 } => {
-  const { data, error } = useSWR(id ? LOAN_DETAIL(id) : null)
+  const { data, error, isLoading } = useSWR<LoanDetail>(id ? LOAN_DETAIL(id) : null)
 
   return {
     loan: data,
-    isLoading: !data && !error,
-    error
+    isLoading,
+    error: error as Error | undefined
   }
 }

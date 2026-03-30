@@ -5,25 +5,35 @@ import { ArrowLeftOutlined } from '@ant-design/icons'
 
 import { BankIcon } from 'components/icons'
 import { useAccounts } from 'hooks'
-import { AmortizationRow, Loan } from 'types'
+import { AmortizationRow } from 'types'
 
 import { LoanStatsPanel, LoanAmortizationTable, LoanFormModal, LoanPayModal, LoanAmortizeModal, LoanEventModal, LoanRemoveModal, LoanEditPaymentModal, LoanDeletePaymentModal } from '../components'
 import { useLoan } from '../hooks'
 
+type ModalState =
+  | { type: 'edit' }
+  | { type: 'amortize' }
+  | { type: 'event' }
+  | { type: 'remove' }
+  | { type: 'editPayment'; data: AmortizationRow }
+  | { type: 'deletePayment'; data: AmortizationRow }
+  | { type: 'pay'; data: AmortizationRow }
+
 const LoanDetail = () => {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
-  const { loan, isLoading } = useLoan(id!)
+
+  if (!id) {
+    navigate('/prestamos', { replace: true })
+    return null
+  }
+
+  const { loan, isLoading } = useLoan(id)
   const { accounts } = useAccounts()
   const linkedAccount = accounts.find(a => a._id === loan?.account)
 
-  const [showEdit, setShowEdit] = useState(false)
-  const [showAmortize, setShowAmortize] = useState(false)
-  const [showEvent, setShowEvent] = useState(false)
-  const [showRemove, setShowRemove] = useState(false)
-  const [editingPayment, setEditingPayment] = useState<AmortizationRow | null>(null)
-  const [deletingPayment, setDeletingPayment] = useState<AmortizationRow | null>(null)
-  const [payingRow, setPayingRow] = useState<AmortizationRow | null>(null)
+  const [activeModal, setActiveModal] = useState<ModalState | null>(null)
+  const closeModal = () => setActiveModal(null)
 
   if (isLoading) {
     return (
@@ -57,16 +67,16 @@ const LoanDetail = () => {
           <BankIcon name={linkedAccount?.bank ?? ''} width={24} height={24} />
         </Box>
         <Stack direction='row' spacing={1} flexWrap='wrap'>
-          <Button variant='outlined' onClick={() => setShowAmortize(true)}>
+          <Button variant='outlined' onClick={() => setActiveModal({ type: 'amortize' })}>
             Amortización extra
           </Button>
-          <Button variant='outlined' onClick={() => setShowEvent(true)}>
+          <Button variant='outlined' onClick={() => setActiveModal({ type: 'event' })}>
             Cambio tipo/cuota
           </Button>
-          <Button variant='outlined' onClick={() => setShowEdit(true)}>
+          <Button variant='outlined' onClick={() => setActiveModal({ type: 'edit' })}>
             Editar
           </Button>
-          <Button variant='outlined' color='error' onClick={() => setShowRemove(true)}>
+          <Button variant='outlined' color='error' onClick={() => setActiveModal({ type: 'remove' })}>
             Eliminar
           </Button>
         </Stack>
@@ -78,56 +88,56 @@ const LoanDetail = () => {
       {/* Amortization table */}
       <LoanAmortizationTable
         rows={loan.amortizationTable}
-        onDeletePayment={(row) => setDeletingPayment(row)}
-        onEditPayment={(row) => setEditingPayment(row)}
-        onPayPayment={(row) => setPayingRow(row)}
+        onDeletePayment={(row) => setActiveModal({ type: 'deletePayment', data: row })}
+        onEditPayment={(row) => setActiveModal({ type: 'editPayment', data: row })}
+        onPayPayment={(row) => setActiveModal({ type: 'pay', data: row })}
       />
 
       {/* Modals */}
-      {deletingPayment && (
+      {activeModal?.type === 'deletePayment' && (
         <LoanDeletePaymentModal
-          loanId={id!}
-          payment={deletingPayment}
-          onClose={() => setDeletingPayment(null)}
+          loanId={id}
+          payment={activeModal.data}
+          onClose={closeModal}
         />
       )}
-      {editingPayment && (
+      {activeModal?.type === 'editPayment' && (
         <LoanEditPaymentModal
-          loanId={id!}
-          payment={editingPayment}
-          onClose={() => setEditingPayment(null)}
+          loanId={id}
+          payment={activeModal.data}
+          onClose={closeModal}
         />
       )}
-      {showEdit && (
+      {activeModal?.type === 'edit' && (
         <LoanFormModal
-          loan={loan as Loan}
-          onClose={() => setShowEdit(false)}
+          loan={loan}
+          onClose={closeModal}
         />
       )}
-      {payingRow && (
+      {activeModal?.type === 'pay' && (
         <LoanPayModal
-          loan={loan as Loan}
-          row={payingRow}
-          onClose={() => setPayingRow(null)}
+          loan={loan}
+          row={activeModal.data}
+          onClose={closeModal}
         />
       )}
-      {showAmortize && (
+      {activeModal?.type === 'amortize' && (
         <LoanAmortizeModal
-          loan={loan as Loan}
-          onClose={() => setShowAmortize(false)}
+          loan={loan}
+          onClose={closeModal}
         />
       )}
-      {showEvent && (
+      {activeModal?.type === 'event' && (
         <LoanEventModal
-          loan={loan as Loan}
-          onClose={() => setShowEvent(false)}
+          loan={loan}
+          onClose={closeModal}
         />
       )}
-      {showRemove && (
+      {activeModal?.type === 'remove' && (
         <LoanRemoveModal
-          loan={loan as Loan}
+          loan={loan}
           onClose={() => {
-            setShowRemove(false)
+            closeModal()
             navigate('/prestamos')
           }}
         />

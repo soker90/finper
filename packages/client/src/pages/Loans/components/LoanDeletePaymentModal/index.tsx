@@ -1,10 +1,12 @@
 import { useState } from 'react'
-import { Button, Card, CardActions, CardContent, CardHeader, Divider, FormHelperText, Modal, Typography } from '@mui/material'
+import { Button, Card, CardActions, CardContent, CardHeader, Divider, Modal, Typography } from '@mui/material'
 import { mutate } from 'swr'
 
 import { LOANS, LOAN_DETAIL } from 'constants/api-paths'
 import { deleteLoanPayment } from 'services/apiService'
 import { AmortizationRow } from 'types'
+
+import { useApiError } from '../../hooks'
 
 interface Props {
   loanId: string
@@ -14,7 +16,7 @@ interface Props {
 
 const LoanDeletePaymentModal = ({ loanId, payment, onClose }: Props) => {
   const [isDeleting, setIsDeleting] = useState(false)
-  const [apiError, setApiError] = useState<string | undefined>(undefined)
+  const { setApiError, ApiErrorMessage } = useApiError()
 
   const handleDelete = async () => {
     setIsDeleting(true)
@@ -45,7 +47,7 @@ const LoanDeletePaymentModal = ({ loanId, payment, onClose }: Props) => {
             ¿Seguro que quieres eliminar la cuota del <b>{dateLabel}</b>?
             Esta acción recalculará el capital pendiente del préstamo y no se puede deshacer.
           </Typography>
-          {apiError && <FormHelperText error>{apiError}</FormHelperText>}
+          {ApiErrorMessage}
         </CardContent>
         <Divider />
         <CardActions sx={{ justifyContent: 'space-between' }}>
