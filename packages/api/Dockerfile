@@ -18,6 +18,7 @@ RUN pnpm install --frozen-lockfile --filter @soker90/finper-api...
 
 COPY --chown=node:node packages/api ./packages/api
 COPY --chown=node:node packages/models ./packages/models
+RUN pnpm --filter @soker90/finper-models build
 RUN pnpm --filter @soker90/finper-api build
 
 # STAGE 2 - Producción
@@ -44,11 +45,13 @@ USER node
 
 COPY --chown=node:node pnpm-workspace.yaml pnpm-lock.yaml package.json .npmrc ./
 COPY --chown=node:node packages/api/package.json ./packages/api/
+COPY --chown=node:node packages/models/package.json ./packages/models/
 
 RUN npm pkg delete scripts.prepare && \
     pnpm install --frozen-lockfile --filter @soker90/finper-api... --prod
 
 COPY --from=builder --chown=node:node /home/node/app/packages/api/dist ./packages/api/dist
+COPY --from=builder --chown=node:node /home/node/app/packages/models/dist ./packages/models/dist
 
 # Healthcheck para monitoreo
 HEALTHCHECK --interval=30s --timeout=3s --start-period=40s --retries=3 \
