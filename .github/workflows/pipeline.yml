@@ -68,6 +68,10 @@ jobs:
         with:
           cache: 'pnpm'
           node-version-file: '.nvmrc'
+      - uses: actions/cache@v4
+        with:
+          path: ~/.cache/mongodb-binaries
+          key: mongodb-binaries-${{ runner.os }}
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
       - name: Test
@@ -131,6 +135,10 @@ jobs:
         with:
           cache: 'pnpm'
           node-version-file: '.nvmrc'
+      - uses: actions/cache@v4
+        with:
+          path: ~/.cache/mongodb-binaries
+          key: mongodb-binaries-${{ runner.os }}
       - uses: actions/download-artifact@v8
         with:
           name: models
