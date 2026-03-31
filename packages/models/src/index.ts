@@ -1,6 +1,6 @@
 import isNil from 'lodash.isnil'
 import isPlainObject from 'lodash.isplainobject'
-import mongoose, { HydratedDocument } from 'mongoose'
+import mongoose, { HydratedDocument, Types } from 'mongoose'
 
 import mongooseConnect from './mongoose-connect'
 
@@ -48,6 +48,7 @@ export default {
 
 export {
   mongoose,
+  Types,
 
   DebtType,
   LoanPaymentType,

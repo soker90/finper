@@ -1,5 +1,4 @@
-import { Types } from 'mongoose'
-import { LoanModel } from '@soker90/finper-models'
+import { Types, LoanModel } from '@soker90/finper-models'
 import Boom from '@hapi/boom'
 
 export const validateLoanExist = async ({ id, user, message }: { id: string, user: string, message?: string }) => {
