@@ -218,7 +218,17 @@ export const buildAmortizationTable = (
   let accum = real[real.length - 1]?.accumulatedPrincipal ?? 0
   const projected: AmortizationRow[] = projectedRaw.map(p => {
     accum = roundNumber(accum + p.principal)
-    return { ...p, accumulatedPrincipal: accum, isProjected: true }
+    return {
+      period: p.period,
+      date: p.date,
+      amount: p.amount,
+      interest: p.interest,
+      principal: p.principal,
+      accumulatedPrincipal: accum,
+      pendingCapital: p.pendingCapital,
+      type: p.type,
+      isProjected: true
+    }
   })
 
   return [...real, ...projected]
