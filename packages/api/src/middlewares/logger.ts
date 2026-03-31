@@ -22,7 +22,7 @@ export default (app: Application): void => {
     })
   ]
 
-  if (process.env.NODE_ENV === 'prod') {
+  if (process.env.NODE_ENV === 'production') {
     transportList.push(new LokiTransport({
       format: prettyPrint(),
       host: config.logger.loki.host,

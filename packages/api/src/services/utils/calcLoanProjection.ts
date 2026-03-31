@@ -1,5 +1,4 @@
-import { ILoanPayment, LoanPaymentType } from '@soker90/finper-models'
-import { Types } from 'mongoose'
+import { ILoanPayment, LoanPaymentType, Types } from '@soker90/finper-models'
 import { roundNumber } from '../../utils/roundNumber'
 
 /**
