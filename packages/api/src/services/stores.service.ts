@@ -1,5 +1,4 @@
 import { IAccount, IStore, ITransaction, StoreModel } from '@soker90/finper-models'
-import { ObjectId } from 'mongoose'
 
 export interface IStoreService {
   getAndReplaceStore(transaction: ITransaction): Promise<ITransaction>
@@ -12,14 +11,14 @@ export interface IStoreService {
 export default class StoreService implements IStoreService {
   public async getAndReplaceStore (transaction: ITransaction): Promise<ITransaction> {
     if (transaction.store) {
-      const store = await StoreModel.findOneAndUpdate({
+      const store = await (StoreModel.findOneAndUpdate as any)({
         name: transaction.store,
         user: transaction.user
       }, { name: transaction.store, user: transaction.user }, {
         new: true,
         upsert: true
-      }) as unknown as IStore
-      transaction.store = store._id as unknown as ObjectId
+      }) as IStore
+      transaction.store = store._id as any
     }
     return transaction
   }

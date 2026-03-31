@@ -1,6 +1,6 @@
 import axios from 'axios'
-import { ACCOUNTS, BUDGETS, CATEGORIES, DEBTS, PENSIONS, TICKETS, TRANSACTIONS } from 'constants/api-paths'
-import { Category, Transaction, TransactionType, Account, Pension, PensionTransaction, Debt } from 'types'
+import { ACCOUNTS, BUDGETS, CATEGORIES, DEBTS, LOANS, LOAN_DETAIL, PENSIONS, TICKETS, TRANSACTIONS } from 'constants/api-paths'
+import { Category, Transaction, TransactionType, Account, Pension, PensionTransaction, Debt, Loan } from 'types'
 
 export const editAccount = (id: string, params: {
   name?: string,
@@ -123,4 +123,42 @@ export const reviewTicket = (id: string): Promise<{ error?: string }> => {
 
 export const deleteTicket = (id: string): Promise<{ error?: string }> => {
   return axios.delete(`${TICKETS}/${id}`).then(() => ({})).catch((error: any) => ({ error: error.message }))
+}
+
+export const addLoan = (params: Partial<Loan>): Promise<{ data?: Loan, error?: string }> => {
+  return axios.post(LOANS, params).then((data: any) => ({ data: data as Loan })).catch((error: any) => ({ error: error.message }))
+}
+
+export const editLoan = (id: string, params: Partial<Loan>): Promise<{ data?: Loan, error?: string }> => {
+  return axios.put(`${LOANS}/${id}`, params).then((data: any) => ({ data: data as Loan })).catch((error: any) => ({ error: error.message }))
+}
+
+export const deleteLoan = (id: string): Promise<{ error?: string }> => {
+  return axios.delete(`${LOANS}/${id}`).then(() => ({})).catch((error: any) => ({ error: error.message }))
+}
+
+export const payLoanOrdinary = (id: string, params?: { date?: number, amount?: number, addMovement?: boolean }): Promise<{ error?: string }> => {
+  return axios.post(`${LOAN_DETAIL(id)}/pay`, params ?? {}).then(() => ({})).catch((error: any) => ({ error: error.message }))
+}
+
+export const payLoanExtraordinary = (id: string, params: { amount: number, mode: 'reduceQuota' | 'reduceTerm', date?: number, addMovement?: boolean }): Promise<{ error?: string }> => {
+  return axios.post(`${LOAN_DETAIL(id)}/amortize`, params).then(() => ({})).catch((error: any) => ({ error: error.message }))
+}
+
+export const addLoanEvent = (id: string, params: { date: number, newRate: number, newPayment: number }): Promise<{ error?: string }> => {
+  return axios.post(`${LOAN_DETAIL(id)}/events`, params).then(() => ({})).catch((error: any) => ({ error: error.message }))
+}
+
+export const deleteLoanPayment = (loanId: string, paymentId: string): Promise<{ error?: string }> => {
+  return axios.delete(`${LOAN_DETAIL(loanId)}/payments/${paymentId}`).then(() => ({})).catch((error: any) => ({ error: error.message }))
+}
+
+export const editLoanPayment = (loanId: string, paymentId: string, params: {
+  date?: number,
+  amount?: number,
+  interest?: number,
+  principal?: number,
+  type?: 'ordinary' | 'extraordinary'
+}): Promise<{ error?: string }> => {
+  return axios.put(`${LOAN_DETAIL(loanId)}/payments/${paymentId}`, params).then(() => ({})).catch((error: any) => ({ error: error.message }))
 }

@@ -5,6 +5,7 @@ import BudgetService from './budget.service'
 import CategoryService from './category.service'
 import DashboardService from './dashboard.service'
 import DebtService from './debt.service'
+import LoanService from './loan.service'
 import PensionService from './pension.service'
 import StoreService from './stores.service'
 import TicketService from './ticket.service'
@@ -17,6 +18,7 @@ export const budgetService = new BudgetService()
 export const categoryService = new CategoryService()
 export const dashboardService = new DashboardService()
 export const debtService = new DebtService()
+export const loanService = new LoanService()
 export const pensionService = new PensionService()
 export const storeService = new StoreService()
 export const ticketService = new TicketService()

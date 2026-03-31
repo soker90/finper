@@ -19,6 +19,7 @@ import { PensionRoutes } from './routes/pension.routes'
 import { TransactionRoutes } from './routes/transaction.routes'
 import { StoreRoutes } from './routes/store.routes'
 import { TicketRoutes } from './routes/ticket.routes'
+import { LoanRoutes } from './routes/loan.routes'
 
 global.Promise = require('bluebird')
 
@@ -45,6 +46,7 @@ class Server {
     this.app.use('/api/transactions', new TransactionRoutes().router)
     this.app.use('/api/stores', new StoreRoutes().router)
     this.app.use('/api/tickets', new TicketRoutes().router)
+    this.app.use('/api/loans', new LoanRoutes().router)
   }
 
   public preMiddlewareConfig (): void {

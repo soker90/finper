@@ -6,7 +6,8 @@ import {
   EuroOutlined,
   CalendarOutlined,
   ProfileOutlined,
-  FileImageOutlined
+  FileImageOutlined,
+  BankOutlined
 } from '@ant-design/icons'
 import { BeachIcon } from 'components'
 
@@ -87,6 +88,14 @@ const dashboard = {
       type: 'item',
       url: '/pension',
       icon: BeachIcon,
+      breadcrumbs: true
+    },
+    {
+      id: 'loans',
+      title: 'Préstamos',
+      type: 'item',
+      url: '/prestamos',
+      icon: BankOutlined,
       breadcrumbs: true
     }
   ]
