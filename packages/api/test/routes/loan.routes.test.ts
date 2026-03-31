@@ -125,6 +125,10 @@ describe('Loans', () => {
       await supertest(server.app).get(path('62a39498c4497e1fe3c2bf35')).expect(401)
     })
 
+    test('when id is not a valid ObjectId, it should respond 400', async () => {
+      await supertest(server.app).get(path('not-a-valid-id')).auth(token, { type: 'bearer' }).expect(400)
+    })
+
     test('when loan does not exist, it should respond 404', async () => {
       await supertest(server.app).get(path('62a39498c4497e1fe3c2bf35')).auth(token, { type: 'bearer' }).expect(404)
     })

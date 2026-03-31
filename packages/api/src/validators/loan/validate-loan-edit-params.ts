@@ -8,9 +8,7 @@ export const validateLoanEditParams = async ({
   body,
   user
 }: { params: Record<string, string>, body: Record<string, any>, user: string }): Promise<{ id: string, value: Partial<ILoan> }> => {
-  if (params.id) {
-    await validateLoanExist({ id: params.id, user })
-  }
+  await validateLoanExist({ id: params.id, user })
 
   const schema = Joi.object({
     name: Joi.string(),

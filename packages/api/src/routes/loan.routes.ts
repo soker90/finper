@@ -8,7 +8,7 @@ import { LoanController } from '../controllers/loan.controller'
 export class LoanRoutes {
   router: Router
 
-  public loanController: LoanController = new LoanController({
+  private loanController: LoanController = new LoanController({
     loanService,
     loggerHandler: loggerHandler('LoanController')
   })

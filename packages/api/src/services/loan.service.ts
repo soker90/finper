@@ -362,6 +362,28 @@ export default class LoanService implements ILoanService {
     }
   }
 
+  /**
+   * Recalcula en cascada los campos derivados de todos los pagos de un préstamo
+   * y actualiza el capital pendiente del propio préstamo.
+   *
+   * **Cuándo llamar**: después de editar o eliminar cualquier pago cuyo `principal`
+   * haya cambiado (o cuya existencia haya cambiado), para mantener la consistencia
+   * de la tabla de amortización.
+   *
+   * **Qué garantiza**:
+   * - `accumulatedPrincipal` de cada pago = suma acumulada de `principal` de todos
+   *   los pagos anteriores (ordenados por `date ASC`) incluyendo el propio.
+   * - `pendingCapital` de cada pago = `initialAmount` − `accumulatedPrincipal`.
+   * - `pendingAmount` del préstamo = capital pendiente tras el último pago registrado.
+   *
+   * **Qué asume**:
+   * - Los pagos se ordenan por `date ASC`; si dos pagos tienen la misma fecha el
+   *   orden entre ellos es arbitrario pero estable (orden de inserción en MongoDB).
+   * - `initialAmount` del préstamo es **inmutable** tras la creación; si se necesitase
+   *   modificarlo habría que revisar esta lógica.
+   * - Ningún proceso externo modifica `accumulatedPrincipal` / `pendingCapital` de
+   *   estos pagos concurrentemente durante la ejecución de este método.
+   */
   private async _recalcChain (loanId: string, user: string): Promise<void> {
     const [allPayments, loan] = await Promise.all([
       leanDoc<(ILoanPayment & { _id: string })[]>(LoanPaymentModel.find({ loan: loanId, user }).sort({ date: 1 }).lean()),
