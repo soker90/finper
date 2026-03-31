@@ -12,10 +12,12 @@ ENV TZ=Europe/Madrid
 COPY --chown=node:node pnpm-workspace.yaml pnpm-lock.yaml package.json .npmrc ./
 
 COPY --chown=node:node packages/api/package.json ./packages/api/
+COPY --chown=node:node packages/models/package.json ./packages/models/
 
 RUN pnpm install --frozen-lockfile --filter @soker90/finper-api...
 
 COPY --chown=node:node packages/api ./packages/api
+COPY --chown=node:node packages/models ./packages/models
 RUN pnpm --filter @soker90/finper-api build
 
 # STAGE 2 - Producción
