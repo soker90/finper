@@ -32,6 +32,9 @@
   "engines": {
     "node": ">=24.x"
   },
+  "files": [
+    "dist"
+  ],
   "dependencies": {
     "@hapi/boom": "10.0.1",
     "@soker90/finper-models": "workspace:*",
