@@ -10,3 +10,5 @@ export const PENSIONS = 'pensions'
 export const TICKETS = 'tickets'
 export const LOANS = 'loans'
 export const LOAN_DETAIL = (id: string) => `loans/${id}`
+export const SUBSCRIPTIONS = 'subscriptions'
+export const SUBSCRIPTION_CANDIDATES = 'subscriptions/candidates'

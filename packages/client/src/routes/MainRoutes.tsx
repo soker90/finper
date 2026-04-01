@@ -14,6 +14,7 @@ const Pensions = lazy(() => import('../pages/Pensions'))
 const Transactions = lazy(() => import('../pages/Transactions'))
 const Tickets = lazy(() => import('../pages/Tickets'))
 const Year = lazy(() => import('../pages/Year'))
+const Subscriptions = lazy(() => import('../pages/Subscriptions'))
 
 const MainRoutes = {
   path: '/',
@@ -71,6 +72,10 @@ const MainRoutes = {
     {
       path: 'prestamos/:id',
       element: <LoanDetail />
+    },
+    {
+      path: 'suscripciones',
+      element: <Subscriptions />
     }
   ]
 }

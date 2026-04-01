@@ -15,6 +15,8 @@ import { IUser, UserModel } from './models/users'
 import { ILoan, LoanModel } from './models/loans'
 import { ILoanPayment, LoanPaymentModel, LoanPaymentType } from './models/loan-payments'
 import { ILoanEvent, LoanEventModel } from './models/loan-events'
+import { ISubscription, SubscriptionModel, SubscriptionCycle } from './models/subscriptions'
+import { ISubscriptionCandidate, SubscriptionCandidateModel } from './models/subscription-candidates'
 
 export type AccountDocument = HydratedDocument<IAccount>
 export type BudgetDocument = HydratedDocument<IBudget>
@@ -27,6 +29,8 @@ export type PensionDocument = HydratedDocument<IPension>
 export type StoreDocument = HydratedDocument<IStore>
 export type TransactionDocument = HydratedDocument<ITransaction>
 export type UserDocument = HydratedDocument<IUser>
+export type SubscriptionDocument = HydratedDocument<ISubscription>
+export type SubscriptionCandidateDocument = HydratedDocument<ISubscriptionCandidate>
 
 function connect (uri: string, options: Record<string, unknown>): void {
   if (isNil(mongoose)) {
@@ -53,6 +57,7 @@ export {
   DebtType,
   LoanPaymentType,
   TransactionType,
+  SubscriptionCycle,
 
   IAccount,
   IBudget,
@@ -63,6 +68,8 @@ export {
   ILoanEvent,
   IPension,
   IStore,
+  ISubscription,
+  ISubscriptionCandidate,
   ITransaction,
   IUser,
 
@@ -75,6 +82,8 @@ export {
   LoanEventModel,
   PensionModel,
   StoreModel,
+  SubscriptionModel,
+  SubscriptionCandidateModel,
   TransactionModel,
   UserModel
 }

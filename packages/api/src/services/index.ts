@@ -11,6 +11,8 @@ import StoreService from './stores.service'
 import TicketService from './ticket.service'
 import TransactionService from './transaction.service'
 import UserService from './user.service'
+import SubscriptionService from './subscription.service'
+import SubscriptionCandidateService from './subscription-candidate.service'
 
 export const accountService = new AccountService()
 export const authService = new AuthService(config.jwt)
@@ -24,3 +26,5 @@ export const storeService = new StoreService()
 export const ticketService = new TicketService()
 export const transactionService = new TransactionService()
 export const userService = new UserService()
+export const subscriptionService = new SubscriptionService()
+export const subscriptionCandidateService = new SubscriptionCandidateService()

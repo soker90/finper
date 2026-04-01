@@ -21,5 +21,11 @@ export const ERROR_MESSAGE = {
   },
   PENSION: {
     NOT_FOUND: 'El movimiento de la pensión no existe'
+  },
+  SUBSCRIPTION: {
+    NOT_FOUND: 'La suscripción no existe'
+  },
+  SUBSCRIPTION_CANDIDATE: {
+    NOT_FOUND: 'La candidata no existe'
   }
 }

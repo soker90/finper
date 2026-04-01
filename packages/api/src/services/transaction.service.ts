@@ -1,6 +1,11 @@
 import { AccountModel, IAccount, ITransaction, TransactionModel } from '@soker90/finper-models'
 import { getTransactionAmount } from './utils'
 import { roundNumber } from '../utils'
+import SubscriptionCandidateService from './subscription-candidate.service'
+import SubscriptionService from './subscription.service'
+
+const subscriptionCandidateService = new SubscriptionCandidateService()
+const subscriptionService = new SubscriptionService()
 
 export interface ITransactionService {
   addTransaction(transaction: ITransaction): Promise<ITransaction>
@@ -35,6 +40,9 @@ export default class TransactionService implements ITransactionService {
       const amount = getTransactionAmount(transaction)
       await updateAcoountBalance(transaction.account.toString(), amount)
 
+      // Fire-and-forget: detect if this transaction matches any pending subscription
+      subscriptionCandidateService.detectCandidates(transaction).catch(() => {})
+
       return transaction
     })
   }
@@ -57,6 +65,10 @@ export default class TransactionService implements ITransactionService {
     const amount = getTransactionAmount(transaction)
     if (amount !== 0) {
       await updateAcoountBalance(transaction.account.toString(), -amount)
+    }
+    // Si era un pago de suscripción, recalcular la próxima fecha (fire-and-forget)
+    if (transaction.subscriptionId) {
+      subscriptionService.recalculateNextPaymentDate(transaction.subscriptionId.toString()).catch(() => {})
     }
   }
 

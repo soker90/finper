@@ -1,0 +1,51 @@
+import { Schema, model, HydratedDocument, Types } from 'mongoose'
+
+export enum SubscriptionCycle {
+  DAILY = 'daily',
+  WEEKLY = 'weekly',
+  MONTHLY = 'monthly',
+  QUARTERLY = 'quarterly',
+  SEMI_ANNUALLY = 'semi-annually',
+  ANNUALLY = 'annually',
+}
+
+export interface ISubscription {
+  _id?: Types.ObjectId
+  name: string
+  amount: number
+  currency?: string
+  cycle: SubscriptionCycle
+  /** Calculado: advanceDate(ultimoPago, cycle). Null si no hay pagos registrados. */
+  nextPaymentDate?: number | null
+  categoryId: Types.ObjectId
+  accountId: Types.ObjectId
+  logoUrl?: string
+  user: string
+}
+
+export type SubscriptionDocument = HydratedDocument<ISubscription>
+
+const subscriptionSchema = new Schema<ISubscription>({
+  name: { type: String, required: true },
+  amount: { type: Number, required: true },
+  currency: { type: String },
+  cycle: {
+    type: String,
+    required: true,
+    enum: [
+      SubscriptionCycle.DAILY,
+      SubscriptionCycle.WEEKLY,
+      SubscriptionCycle.MONTHLY,
+      SubscriptionCycle.QUARTERLY,
+      SubscriptionCycle.SEMI_ANNUALLY,
+      SubscriptionCycle.ANNUALLY,
+    ]
+  },
+  nextPaymentDate: { type: Number, default: null },
+  categoryId: { type: Schema.Types.ObjectId, required: true, ref: 'Category' },
+  accountId: { type: Schema.Types.ObjectId, required: true, ref: 'Account' },
+  logoUrl: { type: String },
+  user: { type: String, required: true }
+}, { versionKey: false })
+
+export const SubscriptionModel = model<ISubscription>('Subscription', subscriptionSchema)

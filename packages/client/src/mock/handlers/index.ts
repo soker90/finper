@@ -7,6 +7,7 @@ import { budgetsHandlers } from './budgets'
 import { ticketsHandlers } from './tickets'
 import { pensionsHandlers } from './pensions'
 import { loansHandlers } from './loans'
+import { subscriptionsHandlers } from './subscriptions'
 
 export const handlers = [
   ...loginHandlers,
@@ -17,5 +18,6 @@ export const handlers = [
   ...budgetsHandlers,
   ...ticketsHandlers,
   ...pensionsHandlers,
-  ...loansHandlers
+  ...loansHandlers,
+  ...subscriptionsHandlers
 ]

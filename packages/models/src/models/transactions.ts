@@ -15,6 +15,7 @@ export interface ITransaction {
   account: Types.ObjectId
   note?: string
   store?: Types.ObjectId
+  subscriptionId?: Types.ObjectId
   user: string
 }
 
@@ -30,6 +31,7 @@ const transactionSchema = new Schema<ITransaction>({
   account: { type: Schema.Types.ObjectId, required: true, ref: 'Account' },
   note: { type: String },
   store: { type: Schema.Types.ObjectId, ref: 'Store' },
+  subscriptionId: { type: Schema.Types.ObjectId, ref: 'Subscription' },
   user: { type: String, required: true }
 }, { versionKey: false })
 
