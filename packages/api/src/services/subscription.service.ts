@@ -60,7 +60,7 @@ export default class SubscriptionService implements ISubscriptionService {
 
   async addSubscription (subscription: ISubscription): Promise<ISubscription> {
     // nextPaymentDate empieza como null (default del schema) — se calculará cuando llegue el primer pago
-    const { nextPaymentDate: _omit, ...rest } = subscription as any
+    const { nextPaymentDate: _omit, ...rest } = subscription as any // eslint-disable-line @typescript-eslint/no-unused-vars
     return SubscriptionModel.create(rest)
   }
 

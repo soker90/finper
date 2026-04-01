@@ -52,7 +52,7 @@ export class SubscriptionController {
     Promise.resolve(req as RequestUser)
       .tap(({ params }) => this.logger.logInfo(`/edit - subscription: ${params.id}`))
       .then(validateSubscriptionEditParams)
-      .then(({ id, user: _user, ...value }) =>
+      .then(({ id, user: _user, ...value }) => // eslint-disable-line @typescript-eslint/no-unused-vars
         this.subscriptionService.editSubscription(id, value)
       )
       .tap(({ _id }) => this.logger.logInfo(`Subscription ${_id} has been successfully edited`))
