@@ -1,9 +1,11 @@
+import { HydratedDocument } from 'mongoose'
 import { NextFunction, Request, Response } from 'express'
 
 import '../auth/local-strategy-passport-handler'
 import extractUser from '../helpers/extract-user'
 import { RequestUser } from '../types'
 import { IDebtService } from '../services/debt.service'
+import { IDebt } from '@soker90/finper-models'
 import { validateDebtCreateParams, validateDebtEditParams, validateDebtExist } from '../validators/debt'
 
 type IDebtController = {
@@ -64,8 +66,8 @@ export class DebtController {
       .tap(({ params }) => this.logger.logInfo(`/edit - debt: ${params?.id}`))
       .then(validateDebtEditParams)
       .then(this.debtService.editDebt.bind(this.debtService))
-      .tap(({ _id }) => this.logger.logInfo(`Debt ${_id} has been succesfully edited`))
-      .then((response) => {
+      .tap(({ _id }: HydratedDocument<IDebt>) => this.logger.logInfo(`Debt ${_id} has been succesfully edited`))
+      .then((response: any) => {
         res.send(response)
       })
       .catch((error) => {

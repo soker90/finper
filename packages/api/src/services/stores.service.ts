@@ -1,3 +1,4 @@
+import { HydratedDocument } from 'mongoose'
 import { IAccount, IStore, ITransaction, StoreModel } from '@soker90/finper-models'
 
 export interface IStoreService {
@@ -11,14 +12,15 @@ export interface IStoreService {
 export default class StoreService implements IStoreService {
   public async getAndReplaceStore (transaction: ITransaction): Promise<ITransaction> {
     if (transaction.store) {
-      const store = await (StoreModel.findOneAndUpdate as any)({
-        name: transaction.store,
+      const storeName = transaction.store as unknown as string
+      const store = await StoreModel.findOneAndUpdate({
+        name: storeName,
         user: transaction.user
-      }, { name: transaction.store, user: transaction.user }, {
+      }, { name: storeName, user: transaction.user }, {
         new: true,
         upsert: true
-      }) as IStore
-      transaction.store = store._id as any
+      }) as HydratedDocument<IStore>
+      transaction.store = store._id
     }
     return transaction
   }

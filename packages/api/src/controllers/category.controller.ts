@@ -1,6 +1,8 @@
+import { HydratedDocument } from 'mongoose'
 import { NextFunction, Request, Response } from 'express'
 
 import '../auth/local-strategy-passport-handler'
+import { ICategory } from '@soker90/finper-models'
 import {
   validateCategoryCreateParams,
   validateCategoryEditParams,
@@ -67,8 +69,8 @@ export class CategoryController {
       .tap(({ body }) => this.logger.logInfo(`/edit - category: ${body.name}`))
       .then(validateCategoryEditParams)
       .then(this.categoryService.editCategory.bind(this.categoryService))
-      .tap(({ _id }) => this.logger.logInfo(`Category ${_id} has been succesfully edited`))
-      .then((response) => {
+      .tap(({ _id }: HydratedDocument<ICategory>) => this.logger.logInfo(`Category ${_id} has been succesfully edited`))
+      .then((response: any) => {
         res.send(response)
       })
       .catch((error) => {

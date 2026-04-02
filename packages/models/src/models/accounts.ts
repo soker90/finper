@@ -1,7 +1,6 @@
 import { Schema, model, HydratedDocument, Types } from 'mongoose'
 
 export interface IAccount {
-  _id?: Types.ObjectId
   name: string
   bank: string
   balance: number

@@ -6,7 +6,6 @@ export enum DebtType {
 }
 
 export interface IDebt {
-  _id?: Types.ObjectId
   from: string
   date: number
   amount: number

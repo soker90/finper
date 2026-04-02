@@ -1,20 +1,21 @@
+import { HydratedDocument } from 'mongoose'
 import { CategoryModel, ICategory } from '@soker90/finper-models'
 
 export interface ICategoryService {
-  addCategory(category: ICategory): Promise<ICategory>
+  addCategory(category: ICategory): Promise<HydratedDocument<ICategory>>
 
-  editCategory({ id, value }: { id: string, value: ICategory }): Promise<ICategory>
+  editCategory({ id, value }: { id: string, value: ICategory }): Promise<HydratedDocument<ICategory>>
 
   deleteCategory({ id }: { id: string }): Promise<void>
 
-  getCategories(user: string): Promise<ICategory[]>
+  getCategories(user: string): Promise<HydratedDocument<ICategory>[]>
 
   getGroupedCategories(): Promise<any[]>
 
 }
 
 export default class CategoryService implements ICategoryService {
-  public async getCategories (user: string): Promise<ICategory[]> {
+  public async getCategories (user: string): Promise<HydratedDocument<ICategory>[]> {
     return CategoryModel.find({ user }, '_id name type').populate('parent', '_id').sort('name')
   }
 
@@ -47,12 +48,12 @@ export default class CategoryService implements ICategoryService {
     ])
   }
 
-  public async addCategory (category: ICategory): Promise<ICategory> {
+  public async addCategory (category: ICategory): Promise<HydratedDocument<ICategory>> {
     return CategoryModel.create(category)
   }
 
-  public async editCategory ({ id, value }: { id: string, value: ICategory }): Promise<ICategory> {
-    return CategoryModel.findByIdAndUpdate(id, value, { new: true }) as unknown as ICategory
+  public async editCategory ({ id, value }: { id: string, value: ICategory }): Promise<HydratedDocument<ICategory>> {
+    return CategoryModel.findByIdAndUpdate(id, value, { new: true }) as unknown as HydratedDocument<ICategory>
   }
 
   public async deleteCategory ({ id }: { id: string }): Promise<void> {
