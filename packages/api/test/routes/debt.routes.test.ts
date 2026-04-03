@@ -159,6 +159,10 @@ describe('Debt', () => {
       await supertest(server.app).put(path('any')).expect(401)
     })
 
+    test('when id is not a valid ObjectId, it should respond 400', async () => {
+      await supertest(server.app).put(path('not-a-valid-id')).auth(token, { type: 'bearer' }).expect(400)
+    })
+
     test('when the debt does not exist, it should response an error with status code 404', async () => {
       await supertest(server.app).put(path('62a39498c4497e1fe3c2bf35')).auth(token, { type: 'bearer' })
         .expect(404)
