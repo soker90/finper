@@ -1,11 +1,10 @@
-
 import { NextFunction, Request, Response } from 'express'
 
 import '../auth/local-strategy-passport-handler'
 import extractUser from '../helpers/extract-user'
 import { RequestUser } from '../types'
 import { IDebtService } from '../services/debt.service'
-import { IDebt, DebtDocument } from '@soker90/finper-models'
+import { DebtDocument } from '@soker90/finper-models'
 import { validateDebtCreateParams, validateDebtEditParams, validateDebtExist } from '../validators/debt'
 
 type IDebtController = {

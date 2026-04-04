@@ -1,9 +1,8 @@
-
 import { NextFunction, Request, Response } from 'express'
 
 import { IAccountService } from '../services/account.service'
 
-import { IAccount, AccountDocument } from '@soker90/finper-models'
+import { AccountDocument } from '@soker90/finper-models'
 import { validateAccountCreateParams, validateAccountEditParams, validateAccountExist } from '../validators/account'
 import '../auth/local-strategy-passport-handler'
 import extractUser from '../helpers/extract-user'

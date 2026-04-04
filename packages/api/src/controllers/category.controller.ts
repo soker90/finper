@@ -1,8 +1,7 @@
-
 import { NextFunction, Request, Response } from 'express'
 
 import '../auth/local-strategy-passport-handler'
-import { ICategory, CategoryDocument } from '@soker90/finper-models'
+import { CategoryDocument } from '@soker90/finper-models'
 import {
   validateCategoryCreateParams,
   validateCategoryEditParams,

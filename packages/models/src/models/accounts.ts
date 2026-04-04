@@ -1,4 +1,4 @@
-import { Schema, model, HydratedDocument, Types } from 'mongoose'
+import { Schema, model, HydratedDocument } from 'mongoose'
 
 export interface IAccount {
   name: string

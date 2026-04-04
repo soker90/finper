@@ -1,10 +1,9 @@
-
 import { NextFunction, Request, Response } from 'express'
 
 import '../auth/local-strategy-passport-handler'
 import { ITransactionService } from '../services/transaction.service'
 import extractUser from '../helpers/extract-user'
-import { ITransaction, TransactionDocument } from '@soker90/finper-models'
+import { TransactionDocument } from '@soker90/finper-models'
 import {
   validateTransactionCreateParams,
   validateTransactionGetParams,

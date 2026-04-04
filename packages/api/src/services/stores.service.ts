@@ -1,4 +1,4 @@
-import { IAccount, IStore, ITransaction, StoreModel, StoreDocument } from '@soker90/finper-models'
+import { IAccount, ITransaction, StoreModel, StoreDocument } from '@soker90/finper-models'
 
 export interface IStoreService {
   getAndReplaceStore(transaction: ITransaction): Promise<ITransaction>
