@@ -11,13 +11,14 @@ export interface ITransactionService {
   deleteTransaction(id: string): Promise<void>
 
   getTransactions(params: {
+    user: string,
     accountId?: string,
     categoryId?: string,
     startDate?: number,
     endDate?: number,
     type?: string,
     limit?: number,
-    skip?: number,
+    page?: number,
   }): Promise<TransactionDocument[]>
 }
 
