@@ -1,4 +1,5 @@
 import { IDebt, DebtModel, DebtType, DebtDocument } from '@soker90/finper-models'
+import Boom from '@hapi/boom'
 
 export interface IDebtService {
   addDebt(debt: IDebt): Promise<DebtDocument>
@@ -19,7 +20,9 @@ export default class DebtService implements IDebtService {
   }
 
   async editDebt ({ id, value }: { id: string, value: IDebt }): Promise<DebtDocument> {
-    return DebtModel.findByIdAndUpdate(id, value, { new: true }) as unknown as DebtDocument
+    const updated = await DebtModel.findByIdAndUpdate(id, value, { new: true }) as unknown as DebtDocument | null
+    if (!updated) throw Boom.notFound('Debt not found').output
+    return updated
   }
 
   async getDebts (userId: string): Promise<{ to: DebtDocument[], from: DebtDocument[], debtsByPerson: { _id: string, amount: number }[] }> {
@@ -71,6 +74,7 @@ export default class DebtService implements IDebtService {
   }
 
   async deleteDebt (id: string): Promise<void> {
-    await DebtModel.findByIdAndDelete(id)
+    const deleted = await DebtModel.findByIdAndDelete(id)
+    if (!deleted) throw Boom.notFound('Debt not found').output
   }
 }

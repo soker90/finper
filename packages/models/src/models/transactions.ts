@@ -15,7 +15,7 @@ export interface ITransaction {
   type: TransactionType
   account: Types.ObjectId
   note?: string
-  store?: Types.ObjectId
+  store?: Types.ObjectId | string
   user: string
 }
 

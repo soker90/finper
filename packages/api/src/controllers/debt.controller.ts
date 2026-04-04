@@ -67,7 +67,7 @@ export class DebtController {
       .then(validateDebtEditParams)
       .then(this.debtService.editDebt.bind(this.debtService))
       .tap(({ _id }: DebtDocument) => this.logger.logInfo(`Debt ${_id} has been succesfully edited`))
-      .then((response: any) => {
+      .then((response) => {
         res.send(response)
       })
       .catch((error) => {

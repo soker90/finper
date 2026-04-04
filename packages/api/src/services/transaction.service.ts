@@ -1,4 +1,5 @@
 import { AccountModel, IAccount, ITransaction, TransactionModel, TransactionDocument } from '@soker90/finper-models'
+import Boom from '@hapi/boom'
 import { getTransactionAmount } from './utils'
 import { roundNumber } from '../utils'
 
@@ -40,10 +41,12 @@ export default class TransactionService implements ITransactionService {
   }
 
   public async editTransaction ({ id, value }: { id: string, value: ITransaction }): Promise<TransactionDocument> {
-    const oldTransaction = await TransactionModel.findById(id) as unknown as TransactionDocument
-    const oldAmount = getTransactionAmount(oldTransaction as any)
+    const oldTransaction = await TransactionModel.findById(id) as unknown as TransactionDocument | null
+    if (!oldTransaction) throw Boom.notFound('Transaction not found').output
+    const oldAmount = getTransactionAmount(oldTransaction)
 
-    const transaction = await TransactionModel.findByIdAndUpdate(id, value, { new: true }) as unknown as TransactionDocument
+    const transaction = await TransactionModel.findByIdAndUpdate(id, value, { new: true }) as unknown as TransactionDocument | null
+    if (!transaction) throw Boom.notFound('Transaction not found').output
     const newAmount = getTransactionAmount(transaction)
 
     const amount = newAmount - oldAmount
@@ -53,8 +56,9 @@ export default class TransactionService implements ITransactionService {
   }
 
   public async deleteTransaction (id: string): Promise<void> {
-    const transaction = await TransactionModel.findByIdAndDelete(id) as unknown as TransactionDocument
-    const amount = getTransactionAmount(transaction as any)
+    const transaction = await TransactionModel.findByIdAndDelete(id) as unknown as TransactionDocument | null
+    if (!transaction) throw Boom.notFound('Transaction not found').output
+    const amount = getTransactionAmount(transaction)
     if (amount !== 0) {
       await updateAcoountBalance(transaction.account.toString(), -amount)
     }

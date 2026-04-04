@@ -11,7 +11,7 @@ export interface IStoreService {
 export default class StoreService implements IStoreService {
   public async getAndReplaceStore (transaction: ITransaction): Promise<ITransaction> {
     if (transaction.store) {
-      const storeName = transaction.store as unknown as string
+      const storeName = transaction.store as string
       const store = await StoreModel.findOneAndUpdate({
         name: storeName,
         user: transaction.user

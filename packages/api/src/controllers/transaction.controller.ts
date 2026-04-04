@@ -40,7 +40,7 @@ export class TransactionController {
       .then(this.storeService.getAndReplaceStore)
       .then(this.transactionService.addTransaction.bind(this.transactionService))
       .tap(({ _id }: TransactionDocument) => this.logger.logInfo(`Transaction ${_id} has been succesfully created`))
-      .then((response: any) => {
+      .then((response) => {
         res.send(response)
       })
       .catch((error) => {
@@ -68,7 +68,7 @@ export class TransactionController {
       .then(this.storeService.replaceShopValue.bind(this.storeService))
       .then(this.transactionService.editTransaction.bind(this.transactionService))
       .tap(({ _id }: TransactionDocument) => this.logger.logInfo(`Transaction ${_id} has been succesfully edited`))
-      .then((response: any) => {
+      .then((response) => {
         res.send(response)
       })
       .catch((error) => {

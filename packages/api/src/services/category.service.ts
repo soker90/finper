@@ -1,4 +1,5 @@
 import { CategoryModel, ICategory, CategoryDocument } from '@soker90/finper-models'
+import Boom from '@hapi/boom'
 
 export interface ICategoryService {
   addCategory(category: ICategory): Promise<CategoryDocument>
@@ -52,10 +53,13 @@ export default class CategoryService implements ICategoryService {
   }
 
   public async editCategory ({ id, value }: { id: string, value: ICategory }): Promise<CategoryDocument> {
-    return CategoryModel.findByIdAndUpdate(id, value, { new: true }) as unknown as CategoryDocument
+    const updated = await CategoryModel.findByIdAndUpdate(id, value, { new: true }) as unknown as CategoryDocument | null
+    if (!updated) throw Boom.notFound('Category not found').output
+    return updated
   }
 
   public async deleteCategory ({ id }: { id: string }): Promise<void> {
-    await CategoryModel.deleteOne({ _id: id })
+    const deleted = await CategoryModel.findByIdAndDelete(id)
+    if (!deleted) throw Boom.notFound('Category not found').output
   }
 }

@@ -56,7 +56,7 @@ export class AccountController {
       .then(validateAccountEditParams)
       .then(this.accountService.editAccount.bind(this.accountService))
       .tap(({ _id }: AccountDocument) => this.logger.logInfo(`Account ${_id} has been succesfully edited`))
-      .then((response: any) => {
+      .then((response) => {
         res.send(response)
       })
       .catch((error) => {

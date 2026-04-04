@@ -1,4 +1,5 @@
 import { AccountModel, IAccount, AccountDocument } from '@soker90/finper-models'
+import Boom from '@hapi/boom'
 
 export interface IAccountService {
   addAccount(account: IAccount): Promise<AccountDocument>;
@@ -18,7 +19,9 @@ export default class AccountService implements IAccountService {
   }
 
   public async editAccount ({ id, value }: { id: string, value: IAccount }): Promise<AccountDocument> {
-    return AccountModel.findByIdAndUpdate(id, value, { new: true }) as unknown as AccountDocument
+    const updated = await AccountModel.findByIdAndUpdate(id, value, { new: true }) as unknown as AccountDocument | null
+    if (!updated) throw Boom.notFound('Account not found').output
+    return updated
   }
 
   public async deleteAccount (account: AccountDocument): Promise<any> {
