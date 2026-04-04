@@ -41,11 +41,11 @@ export default class TransactionService implements ITransactionService {
   }
 
   public async editTransaction ({ id, value }: { id: string, value: ITransaction }): Promise<TransactionDocument> {
-    const oldTransaction = await TransactionModel.findById(id) as unknown as TransactionDocument | null
+    const oldTransaction = await TransactionModel.findById<TransactionDocument>(id)
     if (!oldTransaction) throw Boom.notFound('Transaction not found').output
     const oldAmount = getTransactionAmount(oldTransaction)
 
-    const transaction = await TransactionModel.findByIdAndUpdate(id, value, { new: true }) as unknown as TransactionDocument | null
+    const transaction = await TransactionModel.findByIdAndUpdate<TransactionDocument>(id, value, { new: true })
     if (!transaction) throw Boom.notFound('Transaction not found').output
     const newAmount = getTransactionAmount(transaction)
 
@@ -56,7 +56,7 @@ export default class TransactionService implements ITransactionService {
   }
 
   public async deleteTransaction (id: string): Promise<void> {
-    const transaction = await TransactionModel.findByIdAndDelete(id) as unknown as TransactionDocument | null
+    const transaction = await TransactionModel.findByIdAndDelete<TransactionDocument>(id)
     if (!transaction) throw Boom.notFound('Transaction not found').output
     const amount = getTransactionAmount(transaction)
     if (amount !== 0) {

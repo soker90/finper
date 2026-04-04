@@ -19,7 +19,7 @@ export default class AccountService implements IAccountService {
   }
 
   public async editAccount ({ id, value }: { id: string, value: IAccount }): Promise<AccountDocument> {
-    const updated = await AccountModel.findByIdAndUpdate(id, value, { new: true }) as unknown as AccountDocument | null
+    const updated = await AccountModel.findByIdAndUpdate<AccountDocument>(id, value, { new: true })
     if (!updated) throw Boom.notFound('Account not found').output
     return updated
   }

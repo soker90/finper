@@ -20,7 +20,7 @@ export default class DebtService implements IDebtService {
   }
 
   async editDebt ({ id, value }: { id: string, value: IDebt }): Promise<DebtDocument> {
-    const updated = await DebtModel.findByIdAndUpdate(id, value, { new: true }) as unknown as DebtDocument | null
+    const updated = await DebtModel.findByIdAndUpdate<DebtDocument>(id, value, { new: true })
     if (!updated) throw Boom.notFound('Debt not found').output
     return updated
   }
