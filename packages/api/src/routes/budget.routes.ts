@@ -8,7 +8,7 @@ import authMiddleware from '../middlewares/auth.middleware'
 export class BudgetRoutes {
   router: Router
 
-  public budgetController: BudgetController = new BudgetController({
+  private budgetController: BudgetController = new BudgetController({
     budgetService,
     loggerHandler: loggerHandler('BudgetController')
   })

@@ -8,7 +8,7 @@ import { TicketController } from '../controllers/ticket.controller'
 export class TicketRoutes {
   router: Router
 
-  public ticketController: TicketController = new TicketController({
+  private ticketController: TicketController = new TicketController({
     ticketService,
     loggerHandler: loggerHandler('TicketController')
   })

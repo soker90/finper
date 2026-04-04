@@ -8,7 +8,7 @@ import authMiddleware from '../middlewares/auth.middleware'
 export class PensionRoutes {
   router: Router
 
-  public pensionController: PensionController = new PensionController({
+  private pensionController: PensionController = new PensionController({
     pensionService,
     loggerHandler: loggerHandler('PensionController')
   })

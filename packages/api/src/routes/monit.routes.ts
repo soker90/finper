@@ -6,7 +6,7 @@ import loggerHandler from '../utils/logger'
 export class MonitRoutes {
   router: Router
 
-  public monitController: MonitController = new MonitController({
+  private monitController: MonitController = new MonitController({
     loggerHandler: loggerHandler('MonitController')
   })
 

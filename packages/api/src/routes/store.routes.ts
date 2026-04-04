@@ -8,7 +8,7 @@ import { StoreController } from '../controllers/store.controller'
 export class StoreRoutes {
   router: Router
 
-  public storeController: StoreController = new StoreController({
+  private storeController: StoreController = new StoreController({
     storeService,
     loggerHandler: loggerHandler('StoreController')
   })

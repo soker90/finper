@@ -8,7 +8,7 @@ import { DebtController } from '../controllers/debt.controller'
 export class DebtRoutes {
   router: Router
 
-  public debtController: DebtController = new DebtController({
+  private debtController: DebtController = new DebtController({
     debtService,
     loggerHandler: loggerHandler('DebtController')
   })
