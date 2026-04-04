@@ -63,6 +63,7 @@ export class TransactionController {
   public async edit (req: Request, res: Response, next: NextFunction): Promise<void> {
     Promise.resolve(req as RequestUser)
       .tap(({ params }) => this.logger.logInfo(`/edit - transaction: ${params.id}`))
+      .tap(({ params }) => validateTransactionExist(params.id, req.user as string))
       .then(validateTransactionEditParams)
       .then(this.storeService.replaceShopValue.bind(this.storeService))
       .then(this.transactionService.editTransaction.bind(this.transactionService))

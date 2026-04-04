@@ -66,6 +66,7 @@ export class CategoryController {
   public async edit (req: Request, res: Response, next: NextFunction): Promise<void> {
     Promise.resolve(req as RequestUser)
       .tap(({ body }) => this.logger.logInfo(`/edit - category: ${body.name}`))
+      .tap(({ params }) => validateCategoryExist({ id: params.id, user: req.user as string }))
       .then(validateCategoryEditParams)
       .then(this.categoryService.editCategory.bind(this.categoryService))
       .tap(({ _id }: CategoryDocument) => this.logger.logInfo(`Category ${_id} has been succesfully edited`))

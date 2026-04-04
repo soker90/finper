@@ -1,15 +1,12 @@
 import Joi from 'joi'
 import Boom from '@hapi/boom'
 import { ITransaction, TransactionType } from '@soker90/finper-models'
-import { validateTransactionExist } from './validate-transaction-exist'
 
 export const validateTransactionEditParams = async ({
   params,
   body,
   user
 }: { params: Record<string, string>, body: Record<string, string>, user: string }): Promise<{ id: string, value: ITransaction }> => {
-  await validateTransactionExist(params.id, user)
-
   const schema = Joi.object({
     date: Joi.number().required(),
     category: Joi.string().required(),

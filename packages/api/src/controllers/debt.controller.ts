@@ -63,6 +63,7 @@ export class DebtController {
   public async edit (req: Request, res: Response, next: NextFunction): Promise<void> {
     Promise.resolve(req as RequestUser)
       .tap(({ params }) => this.logger.logInfo(`/edit - debt: ${params?.id}`))
+      .tap(({ params }) => validateDebtExist({ id: params.id, user: req.user as string }))
       .then(validateDebtEditParams)
       .then(this.debtService.editDebt.bind(this.debtService))
       .tap(({ _id }: DebtDocument) => this.logger.logInfo(`Debt ${_id} has been succesfully edited`))
