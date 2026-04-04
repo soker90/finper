@@ -8,7 +8,7 @@ import { DashboardController } from '../controllers/dashboard.controller'
 export class DashboardRoutes {
   router: Router
 
-  public dashboardController: DashboardController = new DashboardController({
+  private dashboardController: DashboardController = new DashboardController({
     dashboardService,
     loggerHandler: loggerHandler('DashboardController')
   })
