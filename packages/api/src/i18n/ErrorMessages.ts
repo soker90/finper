@@ -21,5 +21,13 @@ export const ERROR_MESSAGE = {
   },
   PENSION: {
     NOT_FOUND: 'El movimiento de la pensión no existe'
+  },
+  LOAN: {
+    NOT_FOUND: 'El préstamo no existe',
+    PAYMENT_NOT_FOUND: 'El pago no existe',
+    ALREADY_PAID: 'El préstamo ya está pagado'
+  },
+  USER: {
+    ALREADY_EXISTS: 'El usuario ya existe'
   }
 }

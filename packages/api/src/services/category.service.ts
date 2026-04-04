@@ -1,5 +1,6 @@
 import { CategoryModel, ICategory, CategoryDocument } from '@soker90/finper-models'
 import Boom from '@hapi/boom'
+import { ERROR_MESSAGE } from '../i18n'
 
 export interface ICategoryService {
   addCategory(category: ICategory): Promise<CategoryDocument>
@@ -54,12 +55,12 @@ export default class CategoryService implements ICategoryService {
 
   public async editCategory ({ id, value }: { id: string, value: ICategory }): Promise<CategoryDocument> {
     const updated = await CategoryModel.findByIdAndUpdate<CategoryDocument>(id, value, { new: true })
-    if (!updated) throw Boom.notFound('Category not found').output
+    if (!updated) throw Boom.notFound(ERROR_MESSAGE.CATEGORY.NOT_FOUND).output
     return updated
   }
 
   public async deleteCategory ({ id }: { id: string }): Promise<void> {
     const deleted = await CategoryModel.findByIdAndDelete(id)
-    if (!deleted) throw Boom.notFound('Category not found').output
+    if (!deleted) throw Boom.notFound(ERROR_MESSAGE.CATEGORY.NOT_FOUND).output
   }
 }

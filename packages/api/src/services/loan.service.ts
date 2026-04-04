@@ -19,6 +19,7 @@ import {
   calcRemainingMonths,
   LoanEventInput
 } from './utils/calcLoanProjection'
+import { ERROR_MESSAGE } from '../i18n'
 
 export interface LoanStats {
   paidPrincipal: number
@@ -105,7 +106,7 @@ export default class LoanService implements ILoanService {
 
   async editLoan (id: string, data: Partial<ILoan>): Promise<ILoan & { _id: string }> {
     const updated = await leanDoc<ILoan & { _id: string } | null>(LoanModel.findByIdAndUpdate(id, data, { new: true }).lean())
-    if (!updated) throw Boom.notFound('Loan not found').output
+    if (!updated) throw Boom.notFound(ERROR_MESSAGE.LOAN.NOT_FOUND).output
     return updated
   }
 
@@ -120,7 +121,7 @@ export default class LoanService implements ILoanService {
   async payOrdinary (id: string, user: string, params?: { date?: number, amount?: number, addMovement?: boolean }): Promise<ILoanPayment> {
     const { loan, lastPayment, currentRate, currentPayment } = await this._getLoanWithRates(id, user)
 
-    if (loan.pendingAmount <= 0) throw Boom.badRequest('Loan is already paid off').output
+    if (loan.pendingAmount <= 0) throw Boom.badRequest(ERROR_MESSAGE.LOAN.ALREADY_PAID).output
 
     const r = currentRate / 100 / 12
     const baseInterest = roundNumber(loan.pendingAmount * r)
@@ -218,8 +219,8 @@ export default class LoanService implements ILoanService {
       leanDoc<ILoanPayment | null>(LoanPaymentModel.findOne({ _id: paymentId, loan: loanId, user }).lean()),
       leanDoc<ILoan & { _id: string } | null>(LoanModel.findOne({ _id: loanId, user }).lean())
     ])
-    if (!payment) throw Boom.notFound('Payment not found').output
-    if (!loan) throw Boom.notFound('Loan not found').output
+    if (!payment) throw Boom.notFound(ERROR_MESSAGE.LOAN.PAYMENT_NOT_FOUND).output
+    if (!loan) throw Boom.notFound(ERROR_MESSAGE.LOAN.NOT_FOUND).output
 
     // Reverse the account deduction using the correct account from the loan
     await this._deductFromAccount(loan.account.toString(), -payment.amount)
@@ -245,8 +246,8 @@ export default class LoanService implements ILoanService {
       leanDoc<ILoanPayment & { _id: string } | null>(LoanPaymentModel.findOne({ _id: paymentId, loan: loanId, user }).lean()),
       leanDoc<ILoan & { _id: string } | null>(LoanModel.findOne({ _id: loanId, user }).lean())
     ])
-    if (!payment) throw Boom.notFound('Payment not found').output
-    if (!loan) throw Boom.notFound('Loan not found').output
+    if (!payment) throw Boom.notFound(ERROR_MESSAGE.LOAN.PAYMENT_NOT_FOUND).output
+    if (!loan) throw Boom.notFound(ERROR_MESSAGE.LOAN.NOT_FOUND).output
 
     // Capture original values before applying changes
     const originalAmount = payment.amount
@@ -389,7 +390,7 @@ export default class LoanService implements ILoanService {
       leanDoc<(ILoanPayment & { _id: string })[]>(LoanPaymentModel.find({ loan: loanId, user }).sort({ date: 1 }).lean()),
       leanDoc<ILoan | null>(LoanModel.findOne({ _id: loanId, user }).lean())
     ])
-    if (!loan) throw Boom.notFound('Loan not found').output
+    if (!loan) throw Boom.notFound(ERROR_MESSAGE.LOAN.NOT_FOUND).output
 
     let accumulated = 0
     let pending = loan.initialAmount
@@ -415,7 +416,7 @@ export default class LoanService implements ILoanService {
   private async _deductFromAccount (accountId: string, amount: number): Promise<void> {
     const result = await AccountModel.updateOne({ _id: accountId }, { $inc: { balance: -amount } })
     if (result.matchedCount === 0) {
-      throw new Error(`Account ${accountId} not found`)
+      throw Boom.notFound(ERROR_MESSAGE.ACCOUNT.NOT_FOUND).output
     }
   }
 }

@@ -2,6 +2,7 @@ import {
   UserModel
 } from '@soker90/finper-models'
 import Boom from '@hapi/boom'
+import { ERROR_MESSAGE } from '../i18n'
 
 export interface IUserService {
   createUser({ username, password }: Record<string, string>): Promise<Record<string, string>>
@@ -19,7 +20,7 @@ export default class UserService {
 
     if (credentialDocument) {
       if (credentialDocument.username === username) {
-        throw Boom.conflict('El usuario ya existe').output
+        throw Boom.conflict(ERROR_MESSAGE.USER.ALREADY_EXISTS).output
       }
     }
   }
