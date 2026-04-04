@@ -55,6 +55,7 @@
     "typescript-eslint": "^8.55.0"
   },
   "dependencies": {
+    "@soker90/finper-shared": "workspace:*",
     "bcrypt": "^6.0.0",
     "bluebird": "^3.7.2",
     "lodash.isnil": "^4.0.0",

@@ -1,4 +1,5 @@
-import { AccountModel, DebtModel, LoanModel, PensionModel, TransactionModel, TransactionType, type IPension } from '@soker90/finper-models'
+import { TransactionType } from '@soker90/finper-shared'
+import { AccountModel, DebtModel, LoanModel, PensionModel, TransactionModel, type IPension } from '@soker90/finper-models'
 
 export interface DailyExpense {
   day: number

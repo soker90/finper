@@ -38,6 +38,7 @@
   "dependencies": {
     "@hapi/boom": "10.0.1",
     "@soker90/finper-models": "workspace:*",
+    "@soker90/finper-shared": "workspace:*",
     "bcrypt": "6.0.0",
     "bluebird": "3.7.2",
     "compression": "1.8.1",

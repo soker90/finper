@@ -1,9 +1,7 @@
 import { Schema, model, HydratedDocument } from 'mongoose'
+import { DebtType } from '@soker90/finper-shared'
 
-export enum DebtType {
-  FROM = 'from',
-  TO = 'to',
-}
+export { DebtType }
 
 export interface IDebt {
   from: string

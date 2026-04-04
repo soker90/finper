@@ -1,9 +1,7 @@
 import { Schema, model, HydratedDocument, Types } from 'mongoose'
+import { LoanPaymentType } from '@soker90/finper-shared'
 
-export enum LoanPaymentType {
-  ORDINARY = 'ordinary',
-  EXTRAORDINARY = 'extraordinary',
-}
+export { LoanPaymentType }
 
 export interface ILoanPayment {
   loan: Types.ObjectId

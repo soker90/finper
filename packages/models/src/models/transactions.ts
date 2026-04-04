@@ -1,10 +1,7 @@
 import { Schema, model, Types, HydratedDocument } from 'mongoose'
+import { TransactionType } from '@soker90/finper-shared'
 
-export enum TransactionType {
-  Expense = 'expense',
-  Income = 'income',
-  NotComputable = 'not_computable',
-}
+export { TransactionType }
 
 export type TransactionDocument = HydratedDocument<ITransaction>
 

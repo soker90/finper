@@ -1,4 +1,5 @@
-import { IDebt, DebtModel, DebtType, DebtDocument } from '@soker90/finper-models'
+import { DebtType } from '@soker90/finper-shared'
+import { IDebt, DebtModel, DebtDocument } from '@soker90/finper-models'
 import Boom from '@hapi/boom'
 import { ERROR_MESSAGE } from '../i18n'
 

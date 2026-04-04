@@ -1,9 +1,6 @@
-export enum LoanPaymentType {
-  // eslint-disable-next-line no-unused-vars
-  ORDINARY = 'ordinary',
-  // eslint-disable-next-line no-unused-vars
-  EXTRAORDINARY = 'extraordinary',
-}
+import { LoanPaymentType } from '@soker90/finper-shared'
+
+export { LoanPaymentType }
 
 export interface Loan {
   _id: string

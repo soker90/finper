@@ -1,9 +1,6 @@
-export enum DebtType {
-  // eslint-disable-next-line no-unused-vars
-  FROM = 'from',
-  // eslint-disable-next-line no-unused-vars
-  TO = 'to',
-}
+import { DebtType } from '@soker90/finper-shared'
+
+export { DebtType }
 
 export interface Debt {
   _id?: string;
