@@ -3,7 +3,8 @@ export const ERROR_MESSAGE = {
     NOT_FOUND: 'La cuenta no existe'
   },
   COMMON: {
-    NOT_VALID: 'Uno o más datos introducidos no son válidos'
+    NOT_VALID: 'Uno o más datos introducidos no son válidos',
+    INVALID_ID: 'El id no es válido'
   },
   CATEGORY: {
     NOT_FOUND: 'La categoría no existe',

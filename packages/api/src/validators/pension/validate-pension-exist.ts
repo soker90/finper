@@ -4,7 +4,7 @@ import { ERROR_MESSAGE } from '../../i18n'
 
 export const validatePensionExist = async (id: string, user: string) => {
   if (!Types.ObjectId.isValid(id)) {
-    throw Boom.badRequest('Invalid id').output
+    throw Boom.badRequest(ERROR_MESSAGE.COMMON.INVALID_ID).output
   }
   const exist = await PensionModel.exists({ _id: id, user })
 

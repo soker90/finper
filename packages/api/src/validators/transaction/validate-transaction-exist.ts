@@ -4,7 +4,7 @@ import { ERROR_MESSAGE } from '../../i18n'
 
 export const validateTransactionExist = async (id: string, user: string) => {
   if (!Types.ObjectId.isValid(id)) {
-    throw badRequest('Invalid id').output
+    throw badRequest(ERROR_MESSAGE.COMMON.INVALID_ID).output
   }
   const exist = await TransactionModel.exists({ _id: id, user })
   if (!exist) {
