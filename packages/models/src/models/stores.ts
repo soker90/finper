@@ -1,7 +1,6 @@
-import { Schema, model, HydratedDocument, Types } from 'mongoose'
+import { Schema, model, HydratedDocument } from 'mongoose'
 
 export interface IStore {
-  _id?: Types.ObjectId
   name: string
   user: string
 }

@@ -1,20 +1,22 @@
-import { CategoryModel, ICategory } from '@soker90/finper-models'
+import { CategoryModel, ICategory, CategoryDocument } from '@soker90/finper-models'
+import Boom from '@hapi/boom'
+import { ERROR_MESSAGE } from '../i18n'
 
 export interface ICategoryService {
-  addCategory(category: ICategory): Promise<ICategory>
+  addCategory(category: ICategory): Promise<CategoryDocument>
 
-  editCategory({ id, value }: { id: string, value: ICategory }): Promise<ICategory>
+  editCategory({ id, value }: { id: string, value: ICategory }): Promise<CategoryDocument>
 
   deleteCategory({ id }: { id: string }): Promise<void>
 
-  getCategories(user: string): Promise<ICategory[]>
+  getCategories(user: string): Promise<CategoryDocument[]>
 
   getGroupedCategories(): Promise<any[]>
 
 }
 
 export default class CategoryService implements ICategoryService {
-  public async getCategories (user: string): Promise<ICategory[]> {
+  public async getCategories (user: string): Promise<CategoryDocument[]> {
     return CategoryModel.find({ user }, '_id name type').populate('parent', '_id').sort('name')
   }
 
@@ -47,15 +49,18 @@ export default class CategoryService implements ICategoryService {
     ])
   }
 
-  public async addCategory (category: ICategory): Promise<ICategory> {
+  public async addCategory (category: ICategory): Promise<CategoryDocument> {
     return CategoryModel.create(category)
   }
 
-  public async editCategory ({ id, value }: { id: string, value: ICategory }): Promise<ICategory> {
-    return CategoryModel.findByIdAndUpdate(id, value, { new: true }) as unknown as ICategory
+  public async editCategory ({ id, value }: { id: string, value: ICategory }): Promise<CategoryDocument> {
+    const updated = await CategoryModel.findByIdAndUpdate<CategoryDocument>(id, value, { new: true })
+    if (!updated) throw Boom.notFound(ERROR_MESSAGE.CATEGORY.NOT_FOUND).output
+    return updated
   }
 
   public async deleteCategory ({ id }: { id: string }): Promise<void> {
-    await CategoryModel.deleteOne({ _id: id })
+    const deleted = await CategoryModel.findByIdAndDelete(id)
+    if (!deleted) throw Boom.notFound(ERROR_MESSAGE.CATEGORY.NOT_FOUND).output
   }
 }

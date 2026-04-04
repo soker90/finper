@@ -3,6 +3,7 @@ import { NextFunction, Request, Response } from 'express'
 import '../auth/local-strategy-passport-handler'
 import { ITransactionService } from '../services/transaction.service'
 import extractUser from '../helpers/extract-user'
+import { TransactionDocument } from '@soker90/finper-models'
 import {
   validateTransactionCreateParams,
   validateTransactionGetParams,
@@ -37,7 +38,7 @@ export class TransactionController {
       .then(validateTransactionCreateParams)
       .then(this.storeService.getAndReplaceStore)
       .then(this.transactionService.addTransaction.bind(this.transactionService))
-      .tap(({ _id }) => this.logger.logInfo(`Transaction ${_id} has been succesfully created`))
+      .tap(({ _id }: TransactionDocument) => this.logger.logInfo(`Transaction ${_id} has been succesfully created`))
       .then((response) => {
         res.send(response)
       })
@@ -65,7 +66,7 @@ export class TransactionController {
       .then(validateTransactionEditParams)
       .then(this.storeService.replaceShopValue.bind(this.storeService))
       .then(this.transactionService.editTransaction.bind(this.transactionService))
-      .tap(({ _id }) => this.logger.logInfo(`Transaction ${_id} has been succesfully edited`))
+      .tap(({ _id }: TransactionDocument) => this.logger.logInfo(`Transaction ${_id} has been succesfully edited`))
       .then((response) => {
         res.send(response)
       })
