@@ -10,7 +10,6 @@ export enum SubscriptionCycle {
 }
 
 export interface ISubscription {
-  _id?: Types.ObjectId
   name: string
   amount: number
   currency?: string

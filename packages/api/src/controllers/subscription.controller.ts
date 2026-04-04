@@ -35,7 +35,7 @@ export class SubscriptionController {
       .then(extractUser(req))
       .then(validateSubscriptionCreateParams)
       .then(this.subscriptionService.addSubscription.bind(this.subscriptionService))
-      .tap(({ _id }) => this.logger.logInfo(`Subscription ${_id} has been successfully created`))
+      .tap((created) => { if (created) this.logger.logInfo(`Subscription ${created.id} has been successfully created`) })
       .then((response) => { res.send(response) })
       .catch((error) => { next(error) })
   }
@@ -55,7 +55,7 @@ export class SubscriptionController {
       .then(({ id, user: _user, ...value }) => // eslint-disable-line @typescript-eslint/no-unused-vars
         this.subscriptionService.editSubscription(id, value)
       )
-      .tap(({ _id }) => this.logger.logInfo(`Subscription ${_id} has been successfully edited`))
+      .tap((updated) => { if (updated) this.logger.logInfo(`Subscription ${updated.id} has been successfully edited`) })
       .then((response) => { res.send(response) })
       .catch((error) => { next(error) })
   }

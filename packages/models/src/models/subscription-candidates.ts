@@ -1,7 +1,6 @@
 import { Schema, model, HydratedDocument, Types } from 'mongoose'
 
 export interface ISubscriptionCandidate {
-  _id?: Types.ObjectId
   transactionId: Types.ObjectId
   subscriptionIds: Types.ObjectId[]
   user: string
