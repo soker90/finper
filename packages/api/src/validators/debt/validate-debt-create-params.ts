@@ -1,6 +1,6 @@
 import Joi from 'joi'
 import Boom from '@hapi/boom'
-import { DebtType } from '@soker90/finper-models'
+import { DebtType } from '@soker90/finper-shared'
 
 export const validateDebtCreateParams = async (data: Record<string, string>) => {
   const schema = Joi.object({

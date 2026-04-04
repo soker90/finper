@@ -1,6 +1,7 @@
 import Joi from 'joi'
 import Boom from '@hapi/boom'
-import { ITransaction, TransactionType } from '@soker90/finper-models'
+import { TransactionType } from '@soker90/finper-shared'
+import { ITransaction } from '@soker90/finper-models'
 import { validateTransactionExist } from './validate-transaction-exist'
 
 export const validateTransactionEditParams = async ({

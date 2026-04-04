@@ -1,0 +1,43 @@
+{
+  "name": "@soker90/finper-shared",
+  "version": "1.0.0",
+  "description": "Shared enums and types for finper packages",
+  "main": "dist/cjs/index.js",
+  "module": "dist/esm/index.js",
+  "types": "dist/cjs/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/esm/index.js",
+      "require": "./dist/cjs/index.js",
+      "types": "./dist/cjs/index.d.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json && tsc -p tsconfig.esm.json",
+    "lint": "eslint . --ext .ts",
+    "lint:fix": "eslint . --fix --ext .ts"
+  },
+  "files": [
+    "/dist"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/soker90/finper.git"
+  },
+  "author": "Eduardo Parra Mazuecos",
+  "license": "GPL-3.0-or-later",
+  "bugs": {
+    "url": "https://github.com/soker90/finper/issues"
+  },
+  "homepage": "https://github.com/soker90/finper#readme",
+  "devDependencies": {
+    "@tsconfig/node22": "^22.0.5",
+    "@typescript-eslint/eslint-plugin": "^8.55.0",
+    "@typescript-eslint/parser": "^8.55.0",
+    "eslint": "^9.39.2",
+    "eslint-plugin-import": "^2.32.0",
+    "globals": "^17.3.0",
+    "neostandard": "^0.12.2",
+    "typescript": "^5.9.3"
+  }
+}

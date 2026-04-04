@@ -19,6 +19,7 @@
     "@emotion/styled": "11.14.1",
     "@mui/material": "^7.3.8",
     "@mui/x-date-pickers": "^8.27.0",
+    "@soker90/finper-shared": "workspace:*",
     "@soker90/react-mui-table": "1.1.2",
     "@tanstack/react-virtual": "^3.13.23",
     "axios": "1.13.5",

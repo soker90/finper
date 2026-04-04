@@ -1,9 +1,6 @@
-/* eslint-disable no-unused-vars */
-export enum TransactionType {
-  Expense = 'expense',
-  Income = 'income',
-  NotComputable = 'not_computable',
-}
+import { TransactionType } from '@soker90/finper-shared'
+
+export { TransactionType }
 
 export interface Transaction {
   _id?: string,
