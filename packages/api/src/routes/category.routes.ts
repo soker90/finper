@@ -8,7 +8,7 @@ import authMiddleware from '../middlewares/auth.middleware'
 export class CategoryRoutes {
   router: Router
 
-  public categoryController: CategoryController = new CategoryController({
+  private categoryController: CategoryController = new CategoryController({
     categoryService,
     loggerHandler: loggerHandler('CategoryController')
   })

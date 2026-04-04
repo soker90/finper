@@ -8,9 +8,7 @@ export const validateDebtEditParams = async ({
   body,
   user
 }: { params: Record<string, string>, body: Record<string, string>, user: string }): Promise<{ id: string, value: IDebt }> => {
-  if (params.id) {
-    await validateDebtExist({ id: params.id, user })
-  }
+  await validateDebtExist({ id: params.id, user })
 
   const schema = Joi.object({
     from: Joi.string().required(),

@@ -8,9 +8,7 @@ export const validateTransactionEditParams = async ({
   body,
   user
 }: { params: Record<string, string>, body: Record<string, string>, user: string }): Promise<{ id: string, value: ITransaction }> => {
-  if (params.id) {
-    await validateTransactionExist(params.id, user)
-  }
+  await validateTransactionExist(params.id, user)
 
   const schema = Joi.object({
     date: Joi.number().required(),

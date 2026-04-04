@@ -3,7 +3,8 @@ export const ERROR_MESSAGE = {
     NOT_FOUND: 'La cuenta no existe'
   },
   COMMON: {
-    NOT_VALID: 'Uno o más datos introducidos no son válidos'
+    NOT_VALID: 'Uno o más datos introducidos no son válidos',
+    INVALID_ID: 'El id no es válido'
   },
   CATEGORY: {
     NOT_FOUND: 'La categoría no existe',
@@ -21,6 +22,14 @@ export const ERROR_MESSAGE = {
   },
   PENSION: {
     NOT_FOUND: 'El movimiento de la pensión no existe'
+  },
+  LOAN: {
+    NOT_FOUND: 'El préstamo no existe',
+    PAYMENT_NOT_FOUND: 'El pago no existe',
+    ALREADY_PAID: 'El préstamo ya está pagado'
+  },
+  USER: {
+    ALREADY_EXISTS: 'El usuario ya existe'
   },
   SUBSCRIPTION: {
     NOT_FOUND: 'La suscripción no existe'

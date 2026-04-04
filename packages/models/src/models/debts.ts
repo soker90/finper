@@ -1,4 +1,4 @@
-import { Schema, model, HydratedDocument, Types } from 'mongoose'
+import { Schema, model, HydratedDocument } from 'mongoose'
 
 export enum DebtType {
   FROM = 'from',
@@ -6,7 +6,6 @@ export enum DebtType {
 }
 
 export interface IDebt {
-  _id?: Types.ObjectId
   from: string
   date: number
   amount: number

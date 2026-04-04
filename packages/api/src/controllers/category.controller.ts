@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response } from 'express'
 
 import '../auth/local-strategy-passport-handler'
+import { CategoryDocument } from '@soker90/finper-models'
 import {
   validateCategoryCreateParams,
   validateCategoryEditParams,
@@ -67,7 +68,7 @@ export class CategoryController {
       .tap(({ body }) => this.logger.logInfo(`/edit - category: ${body.name}`))
       .then(validateCategoryEditParams)
       .then(this.categoryService.editCategory.bind(this.categoryService))
-      .tap(({ _id }) => this.logger.logInfo(`Category ${_id} has been succesfully edited`))
+      .tap(({ _id }: CategoryDocument) => this.logger.logInfo(`Category ${_id} has been succesfully edited`))
       .then((response) => {
         res.send(response)
       })

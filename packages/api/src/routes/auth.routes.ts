@@ -8,7 +8,7 @@ import authMiddleware from '../middlewares/auth.middleware'
 export class AuthRoutes {
   router: Router
 
-  public accountController: AuthController = new AuthController({
+  private accountController: AuthController = new AuthController({
     userService,
     authService,
     loggerHandler: loggerHandler('AuthController')

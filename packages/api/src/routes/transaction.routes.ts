@@ -8,7 +8,7 @@ import { TransactionController } from '../controllers/transaction.controller'
 export class TransactionRoutes {
   router: Router
 
-  public transactionController: TransactionController = new TransactionController({
+  private transactionController: TransactionController = new TransactionController({
     transactionService,
     storeService,
     loggerHandler: loggerHandler('TransactionController')

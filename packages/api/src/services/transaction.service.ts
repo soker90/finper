@@ -1,28 +1,31 @@
-import { AccountModel, IAccount, ITransaction, TransactionModel } from '@soker90/finper-models'
+import { AccountModel, IAccount, ITransaction, TransactionModel, TransactionDocument } from '@soker90/finper-models'
+import Boom from '@hapi/boom'
 import { getTransactionAmount } from './utils'
 import { roundNumber } from '../utils'
 import SubscriptionCandidateService from './subscription-candidate.service'
 import SubscriptionService from './subscription.service'
+import { ERROR_MESSAGE } from '../i18n'
 
 const subscriptionCandidateService = new SubscriptionCandidateService()
 const subscriptionService = new SubscriptionService()
 
 export interface ITransactionService {
-  addTransaction(transaction: ITransaction): Promise<ITransaction>
+  addTransaction(transaction: ITransaction): Promise<TransactionDocument>
 
-  editTransaction({ id, value }: { id: string, value: ITransaction }): Promise<ITransaction>
+  editTransaction({ id, value }: { id: string, value: ITransaction }): Promise<TransactionDocument>
 
   deleteTransaction(id: string): Promise<void>
 
   getTransactions(params: {
+    user: string,
     accountId?: string,
     categoryId?: string,
     startDate?: number,
     endDate?: number,
     type?: string,
     limit?: number,
-    skip?: number,
-  }): Promise<ITransaction[]>
+    page?: number,
+  }): Promise<TransactionDocument[]>
 }
 
 const updateAcoountBalance = async (account: string, amount: number) => {
@@ -35,7 +38,7 @@ const updateAcoountBalance = async (account: string, amount: number) => {
 }
 
 export default class TransactionService implements ITransactionService {
-  public async addTransaction (params: ITransaction): Promise<ITransaction> {
+  public async addTransaction (params: ITransaction): Promise<TransactionDocument> {
     return TransactionModel.create(params).then(async transaction => {
       const amount = getTransactionAmount(transaction)
       await updateAcoountBalance(transaction.account.toString(), amount)
@@ -47,11 +50,13 @@ export default class TransactionService implements ITransactionService {
     })
   }
 
-  public async editTransaction ({ id, value }: { id: string, value: ITransaction }): Promise<ITransaction> {
-    const oldTransaction = await TransactionModel.findById(id) as unknown as ITransaction
+  public async editTransaction ({ id, value }: { id: string, value: ITransaction }): Promise<TransactionDocument> {
+    const oldTransaction = await TransactionModel.findById<TransactionDocument>(id)
+    if (!oldTransaction) throw Boom.notFound(ERROR_MESSAGE.TRANSACTION.NOT_FOUND).output
     const oldAmount = getTransactionAmount(oldTransaction)
 
-    const transaction = await TransactionModel.findByIdAndUpdate(id, value, { new: true }) as unknown as ITransaction
+    const transaction = await TransactionModel.findByIdAndUpdate<TransactionDocument>(id, value, { new: true })
+    if (!transaction) throw Boom.notFound(ERROR_MESSAGE.TRANSACTION.NOT_FOUND).output
     const newAmount = getTransactionAmount(transaction)
 
     const amount = newAmount - oldAmount
@@ -61,7 +66,8 @@ export default class TransactionService implements ITransactionService {
   }
 
   public async deleteTransaction (id: string): Promise<void> {
-    const transaction = await TransactionModel.findByIdAndDelete(id) as unknown as ITransaction
+    const transaction = await TransactionModel.findByIdAndDelete<TransactionDocument>(id)
+    if (!transaction) throw Boom.notFound(ERROR_MESSAGE.TRANSACTION.NOT_FOUND).output
     const amount = getTransactionAmount(transaction)
     if (amount !== 0) {
       await updateAcoountBalance(transaction.account.toString(), -amount)
@@ -81,7 +87,7 @@ export default class TransactionService implements ITransactionService {
     type?: string,
     limit?: number,
     page?: number,
-  }): Promise<ITransaction[]> {
+  }): Promise<TransactionDocument[]> {
     const query = {
       ...((startDate || endDate) && {
         date: {

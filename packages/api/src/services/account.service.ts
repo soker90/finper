@@ -1,35 +1,39 @@
-import { AccountModel, IAccount } from '@soker90/finper-models'
+import { AccountModel, IAccount, AccountDocument } from '@soker90/finper-models'
+import Boom from '@hapi/boom'
+import { ERROR_MESSAGE } from '../i18n'
 
 export interface IAccountService {
-  addAccount(account: IAccount): Promise<IAccount>;
+  addAccount(account: IAccount): Promise<AccountDocument>;
 
-  editAccount({ id, value }: { id: string, value: IAccount }): Promise<IAccount>;
+  editAccount({ id, value }: { id: string, value: IAccount }): Promise<AccountDocument>;
 
-  deleteAccount(account: IAccount): Promise<IAccount>;
+  deleteAccount(account: AccountDocument): Promise<void>;
 
-  getAccounts(user: string): Promise<IAccount[]>;
+  getAccounts(user: string): Promise<AccountDocument[]>;
 
-  getAccount({ id }: { id: string }): Promise<IAccount | null>;
+  getAccount({ id }: { id: string }): Promise<AccountDocument | null>;
 }
 
 export default class AccountService implements IAccountService {
-  public async addAccount (account: IAccount): Promise<IAccount> {
+  public async addAccount (account: IAccount): Promise<AccountDocument> {
     return AccountModel.create(account)
   }
 
-  public async editAccount ({ id, value }: { id: string, value: IAccount }): Promise<IAccount> {
-    return AccountModel.findByIdAndUpdate(id, value, { new: true }) as unknown as IAccount
+  public async editAccount ({ id, value }: { id: string, value: IAccount }): Promise<AccountDocument> {
+    const updated = await AccountModel.findByIdAndUpdate<AccountDocument>(id, value, { new: true })
+    if (!updated) throw Boom.notFound(ERROR_MESSAGE.ACCOUNT.NOT_FOUND).output
+    return updated
   }
 
-  public async deleteAccount (account: IAccount): Promise<any> {
-    return AccountModel.updateOne({ _id: account._id }, { $set: { isActive: false } })
+  public async deleteAccount (account: AccountDocument): Promise<void> {
+    await AccountModel.updateOne({ _id: account._id }, { $set: { isActive: false } })
   }
 
-  public async getAccounts (user: string): Promise<IAccount[]> {
+  public async getAccounts (user: string): Promise<AccountDocument[]> {
     return AccountModel.find({ user, isActive: true }, '_id name bank balance')
   }
 
-  public async getAccount ({ id }: { id: string }): Promise<IAccount | null> {
+  public async getAccount ({ id }: { id: string }): Promise<AccountDocument | null> {
     return AccountModel.findOne({ _id: id }, '_id name bank balance')
   }
 }

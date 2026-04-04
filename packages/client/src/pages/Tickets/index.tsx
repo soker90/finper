@@ -16,10 +16,14 @@ import { format } from 'utils'
 import ReviewModal from './components/ReviewModal'
 import DeleteModal from './components/DeleteModal'
 
+type ModalState =
+  | { type: 'review'; data: Ticket }
+  | { type: 'delete'; data: Ticket }
+
 const Tickets = () => {
   const { tickets, isLoading, error } = useTickets()
-  const [toReview, setToReview] = useState<Ticket | null>(null)
-  const [toDelete, setToDelete] = useState<Ticket | null>(null)
+  const [activeModal, setActiveModal] = useState<ModalState | null>(null)
+  const closeModal = () => setActiveModal(null)
 
   if (isLoading) return <Typography>Cargando tickets...</Typography>
   if (error) return <Alert severity='error'>Error al cargar tickets: {error.message}</Alert>
@@ -90,7 +94,7 @@ const Tickets = () => {
                       variant='contained'
                       fullWidth
                       disabled={ticket.status === 'reviewed'}
-                      onClick={() => setToReview(ticket)}
+                      onClick={() => setActiveModal({ type: 'review', data: ticket })}
                     >
                       {ticket.status === 'reviewed' ? 'Revisado' : 'Revisar'}
                     </Button>
@@ -98,7 +102,7 @@ const Tickets = () => {
                       variant='outlined'
                       color='error'
                       fullWidth
-                      onClick={() => setToDelete(ticket)}
+                      onClick={() => setActiveModal({ type: 'delete', data: ticket })}
                     >
                       Eliminar
                     </Button>
@@ -110,17 +114,17 @@ const Tickets = () => {
         ))}
       </Grid>
 
-      {toReview && (
+      {activeModal?.type === 'review' && (
         <ReviewModal
-          ticket={toReview}
-          onClose={() => setToReview(null)}
+          ticket={activeModal.data}
+          onClose={closeModal}
         />
       )}
 
-      {toDelete && (
+      {activeModal?.type === 'delete' && (
         <DeleteModal
-          ticket={toDelete}
-          onClose={() => setToDelete(null)}
+          ticket={activeModal.data}
+          onClose={closeModal}
         />
       )}
     </>
