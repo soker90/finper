@@ -1,10 +1,12 @@
-import { Schema, model, Types } from 'mongoose'
+import { Schema, model, Types, HydratedDocument } from 'mongoose'
 
 export enum TransactionType {
   Expense = 'expense',
   Income = 'income',
   NotComputable = 'not_computable',
 }
+
+export type TransactionDocument = HydratedDocument<ITransaction>
 
 export interface ITransaction {
   date: number

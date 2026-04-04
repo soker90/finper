@@ -1,5 +1,4 @@
-import { HydratedDocument } from 'mongoose'
-import { IAccount, IStore, ITransaction, StoreModel } from '@soker90/finper-models'
+import { IAccount, IStore, ITransaction, StoreModel, StoreDocument } from '@soker90/finper-models'
 
 export interface IStoreService {
   getAndReplaceStore(transaction: ITransaction): Promise<ITransaction>
@@ -19,7 +18,7 @@ export default class StoreService implements IStoreService {
       }, { name: storeName, user: transaction.user }, {
         new: true,
         upsert: true
-      }) as HydratedDocument<IStore>
+      }) as StoreDocument
       transaction.store = store._id
     }
     return transaction

@@ -1,29 +1,28 @@
-import { HydratedDocument } from 'mongoose'
-import { IDebt, DebtModel, DebtType } from '@soker90/finper-models'
+import { IDebt, DebtModel, DebtType, DebtDocument } from '@soker90/finper-models'
 
 export interface IDebtService {
-  addDebt(debt: IDebt): Promise<HydratedDocument<IDebt>>
+  addDebt(debt: IDebt): Promise<DebtDocument>
 
-  editDebt({ id, value }: { id: string, value: IDebt }): Promise<HydratedDocument<IDebt>>
+  editDebt({ id, value }: { id: string, value: IDebt }): Promise<DebtDocument>
 
-  getDebts(userId: string): Promise<{ to: HydratedDocument<IDebt>[], from: HydratedDocument<IDebt>[], debtsByPerson: { _id: string, amount: number }[] }>
+  getDebts(userId: string): Promise<{ to: DebtDocument[], from: DebtDocument[], debtsByPerson: { _id: string, amount: number }[] }>
 
-  getDebtsFrom({ user, from }: { user: string, from: string }): Promise<HydratedDocument<IDebt>[]>
+  getDebtsFrom({ user, from }: { user: string, from: string }): Promise<DebtDocument[]>
 
   deleteDebt(id: string): Promise<void>
 
 }
 
 export default class DebtService implements IDebtService {
-  async addDebt (debt: IDebt): Promise<HydratedDocument<IDebt>> {
+  async addDebt (debt: IDebt): Promise<DebtDocument> {
     return DebtModel.create(debt)
   }
 
-  async editDebt ({ id, value }: { id: string, value: IDebt }): Promise<HydratedDocument<IDebt>> {
-    return DebtModel.findByIdAndUpdate(id, value, { new: true }) as unknown as HydratedDocument<IDebt>
+  async editDebt ({ id, value }: { id: string, value: IDebt }): Promise<DebtDocument> {
+    return DebtModel.findByIdAndUpdate(id, value, { new: true }) as unknown as DebtDocument
   }
 
-  async getDebts (userId: string): Promise<{ to: HydratedDocument<IDebt>[], from: HydratedDocument<IDebt>[], debtsByPerson: { _id: string, amount: number }[] }> {
+  async getDebts (userId: string): Promise<{ to: DebtDocument[], from: DebtDocument[], debtsByPerson: { _id: string, amount: number }[] }> {
     const debtsByPerson = await DebtModel.aggregate([
       {
         $match: {
@@ -61,13 +60,13 @@ export default class DebtService implements IDebtService {
       .exec()
     const debts = await DebtModel.find({ user: userId })
     return {
-      from: debts.filter((debt: HydratedDocument<IDebt>) => debt.type === DebtType.FROM),
-      to: debts.filter((debt: HydratedDocument<IDebt>) => debt.type === DebtType.TO),
+      from: debts.filter((debt: DebtDocument) => debt.type === DebtType.FROM),
+      to: debts.filter((debt: DebtDocument) => debt.type === DebtType.TO),
       debtsByPerson
     }
   }
 
-  async getDebtsFrom ({ user, from }: { user: string, from: string }): Promise<HydratedDocument<IDebt>[]> {
+  async getDebtsFrom ({ user, from }: { user: string, from: string }): Promise<DebtDocument[]> {
     return DebtModel.find({ from, user })
   }
 
