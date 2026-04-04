@@ -1,28 +1,32 @@
-import { IDebt, DebtModel, DebtType } from '@soker90/finper-models'
+import { IDebt, DebtModel, DebtType, DebtDocument } from '@soker90/finper-models'
+import Boom from '@hapi/boom'
+import { ERROR_MESSAGE } from '../i18n'
 
 export interface IDebtService {
-  addDebt(debt: IDebt): Promise<IDebt>
+  addDebt(debt: IDebt): Promise<DebtDocument>
 
-  editDebt({ id, value }: { id: string, value: IDebt }): Promise<IDebt>
+  editDebt({ id, value }: { id: string, value: IDebt }): Promise<DebtDocument>
 
-  getDebts(userId: string): Promise<{ to: IDebt[], from: IDebt[], debtsByPerson: { _id: string, amount: number }[] }>
+  getDebts(userId: string): Promise<{ to: DebtDocument[], from: DebtDocument[], debtsByPerson: { _id: string, amount: number }[] }>
 
-  getDebtsFrom({ user, from }: { user: string, from: string }): Promise<IDebt[]>
+  getDebtsFrom({ user, from }: { user: string, from: string }): Promise<DebtDocument[]>
 
   deleteDebt(id: string): Promise<void>
 
 }
 
 export default class DebtService implements IDebtService {
-  async addDebt (debt: IDebt): Promise<IDebt> {
+  async addDebt (debt: IDebt): Promise<DebtDocument> {
     return DebtModel.create(debt)
   }
 
-  async editDebt ({ id, value }: { id: string, value: IDebt }): Promise<IDebt> {
-    return DebtModel.findByIdAndUpdate(id, value, { new: true }) as unknown as IDebt
+  async editDebt ({ id, value }: { id: string, value: IDebt }): Promise<DebtDocument> {
+    const updated = await DebtModel.findByIdAndUpdate<DebtDocument>(id, value, { new: true })
+    if (!updated) throw Boom.notFound(ERROR_MESSAGE.DEBT.NOT_FOUND).output
+    return updated
   }
 
-  async getDebts (userId: string): Promise<{ to: IDebt[], from: IDebt[], debtsByPerson: { _id: string, amount: number }[] }> {
+  async getDebts (userId: string): Promise<{ to: DebtDocument[], from: DebtDocument[], debtsByPerson: { _id: string, amount: number }[] }> {
     const debtsByPerson = await DebtModel.aggregate([
       {
         $match: {
@@ -60,17 +64,18 @@ export default class DebtService implements IDebtService {
       .exec()
     const debts = await DebtModel.find({ user: userId })
     return {
-      from: debts.filter((debt: IDebt) => debt.type === DebtType.FROM),
-      to: debts.filter((debt: IDebt) => debt.type === DebtType.TO),
+      from: debts.filter((debt: DebtDocument) => debt.type === DebtType.FROM),
+      to: debts.filter((debt: DebtDocument) => debt.type === DebtType.TO),
       debtsByPerson
     }
   }
 
-  async getDebtsFrom ({ user, from }: { user: string, from: string }): Promise<IDebt[]> {
+  async getDebtsFrom ({ user, from }: { user: string, from: string }): Promise<DebtDocument[]> {
     return DebtModel.find({ from, user })
   }
 
   async deleteDebt (id: string): Promise<void> {
-    await DebtModel.findByIdAndDelete(id)
+    const deleted = await DebtModel.findByIdAndDelete(id)
+    if (!deleted) throw Boom.notFound(ERROR_MESSAGE.DEBT.NOT_FOUND).output
   }
 }

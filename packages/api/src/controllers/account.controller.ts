@@ -2,6 +2,7 @@ import { NextFunction, Request, Response } from 'express'
 
 import { IAccountService } from '../services/account.service'
 
+import { AccountDocument } from '@soker90/finper-models'
 import { validateAccountCreateParams, validateAccountEditParams, validateAccountExist } from '../validators/account'
 import '../auth/local-strategy-passport-handler'
 import extractUser from '../helpers/extract-user'
@@ -53,7 +54,7 @@ export class AccountController {
       .tap(({ body }) => this.logger.logInfo(`/edit - account: ${body.name?.toLowerCase()}`))
       .then(validateAccountEditParams)
       .then(this.accountService.editAccount.bind(this.accountService))
-      .tap(({ _id }) => this.logger.logInfo(`Account ${_id} has been succesfully edited`))
+      .tap(({ _id }: AccountDocument) => this.logger.logInfo(`Account ${_id} has been succesfully edited`))
       .then((response) => {
         res.send(response)
       })

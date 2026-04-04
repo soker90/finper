@@ -1,4 +1,4 @@
-import { Schema, model, Types } from 'mongoose'
+import { Schema, model, Types, HydratedDocument } from 'mongoose'
 
 export enum TransactionType {
   Expense = 'expense',
@@ -6,15 +6,16 @@ export enum TransactionType {
   NotComputable = 'not_computable',
 }
 
+export type TransactionDocument = HydratedDocument<ITransaction>
+
 export interface ITransaction {
-  _id?: Types.ObjectId
   date: number
   category: Types.ObjectId
   amount: number
   type: TransactionType
   account: Types.ObjectId
   note?: string
-  store?: Types.ObjectId
+  store?: Types.ObjectId | string
   user: string
 }
 
