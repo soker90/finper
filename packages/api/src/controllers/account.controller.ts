@@ -52,7 +52,6 @@ export class AccountController {
   public async edit (req: Request, res: Response, next: NextFunction): Promise<void> {
     Promise.resolve(req as RequestUser)
       .tap(({ body }) => this.logger.logInfo(`/edit - account: ${body.name?.toLowerCase()}`))
-      .tap(({ params }) => validateAccountExist(params.id, req.user as string))
       .then(validateAccountEditParams)
       .then(this.accountService.editAccount.bind(this.accountService))
       .tap(({ _id }: AccountDocument) => this.logger.logInfo(`Account ${_id} has been succesfully edited`))

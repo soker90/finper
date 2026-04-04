@@ -9,6 +9,8 @@ export const validateCategoryEditParams = async ({
   body,
   user
 }: { params: Record<string, string>, body: Record<string, string>, user: string }): Promise<{ id: string, value: ICategory }> => {
+  await validateCategoryExist({ id: params.id, user })
+
   if (params.parent) {
     await validateCategoryExist({ id: params.parent, message: ERROR_MESSAGE.CATEGORY.PARENT_NOT_FOUND, user })
   }

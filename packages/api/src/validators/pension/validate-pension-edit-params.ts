@@ -1,11 +1,15 @@
 import Joi from 'joi'
 import Boom from '@hapi/boom'
 import { IPension } from '@soker90/finper-models'
+import { validatePensionExist } from '.'
 
-export const validatePensionEditParams = async ({ params, body }: {
+export const validatePensionEditParams = async ({ params, body, user }: {
   params: { id: string },
-  body: Record<string, string>
+  body: Record<string, string>,
+  user: string
 }): Promise<{ id: string, value: IPension }> => {
+  await validatePensionExist(params.id, user)
+
   const schema = Joi.object({
     date: Joi.number().required(),
     employeeAmount: Joi.number().required(),

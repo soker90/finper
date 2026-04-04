@@ -1,11 +1,15 @@
 import Joi from 'joi'
 import Boom from '@hapi/boom'
 import { DebtType, IDebt } from '@soker90/finper-models'
+import { validateDebtExist } from './validate-debt-exist'
 
 export const validateDebtEditParams = async ({
   params,
-  body
-}: { params: Record<string, string>, body: Record<string, string> }): Promise<{ id: string, value: IDebt }> => {
+  body,
+  user
+}: { params: Record<string, string>, body: Record<string, string>, user: string }): Promise<{ id: string, value: IDebt }> => {
+  await validateDebtExist({ id: params.id, user })
+
   const schema = Joi.object({
     from: Joi.string().required(),
     date: Joi.number(),

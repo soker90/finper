@@ -1,11 +1,15 @@
 import Joi from 'joi'
 import Boom from '@hapi/boom'
 import { IAccount } from '@soker90/finper-models'
+import { validateAccountExist } from './validate-account-exist'
 
 export const validateAccountEditParams = async ({
   params,
-  body
-}: { params: Record<string, string>, body: Record<string, string> }): Promise<{ id: string, value: IAccount }> => {
+  body,
+  user
+}: { params: Record<string, string>, body: Record<string, string>, user: string }): Promise<{ id: string, value: IAccount }> => {
+  await validateAccountExist(params.id, user)
+
   const schema = Joi.alternatives().try(
     Joi.object({
       isActive: Joi.boolean()

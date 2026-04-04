@@ -61,7 +61,6 @@ export class LoanController {
   public async edit (req: Request, res: Response, next: NextFunction): Promise<void> {
     Promise.resolve(req as RequestUser)
       .tap(({ params }) => this.logger.logInfo(`/loans/edit - ${params?.id}`))
-      .tap(({ params }) => validateLoanExist({ id: params.id, user: req.user as string }))
       .then(validateLoanEditParams)
       .then(({ id, value }) => this.loanService.editLoan(id, value))
       .then((response) => res.send(response))
