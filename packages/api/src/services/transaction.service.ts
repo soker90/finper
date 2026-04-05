@@ -1,4 +1,4 @@
-import { AccountModel, IAccount, ITransaction, TransactionModel, TransactionDocument } from '@soker90/finper-models'
+import { AccountModel, ITransaction, TransactionModel, TransactionDocument } from '@soker90/finper-models'
 import Boom from '@hapi/boom'
 import { getTransactionAmount } from './utils'
 import { roundNumber } from '../utils'
@@ -30,7 +30,8 @@ export interface ITransactionService {
 
 const updateAcoountBalance = async (account: string, amount: number) => {
   if (amount !== 0) {
-    const accountModel = await AccountModel.findById(account) as IAccount // Problems with round...
+    const accountModel = await AccountModel.findById(account)
+    if (!accountModel) throw Boom.notFound(ERROR_MESSAGE.ACCOUNT.NOT_FOUND).output
     await AccountModel.updateOne({ _id: account }, {
       balance: roundNumber(accountModel.balance + amount)
     })
