@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useMemo } from 'react'
 import { useForm } from 'react-hook-form'
 import ModalGrid from 'components/modals/ModalGrid'
 import InputForm from 'components/forms/InputForm'
@@ -25,7 +25,7 @@ type Props = {
 const SubscriptionForm = ({ subscription, onClose, onSubmit }: Props) => {
   const { accounts } = useAccounts()
   const { categories } = useGroupedCategories()
-  const flatCategories = categories.flatMap((g) => g.children ?? [])
+  const flatCategories = useMemo(() => categories.flatMap((g) => g.children ?? []), [categories])
 
   const defaultValues = subscription
     ? {
