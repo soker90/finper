@@ -103,12 +103,11 @@ const SubscriptionCard = ({ subscription, onEdit, onDelete, onSearchPayments, on
               <Typography variant='caption' color='textSecondary' fontWeight={600} display='block' mb={0.5}>
                 Últimos pagos
               </Typography>
-              <List dense disablePadding>
+              <List dense>
                 {lastPayments.map((t) => (
                   <ListItem
                     key={t._id}
-                    disablePadding
-                    sx={{ py: 0.25 }}
+                    sx={{ py: 0.25, pl: 0, pr: 5 }}
                     secondaryAction={
                       <Tooltip title='Quitar de la suscripción'>
                         <IconButton
