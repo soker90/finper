@@ -1,10 +1,10 @@
-import { useEffect, useMemo } from 'react'
+import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import ModalGrid from 'components/modals/ModalGrid'
 import InputForm from 'components/forms/InputForm'
 import SelectForm from 'components/forms/SelectForm'
 import { useAccounts } from 'hooks/useAccounts'
-import { useGroupedCategories } from 'hooks/useGroupedCategories'
+import { useCategories } from 'hooks/useCategories'
 import { Subscription, SubscriptionInput, SubscriptionCycle } from 'types'
 
 const CYCLE_OPTIONS = [
@@ -24,8 +24,7 @@ type Props = {
 
 const SubscriptionForm = ({ subscription, onClose, onSubmit }: Props) => {
   const { accounts } = useAccounts()
-  const { categories } = useGroupedCategories()
-  const flatCategories = useMemo(() => categories.flatMap((g) => g.children ?? []), [categories])
+  const { categories } = useCategories()
 
   const defaultValues = subscription
     ? {
@@ -46,7 +45,7 @@ const SubscriptionForm = ({ subscription, onClose, onSubmit }: Props) => {
 
   useEffect(() => {
     reset(defaultValues)
-  }, [reset, subscription, accounts, flatCategories])
+  }, [reset, subscription, accounts, categories])
 
   const handleFormSubmit = handleSubmit(async (data) => {
     await onSubmit(data)
@@ -96,7 +95,7 @@ const SubscriptionForm = ({ subscription, onClose, onSubmit }: Props) => {
         id='categoryId'
         label='Categoría'
         size={6}
-        options={flatCategories}
+        options={categories}
         optionValue='_id'
         optionLabel='name'
         voidOption

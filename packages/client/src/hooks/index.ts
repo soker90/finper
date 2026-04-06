@@ -1,4 +1,5 @@
 export * from './useGroupedCategories'
+export * from './useCategories'
 export * from './useAccounts'
 export * from './useStores'
 export * from './useDashboardStats'
