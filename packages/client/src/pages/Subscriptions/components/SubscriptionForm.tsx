@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import ModalGrid from 'components/modals/ModalGrid'
 import InputForm from 'components/forms/InputForm'
@@ -26,20 +27,26 @@ const SubscriptionForm = ({ subscription, onClose, onSubmit }: Props) => {
   const { categories } = useGroupedCategories()
   const flatCategories = categories.flatMap((g) => g.children ?? [])
 
-  const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<SubscriptionInput>({
-    defaultValues: subscription
-      ? {
-          name: subscription.name,
-          amount: subscription.amount,
-          cycle: subscription.cycle,
-          categoryId: subscription.categoryId?._id,
-          accountId: subscription.accountId?._id,
-          logoUrl: subscription.logoUrl ?? ''
-        }
-      : {
-          cycle: SubscriptionCycle.MONTHLY
-        }
+  const defaultValues = subscription
+    ? {
+        name: subscription.name,
+        amount: subscription.amount,
+        cycle: subscription.cycle,
+        categoryId: subscription.categoryId?._id,
+        accountId: subscription.accountId?._id,
+        logoUrl: subscription.logoUrl ?? ''
+      }
+    : {
+        cycle: SubscriptionCycle.MONTHLY
+      }
+
+  const { register, handleSubmit, formState: { errors, isSubmitting }, reset } = useForm<SubscriptionInput>({
+    defaultValues
   })
+
+  useEffect(() => {
+    reset(defaultValues)
+  }, [reset, subscription, accounts, flatCategories])
 
   const handleFormSubmit = handleSubmit(async (data) => {
     await onSubmit(data)
