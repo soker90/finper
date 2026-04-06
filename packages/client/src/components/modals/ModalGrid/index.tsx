@@ -1,4 +1,4 @@
-import { ReactNode } from 'react'
+import { ReactNode, FormEvent } from 'react'
 import {
   Modal,
   Card,
@@ -42,7 +42,7 @@ const ModalGrid = ({
     </Button>
   )
 
-  const handleFormSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleFormSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     if (action) {
       action(e)

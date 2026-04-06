@@ -1,10 +1,15 @@
-/* eslint-disable no-unused-vars */
 export enum SubscriptionCycle {
+  // eslint-disable-next-line no-unused-vars
   DAILY = 'daily',
+  // eslint-disable-next-line no-unused-vars
   WEEKLY = 'weekly',
+  // eslint-disable-next-line no-unused-vars
   MONTHLY = 'monthly',
+  // eslint-disable-next-line no-unused-vars
   QUARTERLY = 'quarterly',
+  // eslint-disable-next-line no-unused-vars
   SEMI_ANNUALLY = 'semi-annually',
+  // eslint-disable-next-line no-unused-vars
   ANNUALLY = 'annually',
 }
 

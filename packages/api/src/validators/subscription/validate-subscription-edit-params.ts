@@ -4,7 +4,7 @@ import { SubscriptionCycle } from '@soker90/finper-models'
 import { validateCategoryExist } from '../category'
 import { validateAccountExist } from '../account'
 
-export const validateSubscriptionEditParams = async (params: Record<string, any>) => {
+export const validateSubscriptionEditParams = async (params: Record<string, any>): Promise<{ id: string, value: Record<string, any> }> => {
   const schema = Joi.object({
     name: Joi.string(),
     amount: Joi.number().positive(),
@@ -37,5 +37,6 @@ export const validateSubscriptionEditParams = async (params: Record<string, any>
     await validateAccountExist(params.accountId, params.user)
   }
 
-  return value
+  const { id, user: _user, ...rest } = value // eslint-disable-line @typescript-eslint/no-unused-vars
+  return { id, value: rest }
 }

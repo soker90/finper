@@ -176,6 +176,9 @@ export const deleteSubscription = (id: string): Promise<{ error?: string }> =>
 export const linkSubscriptionTransactions = (id: string, transactionIds: string[]): Promise<{ error?: string }> =>
   axios.post(`${SUBSCRIPTIONS}/${id}/link-transactions`, { transactionIds }).then(() => ({})).catch((error: any) => ({ error: error.message }))
 
+export const unlinkSubscriptionTransaction = (id: string, transactionId: string): Promise<{ error?: string }> =>
+  axios.delete(`${SUBSCRIPTIONS}/${id}/transactions/${transactionId}`).then(() => ({})).catch((error: any) => ({ error: error.message }))
+
 // Candidates
 export const assignSubscriptionCandidate = (candidateId: string, subscriptionId: string): Promise<{ error?: string }> =>
   axios.post(`${SUBSCRIPTION_CANDIDATES}/${candidateId}/assign`, { subscriptionId }).then(() => ({})).catch((error: any) => ({ error: error.message }))

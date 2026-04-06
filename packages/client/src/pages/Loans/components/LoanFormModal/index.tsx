@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { mutate } from 'swr'
 
@@ -14,23 +15,41 @@ interface Props {
   onClose: () => void
 }
 
+interface LoanFormValues {
+  name: string
+  initialAmount?: number
+  interestRate?: number
+  startDate?: number | null
+  monthlyPayment?: number
+  account: string
+  category: string
+}
+
 const LoanFormModal = ({ loan, onClose }: Props) => {
   const { setApiError, ApiErrorMessage } = useApiError()
   const isEdit = Boolean(loan?._id)
   const { accounts } = useAccounts()
   const { categories } = useGroupedCategories()
 
-  const { register, handleSubmit, formState: { errors, isSubmitting }, control } = useForm({
+  const defaultValues: LoanFormValues = {
+    name: loan?.name || '',
+    initialAmount: loan?.initialAmount,
+    interestRate: loan?.interestRate,
+    startDate: loan?.startDate || null,
+    monthlyPayment: loan?.monthlyPayment,
+    account: loan?.account ?? '',
+    category: loan?.category ?? ''
+  }
+
+  const { register, handleSubmit, formState: { errors, isSubmitting }, control, reset } = useForm<LoanFormValues>({
     defaultValues: {
-      name: loan?.name || '',
-      initialAmount: loan?.initialAmount,
-      interestRate: loan?.interestRate,
-      startDate: loan?.startDate || null,
-      monthlyPayment: loan?.monthlyPayment,
-      account: loan?.account || '',
-      category: loan?.category || ''
+      ...defaultValues
     }
   })
+
+  useEffect(() => {
+    reset(defaultValues)
+  }, [reset, loan, accounts, categories])
 
   const onSubmit = handleSubmit(async (params) => {
     const body = {

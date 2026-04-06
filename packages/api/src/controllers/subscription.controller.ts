@@ -2,7 +2,6 @@ import { NextFunction, Request, Response } from 'express'
 
 import '../auth/local-strategy-passport-handler'
 import extractUser from '../helpers/extract-user'
-import { RequestUser } from '../types'
 import { ISubscriptionService } from '../services/subscription.service'
 import { ISubscriptionCandidateService } from '../services/subscription-candidate.service'
 import {
@@ -49,12 +48,12 @@ export class SubscriptionController {
   }
 
   public async edit (req: Request, res: Response, next: NextFunction): Promise<void> {
-    Promise.resolve(req as RequestUser)
-      .tap(({ params }) => this.logger.logInfo(`/edit - subscription: ${params.id}`))
+    Promise.resolve({ ...req.body, id: req.params.id })
+      .tap(() => this.logger.logInfo(`/edit - subscription: ${req.params.id}`))
+      .then(extractUser(req))
+      .tap(({ id, user }) => validateSubscriptionExist(id, user as string))
       .then(validateSubscriptionEditParams)
-      .then(({ id, user: _user, ...value }) => // eslint-disable-line @typescript-eslint/no-unused-vars
-        this.subscriptionService.editSubscription(id, value)
-      )
+      .then(({ id, value }) => this.subscriptionService.editSubscription(id, value))
       .tap((updated) => { if (updated) this.logger.logInfo(`Subscription ${updated.id} has been successfully edited`) })
       .then((response) => { res.send(response) })
       .catch((error) => { next(error) })
@@ -84,6 +83,17 @@ export class SubscriptionController {
     Promise.resolve(id)
       .tap(() => this.logger.logInfo(`/link-transactions - subscription: ${id}`))
       .then(() => this.subscriptionService.linkTransactions(id, transactionIds))
+      .then(() => { res.status(204).send() })
+      .catch((error) => { next(error) })
+  }
+
+  public async unlinkTransaction (req: Request, res: Response, next: NextFunction): Promise<void> {
+    const { id, transactionId } = req.params
+    Promise.resolve({ id, transactionId })
+      .tap(() => this.logger.logInfo(`/unlink-transaction - subscription: ${id}, transaction: ${transactionId}`))
+      .then(extractUser(req))
+      .tap(({ user }) => validateSubscriptionExist(id, user as string))
+      .then(() => this.subscriptionService.unlinkTransaction(id, transactionId))
       .then(() => { res.status(204).send() })
       .catch((error) => { next(error) })
   }

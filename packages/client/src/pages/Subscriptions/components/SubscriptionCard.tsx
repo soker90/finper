@@ -20,9 +20,10 @@ type Props = {
   onEdit: (s: Subscription) => void
   onDelete: (s: Subscription) => void
   onSearchPayments: (s: Subscription) => void
+  onUnlinkTransaction: (subscriptionId: string, transactionId: string) => void
 }
 
-const SubscriptionCard = ({ subscription, onEdit, onDelete, onSearchPayments }: Props) => {
+const SubscriptionCard = ({ subscription, onEdit, onDelete, onSearchPayments, onUnlinkTransaction }: Props) => {
   const hasDate = Boolean(subscription.nextPaymentDate)
   const days = hasDate ? Math.ceil((subscription.nextPaymentDate! - Date.now()) / (1000 * 60 * 60 * 24)) : null
   const daysLabel = days === null ? null : days < 0 ? `Vencida hace ${Math.abs(days)}d` : days === 0 ? 'Hoy' : `En ${days}d`
@@ -104,10 +105,26 @@ const SubscriptionCard = ({ subscription, onEdit, onDelete, onSearchPayments }: 
               </Typography>
               <List dense disablePadding>
                 {lastPayments.map((t) => (
-                  <ListItem key={t._id} disablePadding sx={{ py: 0.25 }}>
+                  <ListItem
+                    key={t._id}
+                    disablePadding
+                    sx={{ py: 0.25 }}
+                    secondaryAction={
+                      <Tooltip title='Quitar de la suscripción'>
+                        <IconButton
+                          size='small'
+                          edge='end'
+                          color='error'
+                          onClick={() => onUnlinkTransaction(subscription._id, t._id!)}
+                        >
+                          <DeleteOutlined style={{ fontSize: 12 }} />
+                        </IconButton>
+                      </Tooltip>
+                    }
+                  >
                     <ListItemText
                       primary={
-                        <Box display='flex' justifyContent='space-between'>
+                        <Box display='flex' justifyContent='space-between' pr={3}>
                           <Typography variant='caption' color='textSecondary'>
                             {format.date(t.date)}
                           </Typography>

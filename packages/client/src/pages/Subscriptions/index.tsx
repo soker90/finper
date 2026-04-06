@@ -8,6 +8,7 @@ import { useSubscriptions } from 'hooks/useSubscriptions'
 import { useSubscriptionCandidates } from 'hooks/useSubscriptionCandidates'
 import { Subscription, SubscriptionInput } from 'types'
 import { SUBSCRIPTIONS } from 'constants/api-paths'
+import { unlinkSubscriptionTransaction } from 'services/apiService'
 
 import { SubscriptionCard, SubscriptionForm, CandidatesBanner, LinkTransactionsModal } from './components'
 import { SubscriptionsSummary, SubscriptionsEmpty, SubscriptionsSkeleton } from './utils'
@@ -32,6 +33,12 @@ const Subscriptions = () => {
     // Revalidar la lista y los pagos de la suscripción vinculada
     mutate(SUBSCRIPTIONS)
     if (searchTarget) mutate(`${SUBSCRIPTIONS}/${searchTarget._id}/transactions`)
+  }
+
+  const handleUnlinkTransaction = async (subscriptionId: string, transactionId: string) => {
+    await unlinkSubscriptionTransaction(subscriptionId, transactionId)
+    mutate(SUBSCRIPTIONS)
+    mutate(`${SUBSCRIPTIONS}/${subscriptionId}/transactions`)
   }
 
   return (
@@ -60,6 +67,7 @@ const Subscriptions = () => {
                 onEdit={handleEdit}
                 onDelete={(s) => removeSubscription(s._id)}
                 onSearchPayments={setSearchTarget}
+                onUnlinkTransaction={handleUnlinkTransaction}
               />
             </Grid>
           ))}

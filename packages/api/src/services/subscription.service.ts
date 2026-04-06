@@ -4,7 +4,6 @@ import {
   SubscriptionModel,
   SubscriptionCycle,
   TransactionModel,
-  ITransaction,
   TransactionDocument
 } from '@soker90/finper-models'
 
@@ -43,6 +42,7 @@ export interface ISubscriptionService {
   getTransactionsBySubscription(id: string, user: string): Promise<TransactionDocument[]>
   getMatchingTransactions(id: string, user: string): Promise<TransactionDocument[]>
   linkTransactions(id: string, transactionIds: string[]): Promise<void>
+  unlinkTransaction(id: string, transactionId: string): Promise<void>
   recalculateNextPaymentDate(subscriptionId: string): Promise<void>
 }
 
@@ -104,6 +104,14 @@ export default class SubscriptionService implements ISubscriptionService {
     await TransactionModel.updateMany(
       { _id: { $in: transactionIds } },
       { $set: { subscriptionId: id } }
+    )
+    await this.recalculateNextPaymentDate(id)
+  }
+
+  async unlinkTransaction (id: string, transactionId: string): Promise<void> {
+    await TransactionModel.updateOne(
+      { _id: transactionId },
+      { $unset: { subscriptionId: '' } }
     )
     await this.recalculateNextPaymentDate(id)
   }

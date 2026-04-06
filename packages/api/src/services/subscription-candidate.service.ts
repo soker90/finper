@@ -1,7 +1,5 @@
 import {
-  ISubscription,
   SubscriptionCandidateDocument,
-  ITransaction,
   SubscriptionCandidateModel,
   SubscriptionModel,
   TransactionModel,
