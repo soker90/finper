@@ -33,7 +33,6 @@ export class SubscriptionRoutes {
     this.router.get('/:id/transactions', authMiddleware, this.subscriptionController.getTransactions.bind(this.subscriptionController))
     this.router.get('/:id/matching-transactions', authMiddleware, this.subscriptionController.getMatchingTransactions.bind(this.subscriptionController))
     this.router.post('/:id/link-transactions', authMiddleware, this.subscriptionController.linkTransactions.bind(this.subscriptionController))
-    this.router.delete('/:id/transactions/:transactionId', authMiddleware, this.subscriptionController.unlinkTransaction.bind(this.subscriptionController))
     this.router.put('/:id', authMiddleware, this.subscriptionController.edit.bind(this.subscriptionController))
     this.router.delete('/:id', authMiddleware, this.subscriptionController.delete.bind(this.subscriptionController))
   }

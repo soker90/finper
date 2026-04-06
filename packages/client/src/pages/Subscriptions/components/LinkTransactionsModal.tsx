@@ -107,12 +107,12 @@ const LinkTransactionsModal = ({ subscription, onClose, onLinked }: Props) => {
                               {format.euro(tx.amount)}
                             </Typography>
                           </Box>
-                        }
+                      }
                         secondary={
                           <Typography variant='caption' color='textSecondary'>
                             {tx.category?.name} · {tx.account?.name}
                           </Typography>
-                        }
+                      }
                       />
                     </ListItem>
                   )

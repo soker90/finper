@@ -4,8 +4,9 @@ import {
   BudgetModel,
   CategoryModel, DebtModel, DebtType,
   IAccount, ICategory,
-  IDebt, ILoan, ILoanPayment, IPension, IStore,
-  IUser, LoanModel, LoanPaymentModel, LoanPaymentType, PensionModel, StoreModel, TransactionModel,
+  IDebt, ILoan, ILoanPayment, IPension, IStore, ISubscription, ISubscriptionCandidate,
+  IUser, LoanModel, LoanPaymentModel, LoanPaymentType, PensionModel, StoreModel,
+  SubscriptionCandidateModel, SubscriptionCycle, SubscriptionModel, TransactionModel,
   TransactionType,
   UserModel
 } from '@soker90/finper-models'
@@ -170,4 +171,36 @@ export const insertLoanPayment = async (params: Record<string, any> = {}): Promi
     type: params.type ?? LoanPaymentType.ORDINARY,
     user
   }) as unknown as ILoanPayment & { _id: string }
+}
+
+export const insertSubscription = async (params: Record<string, any> = {}): Promise<ISubscription & { _id: any }> => {
+  const user = (params.user ?? generateUsername()) as string
+  const account = params.accountId ? { _id: params.accountId } : await insertAccount({ user })
+  const category = params.categoryId ? { _id: params.categoryId } : await insertCategory({ user })
+
+  return SubscriptionModel.create({
+    name: params.name ?? faker.company.name(),
+    amount: params.amount ?? faker.number.float({ min: 1, max: 50, multipleOf: 0.01 }),
+    cycle: params.cycle ?? SubscriptionCycle.MONTHLY,
+    categoryId: category._id,
+    accountId: account._id,
+    nextPaymentDate: params.nextPaymentDate ?? null,
+    user
+  }) as unknown as ISubscription & { _id: any }
+}
+
+export const insertSubscriptionCandidate = async (params: Record<string, any> = {}): Promise<ISubscriptionCandidate & { _id: any }> => {
+  const user = (params.user ?? generateUsername()) as string
+  const transaction = params.transactionId
+    ? { _id: params.transactionId }
+    : await insertTransaction({ user })
+  const subscription = params.subscriptionId
+    ? { _id: params.subscriptionId }
+    : await insertSubscription({ user })
+
+  return SubscriptionCandidateModel.create({
+    transactionId: transaction._id,
+    subscriptionIds: [subscription._id],
+    user
+  }) as unknown as ISubscriptionCandidate & { _id: any }
 }

@@ -1,4 +1,5 @@
 import { NextFunction, Request, Response } from 'express'
+import { RequestUser } from '../types'
 
 import '../auth/local-strategy-passport-handler'
 import extractUser from '../helpers/extract-user'
@@ -48,10 +49,8 @@ export class SubscriptionController {
   }
 
   public async edit (req: Request, res: Response, next: NextFunction): Promise<void> {
-    Promise.resolve({ ...req.body, id: req.params.id })
-      .tap(() => this.logger.logInfo(`/edit - subscription: ${req.params.id}`))
-      .then(extractUser(req))
-      .tap(({ id, user }) => validateSubscriptionExist(id, user as string))
+    Promise.resolve(req as RequestUser)
+      .tap(({ params }) => this.logger.logInfo(`/edit - subscription: ${params.id}`))
       .then(validateSubscriptionEditParams)
       .then(({ id, value }) => this.subscriptionService.editSubscription(id, value))
       .tap((updated) => { if (updated) this.logger.logInfo(`Subscription ${updated.id} has been successfully edited`) })
@@ -60,40 +59,40 @@ export class SubscriptionController {
   }
 
   public async delete (req: Request, res: Response, next: NextFunction): Promise<void> {
-    Promise.resolve(req.params.id)
-      .tap((id) => this.logger.logInfo(`/delete - subscription: ${id}`))
-      .tap(() => validateSubscriptionExist(req.params.id, req.user as string))
-      .then(this.subscriptionService.deleteSubscription.bind(this.subscriptionService))
+    Promise.resolve({ id: req.params.id })
+      .tap(({ id }) => this.logger.logInfo(`/delete - subscription: ${id}`))
+      .then(extractUser(req))
+      .tap(({ id, user }) => validateSubscriptionExist(id, user as string))
+      .then(({ id }) => this.subscriptionService.deleteSubscription(id))
       .then(() => { res.status(204).send() })
       .catch((error) => { next(error) })
   }
 
   public async getMatchingTransactions (req: Request, res: Response, next: NextFunction): Promise<void> {
-    const { id } = req.params
-    Promise.resolve(id)
-      .tap(() => this.logger.logInfo(`/matching-transactions - subscription: ${id}`))
-      .then(() => this.subscriptionService.getMatchingTransactions(id, req.user as string))
+    Promise.resolve({ id: req.params.id })
+      .tap(({ id }) => this.logger.logInfo(`/matching-transactions - subscription: ${id}`))
+      .then(extractUser(req))
+      .then(({ id, user }) => this.subscriptionService.getMatchingTransactions(id, user as string))
       .then((response) => { res.send(response) })
       .catch((error) => { next(error) })
   }
 
   public async linkTransactions (req: Request, res: Response, next: NextFunction): Promise<void> {
-    const { id } = req.params
-    const { transactionIds } = req.body
-    Promise.resolve(id)
-      .tap(() => this.logger.logInfo(`/link-transactions - subscription: ${id}`))
-      .then(() => this.subscriptionService.linkTransactions(id, transactionIds))
+    Promise.resolve({ id: req.params.id, transactionIds: req.body.transactionIds })
+      .tap(({ id }) => this.logger.logInfo(`/link-transactions - subscription: ${id}`))
+      .then(extractUser(req))
+      .tap(({ id, user }) => validateSubscriptionExist(id, user as string))
+      .then(({ id, transactionIds }) => this.subscriptionService.linkTransactions(id, transactionIds))
       .then(() => { res.status(204).send() })
       .catch((error) => { next(error) })
   }
 
   public async unlinkTransaction (req: Request, res: Response, next: NextFunction): Promise<void> {
-    const { id, transactionId } = req.params
-    Promise.resolve({ id, transactionId })
-      .tap(() => this.logger.logInfo(`/unlink-transaction - subscription: ${id}, transaction: ${transactionId}`))
+    Promise.resolve({ id: req.params.id, transactionId: req.params.transactionId })
+      .tap(({ id, transactionId }) => this.logger.logInfo(`/unlink-transaction - subscription: ${id}, transaction: ${transactionId}`))
       .then(extractUser(req))
-      .tap(({ user }) => validateSubscriptionExist(id, user as string))
-      .then(() => this.subscriptionService.unlinkTransaction(id, transactionId))
+      .tap(({ id, user }) => validateSubscriptionExist(id, user as string))
+      .then(({ id, transactionId }) => this.subscriptionService.unlinkTransaction(id, transactionId))
       .then(() => { res.status(204).send() })
       .catch((error) => { next(error) })
   }
@@ -101,11 +100,11 @@ export class SubscriptionController {
   // --- Candidates ---
 
   public async getTransactions (req: Request, res: Response, next: NextFunction): Promise<void> {
-    const { id } = req.params
-    Promise.resolve(id)
-      .tap(() => this.logger.logInfo(`/transactions - subscription: ${id}`))
-      .tap(() => validateSubscriptionExist(id, req.user as string))
-      .then(() => this.subscriptionService.getTransactionsBySubscription(id, req.user as string))
+    Promise.resolve({ id: req.params.id })
+      .tap(({ id }) => this.logger.logInfo(`/transactions - subscription: ${id}`))
+      .then(extractUser(req))
+      .tap(({ id, user }) => validateSubscriptionExist(id, user as string))
+      .then(({ id, user }) => this.subscriptionService.getTransactionsBySubscription(id, user as string))
       .then((response) => { res.send(response) })
       .catch((error) => { next(error) })
   }
@@ -119,22 +118,21 @@ export class SubscriptionController {
   }
 
   public async assignCandidate (req: Request, res: Response, next: NextFunction): Promise<void> {
-    const { id } = req.params
-    const { subscriptionId } = req.body
-    Promise.resolve(id)
-      .tap(() => this.logger.logInfo(`/assign - candidate: ${id} → subscription: ${subscriptionId}`))
-      .tap(() => validateCandidateExist(id, req.user as string))
-      .then(() => this.subscriptionCandidateService.assignSubscription(id, subscriptionId))
+    Promise.resolve({ id: req.params.id, subscriptionId: req.body.subscriptionId })
+      .tap(({ id, subscriptionId }) => this.logger.logInfo(`/assign - candidate: ${id} → subscription: ${subscriptionId}`))
+      .then(extractUser(req))
+      .tap(({ id, user }) => validateCandidateExist(id, user as string))
+      .then(({ id, subscriptionId }) => this.subscriptionCandidateService.assignSubscription(id, subscriptionId))
       .then(() => { res.status(204).send() })
       .catch((error) => { next(error) })
   }
 
   public async dismissCandidate (req: Request, res: Response, next: NextFunction): Promise<void> {
-    const { id } = req.params
-    Promise.resolve(id)
-      .tap(() => this.logger.logInfo(`/dismiss - candidate: ${id}`))
-      .tap(() => validateCandidateExist(id, req.user as string))
-      .then(() => this.subscriptionCandidateService.dismissCandidate(id))
+    Promise.resolve({ id: req.params.id })
+      .tap(({ id }) => this.logger.logInfo(`/dismiss - candidate: ${id}`))
+      .then(extractUser(req))
+      .tap(({ id, user }) => validateCandidateExist(id, user as string))
+      .then(({ id }) => this.subscriptionCandidateService.dismissCandidate(id))
       .then(() => { res.status(204).send() })
       .catch((error) => { next(error) })
   }

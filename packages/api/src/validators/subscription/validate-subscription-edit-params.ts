@@ -1,10 +1,17 @@
 import Joi from 'joi'
 import Boom from '@hapi/boom'
-import { SubscriptionCycle } from '@soker90/finper-models'
+import { ISubscription, SubscriptionCycle } from '@soker90/finper-models'
 import { validateCategoryExist } from '../category'
 import { validateAccountExist } from '../account'
+import { validateSubscriptionExist } from './validate-subscription-exist'
 
-export const validateSubscriptionEditParams = async (params: Record<string, any>): Promise<{ id: string, value: Record<string, any> }> => {
+export const validateSubscriptionEditParams = async ({
+  params,
+  body,
+  user
+}: { params: Record<string, string>, body: Record<string, any>, user: string }): Promise<{ id: string, value: Partial<ISubscription> }> => {
+  await validateSubscriptionExist(params.id, user)
+
   const schema = Joi.object({
     name: Joi.string(),
     amount: Joi.number().positive(),
@@ -18,25 +25,22 @@ export const validateSubscriptionEditParams = async (params: Record<string, any>
     ),
     categoryId: Joi.string(),
     accountId: Joi.string(),
-    logoUrl: Joi.string().uri().allow(''),
-    id: Joi.string(),
-    user: Joi.string()
+    logoUrl: Joi.string().uri().allow('')
   })
 
-  const { error, value } = schema.validate(params)
+  const { error, value } = schema.validate(body)
 
   if (error) {
     throw Boom.badData(error.message).output
   }
 
-  if (params.categoryId) {
-    await validateCategoryExist({ id: params.categoryId, user: params.user })
+  if (body.categoryId) {
+    await validateCategoryExist({ id: body.categoryId, user })
   }
 
-  if (params.accountId) {
-    await validateAccountExist(params.accountId, params.user)
+  if (body.accountId) {
+    await validateAccountExist(body.accountId, user)
   }
 
-  const { id, user: _user, ...rest } = value // eslint-disable-line @typescript-eslint/no-unused-vars
-  return { id, value: rest }
+  return { id: params.id, value }
 }

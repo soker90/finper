@@ -1,17 +1,18 @@
 import {
-  SubscriptionCandidateDocument,
+  ISubscription,
+  ISubscriptionCandidate,
+  ITransaction,
   SubscriptionCandidateModel,
   SubscriptionModel,
-  TransactionModel,
-  TransactionDocument
+  TransactionModel
 } from '@soker90/finper-models'
 import SubscriptionService from './subscription.service'
 
 const ONE_WEEK_MS = 7 * 24 * 60 * 60 * 1000
 
 export interface ISubscriptionCandidateService {
-  detectCandidates(transaction: TransactionDocument): Promise<void>
-  getCandidates(user: string): Promise<SubscriptionCandidateDocument[]>
+  detectCandidates(transaction: ITransaction): Promise<void>
+  getCandidates(user: string): Promise<ISubscriptionCandidate[]>
   assignSubscription(candidateId: string, subscriptionId: string): Promise<void>
   dismissCandidate(candidateId: string): Promise<void>
 }
@@ -21,7 +22,7 @@ export default class SubscriptionCandidateService implements ISubscriptionCandid
    * Called after a transaction is created (fire-and-forget).
    * Finds active subscriptions matching account + category with nextPaymentDate within ±7 days.
    */
-  async detectCandidates (transaction: TransactionDocument): Promise<void> {
+  async detectCandidates (transaction: ITransaction): Promise<void> {
     const from = transaction.date - ONE_WEEK_MS
     const to = transaction.date + ONE_WEEK_MS
 
@@ -34,16 +35,16 @@ export default class SubscriptionCandidateService implements ISubscriptionCandid
 
     if (matchingSubscriptions.length === 0) return
 
-    const subscriptionIds = matchingSubscriptions.map((s) => s.id)
+    const subscriptionIds = matchingSubscriptions.map((s: ISubscription) => s._id!)
 
     await SubscriptionCandidateModel.create({
-      transactionId: transaction.id,
+      transactionId: transaction._id,
       subscriptionIds,
       user: transaction.user
     })
   }
 
-  async getCandidates (user: string): Promise<SubscriptionCandidateDocument[]> {
+  async getCandidates (user: string): Promise<ISubscriptionCandidate[]> {
     return SubscriptionCandidateModel.find({ user })
       .populate({
         path: 'transactionId',
@@ -61,7 +62,7 @@ export default class SubscriptionCandidateService implements ISubscriptionCandid
    * Links the transaction, advances nextPaymentDate, deletes candidate.
    */
   async assignSubscription (candidateId: string, subscriptionId: string): Promise<void> {
-    const candidate = await SubscriptionCandidateModel.findById(candidateId)
+    const candidate = await SubscriptionCandidateModel.findById(candidateId) as unknown as ISubscriptionCandidate
     if (!candidate) {
       const { notFound } = await import('@hapi/boom')
       throw notFound('Candidate not found').output

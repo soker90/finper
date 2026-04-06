@@ -20,10 +20,9 @@ type Props = {
   onEdit: (s: Subscription) => void
   onDelete: (s: Subscription) => void
   onSearchPayments: (s: Subscription) => void
-  onUnlinkTransaction: (subscriptionId: string, transactionId: string) => void
 }
 
-const SubscriptionCard = ({ subscription, onEdit, onDelete, onSearchPayments, onUnlinkTransaction }: Props) => {
+const SubscriptionCard = ({ subscription, onEdit, onDelete, onSearchPayments }: Props) => {
   const hasDate = Boolean(subscription.nextPaymentDate)
   const days = hasDate ? Math.ceil((subscription.nextPaymentDate! - Date.now()) / (1000 * 60 * 60 * 24)) : null
   const daysLabel = days === null ? null : days < 0 ? `Vencida hace ${Math.abs(days)}d` : days === 0 ? 'Hoy' : `En ${days}d`
@@ -103,27 +102,12 @@ const SubscriptionCard = ({ subscription, onEdit, onDelete, onSearchPayments, on
               <Typography variant='caption' color='textSecondary' fontWeight={600} display='block' mb={0.5}>
                 Últimos pagos
               </Typography>
-              <List dense>
+              <List dense disablePadding>
                 {lastPayments.map((t) => (
-                  <ListItem
-                    key={t._id}
-                    sx={{ py: 0.25, pl: 0, pr: 5 }}
-                    secondaryAction={
-                      <Tooltip title='Quitar de la suscripción'>
-                        <IconButton
-                          size='small'
-                          edge='end'
-                          color='error'
-                          onClick={() => onUnlinkTransaction(subscription._id, t._id!)}
-                        >
-                          <DeleteOutlined style={{ fontSize: 12 }} />
-                        </IconButton>
-                      </Tooltip>
-                    }
-                  >
+                  <ListItem key={t._id} disablePadding sx={{ py: 0.25 }}>
                     <ListItemText
                       primary={
-                        <Box display='flex' justifyContent='space-between' pr={3}>
+                        <Box display='flex' justifyContent='space-between'>
                           <Typography variant='caption' color='textSecondary'>
                             {format.date(t.date)}
                           </Typography>
