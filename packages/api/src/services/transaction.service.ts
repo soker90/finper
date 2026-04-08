@@ -73,7 +73,7 @@ export default class TransactionService implements ITransactionService {
     if (amount !== 0) {
       await updateAcoountBalance(transaction.account.toString(), -amount)
     }
-    // Si era un pago de suscripción, recalcular la próxima fecha (fire-and-forget)
+    // If it was a subscription payment, recalculate the next payment date (fire-and-forget)
     if (transaction.subscriptionId) {
       subscriptionService.recalculateNextPaymentDate(transaction.subscriptionId.toString()).catch(() => {})
     }
