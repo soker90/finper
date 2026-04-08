@@ -1,6 +1,6 @@
 import isNil from 'lodash.isnil'
 import isPlainObject from 'lodash.isplainobject'
-import mongoose, { HydratedDocument, Types } from 'mongoose'
+import mongoose, { Types } from 'mongoose'
 
 import mongooseConnect from './mongoose-connect'
 
@@ -18,19 +18,19 @@ import { ILoanEvent, LoanEventModel } from './models/loan-events'
 import { ISubscription, SubscriptionModel, SubscriptionCycle } from './models/subscriptions'
 import { ISubscriptionCandidate, SubscriptionCandidateModel } from './models/subscription-candidates'
 
-export type AccountDocument = HydratedDocument<IAccount>
-export type BudgetDocument = HydratedDocument<IBudget>
-export type CategoryDocument = HydratedDocument<ICategory>
-export type DebtDocument = HydratedDocument<IDebt>
-export type LoanDocument = HydratedDocument<ILoan>
-export type LoanPaymentDocument = HydratedDocument<ILoanPayment>
-export type LoanEventDocument = HydratedDocument<ILoanEvent>
-export type PensionDocument = HydratedDocument<IPension>
-export type StoreDocument = HydratedDocument<IStore>
-export type TransactionDocument = HydratedDocument<ITransaction>
-export type UserDocument = HydratedDocument<IUser>
-export type SubscriptionDocument = HydratedDocument<ISubscription>
-export type SubscriptionCandidateDocument = HydratedDocument<ISubscriptionCandidate>
+export type { AccountDocument } from './models/accounts'
+export type { BudgetDocument } from './models/budgets'
+export type { CategoryDocument } from './models/categories'
+export type { DebtDocument } from './models/debts'
+export type { LoanDocument } from './models/loans'
+export type { LoanPaymentDocument } from './models/loan-payments'
+export type { LoanEventDocument } from './models/loan-events'
+export type { PensionDocument } from './models/pensions'
+export type { StoreDocument } from './models/stores'
+export type { TransactionDocument } from './models/transactions'
+export type { UserDocument } from './models/users'
+export type { SubscriptionDocument } from './models/subscriptions'
+export type { SubscriptionCandidateDocument } from './models/subscription-candidates'
 
 function connect (uri: string, options: Record<string, unknown>): void {
   if (isNil(mongoose)) {

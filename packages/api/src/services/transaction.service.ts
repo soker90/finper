@@ -18,8 +18,8 @@ export interface ITransactionService {
 
   getTransactions(params: {
     user: string,
-    accountId?: string,
-    categoryId?: string,
+    account?: string,
+    category?: string,
     startDate?: number,
     endDate?: number,
     type?: string,
@@ -81,8 +81,8 @@ export default class TransactionService implements ITransactionService {
 
   public async getTransactions ({ page = 0, limit = 50, startDate, endDate, ...params }: {
     user: string,
-    accountId?: string,
-    categoryId?: string,
+    account?: string,
+    category?: string,
     startDate?: number,
     endDate?: number,
     type?: string,

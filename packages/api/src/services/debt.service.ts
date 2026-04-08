@@ -16,17 +16,17 @@ export interface IDebtService {
 }
 
 export default class DebtService implements IDebtService {
-  async addDebt (debt: IDebt): Promise<DebtDocument> {
+  public async addDebt (debt: IDebt): Promise<DebtDocument> {
     return DebtModel.create(debt)
   }
 
-  async editDebt ({ id, value }: { id: string, value: IDebt }): Promise<DebtDocument> {
+  public async editDebt ({ id, value }: { id: string, value: IDebt }): Promise<DebtDocument> {
     const updated = await DebtModel.findByIdAndUpdate<DebtDocument>(id, value, { new: true })
     if (!updated) throw Boom.notFound(ERROR_MESSAGE.DEBT.NOT_FOUND).output
     return updated
   }
 
-  async getDebts (userId: string): Promise<{ to: DebtDocument[], from: DebtDocument[], debtsByPerson: { _id: string, amount: number }[] }> {
+  public async getDebts (userId: string): Promise<{ to: DebtDocument[], from: DebtDocument[], debtsByPerson: { _id: string, amount: number }[] }> {
     const debtsByPerson = await DebtModel.aggregate([
       {
         $match: {
@@ -70,11 +70,11 @@ export default class DebtService implements IDebtService {
     }
   }
 
-  async getDebtsFrom ({ user, from }: { user: string, from: string }): Promise<DebtDocument[]> {
+  public async getDebtsFrom ({ user, from }: { user: string, from: string }): Promise<DebtDocument[]> {
     return DebtModel.find({ from, user })
   }
 
-  async deleteDebt (id: string): Promise<void> {
+  public async deleteDebt (id: string): Promise<void> {
     const deleted = await DebtModel.findByIdAndDelete(id)
     if (!deleted) throw Boom.notFound(ERROR_MESSAGE.DEBT.NOT_FOUND).output
   }

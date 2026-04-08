@@ -291,7 +291,7 @@ export default class LoanService implements ILoanService {
       )
     }
 
-    return leanDoc<ILoanPayment>(LoanPaymentModel.findById(paymentId).lean())
+    return leanDoc<ILoanPayment>(await LoanPaymentModel.findById(paymentId).lean())
   }
 
   private async _registerPaymentMovement (loan: ILoan & { _id: string }, amount: number, date: number, user: string): Promise<void> {

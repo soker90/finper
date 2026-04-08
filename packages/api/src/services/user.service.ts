@@ -8,7 +8,7 @@ export interface IUserService {
   createUser({ username, password }: Record<string, string>): Promise<Record<string, string>>
 }
 
-export default class UserService {
+export default class UserService implements IUserService {
   private UserModel
 
   constructor () {
