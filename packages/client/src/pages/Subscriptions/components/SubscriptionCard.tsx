@@ -1,5 +1,5 @@
 import { Stack, Typography, Chip, Box, Avatar, IconButton, Tooltip, Divider, List, ListItem, ListItemText } from '@mui/material'
-import { EditOutlined, DeleteOutlined, SearchOutlined } from '@ant-design/icons'
+import { EditOutlined, DeleteOutlined, SearchOutlined, DisconnectOutlined } from '@ant-design/icons'
 import useSWR from 'swr'
 import { MainCard } from 'components'
 import { format } from 'utils'
@@ -20,9 +20,10 @@ type Props = {
   onEdit: (s: Subscription) => void
   onDelete: (s: Subscription) => void
   onSearchPayments: (s: Subscription) => void
+  onUnlinkTransaction: (subscriptionId: string, transactionId: string) => void
 }
 
-const SubscriptionCard = ({ subscription, onEdit, onDelete, onSearchPayments }: Props) => {
+const SubscriptionCard = ({ subscription, onEdit, onDelete, onSearchPayments, onUnlinkTransaction }: Props) => {
   const hasDate = Boolean(subscription.nextPaymentDate)
   const days = hasDate ? Math.ceil((subscription.nextPaymentDate! - Date.now()) / (1000 * 60 * 60 * 24)) : null
   const daysLabel = days === null ? null : days < 0 ? `Vencida hace ${Math.abs(days)}d` : days === 0 ? 'Hoy' : `En ${days}d`
@@ -107,13 +108,20 @@ const SubscriptionCard = ({ subscription, onEdit, onDelete, onSearchPayments }: 
                   <ListItem key={t._id} disablePadding sx={{ py: 0.25 }}>
                     <ListItemText
                       primary={
-                        <Box display='flex' justifyContent='space-between'>
+                        <Box display='flex' justifyContent='space-between' alignItems='center'>
                           <Typography variant='caption' color='textSecondary'>
                             {format.date(t.date)}
                           </Typography>
-                          <Typography variant='caption' fontWeight={600}>
-                            {format.euro(t.amount)}
-                          </Typography>
+                          <Box display='flex' alignItems='center' gap={0.5}>
+                            <Typography variant='caption' fontWeight={600}>
+                              {format.euro(t.amount)}
+                            </Typography>
+                            <Tooltip title='Desvincular'>
+                              <IconButton size='small' onClick={() => onUnlinkTransaction(subscription._id, t._id)} sx={{ p: 0.25 }}>
+                                <DisconnectOutlined style={{ fontSize: 11 }} />
+                              </IconButton>
+                            </Tooltip>
+                          </Box>
                         </Box>
                       }
                     />
