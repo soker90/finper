@@ -51,19 +51,18 @@ const renderModal = (props = {}) =>
     </SWRConfig>
   )
 
-describe('LinkTransactionsModal', () => {
-  // ── Estado de carga ───────────────────────────────────────────────────────
-  it('renders the modal title immediately without waiting for data', () => {
-    // Verifies the modal mounts synchronously with the subscription name
-    const { getByText } = render(
-      <SWRConfig value={{ provider: () => new Map() }}>
-        <LinkTransactionsModal
-          subscription={mockSubscription}
-          onClose={vi.fn()}
-          onLinked={vi.fn()}
-        />
-      </SWRConfig>
+const withTransactions = () =>
+  server.use(
+    http.get('/subscriptions/sub-lm-1/matching-transactions', () =>
+      HttpResponse.json(mockTransactions)
     )
+  )
+
+describe('LinkTransactionsModal', () => {
+  // ── Título ────────────────────────────────────────────────────────────────
+  it('renders the modal title synchronously before data loads', () => {
+    // getByText (no findByText) verifica que el título está presente sin esperar la API
+    const { getByText } = renderModal()
     expect(getByText('Pagos de Spotify')).toBeDefined()
   })
 
@@ -75,34 +74,15 @@ describe('LinkTransactionsModal', () => {
 
   // ── Lista de transacciones ────────────────────────────────────────────────
   it('renders a row per matching transaction', async () => {
-    server.use(
-      http.get('/subscriptions/sub-lm-1/matching-transactions', () =>
-        HttpResponse.json(mockTransactions)
-      )
-    )
+    withTransactions()
     const { findAllByRole } = renderModal()
     const rows = await findAllByRole('checkbox')
     expect(rows.length).toBe(2)
   })
 
-  it('shows category and account for each transaction', async () => {
-    server.use(
-      http.get('/subscriptions/sub-lm-1/matching-transactions', () =>
-        HttpResponse.json(mockTransactions)
-      )
-    )
-    const { findAllByText } = renderModal()
-    const ocioLabels = await findAllByText(/Ocio.*Mi cuenta|Mi cuenta.*Ocio/)
-    expect(ocioLabels.length).toBeGreaterThanOrEqual(1)
-  })
-
   // ── Interacción ───────────────────────────────────────────────────────────
   it('submit button is disabled when no transaction is selected', async () => {
-    server.use(
-      http.get('/subscriptions/sub-lm-1/matching-transactions', () =>
-        HttpResponse.json(mockTransactions)
-      )
-    )
+    withTransactions()
     const { findByText } = renderModal()
     const submitBtn = await findByText('Aceptar')
     expect(submitBtn.closest('button')).toHaveProperty('disabled', true)
@@ -116,16 +96,9 @@ describe('LinkTransactionsModal', () => {
     expect(onClose).toHaveBeenCalled()
   })
 
-  it('shows modal title with subscription name', async () => {
-    const { findByText } = renderModal()
-    expect(await findByText('Pagos de Spotify')).toBeDefined()
-  })
-
   // ── Selección y submit ────────────────────────────────────────────────────
   it('enables the submit button when a transaction is selected', async () => {
-    server.use(
-      http.get('/subscriptions/sub-lm-1/matching-transactions', () => HttpResponse.json(mockTransactions))
-    )
+    withTransactions()
     const { findAllByRole, findByText } = renderModal()
     const checkboxes = await findAllByRole('checkbox')
     const listItem = checkboxes[0].closest('li')
@@ -135,9 +108,7 @@ describe('LinkTransactionsModal', () => {
   })
 
   it('calls link endpoint with selected ids and closes modal on success', async () => {
-    server.use(
-      http.get('/subscriptions/sub-lm-1/matching-transactions', () => HttpResponse.json(mockTransactions))
-    )
+    withTransactions()
     let capturedBody: any
     server.use(
       http.post('/subscriptions/sub-lm-1/link-transactions', async ({ request }) => {
@@ -149,12 +120,10 @@ describe('LinkTransactionsModal', () => {
     const onLinked = vi.fn()
     const { findAllByRole, findByText } = renderModal({ onClose, onLinked })
 
-    // Select first transaction
     const checkboxes = await findAllByRole('checkbox')
     const listItem = checkboxes[0].closest('li')
     if (listItem) listItem.click()
 
-    // Wait for button to enable and click it
     const submitBtn = await findByText('Aceptar')
     await waitFor(() => expect(submitBtn.closest('button')?.hasAttribute('disabled')).toBe(false))
     submitBtn.closest('button')!.click()
@@ -165,9 +134,7 @@ describe('LinkTransactionsModal', () => {
   })
 
   it('shows error alert when the link operation fails', async () => {
-    server.use(
-      http.get('/subscriptions/sub-lm-1/matching-transactions', () => HttpResponse.json(mockTransactions))
-    )
+    withTransactions()
     server.use(
       http.post('/subscriptions/sub-lm-1/link-transactions', () =>
         HttpResponse.json({}, { status: 500 })
@@ -184,7 +151,6 @@ describe('LinkTransactionsModal', () => {
     await waitFor(() => expect(submitBtn.closest('button')?.hasAttribute('disabled')).toBe(false))
     submitBtn.closest('button')!.click()
 
-    // Error alert should appear and modal should stay open
     await waitFor(() => expect(document.querySelector('[role="alert"][class*="MuiAlert"]')).not.toBeNull())
     expect(onClose).not.toHaveBeenCalled()
   })

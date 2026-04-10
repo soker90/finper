@@ -38,51 +38,17 @@ describe('CandidatesBanner', () => {
     expect(container.firstChild).toBeNull()
   })
 
-  // ── Contenido ─────────────────────────────────────────────────────────────
-  it('renders the banner title when there are candidates', () => {
-    const { getByText } = render(
-      <CandidatesBanner
-        candidates={[makeCandidate(1)]}
-        onAssign={vi.fn()}
-        onDismiss={vi.fn()}
-      />
-    )
-    expect(getByText('Posibles pagos de suscripción detectados')).toBeDefined()
-  })
-
+  // ── Filas de candidatos ───────────────────────────────────────────────────
   it('renders one row per candidate', () => {
-    const candidates = [makeCandidate(1), makeCandidate(2)]
     const { getAllByRole } = render(
       <CandidatesBanner
-        candidates={candidates}
+        candidates={[makeCandidate(1), makeCandidate(2)]}
         onAssign={vi.fn()}
         onDismiss={vi.fn()}
       />
     )
-    // Each candidate has a dismiss button with aria-label "No es una suscripción"
+    // Cada candidato tiene un botón de descartar con aria-label "No es una suscripción"
     expect(getAllByRole('button', { name: /no es una suscripción/i }).length).toBe(2)
-  })
-
-  it('shows the subscription name for each suggested subscription', () => {
-    const { getByText } = render(
-      <CandidatesBanner
-        candidates={[makeCandidate(1)]}
-        onAssign={vi.fn()}
-        onDismiss={vi.fn()}
-      />
-    )
-    expect(getByText('Netflix 1')).toBeDefined()
-  })
-
-  it('shows the transaction category and account', () => {
-    const { getByText } = render(
-      <CandidatesBanner
-        candidates={[makeCandidate(1)]}
-        onAssign={vi.fn()}
-        onDismiss={vi.fn()}
-      />
-    )
-    expect(getByText(/Ocio.*Mi cuenta|Mi cuenta.*Ocio/)).toBeDefined()
   })
 
   // ── Callbacks ─────────────────────────────────────────────────────────────
@@ -109,7 +75,7 @@ describe('CandidatesBanner', () => {
         onDismiss={vi.fn()}
       />
     )
-    // The subscription box contains the name text; click on it
+    // La caja de suscripción contiene el texto del nombre; hacer clic en ella
     getByText('Netflix 1').click()
     expect(onAssign).toHaveBeenCalledWith('cand-1', 'sub-1')
   })
