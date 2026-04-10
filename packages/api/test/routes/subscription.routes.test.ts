@@ -1,6 +1,6 @@
 import supertest from 'supertest'
 import {
-  SubscriptionCycle,
+  SUBSCRIPTION_CYCLE,
   SubscriptionModel,
   SubscriptionCandidateModel,
   TransactionModel,
@@ -57,7 +57,7 @@ describe('Subscriptions', () => {
         .send({
           name: 'Netflix',
           amount: 9.99,
-          cycle: SubscriptionCycle.MONTHLY,
+          cycle: SUBSCRIPTION_CYCLE.MONTHLY,
           categoryId: category._id.toString(),
           accountId: account._id.toString()
         })
@@ -134,7 +134,7 @@ describe('Subscriptions', () => {
       const subscription = await SubscriptionModel.create({
         name: 'Netflix',
         amount: 9.99,
-        cycle: SubscriptionCycle.MONTHLY,
+        cycle: SUBSCRIPTION_CYCLE.MONTHLY,
         categoryId: category._id,
         accountId: account._id,
         user
@@ -310,7 +310,7 @@ describe('Subscriptions', () => {
         .send({
           name: 'Test',
           amount: -5,
-          cycle: SubscriptionCycle.MONTHLY,
+          cycle: SUBSCRIPTION_CYCLE.MONTHLY,
           categoryId: category._id.toString(),
           accountId: account._id.toString()
         })
@@ -344,7 +344,7 @@ describe('Subscriptions', () => {
         .send({
           name: 'Test',
           amount: 9.99,
-          cycle: SubscriptionCycle.MONTHLY,
+          cycle: SUBSCRIPTION_CYCLE.MONTHLY,
           categoryId: otherCategory._id.toString(),
           accountId: account._id.toString()
         })
@@ -361,7 +361,7 @@ describe('Subscriptions', () => {
         .send({
           name: 'Test',
           amount: 9.99,
-          cycle: SubscriptionCycle.MONTHLY,
+          cycle: SUBSCRIPTION_CYCLE.MONTHLY,
           categoryId: category._id.toString(),
           accountId: otherAccount._id.toString()
         })
@@ -378,7 +378,7 @@ describe('Subscriptions', () => {
         .send({
           name: 'Spotify',
           amount: 4.99,
-          cycle: SubscriptionCycle.MONTHLY,
+          cycle: SUBSCRIPTION_CYCLE.MONTHLY,
           categoryId: category._id.toString(),
           accountId: account._id.toString()
         })
@@ -741,7 +741,7 @@ describe('Subscriptions', () => {
     test('links transactions and updates nextPaymentDate', async () => {
       const account = await insertAccount({ user })
       const category = await insertCategory({ user })
-      const sub = await insertSubscription({ user, accountId: account._id, categoryId: category._id, cycle: SubscriptionCycle.MONTHLY })
+      const sub = await insertSubscription({ user, accountId: account._id, categoryId: category._id, cycle: SUBSCRIPTION_CYCLE.MONTHLY })
       const txDate = new Date('2024-03-10T12:00:00Z').getTime()
       const tx = await TransactionModel.create({
         date: txDate,
@@ -874,7 +874,7 @@ describe('Subscriptions', () => {
     test('updates nextPaymentDate of the subscription after assign', async () => {
       const account = await insertAccount({ user })
       const category = await insertCategory({ user })
-      const sub = await insertSubscription({ user, accountId: account._id, categoryId: category._id, cycle: SubscriptionCycle.MONTHLY })
+      const sub = await insertSubscription({ user, accountId: account._id, categoryId: category._id, cycle: SUBSCRIPTION_CYCLE.MONTHLY })
       const txDate = new Date('2024-04-10T12:00:00Z').getTime()
       const tx = await TransactionModel.create({
         date: txDate,

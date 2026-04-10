@@ -2,7 +2,7 @@
 import { describe, expect, it, vi } from 'vitest'
 import { render } from '../../../../test/testUtils'
 import CandidatesBanner from '.'
-import { SubscriptionCycle } from 'types'
+import { SUBSCRIPTION_CYCLE } from 'types'
 
 const NOW = Date.now()
 
@@ -11,7 +11,7 @@ const makeSub = (i: number) => ({
   name: `Netflix ${i}`,
   logoUrl: undefined,
   amount: 9.99,
-  cycle: SubscriptionCycle.MONTHLY,
+  cycle: SUBSCRIPTION_CYCLE.MONTHLY,
   nextPaymentDate: NOW
 })
 

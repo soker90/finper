@@ -15,7 +15,7 @@ import { IUser, UserModel } from './models/users'
 import { ILoan, LoanModel } from './models/loans'
 import { ILoanPayment, LoanPaymentModel, LoanPaymentType, LOAN_PAYMENT } from './models/loan-payments'
 import { ILoanEvent, LoanEventModel } from './models/loan-events'
-import { ISubscription, SubscriptionModel, SubscriptionCycle } from './models/subscriptions'
+import { ISubscription, SubscriptionModel, SubscriptionCycle, SUBSCRIPTION_CYCLE } from './models/subscriptions'
 import { ISubscriptionCandidate, SubscriptionCandidateModel } from './models/subscription-candidates'
 
 export type { AccountDocument } from './models/accounts'
@@ -60,6 +60,7 @@ export {
   LoanPaymentType,
   TRANSACTION,
   TransactionType,
+  SUBSCRIPTION_CYCLE,
   SubscriptionCycle,
 
   IAccount,

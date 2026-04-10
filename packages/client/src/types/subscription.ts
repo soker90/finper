@@ -1,15 +1,12 @@
-export enum SubscriptionCycle {
-  // eslint-disable-next-line no-unused-vars
-  MONTHLY = 'monthly',
-  // eslint-disable-next-line no-unused-vars
-  BIMONTHLY = 'bimonthly',
-  // eslint-disable-next-line no-unused-vars
-  QUARTERLY = 'quarterly',
-  // eslint-disable-next-line no-unused-vars
-  SEMI_ANNUALLY = 'semi-annually',
-  // eslint-disable-next-line no-unused-vars
-  ANNUALLY = 'annually',
-}
+export const SUBSCRIPTION_CYCLE = {
+  MONTHLY: 'monthly',
+  BIMONTHLY: 'bimonthly',
+  QUARTERLY: 'quarterly',
+  SEMI_ANNUALLY: 'semi-annually',
+  ANNUALLY: 'annually',
+} as const
+
+export type SubscriptionCycle = typeof SUBSCRIPTION_CYCLE[keyof typeof SUBSCRIPTION_CYCLE]
 
 export interface Subscription {
   _id: string

@@ -6,14 +6,14 @@ import InputForm from 'components/forms/InputForm'
 import SelectForm from 'components/forms/SelectForm'
 import { useAccounts } from 'hooks/useAccounts'
 import { useCategories } from 'hooks'
-import { Subscription, SubscriptionInput, SubscriptionCycle } from 'types'
+import { Subscription, SubscriptionInput, SUBSCRIPTION_CYCLE } from 'types'
 
 const CYCLE_OPTIONS = [
-  { value: SubscriptionCycle.MONTHLY, label: 'Mensual' },
-  { value: SubscriptionCycle.BIMONTHLY, label: 'Bimensual' },
-  { value: SubscriptionCycle.QUARTERLY, label: 'Trimestral' },
-  { value: SubscriptionCycle.SEMI_ANNUALLY, label: 'Semestral' },
-  { value: SubscriptionCycle.ANNUALLY, label: 'Anual' }
+  { value: SUBSCRIPTION_CYCLE.MONTHLY, label: 'Mensual' },
+  { value: SUBSCRIPTION_CYCLE.BIMONTHLY, label: 'Bimensual' },
+  { value: SUBSCRIPTION_CYCLE.QUARTERLY, label: 'Trimestral' },
+  { value: SUBSCRIPTION_CYCLE.SEMI_ANNUALLY, label: 'Semestral' },
+  { value: SUBSCRIPTION_CYCLE.ANNUALLY, label: 'Anual' }
 ]
 
 type Props = {
@@ -36,7 +36,7 @@ const SubscriptionForm = ({ subscription, onClose, onSubmit }: Props) => {
         logoUrl: subscription.logoUrl ?? ''
       }
     : {
-        cycle: SubscriptionCycle.MONTHLY
+        cycle: SUBSCRIPTION_CYCLE.MONTHLY
       }
 
   const { register, handleSubmit, formState: { errors, isSubmitting }, reset } = useForm<SubscriptionInput>({

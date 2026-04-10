@@ -1,6 +1,6 @@
 import {
   SubscriptionModel,
-  SubscriptionCycle,
+  SUBSCRIPTION_CYCLE,
   TransactionModel,
   mongoose
 } from '@soker90/finper-models'
@@ -31,35 +31,35 @@ describe('advanceDate', () => {
   const base = makeDate(2024, 3, 15) // 15 March 2024
 
   test('monthly → advances 1 month', () => {
-    expect(toYMD(advanceDate(base, SubscriptionCycle.MONTHLY))).toBe('2024-04-15')
+    expect(toYMD(advanceDate(base, SUBSCRIPTION_CYCLE.MONTHLY))).toBe('2024-04-15')
   })
 
   test('bimonthly → advances 2 months', () => {
-    expect(toYMD(advanceDate(base, SubscriptionCycle.BIMONTHLY))).toBe('2024-05-15')
+    expect(toYMD(advanceDate(base, SUBSCRIPTION_CYCLE.BIMONTHLY))).toBe('2024-05-15')
   })
 
   test('quarterly → advances 3 months', () => {
-    expect(toYMD(advanceDate(base, SubscriptionCycle.QUARTERLY))).toBe('2024-06-15')
+    expect(toYMD(advanceDate(base, SUBSCRIPTION_CYCLE.QUARTERLY))).toBe('2024-06-15')
   })
 
   test('semi-annually → advances 6 months', () => {
-    expect(toYMD(advanceDate(base, SubscriptionCycle.SEMI_ANNUALLY))).toBe('2024-09-15')
+    expect(toYMD(advanceDate(base, SUBSCRIPTION_CYCLE.SEMI_ANNUALLY))).toBe('2024-09-15')
   })
 
   test('annually → advances 1 year', () => {
-    expect(toYMD(advanceDate(base, SubscriptionCycle.ANNUALLY))).toBe('2025-03-15')
+    expect(toYMD(advanceDate(base, SUBSCRIPTION_CYCLE.ANNUALLY))).toBe('2025-03-15')
   })
 
   test('monthly edge case: Jan 31 clamps to last day of February', () => {
     // Feb 2024 has 29 days (leap year) → result should be Feb 29, not Mar 2
     const jan31 = makeDate(2024, 1, 31)
-    expect(toYMD(advanceDate(jan31, SubscriptionCycle.MONTHLY))).toBe('2024-02-29')
+    expect(toYMD(advanceDate(jan31, SUBSCRIPTION_CYCLE.MONTHLY))).toBe('2024-02-29')
   })
 
   test('annually edge case: Feb 29 leap year clamps to Feb 28 next year', () => {
     // Feb 29 in 2024 (leap) → 2025 is not a leap year → clamp to Feb 28
     const feb29 = makeDate(2024, 2, 29)
-    expect(toYMD(advanceDate(feb29, SubscriptionCycle.ANNUALLY))).toBe('2025-02-28')
+    expect(toYMD(advanceDate(feb29, SUBSCRIPTION_CYCLE.ANNUALLY))).toBe('2025-02-28')
   })
 })
 
@@ -147,7 +147,7 @@ describe('SubscriptionService', () => {
       const created = await service.addSubscription({
         name: 'Netflix',
         amount: 9.99,
-        cycle: SubscriptionCycle.MONTHLY,
+        cycle: SUBSCRIPTION_CYCLE.MONTHLY,
         categoryId: category._id as any,
         accountId: account._id as any,
         user
@@ -155,7 +155,7 @@ describe('SubscriptionService', () => {
 
       expect(created.name).toBe('Netflix')
       expect(created.amount).toBe(9.99)
-      expect(created.cycle).toBe(SubscriptionCycle.MONTHLY)
+      expect(created.cycle).toBe(SUBSCRIPTION_CYCLE.MONTHLY)
       expect(created.user).toBe(user)
     })
 
@@ -167,7 +167,7 @@ describe('SubscriptionService', () => {
       const created = await service.addSubscription({
         name: faker.company.name(),
         amount: 5,
-        cycle: SubscriptionCycle.MONTHLY,
+        cycle: SUBSCRIPTION_CYCLE.MONTHLY,
         categoryId: category._id as any,
         accountId: account._id as any,
         user,
@@ -186,7 +186,7 @@ describe('SubscriptionService', () => {
       const created = await service.addSubscription({
         name: faker.company.name(),
         amount: 5,
-        cycle: SubscriptionCycle.BIMONTHLY,
+        cycle: SUBSCRIPTION_CYCLE.BIMONTHLY,
         categoryId: category._id as any,
         accountId: account._id as any,
         logoUrl,
@@ -412,14 +412,14 @@ describe('SubscriptionService', () => {
       const user = generateUsername()
       const account = await insertAccount({ user })
       const category = await insertCategory({ user })
-      const sub = await insertSubscription({ user, accountId: account._id, categoryId: category._id, cycle: SubscriptionCycle.MONTHLY })
+      const sub = await insertSubscription({ user, accountId: account._id, categoryId: category._id, cycle: SUBSCRIPTION_CYCLE.MONTHLY })
       const txDate = makeDate(2024, 3, 10)
       const tx = await TransactionModel.create({ date: txDate, amount: 9.99, type: 'expense', category: category._id, account: account._id, user })
 
       await service.linkTransactions(sub._id.toString(), [tx._id.toString()])
 
       const updated = await SubscriptionModel.findById(sub._id).lean()
-      expect(updated?.nextPaymentDate).toBe(advanceDate(txDate, SubscriptionCycle.MONTHLY))
+      expect(updated?.nextPaymentDate).toBe(advanceDate(txDate, SUBSCRIPTION_CYCLE.MONTHLY))
     })
   })
 
@@ -482,7 +482,7 @@ describe('SubscriptionService', () => {
       const user = generateUsername()
       const account = await insertAccount({ user })
       const category = await insertCategory({ user })
-      const sub = await insertSubscription({ user, accountId: account._id, categoryId: category._id, cycle: SubscriptionCycle.BIMONTHLY })
+      const sub = await insertSubscription({ user, accountId: account._id, categoryId: category._id, cycle: SUBSCRIPTION_CYCLE.BIMONTHLY })
 
       const oldDate = makeDate(2024, 1, 1)
       const newDate = makeDate(2024, 2, 1)
@@ -493,7 +493,7 @@ describe('SubscriptionService', () => {
       await service.recalculateNextPaymentDate(sub._id.toString())
 
       const updated = await SubscriptionModel.findById(sub._id).lean()
-      expect(updated?.nextPaymentDate).toBe(advanceDate(newDate, SubscriptionCycle.BIMONTHLY))
+      expect(updated?.nextPaymentDate).toBe(advanceDate(newDate, SUBSCRIPTION_CYCLE.BIMONTHLY))
     })
 
     test('does nothing when the subscription does not exist', async () => {

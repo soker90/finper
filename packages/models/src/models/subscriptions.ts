@@ -1,12 +1,14 @@
 import { Schema, model, HydratedDocument, Types } from 'mongoose'
 
-export enum SubscriptionCycle {
-  MONTHLY = 'monthly',
-  BIMONTHLY = 'bimonthly',
-  QUARTERLY = 'quarterly',
-  SEMI_ANNUALLY = 'semi-annually',
-  ANNUALLY = 'annually',
-}
+export const SUBSCRIPTION_CYCLE = {
+  MONTHLY: 'monthly',
+  BIMONTHLY: 'bimonthly',
+  QUARTERLY: 'quarterly',
+  SEMI_ANNUALLY: 'semi-annually',
+  ANNUALLY: 'annually',
+} as const
+
+export type SubscriptionCycle = typeof SUBSCRIPTION_CYCLE[keyof typeof SUBSCRIPTION_CYCLE]
 
 export interface ISubscription {
   name: string
@@ -31,11 +33,11 @@ const subscriptionSchema = new Schema<ISubscription>({
     type: String,
     required: true,
     enum: [
-      SubscriptionCycle.MONTHLY,
-      SubscriptionCycle.BIMONTHLY,
-      SubscriptionCycle.QUARTERLY,
-      SubscriptionCycle.SEMI_ANNUALLY,
-      SubscriptionCycle.ANNUALLY,
+      SUBSCRIPTION_CYCLE.MONTHLY,
+      SUBSCRIPTION_CYCLE.BIMONTHLY,
+      SUBSCRIPTION_CYCLE.QUARTERLY,
+      SUBSCRIPTION_CYCLE.SEMI_ANNUALLY,
+      SUBSCRIPTION_CYCLE.ANNUALLY,
     ]
   },
   nextPaymentDate: { type: Number, default: null },

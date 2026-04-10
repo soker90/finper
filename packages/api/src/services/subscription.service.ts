@@ -3,6 +3,7 @@ import {
   SubscriptionDocument,
   SubscriptionModel,
   SubscriptionCycle,
+  SUBSCRIPTION_CYCLE,
   TransactionModel,
   TransactionDocument
 } from '@soker90/finper-models'
@@ -12,19 +13,19 @@ export const advanceDate = (timestamp: number, cycle: SubscriptionCycle): number
   const originalDay = date.getDate()
 
   switch (cycle) {
-    case SubscriptionCycle.MONTHLY:
+    case SUBSCRIPTION_CYCLE.MONTHLY:
       date.setMonth(date.getMonth() + 1)
       break
-    case SubscriptionCycle.BIMONTHLY:
+    case SUBSCRIPTION_CYCLE.BIMONTHLY:
       date.setMonth(date.getMonth() + 2)
       break
-    case SubscriptionCycle.QUARTERLY:
+    case SUBSCRIPTION_CYCLE.QUARTERLY:
       date.setMonth(date.getMonth() + 3)
       break
-    case SubscriptionCycle.SEMI_ANNUALLY:
+    case SUBSCRIPTION_CYCLE.SEMI_ANNUALLY:
       date.setMonth(date.getMonth() + 6)
       break
-    case SubscriptionCycle.ANNUALLY:
+    case SUBSCRIPTION_CYCLE.ANNUALLY:
       date.setFullYear(date.getFullYear() + 1)
       break
     default: {

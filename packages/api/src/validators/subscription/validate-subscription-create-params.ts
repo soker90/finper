@@ -1,6 +1,6 @@
 import Joi from 'joi'
 import Boom from '@hapi/boom'
-import { SubscriptionCycle } from '@soker90/finper-models'
+import { SUBSCRIPTION_CYCLE } from '@soker90/finper-models'
 import { validateCategoryExist } from '../category'
 import { validateAccountExist } from '../account'
 
@@ -9,11 +9,11 @@ export const validateSubscriptionCreateParams = async (params: Record<string, an
     name: Joi.string().required(),
     amount: Joi.number().positive().required(),
     cycle: Joi.string().valid(
-      SubscriptionCycle.MONTHLY,
-      SubscriptionCycle.BIMONTHLY,
-      SubscriptionCycle.QUARTERLY,
-      SubscriptionCycle.SEMI_ANNUALLY,
-      SubscriptionCycle.ANNUALLY
+      SUBSCRIPTION_CYCLE.MONTHLY,
+      SUBSCRIPTION_CYCLE.BIMONTHLY,
+      SUBSCRIPTION_CYCLE.QUARTERLY,
+      SUBSCRIPTION_CYCLE.SEMI_ANNUALLY,
+      SUBSCRIPTION_CYCLE.ANNUALLY
     ).required(),
     categoryId: Joi.string().required(),
     accountId: Joi.string().required(),

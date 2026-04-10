@@ -6,7 +6,7 @@ import { SWRConfig } from 'swr'
 import { server } from '../../../../mock/server'
 import { render } from '../../../../test/testUtils'
 import LinkTransactionsModal from '.'
-import { Subscription, SubscriptionCycle, TRANSACTION } from 'types'
+import { Subscription, SUBSCRIPTION_CYCLE, TRANSACTION } from 'types'
 
 const NOW = Date.now()
 
@@ -14,7 +14,7 @@ const mockSubscription: Subscription = {
   _id: 'sub-lm-1',
   name: 'Spotify',
   amount: 4.99,
-  cycle: SubscriptionCycle.MONTHLY,
+  cycle: SUBSCRIPTION_CYCLE.MONTHLY,
   nextPaymentDate: null,
   categoryId: { _id: 'cat-1', name: 'Ocio' },
   accountId: { _id: 'acc-1', name: 'Mi cuenta', bank: 'BBVA' }

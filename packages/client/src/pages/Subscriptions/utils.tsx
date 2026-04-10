@@ -1,23 +1,23 @@
 import { Grid, Skeleton, Alert } from '@mui/material'
 import { SyncOutlined } from '@ant-design/icons'
 import { format } from 'utils'
-import { SubscriptionCycle, Subscription } from 'types'
+import { SubscriptionCycle, SUBSCRIPTION_CYCLE, Subscription } from 'types'
 import KpiCard from '../Dashboard/components/KpiCard'
 
 const MONTHLY_MULTIPLIERS: Record<SubscriptionCycle, number> = {
-  [SubscriptionCycle.MONTHLY]: 1,
-  [SubscriptionCycle.BIMONTHLY]: 1 / 2,
-  [SubscriptionCycle.QUARTERLY]: 1 / 3,
-  [SubscriptionCycle.SEMI_ANNUALLY]: 1 / 6,
-  [SubscriptionCycle.ANNUALLY]: 1 / 12
+  [SUBSCRIPTION_CYCLE.MONTHLY]: 1,
+  [SUBSCRIPTION_CYCLE.BIMONTHLY]: 1 / 2,
+  [SUBSCRIPTION_CYCLE.QUARTERLY]: 1 / 3,
+  [SUBSCRIPTION_CYCLE.SEMI_ANNUALLY]: 1 / 6,
+  [SUBSCRIPTION_CYCLE.ANNUALLY]: 1 / 12
 }
 
 export const CYCLE_LABELS: Record<SubscriptionCycle, string> = {
-  [SubscriptionCycle.MONTHLY]: 'Mensual',
-  [SubscriptionCycle.BIMONTHLY]: 'Bimensual',
-  [SubscriptionCycle.QUARTERLY]: 'Trimestral',
-  [SubscriptionCycle.SEMI_ANNUALLY]: 'Semestral',
-  [SubscriptionCycle.ANNUALLY]: 'Anual'
+  [SUBSCRIPTION_CYCLE.MONTHLY]: 'Mensual',
+  [SUBSCRIPTION_CYCLE.BIMONTHLY]: 'Bimensual',
+  [SUBSCRIPTION_CYCLE.QUARTERLY]: 'Trimestral',
+  [SUBSCRIPTION_CYCLE.SEMI_ANNUALLY]: 'Semestral',
+  [SUBSCRIPTION_CYCLE.ANNUALLY]: 'Anual'
 }
 
 export const calcMonthly = (subs: Subscription[]) =>
