@@ -2,37 +2,19 @@ import {
   ISubscription,
   SubscriptionDocument,
   SubscriptionModel,
-  SubscriptionCycle,
-  SUBSCRIPTION_CYCLE,
   TransactionModel,
   TransactionDocument
 } from '@soker90/finper-models'
 
-export const advanceDate = (timestamp: number, cycle: SubscriptionCycle): number => {
+/**
+ * Avanza un timestamp tantos meses como indique `cycle` (número de meses entre pagos).
+ * Corrige el desbordamiento de día (ej. 31 ene + 1 mes → 28 feb).
+ */
+export const advanceDate = (timestamp: number, cycle: number): number => {
   const date = new Date(timestamp)
   const originalDay = date.getDate()
 
-  switch (cycle) {
-    case SUBSCRIPTION_CYCLE.MONTHLY:
-      date.setMonth(date.getMonth() + 1)
-      break
-    case SUBSCRIPTION_CYCLE.BIMONTHLY:
-      date.setMonth(date.getMonth() + 2)
-      break
-    case SUBSCRIPTION_CYCLE.QUARTERLY:
-      date.setMonth(date.getMonth() + 3)
-      break
-    case SUBSCRIPTION_CYCLE.SEMI_ANNUALLY:
-      date.setMonth(date.getMonth() + 6)
-      break
-    case SUBSCRIPTION_CYCLE.ANNUALLY:
-      date.setFullYear(date.getFullYear() + 1)
-      break
-    default: {
-      const _exhaustiveCheck: never = cycle
-      throw new Error(`Unhandled SubscriptionCycle: ${_exhaustiveCheck}`)
-    }
-  }
+  date.setMonth(date.getMonth() + cycle)
 
   // Si el día desbordó (ej: 31 ene + 1 mes → 2 mar), retroceder al último día del mes correcto
   if (date.getDate() !== originalDay) {

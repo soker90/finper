@@ -6,7 +6,7 @@ import {
   IAccount, ICategory,
   IDebt, ILoan, ILoanPayment, IPension, IStore, ISubscription, ISubscriptionCandidate,
   IUser, LoanModel, LoanPaymentModel, LOAN_PAYMENT, PensionModel, StoreModel,
-  SubscriptionCandidateModel, SUBSCRIPTION_CYCLE, SubscriptionModel, TransactionModel,
+  SubscriptionCandidateModel, SubscriptionModel, TransactionModel,
   TRANSACTION,
   UserModel
 } from '@soker90/finper-models'
@@ -181,7 +181,7 @@ export const insertSubscription = async (params: Record<string, any> = {}): Prom
   return SubscriptionModel.create({
     name: params.name ?? faker.company.name(),
     amount: params.amount ?? faker.number.float({ min: 1, max: 50, multipleOf: 0.01 }),
-    cycle: params.cycle ?? SUBSCRIPTION_CYCLE.MONTHLY,
+    cycle: params.cycle ?? 1,
     categoryId: category._id,
     accountId: account._id,
     nextPaymentDate: params.nextPaymentDate ?? null,

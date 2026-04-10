@@ -5,7 +5,7 @@ import { format } from 'utils'
 import { Subscription, Transaction } from 'types'
 import { SUBSCRIPTIONS } from 'constants/api-paths'
 import { hoverCardSx } from '../../../Dashboard/components/shared'
-import { CYCLE_LABELS } from '../../utils'
+import { getCycleLabel } from '../../utils'
 import SubscriptionCardHeader from './SubscriptionCardHeader'
 import SubscriptionNextPayment from './SubscriptionNextPayment'
 import SubscriptionPaymentList from './SubscriptionPaymentList'
@@ -37,7 +37,7 @@ const SubscriptionCard = ({ subscription, onEdit, onDelete, onSearchPayments, on
         <Typography variant='h4' color='inherit'>
           {format.euro(subscription.amount)}
           <Typography component='span' variant='body2' color='textSecondary' ml={1}>
-            / {CYCLE_LABELS[subscription.cycle]}
+            / {getCycleLabel(subscription.cycle)}
           </Typography>
         </Typography>
 

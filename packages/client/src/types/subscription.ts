@@ -1,18 +1,9 @@
-export const SUBSCRIPTION_CYCLE = {
-  MONTHLY: 'monthly',
-  BIMONTHLY: 'bimonthly',
-  QUARTERLY: 'quarterly',
-  SEMI_ANNUALLY: 'semi-annually',
-  ANNUALLY: 'annually',
-} as const
-
-export type SubscriptionCycle = typeof SUBSCRIPTION_CYCLE[keyof typeof SUBSCRIPTION_CYCLE]
-
 export interface Subscription {
   _id: string
   name: string
   amount: number
-  cycle: SubscriptionCycle
+  /** Número de meses entre pagos (ej. 1 = mensual, 3 = trimestral, 12 = anual). */
+  cycle: number
   nextPaymentDate?: number | null
   categoryId: {
     _id: string
@@ -29,7 +20,8 @@ export interface Subscription {
 export interface SubscriptionInput {
   name: string
   amount: number
-  cycle: SubscriptionCycle
+  /** Número de meses entre pagos. */
+  cycle: number
   categoryId: string
   accountId: string
   logoUrl?: string
@@ -50,7 +42,8 @@ export interface SubscriptionCandidate {
     name: string
     logoUrl?: string
     amount: number
-    cycle: SubscriptionCycle
+    /** Número de meses entre pagos. */
+    cycle: number
     nextPaymentDate: number
   }>
   createdAt: string

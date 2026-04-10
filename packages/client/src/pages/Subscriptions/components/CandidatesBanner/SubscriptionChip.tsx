@@ -2,7 +2,7 @@ import { Box, Avatar, Tooltip, Typography } from '@mui/material'
 import { CheckOutlined } from '@ant-design/icons'
 import { format } from 'utils'
 import { SubscriptionCandidate } from 'types'
-import { CYCLE_LABELS } from '../../utils'
+import { getCycleLabel } from '../../utils'
 
 type Sub = SubscriptionCandidate['subscriptionIds'][number]
 
@@ -41,7 +41,7 @@ const SubscriptionChip = ({ sub, disabled, onAssign }: Props) => (
         {sub.name}
       </Typography>
       <Typography variant='caption' color='textSecondary'>
-        {format.euro(sub.amount)} / {CYCLE_LABELS[sub.cycle]}
+        {format.euro(sub.amount)} / {getCycleLabel(sub.cycle)}
       </Typography>
       <CheckOutlined style={{ fontSize: 11, color: 'inherit' }} />
     </Box>

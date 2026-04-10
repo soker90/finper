@@ -1,27 +1,23 @@
 import { Grid, Skeleton, Alert } from '@mui/material'
 import { SyncOutlined } from '@ant-design/icons'
 import { format } from 'utils'
-import { SubscriptionCycle, SUBSCRIPTION_CYCLE, Subscription } from 'types'
+import { Subscription } from 'types'
 import KpiCard from '../Dashboard/components/KpiCard'
 
-const MONTHLY_MULTIPLIERS: Record<SubscriptionCycle, number> = {
-  [SUBSCRIPTION_CYCLE.MONTHLY]: 1,
-  [SUBSCRIPTION_CYCLE.BIMONTHLY]: 1 / 2,
-  [SUBSCRIPTION_CYCLE.QUARTERLY]: 1 / 3,
-  [SUBSCRIPTION_CYCLE.SEMI_ANNUALLY]: 1 / 6,
-  [SUBSCRIPTION_CYCLE.ANNUALLY]: 1 / 12
+const CYCLE_LABEL_MAP: Record<number, string> = {
+  1: 'Mensual',
+  2: 'Bimensual',
+  3: 'Trimestral',
+  6: 'Semestral',
+  12: 'Anual',
 }
 
-export const CYCLE_LABELS: Record<SubscriptionCycle, string> = {
-  [SUBSCRIPTION_CYCLE.MONTHLY]: 'Mensual',
-  [SUBSCRIPTION_CYCLE.BIMONTHLY]: 'Bimensual',
-  [SUBSCRIPTION_CYCLE.QUARTERLY]: 'Trimestral',
-  [SUBSCRIPTION_CYCLE.SEMI_ANNUALLY]: 'Semestral',
-  [SUBSCRIPTION_CYCLE.ANNUALLY]: 'Anual'
-}
+/** Devuelve una etiqueta legible para el ciclo (nº de meses). */
+export const getCycleLabel = (cycle: number): string =>
+  CYCLE_LABEL_MAP[cycle] ?? `Cada ${cycle} ${cycle === 1 ? 'mes' : 'meses'}`
 
 export const calcMonthly = (subs: Subscription[]) =>
-  subs.reduce((acc, s) => acc + s.amount * MONTHLY_MULTIPLIERS[s.cycle], 0)
+  subs.reduce((acc, s) => acc + s.amount / s.cycle, 0)
 
 // --- Summary row ---
 type SummaryProps = { subscriptions: Subscription[]; isLoading: boolean }

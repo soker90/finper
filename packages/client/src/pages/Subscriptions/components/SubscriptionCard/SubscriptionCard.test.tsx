@@ -5,7 +5,7 @@ import { SWRConfig } from 'swr'
 import { server } from '../../../../mock/server'
 import { render } from '../../../../test/testUtils'
 import SubscriptionCard from '.'
-import { Subscription, SUBSCRIPTION_CYCLE, TRANSACTION } from 'types'
+import { Subscription, TRANSACTION } from 'types'
 
 const NOW = Date.now()
 const FIVE_DAYS = 5 * 24 * 60 * 60 * 1000
@@ -14,7 +14,7 @@ const mockSubscription: Subscription = {
   _id: 'sub-test-1',
   name: 'Netflix',
   amount: 9.99,
-  cycle: SUBSCRIPTION_CYCLE.MONTHLY,
+  cycle: 1,
   nextPaymentDate: NOW + FIVE_DAYS,
   categoryId: { _id: 'cat-1', name: 'Ocio' },
   accountId: { _id: 'acc-1', name: 'Mi cuenta', bank: 'BBVA' }

@@ -6,15 +6,7 @@ import InputForm from 'components/forms/InputForm'
 import SelectForm from 'components/forms/SelectForm'
 import { useAccounts } from 'hooks/useAccounts'
 import { useCategories } from 'hooks'
-import { Subscription, SubscriptionInput, SUBSCRIPTION_CYCLE } from 'types'
-
-const CYCLE_OPTIONS = [
-  { value: SUBSCRIPTION_CYCLE.MONTHLY, label: 'Mensual' },
-  { value: SUBSCRIPTION_CYCLE.BIMONTHLY, label: 'Bimensual' },
-  { value: SUBSCRIPTION_CYCLE.QUARTERLY, label: 'Trimestral' },
-  { value: SUBSCRIPTION_CYCLE.SEMI_ANNUALLY, label: 'Semestral' },
-  { value: SUBSCRIPTION_CYCLE.ANNUALLY, label: 'Anual' }
-]
+import { Subscription, SubscriptionInput } from 'types'
 
 type Props = {
   subscription?: Subscription
@@ -36,7 +28,7 @@ const SubscriptionForm = ({ subscription, onClose, onSubmit }: Props) => {
         logoUrl: subscription.logoUrl ?? ''
       }
     : {
-        cycle: SUBSCRIPTION_CYCLE.MONTHLY
+        cycle: 1
       }
 
   const { register, handleSubmit, formState: { errors, isSubmitting }, reset } = useForm<SubscriptionInput>({
@@ -88,14 +80,15 @@ const SubscriptionForm = ({ subscription, onClose, onSubmit }: Props) => {
         {...register('amount', { required: true, valueAsNumber: true, min: 0.01 })}
       />
 
-      <SelectForm
+      <InputForm
         id='cycle'
-        label='Ciclo'
+        label='Ciclo (meses)'
+        placeholder='1'
+        type='number'
         size={3}
-        options={CYCLE_OPTIONS}
-        optionValue='value'
-        optionLabel='label'
-        {...register('cycle', { required: true })}
+        error={Boolean(errors.cycle)}
+        errorText='El ciclo debe ser entre 1 y 60 meses'
+        {...register('cycle', { required: true, valueAsNumber: true, min: 1, max: 60 })}
       />
 
       <SelectForm

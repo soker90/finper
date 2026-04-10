@@ -7,7 +7,6 @@ import { server } from '../../mock/server'
 import { render } from '../../test/testUtils'
 import Subscriptions from './index'
 import { SUBSCRIPTIONS_LIST, CANDIDATES_LIST } from '../../mock/handlers/subscriptions'
-import { SUBSCRIPTION_CYCLE } from 'types'
 import { calcMonthly } from './utils'
 import { format } from 'utils'
 
@@ -194,7 +193,7 @@ describe('Flujo 1: Ciclo de vida de una suscripción', () => {
       _id: 'sub-new-1',
       name: 'NuevaSub E2E',
       amount: 6.99,
-      cycle: SUBSCRIPTION_CYCLE.MONTHLY,
+      cycle: 1,
       nextPaymentDate: null,
       categoryId: { _id: 'cat-1', name: 'Ocio' },
       accountId: { _id: 'acc-1', name: 'Mi cuenta', bank: 'BBVA' }

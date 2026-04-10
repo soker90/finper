@@ -1,8 +1,7 @@
 import { http, HttpResponse } from 'msw'
 import { faker } from '@faker-js/faker'
-import { SUBSCRIPTION_CYCLE } from 'types'
 
-const CYCLES = Object.values(SUBSCRIPTION_CYCLE)
+const CYCLES = [1, 2, 3, 6, 12]
 
 const makeSubscription = () => ({
   _id: faker.database.mongodbObjectId(),

@@ -1,6 +1,5 @@
 import Joi from 'joi'
 import Boom from '@hapi/boom'
-import { SUBSCRIPTION_CYCLE } from '@soker90/finper-models'
 import { validateCategoryExist } from '../category'
 import { validateAccountExist } from '../account'
 
@@ -8,13 +7,7 @@ export const validateSubscriptionCreateParams = async (params: Record<string, an
   const schema = Joi.object({
     name: Joi.string().required(),
     amount: Joi.number().positive().required(),
-    cycle: Joi.string().valid(
-      SUBSCRIPTION_CYCLE.MONTHLY,
-      SUBSCRIPTION_CYCLE.BIMONTHLY,
-      SUBSCRIPTION_CYCLE.QUARTERLY,
-      SUBSCRIPTION_CYCLE.SEMI_ANNUALLY,
-      SUBSCRIPTION_CYCLE.ANNUALLY
-    ).required(),
+    cycle: Joi.number().integer().min(1).max(60).required(),
     categoryId: Joi.string().required(),
     accountId: Joi.string().required(),
     logoUrl: Joi.string().uri().allow(''),

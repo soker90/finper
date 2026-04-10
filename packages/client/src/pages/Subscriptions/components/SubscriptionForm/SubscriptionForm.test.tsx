@@ -5,7 +5,7 @@ import { SWRConfig } from 'swr'
 import { fireEvent, waitFor } from '@testing-library/react'
 import { render as customRender } from '../../../../test/testUtils'
 import SubscriptionForm from '.'
-import { Subscription, SubscriptionInput, SUBSCRIPTION_CYCLE } from 'types'
+import { Subscription, SubscriptionInput } from 'types'
 
 // Mock the data hooks so selects have options and validation can pass on submit.
 // Arrays are defined inside the factory closure (not inside the returned hook
@@ -24,7 +24,7 @@ const mockSubscription: Subscription = {
   _id: 'sub-form-1',
   name: 'HBO Max',
   amount: 8.99,
-  cycle: SUBSCRIPTION_CYCLE.MONTHLY,
+  cycle: 1,
   nextPaymentDate: null,
   categoryId: { _id: 'cat-1', name: 'Ocio' },
   accountId: { _id: 'acc-1', name: 'Mi cuenta', bank: 'BBVA' }
@@ -98,10 +98,10 @@ describe('SubscriptionForm', () => {
     expect(onClose).toHaveBeenCalled()
   })
 
-  it('shows cycle options Mensual and Anual', async () => {
-    const { findByText } = await renderAndOpen()
-    expect(await findByText('Mensual')).toBeDefined()
-    expect(await findByText('Anual')).toBeDefined()
+  it('shows cycle number input field', async () => {
+    const { findByLabelText } = await renderAndOpen()
+    const cycleInput = await findByLabelText('Ciclo (meses)')
+    expect(cycleInput).toBeDefined()
   })
 
   it('pre-fills name field in edit mode', async () => {
