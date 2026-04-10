@@ -1,4 +1,4 @@
-import { IDebt, DebtModel, DebtType, DebtDocument } from '@soker90/finper-models'
+import { IDebt, DebtModel, DEBT, DebtDocument } from '@soker90/finper-models'
 import Boom from '@hapi/boom'
 import { ERROR_MESSAGE } from '../i18n'
 
@@ -64,8 +64,8 @@ export default class DebtService implements IDebtService {
       .exec()
     const debts = await DebtModel.find({ user: userId })
     return {
-      from: debts.filter((debt: DebtDocument) => debt.type === DebtType.FROM),
-      to: debts.filter((debt: DebtDocument) => debt.type === DebtType.TO),
+      from: debts.filter((debt: DebtDocument) => debt.type === DEBT.FROM),
+      to: debts.filter((debt: DebtDocument) => debt.type === DEBT.TO),
       debtsByPerson
     }
   }

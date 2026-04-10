@@ -2,7 +2,7 @@ import { faker } from '@faker-js/faker'
 import {
   AccountModel,
   BudgetModel,
-  CategoryModel, DebtModel, DebtType,
+  CategoryModel, DebtModel, DEBT,
   IAccount, ICategory,
   IDebt, ILoan, ILoanPayment, IPension, IStore, ISubscription, ISubscriptionCandidate,
   IUser, LoanModel, LoanPaymentModel, LOAN_PAYMENT, PensionModel, StoreModel,
@@ -95,7 +95,7 @@ export const insertDebt = async (params: Record<string, string | number> = {}): 
     amount: params.amount ?? faker.number.int(),
     ...(params.paymentDate !== 0 && { paymentDate: params.paymentDate ?? faker.number.int() }),
     concept: params.concept ?? faker.lorem.words(4),
-    type: params.type ?? (Math.random() > 0.5 ? DebtType.TO : DebtType.FROM),
+    type: params.type ?? (Math.random() > 0.5 ? DEBT.TO : DEBT.FROM),
     user: params.user ?? faker.internet.username().slice(MIN_LENGTH_USERNAME, MAX_USERNAME_LENGTH).toLowerCase()
   })
 }

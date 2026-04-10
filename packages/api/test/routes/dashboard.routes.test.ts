@@ -2,7 +2,7 @@ import supertest from 'supertest'
 import {
   AccountModel,
   DebtModel,
-  DebtType,
+  DEBT,
   mongoose,
   PensionModel,
   TransactionModel,
@@ -208,10 +208,10 @@ describe('Dashboard', () => {
     })
 
     test('should compute totalDebts from unpaid debts only', async () => {
-      await insertDebt({ user, amount: 200, type: DebtType.TO, paymentDate: 0 })
-      await insertDebt({ user, amount: 300, type: DebtType.TO, paymentDate: 0 })
+      await insertDebt({ user, amount: 200, type: DEBT.TO, paymentDate: 0 })
+      await insertDebt({ user, amount: 300, type: DEBT.TO, paymentDate: 0 })
       // Paid debt - should not count
-      await insertDebt({ user, amount: 9999, type: DebtType.TO })
+      await insertDebt({ user, amount: 9999, type: DEBT.TO })
 
       const response = await supertest(server.app)
         .get(path)
@@ -223,7 +223,7 @@ describe('Dashboard', () => {
 
     test('should compute netWorth as totalBalance minus totalDebts', async () => {
       await insertAccount({ user, balance: 1000, isActive: true })
-      await insertDebt({ user, amount: 200, type: DebtType.TO, paymentDate: 0 })
+      await insertDebt({ user, amount: 200, type: DEBT.TO, paymentDate: 0 })
 
       const response = await supertest(server.app)
         .get(path)

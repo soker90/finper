@@ -4,7 +4,7 @@ import { mutate } from 'swr'
 import { DateForm, InputForm, ModalGrid, SelectForm } from 'components'
 import { DEBTS } from 'constants/api-paths'
 import { addDebt, editDebt } from 'services/apiService'
-import { Debt, DebtType } from 'types'
+import { Debt, DEBT } from 'types'
 
 import { TYPES_DEBTS } from '../../constants'
 import './style.module.css'
@@ -20,7 +20,7 @@ const DebtEditModal = ({
       date: debt?.date || null,
       amount: debt?.amount,
       concept: debt?.concept || '',
-      type: debt?.type || DebtType.FROM
+      type: debt?.type || DEBT.FROM
     }
 
   })
