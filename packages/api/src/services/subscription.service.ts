@@ -9,6 +9,8 @@ import {
 
 export const advanceDate = (timestamp: number, cycle: SubscriptionCycle): number => {
   const date = new Date(timestamp)
+  const originalDay = date.getDate()
+
   switch (cycle) {
     case SubscriptionCycle.MONTHLY:
       date.setMonth(date.getMonth() + 1)
@@ -25,7 +27,17 @@ export const advanceDate = (timestamp: number, cycle: SubscriptionCycle): number
     case SubscriptionCycle.ANNUALLY:
       date.setFullYear(date.getFullYear() + 1)
       break
+    default: {
+      const _exhaustiveCheck: never = cycle
+      throw new Error(`Unhandled SubscriptionCycle: ${_exhaustiveCheck}`)
+    }
   }
+
+  // Si el día desbordó (ej: 31 ene + 1 mes → 2 mar), retroceder al último día del mes correcto
+  if (date.getDate() !== originalDay) {
+    date.setDate(0)
+  }
+
   return date.getTime()
 }
 

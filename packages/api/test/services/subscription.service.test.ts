@@ -50,16 +50,16 @@ describe('advanceDate', () => {
     expect(toYMD(advanceDate(base, SubscriptionCycle.ANNUALLY))).toBe('2025-03-15')
   })
 
-  test('monthly edge case: Jan 31 overflows into March (JS native behaviour)', () => {
-    // Feb 2024 has 29 days; Feb 31 overflows by 2 → March 2
+  test('monthly edge case: Jan 31 clamps to last day of February', () => {
+    // Feb 2024 has 29 days (leap year) → result should be Feb 29, not Mar 2
     const jan31 = makeDate(2024, 1, 31)
-    expect(toYMD(advanceDate(jan31, SubscriptionCycle.MONTHLY))).toBe('2024-03-02')
+    expect(toYMD(advanceDate(jan31, SubscriptionCycle.MONTHLY))).toBe('2024-02-29')
   })
 
-  test('annually edge case: Feb 29 leap year overflows into March next year', () => {
-    // Feb 29 in 2024 (leap) → Feb 29, 2025 → 2025 is not a leap year → March 1
+  test('annually edge case: Feb 29 leap year clamps to Feb 28 next year', () => {
+    // Feb 29 in 2024 (leap) → 2025 is not a leap year → clamp to Feb 28
     const feb29 = makeDate(2024, 2, 29)
-    expect(toYMD(advanceDate(feb29, SubscriptionCycle.ANNUALLY))).toBe('2025-03-01')
+    expect(toYMD(advanceDate(feb29, SubscriptionCycle.ANNUALLY))).toBe('2025-02-28')
   })
 })
 
