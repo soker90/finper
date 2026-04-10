@@ -3,9 +3,9 @@ import { describe, expect, it, vi } from 'vitest'
 import { http, HttpResponse } from 'msw'
 import { waitFor } from '@testing-library/react'
 import { SWRConfig } from 'swr'
-import { server } from '../../../mock/server'
-import { render } from '../../../test/testUtils'
-import LinkTransactionsModal from './LinkTransactionsModal'
+import { server } from '../../../../mock/server'
+import { render } from '../../../../test/testUtils'
+import LinkTransactionsModal from '.'
 import { Subscription, SubscriptionCycle, TransactionType } from 'types'
 
 const NOW = Date.now()

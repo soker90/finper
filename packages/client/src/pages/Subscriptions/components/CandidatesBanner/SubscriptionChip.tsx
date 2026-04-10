@@ -2,7 +2,7 @@ import { Box, Avatar, Tooltip, Typography } from '@mui/material'
 import { CheckOutlined } from '@ant-design/icons'
 import { format } from 'utils'
 import { SubscriptionCandidate } from 'types'
-import { CYCLE_LABELS } from '../utils'
+import { CYCLE_LABELS } from '../../utils'
 
 type Sub = SubscriptionCandidate['subscriptionIds'][number]
 

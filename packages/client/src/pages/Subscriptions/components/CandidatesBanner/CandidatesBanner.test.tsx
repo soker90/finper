@@ -1,7 +1,7 @@
 // @vitest-environment happy-dom
 import { describe, expect, it, vi } from 'vitest'
-import { render } from '../../../test/testUtils'
-import CandidatesBanner from './CandidatesBanner'
+import { render } from '../../../../test/testUtils'
+import CandidatesBanner from '.'
 import { SubscriptionCycle } from 'types'
 
 const NOW = Date.now()

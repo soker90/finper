@@ -3,8 +3,8 @@ import { describe, expect, it, vi } from 'vitest'
 import { useState } from 'react'
 import { SWRConfig } from 'swr'
 import { fireEvent, waitFor } from '@testing-library/react'
-import { render as customRender } from '../../../test/testUtils'
-import SubscriptionForm from './SubscriptionForm'
+import { render as customRender } from '../../../../test/testUtils'
+import SubscriptionForm from '.'
 import { Subscription, SubscriptionCycle, SubscriptionInput } from 'types'
 
 // Mock the data hooks so selects have options and validation can pass on submit.

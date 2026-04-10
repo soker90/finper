@@ -2,9 +2,9 @@
 import { describe, expect, it, vi } from 'vitest'
 import { http, HttpResponse } from 'msw'
 import { SWRConfig } from 'swr'
-import { server } from '../../../mock/server'
-import { render } from '../../../test/testUtils'
-import SubscriptionCard from './SubscriptionCard'
+import { server } from '../../../../mock/server'
+import { render } from '../../../../test/testUtils'
+import SubscriptionCard from '.'
 import { Subscription, SubscriptionCycle, TransactionType } from 'types'
 
 const NOW = Date.now()
