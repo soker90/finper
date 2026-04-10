@@ -32,7 +32,8 @@ export const ERROR_MESSAGE = {
     ALREADY_EXISTS: 'El usuario ya existe'
   },
   SUBSCRIPTION: {
-    NOT_FOUND: 'La suscripción no existe'
+    NOT_FOUND: 'La suscripción no existe',
+    TRANSACTION_IDS_REQUIRED: 'transactionIds debe ser un array no vacío'
   },
   SUBSCRIPTION_CANDIDATE: {
     NOT_FOUND: 'La candidata no existe'

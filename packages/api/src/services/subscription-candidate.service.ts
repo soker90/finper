@@ -7,6 +7,7 @@ import {
   TransactionModel
 } from '@soker90/finper-models'
 import SubscriptionService from './subscription.service'
+import { leanDoc } from '../utils/mongoose'
 
 const ONE_WEEK_MS = 7 * 24 * 60 * 60 * 1000
 
@@ -68,7 +69,7 @@ export default class SubscriptionCandidateService implements ISubscriptionCandid
    * Links the transaction, advances nextPaymentDate, deletes candidate.
    */
   async assignSubscription (candidateId: string, subscriptionId: string): Promise<void> {
-    const candidate = await SubscriptionCandidateModel.findByIdAndDelete(candidateId) as unknown as ISubscriptionCandidate
+    const candidate = leanDoc<ISubscriptionCandidate>(await SubscriptionCandidateModel.findByIdAndDelete(candidateId).lean())
 
     // Vincular la transacción a la suscripción
     await TransactionModel.findByIdAndUpdate(candidate.transactionId, { subscriptionId })

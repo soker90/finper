@@ -32,17 +32,24 @@ describe('SubscriptionCandidateService', () => {
 
   // ── detectCandidates ─────────────────────────────────────────────────────
   describe('detectCandidates', () => {
-    test('does nothing when no active subscriptions exist for the user', async () => {
-      const user = generateUsername()
-      const account = await insertAccount({ user })
-      const category = await insertCategory({ user })
-      const transaction = await insertTransaction({
+    let user: string
+    let account: any
+    let category: any
+    let transaction: any
+
+    beforeEach(async () => {
+      user = generateUsername()
+      account = await insertAccount({ user })
+      category = await insertCategory({ user })
+      transaction = await insertTransaction({
         user,
         date: NOW,
         account: account._id.toString(),
         category: category._id.toString()
       })
+    })
 
+    test('does nothing when no active subscriptions exist for the user', async () => {
       await service.detectCandidates(transaction)
 
       const candidates = await SubscriptionCandidateModel.find({ user })
@@ -50,10 +57,6 @@ describe('SubscriptionCandidateService', () => {
     })
 
     test('detects subscriptions whose nextPaymentDate is within ±7 days', async () => {
-      const user = generateUsername()
-      const account = await insertAccount({ user })
-      const category = await insertCategory({ user })
-
       // Within range: same day
       await insertSubscription({
         user,
@@ -83,13 +86,6 @@ describe('SubscriptionCandidateService', () => {
         nextPaymentDate: null
       })
 
-      const transaction = await insertTransaction({
-        user,
-        date: NOW,
-        account: account._id.toString(),
-        category: category._id.toString()
-      })
-
       await service.detectCandidates(transaction)
 
       const candidates = await SubscriptionCandidateModel.find({ user })
@@ -98,22 +94,11 @@ describe('SubscriptionCandidateService', () => {
     })
 
     test('does not create a duplicate candidate for the same transaction', async () => {
-      const user = generateUsername()
-      const account = await insertAccount({ user })
-      const category = await insertCategory({ user })
-
       await insertSubscription({
         user,
         accountId: account._id.toString(),
         categoryId: category._id.toString(),
         nextPaymentDate: NOW
-      })
-
-      const transaction = await insertTransaction({
-        user,
-        date: NOW,
-        account: account._id.toString(),
-        category: category._id.toString()
       })
 
       // First call creates a candidate
@@ -125,10 +110,6 @@ describe('SubscriptionCandidateService', () => {
     })
 
     test('creates a candidate with the matching subscriptionIds', async () => {
-      const user = generateUsername()
-      const account = await insertAccount({ user })
-      const category = await insertCategory({ user })
-
       const sub1 = await insertSubscription({
         user,
         accountId: account._id.toString(),
@@ -142,13 +123,6 @@ describe('SubscriptionCandidateService', () => {
         nextPaymentDate: NOW - ONE_WEEK_MS + 60_000
       })
 
-      const transaction = await insertTransaction({
-        user,
-        date: NOW,
-        account: account._id.toString(),
-        category: category._id.toString()
-      })
-
       await service.detectCandidates(transaction)
 
       const candidate = await SubscriptionCandidateModel.findOne({ user })
@@ -160,11 +134,7 @@ describe('SubscriptionCandidateService', () => {
     })
 
     test('ignores subscriptions belonging to other users', async () => {
-      const user = generateUsername()
       const otherUser = generateUsername()
-
-      const account = await insertAccount({ user })
-      const category = await insertCategory({ user })
 
       // Other user's subscription within date range
       const otherAccount = await insertAccount({ user: otherUser })
@@ -176,13 +146,6 @@ describe('SubscriptionCandidateService', () => {
         nextPaymentDate: NOW
       })
 
-      const transaction = await insertTransaction({
-        user,
-        date: NOW,
-        account: account._id.toString(),
-        category: category._id.toString()
-      })
-
       await service.detectCandidates(transaction)
 
       const candidates = await SubscriptionCandidateModel.find({ user })
@@ -192,15 +155,6 @@ describe('SubscriptionCandidateService', () => {
     test('never propagates errors to the caller (fire-and-forget wrapper)', async () => {
       // The service is always called fire-and-forget from the controller via .catch(() => {}).
       // We verify the happy-path completes without throwing when there are simply no matches.
-      const user = generateUsername()
-      const account = await insertAccount({ user })
-      const category = await insertCategory({ user })
-      const transaction = await insertTransaction({
-        user,
-        date: NOW,
-        account: account._id.toString(),
-        category: category._id.toString()
-      })
       // No matching subscriptions → early return without error
       await expect(service.detectCandidates(transaction)).resolves.toBeUndefined()
     })
@@ -208,13 +162,18 @@ describe('SubscriptionCandidateService', () => {
 
   // ── getCandidates ────────────────────────────────────────────────────────
   describe('getCandidates', () => {
+    let user: string
+
+    beforeEach(() => {
+      user = generateUsername()
+    })
+
     test('returns empty array when there are no candidates', async () => {
       const result = await service.getCandidates(generateUsername())
       expect(result).toEqual([])
     })
 
     test('returns only candidates belonging to the given user', async () => {
-      const user = generateUsername()
       const otherUser = generateUsername()
 
       await insertSubscriptionCandidate({ user })
@@ -227,7 +186,6 @@ describe('SubscriptionCandidateService', () => {
     })
 
     test('transactionId is populated with date, amount, category, account, note', async () => {
-      const user = generateUsername()
       const account = await insertAccount({ user })
       const category = await insertCategory({ user })
       const transaction = await insertTransaction({
@@ -253,7 +211,6 @@ describe('SubscriptionCandidateService', () => {
     })
 
     test('subscriptionIds are populated with name, logoUrl, amount, cycle, nextPaymentDate', async () => {
-      const user = generateUsername()
       const sub = await insertSubscription({
         user,
         nextPaymentDate: NOW
@@ -274,15 +231,24 @@ describe('SubscriptionCandidateService', () => {
 
   // ── assignSubscription ───────────────────────────────────────────────────
   describe('assignSubscription', () => {
-    test('links subscriptionId to the candidate transaction', async () => {
-      const user = generateUsername()
-      const account = await insertAccount({ user })
-      const category = await insertCategory({ user })
-      const transaction = await insertTransaction({
+    let user: string
+    let account: any
+    let category: any
+    let transaction: any
+
+    beforeEach(async () => {
+      user = generateUsername()
+      account = await insertAccount({ user })
+      category = await insertCategory({ user })
+      transaction = await insertTransaction({
         user,
+        date: NOW,
         account: account._id.toString(),
         category: category._id.toString()
       })
+    })
+
+    test('links subscriptionId to the candidate transaction', async () => {
       const sub = await insertSubscription({
         user,
         accountId: account._id.toString(),
@@ -301,16 +267,6 @@ describe('SubscriptionCandidateService', () => {
     })
 
     test('calls recalculateNextPaymentDate: nextPaymentDate is updated after assignment', async () => {
-      const user = generateUsername()
-      const account = await insertAccount({ user })
-      const category = await insertCategory({ user })
-      const txDate = NOW
-      const transaction = await insertTransaction({
-        user,
-        date: txDate,
-        account: account._id.toString(),
-        category: category._id.toString()
-      })
       const sub = await insertSubscription({
         user,
         accountId: account._id.toString(),
@@ -333,7 +289,6 @@ describe('SubscriptionCandidateService', () => {
     })
 
     test('deletes the candidate after assignment', async () => {
-      const user = generateUsername()
       const candidate = await insertSubscriptionCandidate({ user })
       const sub = (candidate.subscriptionIds as any[])[0]
 
