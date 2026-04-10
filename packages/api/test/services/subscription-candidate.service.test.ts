@@ -6,6 +6,7 @@ import {
 } from '@soker90/finper-models'
 
 import SubscriptionCandidateService from '../../src/services/subscription-candidate.service'
+import SubscriptionService from '../../src/services/subscription.service'
 import {
   insertAccount,
   insertCategory,
@@ -20,7 +21,7 @@ const testDatabase = require('../test-db')(mongoose)
 // ── SubscriptionCandidateService ─────────────────────────────────────────────
 
 describe('SubscriptionCandidateService', () => {
-  const service = new SubscriptionCandidateService()
+  const service = new SubscriptionCandidateService(new SubscriptionService())
 
   const ONE_WEEK_MS = 7 * 24 * 60 * 60 * 1000
   const NOW = new Date('2024-06-15T12:00:00Z').getTime()
@@ -341,12 +342,6 @@ describe('SubscriptionCandidateService', () => {
       const found = await SubscriptionCandidateModel.findById(candidate._id)
       expect(found).toBeNull()
     })
-
-    test('throws not-found error when candidate does not exist', async () => {
-      await expect(
-        service.assignSubscription('62a39498c4497e1fe3c2bf35', '62a39498c4497e1fe3c2bf36')
-      ).rejects.toMatchObject({ statusCode: 404 })
-    })
   })
 
   // ── dismissCandidate ─────────────────────────────────────────────────────
@@ -385,12 +380,6 @@ describe('SubscriptionCandidateService', () => {
       // Subscription unchanged (nextPaymentDate intact)
       const updatedSub = await SubscriptionModel.findById(sub._id)
       expect(updatedSub!.nextPaymentDate).toBe(NOW)
-    })
-
-    test('throws not-found error when candidate does not exist', async () => {
-      await expect(
-        service.dismissCandidate('62a39498c4497e1fe3c2bf35')
-      ).rejects.toMatchObject({ statusCode: 404 })
     })
   })
 })

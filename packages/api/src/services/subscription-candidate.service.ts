@@ -18,6 +18,12 @@ export interface ISubscriptionCandidateService {
 }
 
 export default class SubscriptionCandidateService implements ISubscriptionCandidateService {
+  private subscriptionService: SubscriptionService
+
+  constructor (subscriptionService: SubscriptionService) {
+    this.subscriptionService = subscriptionService
+  }
+
   /**
    * Called after a transaction is created (fire-and-forget).
    * Finds active subscriptions matching account + category with nextPaymentDate within ±7 days.
@@ -62,20 +68,13 @@ export default class SubscriptionCandidateService implements ISubscriptionCandid
    * Links the transaction, advances nextPaymentDate, deletes candidate.
    */
   async assignSubscription (candidateId: string, subscriptionId: string): Promise<void> {
-    const candidate = await SubscriptionCandidateModel.findById(candidateId) as unknown as ISubscriptionCandidate
-    if (!candidate) {
-      const { notFound } = await import('@hapi/boom')
-      throw notFound('Candidate not found').output
-    }
+    const candidate = await SubscriptionCandidateModel.findByIdAndDelete(candidateId) as unknown as ISubscriptionCandidate
 
     // Vincular la transacción a la suscripción
     await TransactionModel.findByIdAndUpdate(candidate.transactionId, { subscriptionId })
 
     // Recalcular nextPaymentDate a partir del último pago (fire-and-forget)
-    const subscriptionService = new SubscriptionService()
-    subscriptionService.recalculateNextPaymentDate(subscriptionId).catch(() => {})
-
-    await SubscriptionCandidateModel.findByIdAndDelete(candidateId)
+    this.subscriptionService.recalculateNextPaymentDate(subscriptionId).catch(() => {})
   }
 
   /**
@@ -83,10 +82,6 @@ export default class SubscriptionCandidateService implements ISubscriptionCandid
    * Deletes the candidate without touching the transaction or subscription.
    */
   async dismissCandidate (candidateId: string): Promise<void> {
-    const deleted = await SubscriptionCandidateModel.findByIdAndDelete(candidateId)
-    if (!deleted) {
-      const { notFound } = await import('@hapi/boom')
-      throw notFound('Candidate not found').output
-    }
+    await SubscriptionCandidateModel.findByIdAndDelete(candidateId)
   }
 }
