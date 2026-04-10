@@ -1,10 +1,10 @@
 import { useMemo, useState } from 'react'
-import { useCategories } from './hooks'
+import { useCategories } from 'hooks'
 import { CategoryItem } from './components'
 import { PlusOutlined } from '@ant-design/icons'
 import { ListContainer } from './components/ListContainer'
 import { HeaderButtons, LoadingList } from 'components'
-import { TransactionType } from 'types/transaction'
+import { TRANSACTION } from 'types/transaction'
 
 const Accounts = () => {
   const { categories, isLoading } = useCategories()
@@ -33,7 +33,7 @@ const Accounts = () => {
       <ListContainer>
         {newAccount &&
           <CategoryItem
-            category={{ name: '', type: TransactionType.Expense }} forceExpand
+            category={{ name: '', type: TRANSACTION.Expense }} forceExpand
             cancelCreate={cancelCreate} rootCategories={rootCategories}
           />}
         {categories.map((category) => <CategoryItem

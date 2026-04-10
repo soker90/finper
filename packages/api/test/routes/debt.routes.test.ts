@@ -1,7 +1,7 @@
 import supertest from 'supertest'
 import {
-  DebtType,
   IDebt,
+  DEBT,
   mongoose
 } from '@soker90/finper-models'
 import { faker } from '@faker-js/faker'
@@ -40,7 +40,7 @@ describe('Debt', () => {
       const params: Record<string, string | number> = {
         from: faker.person.firstName(),
         amount: faker.number.int(),
-        type: Math.random() > 0.5 ? DebtType.TO : DebtType.FROM
+        type: Math.random() > 0.5 ? DEBT.TO : DEBT.FROM
       }
 
       delete params[param]
@@ -58,7 +58,7 @@ describe('Debt', () => {
         .send({
           from: faker.person.firstName(),
           amount: faker.number.int(),
-          type: Math.random() > 0.5 ? DebtType.TO : DebtType.FROM
+          type: Math.random() > 0.5 ? DEBT.TO : DEBT.FROM
         })
         .expect(200)
     })
@@ -88,9 +88,9 @@ describe('Debt', () => {
     test('when there are debts, it should return the debts', async () => {
       const name = `a${faker.person.firstName()}`
       const name2 = `b${faker.person.firstName()}`
-      const from = await insertDebt({ user, type: DebtType.FROM, from: name, paymentDate: 0 })
-      const to = await insertDebt({ user, type: DebtType.TO, from: name2, paymentDate: 0 })
-      const to2 = await insertDebt({ user, type: DebtType.TO, from: name, paymentDate: 0 })
+      const from = await insertDebt({ user, type: DEBT.FROM, from: name, paymentDate: 0 })
+      const to = await insertDebt({ user, type: DEBT.TO, from: name2, paymentDate: 0 })
+      const to2 = await insertDebt({ user, type: DEBT.TO, from: name, paymentDate: 0 })
       const getResponseDebt = (debt: any) => ({
         _id: debt._id.toString(),
         from: debt.from,
@@ -181,7 +181,7 @@ describe('Debt', () => {
       const params: Record<string, string | number> = {
         from: faker.person.firstName(),
         amount: faker.number.int(),
-        type: Math.random() > 0.5 ? DebtType.TO : DebtType.FROM
+        type: Math.random() > 0.5 ? DEBT.TO : DEBT.FROM
       }
 
       delete params[param]
@@ -197,7 +197,7 @@ describe('Debt', () => {
       const params: Record<string, string | number> = {
         from: faker.person.firstName(),
         amount: faker.number.int(),
-        type: Math.random() > 0.5 ? DebtType.TO : DebtType.FROM
+        type: Math.random() > 0.5 ? DEBT.TO : DEBT.FROM
       }
       await supertest(server.app)
         .put(path(debt._id.toString()))

@@ -6,7 +6,7 @@ import { mutate } from 'swr'
 import { DateForm, InputForm, SelectForm, SelectGroupForm } from 'components'
 import { addTransaction, deleteTransaction, editTransaction } from 'services/apiService'
 import { TRANSACTIONS } from 'constants/api-paths'
-import { Transaction, TransactionType } from 'types/transaction'
+import { Transaction, TRANSACTION } from 'types/transaction'
 import { useAccounts, useGroupedCategories, useStores } from 'hooks'
 import './style.module.css'
 import { TYPES_TRANSACTIONS_ENTRIES } from 'constants/transactions'
@@ -26,7 +26,7 @@ const TransactionEdit = ({
       category: transaction?.category?._id,
       date: transaction?.date || null,
       amount: transaction?.amount,
-      type: transaction?.type || TransactionType.Expense,
+      type: transaction?.type || TRANSACTION.Expense,
       store: transaction?.store?.name || ''
     }
   })

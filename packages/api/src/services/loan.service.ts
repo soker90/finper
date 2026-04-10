@@ -6,9 +6,10 @@ import {
   LoanPaymentModel,
   LoanEventModel,
   LoanPaymentType,
+  LOAN_PAYMENT,
   AccountModel,
   TransactionModel,
-  TransactionType
+  TRANSACTION
 } from '@soker90/finper-models'
 import Boom from '@hapi/boom'
 import { roundNumber } from '../utils/roundNumber'
@@ -144,7 +145,7 @@ export default class LoanService implements ILoanService {
       principal: principalPart,
       accumulatedPrincipal,
       pendingCapital,
-      type: LoanPaymentType.ORDINARY,
+      type: LOAN_PAYMENT.ORDINARY,
       user
     })
 
@@ -178,7 +179,7 @@ export default class LoanService implements ILoanService {
       principal,
       accumulatedPrincipal,
       pendingCapital,
-      type: LoanPaymentType.EXTRAORDINARY,
+      type: LOAN_PAYMENT.EXTRAORDINARY,
       user
     })
 
@@ -226,7 +227,7 @@ export default class LoanService implements ILoanService {
     await this._deductFromAccount(loan.account.toString(), -payment.amount)
 
     // Delete the associated expense transaction (only ordinary payments generate one)
-    if (payment.type === LoanPaymentType.ORDINARY) {
+    if (payment.type === LOAN_PAYMENT.ORDINARY) {
       await TransactionModel.findOneAndDelete({
         user,
         account: loan.account,
@@ -276,7 +277,7 @@ export default class LoanService implements ILoanService {
 
     // Update the linked expense transaction if the payment is/was ordinary
     const effectiveType = data.type ?? originalType
-    if (effectiveType === LoanPaymentType.ORDINARY || originalType === LoanPaymentType.ORDINARY) {
+    if (effectiveType === LOAN_PAYMENT.ORDINARY || originalType === LOAN_PAYMENT.ORDINARY) {
       await TransactionModel.findOneAndUpdate(
         {
           user,
@@ -291,7 +292,7 @@ export default class LoanService implements ILoanService {
       )
     }
 
-    return leanDoc<ILoanPayment>(LoanPaymentModel.findById(paymentId).lean())
+    return leanDoc<ILoanPayment>(await LoanPaymentModel.findById(paymentId).lean())
   }
 
   private async _registerPaymentMovement (loan: ILoan & { _id: string }, amount: number, date: number, user: string): Promise<void> {
@@ -300,7 +301,7 @@ export default class LoanService implements ILoanService {
       date,
       category: loan.category,
       amount,
-      type: TransactionType.Expense,
+      type: TRANSACTION.Expense,
       account: loan.account,
       user
     })
@@ -327,8 +328,8 @@ export default class LoanService implements ILoanService {
     const realRows = table.filter(r => !r.isProjected)
     const projectedRows = table.filter(r => r.isProjected)
 
-    const ordinaryPayments = realRows.filter(r => r.type === LoanPaymentType.ORDINARY)
-    const extraordinaryPayments = realRows.filter(r => r.type === LoanPaymentType.EXTRAORDINARY)
+    const ordinaryPayments = realRows.filter(r => r.type === LOAN_PAYMENT.ORDINARY)
+    const extraordinaryPayments = realRows.filter(r => r.type === LOAN_PAYMENT.EXTRAORDINARY)
 
     const paidPrincipal = roundNumber(realRows.reduce((s, r) => s + r.principal, 0))
     const paidInterest = roundNumber(realRows.reduce((s, r) => s + r.interest, 0))
@@ -388,9 +389,8 @@ export default class LoanService implements ILoanService {
   private async _recalcChain (loanId: string, user: string): Promise<void> {
     const [allPayments, loan] = await Promise.all([
       leanDoc<(ILoanPayment & { _id: string })[]>(LoanPaymentModel.find({ loan: loanId, user }).sort({ date: 1 }).lean()),
-      leanDoc<ILoan | null>(LoanModel.findOne({ _id: loanId, user }).lean())
+      leanDoc<ILoan>(LoanModel.findOne({ _id: loanId, user }).lean())
     ])
-    if (!loan) throw Boom.notFound(ERROR_MESSAGE.LOAN.NOT_FOUND).output
 
     let accumulated = 0
     let pending = loan.initialAmount

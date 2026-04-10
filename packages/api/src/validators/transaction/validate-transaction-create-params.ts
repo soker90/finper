@@ -1,6 +1,6 @@
 import Joi from 'joi'
 import Boom from '@hapi/boom'
-import { TransactionType } from '@soker90/finper-models'
+import { TRANSACTION } from '@soker90/finper-models'
 import { validateCategoryExist } from '../category'
 import { validateAccountExist } from '../account'
 
@@ -9,7 +9,7 @@ export const validateTransactionCreateParams = async (params: Record<string, str
     date: Joi.number().required(),
     category: Joi.string().required(),
     amount: Joi.number().required(),
-    type: Joi.string().valid(TransactionType.Income, TransactionType.Expense, TransactionType.NotComputable).required(),
+    type: Joi.string().valid(TRANSACTION.Income, TRANSACTION.Expense, TRANSACTION.NotComputable).required(),
     account: Joi.string().required(),
     note: Joi.string(),
     store: Joi.string(),

@@ -7,7 +7,8 @@ import {
   CalendarOutlined,
   ProfileOutlined,
   FileImageOutlined,
-  BankOutlined
+  BankOutlined,
+  SyncOutlined
 } from '@ant-design/icons'
 import { BeachIcon } from 'components'
 
@@ -96,6 +97,14 @@ const dashboard = {
       type: 'item',
       url: '/prestamos',
       icon: BankOutlined,
+      breadcrumbs: true
+    },
+    {
+      id: 'subscriptions',
+      title: 'Suscripciones',
+      type: 'item',
+      url: '/suscripciones',
+      icon: SyncOutlined,
       breadcrumbs: true
     }
   ]

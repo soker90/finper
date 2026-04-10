@@ -1,9 +1,11 @@
 import { Schema, model, HydratedDocument } from 'mongoose'
 
-export enum DebtType {
-  FROM = 'from',
-  TO = 'to',
-}
+export const DEBT = {
+  FROM: 'from',
+  TO: 'to',
+} as const
+
+export type DebtType = typeof DEBT[keyof typeof DEBT]
 
 export interface IDebt {
   from: string
@@ -23,7 +25,7 @@ const debtSchema = new Schema<IDebt>({
   amount: { type: Number, required: true },
   paymentDate: { type: Number },
   concept: { type: String },
-  type: { type: String, required: true, enum: [DebtType.FROM, DebtType.TO] },
+  type: { type: String, required: true, enum: [DEBT.FROM, DEBT.TO] },
   user: { type: String, required: true }
 }, { versionKey: false })
 

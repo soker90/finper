@@ -1,4 +1,4 @@
-import { CategoryModel, TransactionType, mongoose, IBudget, BudgetModel } from '@soker90/finper-models'
+import { CategoryModel, TransactionType, TRANSACTION, mongoose, IBudget, BudgetModel } from '@soker90/finper-models'
 import { calcBudgetByMonths, getTransactionsSumByMonth } from './utils'
 
 interface CategoriesWithBudgets {
@@ -147,14 +147,14 @@ export default class BudgetService implements IBudgetService {
     const categoriesWithBudgets = await this.getCategoriesWithBudgets({ user, year, month })
 
     const expenses = this.getBudgetsByType({
-      filterType: TransactionType.Expense,
+      filterType: TRANSACTION.Expense,
       categoriesWithBudgets,
       transactionsSum,
       month
     })
 
     const incomes = this.getBudgetsByType({
-      filterType: TransactionType.Income,
+      filterType: TRANSACTION.Income,
       categoriesWithBudgets,
       transactionsSum,
       month

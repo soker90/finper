@@ -1,9 +1,9 @@
-import { IAccount, ITransaction, StoreModel, StoreDocument } from '@soker90/finper-models'
+import { ITransaction, StoreModel, StoreDocument } from '@soker90/finper-models'
 
 export interface IStoreService {
   getAndReplaceStore(transaction: ITransaction): Promise<ITransaction>
 
-  getStores(user: string): Promise<IAccount[]>;
+  getStores(user: string): Promise<StoreDocument[]>;
 
   replaceShopValue(transaction: { value: ITransaction }): Promise<any>
 }
@@ -31,7 +31,7 @@ export default class StoreService implements IStoreService {
     }
   }
 
-  public async getStores (user: string): Promise<IAccount[]> {
+  public async getStores (user: string): Promise<StoreDocument[]> {
     return StoreModel.find({ user }, '_id name')
   }
 }

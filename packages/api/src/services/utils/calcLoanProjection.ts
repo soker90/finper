@@ -1,4 +1,4 @@
-import { ILoanPayment, LoanPaymentType, Types } from '@soker90/finper-models'
+import { ILoanPayment, LoanPaymentType, LOAN_PAYMENT, Types } from '@soker90/finper-models'
 import { roundNumber } from '../../utils/roundNumber'
 
 /**
@@ -136,7 +136,7 @@ const projectLoanPayments = (input: ProjectionInput): ProjectedPayment[] => {
       principal: principalPart,
       accumulatedPrincipal: 0, // filled by caller if needed
       pendingCapital: pending,
-      type: LoanPaymentType.ORDINARY
+      type: LOAN_PAYMENT.ORDINARY
     })
 
     lastDate = nextDate
@@ -192,7 +192,7 @@ export const buildAmortizationTable = (
   // Extraordinary payments must not shift the schedule.
   const lastOrdinaryReal = [...sorted]
     .reverse()
-    .find(p => p.type === LoanPaymentType.ORDINARY)
+    .find(p => p.type === LOAN_PAYMENT.ORDINARY)
 
   const lastOrdinaryDate = lastOrdinaryReal?.date ?? subtractOneMonth(startDate)
   const nextProjectedDate = addOneMonth(lastOrdinaryDate)

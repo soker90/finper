@@ -1,4 +1,4 @@
-import { ReactNode } from 'react'
+import { ReactNode, FormEvent } from 'react'
 import {
   Modal,
   Card,
@@ -42,13 +42,20 @@ const ModalGrid = ({
     </Button>
   )
 
+  const handleFormSubmit = (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    if (action) {
+      action(e)
+    }
+  }
+
   return (
     <Modal
       onClose={onClose}
       open={show}
       sx={{ margin: 'auto', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
     >
-      <form onSubmit={action}>
+      <form onSubmit={handleFormSubmit}>
         <Card>
           <CardHeader title={title} />
           <Divider />

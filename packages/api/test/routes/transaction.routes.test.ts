@@ -6,7 +6,7 @@ import {
   mongoose,
   StoreModel,
   TransactionModel,
-  TransactionType
+  TRANSACTION
 } from '@soker90/finper-models'
 import { faker } from '@faker-js/faker'
 
@@ -50,7 +50,7 @@ describe('Transaction', () => {
         date: faker.date.past().getTime(),
         category: (await insertCategory({ user }))._id.toString(),
         amount: faker.finance.amount(),
-        type: Math.random() > 0.5 ? TransactionType.Expense : TransactionType.Income,
+        type: Math.random() > 0.5 ? TRANSACTION.Expense : TRANSACTION.Income,
         account: (await insertAccount({ user }))._id.toString()
       }
 
@@ -70,7 +70,7 @@ describe('Transaction', () => {
           date: faker.date.past().getTime(),
           category: (await insertCategory({ user }))._id.toString(),
           amount: faker.finance.amount(),
-          type: Math.random() > 0.5 ? TransactionType.Expense : TransactionType.Income,
+          type: Math.random() > 0.5 ? TRANSACTION.Expense : TRANSACTION.Income,
           account: (await insertAccount())._id.toString(),
           note: faker.lorem.sentence(),
           store: faker.company.name()
@@ -86,7 +86,7 @@ describe('Transaction', () => {
           date: faker.date.past().getTime(),
           category: (await insertCategory({ user }))._id.toString(),
           amount: faker.finance.amount(),
-          type: Math.random() > 0.5 ? TransactionType.Expense : TransactionType.Income,
+          type: Math.random() > 0.5 ? TRANSACTION.Expense : TRANSACTION.Income,
           account: (await insertAccount({ user }))._id.toString(),
           note: faker.lorem.sentence(),
           store: faker.company.name()
@@ -104,7 +104,7 @@ describe('Transaction', () => {
             date: faker.date.past().getTime(),
             category: (await insertCategory({ user }))._id.toString(),
             amount: faker.finance.amount(),
-            type: Math.random() > 0.5 ? TransactionType.Expense : TransactionType.Income,
+            type: Math.random() > 0.5 ? TRANSACTION.Expense : TRANSACTION.Income,
             account: (await insertAccount({ user }))._id.toString(),
             note: faker.lorem.sentence(),
             store
@@ -115,7 +115,7 @@ describe('Transaction', () => {
       expect(await StoreModel.countDocuments({ name: store })).toBe(1)
     })
 
-    test.each([TransactionType.Income, TransactionType.Expense, TransactionType.NotComputable])(
+    test.each([TRANSACTION.Income, TRANSACTION.Expense, TRANSACTION.NotComputable])(
       'when success creating an transaction of %s and balance is updated', async (type) => {
         const balance = faker.number.float({ multipleOf: 0.01, max: 10000, min: 0 })
         const account = await insertAccount({ user, balance })
@@ -135,9 +135,9 @@ describe('Transaction', () => {
           })
 
         const accountAfter = await AccountModel.findById(account._id) as IAccount
-        const balanceAfter = type === TransactionType.Income
+        const balanceAfter = type === TRANSACTION.Income
           ? account.balance + transactionAmount
-          : type === TransactionType.Expense
+          : type === TRANSACTION.Expense
             ? account.balance - transactionAmount
             : account.balance
 
@@ -218,7 +218,7 @@ describe('Transaction', () => {
         date: faker.date.past().getTime(),
         category: (await insertCategory({ user: username }))._id.toString(),
         amount: faker.number.int(),
-        type: Math.random() > 0.5 ? TransactionType.Expense : TransactionType.Income,
+        type: Math.random() > 0.5 ? TRANSACTION.Expense : TRANSACTION.Income,
         account: (await insertAccount({ user: username }))._id.toString()
 
       }
@@ -238,7 +238,7 @@ describe('Transaction', () => {
         date: faker.date.past().getTime(),
         category: (await insertCategory({ user: username }))._id.toString(),
         amount: faker.number.int(),
-        type: Math.random() > 0.5 ? TransactionType.Expense : TransactionType.Income,
+        type: Math.random() > 0.5 ? TRANSACTION.Expense : TRANSACTION.Income,
         account: (await insertAccount({ user: username }))._id.toString()
 
       }
@@ -250,25 +250,25 @@ describe('Transaction', () => {
     })
 
     test.each([{
-      old: TransactionType.Income,
-      updated: TransactionType.Expense
+      old: TRANSACTION.Income,
+      updated: TRANSACTION.Expense
     }, {
-      old: TransactionType.Expense,
-      updated: TransactionType.NotComputable
+      old: TRANSACTION.Expense,
+      updated: TRANSACTION.NotComputable
     },
     {
-      old: TransactionType.NotComputable,
-      updated: TransactionType.Income
+      old: TRANSACTION.NotComputable,
+      updated: TRANSACTION.Income
     }, {
-      old: TransactionType.Expense,
-      updated: TransactionType.Income
+      old: TRANSACTION.Expense,
+      updated: TRANSACTION.Income
     },
     {
-      old: TransactionType.Income,
-      updated: TransactionType.NotComputable
+      old: TRANSACTION.Income,
+      updated: TRANSACTION.NotComputable
     }, {
-      old: TransactionType.NotComputable,
-      updated: TransactionType.Expense
+      old: TRANSACTION.NotComputable,
+      updated: TRANSACTION.Expense
     }])(
       'when success editing an transaction of %s and balance is updated', async ({ old, updated }) => {
         const balance = faker.number.float({ multipleOf: 0.01, max: 10000, min: 0 })
@@ -345,7 +345,7 @@ describe('Transaction', () => {
       await supertest(server.app).delete(path(transaction._id.toString())).set('Authorization', `Bearer ${token}`).expect(204)
     })
 
-    test.each([TransactionType.Income, TransactionType.Expense, TransactionType.NotComputable])('when delete the transaction of type %s, it should decrease the account balance', async (type) => {
+    test.each([TRANSACTION.Income, TRANSACTION.Expense, TRANSACTION.NotComputable])('when delete the transaction of type %s, it should decrease the account balance', async (type) => {
       const balance = faker.number.float({ multipleOf: 0.01, max: 10000, min: 0 })
       const account = await insertAccount({ user, balance })
 

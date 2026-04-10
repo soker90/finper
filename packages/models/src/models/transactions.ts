@@ -1,10 +1,12 @@
 import { Schema, model, Types, HydratedDocument } from 'mongoose'
 
-export enum TransactionType {
-  Expense = 'expense',
-  Income = 'income',
-  NotComputable = 'not_computable',
-}
+export const TRANSACTION = {
+  Expense: 'expense',
+  Income: 'income',
+  NotComputable: 'not_computable',
+} as const
+
+export type TransactionType = typeof TRANSACTION[keyof typeof TRANSACTION]
 
 export type TransactionDocument = HydratedDocument<ITransaction>
 
@@ -15,7 +17,8 @@ export interface ITransaction {
   type: TransactionType
   account: Types.ObjectId
   note?: string
-  store?: Types.ObjectId | string
+  store?: Types.ObjectId
+  subscriptionId?: Types.ObjectId
   user: string
 }
 
@@ -26,11 +29,12 @@ const transactionSchema = new Schema<ITransaction>({
   type: {
     type: String,
     required: true,
-    enum: [TransactionType.Expense, TransactionType.Income, TransactionType.NotComputable]
+    enum: [TRANSACTION.Expense, TRANSACTION.Income, TRANSACTION.NotComputable]
   },
   account: { type: Schema.Types.ObjectId, required: true, ref: 'Account' },
   note: { type: String },
   store: { type: Schema.Types.ObjectId, ref: 'Store' },
+  subscriptionId: { type: Schema.Types.ObjectId, ref: 'Subscription' },
   user: { type: String, required: true }
 }, { versionKey: false })
 

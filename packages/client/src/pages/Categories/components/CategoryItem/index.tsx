@@ -5,14 +5,13 @@ import { Category } from 'types'
 import { ItemContent } from 'components'
 
 import CategorytEdit from '../CategorytEdit'
-import { TransactionType } from 'types/transaction'
+import { TRANSACTION } from 'types/transaction'
 import styles from './styles.module.css'
 
 const CATEGORY_TYPE = {
-  [TransactionType.Income]: 'Ingreso',
-  [TransactionType.Expense]: 'Gasto',
-  [TransactionType.NotComputable]: 'No computable'
-
+  [TRANSACTION.Income]: 'Ingreso',
+  [TRANSACTION.Expense]: 'Gasto',
+  [TRANSACTION.NotComputable]: 'No computable'
 }
 
 interface CategoryItemProps {

@@ -1,8 +1,13 @@
-import { AccountModel, IAccount, ITransaction, TransactionModel, TransactionDocument } from '@soker90/finper-models'
+import { AccountModel, ITransaction, TransactionModel, TransactionDocument } from '@soker90/finper-models'
 import Boom from '@hapi/boom'
 import { getTransactionAmount } from './utils'
 import { roundNumber } from '../utils'
+import SubscriptionCandidateService from './subscription-candidate.service'
+import SubscriptionService from './subscription.service'
 import { ERROR_MESSAGE } from '../i18n'
+
+const subscriptionService = new SubscriptionService()
+const subscriptionCandidateService = new SubscriptionCandidateService(subscriptionService)
 
 export interface ITransactionService {
   addTransaction(transaction: ITransaction): Promise<TransactionDocument>
@@ -13,8 +18,8 @@ export interface ITransactionService {
 
   getTransactions(params: {
     user: string,
-    accountId?: string,
-    categoryId?: string,
+    account?: string,
+    category?: string,
     startDate?: number,
     endDate?: number,
     type?: string,
@@ -25,7 +30,8 @@ export interface ITransactionService {
 
 const updateAcoountBalance = async (account: string, amount: number) => {
   if (amount !== 0) {
-    const accountModel = await AccountModel.findById(account) as IAccount // Problems with round...
+    const accountModel = await AccountModel.findById(account)
+    if (!accountModel) throw Boom.notFound(ERROR_MESSAGE.ACCOUNT.NOT_FOUND).output
     await AccountModel.updateOne({ _id: account }, {
       balance: roundNumber(accountModel.balance + amount)
     })
@@ -37,6 +43,9 @@ export default class TransactionService implements ITransactionService {
     return TransactionModel.create(params).then(async transaction => {
       const amount = getTransactionAmount(transaction)
       await updateAcoountBalance(transaction.account.toString(), amount)
+
+      // Fire-and-forget: detect if this transaction matches any pending subscription
+      subscriptionCandidateService.detectCandidates(transaction).catch(() => {})
 
       return transaction
     })
@@ -64,12 +73,16 @@ export default class TransactionService implements ITransactionService {
     if (amount !== 0) {
       await updateAcoountBalance(transaction.account.toString(), -amount)
     }
+    // If it was a subscription payment, recalculate the next payment date (fire-and-forget)
+    if (transaction.subscriptionId) {
+      subscriptionService.recalculateNextPaymentDate(transaction.subscriptionId.toString()).catch(() => {})
+    }
   }
 
   public async getTransactions ({ page = 0, limit = 50, startDate, endDate, ...params }: {
     user: string,
-    accountId?: string,
-    categoryId?: string,
+    account?: string,
+    category?: string,
     startDate?: number,
     endDate?: number,
     type?: string,

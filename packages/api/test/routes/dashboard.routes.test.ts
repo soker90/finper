@@ -2,11 +2,11 @@ import supertest from 'supertest'
 import {
   AccountModel,
   DebtModel,
-  DebtType,
+  DEBT,
   mongoose,
   PensionModel,
   TransactionModel,
-  TransactionType
+  TRANSACTION
 } from '@soker90/finper-models'
 
 import { server } from '../../src/server'
@@ -80,9 +80,9 @@ describe('Dashboard', () => {
       const year = now.getFullYear()
       const month = now.getMonth()
 
-      await insertTransaction({ user, date: new Date(year, month, 5).getTime(), amount: 100, type: TransactionType.Expense })
-      await insertTransaction({ user, date: new Date(year, month, 10).getTime(), amount: 50, type: TransactionType.Expense })
-      await insertTransaction({ user, date: new Date(year, month, 3).getTime(), amount: 2000, type: TransactionType.Income })
+      await insertTransaction({ user, date: new Date(year, month, 5).getTime(), amount: 100, type: TRANSACTION.Expense })
+      await insertTransaction({ user, date: new Date(year, month, 10).getTime(), amount: 50, type: TRANSACTION.Expense })
+      await insertTransaction({ user, date: new Date(year, month, 3).getTime(), amount: 2000, type: TRANSACTION.Income })
 
       const response = await supertest(server.app)
         .get(path)
@@ -101,12 +101,12 @@ describe('Dashboard', () => {
       const prevYear = month === 0 ? year - 1 : year
 
       // Current month
-      await insertTransaction({ user, date: new Date(year, month, 5).getTime(), amount: 100, type: TransactionType.Expense })
-      await insertTransaction({ user, date: new Date(year, month, 3).getTime(), amount: 2000, type: TransactionType.Income })
+      await insertTransaction({ user, date: new Date(year, month, 5).getTime(), amount: 100, type: TRANSACTION.Expense })
+      await insertTransaction({ user, date: new Date(year, month, 3).getTime(), amount: 2000, type: TRANSACTION.Income })
 
       // Previous month
-      await insertTransaction({ user, date: new Date(prevYear, prevMonth, 15).getTime(), amount: 300, type: TransactionType.Expense })
-      await insertTransaction({ user, date: new Date(prevYear, prevMonth, 10).getTime(), amount: 1500, type: TransactionType.Income })
+      await insertTransaction({ user, date: new Date(prevYear, prevMonth, 15).getTime(), amount: 300, type: TRANSACTION.Expense })
+      await insertTransaction({ user, date: new Date(prevYear, prevMonth, 10).getTime(), amount: 1500, type: TRANSACTION.Income })
 
       const response = await supertest(server.app)
         .get(path)
@@ -124,8 +124,8 @@ describe('Dashboard', () => {
       const year = now.getFullYear()
       const month = now.getMonth()
 
-      await insertTransaction({ user, date: new Date(year, month, 5).getTime(), amount: 100, type: TransactionType.Expense })
-      await insertTransaction({ user, date: new Date(year, month, 3).getTime(), amount: 2000, type: TransactionType.Income })
+      await insertTransaction({ user, date: new Date(year, month, 5).getTime(), amount: 100, type: TRANSACTION.Expense })
+      await insertTransaction({ user, date: new Date(year, month, 3).getTime(), amount: 2000, type: TRANSACTION.Income })
 
       const response = await supertest(server.app)
         .get(path)
@@ -147,8 +147,8 @@ describe('Dashboard', () => {
       const year = now.getFullYear()
       const month = now.getMonth()
 
-      await insertTransaction({ user, date: new Date(year, month, 5).getTime(), amount: 300, type: TransactionType.Expense })
-      await insertTransaction({ user, date: new Date(year, month, 6).getTime(), amount: 100, type: TransactionType.Expense })
+      await insertTransaction({ user, date: new Date(year, month, 5).getTime(), amount: 300, type: TRANSACTION.Expense })
+      await insertTransaction({ user, date: new Date(year, month, 6).getTime(), amount: 100, type: TRANSACTION.Expense })
 
       const response = await supertest(server.app)
         .get(path)
@@ -175,8 +175,8 @@ describe('Dashboard', () => {
       const year = now.getFullYear()
       const month = now.getMonth()
 
-      await insertTransaction({ user, date: new Date(year, month, 1).getTime(), amount: 50, type: TransactionType.Expense })
-      await insertTransaction({ user, date: new Date(year, month, 3).getTime(), amount: 30, type: TransactionType.Expense })
+      await insertTransaction({ user, date: new Date(year, month, 1).getTime(), amount: 50, type: TRANSACTION.Expense })
+      await insertTransaction({ user, date: new Date(year, month, 3).getTime(), amount: 30, type: TRANSACTION.Expense })
 
       const response = await supertest(server.app)
         .get(path)
@@ -208,10 +208,10 @@ describe('Dashboard', () => {
     })
 
     test('should compute totalDebts from unpaid debts only', async () => {
-      await insertDebt({ user, amount: 200, type: DebtType.TO, paymentDate: 0 })
-      await insertDebt({ user, amount: 300, type: DebtType.TO, paymentDate: 0 })
+      await insertDebt({ user, amount: 200, type: DEBT.TO, paymentDate: 0 })
+      await insertDebt({ user, amount: 300, type: DEBT.TO, paymentDate: 0 })
       // Paid debt - should not count
-      await insertDebt({ user, amount: 9999, type: DebtType.TO })
+      await insertDebt({ user, amount: 9999, type: DEBT.TO })
 
       const response = await supertest(server.app)
         .get(path)
@@ -223,7 +223,7 @@ describe('Dashboard', () => {
 
     test('should compute netWorth as totalBalance minus totalDebts', async () => {
       await insertAccount({ user, balance: 1000, isActive: true })
-      await insertDebt({ user, amount: 200, type: DebtType.TO, paymentDate: 0 })
+      await insertDebt({ user, amount: 200, type: DEBT.TO, paymentDate: 0 })
 
       const response = await supertest(server.app)
         .get(path)
@@ -238,8 +238,8 @@ describe('Dashboard', () => {
       const year = now.getFullYear()
       const month = now.getMonth()
 
-      await insertTransaction({ user, date: new Date(year, month, 5).getTime(), amount: 500, type: TransactionType.NotComputable })
-      await insertTransaction({ user, date: new Date(year, month, 6).getTime(), amount: 100, type: TransactionType.Expense })
+      await insertTransaction({ user, date: new Date(year, month, 5).getTime(), amount: 500, type: TRANSACTION.NotComputable })
+      await insertTransaction({ user, date: new Date(year, month, 6).getTime(), amount: 100, type: TRANSACTION.Expense })
 
       const response = await supertest(server.app)
         .get(path)
@@ -256,9 +256,9 @@ describe('Dashboard', () => {
       const month = now.getMonth()
 
       // Another user's transaction
-      await insertTransaction({ date: new Date(year, month, 5).getTime(), amount: 9999, type: TransactionType.Expense })
+      await insertTransaction({ date: new Date(year, month, 5).getTime(), amount: 9999, type: TRANSACTION.Expense })
       // Our user's transaction
-      await insertTransaction({ user, date: new Date(year, month, 5).getTime(), amount: 100, type: TransactionType.Expense })
+      await insertTransaction({ user, date: new Date(year, month, 5).getTime(), amount: 100, type: TRANSACTION.Expense })
 
       const response = await supertest(server.app)
         .get(path)
@@ -273,8 +273,8 @@ describe('Dashboard', () => {
       const year = now.getFullYear()
       const month = now.getMonth()
 
-      await insertTransaction({ user, date: new Date(year, month, 5).getTime(), amount: 50, type: TransactionType.Expense })
-      await insertTransaction({ user, date: new Date(year, month, 10).getTime(), amount: -40, type: TransactionType.Expense })
+      await insertTransaction({ user, date: new Date(year, month, 5).getTime(), amount: 50, type: TRANSACTION.Expense })
+      await insertTransaction({ user, date: new Date(year, month, 10).getTime(), amount: -40, type: TRANSACTION.Expense })
 
       const response = await supertest(server.app)
         .get(path)
@@ -289,8 +289,8 @@ describe('Dashboard', () => {
       const year = now.getFullYear()
       const month = now.getMonth()
 
-      await insertTransaction({ user, date: new Date(year, month, 3).getTime(), amount: 1000, type: TransactionType.Income })
-      await insertTransaction({ user, date: new Date(year, month, 5).getTime(), amount: 200, type: TransactionType.Expense })
+      await insertTransaction({ user, date: new Date(year, month, 3).getTime(), amount: 1000, type: TRANSACTION.Income })
+      await insertTransaction({ user, date: new Date(year, month, 5).getTime(), amount: 200, type: TRANSACTION.Expense })
 
       const response = await supertest(server.app)
         .get(path)
@@ -335,8 +335,8 @@ describe('Dashboard', () => {
       const month = now.getMonth()
 
       await insertAccount({ user, balance: 10000, isActive: true })
-      await insertTransaction({ user, date: new Date(year, month, 3).getTime(), amount: 3000, type: TransactionType.Income })
-      await insertTransaction({ user, date: new Date(year, month, 5).getTime(), amount: 1000, type: TransactionType.Expense })
+      await insertTransaction({ user, date: new Date(year, month, 3).getTime(), amount: 3000, type: TRANSACTION.Income })
+      await insertTransaction({ user, date: new Date(year, month, 5).getTime(), amount: 1000, type: TRANSACTION.Expense })
 
       const response = await supertest(server.app)
         .get(path)

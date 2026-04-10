@@ -1,9 +1,10 @@
 import { http, HttpResponse } from 'msw'
 
-export enum LoginUsernames {
-  // eslint-disable-next-line no-unused-vars
-  success = 'success',
-}
+export const LOGIN_USERNAMES = {
+  success: 'success',
+} as const
+
+export type LoginUsernames = typeof LOGIN_USERNAMES[keyof typeof LOGIN_USERNAMES]
 
 interface LoginRequest {
   username: LoginUsernames,
@@ -11,7 +12,7 @@ interface LoginRequest {
 }
 
 const LOGIN_RESPONSE: Record<LoginUsernames, { token: string }> = {
-  [LoginUsernames.success]: {
+  [LOGIN_USERNAMES.success]: {
     token:
             'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InRlc3QiLCJpYXQiOjE2NTc0MDg5NDEsImV4cCI6MjA1NzQxMjU0MX0.rkv9hF9TF0f9ebqgzEUJlsetHTFPdvzA9oyps1SF1l4'
   }

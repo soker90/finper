@@ -1,6 +1,6 @@
 import Joi from 'joi'
 import Boom from '@hapi/boom'
-import { ITransaction, TransactionType } from '@soker90/finper-models'
+import { ITransaction, TRANSACTION } from '@soker90/finper-models'
 import { validateTransactionExist } from './validate-transaction-exist'
 
 export const validateTransactionEditParams = async ({
@@ -14,7 +14,7 @@ export const validateTransactionEditParams = async ({
     date: Joi.number().required(),
     category: Joi.string().required(),
     amount: Joi.number().required(),
-    type: Joi.string().valid(TransactionType.Income, TransactionType.Expense, TransactionType.NotComputable).required(),
+    type: Joi.string().valid(TRANSACTION.Income, TRANSACTION.Expense, TRANSACTION.NotComputable).required(),
     account: Joi.string().required(),
     note: Joi.string(),
     store: Joi.string()

@@ -1,32 +1,36 @@
 import isNil from 'lodash.isnil'
 import isPlainObject from 'lodash.isplainobject'
-import mongoose, { HydratedDocument, Types } from 'mongoose'
+import mongoose, { Types } from 'mongoose'
 
 import mongooseConnect from './mongoose-connect'
 
 import { IAccount, AccountModel } from './models/accounts'
 import { IBudget, BudgetModel } from './models/budgets'
 import { ICategory, CategoryModel } from './models/categories'
-import { IDebt, DebtModel, DebtType } from './models/debts'
+import { IDebt, DebtModel, DebtType, DEBT } from './models/debts'
 import { IPension, PensionModel } from './models/pensions'
 import { IStore, StoreModel } from './models/stores'
-import { ITransaction, TransactionModel, TransactionType } from './models/transactions'
+import { ITransaction, TransactionModel, TransactionType, TRANSACTION } from './models/transactions'
 import { IUser, UserModel } from './models/users'
 import { ILoan, LoanModel } from './models/loans'
-import { ILoanPayment, LoanPaymentModel, LoanPaymentType } from './models/loan-payments'
+import { ILoanPayment, LoanPaymentModel, LoanPaymentType, LOAN_PAYMENT } from './models/loan-payments'
 import { ILoanEvent, LoanEventModel } from './models/loan-events'
+import { ISubscription, SubscriptionModel } from './models/subscriptions'
+import { ISubscriptionCandidate, SubscriptionCandidateModel } from './models/subscription-candidates'
 
-export type AccountDocument = HydratedDocument<IAccount>
-export type BudgetDocument = HydratedDocument<IBudget>
-export type CategoryDocument = HydratedDocument<ICategory>
-export type DebtDocument = HydratedDocument<IDebt>
-export type LoanDocument = HydratedDocument<ILoan>
-export type LoanPaymentDocument = HydratedDocument<ILoanPayment>
-export type LoanEventDocument = HydratedDocument<ILoanEvent>
-export type PensionDocument = HydratedDocument<IPension>
-export type StoreDocument = HydratedDocument<IStore>
-export type TransactionDocument = HydratedDocument<ITransaction>
-export type UserDocument = HydratedDocument<IUser>
+export type { AccountDocument } from './models/accounts'
+export type { BudgetDocument } from './models/budgets'
+export type { CategoryDocument } from './models/categories'
+export type { DebtDocument } from './models/debts'
+export type { LoanDocument } from './models/loans'
+export type { LoanPaymentDocument } from './models/loan-payments'
+export type { LoanEventDocument } from './models/loan-events'
+export type { PensionDocument } from './models/pensions'
+export type { StoreDocument } from './models/stores'
+export type { TransactionDocument } from './models/transactions'
+export type { UserDocument } from './models/users'
+export type { SubscriptionDocument } from './models/subscriptions'
+export type { SubscriptionCandidateDocument } from './models/subscription-candidates'
 
 function connect (uri: string, options: Record<string, unknown>): void {
   if (isNil(mongoose)) {
@@ -50,8 +54,11 @@ export {
   mongoose,
   Types,
 
+  DEBT,
   DebtType,
+  LOAN_PAYMENT,
   LoanPaymentType,
+  TRANSACTION,
   TransactionType,
 
   IAccount,
@@ -63,6 +70,8 @@ export {
   ILoanEvent,
   IPension,
   IStore,
+  ISubscription,
+  ISubscriptionCandidate,
   ITransaction,
   IUser,
 
@@ -75,6 +84,8 @@ export {
   LoanEventModel,
   PensionModel,
   StoreModel,
+  SubscriptionModel,
+  SubscriptionCandidateModel,
   TransactionModel,
   UserModel
 }

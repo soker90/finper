@@ -1,13 +1,13 @@
-import { TransactionType } from 'types/transaction'
+import { TRANSACTION } from 'types/transaction'
 
 export const AMOUNT_COLORS = {
-  [TransactionType.Income]: 'success.main',
-  [TransactionType.Expense]: 'error.main',
-  [TransactionType.NotComputable]: 'secondary.main'
+  [TRANSACTION.Income]: 'success.main',
+  [TRANSACTION.Expense]: 'error.main',
+  [TRANSACTION.NotComputable]: 'secondary.main'
 }
 
 export const TRANSACTION_SYMBOL = {
-  [TransactionType.Expense]: '-',
-  [TransactionType.Income]: '+',
-  [TransactionType.NotComputable]: ''
+  [TRANSACTION.Expense]: '-',
+  [TRANSACTION.Income]: '+',
+  [TRANSACTION.NotComputable]: ''
 }

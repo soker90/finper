@@ -1,9 +1,11 @@
 import { Schema, model, HydratedDocument, Types } from 'mongoose'
 
-export enum LoanPaymentType {
-  ORDINARY = 'ordinary',
-  EXTRAORDINARY = 'extraordinary',
-}
+export const LOAN_PAYMENT = {
+  ORDINARY: 'ordinary',
+  EXTRAORDINARY: 'extraordinary',
+} as const
+
+export type LoanPaymentType = typeof LOAN_PAYMENT[keyof typeof LOAN_PAYMENT]
 
 export interface ILoanPayment {
   loan: Types.ObjectId
@@ -27,7 +29,7 @@ const loanPaymentSchema = new Schema<ILoanPayment>({
   principal: { type: Number, required: true },
   accumulatedPrincipal: { type: Number, required: true },
   pendingCapital: { type: Number, required: true },
-  type: { type: String, enum: Object.values(LoanPaymentType), default: LoanPaymentType.ORDINARY },
+  type: { type: String, enum: Object.values(LOAN_PAYMENT), default: LOAN_PAYMENT.ORDINARY },
   user: { type: String, required: true }
 }, { versionKey: false })
 

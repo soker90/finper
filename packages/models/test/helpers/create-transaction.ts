@@ -1,7 +1,7 @@
 import { faker } from '@faker-js/faker'
 import { HydratedDocument } from 'mongoose'
 
-import { ITransaction, TransactionModel, TransactionType } from '../../src'
+import { ITransaction, TransactionModel, TRANSACTION } from '../../src'
 import createCategory from './create-category'
 import createAccount from './create-account'
 import createStore from './create-store'
@@ -11,7 +11,7 @@ export default async (params = {}): Promise<HydratedDocument<ITransaction>> => (
     date: faker.number.int(),
     category: (await createCategory())._id,
     amount: faker.number.float({ min: 0.2, max: 1000, fractionDigits: 2 }),
-    type: Math.random() > 0.5 ? TransactionType.Expense : TransactionType.Income,
+    type: Math.random() > 0.5 ? TRANSACTION.Expense : TRANSACTION.Income,
     account: (await createAccount())._id,
     note: faker.lorem.sentence(),
     store: (await createStore())._id,

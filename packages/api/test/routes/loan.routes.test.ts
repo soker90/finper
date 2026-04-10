@@ -4,7 +4,7 @@ import {
   LoanModel,
   LoanPaymentModel,
   LoanEventModel,
-  LoanPaymentType,
+  LOAN_PAYMENT,
   TransactionModel,
   mongoose
 } from '@soker90/finper-models'
@@ -282,7 +282,7 @@ describe('Loans', () => {
         .send({ addMovement: true })
         .expect(201)
 
-      expect(res.body.type).toBe(LoanPaymentType.ORDINARY)
+      expect(res.body.type).toBe(LOAN_PAYMENT.ORDINARY)
 
       // interest = 10000 * 3% / 12 = 25; principal = 200 - 25 = 175; pendingAmount = 10000 - 175 = 9825
       const expectedInterest = roundNumber(initialAmount * interestRate / 100 / 12)
@@ -316,7 +316,7 @@ describe('Loans', () => {
         .send({ addMovement: false })
         .expect(201)
 
-      expect(res.body.type).toBe(LoanPaymentType.ORDINARY)
+      expect(res.body.type).toBe(LOAN_PAYMENT.ORDINARY)
 
       const expectedInterest = roundNumber(initialAmount * interestRate / 100 / 12)
       const expectedPrincipal = roundNumber(monthlyPayment - expectedInterest)
@@ -450,7 +450,7 @@ describe('Loans', () => {
         .send({ amount: amortizeAmount, mode: 'reduceTerm', addMovement: true })
         .expect(201)
 
-      expect(res.body.type).toBe(LoanPaymentType.EXTRAORDINARY)
+      expect(res.body.type).toBe(LOAN_PAYMENT.EXTRAORDINARY)
       // amortizeAmount <= pendingAmount so all goes to principal
       expect(res.body.principal).toBe(amortizeAmount)
       expect(res.body.interest).toBe(0)
@@ -667,7 +667,7 @@ describe('Loans', () => {
         user,
         amount: paymentAmount,
         date: paymentDate,
-        type: LoanPaymentType.ORDINARY,
+        type: LOAN_PAYMENT.ORDINARY,
         principal,
         accumulatedPrincipal: principal,
         pendingCapital: initialPending
@@ -715,7 +715,7 @@ describe('Loans', () => {
         loan: loanId,
         user,
         amount: paymentAmount,
-        type: LoanPaymentType.EXTRAORDINARY,
+        type: LOAN_PAYMENT.EXTRAORDINARY,
         principal: paymentPrincipal,
         interest: 0,
         accumulatedPrincipal: paymentPrincipal,
@@ -798,7 +798,7 @@ describe('Loans', () => {
         interest: 25,
         accumulatedPrincipal: originalPrincipal,
         pendingCapital: initialAmount - originalPrincipal,
-        type: LoanPaymentType.ORDINARY
+        type: LOAN_PAYMENT.ORDINARY
       })
 
       // Create the linked transaction
@@ -833,18 +833,18 @@ describe('Loans', () => {
     test('editing type from ORDINARY to EXTRAORDINARY should succeed and persist the new type', async () => {
       const loan = await insertLoan({ user })
       const loanId = loan._id.toString()
-      const payment = await insertLoanPayment({ loan: loanId, user, type: LoanPaymentType.ORDINARY })
+      const payment = await insertLoanPayment({ loan: loanId, user, type: LOAN_PAYMENT.ORDINARY })
 
       const res = await supertest(server.app)
         .put(path(loanId, payment._id.toString()))
         .auth(token, { type: 'bearer' })
-        .send({ type: LoanPaymentType.EXTRAORDINARY })
+        .send({ type: LOAN_PAYMENT.EXTRAORDINARY })
         .expect(200)
 
-      expect(res.body.type).toBe(LoanPaymentType.EXTRAORDINARY)
+      expect(res.body.type).toBe(LOAN_PAYMENT.EXTRAORDINARY)
 
       const dbPayment = await LoanPaymentModel.findById(payment._id).lean()
-      expect(dbPayment!.type).toBe(LoanPaymentType.EXTRAORDINARY)
+      expect(dbPayment!.type).toBe(LOAN_PAYMENT.EXTRAORDINARY)
     })
 
     test('editing date should update the payment date and the linked transaction date', async () => {
@@ -861,7 +861,7 @@ describe('Loans', () => {
         user,
         date: originalDate,
         amount: paymentAmount,
-        type: LoanPaymentType.ORDINARY
+        type: LOAN_PAYMENT.ORDINARY
       })
 
       // Linked transaction

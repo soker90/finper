@@ -1,9 +1,9 @@
-export enum LoanPaymentType {
-  // eslint-disable-next-line no-unused-vars
-  ORDINARY = 'ordinary',
-  // eslint-disable-next-line no-unused-vars
-  EXTRAORDINARY = 'extraordinary',
-}
+export const LOAN_PAYMENT = {
+  ORDINARY: 'ordinary',
+  EXTRAORDINARY: 'extraordinary',
+} as const
+
+export type LoanPaymentType = typeof LOAN_PAYMENT[keyof typeof LOAN_PAYMENT]
 
 export interface Loan {
   _id: string

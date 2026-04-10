@@ -1,6 +1,6 @@
 import axios from 'axios'
-import { ACCOUNTS, BUDGETS, CATEGORIES, DEBTS, LOANS, LOAN_DETAIL, PENSIONS, TICKETS, TRANSACTIONS } from 'constants/api-paths'
-import { Category, Transaction, TransactionType, Account, Pension, PensionTransaction, Debt, Loan } from 'types'
+import { ACCOUNTS, BUDGETS, CATEGORIES, DEBTS, LOANS, LOAN_DETAIL, PENSIONS, TICKETS, TRANSACTIONS, SUBSCRIPTIONS, SUBSCRIPTION_CANDIDATES } from 'constants/api-paths'
+import { Category, Transaction, TransactionType, Account, Pension, PensionTransaction, Debt, Loan, SubscriptionInput } from 'types'
 
 export const editAccount = (id: string, params: {
   name?: string,
@@ -162,3 +162,26 @@ export const editLoanPayment = (loanId: string, paymentId: string, params: {
 }): Promise<{ error?: string }> => {
   return axios.put(`${LOAN_DETAIL(loanId)}/payments/${paymentId}`, params).then(() => ({})).catch((error: any) => ({ error: error.message }))
 }
+
+// Subscriptions
+export const addSubscription = (params: SubscriptionInput): Promise<{ data?: any, error?: string }> =>
+  axios.post(SUBSCRIPTIONS, params).then((data: any) => ({ data })).catch((error: any) => ({ error: error.message }))
+
+export const editSubscription = (id: string, params: Partial<SubscriptionInput>): Promise<{ data?: any, error?: string }> =>
+  axios.put(`${SUBSCRIPTIONS}/${id}`, params).then((data: any) => ({ data })).catch((error: any) => ({ error: error.message }))
+
+export const deleteSubscription = (id: string): Promise<{ error?: string }> =>
+  axios.delete(`${SUBSCRIPTIONS}/${id}`).then(() => ({})).catch((error: any) => ({ error: error.message }))
+
+export const linkSubscriptionTransactions = (id: string, transactionIds: string[]): Promise<{ error?: string }> =>
+  axios.post(`${SUBSCRIPTIONS}/${id}/link-transactions`, { transactionIds }).then(() => ({})).catch((error: any) => ({ error: error.message }))
+
+export const unlinkSubscriptionTransaction = (id: string, transactionId: string): Promise<{ error?: string }> =>
+  axios.delete(`${SUBSCRIPTIONS}/${id}/unlink-transactions/${transactionId}`).then(() => ({})).catch((error: any) => ({ error: error.message }))
+
+// Candidates
+export const assignSubscriptionCandidate = (candidateId: string, subscriptionId: string): Promise<{ error?: string }> =>
+  axios.post(`${SUBSCRIPTION_CANDIDATES}/${candidateId}/assign`, { subscriptionId }).then(() => ({})).catch((error: any) => ({ error: error.message }))
+
+export const dismissSubscriptionCandidate = (candidateId: string): Promise<{ error?: string }> =>
+  axios.post(`${SUBSCRIPTION_CANDIDATES}/${candidateId}/dismiss`).then(() => ({})).catch((error: any) => ({ error: error.message }))

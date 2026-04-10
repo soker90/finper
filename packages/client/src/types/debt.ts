@@ -1,9 +1,9 @@
-export enum DebtType {
-  // eslint-disable-next-line no-unused-vars
-  FROM = 'from',
-  // eslint-disable-next-line no-unused-vars
-  TO = 'to',
-}
+export const DEBT = {
+  FROM: 'from',
+  TO: 'to',
+} as const
+
+export type DebtType = typeof DEBT[keyof typeof DEBT]
 
 export interface Debt {
   _id?: string;

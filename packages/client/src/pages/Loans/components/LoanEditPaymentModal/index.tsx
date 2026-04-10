@@ -2,14 +2,14 @@ import { useForm } from 'react-hook-form'
 
 import { DateForm, InputForm, ModalGrid, SelectForm } from 'components'
 import { editLoanPayment } from 'services/apiService'
-import { AmortizationRow, LoanPaymentType } from 'types'
+import { AmortizationRow, LoanPaymentType, LOAN_PAYMENT } from 'types'
 
 import { useApiError, useLoanMutate } from '../../hooks'
 import { dateToInput, inputToTimestamp } from '../../utils/date'
 
 const PAYMENT_TYPE_OPTIONS = [
-  { value: LoanPaymentType.ORDINARY, label: 'Ordinaria' },
-  { value: LoanPaymentType.EXTRAORDINARY, label: 'Extraordinaria' }
+  { value: LOAN_PAYMENT.ORDINARY, label: 'Ordinaria' },
+  { value: LOAN_PAYMENT.EXTRAORDINARY, label: 'Extraordinaria' }
 ]
 
 interface FormValues {

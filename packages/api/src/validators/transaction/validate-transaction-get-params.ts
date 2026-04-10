@@ -1,12 +1,12 @@
 import Joi from 'joi'
 import Boom from '@hapi/boom'
-import { TransactionType } from '@soker90/finper-models'
+import { TRANSACTION } from '@soker90/finper-models'
 
 export const validateTransactionGetParams = async (query?: Record<string, any>) => {
   const schema = Joi.object({
     date: Joi.number(),
     category: Joi.string(),
-    type: Joi.string().valid(TransactionType.Income, TransactionType.Expense, TransactionType.NotComputable),
+    type: Joi.string().valid(TRANSACTION.Income, TRANSACTION.Expense, TRANSACTION.NotComputable),
     account: Joi.string(),
     store: Joi.string(),
     page: Joi.number()

@@ -2,11 +2,12 @@ import { faker } from '@faker-js/faker'
 import {
   AccountModel,
   BudgetModel,
-  CategoryModel, DebtModel, DebtType,
+  CategoryModel, DebtModel, DEBT,
   IAccount, ICategory,
-  IDebt, ILoan, ILoanPayment, IPension, IStore,
-  IUser, LoanModel, LoanPaymentModel, LoanPaymentType, PensionModel, StoreModel, TransactionModel,
-  TransactionType,
+  IDebt, ILoan, ILoanPayment, IPension, IStore, ISubscription, ISubscriptionCandidate,
+  IUser, LoanModel, LoanPaymentModel, LOAN_PAYMENT, PensionModel, StoreModel,
+  SubscriptionCandidateModel, SubscriptionModel, TransactionModel,
+  TRANSACTION,
   UserModel
 } from '@soker90/finper-models'
 
@@ -58,7 +59,7 @@ export const insertCategory = async (params: Record<string, any> = {}): Promise<
 
   const category = await CategoryModel.create({
     name: params.name ?? faker.commerce.department(),
-    type: params.type ?? (Math.random() > 0.5 ? TransactionType.Expense : TransactionType.Income),
+    type: params.type ?? (Math.random() > 0.5 ? TRANSACTION.Expense : TRANSACTION.Income),
     ...(parent && { parent }),
     user
   })
@@ -79,7 +80,7 @@ export const insertTransaction = async (params: Record<string, string | number> 
     date: params.date ?? faker.date.past().getTime(),
     category: params.category ?? (await insertCategory({ user })),
     amount: params.amount ?? faker.number.int(),
-    type: params.type ?? (Math.random() > 0.5 ? TransactionType.Expense : TransactionType.Income),
+    type: params.type ?? (Math.random() > 0.5 ? TRANSACTION.Expense : TRANSACTION.Income),
     account: params.account ?? (await insertAccount({ user })),
     note: params.note ?? faker.lorem.sentence(),
     store: params.store ?? (await insertStore({ user })),
@@ -94,7 +95,7 @@ export const insertDebt = async (params: Record<string, string | number> = {}): 
     amount: params.amount ?? faker.number.int(),
     ...(params.paymentDate !== 0 && { paymentDate: params.paymentDate ?? faker.number.int() }),
     concept: params.concept ?? faker.lorem.words(4),
-    type: params.type ?? (Math.random() > 0.5 ? DebtType.TO : DebtType.FROM),
+    type: params.type ?? (Math.random() > 0.5 ? DEBT.TO : DEBT.FROM),
     user: params.user ?? faker.internet.username().slice(MIN_LENGTH_USERNAME, MAX_USERNAME_LENGTH).toLowerCase()
   })
 }
@@ -127,7 +128,7 @@ export const insertPension = async (params: Record<string, string | number> = {}
 export const insertLoan = async (params: Record<string, any> = {}): Promise<ILoan & { _id: string }> => {
   const user = (params.user ?? generateUsername()) as string
   const account = params.account ?? (await insertAccount({ user }))._id
-  const category = params.category ?? (await insertCategory({ user, type: TransactionType.Expense }))._id
+  const category = params.category ?? (await insertCategory({ user, type: TRANSACTION.Expense }))._id
   const initialAmount = params.initialAmount ?? 10000
   const interestRate = params.interestRate ?? 3
   const monthlyPayment = params.monthlyPayment ?? 200
@@ -167,7 +168,39 @@ export const insertLoanPayment = async (params: Record<string, any> = {}): Promi
     principal,
     accumulatedPrincipal,
     pendingCapital,
-    type: params.type ?? LoanPaymentType.ORDINARY,
+    type: params.type ?? LOAN_PAYMENT.ORDINARY,
     user
   }) as unknown as ILoanPayment & { _id: string }
+}
+
+export const insertSubscription = async (params: Record<string, any> = {}): Promise<ISubscription & { _id: any }> => {
+  const user = (params.user ?? generateUsername()) as string
+  const account = params.accountId ? { _id: params.accountId } : await insertAccount({ user })
+  const category = params.categoryId ? { _id: params.categoryId } : await insertCategory({ user })
+
+  return SubscriptionModel.create({
+    name: params.name ?? faker.company.name(),
+    amount: params.amount ?? faker.number.float({ min: 1, max: 50, multipleOf: 0.01 }),
+    cycle: params.cycle ?? 1,
+    categoryId: category._id,
+    accountId: account._id,
+    nextPaymentDate: params.nextPaymentDate ?? null,
+    user
+  }) as unknown as ISubscription & { _id: any }
+}
+
+export const insertSubscriptionCandidate = async (params: Record<string, any> = {}): Promise<ISubscriptionCandidate & { _id: any }> => {
+  const user = (params.user ?? generateUsername()) as string
+  const transaction = params.transactionId
+    ? { _id: params.transactionId }
+    : await insertTransaction({ user })
+  const subscription = params.subscriptionId
+    ? { _id: params.subscriptionId }
+    : await insertSubscription({ user })
+
+  return SubscriptionCandidateModel.create({
+    transactionId: transaction._id,
+    subscriptionIds: [subscription._id],
+    user
+  }) as unknown as ISubscriptionCandidate & { _id: any }
 }

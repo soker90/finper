@@ -6,7 +6,7 @@ import { mutate } from 'swr'
 import { ModalGrid, DateForm, InputForm, SelectForm, SelectGroupForm } from 'components'
 import { addTransaction } from 'services/apiService'
 import { TRANSACTIONS } from 'constants/api-paths'
-import { Ticket, TransactionType } from 'types'
+import { Ticket, TransactionType, TRANSACTION } from 'types'
 import { useAccounts, useGroupedCategories, useTickets } from 'hooks'
 import { TYPES_TRANSACTIONS_ENTRIES } from 'constants/transactions'
 
@@ -36,7 +36,7 @@ const ReviewModal = ({ ticket, onClose }: Props) => {
       amount: ticket.amount ?? 0,
       account: '',
       category: '',
-      type: TransactionType.Expense,
+      type: TRANSACTION.Expense,
       store: ticket.store ?? ''
     }
   })
