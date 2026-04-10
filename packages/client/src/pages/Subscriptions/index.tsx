@@ -32,7 +32,10 @@ const Subscriptions = () => {
   const handleLinked = () => {
     // Revalidar la lista y los pagos de la suscripción vinculada
     mutate(SUBSCRIPTIONS)
-    if (searchTarget) mutate(`${SUBSCRIPTIONS}/${searchTarget._id}/transactions`)
+    if (searchTarget) {
+      mutate(`${SUBSCRIPTIONS}/${searchTarget._id}/transactions`)
+      mutate(`${SUBSCRIPTIONS}/${searchTarget._id}/matching-transactions`)
+    }
   }
 
   const handleUnlinkTransaction = async (subscriptionId: string, transactionId: string) => {
