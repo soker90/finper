@@ -1,8 +1,8 @@
-import { ITransaction, TransactionType } from '@soker90/finper-models'
+import { ITransaction, TRANSACTION } from '@soker90/finper-models'
 
 export const getTransactionAmount = (transaction: ITransaction): number =>
-  transaction.type === TransactionType.Expense
+  transaction.type === TRANSACTION.Expense
     ? -transaction.amount
-    : transaction.type === TransactionType.Income
+    : transaction.type === TRANSACTION.Income
       ? transaction.amount
       : 0

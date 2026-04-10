@@ -1,4 +1,4 @@
-import { AccountModel, DebtModel, LoanModel, PensionModel, TransactionModel, TransactionType, type IPension } from '@soker90/finper-models'
+import { AccountModel, DebtModel, LoanModel, PensionModel, TransactionModel, TRANSACTION, type IPension } from '@soker90/finper-models'
 
 export interface DailyExpense {
   day: number
@@ -215,17 +215,17 @@ export default class DashboardService implements IDashboardService {
           $match: {
             user,
             date: { $gte: currentMonthStart, $lt: currentMonthEnd },
-            type: { $in: [TransactionType.Income, TransactionType.Expense] }
+            type: { $in: [TRANSACTION.Income, TRANSACTION.Expense] }
           }
         },
         {
           $group: {
             _id: null,
             income: {
-              $sum: { $cond: [{ $eq: ['$type', TransactionType.Income] }, '$amount', 0] }
+              $sum: { $cond: [{ $eq: ['$type', TRANSACTION.Income] }, '$amount', 0] }
             },
             expenses: {
-              $sum: { $cond: [{ $eq: ['$type', TransactionType.Expense] }, '$amount', 0] }
+              $sum: { $cond: [{ $eq: ['$type', TRANSACTION.Expense] }, '$amount', 0] }
             }
           }
         }
@@ -237,17 +237,17 @@ export default class DashboardService implements IDashboardService {
           $match: {
             user,
             date: { $gte: previousMonthStart, $lt: previousMonthEnd },
-            type: { $in: [TransactionType.Income, TransactionType.Expense] }
+            type: { $in: [TRANSACTION.Income, TRANSACTION.Expense] }
           }
         },
         {
           $group: {
             _id: null,
             income: {
-              $sum: { $cond: [{ $eq: ['$type', TransactionType.Income] }, '$amount', 0] }
+              $sum: { $cond: [{ $eq: ['$type', TRANSACTION.Income] }, '$amount', 0] }
             },
             expenses: {
-              $sum: { $cond: [{ $eq: ['$type', TransactionType.Expense] }, '$amount', 0] }
+              $sum: { $cond: [{ $eq: ['$type', TRANSACTION.Expense] }, '$amount', 0] }
             }
           }
         }
@@ -259,7 +259,7 @@ export default class DashboardService implements IDashboardService {
           $match: {
             user,
             date: { $gte: last6MonthsStart },
-            type: { $in: [TransactionType.Income, TransactionType.Expense] }
+            type: { $in: [TRANSACTION.Income, TRANSACTION.Expense] }
           }
         },
         {
@@ -269,10 +269,10 @@ export default class DashboardService implements IDashboardService {
               month: { $month: { date: { $toDate: '$date' }, timezone: TIMEZONE } }
             },
             income: {
-              $sum: { $cond: [{ $eq: ['$type', TransactionType.Income] }, '$amount', 0] }
+              $sum: { $cond: [{ $eq: ['$type', TRANSACTION.Income] }, '$amount', 0] }
             },
             expenses: {
-              $sum: { $cond: [{ $eq: ['$type', TransactionType.Expense] }, '$amount', 0] }
+              $sum: { $cond: [{ $eq: ['$type', TRANSACTION.Expense] }, '$amount', 0] }
             }
           }
         },
@@ -294,7 +294,7 @@ export default class DashboardService implements IDashboardService {
           $match: {
             user,
             date: { $gte: currentMonthStart, $lt: currentMonthEnd },
-            type: TransactionType.Expense
+            type: TRANSACTION.Expense
           }
         },
         {
@@ -312,7 +312,7 @@ export default class DashboardService implements IDashboardService {
           $match: {
             user,
             date: { $gte: previousMonthStart, $lt: previousMonthEnd },
-            type: TransactionType.Expense
+            type: TRANSACTION.Expense
           }
         },
         {
@@ -330,7 +330,7 @@ export default class DashboardService implements IDashboardService {
           $match: {
             user,
             date: { $gte: currentMonthStart, $lt: currentMonthEnd },
-            type: TransactionType.Expense
+            type: TRANSACTION.Expense
           }
         },
         {
@@ -363,7 +363,7 @@ export default class DashboardService implements IDashboardService {
           $match: {
             user,
             date: { $gte: currentMonthStart, $lt: currentMonthEnd },
-            type: TransactionType.Expense,
+            type: TRANSACTION.Expense,
             store: { $exists: true, $ne: null }
           }
         },
@@ -414,7 +414,7 @@ export default class DashboardService implements IDashboardService {
           $match: {
             user,
             date: { $gte: currentMonthStart, $lt: currentMonthEnd },
-            type: TransactionType.Expense
+            type: TRANSACTION.Expense
           }
         },
         {

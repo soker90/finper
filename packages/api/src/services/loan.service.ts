@@ -8,7 +8,7 @@ import {
   LoanPaymentType,
   AccountModel,
   TransactionModel,
-  TransactionType
+  TRANSACTION
 } from '@soker90/finper-models'
 import Boom from '@hapi/boom'
 import { roundNumber } from '../utils/roundNumber'
@@ -300,7 +300,7 @@ export default class LoanService implements ILoanService {
       date,
       category: loan.category,
       amount,
-      type: TransactionType.Expense,
+      type: TRANSACTION.Expense,
       account: loan.account,
       user
     })

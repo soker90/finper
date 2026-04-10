@@ -1,12 +1,12 @@
 import { faker } from '@faker-js/faker'
-import { ITransaction, TransactionType } from '@soker90/finper-models'
+import { ITransaction, TRANSACTION } from '@soker90/finper-models'
 import { getTransactionAmount } from '../../src/services/utils'
 
 describe('getTransactionsAmount', () => {
   test('should return the amount without the sign', () => {
     const transaction = {
       amount: faker.number.int(),
-      type: TransactionType.Income
+      type: TRANSACTION.Income
     } as ITransaction
 
     const result = getTransactionAmount(transaction)
@@ -16,7 +16,7 @@ describe('getTransactionsAmount', () => {
   test('should return the amount with minus sign', () => {
     const transaction = {
       amount: faker.number.int(),
-      type: TransactionType.Expense
+      type: TRANSACTION.Expense
     } as ITransaction
 
     const result = getTransactionAmount(transaction)
@@ -27,7 +27,7 @@ describe('getTransactionsAmount', () => {
   test('should return the amount equal to 0', () => {
     const transaction = {
       amount: faker.number.int(),
-      type: TransactionType.NotComputable
+      type: TRANSACTION.NotComputable
     } as ITransaction
 
     const result = getTransactionAmount(transaction)

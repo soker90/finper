@@ -7,7 +7,7 @@ import {
   IDebt, ILoan, ILoanPayment, IPension, IStore, ISubscription, ISubscriptionCandidate,
   IUser, LoanModel, LoanPaymentModel, LoanPaymentType, PensionModel, StoreModel,
   SubscriptionCandidateModel, SubscriptionCycle, SubscriptionModel, TransactionModel,
-  TransactionType,
+  TRANSACTION,
   UserModel
 } from '@soker90/finper-models'
 
@@ -59,7 +59,7 @@ export const insertCategory = async (params: Record<string, any> = {}): Promise<
 
   const category = await CategoryModel.create({
     name: params.name ?? faker.commerce.department(),
-    type: params.type ?? (Math.random() > 0.5 ? TransactionType.Expense : TransactionType.Income),
+    type: params.type ?? (Math.random() > 0.5 ? TRANSACTION.Expense : TRANSACTION.Income),
     ...(parent && { parent }),
     user
   })
@@ -80,7 +80,7 @@ export const insertTransaction = async (params: Record<string, string | number> 
     date: params.date ?? faker.date.past().getTime(),
     category: params.category ?? (await insertCategory({ user })),
     amount: params.amount ?? faker.number.int(),
-    type: params.type ?? (Math.random() > 0.5 ? TransactionType.Expense : TransactionType.Income),
+    type: params.type ?? (Math.random() > 0.5 ? TRANSACTION.Expense : TRANSACTION.Income),
     account: params.account ?? (await insertAccount({ user })),
     note: params.note ?? faker.lorem.sentence(),
     store: params.store ?? (await insertStore({ user })),
@@ -128,7 +128,7 @@ export const insertPension = async (params: Record<string, string | number> = {}
 export const insertLoan = async (params: Record<string, any> = {}): Promise<ILoan & { _id: string }> => {
   const user = (params.user ?? generateUsername()) as string
   const account = params.account ?? (await insertAccount({ user }))._id
-  const category = params.category ?? (await insertCategory({ user, type: TransactionType.Expense }))._id
+  const category = params.category ?? (await insertCategory({ user, type: TRANSACTION.Expense }))._id
   const initialAmount = params.initialAmount ?? 10000
   const interestRate = params.interestRate ?? 3
   const monthlyPayment = params.monthlyPayment ?? 200

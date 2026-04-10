@@ -1,5 +1,5 @@
 import { model, Schema, Types, HydratedDocument } from 'mongoose'
-import { TransactionType } from './transactions'
+import { TransactionType, TRANSACTION } from './transactions'
 
 export interface ICategory {
   name: string
@@ -15,7 +15,7 @@ const categorySchema = new Schema<ICategory>({
   type: {
     type: String,
     required: true,
-    enum: [TransactionType.Income, TransactionType.Expense, TransactionType.NotComputable]
+    enum: [TRANSACTION.Income, TRANSACTION.Expense, TRANSACTION.NotComputable]
   },
   parent: { type: Schema.Types.ObjectId, ref: 'Category' },
   user: { type: String, required: true }

@@ -10,7 +10,7 @@ import { ICategory, CategoryModel } from './models/categories'
 import { IDebt, DebtModel, DebtType } from './models/debts'
 import { IPension, PensionModel } from './models/pensions'
 import { IStore, StoreModel } from './models/stores'
-import { ITransaction, TransactionModel, TransactionType } from './models/transactions'
+import { ITransaction, TransactionModel, TransactionType, TRANSACTION } from './models/transactions'
 import { IUser, UserModel } from './models/users'
 import { ILoan, LoanModel } from './models/loans'
 import { ILoanPayment, LoanPaymentModel, LoanPaymentType } from './models/loan-payments'
@@ -56,6 +56,7 @@ export {
 
   DebtType,
   LoanPaymentType,
+  TRANSACTION,
   TransactionType,
   SubscriptionCycle,
 

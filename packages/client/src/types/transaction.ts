@@ -1,9 +1,10 @@
-/* eslint-disable no-unused-vars */
-export enum TransactionType {
-  Expense = 'expense',
-  Income = 'income',
-  NotComputable = 'not_computable',
-}
+export const TRANSACTION = {
+  Expense: 'expense',
+  Income: 'income',
+  NotComputable: 'not_computable',
+} as const
+
+export type TransactionType = typeof TRANSACTION[keyof typeof TRANSACTION]
 
 export interface Transaction {
   _id?: string,
@@ -23,15 +24,4 @@ export interface Transaction {
   store?: {
     name: string,
   },
-}
-
-export interface TransactionInput {
-  _id?: string,
-  date: number,
-  category: string,
-  amount: number,
-  type: TransactionType,
-  account: string,
-  note?: string,
-  store?: string,
 }

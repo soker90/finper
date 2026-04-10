@@ -1,9 +1,9 @@
-import { TransactionType } from 'types/transaction'
+import { TRANSACTION } from 'types/transaction'
 
 export const TYPES_TRANSACTIONS = {
-  [TransactionType.Income]: 'Ingreso',
-  [TransactionType.Expense]: 'Gasto',
-  [TransactionType.NotComputable]: 'No computable'
+  [TRANSACTION.Income]: 'Ingreso',
+  [TRANSACTION.Expense]: 'Gasto',
+  [TRANSACTION.NotComputable]: 'No computable'
 }
 
 export const TYPES_TRANSACTIONS_ENTRIES = Object.entries(TYPES_TRANSACTIONS)

@@ -1,7 +1,7 @@
 import supertest from 'supertest'
 import {
   BudgetModel, CategoryModel, ICategory,
-  mongoose, TransactionModel, TransactionType
+  mongoose, TransactionModel, TRANSACTION
 } from '@soker90/finper-models'
 import { faker } from '@faker-js/faker'
 
@@ -70,12 +70,12 @@ describe('Budget', () => {
     test('when there are budgets and month is provided, it should return the budgets', async () => {
       const year = faker.date.past().getFullYear()
       const month = faker.date.past().getMonth()
-      const budgetIncome = await insertBudget({ user, type: TransactionType.Income, year, month })
-      const budgetExpense = await insertBudget({ user, type: TransactionType.Expense, year, month })
+      const budgetIncome = await insertBudget({ user, type: TRANSACTION.Income, year, month })
+      const budgetExpense = await insertBudget({ user, type: TRANSACTION.Expense, year, month })
       const transaction = await insertTransaction({
         user,
         category: budgetIncome.category._id,
-        type: TransactionType.Income,
+        type: TRANSACTION.Income,
         date: new Date(year, month, faker.number.int({
           min: 1, max: 28
         })).getTime()
@@ -83,7 +83,7 @@ describe('Budget', () => {
       const transaction2 = await insertTransaction({
         user,
         category: budgetIncome.category._id,
-        type: TransactionType.Income,
+        type: TRANSACTION.Income,
         date: new Date(year, month, faker.number.int({
           min: 1, max: 28
         })).getTime()
@@ -103,12 +103,12 @@ describe('Budget', () => {
       const month = faker.number.int({
         min: 0, max: 11
       })
-      const budgetIncome = await insertBudget({ user, type: TransactionType.Income, year, month: month + 1 })
-      const budgetExpense = await insertBudget({ user, type: TransactionType.Expense, year })
+      const budgetIncome = await insertBudget({ user, type: TRANSACTION.Income, year, month: month + 1 })
+      const budgetExpense = await insertBudget({ user, type: TRANSACTION.Expense, year })
       const transaction = await insertTransaction({
         user,
         category: budgetIncome.category._id.toString(),
-        type: TransactionType.Income,
+        type: TRANSACTION.Income,
         date: new Date(year, month, faker.number.int({
           min: 1, max: 28
         })).getTime()
@@ -116,7 +116,7 @@ describe('Budget', () => {
       const transaction2 = await insertTransaction({
         user,
         category: budgetIncome.category._id.toString(),
-        type: TransactionType.Income,
+        type: TRANSACTION.Income,
         date: new Date(year, month, faker.number.int({
           min: 1, max: 28
         })).getTime()

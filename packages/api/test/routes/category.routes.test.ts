@@ -2,7 +2,7 @@ import supertest from 'supertest'
 import {
   CategoryModel,
   ICategory,
-  mongoose, TransactionType
+  mongoose, TRANSACTION
 } from '@soker90/finper-models'
 import { faker } from '@faker-js/faker'
 
@@ -39,7 +39,7 @@ describe('Category', () => {
     test.each(['name', 'type'])('when no %s param provided, it should response an error with status code 422', async (param: string) => {
       const params: Record<string, string> = {
         name: faker.commerce.department(),
-        type: Math.random() > 0.5 ? TransactionType.Expense : TransactionType.Income
+        type: Math.random() > 0.5 ? TRANSACTION.Expense : TRANSACTION.Income
       }
 
       delete params[param]
@@ -56,7 +56,7 @@ describe('Category', () => {
         .set('Authorization', `Bearer ${token}`)
         .send({
           name: faker.commerce.department(),
-          type: Math.random() > 0.5 ? TransactionType.Expense : TransactionType.Income
+          type: Math.random() > 0.5 ? TRANSACTION.Expense : TRANSACTION.Income
         })
         .expect(200)
     })
@@ -127,7 +127,7 @@ describe('Category', () => {
       const category: ICategory = await insertCategory({ user })
       const params: Record<string, string> = {
         name: faker.commerce.department(),
-        type: Math.random() > 0.5 ? TransactionType.Expense : TransactionType.Income
+        type: Math.random() > 0.5 ? TRANSACTION.Expense : TRANSACTION.Income
       }
 
       delete params[param]
@@ -142,7 +142,7 @@ describe('Category', () => {
       const category: ICategory = await insertCategory({ user })
       const params: Record<string, string | boolean> = {
         name: faker.commerce.department(),
-        type: Math.random() > 0.5 ? TransactionType.Expense : TransactionType.Income
+        type: Math.random() > 0.5 ? TRANSACTION.Expense : TRANSACTION.Income
       }
       await supertest(server.app)
         .patch(path(category._id.toString()))
