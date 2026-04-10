@@ -52,17 +52,17 @@ const SubscriptionCard = ({ subscription, onEdit, onDelete, onSearchPayments, on
           </Stack>
           <Stack direction='row' spacing={0.5}>
             <Tooltip title='Buscar pagos anteriores'>
-              <IconButton size='small' color='primary' onClick={() => onSearchPayments(subscription)}>
+              <IconButton size='small' color='primary' aria-label='Buscar pagos anteriores' onClick={() => onSearchPayments(subscription)}>
                 <SearchOutlined />
               </IconButton>
             </Tooltip>
             <Tooltip title='Editar'>
-              <IconButton size='small' onClick={() => onEdit(subscription)}>
+              <IconButton size='small' aria-label='Editar' onClick={() => onEdit(subscription)}>
                 <EditOutlined />
               </IconButton>
             </Tooltip>
             <Tooltip title='Eliminar'>
-              <IconButton size='small' color='error' onClick={() => onDelete(subscription)}>
+              <IconButton size='small' color='error' aria-label='Eliminar' onClick={() => onDelete(subscription)}>
                 <DeleteOutlined />
               </IconButton>
             </Tooltip>
@@ -117,7 +117,7 @@ const SubscriptionCard = ({ subscription, onEdit, onDelete, onSearchPayments, on
                               {format.euro(t.amount)}
                             </Typography>
                             <Tooltip title='Desvincular'>
-                              <IconButton size='small' onClick={() => onUnlinkTransaction(subscription._id, t._id)} sx={{ p: 0.25 }}>
+                              <IconButton size='small' aria-label='Desvincular' onClick={() => onUnlinkTransaction(subscription._id, t._id)} sx={{ p: 0.25 }}>
                                 <DisconnectOutlined style={{ fontSize: 11 }} />
                               </IconButton>
                             </Tooltip>

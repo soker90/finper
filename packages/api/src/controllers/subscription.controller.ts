@@ -8,7 +8,8 @@ import { ISubscriptionCandidateService } from '../services/subscription-candidat
 import {
   validateSubscriptionCreateParams,
   validateSubscriptionEditParams,
-  validateSubscriptionExist
+  validateSubscriptionExist,
+  validateSubscriptionLinkParams
 } from '../validators/subscription'
 import { validateCandidateExist } from '../validators/subscription-candidate'
 
@@ -82,6 +83,7 @@ export class SubscriptionController {
       .tap(({ id }) => this.logger.logInfo(`/link-transactions - subscription: ${id}`))
       .then(extractUser(req))
       .tap(({ id, user }) => validateSubscriptionExist(id, user as string))
+      .then(validateSubscriptionLinkParams)
       .then(({ id, transactionIds }) => this.subscriptionService.linkTransactions(id, transactionIds))
       .then(() => { res.status(204).send() })
       .catch((error) => { next(error) })

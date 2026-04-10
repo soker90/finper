@@ -30,7 +30,7 @@ const CandidatesBanner = ({ candidates, onAssign, onDismiss }: Props) => {
   }
 
   return (
-    <MainCard contentSX={{ p: 2.25 }} sx={{ mb: 2 }}>
+    <MainCard data-testid='candidates-banner' contentSX={{ p: 2.25 }} sx={{ mb: 2 }}>
       <Typography variant='body1' color='textSecondary' fontWeight={600} mb={1.5}>
         Posibles pagos de suscripción detectados
       </Typography>
@@ -55,6 +55,7 @@ const CandidatesBanner = ({ candidates, onAssign, onDismiss }: Props) => {
                 <Tooltip title='No es una suscripción'>
                   <IconButton
                     size='small'
+                    aria-label='No es una suscripción'
                     disabled={isLoading}
                     onClick={() => handleDismiss(candidate._id)}
                   >

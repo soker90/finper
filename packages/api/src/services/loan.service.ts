@@ -308,10 +308,11 @@ export default class LoanService implements ILoanService {
 
   private async _getLoanWithRates (id: string, user: string) {
     const [loan, events, lastPayment] = await Promise.all([
-      leanDoc<ILoan & { _id: string }>(LoanModel.findOne({ _id: id, user }).lean()),
+      leanDoc<ILoan & { _id: string } | null>(LoanModel.findOne({ _id: id, user }).lean()),
       leanDoc<ILoanEvent[]>(LoanEventModel.find({ loan: id, user }).sort({ date: 1 }).lean()),
       leanDoc<ILoanPayment | null>(LoanPaymentModel.findOne({ loan: id, user }).sort({ date: -1 }).lean())
     ])
+    if (!loan) throw Boom.notFound(ERROR_MESSAGE.LOAN.NOT_FOUND).output
     const currentEvent = events.findLast(e => e.date <= Date.now())
     const currentRate = currentEvent?.newRate ?? loan.interestRate
     const currentPayment = currentEvent?.newPayment ?? loan.monthlyPayment

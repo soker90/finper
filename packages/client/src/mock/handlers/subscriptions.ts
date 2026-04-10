@@ -37,7 +37,7 @@ const makeCandidate = () => ({
 })
 
 export const SUBSCRIPTIONS_LIST = Array.from({ length: 3 }, makeSubscription)
-const CANDIDATES_LIST = Array.from({ length: 1 }, makeCandidate)
+export const CANDIDATES_LIST = Array.from({ length: 1 }, makeCandidate)
 
 export const subscriptionsHandlers = [
   http.get('/subscriptions', () => {
@@ -80,6 +80,10 @@ export const subscriptionsHandlers = [
   }),
 
   http.post('/subscriptions/candidates/:id/dismiss', () => {
+    return new HttpResponse(null, { status: 204 })
+  }),
+
+  http.delete('/subscriptions/:id/unlink-transactions/:transactionId', () => {
     return new HttpResponse(null, { status: 204 })
   })
 ]

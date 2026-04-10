@@ -1,5 +1,6 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
+import { Alert, Box } from '@mui/material'
 import ModalGrid from 'components/modals/ModalGrid'
 import InputForm from 'components/forms/InputForm'
 import SelectForm from 'components/forms/SelectForm'
@@ -43,12 +44,19 @@ const SubscriptionForm = ({ subscription, onClose, onSubmit }: Props) => {
     defaultValues
   })
 
+  const [submitError, setSubmitError] = useState<string | null>(null)
+
   useEffect(() => {
     reset(defaultValues)
   }, [reset, subscription, accounts, categories])
 
   const handleFormSubmit = handleSubmit(async (data) => {
-    await onSubmit(data)
+    setSubmitError(null)
+    const result = await onSubmit(data)
+    if (result?.error) {
+      setSubmitError(result.error)
+      return
+    }
     onClose()
   })
 
@@ -77,8 +85,8 @@ const SubscriptionForm = ({ subscription, onClose, onSubmit }: Props) => {
         type='number'
         size={3}
         error={Boolean(errors.amount)}
-        errorText='El importe es obligatorio'
-        {...register('amount', { required: true, valueAsNumber: true })}
+        errorText='El importe debe ser mayor que 0'
+        {...register('amount', { required: true, valueAsNumber: true, min: 0.01 })}
       />
 
       <SelectForm
@@ -126,6 +134,12 @@ const SubscriptionForm = ({ subscription, onClose, onSubmit }: Props) => {
         errorText=''
         {...register('logoUrl')}
       />
+
+      {submitError && (
+        <Box sx={{ gridColumn: '1 / -1' }}>
+          <Alert severity='error'>{submitError}</Alert>
+        </Box>
+      )}
     </ModalGrid>
   )
 }

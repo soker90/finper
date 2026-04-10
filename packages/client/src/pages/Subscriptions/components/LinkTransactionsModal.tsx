@@ -26,6 +26,7 @@ type Props = {
 const LinkTransactionsModal = ({ subscription, onClose, onLinked }: Props) => {
   const [selected, setSelected] = useState<Set<string>>(new Set())
   const [submitting, setSubmitting] = useState(false)
+  const [linkError, setLinkError] = useState<string | null>(null)
 
   const { data: transactions, isLoading } = useSWR<PopulatedTransaction[]>(
     `${SUBSCRIPTIONS}/${subscription._id}/matching-transactions`
@@ -41,8 +42,13 @@ const LinkTransactionsModal = ({ subscription, onClose, onLinked }: Props) => {
   const handleSubmit = async () => {
     if (selected.size === 0) return
     setSubmitting(true)
-    await linkSubscriptionTransactions(subscription._id, [...selected])
+    setLinkError(null)
+    const result = await linkSubscriptionTransactions(subscription._id, [...selected])
     setSubmitting(false)
+    if (result.error) {
+      setLinkError(result.error)
+      return
+    }
     onLinked()
     onClose()
   }
@@ -66,6 +72,10 @@ const LinkTransactionsModal = ({ subscription, onClose, onLinked }: Props) => {
           <Alert severity='info' icon={<SearchOutlined />}>
             No hay movimientos sin asignar con la misma categoría y cuenta que esta suscripción.
           </Alert>
+        )}
+
+        {linkError && (
+          <Alert severity='error' sx={{ mt: 1 }}>{linkError}</Alert>
         )}
 
         {!isLoading && transactions && transactions.length > 0 && (

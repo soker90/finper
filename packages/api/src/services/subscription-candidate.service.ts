@@ -83,6 +83,10 @@ export default class SubscriptionCandidateService implements ISubscriptionCandid
    * Deletes the candidate without touching the transaction or subscription.
    */
   async dismissCandidate (candidateId: string): Promise<void> {
-    await SubscriptionCandidateModel.findByIdAndDelete(candidateId)
+    const deleted = await SubscriptionCandidateModel.findByIdAndDelete(candidateId)
+    if (!deleted) {
+      const { notFound } = await import('@hapi/boom')
+      throw notFound('Candidate not found').output
+    }
   }
 }
