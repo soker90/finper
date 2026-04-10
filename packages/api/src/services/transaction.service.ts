@@ -6,8 +6,8 @@ import SubscriptionCandidateService from './subscription-candidate.service'
 import SubscriptionService from './subscription.service'
 import { ERROR_MESSAGE } from '../i18n'
 
-const subscriptionCandidateService = new SubscriptionCandidateService()
 const subscriptionService = new SubscriptionService()
+const subscriptionCandidateService = new SubscriptionCandidateService(subscriptionService)
 
 export interface ITransactionService {
   addTransaction(transaction: ITransaction): Promise<TransactionDocument>
