@@ -6,6 +6,7 @@ import {
   LoanPaymentModel,
   LoanEventModel,
   LoanPaymentType,
+  LOAN_PAYMENT,
   AccountModel,
   TransactionModel,
   TRANSACTION
@@ -144,7 +145,7 @@ export default class LoanService implements ILoanService {
       principal: principalPart,
       accumulatedPrincipal,
       pendingCapital,
-      type: LoanPaymentType.ORDINARY,
+      type: LOAN_PAYMENT.ORDINARY,
       user
     })
 
@@ -178,7 +179,7 @@ export default class LoanService implements ILoanService {
       principal,
       accumulatedPrincipal,
       pendingCapital,
-      type: LoanPaymentType.EXTRAORDINARY,
+      type: LOAN_PAYMENT.EXTRAORDINARY,
       user
     })
 
@@ -226,7 +227,7 @@ export default class LoanService implements ILoanService {
     await this._deductFromAccount(loan.account.toString(), -payment.amount)
 
     // Delete the associated expense transaction (only ordinary payments generate one)
-    if (payment.type === LoanPaymentType.ORDINARY) {
+    if (payment.type === LOAN_PAYMENT.ORDINARY) {
       await TransactionModel.findOneAndDelete({
         user,
         account: loan.account,
@@ -276,7 +277,7 @@ export default class LoanService implements ILoanService {
 
     // Update the linked expense transaction if the payment is/was ordinary
     const effectiveType = data.type ?? originalType
-    if (effectiveType === LoanPaymentType.ORDINARY || originalType === LoanPaymentType.ORDINARY) {
+    if (effectiveType === LOAN_PAYMENT.ORDINARY || originalType === LOAN_PAYMENT.ORDINARY) {
       await TransactionModel.findOneAndUpdate(
         {
           user,
@@ -327,8 +328,8 @@ export default class LoanService implements ILoanService {
     const realRows = table.filter(r => !r.isProjected)
     const projectedRows = table.filter(r => r.isProjected)
 
-    const ordinaryPayments = realRows.filter(r => r.type === LoanPaymentType.ORDINARY)
-    const extraordinaryPayments = realRows.filter(r => r.type === LoanPaymentType.EXTRAORDINARY)
+    const ordinaryPayments = realRows.filter(r => r.type === LOAN_PAYMENT.ORDINARY)
+    const extraordinaryPayments = realRows.filter(r => r.type === LOAN_PAYMENT.EXTRAORDINARY)
 
     const paidPrincipal = roundNumber(realRows.reduce((s, r) => s + r.principal, 0))
     const paidInterest = roundNumber(realRows.reduce((s, r) => s + r.interest, 0))

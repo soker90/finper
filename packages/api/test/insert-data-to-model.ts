@@ -5,7 +5,7 @@ import {
   CategoryModel, DebtModel, DebtType,
   IAccount, ICategory,
   IDebt, ILoan, ILoanPayment, IPension, IStore, ISubscription, ISubscriptionCandidate,
-  IUser, LoanModel, LoanPaymentModel, LoanPaymentType, PensionModel, StoreModel,
+  IUser, LoanModel, LoanPaymentModel, LOAN_PAYMENT, PensionModel, StoreModel,
   SubscriptionCandidateModel, SubscriptionCycle, SubscriptionModel, TransactionModel,
   TRANSACTION,
   UserModel
@@ -168,7 +168,7 @@ export const insertLoanPayment = async (params: Record<string, any> = {}): Promi
     principal,
     accumulatedPrincipal,
     pendingCapital,
-    type: params.type ?? LoanPaymentType.ORDINARY,
+    type: params.type ?? LOAN_PAYMENT.ORDINARY,
     user
   }) as unknown as ILoanPayment & { _id: string }
 }

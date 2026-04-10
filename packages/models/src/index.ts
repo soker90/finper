@@ -13,7 +13,7 @@ import { IStore, StoreModel } from './models/stores'
 import { ITransaction, TransactionModel, TransactionType, TRANSACTION } from './models/transactions'
 import { IUser, UserModel } from './models/users'
 import { ILoan, LoanModel } from './models/loans'
-import { ILoanPayment, LoanPaymentModel, LoanPaymentType } from './models/loan-payments'
+import { ILoanPayment, LoanPaymentModel, LoanPaymentType, LOAN_PAYMENT } from './models/loan-payments'
 import { ILoanEvent, LoanEventModel } from './models/loan-events'
 import { ISubscription, SubscriptionModel, SubscriptionCycle } from './models/subscriptions'
 import { ISubscriptionCandidate, SubscriptionCandidateModel } from './models/subscription-candidates'
@@ -55,6 +55,7 @@ export {
   Types,
 
   DebtType,
+  LOAN_PAYMENT,
   LoanPaymentType,
   TRANSACTION,
   TransactionType,

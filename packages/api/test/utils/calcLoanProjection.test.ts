@@ -1,5 +1,5 @@
 import { buildAmortizationTable, calcMonthlyPayment } from '../../src/services/utils/calcLoanProjection'
-import { LoanPaymentType } from '@soker90/finper-models'
+import { LOAN_PAYMENT } from '@soker90/finper-models'
 
 describe('buildAmortizationTable', () => {
   const START_DATE = new Date('2020-01-15').getTime()
@@ -116,7 +116,7 @@ describe('buildAmortizationTable', () => {
         principal: monthlyPayment - 25,
         accumulatedPrincipal: monthlyPayment - 25,
         pendingCapital: pendingAmount - (monthlyPayment - 25),
-        type: LoanPaymentType.ORDINARY,
+        type: LOAN_PAYMENT.ORDINARY,
         user: 'user1'
       }
 

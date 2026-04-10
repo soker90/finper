@@ -17,7 +17,7 @@ import { useVirtualizer } from '@tanstack/react-virtual'
 import { DeleteOutlined, EditOutlined, EuroCircleOutlined } from '@ant-design/icons'
 import { MainCard } from 'components'
 import { format } from 'utils'
-import { AmortizationRow, LoanPaymentType } from 'types'
+import { AmortizationRow, LOAN_PAYMENT } from 'types'
 
 /** Altura estimada de cada fila en píxeles (Table size='small'). */
 const ROW_HEIGHT = 37
@@ -47,7 +47,7 @@ const LoanAmortizationTable = ({ rows, onDeletePayment, onEditPayment, onPayPaym
 
   const rowBackground = (row: AmortizationRow): string | undefined => {
     if (row.isProjected) return undefined
-    if (row.type === LoanPaymentType.EXTRAORDINARY) return alpha(theme.palette.info.main, 0.08)
+    if (row.type === LOAN_PAYMENT.EXTRAORDINARY) return alpha(theme.palette.info.main, 0.08)
     return alpha(theme.palette.success.main, 0.08)
   }
 
