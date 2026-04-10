@@ -5,7 +5,7 @@ import userEvent from '@testing-library/user-event'
 import { render } from '../../test/testUtils'
 
 import Login from './index'
-import { LoginUsernames } from '../../mock/handlers/auth/login'
+import { LOGIN_USERNAMES } from '../../mock/handlers/auth/login'
 
 const user = userEvent.setup()
 let handleSubmit: any
@@ -29,9 +29,9 @@ describe('Login', async () => {
     const inputUsername = getByPlaceholderText('Introduce tu nombre de usuario')
     const inputPassword = getByPlaceholderText('Introduce la contraseña')
 
-    await user.type(inputUsername, LoginUsernames.success)
+    await user.type(inputUsername, LOGIN_USERNAMES.success)
     await user.type(inputPassword, 'password')
-    await userEvent.type(inputUsername, LoginUsernames.success)
+    await userEvent.type(inputUsername, LOGIN_USERNAMES.success)
     await userEvent.type(inputPassword, 'password')
 
     const button = getByTestId('login-button')
