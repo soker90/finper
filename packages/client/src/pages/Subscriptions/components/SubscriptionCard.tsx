@@ -117,7 +117,7 @@ const SubscriptionCard = ({ subscription, onEdit, onDelete, onSearchPayments, on
                               {format.euro(t.amount)}
                             </Typography>
                             <Tooltip title='Desvincular'>
-                              <IconButton size='small' aria-label='Desvincular' onClick={() => onUnlinkTransaction(subscription._id, t._id)} sx={{ p: 0.25 }}>
+                              <IconButton size='small' aria-label='Desvincular' onClick={() => onUnlinkTransaction(subscription._id, t._id!)} sx={{ p: 0.25 }}>
                                 <DisconnectOutlined style={{ fontSize: 11 }} />
                               </IconButton>
                             </Tooltip>

@@ -1,9 +1,9 @@
 import {
-  ISubscription,
   ISubscriptionCandidate,
-  ITransaction,
   SubscriptionCandidateModel,
+  SubscriptionDocument,
   SubscriptionModel,
+  TransactionDocument,
   TransactionModel
 } from '@soker90/finper-models'
 import SubscriptionService from './subscription.service'
@@ -11,7 +11,7 @@ import SubscriptionService from './subscription.service'
 const ONE_WEEK_MS = 7 * 24 * 60 * 60 * 1000
 
 export interface ISubscriptionCandidateService {
-  detectCandidates(transaction: ITransaction): Promise<void>
+  detectCandidates(transaction: TransactionDocument): Promise<void>
   getCandidates(user: string): Promise<ISubscriptionCandidate[]>
   assignSubscription(candidateId: string, subscriptionId: string): Promise<void>
   dismissCandidate(candidateId: string): Promise<void>
@@ -22,7 +22,7 @@ export default class SubscriptionCandidateService implements ISubscriptionCandid
    * Called after a transaction is created (fire-and-forget).
    * Finds active subscriptions matching account + category with nextPaymentDate within ±7 days.
    */
-  async detectCandidates (transaction: ITransaction): Promise<void> {
+  async detectCandidates (transaction: TransactionDocument): Promise<void> {
     const from = transaction.date - ONE_WEEK_MS
     const to = transaction.date + ONE_WEEK_MS
 
@@ -35,7 +35,7 @@ export default class SubscriptionCandidateService implements ISubscriptionCandid
 
     if (matchingSubscriptions.length === 0) return
 
-    const subscriptionIds = matchingSubscriptions.map((s: ISubscription) => s._id!)
+    const subscriptionIds = matchingSubscriptions.map((s: SubscriptionDocument) => s._id)
 
     await SubscriptionCandidateModel.create({
       transactionId: transaction._id,
