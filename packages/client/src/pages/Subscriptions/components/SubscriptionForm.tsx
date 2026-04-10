@@ -5,7 +5,7 @@ import ModalGrid from 'components/modals/ModalGrid'
 import InputForm from 'components/forms/InputForm'
 import SelectForm from 'components/forms/SelectForm'
 import { useAccounts } from 'hooks/useAccounts'
-import { useCategories } from 'hooks/useCategories'
+import { useCategories } from 'hooks'
 import { Subscription, SubscriptionInput, SubscriptionCycle } from 'types'
 
 const CYCLE_OPTIONS = [

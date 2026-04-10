@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { useCategories } from './hooks'
+import { useCategories } from 'hooks'
 import { CategoryItem } from './components'
 import { PlusOutlined } from '@ant-design/icons'
 import { ListContainer } from './components/ListContainer'
