@@ -297,6 +297,30 @@ describe('SubscriptionCandidateService', () => {
       const found = await SubscriptionCandidateModel.findById(candidate._id)
       expect(found).toBeNull()
     })
+
+    test('silently swallows errors thrown by recalculateNextPaymentDate (catch branch)', async () => {
+      const sub = await insertSubscription({
+        user,
+        accountId: account._id.toString(),
+        categoryId: category._id.toString()
+      })
+      const candidate = await SubscriptionCandidateModel.create({
+        transactionId: transaction._id,
+        subscriptionIds: [sub._id],
+        user
+      })
+
+      // Force recalculate to reject — the .catch(() => {}) must absorb the error
+      const spy = jest
+        .spyOn((service as any).subscriptionService, 'recalculateNextPaymentDate')
+        .mockRejectedValueOnce(new Error('DB error'))
+
+      await expect(
+        service.assignSubscription(candidate._id.toString(), sub._id.toString())
+      ).resolves.toBeUndefined()
+
+      spy.mockRestore()
+    })
   })
 
   // ── dismissCandidate ─────────────────────────────────────────────────────

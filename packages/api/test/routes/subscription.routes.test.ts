@@ -479,6 +479,54 @@ describe('Subscriptions', () => {
         .send({ cycle: 'invalid-cycle' })
         .expect(422)
     })
+
+    test('404 when categoryId does not belong to user', async () => {
+      const sub = await insertSubscription({ user })
+      const otherCategory = await insertCategory({ user: generateUsername() })
+
+      await supertest(server.app)
+        .put(path(sub._id.toString()))
+        .auth(token, { type: 'bearer' })
+        .send({ categoryId: otherCategory._id.toString() })
+        .expect(404)
+    })
+
+    test('404 when accountId does not belong to user', async () => {
+      const sub = await insertSubscription({ user })
+      const otherAccount = await insertAccount({ user: generateUsername() })
+
+      await supertest(server.app)
+        .put(path(sub._id.toString()))
+        .auth(token, { type: 'bearer' })
+        .send({ accountId: otherAccount._id.toString() })
+        .expect(404)
+    })
+
+    test('200 when updating categoryId with a valid category', async () => {
+      const sub = await insertSubscription({ user })
+      const newCategory = await insertCategory({ user })
+
+      const res = await supertest(server.app)
+        .put(path(sub._id.toString()))
+        .auth(token, { type: 'bearer' })
+        .send({ categoryId: newCategory._id.toString() })
+        .expect(200)
+
+      expect(res.body.categoryId.toString()).toBe(newCategory._id.toString())
+    })
+
+    test('200 when updating accountId with a valid account', async () => {
+      const sub = await insertSubscription({ user })
+      const newAccount = await insertAccount({ user })
+
+      const res = await supertest(server.app)
+        .put(path(sub._id.toString()))
+        .auth(token, { type: 'bearer' })
+        .send({ accountId: newAccount._id.toString() })
+        .expect(200)
+
+      expect(res.body.accountId.toString()).toBe(newAccount._id.toString())
+    })
   })
 
   // ── DELETE /api/subscriptions/:id — additional ──────────────────────────
@@ -853,6 +901,55 @@ describe('Subscriptions', () => {
 
       const updatedSub = await SubscriptionModel.findById(sub._id).lean()
       expect(updatedSub?.nextPaymentDate).not.toBeNull()
+    })
+  })
+
+  // ── Controller error paths (catch handlers) ──────────────────────────────
+  describe('Controller catch handlers', () => {
+    let token: string
+    const user = generateUsername()
+
+    beforeAll(async () => {
+      token = await requestLogin(server.app, { username: user })
+    })
+
+    test('GET /api/subscriptions — propagates DB error as 500', async () => {
+      const spy = jest
+        .spyOn(SubscriptionModel, 'find')
+        .mockImplementationOnce(() => { throw new Error('DB failure') })
+
+      await supertest(server.app)
+        .get('/api/subscriptions')
+        .auth(token, { type: 'bearer' })
+        .expect(500)
+
+      spy.mockRestore()
+    })
+
+    test('GET /api/subscriptions/:id/matching-transactions — propagates DB error as 500', async () => {
+      const spy = jest
+        .spyOn(SubscriptionModel, 'findOne')
+        .mockRejectedValueOnce(new Error('DB failure'))
+
+      await supertest(server.app)
+        .get('/api/subscriptions/62a39498c4497e1fe3c2bf35/matching-transactions')
+        .auth(token, { type: 'bearer' })
+        .expect(500)
+
+      spy.mockRestore()
+    })
+
+    test('GET /api/subscriptions/candidates — propagates DB error as 500', async () => {
+      const spy = jest
+        .spyOn(SubscriptionCandidateModel, 'find')
+        .mockImplementationOnce(() => { throw new Error('DB failure') })
+
+      await supertest(server.app)
+        .get('/api/subscriptions/candidates')
+        .auth(token, { type: 'bearer' })
+        .expect(500)
+
+      spy.mockRestore()
     })
   })
 })
