@@ -9,9 +9,8 @@ import { useCategories } from 'hooks/useCategories'
 import { Subscription, SubscriptionInput, SubscriptionCycle } from 'types'
 
 const CYCLE_OPTIONS = [
-  { value: SubscriptionCycle.DAILY, label: 'Diario' },
-  { value: SubscriptionCycle.WEEKLY, label: 'Semanal' },
   { value: SubscriptionCycle.MONTHLY, label: 'Mensual' },
+  { value: SubscriptionCycle.BIMONTHLY, label: 'Bimensual' },
   { value: SubscriptionCycle.QUARTERLY, label: 'Trimestral' },
   { value: SubscriptionCycle.SEMI_ANNUALLY, label: 'Semestral' },
   { value: SubscriptionCycle.ANNUALLY, label: 'Anual' }

@@ -1,9 +1,8 @@
 import { Schema, model, HydratedDocument, Types } from 'mongoose'
 
 export enum SubscriptionCycle {
-  DAILY = 'daily',
-  WEEKLY = 'weekly',
   MONTHLY = 'monthly',
+  BIMONTHLY = 'bimonthly',
   QUARTERLY = 'quarterly',
   SEMI_ANNUALLY = 'semi-annually',
   ANNUALLY = 'annually',
@@ -32,9 +31,8 @@ const subscriptionSchema = new Schema<ISubscription>({
     type: String,
     required: true,
     enum: [
-      SubscriptionCycle.DAILY,
-      SubscriptionCycle.WEEKLY,
       SubscriptionCycle.MONTHLY,
+      SubscriptionCycle.BIMONTHLY,
       SubscriptionCycle.QUARTERLY,
       SubscriptionCycle.SEMI_ANNUALLY,
       SubscriptionCycle.ANNUALLY,

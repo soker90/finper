@@ -30,16 +30,12 @@ const toYMD = (ts: number): string => {
 describe('advanceDate', () => {
   const base = makeDate(2024, 3, 15) // 15 March 2024
 
-  test('daily → advances exactly 1 day', () => {
-    expect(advanceDate(base, SubscriptionCycle.DAILY) - base).toBe(24 * 60 * 60 * 1000)
-  })
-
-  test('weekly → advances exactly 7 days', () => {
-    expect(advanceDate(base, SubscriptionCycle.WEEKLY) - base).toBe(7 * 24 * 60 * 60 * 1000)
-  })
-
   test('monthly → advances 1 month', () => {
     expect(toYMD(advanceDate(base, SubscriptionCycle.MONTHLY))).toBe('2024-04-15')
+  })
+
+  test('bimonthly → advances 2 months', () => {
+    expect(toYMD(advanceDate(base, SubscriptionCycle.BIMONTHLY))).toBe('2024-05-15')
   })
 
   test('quarterly → advances 3 months', () => {
@@ -190,7 +186,7 @@ describe('SubscriptionService', () => {
       const created = await service.addSubscription({
         name: faker.company.name(),
         amount: 5,
-        cycle: SubscriptionCycle.WEEKLY,
+        cycle: SubscriptionCycle.BIMONTHLY,
         categoryId: category._id as any,
         accountId: account._id as any,
         logoUrl,
@@ -486,7 +482,7 @@ describe('SubscriptionService', () => {
       const user = generateUsername()
       const account = await insertAccount({ user })
       const category = await insertCategory({ user })
-      const sub = await insertSubscription({ user, accountId: account._id, categoryId: category._id, cycle: SubscriptionCycle.WEEKLY })
+      const sub = await insertSubscription({ user, accountId: account._id, categoryId: category._id, cycle: SubscriptionCycle.BIMONTHLY })
 
       const oldDate = makeDate(2024, 1, 1)
       const newDate = makeDate(2024, 2, 1)
@@ -497,7 +493,7 @@ describe('SubscriptionService', () => {
       await service.recalculateNextPaymentDate(sub._id.toString())
 
       const updated = await SubscriptionModel.findById(sub._id).lean()
-      expect(updated?.nextPaymentDate).toBe(advanceDate(newDate, SubscriptionCycle.WEEKLY))
+      expect(updated?.nextPaymentDate).toBe(advanceDate(newDate, SubscriptionCycle.BIMONTHLY))
     })
 
     test('does nothing when the subscription does not exist', async () => {

@@ -16,9 +16,8 @@ export const validateSubscriptionEditParams = async ({
     name: Joi.string(),
     amount: Joi.number().positive(),
     cycle: Joi.string().valid(
-      SubscriptionCycle.DAILY,
-      SubscriptionCycle.WEEKLY,
       SubscriptionCycle.MONTHLY,
+      SubscriptionCycle.BIMONTHLY,
       SubscriptionCycle.QUARTERLY,
       SubscriptionCycle.SEMI_ANNUALLY,
       SubscriptionCycle.ANNUALLY

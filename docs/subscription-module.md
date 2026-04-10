@@ -64,12 +64,11 @@ packages/
 
 ```typescript
 enum SubscriptionCycle {
-  DAILY        = 'daily',
-  WEEKLY       = 'weekly',
-  MONTHLY      = 'monthly',
-  QUARTERLY    = 'quarterly',
+  MONTHLY       = 'monthly',
+  BIMONTHLY     = 'bimonthly',
+  QUARTERLY     = 'quarterly',
   SEMI_ANNUALLY = 'semi-annually',
-  ANNUALLY     = 'annually',
+  ANNUALLY      = 'annually',
 }
 ```
 
@@ -98,9 +97,8 @@ Dado un timestamp y un ciclo, devuelve el timestamp del siguiente período.
 const advanceDate = (timestamp: number, cycle: SubscriptionCycle): number => {
   const date = new Date(timestamp)
   switch (cycle) {
-    case 'daily':         date.setDate(date.getDate() + 1);        break
-    case 'weekly':        date.setDate(date.getDate() + 7);        break
     case 'monthly':       date.setMonth(date.getMonth() + 1);      break
+    case 'bimonthly':     date.setMonth(date.getMonth() + 2);      break
     case 'quarterly':     date.setMonth(date.getMonth() + 3);      break
     case 'semi-annually': date.setMonth(date.getMonth() + 6);      break
     case 'annually':      date.setFullYear(date.getFullYear() + 1); break

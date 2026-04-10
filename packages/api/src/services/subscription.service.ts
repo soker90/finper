@@ -10,14 +10,11 @@ import {
 export const advanceDate = (timestamp: number, cycle: SubscriptionCycle): number => {
   const date = new Date(timestamp)
   switch (cycle) {
-    case SubscriptionCycle.DAILY:
-      date.setDate(date.getDate() + 1)
-      break
-    case SubscriptionCycle.WEEKLY:
-      date.setDate(date.getDate() + 7)
-      break
     case SubscriptionCycle.MONTHLY:
       date.setMonth(date.getMonth() + 1)
+      break
+    case SubscriptionCycle.BIMONTHLY:
+      date.setMonth(date.getMonth() + 2)
       break
     case SubscriptionCycle.QUARTERLY:
       date.setMonth(date.getMonth() + 3)

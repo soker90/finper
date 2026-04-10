@@ -9,9 +9,8 @@ export const validateSubscriptionCreateParams = async (params: Record<string, an
     name: Joi.string().required(),
     amount: Joi.number().positive().required(),
     cycle: Joi.string().valid(
-      SubscriptionCycle.DAILY,
-      SubscriptionCycle.WEEKLY,
       SubscriptionCycle.MONTHLY,
+      SubscriptionCycle.BIMONTHLY,
       SubscriptionCycle.QUARTERLY,
       SubscriptionCycle.SEMI_ANNUALLY,
       SubscriptionCycle.ANNUALLY

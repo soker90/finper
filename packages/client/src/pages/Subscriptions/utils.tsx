@@ -5,18 +5,16 @@ import { SubscriptionCycle, Subscription } from 'types'
 import KpiCard from '../Dashboard/components/KpiCard'
 
 const MONTHLY_MULTIPLIERS: Record<SubscriptionCycle, number> = {
-  [SubscriptionCycle.DAILY]: 30,
-  [SubscriptionCycle.WEEKLY]: 4.33,
   [SubscriptionCycle.MONTHLY]: 1,
+  [SubscriptionCycle.BIMONTHLY]: 1 / 2,
   [SubscriptionCycle.QUARTERLY]: 1 / 3,
   [SubscriptionCycle.SEMI_ANNUALLY]: 1 / 6,
   [SubscriptionCycle.ANNUALLY]: 1 / 12
 }
 
 export const CYCLE_LABELS: Record<SubscriptionCycle, string> = {
-  [SubscriptionCycle.DAILY]: 'Diario',
-  [SubscriptionCycle.WEEKLY]: 'Semanal',
   [SubscriptionCycle.MONTHLY]: 'Mensual',
+  [SubscriptionCycle.BIMONTHLY]: 'Bimensual',
   [SubscriptionCycle.QUARTERLY]: 'Trimestral',
   [SubscriptionCycle.SEMI_ANNUALLY]: 'Semestral',
   [SubscriptionCycle.ANNUALLY]: 'Anual'
