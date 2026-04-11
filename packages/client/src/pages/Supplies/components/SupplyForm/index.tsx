@@ -1,9 +1,5 @@
-import { useState } from 'react'
 import { useForm, useWatch } from 'react-hook-form'
-import { Alert, Box } from '@mui/material'
-import ModalGrid from 'components/modals/ModalGrid'
-import InputForm from 'components/forms/InputForm'
-import SelectForm from 'components/forms/SelectForm'
+import { ModalGrid, InputForm, SelectForm } from 'components'
 import { SupplyInput, SupplyType } from 'types'
 
 const SUPPLY_TYPE_OPTIONS: { value: SupplyType; label: string }[] = [
@@ -22,28 +18,23 @@ type Props = {
 }
 
 const SupplyForm = ({ supply, propertyId, onClose, onSubmit }: Props) => {
-  const defaultValues: Partial<SupplyInput> = supply
-    ? { name: supply.name, type: supply.type, propertyId: supply.propertyId }
-    : { propertyId }
-
-  const { register, handleSubmit, control, formState: { errors, isSubmitting } } = useForm<SupplyInput>({ defaultValues })
+  const { register, handleSubmit, control, formState: { errors } } = useForm<SupplyInput>({
+    defaultValues: supply
+      ? { name: supply.name, type: supply.type, propertyId: supply.propertyId }
+      : { propertyId }
+  })
 
   const selectedType = useWatch({ control, name: 'type' })
   const isOther = selectedType === 'other'
 
-  const [submitError, setSubmitError] = useState<string | null>(null)
-
   const handleFormSubmit = handleSubmit(async (data) => {
-    setSubmitError(null)
     const result = await onSubmit({
       ...data,
       name: isOther ? data.name : undefined
     })
-    if (result?.error) {
-      setSubmitError(result.error)
-      return
+    if (!result?.error) {
+      onClose()
     }
-    onClose()
   })
 
   return (
@@ -52,7 +43,6 @@ const SupplyForm = ({ supply, propertyId, onClose, onSubmit }: Props) => {
       title={supply ? 'Editar suministro' : 'Nuevo suministro'}
       onClose={onClose}
       action={handleFormSubmit}
-      actionDisabled={isSubmitting}
     >
       <SelectForm
         id='supply-type'
@@ -76,12 +66,6 @@ const SupplyForm = ({ supply, propertyId, onClose, onSubmit }: Props) => {
           errorText='El nombre es obligatorio'
           {...register('name', { required: isOther })}
         />
-      )}
-
-      {submitError && (
-        <Box sx={{ gridColumn: '1 / -1' }}>
-          <Alert severity='error'>{submitError}</Alert>
-        </Box>
       )}
     </ModalGrid>
   )

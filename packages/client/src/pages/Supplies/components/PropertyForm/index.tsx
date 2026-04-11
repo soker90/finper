@@ -1,8 +1,5 @@
-import { useState } from 'react'
 import { useForm } from 'react-hook-form'
-import { Alert, Box } from '@mui/material'
-import ModalGrid from 'components/modals/ModalGrid'
-import InputForm from 'components/forms/InputForm'
+import { ModalGrid, InputForm } from 'components'
 import { PropertyInput } from 'types'
 
 type Props = {
@@ -12,20 +9,15 @@ type Props = {
 }
 
 const PropertyForm = ({ property, onClose, onSubmit }: Props) => {
-  const defaultValues = property ? { name: property.name } : {}
-
-  const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<PropertyInput>({ defaultValues })
-
-  const [submitError, setSubmitError] = useState<string | null>(null)
+  const { register, handleSubmit, formState: { errors } } = useForm<PropertyInput>({
+    defaultValues: property ? { name: property.name } : {}
+  })
 
   const handleFormSubmit = handleSubmit(async (data) => {
-    setSubmitError(null)
     const result = await onSubmit(data)
-    if (result?.error) {
-      setSubmitError(result.error)
-      return
+    if (!result?.error) {
+      onClose()
     }
-    onClose()
   })
 
   return (
@@ -34,7 +26,6 @@ const PropertyForm = ({ property, onClose, onSubmit }: Props) => {
       title={property ? 'Editar inmueble' : 'Nuevo inmueble'}
       onClose={onClose}
       action={handleFormSubmit}
-      actionDisabled={isSubmitting}
     >
       <InputForm
         id='property-name'
@@ -45,12 +36,6 @@ const PropertyForm = ({ property, onClose, onSubmit }: Props) => {
         errorText='El nombre es obligatorio'
         {...register('name', { required: true })}
       />
-
-      {submitError && (
-        <Box sx={{ gridColumn: '1 / -1' }}>
-          <Alert severity='error'>{submitError}</Alert>
-        </Box>
-      )}
     </ModalGrid>
   )
 }
