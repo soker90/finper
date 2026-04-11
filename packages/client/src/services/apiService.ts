@@ -197,10 +197,10 @@ export const deleteProperty = (id: string): Promise<{ error?: string }> =>
   axios.delete(`${SUPPLIES_PROPERTIES}/${id}`).then(() => ({})).catch((error: any) => ({ error: error.message }))
 
 // Supplies
-export const addSupply = (params: { name: string, type: string, propertyId: string }): Promise<{ data?: any, error?: string }> =>
+export const addSupply = (params: { name?: string, type: string, propertyId: string }): Promise<{ data?: any, error?: string }> =>
   axios.post(`${SUPPLIES}`, params).then((data: any) => ({ data })).catch((error: any) => ({ error: error.message }))
 
-export const editSupply = (id: string, params: { name: string, type: string, propertyId: string }): Promise<{ data?: any, error?: string }> =>
+export const editSupply = (id: string, params: { name?: string, type: string, propertyId: string }): Promise<{ data?: any, error?: string }> =>
   axios.patch(`${SUPPLIES}/${id}`, params).then((data: any) => ({ data })).catch((error: any) => ({ error: error.message }))
 
 export const deleteSupply = (id: string): Promise<{ error?: string }> =>
