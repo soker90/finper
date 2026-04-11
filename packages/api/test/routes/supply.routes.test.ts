@@ -65,7 +65,7 @@ describe('Supply Routes', () => {
     })
   })
 
-  describe('PATCH /api/supplies/:id', () => {
+  describe('PUT /api/supplies/:id', () => {
     const path = (id: string) => `/api/supplies/${id}`
     let token: string
     const user = generateUsername()
@@ -76,7 +76,7 @@ describe('Supply Routes', () => {
 
     test('when success editing a supply', async () => {
       const supply = await insertSupply({ user })
-      await supertest(server.app).patch(path(supply._id.toString())).auth(token, { type: 'bearer' })
+      await supertest(server.app).put(path(supply._id.toString())).auth(token, { type: 'bearer' })
         .send({ name: 'Nuevo nombre', type: SUPPLY_TYPE.ELECTRICITY, propertyId: supply.propertyId.toString() })
         .expect(200)
     })

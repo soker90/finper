@@ -31,7 +31,7 @@ export class SupplyReadingRoutes {
       this.supplyReadingController.create.bind(this.supplyReadingController)
     )
 
-    this.router.patch(
+    this.router.put(
       '/:id',
       authMiddleware,
       this.supplyReadingController.edit.bind(this.supplyReadingController)

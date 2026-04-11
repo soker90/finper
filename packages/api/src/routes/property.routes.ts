@@ -25,7 +25,7 @@ export class PropertyRoutes {
       this.propertyController.create.bind(this.propertyController)
     )
 
-    this.router.patch(
+    this.router.put(
       '/:id',
       authMiddleware,
       this.propertyController.edit.bind(this.propertyController)
