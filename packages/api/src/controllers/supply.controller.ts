@@ -47,7 +47,9 @@ export class SupplyController {
       .then((response) => {
         res.send(response)
       })
-      .catch(next)
+      .catch((error) => {
+        next(error)
+      })
   }
 
   public async edit (req: Request, res: Response, next: NextFunction): Promise<void> {
@@ -59,7 +61,9 @@ export class SupplyController {
       .then((response) => {
         res.send(response)
       })
-      .catch(next)
+      .catch((error) => {
+        next(error)
+      })
   }
 
   public async delete (req: Request, res: Response, next: NextFunction): Promise<void> {
@@ -71,6 +75,8 @@ export class SupplyController {
       .then(() => {
         res.sendStatus(204)
       })
-      .catch(next)
+      .catch((error) => {
+        next(error)
+      })
   }
 }

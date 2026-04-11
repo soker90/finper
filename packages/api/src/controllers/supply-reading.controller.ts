@@ -27,14 +27,17 @@ export class SupplyReadingController {
   }
 
   public async getReadings (req: Request, res: Response, next: NextFunction): Promise<void> {
-    Promise.resolve(req.params as { supplyId: string })
-      .tap(() => this.logger.logInfo('/supply/:supplyId - list readings'))
-      .tap(({ supplyId }) => validateSupplyExist({ id: supplyId, user: req.user as string }))
-      .then(({ supplyId }) => this.supplyReadingService.getSupplyReadings({ supplyId, user: req.user as string }))
+    Promise.resolve({ supplyId: req.params.supplyId })
+      .tap(() => this.logger.logInfo(`/supply/${req.params.supplyId} - list readings`))
+      .then(extractUser(req))
+      .tap(({ supplyId, user }) => validateSupplyExist({ id: supplyId as string, user: user as string }))
+      .then(this.supplyReadingService.getSupplyReadings.bind(this.supplyReadingService))
       .then((response) => {
         res.send(response)
       })
-      .catch(next)
+      .catch((error) => {
+        next(error)
+      })
   }
 
   public async create (req: Request, res: Response, next: NextFunction): Promise<void> {
@@ -47,7 +50,9 @@ export class SupplyReadingController {
       .then((response) => {
         res.send(response)
       })
-      .catch(next)
+      .catch((error) => {
+        next(error)
+      })
   }
 
   public async edit (req: Request, res: Response, next: NextFunction): Promise<void> {
@@ -59,7 +64,9 @@ export class SupplyReadingController {
       .then((response) => {
         res.send(response)
       })
-      .catch(next)
+      .catch((error) => {
+        next(error)
+      })
   }
 
   public async delete (req: Request, res: Response, next: NextFunction): Promise<void> {
@@ -71,6 +78,8 @@ export class SupplyReadingController {
       .then(() => {
         res.sendStatus(204)
       })
-      .catch(next)
+      .catch((error) => {
+        next(error)
+      })
   }
 }
