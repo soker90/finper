@@ -1,0 +1,128 @@
+import { useForm } from 'react-hook-form'
+import dayjs from 'dayjs'
+import { DateForm, InputForm, ModalGrid } from 'components'
+import { Supply, SupplyReading, SupplyReadingInput } from 'types'
+
+interface FormValues {
+  startDate: any
+  endDate: any
+  consumption?: number
+  consumptionPeak?: number
+  consumptionFlat?: number
+  consumptionOffPeak?: number
+}
+
+interface Props {
+  supply: Supply
+  reading?: SupplyReading
+  onClose: () => void
+  onSubmit: (data: Omit<SupplyReadingInput, 'supplyId'>) => Promise<{ error?: string }>
+}
+
+const SupplyReadingForm = ({ supply, reading, onClose, onSubmit }: Props) => {
+  const isElectricity = supply.type === 'electricity'
+
+  const { register, handleSubmit, formState: { errors, isSubmitting }, control } = useForm<FormValues>({
+    defaultValues: reading
+      ? {
+          startDate: dayjs(reading.startDate).format('YYYY-MM-DD'),
+          endDate: dayjs(reading.endDate).format('YYYY-MM-DD'),
+          consumption: reading.consumption,
+          consumptionPeak: reading.consumptionPeak,
+          consumptionFlat: reading.consumptionFlat,
+          consumptionOffPeak: reading.consumptionOffPeak
+        }
+      : { startDate: null, endDate: null }
+  })
+
+  const handleFormSubmit = handleSubmit(async (data) => {
+    const result = await onSubmit({
+      startDate: data.startDate ? dayjs(data.startDate).startOf('day').valueOf() : Date.now(),
+      endDate: data.endDate ? dayjs(data.endDate).startOf('day').valueOf() : Date.now(),
+      ...(isElectricity
+        ? {
+            consumptionPeak: data.consumptionPeak !== undefined ? Number(data.consumptionPeak) : undefined,
+            consumptionFlat: data.consumptionFlat !== undefined ? Number(data.consumptionFlat) : undefined,
+            consumptionOffPeak: data.consumptionOffPeak !== undefined ? Number(data.consumptionOffPeak) : undefined
+          }
+        : {
+            consumption: data.consumption !== undefined ? Number(data.consumption) : undefined
+          })
+    })
+    if (!result?.error) onClose()
+  })
+
+  return (
+    <ModalGrid
+      show
+      title={reading ? 'Editar lectura' : 'Nueva lectura'}
+      onClose={onClose}
+      action={handleFormSubmit}
+      actionDisabled={isSubmitting}
+      cardSx={{ minWidth: 520 }}
+    >
+      <DateForm
+        id='startDate'
+        label='Fecha inicio'
+        placeholder='DD/MM/YYYY'
+        error={!!errors.startDate}
+        control={control}
+        size={6}
+      />
+      <DateForm
+        id='endDate'
+        label='Fecha fin'
+        placeholder='DD/MM/YYYY'
+        error={!!errors.endDate}
+        control={control}
+        size={6}
+      />
+
+      {isElectricity
+        ? (
+          <>
+            <InputForm
+              id='consumptionPeak'
+              label='Punta (kWh)'
+              type='number'
+              size={4}
+              error={false}
+              errorText=''
+              {...register('consumptionPeak', { valueAsNumber: true })}
+            />
+            <InputForm
+              id='consumptionFlat'
+              label='Llano (kWh)'
+              type='number'
+              size={4}
+              error={false}
+              errorText=''
+              {...register('consumptionFlat', { valueAsNumber: true })}
+            />
+            <InputForm
+              id='consumptionOffPeak'
+              label='Valle (kWh)'
+              type='number'
+              size={4}
+              error={false}
+              errorText=''
+              {...register('consumptionOffPeak', { valueAsNumber: true })}
+            />
+          </>
+          )
+        : (
+          <InputForm
+            id='consumption'
+            label='Consumo'
+            type='number'
+            size={12}
+            error={false}
+            errorText=''
+            {...register('consumption', { valueAsNumber: true })}
+          />
+          )}
+    </ModalGrid>
+  )
+}
+
+export default SupplyReadingForm
