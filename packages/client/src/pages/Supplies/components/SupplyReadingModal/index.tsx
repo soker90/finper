@@ -15,7 +15,7 @@ import dayjs from 'dayjs'
 
 import { Supply, SupplyReading, SupplyReadingInput } from 'types'
 import { useSupplyReadings } from 'hooks'
-import { supplyDisplayName } from '../../utils/supply'
+import { supplyDisplayName, SUPPLY_TYPE_UNITS } from '../../utils/supply'
 import RemoveModal from '../RemoveModal'
 import SupplyReadingForm from '../SupplyReadingForm'
 import SupplyReadingList from '../SupplyReadingList'
@@ -72,6 +72,7 @@ const SupplyReadingModal = ({ supply, onClose }: Props) => {
               readings={readings}
               isLoading={isLoading}
               isElectricity={supply.type === 'electricity'}
+              unit={SUPPLY_TYPE_UNITS[supply.type]}
               onAdd={() => setShowForm(true)}
               onEdit={setEditTarget}
               onDelete={setDeleteTarget}

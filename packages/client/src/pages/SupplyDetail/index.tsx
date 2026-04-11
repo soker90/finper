@@ -15,18 +15,15 @@ import dayjs from 'dayjs'
 
 import { useSupplies, useSupplyReadings } from 'hooks'
 import { SupplyReading, SupplyReadingInput } from 'types'
-import { SUPPLY_TYPE_LABELS, supplyDisplayName } from '../utils/supply'
-import SupplyReadingForm from '../components/SupplyReadingForm'
-import SupplyReadingList from '../components/SupplyReadingList'
-import RemoveModal from '../components/RemoveModal'
+import { SUPPLY_TYPE_LABELS, SUPPLY_TYPE_COLORS, SUPPLY_TYPE_UNITS, supplyDisplayName } from '../Supplies/utils/supply'
+import SupplyReadingForm from '../Supplies/components/SupplyReadingForm'
+import SupplyReadingList from '../Supplies/components/SupplyReadingList'
+import RemoveModal from '../Supplies/components/RemoveModal'
 
-const SUPPLY_TYPE_COLORS: Record<string, 'warning' | 'info' | 'error' | 'primary' | 'default'> = {
-  electricity: 'warning',
-  water: 'info',
-  gas: 'error',
-  internet: 'primary',
-  other: 'default'
-}
+type ModalState =
+  | { type: 'add' }
+  | { type: 'edit'; data: SupplyReading }
+  | { type: 'delete'; data: SupplyReading }
 
 const SupplyDetail = () => {
   const { supplyId } = useParams<{ supplyId: string }>()
@@ -51,9 +48,8 @@ const SupplyDetail = () => {
   }, [readings])
 
   const [selectedYear, setSelectedYear] = useState<number>(() => new Date().getFullYear())
-  const [showForm, setShowForm] = useState(false)
-  const [editTarget, setEditTarget] = useState<SupplyReading | null>(null)
-  const [deleteTarget, setDeleteTarget] = useState<SupplyReading | null>(null)
+  const [activeModal, setActiveModal] = useState<ModalState | null>(null)
+  const closeModal = () => setActiveModal(null)
 
   const filteredReadings = useMemo(
     () => readings.filter((r) => new Date(r.startDate).getFullYear() === selectedYear),
@@ -62,14 +58,9 @@ const SupplyDetail = () => {
 
   const handleFormSubmit = (data: Omit<SupplyReadingInput, 'supplyId'>) => {
     const payload: SupplyReadingInput = { ...data, supplyId: supply!._id }
-    return editTarget
-      ? updateReading(editTarget._id, payload)
+    return activeModal?.type === 'edit'
+      ? updateReading(activeModal.data._id, payload)
       : createReading(payload)
-  }
-
-  const handleCloseForm = () => {
-    setShowForm(false)
-    setEditTarget(null)
   }
 
   if (loadingSupplies) {
@@ -109,9 +100,9 @@ const SupplyDetail = () => {
         </Box>
 
         <Button
-          variant='contained'
+          variant='outlined'
           startIcon={<PlusOutlined />}
-          onClick={() => setShowForm(true)}
+          onClick={() => setActiveModal({ type: 'add' })}
         >
           Añadir lectura
         </Button>
@@ -133,7 +124,7 @@ const SupplyDetail = () => {
             </MenuItem>
           ))}
         </Select>
-        <Typography variant='caption' color='textSecondary'>
+        <Typography variant='body2' color='textSecondary'>
           {filteredReadings.length} lectura{filteredReadings.length !== 1 ? 's' : ''}
         </Typography>
       </Box>
@@ -143,28 +134,29 @@ const SupplyDetail = () => {
         readings={filteredReadings}
         isLoading={loadingReadings}
         isElectricity={supply.type === 'electricity'}
-        onAdd={() => setShowForm(true)}
-        onEdit={(r) => setEditTarget(r)}
-        onDelete={(r) => setDeleteTarget(r)}
+        unit={SUPPLY_TYPE_UNITS[supply.type]}
+        onAdd={() => setActiveModal({ type: 'add' })}
+        onEdit={(r) => setActiveModal({ type: 'edit', data: r })}
+        onDelete={(r) => setActiveModal({ type: 'delete', data: r })}
       />
 
       {/* Formulario add/edit */}
-      {(showForm || Boolean(editTarget)) && (
+      {(activeModal?.type === 'add' || activeModal?.type === 'edit') && (
         <SupplyReadingForm
           supply={supply}
-          reading={editTarget ?? undefined}
-          onClose={handleCloseForm}
+          reading={activeModal.type === 'edit' ? activeModal.data : undefined}
+          onClose={closeModal}
           onSubmit={handleFormSubmit}
         />
       )}
 
       {/* Confirmación borrado */}
-      {deleteTarget && (
+      {activeModal?.type === 'delete' && (
         <RemoveModal
           title='¿Eliminar lectura?'
-          description={`¿Eliminar la lectura del ${dayjs(deleteTarget.startDate).format('DD/MM/YYYY')} al ${dayjs(deleteTarget.endDate).format('DD/MM/YYYY')}?`}
-          onClose={() => setDeleteTarget(null)}
-          onConfirm={() => removeReading(deleteTarget._id)}
+          description={`¿Eliminar la lectura del ${dayjs(activeModal.data.startDate).format('DD/MM/YYYY')} al ${dayjs(activeModal.data.endDate).format('DD/MM/YYYY')}?`}
+          onClose={closeModal}
+          onConfirm={() => removeReading(activeModal.data._id)}
         />
       )}
     </Stack>

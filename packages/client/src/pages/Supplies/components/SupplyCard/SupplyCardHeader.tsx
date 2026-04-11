@@ -2,15 +2,7 @@ import { MouseEvent } from 'react'
 import { Box, Chip, IconButton, Stack, Tooltip, Typography } from '@mui/material'
 import { DeleteOutlined, EditOutlined } from '@ant-design/icons'
 import { Supply } from 'types'
-import { SUPPLY_TYPE_LABELS } from '../../utils/supply'
-
-const SUPPLY_TYPE_COLORS: Record<string, 'warning' | 'info' | 'error' | 'primary' | 'default'> = {
-  electricity: 'warning',
-  water: 'info',
-  gas: 'error',
-  internet: 'primary',
-  other: 'default'
-}
+import { SUPPLY_TYPE_LABELS, SUPPLY_TYPE_COLORS } from '../../utils/supply'
 
 type Props = {
   supply: Supply
@@ -28,7 +20,7 @@ const SupplyCardHeader = ({ supply, onEdit, onDelete }: Props) => (
         sx={{ fontWeight: 600 }}
       />
       {supply.type === 'other' && supply.name && (
-        <Typography variant='body2' color='textSecondary' noWrap>
+        <Typography variant='h6' color='textSecondary' noWrap>
           {supply.name}
         </Typography>
       )}

@@ -6,7 +6,7 @@ import { MainCard } from 'components'
 import { Supply, SupplyInput } from 'types'
 import { useSupplyReadings } from 'hooks'
 import { hoverCardSx } from '../../../Dashboard/components/shared'
-import { supplyDisplayName } from '../../utils/supply'
+import { supplyDisplayName, SUPPLY_TYPE_UNITS } from '../../utils/supply'
 import SupplyForm from '../SupplyForm'
 import RemoveModal from '../RemoveModal'
 import SupplyCardHeader from './SupplyCardHeader'
@@ -46,6 +46,7 @@ const SupplyCard = ({ supply, propertyId, onEdit, onDelete }: Props) => {
           <SupplyReadingPreview
             readings={lastReadings}
             isElectricity={supply.type === 'electricity'}
+            unit={SUPPLY_TYPE_UNITS[supply.type]}
           />
         </Stack>
       </MainCard>

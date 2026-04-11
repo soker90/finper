@@ -5,9 +5,10 @@ import { SupplyReading } from 'types'
 type Props = {
   readings: SupplyReading[]
   isElectricity: boolean
+  unit: string
 }
 
-const SupplyReadingPreview = ({ readings, isElectricity }: Props) => {
+const SupplyReadingPreview = ({ readings, isElectricity, unit }: Props) => {
   if (readings.length === 0) return null
 
   return (
@@ -28,8 +29,8 @@ const SupplyReadingPreview = ({ readings, isElectricity }: Props) => {
                     </Typography>
                     <Typography variant='caption' fontWeight={600}>
                       {isElectricity
-                        ? `P:${r.consumptionPeak ?? '—'} L:${r.consumptionFlat ?? '—'} V:${r.consumptionOffPeak ?? '—'}`
-                        : String(r.consumption ?? '—')}
+                        ? `P:${r.consumptionPeak ?? '—'} kWh · L:${r.consumptionFlat ?? '—'} kWh · V:${r.consumptionOffPeak ?? '—'} kWh`
+                        : `${r.consumption ?? '—'}${unit ? ` ${unit}` : ''}`}
                     </Typography>
                   </Box>
                 }

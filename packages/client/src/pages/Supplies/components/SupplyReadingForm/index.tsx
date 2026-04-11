@@ -2,6 +2,7 @@ import { useForm } from 'react-hook-form'
 import dayjs from 'dayjs'
 import { DateForm, InputForm, ModalGrid } from 'components'
 import { Supply, SupplyReading, SupplyReadingInput } from 'types'
+import { SUPPLY_TYPE_UNITS } from '../../utils/supply'
 
 interface FormValues {
   startDate: any
@@ -21,6 +22,7 @@ interface Props {
 
 const SupplyReadingForm = ({ supply, reading, onClose, onSubmit }: Props) => {
   const isElectricity = supply.type === 'electricity'
+  const unit = SUPPLY_TYPE_UNITS[supply.type]
 
   const { register, handleSubmit, formState: { errors, isSubmitting }, control } = useForm<FormValues>({
     defaultValues: reading
@@ -113,7 +115,7 @@ const SupplyReadingForm = ({ supply, reading, onClose, onSubmit }: Props) => {
         : (
           <InputForm
             id='consumption'
-            label='Consumo'
+            label={`Consumo${unit ? ` (${unit})` : ''}`}
             type='number'
             size={12}
             error={false}
