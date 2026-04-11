@@ -13,3 +13,4 @@
 - Do not add git-based or tarball URL dependencies unless explicitly approved.
 - **Do not run `npm update`**, `npx npm-check-updates`, or any blind upgrade command. Review each update individually.
 - **Use deterministic installs**: prefer `pnpm install --frozen-lockfile` over `pnpm install` in CI and scripts.
+- **Always communicate in Spanish**: You must answer, explain, and summarize all your work strictily in conversational Spanish.
