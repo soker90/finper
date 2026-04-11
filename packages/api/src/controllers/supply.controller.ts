@@ -65,7 +65,7 @@ export class SupplyController {
   public async delete (req: Request, res: Response, next: NextFunction): Promise<void> {
     Promise.resolve(req.params as { id: string })
       .tap(({ id }) => this.logger.logInfo(`/delete - supply: ${id}`))
-      .tap(validateSupplyExist.bind(null, { id: req.params.id, user: req.user as string }))
+      .tap(({ id }) => validateSupplyExist({ id, user: req.user as string }))
       .then(this.supplyService.deleteSupply.bind(this.supplyService))
       .then(() => {
         res.sendStatus(204)
