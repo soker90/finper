@@ -86,5 +86,6 @@ build-image-client-latest:
 	@docker build . -t soker90/finper-client:latest -f ./packages/client/Dockerfile
 	@docker push soker90/finper-client:latest
 
+.PHONY: clean
 clean:
 	rm -rf packages/*/dist packages/*/coverage packages/*/node_modules
