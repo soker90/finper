@@ -16,7 +16,7 @@ export type SupplyReadingDocument = HydratedDocument<ISupplyReading>
 const supplyReadingSchema = new Schema<ISupplyReading>({
   supplyId: { type: Schema.Types.ObjectId, required: true, ref: 'Supply' },
   startDate: { type: Number, required: true },
-  endDate: { type: Number, required: true },
+  endDate: { type: Number, required: true, validate: { validator: function (this: any, value: number) { return value >= this.startDate }, message: 'endDate must be greater than or equal to startDate' } },
   consumption: { type: Number },
   consumptionPeak: { type: Number },
   consumptionFlat: { type: Number },

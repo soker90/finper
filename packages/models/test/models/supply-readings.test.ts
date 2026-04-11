@@ -25,8 +25,7 @@ describe('SupplyReading', () => {
     afterAll(() => testDatabase.clear())
 
     test('it should contain all the defined properties', async () => {
-      // @ts-ignore - mongoose typing mismatch
-      const readingDocument: SupplyReadingDocument = await SupplyReadingModel.findOne()
+      const readingDocument = await SupplyReadingModel.findOne() as SupplyReadingDocument
 
       testSupplyReading(readingDocument, readingData)
     })
