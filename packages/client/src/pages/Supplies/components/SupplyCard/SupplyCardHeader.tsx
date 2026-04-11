@@ -20,7 +20,7 @@ const SupplyCardHeader = ({ supply, onEdit, onDelete }: Props) => (
         sx={{ fontWeight: 600 }}
       />
       {supply.type === 'other' && supply.name && (
-        <Typography variant='h6' color='textSecondary' noWrap>
+        <Typography variant='subtitle1' color='textSecondary' noWrap>
           {supply.name}
         </Typography>
       )}

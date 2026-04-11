@@ -5,8 +5,8 @@ import { Supply, SupplyReading, SupplyReadingInput } from 'types'
 import { SUPPLY_TYPE_UNITS } from '../../utils/supply'
 
 interface FormValues {
-  startDate: any
-  endDate: any
+  startDate: string | null
+  endDate: string | null
   consumption?: number
   consumptionPeak?: number
   consumptionFlat?: number
