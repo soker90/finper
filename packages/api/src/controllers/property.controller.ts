@@ -3,7 +3,8 @@ import { NextFunction, Request, Response } from 'express'
 import '../auth/local-strategy-passport-handler'
 import { PropertyDocument } from '@soker90/finper-models'
 import {
-  validatePropertyParams,
+  validatePropertyCreateParams,
+  validatePropertyEditParams,
   validatePropertyExist
 } from '../validators/property'
 import { IPropertyService } from '../services/property.service'
@@ -27,9 +28,8 @@ export class PropertyController {
   public async create (req: Request, res: Response, next: NextFunction): Promise<void> {
     Promise.resolve(req.body)
       .tap(({ name }) => this.logger.logInfo(`/create - property: ${name}`))
-      .then(validatePropertyParams.bind(null, req as unknown as RequestUser))
-      .then(({ value }) => value)
       .then(extractUser(req))
+      .then(validatePropertyCreateParams)
       .then(this.propertyService.addProperty.bind(this.propertyService))
       .tap(({ name }: PropertyDocument) => this.logger.logInfo(`Property ${name} has been succesfully created`))
       .then((response) => {
@@ -41,7 +41,7 @@ export class PropertyController {
   public async edit (req: Request, res: Response, next: NextFunction): Promise<void> {
     Promise.resolve(req as unknown as RequestUser)
       .tap(({ body }) => this.logger.logInfo(`/edit - property: ${body.name}`))
-      .then(validatePropertyParams)
+      .then(validatePropertyEditParams)
       .then(this.propertyService.editProperty.bind(this.propertyService))
       .tap(({ _id }: PropertyDocument) => this.logger.logInfo(`Property ${_id} has been succesfully edited`))
       .then((response) => {

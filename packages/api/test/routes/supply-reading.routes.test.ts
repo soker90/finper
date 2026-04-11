@@ -56,7 +56,7 @@ describe('SupplyReading Routes', () => {
 
     test('success creating reading', async () => {
       const supply = await insertSupply({ user })
-      const res = await supertest(server.app).post(path).auth(token, { type: 'bearer' })
+      await supertest(server.app).post(path).auth(token, { type: 'bearer' })
         .send({
           supplyId: supply._id.toString(),
           startDate: 1000,

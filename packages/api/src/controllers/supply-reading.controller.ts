@@ -3,7 +3,8 @@ import { NextFunction, Request, Response } from 'express'
 import '../auth/local-strategy-passport-handler'
 import { SupplyReadingDocument } from '@soker90/finper-models'
 import {
-  validateReadingParams,
+  validateReadingCreateParams,
+  validateReadingEditParams,
   validateReadingExist
 } from '../validators/supply-reading'
 import { validateSupplyExist } from '../validators/supply'
@@ -39,9 +40,8 @@ export class SupplyReadingController {
   public async create (req: Request, res: Response, next: NextFunction): Promise<void> {
     Promise.resolve(req.body)
       .tap(() => this.logger.logInfo('/create - supply-reading'))
-      .then(validateReadingParams.bind(null, req as unknown as RequestUser))
-      .then(({ value }) => value)
       .then(extractUser(req))
+      .then(validateReadingCreateParams)
       .then(this.supplyReadingService.addReading.bind(this.supplyReadingService))
       .tap(({ _id }: SupplyReadingDocument) => this.logger.logInfo(`Supply Reading ${_id} has been succesfully created`))
       .then((response) => {
@@ -53,7 +53,7 @@ export class SupplyReadingController {
   public async edit (req: Request, res: Response, next: NextFunction): Promise<void> {
     Promise.resolve(req as unknown as RequestUser)
       .tap(() => this.logger.logInfo(`/edit - supply-reading: ${req.params.id}`))
-      .then(validateReadingParams)
+      .then(validateReadingEditParams)
       .then(this.supplyReadingService.editReading.bind(this.supplyReadingService))
       .tap(({ _id }: SupplyReadingDocument) => this.logger.logInfo(`Supply Reading ${_id} has been succesfully edited`))
       .then((response) => {
