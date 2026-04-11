@@ -98,16 +98,16 @@ describe('Budget', () => {
       })
     })
 
-    test.skip('when there are budgets and month is not provided, it should return the budgets of all year', async () => {
+    test('when there are budgets and month is not provided, it should return the budgets of all year', async () => {
       const year = faker.date.past().getFullYear()
       const month = faker.number.int({
         min: 0, max: 11
       })
       const budgetIncome = await insertBudget({ user, type: TRANSACTION.Income, year, month: month + 1 })
-      const budgetExpense = await insertBudget({ user, type: TRANSACTION.Expense, year })
+      const budgetExpense = await insertBudget({ user, type: TRANSACTION.Expense, year, month: month + 1 })
       const transaction = await insertTransaction({
         user,
-        category: budgetIncome.category._id.toString(),
+        category: budgetIncome.category.toString(),
         type: TRANSACTION.Income,
         date: new Date(year, month, faker.number.int({
           min: 1, max: 28
@@ -115,7 +115,7 @@ describe('Budget', () => {
       })
       const transaction2 = await insertTransaction({
         user,
-        category: budgetIncome.category._id.toString(),
+        category: budgetIncome.category.toString(),
         type: TRANSACTION.Income,
         date: new Date(year, month, faker.number.int({
           min: 1, max: 28
@@ -124,20 +124,13 @@ describe('Budget', () => {
 
       const response = await supertest(server.app).get(pathWithParams(year)).auth(token, { type: 'bearer' }).expect(200)
 
-      expect(budgetExpense.month - 1).toBe(response.body.expenses[0].budgets.length)
+      expect(response.body.incomes[0].budgets).toHaveLength(12)
+      expect(response.body.incomes[0].budgets[month].amount).toBe(budgetIncome.amount)
+      expect(response.body.incomes[0].budgets[month].real).toBe(transaction.amount + transaction2.amount)
 
-      await testBudgetsResponse({
-        budgetResponse: response.body.expenses[0],
-        budgetValid: budgetExpense,
-        real: 0,
-        months: [budgetExpense.month - 1]
-      })
-      await testBudgetsResponse({
-        budgetResponse: response.body.incomes[0],
-        budgetValid: budgetIncome,
-        real: transaction.amount + transaction2.amount,
-        months: [month]
-      })
+      expect(response.body.expenses[0].budgets).toHaveLength(12)
+      expect(response.body.expenses[0].budgets[month].amount).toBe(budgetExpense.amount)
+      expect(response.body.expenses[0].budgets[month].real).toBe(0)
     })
   })
 

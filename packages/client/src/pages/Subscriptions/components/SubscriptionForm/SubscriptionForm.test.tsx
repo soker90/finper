@@ -2,7 +2,7 @@
 import { describe, expect, it, vi } from 'vitest'
 import { useState } from 'react'
 import { SWRConfig } from 'swr'
-import { fireEvent, waitFor } from '@testing-library/react'
+import { fireEvent, waitFor, act } from '@testing-library/react'
 import { render as customRender } from '../../../../test/testUtils'
 import SubscriptionForm from '.'
 import { Subscription, SubscriptionInput } from 'types'
@@ -62,7 +62,7 @@ const renderAndOpen = async (props: FormWrapperProps = {}, editMode = false) => 
     </SWRConfig>
   )
   await utils.findByText('READY')
-  utils.getByText('Abrir').click()
+  fireEvent.click(utils.getByText('Abrir'))
   await utils.findByText(editMode ? 'Editar suscripción' : 'Nueva suscripción')
   return utils
 }
@@ -94,7 +94,7 @@ describe('SubscriptionForm', () => {
     const onClose = vi.fn()
     const { findByText } = await renderAndOpen({ onClose })
     const cancelBtn = await findByText('Cancelar')
-    cancelBtn.click()
+    fireEvent.click(cancelBtn)
     expect(onClose).toHaveBeenCalled()
   })
 
@@ -174,6 +174,8 @@ describe('SubscriptionForm', () => {
       const btn = utils.getByText('Aceptar').closest('button')
       expect(btn?.hasAttribute('disabled')).toBe(true)
     })
-    resolveSubmit({})
+    await act(async () => {
+      resolveSubmit({})
+    })
   })
 })

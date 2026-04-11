@@ -26,19 +26,11 @@ export default [
     },
     rules: {
       'no-unused-vars': 'off',
-      '@typescript-eslint/no-unused-vars': 'error',
-      'import/no-unresolved': [
-        'error',
-        {
-          ignore: ['^@soker90/finper-models', '^mongoose$', '^@typescript-eslint/', '^eslint-plugin-']
-        }
-      ]
+      '@typescript-eslint/no-unused-vars': 'error'
     },
     settings: {
       'import/resolver': {
-        node: {
-          extensions: ['.js', '.ts']
-        }
+        typescript: {},
       },
     },
   },
@@ -58,6 +50,6 @@ export default [
   },
 
   {
-    ignores: ['dist', 'build', 'node_modules', 'eslint.config.js'],
+    ignores: ['dist', 'build', 'node_modules', 'eslint.config.mjs'],
   },
 ]
