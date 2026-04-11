@@ -8,7 +8,9 @@ import {
   IUser, LoanModel, LoanPaymentModel, LOAN_PAYMENT, PensionModel, StoreModel,
   SubscriptionCandidateModel, SubscriptionModel, TransactionModel,
   TRANSACTION,
-  UserModel
+  UserModel,
+  PropertyModel, SupplyModel, SupplyReadingModel,
+  IProperty, ISupply, ISupplyReading, SUPPLY_TYPE
 } from '@soker90/finper-models'
 
 import {
@@ -203,4 +205,41 @@ export const insertSubscriptionCandidate = async (params: Record<string, any> = 
     subscriptionIds: [subscription._id],
     user
   }) as unknown as ISubscriptionCandidate & { _id: any }
+}
+
+export const insertProperty = async (params: Record<string, any> = {}): Promise<IProperty & { _id: any }> => {
+  const user = (params.user ?? generateUsername()) as string
+
+  return PropertyModel.create({
+    name: params.name ?? faker.location.streetAddress(),
+    user
+  }) as unknown as IProperty & { _id: any }
+}
+
+export const insertSupply = async (params: Record<string, any> = {}): Promise<ISupply & { _id: any }> => {
+  const user = (params.user ?? generateUsername()) as string
+  const propertyId = params.propertyId ?? (await insertProperty({ user }))._id
+
+  return SupplyModel.create({
+    name: params.name ?? faker.company.name(),
+    type: params.type ?? SUPPLY_TYPE.ELECTRICITY,
+    propertyId,
+    user
+  }) as unknown as ISupply & { _id: any }
+}
+
+export const insertSupplyReading = async (params: Record<string, any> = {}): Promise<ISupplyReading & { _id: any }> => {
+  const user = (params.user ?? generateUsername()) as string
+  const supplyId = params.supplyId ?? (await insertSupply({ user }))._id
+
+  return SupplyReadingModel.create({
+    supplyId,
+    startDate: params.startDate ?? faker.date.past().getTime(),
+    endDate: params.endDate ?? faker.date.recent().getTime(),
+    consumptionPeak: params.consumptionPeak ?? faker.number.int({ min: 10, max: 100 }),
+    consumptionFlat: params.consumptionFlat ?? faker.number.int({ min: 10, max: 100 }),
+    consumptionOffPeak: params.consumptionOffPeak ?? faker.number.int({ min: 10, max: 100 }),
+    consumption: params.consumption ?? faker.number.int({ min: 10, max: 100 }),
+    user
+  }) as unknown as ISupplyReading & { _id: any }
 }

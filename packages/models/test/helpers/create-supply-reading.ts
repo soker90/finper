@@ -9,7 +9,7 @@ export default async (params: any = {}): Promise<HydratedDocument<ISupplyReading
 
   return SupplyReadingModel.create({
     supplyId,
-    startDate: faker.date.recent().getTime(),
+    startDate: faker.date.past().getTime(),
     endDate: faker.date.recent().getTime(),
     consumption: faker.number.int({ min: 10, max: 100 }),
     user: faker.internet.username(),
