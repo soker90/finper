@@ -50,6 +50,6 @@ export default [
   },
 
   {
-    ignores: ['dist', 'build', 'node_modules'],
+    ignores: ['dist', 'build', 'node_modules', 'eslint.config.mjs'],
   },
 ]

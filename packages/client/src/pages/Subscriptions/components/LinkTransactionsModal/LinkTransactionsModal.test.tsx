@@ -1,7 +1,7 @@
 // @vitest-environment happy-dom
 import { describe, expect, it, vi } from 'vitest'
 import { http, HttpResponse } from 'msw'
-import { waitFor } from '@testing-library/react'
+import { fireEvent, waitFor } from '@testing-library/react'
 import { SWRConfig } from 'swr'
 import { server } from '../../../../mock/server'
 import { render } from '../../../../test/testUtils'
@@ -92,7 +92,7 @@ describe('LinkTransactionsModal', () => {
     const onClose = vi.fn()
     const { findByText } = renderModal({ onClose })
     const cancelBtn = await findByText('Cancelar')
-    cancelBtn.click()
+    fireEvent.click(cancelBtn)
     expect(onClose).toHaveBeenCalled()
   })
 
@@ -102,7 +102,7 @@ describe('LinkTransactionsModal', () => {
     const { findAllByRole, findByText } = renderModal()
     const checkboxes = await findAllByRole('checkbox')
     const listItem = checkboxes[0].closest('li')
-    if (listItem) listItem.click()
+    if (listItem) fireEvent.click(listItem)
     const submitBtn = await findByText('Aceptar')
     await waitFor(() => expect(submitBtn.closest('button')?.hasAttribute('disabled')).toBe(false))
   })
@@ -122,11 +122,11 @@ describe('LinkTransactionsModal', () => {
 
     const checkboxes = await findAllByRole('checkbox')
     const listItem = checkboxes[0].closest('li')
-    if (listItem) listItem.click()
+    if (listItem) fireEvent.click(listItem)
 
     const submitBtn = await findByText('Aceptar')
     await waitFor(() => expect(submitBtn.closest('button')?.hasAttribute('disabled')).toBe(false))
-    submitBtn.closest('button')!.click()
+    fireEvent.click(submitBtn.closest('button')!)
 
     await waitFor(() => expect(onClose).toHaveBeenCalled())
     expect(onLinked).toHaveBeenCalled()
@@ -145,11 +145,11 @@ describe('LinkTransactionsModal', () => {
 
     const checkboxes = await findAllByRole('checkbox')
     const listItem = checkboxes[0].closest('li')
-    if (listItem) listItem.click()
+    if (listItem) fireEvent.click(listItem)
 
     const submitBtn = await findByText('Aceptar')
     await waitFor(() => expect(submitBtn.closest('button')?.hasAttribute('disabled')).toBe(false))
-    submitBtn.closest('button')!.click()
+    fireEvent.click(submitBtn.closest('button')!)
 
     await waitFor(() => expect(document.querySelector('[role="alert"][class*="MuiAlert"]')).not.toBeNull())
     expect(onClose).not.toHaveBeenCalled()

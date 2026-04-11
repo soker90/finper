@@ -1,5 +1,6 @@
 // @vitest-environment happy-dom
 import { describe, expect, it, vi } from 'vitest'
+import { act, fireEvent } from '@testing-library/react'
 import { render } from '../../../../test/testUtils'
 import CandidatesBanner from '.'
 
@@ -60,7 +61,9 @@ describe('CandidatesBanner', () => {
         onDismiss={onDismiss}
       />
     )
-    getAllByRole('button', { name: /no es una suscripción/i })[0].click()
+    await act(async () => {
+      fireEvent.click(getAllByRole('button', { name: /no es una suscripción/i })[0])
+    })
     expect(onDismiss).toHaveBeenCalledWith('cand-1')
   })
 
@@ -75,7 +78,9 @@ describe('CandidatesBanner', () => {
       />
     )
     // La caja de suscripción contiene el texto del nombre; hacer clic en ella
-    getByText('Netflix 1').click()
+    await act(async () => {
+      fireEvent.click(getByText('Netflix 1'))
+    })
     expect(onAssign).toHaveBeenCalledWith('cand-1', 'sub-1')
   })
 })
