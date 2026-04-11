@@ -31,7 +31,7 @@ export class SupplyRoutes {
       this.supplyController.create.bind(this.supplyController)
     )
 
-    this.router.patch(
+    this.router.put(
       '/:id',
       authMiddleware,
       this.supplyController.edit.bind(this.supplyController)

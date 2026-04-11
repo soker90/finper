@@ -10,7 +10,11 @@ export const validateSupplyCreateParams = async (data: Record<string, string>) =
 
   const schema = Joi.object({
     propertyId: Joi.string().required(),
-    name: Joi.string().required(),
+    name: Joi.when('type', {
+      is: SUPPLY_TYPE.OTHER,
+      then: Joi.string().required(),
+      otherwise: Joi.string().optional()
+    }),
     type: Joi.string().valid(...Object.values(SUPPLY_TYPE)).required(),
     user: Joi.string().required()
   })

@@ -67,7 +67,7 @@ describe('SupplyReading Routes', () => {
     })
   })
 
-  describe('PATCH /api/supplies/readings/:id', () => {
+  describe('PUT /api/supplies/readings/:id', () => {
     const path = (id: string) => `/api/supplies/readings/${id}`
     let token: string
     const user = generateUsername()
@@ -78,7 +78,7 @@ describe('SupplyReading Routes', () => {
 
     test('success updating reading', async () => {
       const reading = await insertSupplyReading({ user })
-      await supertest(server.app).patch(path(reading._id.toString())).auth(token, { type: 'bearer' })
+      await supertest(server.app).put(path(reading._id.toString())).auth(token, { type: 'bearer' })
         .send({
           supplyId: reading.supplyId.toString(),
           startDate: 1000,

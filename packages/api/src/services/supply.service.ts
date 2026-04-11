@@ -15,7 +15,7 @@ export default class SupplyService implements ISupplyService {
       { $match: { user } },
       {
         $lookup: {
-          from: 'supplies',
+          from: SupplyModel.collection.name,
           localField: '_id',
           foreignField: 'propertyId',
           as: 'supplies'

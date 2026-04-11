@@ -36,7 +36,7 @@ describe('Property Routes', () => {
     })
   })
 
-  describe('PATCH /api/supplies/properties/:id', () => {
+  describe('PUT /api/supplies/properties/:id', () => {
     const path = (id: string) => `/api/supplies/properties/${id}`
     let token: string
     const user = generateUsername()
@@ -46,17 +46,17 @@ describe('Property Routes', () => {
     })
 
     test('when property does not exist, it should return 404', async () => {
-      await supertest(server.app).patch(path('662cc99403a45c3453b3bbed')).auth(token, { type: 'bearer' }).send({ name: 'casa' }).expect(404)
+      await supertest(server.app).put(path('662cc99403a45c3453b3bbed')).auth(token, { type: 'bearer' }).send({ name: 'casa' }).expect(404)
     })
 
     test('when another user property, it should return 404', async () => {
       const property = await insertProperty()
-      await supertest(server.app).patch(path(property._id.toString())).auth(token, { type: 'bearer' }).send({ name: 'casa' }).expect(404)
+      await supertest(server.app).put(path(property._id.toString())).auth(token, { type: 'bearer' }).send({ name: 'casa' }).expect(404)
     })
 
     test('when success editing a property', async () => {
       const property = await insertProperty({ user })
-      await supertest(server.app).patch(path(property._id.toString())).auth(token, { type: 'bearer' })
+      await supertest(server.app).put(path(property._id.toString())).auth(token, { type: 'bearer' })
         .send({ name: 'Mi chalet' })
         .expect(200)
     })
