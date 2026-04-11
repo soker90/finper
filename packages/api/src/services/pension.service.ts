@@ -64,6 +64,6 @@ export default class PensionService implements IPensionService {
   }
 
   public async editPension ({ id, value }: { id: string, value: IPension }): Promise<IPension> {
-    return await PensionModel.findByIdAndUpdate(id, value, { new: true }) as unknown as IPension
+    return await PensionModel.findByIdAndUpdate(id, value, { returnDocument: 'after' }) as unknown as IPension
   }
 }

@@ -56,7 +56,7 @@ export default class TransactionService implements ITransactionService {
     if (!oldTransaction) throw Boom.notFound(ERROR_MESSAGE.TRANSACTION.NOT_FOUND).output
     const oldAmount = getTransactionAmount(oldTransaction)
 
-    const transaction = await TransactionModel.findByIdAndUpdate<TransactionDocument>(id, value, { new: true })
+    const transaction = await TransactionModel.findByIdAndUpdate<TransactionDocument>(id, value, { returnDocument: 'after' })
     if (!transaction) throw Boom.notFound(ERROR_MESSAGE.TRANSACTION.NOT_FOUND).output
     const newAmount = getTransactionAmount(transaction)
 

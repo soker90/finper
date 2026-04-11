@@ -106,7 +106,7 @@ export default class LoanService implements ILoanService {
   }
 
   async editLoan (id: string, data: Partial<ILoan>): Promise<ILoan & { _id: string }> {
-    const updated = await leanDoc<ILoan & { _id: string } | null>(LoanModel.findByIdAndUpdate(id, data, { new: true }).lean())
+    const updated = await leanDoc<ILoan & { _id: string } | null>(LoanModel.findByIdAndUpdate(id, data, { returnDocument: 'after' }).lean())
     if (!updated) throw Boom.notFound(ERROR_MESSAGE.LOAN.NOT_FOUND).output
     return updated
   }

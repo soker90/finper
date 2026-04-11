@@ -16,7 +16,7 @@ export default class StoreService implements IStoreService {
         name: storeName,
         user: transaction.user
       }, { name: storeName, user: transaction.user }, {
-        new: true,
+        returnDocument: 'after',
         upsert: true
       }) as StoreDocument
       transaction.store = store._id
