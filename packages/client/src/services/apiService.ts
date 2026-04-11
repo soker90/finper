@@ -1,6 +1,6 @@
 import axios from 'axios'
-import { ACCOUNTS, BUDGETS, CATEGORIES, DEBTS, LOANS, LOAN_DETAIL, PENSIONS, TICKETS, TRANSACTIONS, SUBSCRIPTIONS, SUBSCRIPTION_CANDIDATES, SUPPLIES, SUPPLIES_PROPERTIES } from 'constants/api-paths'
-import { Category, Transaction, TransactionType, Account, Pension, PensionTransaction, Debt, Loan, SubscriptionInput } from 'types'
+import { ACCOUNTS, BUDGETS, CATEGORIES, DEBTS, LOANS, LOAN_DETAIL, PENSIONS, TICKETS, TRANSACTIONS, SUBSCRIPTIONS, SUBSCRIPTION_CANDIDATES, SUPPLIES, SUPPLIES_PROPERTIES, SUPPLIES_READINGS } from 'constants/api-paths'
+import { Category, Transaction, TransactionType, Account, Pension, PensionTransaction, Debt, Loan, SubscriptionInput, SupplyReadingInput } from 'types'
 
 export const editAccount = (id: string, params: {
   name?: string,
@@ -205,3 +205,24 @@ export const editSupply = (id: string, params: { name?: string, type: string, pr
 
 export const deleteSupply = (id: string): Promise<{ error?: string }> =>
   axios.delete(`${SUPPLIES}/${id}`).then(() => ({})).catch((error: any) => ({ error: error.message }))
+
+// Supply Readings
+export const getSupplyReadings = (supplyId: string): Promise<{ data?: any[], error?: string }> =>
+  axios.get(`${SUPPLIES_READINGS}/supply/${supplyId}`)
+    .then((data: any) => ({ data }))
+    .catch((error: any) => ({ error: error.message }))
+
+export const addSupplyReading = (params: SupplyReadingInput): Promise<{ data?: any, error?: string }> =>
+  axios.post(SUPPLIES_READINGS, params)
+    .then((data: any) => ({ data }))
+    .catch((error: any) => ({ error: error.message }))
+
+export const editSupplyReading = (id: string, params: SupplyReadingInput): Promise<{ data?: any, error?: string }> =>
+  axios.put(`${SUPPLIES_READINGS}/${id}`, params)
+    .then((data: any) => ({ data }))
+    .catch((error: any) => ({ error: error.message }))
+
+export const deleteSupplyReading = (id: string): Promise<{ error?: string }> =>
+  axios.delete(`${SUPPLIES_READINGS}/${id}`)
+    .then(() => ({}))
+    .catch((error: any) => ({ error: error.message }))

@@ -41,7 +41,7 @@ const PropertyCard = ({
       <Card variant='outlined' sx={{ mb: 3 }}>
         <CardHeader
           title={
-            <Typography variant='h5' fontWeight={600}>
+            <Typography variant='h5'>
               {property.name}
             </Typography>
           }

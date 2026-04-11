@@ -25,3 +25,24 @@ export interface SupplyInput {
   type: SupplyType
   propertyId: string
 }
+
+export interface SupplyReading {
+  _id: string
+  supplyId: string
+  startDate: number
+  endDate: number
+  consumption?: number
+  consumptionPeak?: number
+  consumptionFlat?: number
+  consumptionOffPeak?: number
+}
+
+export interface SupplyReadingInput {
+  supplyId: string
+  startDate: number
+  endDate: number
+  consumption?: number
+  consumptionPeak?: number
+  consumptionFlat?: number
+  consumptionOffPeak?: number
+}
