@@ -7,7 +7,9 @@ import {
   CardActions,
   Grid,
   Divider,
-  Button
+  Button,
+  SxProps,
+  Theme
 } from '@mui/material'
 
 interface Props {
@@ -18,10 +20,11 @@ interface Props {
   action?: any
   actions?: any
   actionDisabled?: boolean
+  cardSx?: SxProps<Theme>
 }
 
 const ModalGrid = ({
-  show, title, children, action, actions, onClose, actionDisabled
+  show, title, children, action, actions, onClose, actionDisabled, cardSx
 }: Props) => {
   const _renderButtons = () => (
     <>
@@ -56,7 +59,7 @@ const ModalGrid = ({
       sx={{ margin: 'auto', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
     >
       <form onSubmit={handleFormSubmit}>
-        <Card>
+        <Card sx={cardSx}>
           <CardHeader title={title} />
           <Divider />
           <CardContent>
