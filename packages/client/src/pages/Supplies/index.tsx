@@ -31,12 +31,6 @@ const Supplies = () => {
       ? updateProperty(editProperty._id, data)
       : createProperty(data)
 
-  const handleCreateSupply = (propertyId: string) => async (data: SupplyInput) =>
-    createSupply({ ...data, propertyId })
-
-  const handleEditSupply = (id: string) => async (data: SupplyInput) =>
-    updateSupply(id, data)
-
   return (
     <>
       <HeaderButtons
@@ -67,8 +61,8 @@ const Supplies = () => {
           property={property}
           onEditProperty={setEditProperty}
           onDeleteProperty={removeProperty}
-          onCreateSupply={handleCreateSupply(property._id)}
-          onEditSupply={(id, data) => handleEditSupply(id)(data)}
+          onCreateSupply={(data: SupplyInput) => createSupply({ ...data, propertyId: property._id })}
+          onEditSupply={updateSupply}
           onDeleteSupply={removeSupply}
         />
       ))}

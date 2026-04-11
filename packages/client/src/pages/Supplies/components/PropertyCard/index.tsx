@@ -14,6 +14,7 @@ import {
 import { DeleteOutlined, EditOutlined, PlusOutlined } from '@ant-design/icons'
 import { PropertyWithSupplies, Supply, SupplyInput, SupplyType } from 'types'
 import SupplyForm from '../SupplyForm'
+import RemoveModal from '../RemoveModal'
 
 const SUPPLY_TYPE_LABELS: Record<SupplyType, string> = {
   electricity: 'Electricidad',
@@ -31,13 +32,16 @@ const SUPPLY_TYPE_COLORS: Record<SupplyType, 'warning' | 'info' | 'error' | 'def
   other: 'default'
 }
 
+const supplyDisplayName = (supply: Supply) =>
+  supply.type === 'other' ? supply.name ?? '' : SUPPLY_TYPE_LABELS[supply.type]
+
 type Props = {
   property: PropertyWithSupplies
   onEditProperty: (property: PropertyWithSupplies) => void
-  onDeleteProperty: (id: string) => void
+  onDeleteProperty: (id: string) => Promise<{ error?: string }>
   onCreateSupply: (data: SupplyInput) => Promise<{ error?: string }>
   onEditSupply: (id: string, data: SupplyInput) => Promise<{ error?: string }>
-  onDeleteSupply: (id: string) => void
+  onDeleteSupply: (id: string) => Promise<{ error?: string }>
 }
 
 const PropertyCard = ({
@@ -50,6 +54,8 @@ const PropertyCard = ({
 }: Props) => {
   const [showSupplyForm, setShowSupplyForm] = useState(false)
   const [editSupply, setEditSupply] = useState<Supply | undefined>()
+  const [removeSupply, setRemoveSupply] = useState<Supply | undefined>()
+  const [showRemoveProperty, setShowRemoveProperty] = useState(false)
 
   const handleSupplySubmit = async (data: SupplyInput) => {
     if (editSupply) {
@@ -87,7 +93,7 @@ const PropertyCard = ({
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                 <Box>
                   <Typography variant='subtitle1' fontWeight={500}>
-                    {supply.type === 'other' ? supply.name : SUPPLY_TYPE_LABELS[supply.type]}
+                    {supplyDisplayName(supply)}
                   </Typography>
                   {supply.type === 'other' && (
                     <Chip
@@ -111,7 +117,7 @@ const PropertyCard = ({
                     </IconButton>
                   </Tooltip>
                   <Tooltip title='Eliminar'>
-                    <IconButton size='small' color='error' onClick={() => onDeleteSupply(supply._id)}>
+                    <IconButton size='small' color='error' onClick={() => setRemoveSupply(supply)}>
                       <DeleteOutlined />
                     </IconButton>
                   </Tooltip>
@@ -146,7 +152,7 @@ const PropertyCard = ({
                 </IconButton>
               </Tooltip>
               <Tooltip title='Eliminar inmueble'>
-                <IconButton size='small' color='error' onClick={() => onDeleteProperty(property._id)}>
+                <IconButton size='small' color='error' onClick={() => setShowRemoveProperty(true)}>
                   <DeleteOutlined />
                 </IconButton>
               </Tooltip>
@@ -167,6 +173,24 @@ const PropertyCard = ({
           propertyId={property._id}
           onClose={handleCloseSupplyForm}
           onSubmit={handleSupplySubmit}
+        />
+      )}
+
+      {Boolean(removeSupply) && (
+        <RemoveModal
+          title='¿Eliminar suministro?'
+          description={`¿Seguro que quieres eliminar el suministro "${supplyDisplayName(removeSupply!)}"?`}
+          onClose={() => setRemoveSupply(undefined)}
+          onConfirm={() => onDeleteSupply(removeSupply!._id)}
+        />
+      )}
+
+      {showRemoveProperty && (
+        <RemoveModal
+          title='¿Eliminar inmueble?'
+          description={`¿Seguro que quieres eliminar el inmueble "${property.name}" y todos sus suministros?`}
+          onClose={() => setShowRemoveProperty(false)}
+          onConfirm={() => onDeleteProperty(property._id)}
         />
       )}
     </>
