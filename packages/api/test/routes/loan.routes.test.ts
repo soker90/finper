@@ -170,9 +170,15 @@ describe('Loans', () => {
     const path = (id: string) => `/api/loans/${id}`
     let token: string
     const user = generateUsername()
+    let accountId: string
+    let categoryId: string
 
     beforeAll(async () => {
       token = await requestLogin(server.app, { username: user })
+      const account = await insertAccount({ user })
+      accountId = account._id.toString()
+      const category = await insertCategory({ user })
+      categoryId = category._id.toString()
     })
 
     test('when token is not provided, it should respond 401', async () => {
@@ -196,16 +202,30 @@ describe('Loans', () => {
         .expect(404)
     })
 
-    test('when success, it should respond 200', async () => {
+    test.each(['initialAmount', 'interestRate', 'monthlyPayment', 'startDate'])(
+      'when body contains only %s (financial field), it should respond 422',
+      async (field) => {
+        const loan = await insertLoan({ user })
+        await supertest(server.app)
+          .put(path(loan._id.toString()))
+          .auth(token, { type: 'bearer' })
+          .send({ [field]: 9999 })
+          .expect(422)
+      }
+    )
+
+    test('when success, it should respond 200 and update name, account and category', async () => {
       const loan = await insertLoan({ user })
       const newName = faker.lorem.words(2)
       const res = await supertest(server.app)
         .put(path(loan._id.toString()))
         .auth(token, { type: 'bearer' })
-        .send({ name: newName })
+        .send({ name: newName, account: accountId, category: categoryId })
         .expect(200)
 
       expect(res.body.name).toBe(newName)
+      expect(res.body.account).toBe(accountId)
+      expect(res.body.category).toBe(categoryId)
     })
   })
 
