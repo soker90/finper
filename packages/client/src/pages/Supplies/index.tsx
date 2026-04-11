@@ -35,7 +35,7 @@ const Supplies = () => {
     <>
       <HeaderButtons
         buttons={[{ Icon: PlusOutlined, title: 'Nuevo inmueble', onClick: () => setShowPropertyForm(true) }]}
-        desktopSx={{ marginTop: -7 }}
+        desktopSx={{ marginTop: -7, marginBottom: 2 }}
       />
 
       {isLoading && (
