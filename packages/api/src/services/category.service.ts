@@ -54,7 +54,7 @@ export default class CategoryService implements ICategoryService {
   }
 
   public async editCategory ({ id, value }: { id: string, value: ICategory }): Promise<CategoryDocument> {
-    const updated = await CategoryModel.findByIdAndUpdate<CategoryDocument>(id, value, { new: true })
+    const updated = await CategoryModel.findByIdAndUpdate<CategoryDocument>(id, value, { returnDocument: 'after' })
     if (!updated) throw Boom.notFound(ERROR_MESSAGE.CATEGORY.NOT_FOUND).output
     return updated
   }

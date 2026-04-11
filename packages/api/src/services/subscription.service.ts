@@ -59,7 +59,7 @@ export default class SubscriptionService implements ISubscriptionService {
   }
 
   async editSubscription (id: string, value: Partial<ISubscription>): Promise<SubscriptionDocument | null> {
-    return SubscriptionModel.findByIdAndUpdate(id, value, { new: true })
+    return SubscriptionModel.findByIdAndUpdate(id, value, { returnDocument: 'after' })
   }
 
   async deleteSubscription (id: string): Promise<void> {
