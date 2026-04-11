@@ -87,14 +87,16 @@ const PropertyCard = ({
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                 <Box>
                   <Typography variant='subtitle1' fontWeight={500}>
-                    {supply.name}
+                    {supply.type === 'other' ? supply.name : SUPPLY_TYPE_LABELS[supply.type]}
                   </Typography>
-                  <Chip
-                    label={SUPPLY_TYPE_LABELS[supply.type]}
-                    color={SUPPLY_TYPE_COLORS[supply.type]}
-                    size='small'
-                    sx={{ mt: 0.5 }}
-                  />
+                  {supply.type === 'other' && (
+                    <Chip
+                      label={SUPPLY_TYPE_LABELS[supply.type]}
+                      color={SUPPLY_TYPE_COLORS[supply.type]}
+                      size='small'
+                      sx={{ mt: 0.5 }}
+                    />
+                  )}
                 </Box>
                 <Box sx={{ display: 'flex', gap: 0.5 }}>
                   <Tooltip title='Editar'>

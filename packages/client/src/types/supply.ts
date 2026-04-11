@@ -7,7 +7,7 @@ export interface Property {
 
 export interface Supply {
   _id: string
-  name: string
+  name?: string
   type: SupplyType
   propertyId: string
 }
@@ -21,7 +21,7 @@ export interface PropertyInput {
 }
 
 export interface SupplyInput {
-  name: string
+  name?: string
   type: SupplyType
   propertyId: string
 }
