@@ -53,7 +53,8 @@ export class PropertyController {
   public async delete (req: Request, res: Response, next: NextFunction): Promise<void> {
     Promise.resolve(req.params as { id: string })
       .tap(({ id }) => this.logger.logInfo(`/delete - property: ${id}`))
-      .tap(({ id }) => validatePropertyExist({ id, user: req.user as string }))
+      .then(extractUser(req))
+      .tap(validatePropertyExist)
       .then(this.propertyService.deleteProperty.bind(this.propertyService))
       .then(() => {
         res.sendStatus(204)

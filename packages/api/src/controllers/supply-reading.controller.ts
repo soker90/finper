@@ -65,7 +65,8 @@ export class SupplyReadingController {
   public async delete (req: Request, res: Response, next: NextFunction): Promise<void> {
     Promise.resolve(req.params as { id: string })
       .tap(({ id }) => this.logger.logInfo(`/delete - supply-reading: ${id}`))
-      .tap(({ id }) => validateReadingExist({ id, user: req.user as string }))
+      .then(extractUser(req))
+      .tap(validateReadingExist)
       .then(this.supplyReadingService.deleteReading.bind(this.supplyReadingService))
       .then(() => {
         res.sendStatus(204)
