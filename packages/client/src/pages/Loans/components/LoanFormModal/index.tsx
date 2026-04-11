@@ -52,21 +52,24 @@ const LoanFormModal = ({ loan, onClose }: Props) => {
   }, [reset, loan, accounts, categories])
 
   const onSubmit = handleSubmit(async (params) => {
-    const body = {
+    const commonBody = {
       name: params.name,
-      initialAmount: Number(params.initialAmount),
-      interestRate: Number(params.interestRate),
-      monthlyPayment: Number(params.monthlyPayment),
-      startDate: params.startDate ? new Date(params.startDate).getTime() : undefined,
       account: params.account,
       category: params.category
     }
 
     if (isEdit) {
-      const { error } = await editLoan(loan!._id!, body)
+      const { error } = await editLoan(loan!._id!, commonBody)
       if (error) { setApiError(error); return }
       await mutate(LOAN_DETAIL(loan!._id!))
     } else {
+      const body = {
+        ...commonBody,
+        initialAmount: Number(params.initialAmount),
+        interestRate: Number(params.interestRate),
+        monthlyPayment: Number(params.monthlyPayment),
+        startDate: params.startDate ? new Date(params.startDate).getTime() : undefined
+      }
       const { error } = await addLoan(body)
       if (error) { setApiError(error); return }
     }
@@ -81,30 +84,34 @@ const LoanFormModal = ({ loan, onClose }: Props) => {
         error={!!errors.name} errorText='Nombre requerido'
         {...register('name', { required: true })}
       />
-      <InputForm
-        id='initialAmount' label='Capital inicial' type='number'
-        inputProps={{ step: 'any', min: 0 }}
-        error={!!errors.initialAmount} errorText='Capital inicial requerido'
-        {...register('initialAmount', { required: true, valueAsNumber: true })}
-      />
-      <InputForm
-        id='interestRate' label='TIN anual (%)' type='number'
-        inputProps={{ step: 'any', min: 0 }}
-        error={!!errors.interestRate} errorText='TIN requerido'
-        {...register('interestRate', { required: true, valueAsNumber: true })}
-      />
-      <InputForm
-        id='monthlyPayment' label='Cuota mensual' type='number'
-        inputProps={{ step: 'any', min: 0 }}
-        error={!!errors.monthlyPayment} errorText='Cuota mensual requerida'
-        {...register('monthlyPayment', { required: true, valueAsNumber: true })}
-      />
-      <DateForm
-        id='startDate' label='Fecha primer pago'
-        placeholder='Fecha primer pago'
-        error={!!errors.startDate}
-        control={control}
-      />
+      {!isEdit && (
+        <>
+          <InputForm
+            id='initialAmount' label='Capital inicial' type='number'
+            inputProps={{ step: 'any', min: 0 }}
+            error={!!errors.initialAmount} errorText='Capital inicial requerido'
+            {...register('initialAmount', { required: true, valueAsNumber: true })}
+          />
+          <InputForm
+            id='interestRate' label='TIN anual (%)' type='number'
+            inputProps={{ step: 'any', min: 0 }}
+            error={!!errors.interestRate} errorText='TIN requerido'
+            {...register('interestRate', { required: true, valueAsNumber: true })}
+          />
+          <InputForm
+            id='monthlyPayment' label='Cuota mensual' type='number'
+            inputProps={{ step: 'any', min: 0 }}
+            error={!!errors.monthlyPayment} errorText='Cuota mensual requerida'
+            {...register('monthlyPayment', { required: true, valueAsNumber: true })}
+          />
+          <DateForm
+            id='startDate' label='Fecha primer pago'
+            placeholder='Fecha primer pago'
+            error={!!errors.startDate}
+            control={control}
+          />
+        </>
+      )}
       <SelectForm
         id='account' label='Cuenta vinculada'
         options={accounts}
