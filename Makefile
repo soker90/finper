@@ -19,6 +19,7 @@ define help
     test-models:               run all tests for the models.
     start-api:                 launch api
     start-client:              launch client
+    clean:                    clean all build artifacts.
 
 endef
 export help
@@ -84,3 +85,6 @@ build-image-client-daily:
 build-image-client-latest:
 	@docker build . -t soker90/finper-client:latest -f ./packages/client/Dockerfile
 	@docker push soker90/finper-client:latest
+
+clean:
+	rm -rf packages/*/dist packages/*/coverage packages/*/node_modules

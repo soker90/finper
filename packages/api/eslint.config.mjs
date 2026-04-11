@@ -30,7 +30,7 @@ export default [
       'import/no-unresolved': [
         'error',
         {
-          ignore: ['^@soker90/finper-models', '^mongoose$', '^@typescript-eslint/', '^eslint-plugin-']
+          ignore: ['^@soker90/finper-models', '^mongoose$', '^@typescript-eslint/', '^eslint-plugin-', '^neostandard$']
         }
       ]
     },
@@ -58,6 +58,6 @@ export default [
   },
 
   {
-    ignores: ['dist', 'build', 'node_modules', 'eslint.config.js'],
+    ignores: ['dist', 'build', 'node_modules', 'eslint.config.mjs'],
   },
 ]
