@@ -7,6 +7,8 @@ import {
   validateSupplyExist
 } from '../validators/supply'
 import { ISupplyService } from '../services/supply.service'
+import extractUser from '../helpers/extract-user'
+import { RequestUser } from '../types'
 
 type ISupplyController = {
   loggerHandler: any,
@@ -35,46 +37,39 @@ export class SupplyController {
   }
 
   public async create (req: Request, res: Response, next: NextFunction): Promise<void> {
-    Promise.resolve({ body: req.body, user: req.user as string })
-      .tap(({ body }) => this.logger.logInfo(`/create - supply: ${body.name}`))
-      .then(validateSupplyParams)
-      .then(({ value }) => {
-        return { ...value, user: req.user as string }
-      })
+    Promise.resolve(req.body)
+      .tap(({ name }) => this.logger.logInfo(`/create - supply: ${name}`))
+      .then(validateSupplyParams.bind(null, req as unknown as RequestUser))
+      .then(({ value }) => value)
+      .then(extractUser(req))
       .then(this.supplyService.addSupply.bind(this.supplyService))
       .tap(({ name }: SupplyDocument) => this.logger.logInfo(`Supply ${name} has been succesfully created`))
       .then((response) => {
         res.send(response)
       })
-      .catch((error) => {
-        next(error)
-      })
+      .catch(next)
   }
 
   public async edit (req: Request, res: Response, next: NextFunction): Promise<void> {
-    Promise.resolve({ params: req.params, body: req.body, user: req.user as string })
+    Promise.resolve(req as unknown as RequestUser)
       .tap(({ body }) => this.logger.logInfo(`/edit - supply: ${body.name}`))
       .then(validateSupplyParams)
-      .then((validated) => this.supplyService.editSupply({ id: validated.id as string, value: validated.value }))
+      .then(this.supplyService.editSupply.bind(this.supplyService))
       .tap(({ _id }: SupplyDocument) => this.logger.logInfo(`Supply ${_id} has been succesfully edited`))
       .then((response) => {
         res.send(response)
       })
-      .catch((error) => {
-        next(error)
-      })
+      .catch(next)
   }
 
   public async delete (req: Request, res: Response, next: NextFunction): Promise<void> {
-    Promise.resolve({ id: req.params.id, user: req.user as string })
+    Promise.resolve(req.params as { id: string })
       .tap(({ id }) => this.logger.logInfo(`/delete - supply: ${id}`))
-      .tap(validateSupplyExist)
+      .tap(validateSupplyExist.bind(null, { id: req.params.id, user: req.user as string }))
       .then(this.supplyService.deleteSupply.bind(this.supplyService))
       .then(() => {
-        res.send({ deleted: true })
+        res.sendStatus(204)
       })
-      .catch((error) => {
-        next(error)
-      })
+      .catch(next)
   }
 }

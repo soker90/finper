@@ -7,6 +7,8 @@ import {
   validatePropertyExist
 } from '../validators/property'
 import { IPropertyService } from '../services/property.service'
+import extractUser from '../helpers/extract-user'
+import { RequestUser } from '../types'
 
 type IPropertyController = {
   loggerHandler: any,
@@ -23,46 +25,39 @@ export class PropertyController {
   }
 
   public async create (req: Request, res: Response, next: NextFunction): Promise<void> {
-    Promise.resolve({ body: req.body, user: req.user as string })
-      .tap(({ body }) => this.logger.logInfo(`/create - property: ${body.name}`))
-      .then(validatePropertyParams)
-      .then(({ value }) => {
-        return { ...value, user: req.user as string }
-      })
+    Promise.resolve(req.body)
+      .tap(({ name }) => this.logger.logInfo(`/create - property: ${name}`))
+      .then(validatePropertyParams.bind(null, req as unknown as RequestUser))
+      .then(({ value }) => value)
+      .then(extractUser(req))
       .then(this.propertyService.addProperty.bind(this.propertyService))
       .tap(({ name }: PropertyDocument) => this.logger.logInfo(`Property ${name} has been succesfully created`))
       .then((response) => {
         res.send(response)
       })
-      .catch((error) => {
-        next(error)
-      })
+      .catch(next)
   }
 
   public async edit (req: Request, res: Response, next: NextFunction): Promise<void> {
-    Promise.resolve({ params: req.params, body: req.body, user: req.user as string })
+    Promise.resolve(req as unknown as RequestUser)
       .tap(({ body }) => this.logger.logInfo(`/edit - property: ${body.name}`))
       .then(validatePropertyParams)
-      .then((validated) => this.propertyService.editProperty({ id: validated.id as string, value: validated.value }))
+      .then(this.propertyService.editProperty.bind(this.propertyService))
       .tap(({ _id }: PropertyDocument) => this.logger.logInfo(`Property ${_id} has been succesfully edited`))
       .then((response) => {
         res.send(response)
       })
-      .catch((error) => {
-        next(error)
-      })
+      .catch(next)
   }
 
   public async delete (req: Request, res: Response, next: NextFunction): Promise<void> {
-    Promise.resolve({ id: req.params.id, user: req.user as string })
+    Promise.resolve(req.params as { id: string })
       .tap(({ id }) => this.logger.logInfo(`/delete - property: ${id}`))
-      .tap(validatePropertyExist)
+      .tap(validatePropertyExist.bind(null, { id: req.params.id, user: req.user as string }))
       .then(this.propertyService.deleteProperty.bind(this.propertyService))
       .then(() => {
-        res.send({ deleted: true })
+        res.sendStatus(204)
       })
-      .catch((error) => {
-        next(error)
-      })
+      .catch(next)
   }
 }
