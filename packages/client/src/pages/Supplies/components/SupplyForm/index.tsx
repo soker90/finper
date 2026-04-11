@@ -43,6 +43,7 @@ const SupplyForm = ({ supply, propertyId, onClose, onSubmit }: Props) => {
       title={supply ? 'Editar suministro' : 'Nuevo suministro'}
       onClose={onClose}
       action={handleFormSubmit}
+      cardSx={{ minWidth: 480 }}
     >
       <SelectForm
         id='supply-type'

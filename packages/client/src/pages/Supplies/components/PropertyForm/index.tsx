@@ -26,6 +26,7 @@ const PropertyForm = ({ property, onClose, onSubmit }: Props) => {
       title={property ? 'Editar inmueble' : 'Nuevo inmueble'}
       onClose={onClose}
       action={handleFormSubmit}
+      cardSx={{ minWidth: 480 }}
     >
       <InputForm
         id='property-name'
