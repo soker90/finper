@@ -110,7 +110,7 @@ const SupplyDetail = () => {
 
       {/* Selector de año */}
       <Box display='flex' alignItems='center' gap={2}>
-        <Typography variant='body2' color='textSecondary'>
+        <Typography color='textSecondary'>
           Año:
         </Typography>
         <Select
@@ -124,7 +124,7 @@ const SupplyDetail = () => {
             </MenuItem>
           ))}
         </Select>
-        <Typography variant='body2' color='textSecondary'>
+        <Typography color='textSecondary'>
           {filteredReadings.length} lectura{filteredReadings.length !== 1 ? 's' : ''}
         </Typography>
       </Box>

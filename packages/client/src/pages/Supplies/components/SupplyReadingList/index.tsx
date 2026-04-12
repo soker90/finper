@@ -106,7 +106,6 @@ const SupplyReadingList = ({ readings, isLoading, isElectricity, unit, onAdd, on
         }}
       >
         <Table
-          size='small'
           stickyHeader
           aria-labelledby='supply-readings-table'
           sx={{

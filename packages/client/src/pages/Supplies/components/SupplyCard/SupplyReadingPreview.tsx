@@ -15,7 +15,7 @@ const SupplyReadingPreview = ({ readings, isElectricity, unit }: Props) => {
     <>
       <Divider />
       <Box sx={{ bgcolor: 'action.hover', borderRadius: 1, px: 1, py: 0.5, mx: -1 }}>
-        <Typography variant='caption' color='textSecondary' fontWeight={600} display='block' mb={0.5}>
+        <Typography variant='body2' color='textSecondary' fontWeight={600} display='block' mb={0.5}>
           Últimas lecturas
         </Typography>
         <List dense disablePadding>
@@ -24,10 +24,10 @@ const SupplyReadingPreview = ({ readings, isElectricity, unit }: Props) => {
               <ListItemText
                 primary={
                   <Box display='flex' justifyContent='space-between' alignItems='center'>
-                    <Typography variant='caption' color='textSecondary'>
+                    <Typography variant='body2' color='textSecondary'>
                       {dayjs(r.startDate).format('DD/MM/YY')} – {dayjs(r.endDate).format('DD/MM/YY')}
                     </Typography>
-                    <Typography variant='caption' fontWeight={600}>
+                    <Typography variant='body2' fontWeight={600}>
                       {isElectricity
                         ? `P:${r.consumptionPeak ?? '—'} kWh · L:${r.consumptionFlat ?? '—'} kWh · V:${r.consumptionOffPeak ?? '—'} kWh`
                         : `${r.consumption ?? '—'}${unit ? ` ${unit}` : ''}`}
