@@ -39,8 +39,8 @@ const SupplyReadingForm = ({ supply, reading, onClose, onSubmit }: Props) => {
 
   const handleFormSubmit = handleSubmit(async (data) => {
     const result = await onSubmit({
-      startDate: data.startDate ? dayjs(data.startDate).startOf('day').valueOf() : Date.now(),
-      endDate: data.endDate ? dayjs(data.endDate).startOf('day').valueOf() : Date.now(),
+      startDate: dayjs(data.startDate!).startOf('day').valueOf(),
+      endDate: dayjs(data.endDate!).startOf('day').valueOf(),
       ...(isElectricity
         ? {
             consumptionPeak: data.consumptionPeak !== undefined ? Number(data.consumptionPeak) : undefined,
@@ -88,8 +88,8 @@ const SupplyReadingForm = ({ supply, reading, onClose, onSubmit }: Props) => {
               label='Punta (kWh)'
               type='number'
               size={4}
-              error={false}
-              errorText=''
+              error={!!errors.consumptionPeak}
+              errorText={errors.consumptionPeak?.message ?? ''}
               {...register('consumptionPeak', { valueAsNumber: true })}
             />
             <InputForm
@@ -97,8 +97,8 @@ const SupplyReadingForm = ({ supply, reading, onClose, onSubmit }: Props) => {
               label='Llano (kWh)'
               type='number'
               size={4}
-              error={false}
-              errorText=''
+              error={!!errors.consumptionFlat}
+              errorText={errors.consumptionFlat?.message ?? ''}
               {...register('consumptionFlat', { valueAsNumber: true })}
             />
             <InputForm
@@ -106,8 +106,8 @@ const SupplyReadingForm = ({ supply, reading, onClose, onSubmit }: Props) => {
               label='Valle (kWh)'
               type='number'
               size={4}
-              error={false}
-              errorText=''
+              error={!!errors.consumptionOffPeak}
+              errorText={errors.consumptionOffPeak?.message ?? ''}
               {...register('consumptionOffPeak', { valueAsNumber: true })}
             />
           </>
@@ -118,8 +118,8 @@ const SupplyReadingForm = ({ supply, reading, onClose, onSubmit }: Props) => {
             label={`Consumo${unit ? ` (${unit})` : ''}`}
             type='number'
             size={12}
-            error={false}
-            errorText=''
+            error={!!errors.consumption}
+            errorText={errors.consumption?.message ?? ''}
             {...register('consumption', { valueAsNumber: true })}
           />
           )}

@@ -207,11 +207,6 @@ export const deleteSupply = (id: string): Promise<{ error?: string }> =>
   axios.delete(`${SUPPLIES}/${id}`).then(() => ({})).catch((error: any) => ({ error: error.message }))
 
 // Supply Readings
-export const getSupplyReadings = (supplyId: string): Promise<{ data?: any[], error?: string }> =>
-  axios.get(`${SUPPLIES_READINGS}/supply/${supplyId}`)
-    .then((data: any) => ({ data }))
-    .catch((error: any) => ({ error: error.message }))
-
 export const addSupplyReading = (params: SupplyReadingInput): Promise<{ data?: any, error?: string }> =>
   axios.post(SUPPLIES_READINGS, params)
     .then((data: any) => ({ data }))
