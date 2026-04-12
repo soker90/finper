@@ -1,31 +1,32 @@
 import { http, HttpResponse } from 'msw'
 import { faker } from '@faker-js/faker'
 
-const SUPPLY_TYPES = ['electricity', 'water', 'gas', 'internet'] as const
+// ── IDs fijos para tests deterministas ────────────────────────────────────────
+export const PROPERTY_ID = 'prop-test-1'
+export const SUPPLY_WATER_ID = 'supply-water-1'
+export const SUPPLY_ELEC_ID = 'supply-elec-1'
 
-const makeSupply = (propertyId: string) => ({
-  _id: faker.database.mongodbObjectId(),
-  type: faker.helpers.arrayElement(SUPPLY_TYPES),
-  propertyId
-})
+const CURRENT_YEAR = new Date().getFullYear()
 
-const makeProperty = () => {
-  const _id = faker.database.mongodbObjectId()
-  return { _id, name: faker.location.streetAddress(), supplies: [makeSupply(_id)] }
-}
+// Lecturas fijas para el suministro de agua (año actual)
+export const READINGS_LIST = [0, 1, 2].map((i) => ({
+  _id: `reading-${i + 1}`,
+  supplyId: SUPPLY_WATER_ID,
+  startDate: new Date(CURRENT_YEAR, i * 3, 1).getTime(),
+  endDate: new Date(CURRENT_YEAR, i * 3 + 2, 28).getTime(),
+  consumption: 100 + i * 50
+}))
 
-const makeReading = (supplyId: string) => {
-  const startDate = faker.date.recent({ days: 60 }).getTime()
-  return {
-    _id: faker.database.mongodbObjectId(),
-    supplyId,
-    startDate,
-    endDate: startDate + 30 * 24 * 60 * 60 * 1000,
-    consumption: faker.number.int({ min: 50, max: 500 })
+export const PROPERTIES_LIST = [
+  {
+    _id: PROPERTY_ID,
+    name: 'Casa Principal',
+    supplies: [
+      { _id: SUPPLY_WATER_ID, type: 'water', propertyId: PROPERTY_ID },
+      { _id: SUPPLY_ELEC_ID, type: 'electricity', propertyId: PROPERTY_ID }
+    ]
   }
-}
-
-export const PROPERTIES_LIST = Array.from({ length: 2 }, makeProperty)
+]
 
 export const suppliesHandlers = [
   http.get('/supplies', () => HttpResponse.json(PROPERTIES_LIST)),
@@ -44,7 +45,7 @@ export const suppliesHandlers = [
 
   // Readings — rutas estáticas ANTES de /supplies/:id
   http.get('/supplies/readings/supply/:supplyId', ({ params }) => {
-    return HttpResponse.json(Array.from({ length: 3 }, () => makeReading(params.supplyId as string)))
+    return HttpResponse.json(READINGS_LIST.filter(r => r.supplyId === params.supplyId))
   }),
   http.post('/supplies/readings', async ({ request }) => {
     const body = await request.json() as Record<string, any>

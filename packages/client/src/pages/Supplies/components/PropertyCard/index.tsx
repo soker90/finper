@@ -48,17 +48,17 @@ const PropertyCard = ({
           action={
             <Box sx={{ display: 'flex', gap: 0.5 }}>
               <Tooltip title='Añadir suministro'>
-                <IconButton size='small' color='primary' onClick={() => setShowSupplyForm(true)}>
+                <IconButton size='small' color='primary' aria-label='Añadir suministro' onClick={() => setShowSupplyForm(true)}>
                   <PlusOutlined />
                 </IconButton>
               </Tooltip>
               <Tooltip title='Editar inmueble'>
-                <IconButton size='small' onClick={() => onEditProperty(property)}>
+                <IconButton size='small' aria-label='Editar inmueble' onClick={() => onEditProperty(property)}>
                   <EditOutlined />
                 </IconButton>
               </Tooltip>
               <Tooltip title='Eliminar inmueble'>
-                <IconButton size='small' color='error' onClick={() => setShowRemoveProperty(true)}>
+                <IconButton size='small' color='error' aria-label='Eliminar inmueble' onClick={() => setShowRemoveProperty(true)}>
                   <DeleteOutlined />
                 </IconButton>
               </Tooltip>
