@@ -15,6 +15,8 @@ const Transactions = lazy(() => import('../pages/Transactions'))
 const Tickets = lazy(() => import('../pages/Tickets'))
 const Year = lazy(() => import('../pages/Year'))
 const Subscriptions = lazy(() => import('../pages/Subscriptions'))
+const Supplies = lazy(() => import('../pages/Supplies'))
+const SupplyDetail = lazy(() => import('../pages/SupplyDetail'))
 
 const MainRoutes = {
   path: '/',
@@ -76,6 +78,14 @@ const MainRoutes = {
     {
       path: 'suscripciones',
       element: <Subscriptions />
+    },
+    {
+      path: 'suministros',
+      element: <Supplies />
+    },
+    {
+      path: 'suministros/:supplyId',
+      element: <SupplyDetail />
     }
   ]
 }

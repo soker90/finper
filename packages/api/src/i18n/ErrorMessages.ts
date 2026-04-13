@@ -37,5 +37,14 @@ export const ERROR_MESSAGE = {
   },
   SUBSCRIPTION_CANDIDATE: {
     NOT_FOUND: 'La candidata no existe'
+  },
+  PROPERTY: {
+    NOT_FOUND: 'El inmueble no existe'
+  },
+  SUPPLY: {
+    NOT_FOUND: 'El suministro no existe'
+  },
+  SUPPLY_READING: {
+    NOT_FOUND: 'La lectura del suministro no existe'
   }
 }

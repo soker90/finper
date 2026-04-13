@@ -12,3 +12,6 @@ export const LOANS = 'loans'
 export const LOAN_DETAIL = (id: string) => `loans/${id}`
 export const SUBSCRIPTIONS = 'subscriptions'
 export const SUBSCRIPTION_CANDIDATES = 'subscriptions/candidates'
+export const SUPPLIES = 'supplies'
+export const SUPPLIES_PROPERTIES = 'supplies/properties'
+export const SUPPLIES_READINGS = 'supplies/readings'
