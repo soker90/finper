@@ -14,6 +14,7 @@ export const READINGS_LIST = [0, 1, 2].map((i) => ({
   supplyId: SUPPLY_WATER_ID,
   startDate: new Date(CURRENT_YEAR, i * 3, 1).getTime(),
   endDate: new Date(CURRENT_YEAR, i * 3 + 2, 28).getTime(),
+  amount: 30.5 + i * 12.75,
   consumption: 100 + i * 50
 }))
 

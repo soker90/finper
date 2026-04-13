@@ -1,4 +1,4 @@
-import { SupplyModel, PropertyModel, ISupply, SupplyDocument } from '@soker90/finper-models'
+import { SupplyModel, PropertyModel, SupplyReadingModel, ISupply, SupplyDocument } from '@soker90/finper-models'
 import Boom from '@hapi/boom'
 import { ERROR_MESSAGE } from '../i18n'
 
@@ -36,6 +36,7 @@ export default class SupplyService implements ISupplyService {
   }
 
   public async deleteSupply ({ id }: { id: string }): Promise<void> {
+    await SupplyReadingModel.deleteMany({ supplyId: id })
     const deleted = await SupplyModel.findByIdAndDelete(id)
     if (!deleted) throw Boom.notFound(ERROR_MESSAGE.SUPPLY.NOT_FOUND).output
   }

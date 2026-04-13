@@ -7,6 +7,7 @@ import { SUPPLY_TYPE_UNITS } from '../../utils/supply'
 interface FormValues {
   startDate: string | null
   endDate: string | null
+  amount?: string | number
   consumption?: number
   consumptionPeak?: number
   consumptionFlat?: number
@@ -20,15 +21,33 @@ interface Props {
   onSubmit: (data: Omit<SupplyReadingInput, 'supplyId'>) => Promise<{ error?: string }>
 }
 
+const parseAmountInput = (value: unknown): number => {
+  if (typeof value === 'number') return value
+  if (typeof value !== 'string') return Number.NaN
+
+  const normalized = value.replace(',', '.').trim()
+  if (normalized === '') return Number.NaN
+
+  return Number(normalized)
+}
+
 const SupplyReadingForm = ({ supply, reading, onClose, onSubmit }: Props) => {
   const isElectricity = supply.type === 'electricity'
   const unit = SUPPLY_TYPE_UNITS[supply.type]
 
-  const { register, handleSubmit, formState: { errors, isSubmitting }, control } = useForm<FormValues>({
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+    control,
+    setError,
+    clearErrors
+  } = useForm<FormValues>({
     defaultValues: reading
       ? {
           startDate: dayjs(reading.startDate).format('YYYY-MM-DD'),
           endDate: dayjs(reading.endDate).format('YYYY-MM-DD'),
+          amount: reading.amount,
           consumption: reading.consumption,
           consumptionPeak: reading.consumptionPeak,
           consumptionFlat: reading.consumptionFlat,
@@ -38,9 +57,18 @@ const SupplyReadingForm = ({ supply, reading, onClose, onSubmit }: Props) => {
   })
 
   const handleFormSubmit = handleSubmit(async (data) => {
-    const result = await onSubmit({
+    const parsedAmount = parseAmountInput(data.amount)
+    if (!Number.isFinite(parsedAmount)) {
+      setError('amount', { type: 'validate', message: 'El importe es obligatorio y debe ser un numero valido' })
+      return
+    }
+
+    clearErrors('amount')
+
+    const payload = {
       startDate: dayjs(data.startDate!).startOf('day').valueOf(),
       endDate: dayjs(data.endDate!).startOf('day').valueOf(),
+      amount: parsedAmount,
       ...(isElectricity
         ? {
             consumptionPeak: data.consumptionPeak !== undefined ? Number(data.consumptionPeak) : undefined,
@@ -50,7 +78,9 @@ const SupplyReadingForm = ({ supply, reading, onClose, onSubmit }: Props) => {
         : {
             consumption: data.consumption !== undefined ? Number(data.consumption) : undefined
           })
-    })
+    }
+
+    const result = await onSubmit(payload)
     if (!result?.error) onClose()
   })
 
@@ -78,6 +108,20 @@ const SupplyReadingForm = ({ supply, reading, onClose, onSubmit }: Props) => {
         error={!!errors.endDate}
         control={control}
         size={6}
+      />
+
+      <InputForm
+        id='amount'
+        label='Importe (€)'
+        type='text'
+        size={12}
+        inputProps={{ inputMode: 'decimal' }}
+        error={!!errors.amount}
+        errorText={errors.amount?.message ?? 'El importe es obligatorio y debe ser un numero valido'}
+        {...register('amount', {
+          required: true,
+          validate: (value) => Number.isFinite(parseAmountInput(value)) || 'El importe es obligatorio y debe ser un numero valido'
+        })}
       />
 
       {isElectricity

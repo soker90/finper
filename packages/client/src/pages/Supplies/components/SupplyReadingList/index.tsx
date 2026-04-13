@@ -14,6 +14,7 @@ import { DeleteOutlined, EditOutlined } from '@ant-design/icons'
 import dayjs from 'dayjs'
 import { MainCard } from 'components'
 import { SupplyReading } from 'types'
+import { format } from 'utils'
 
 interface Props {
   readings: SupplyReading[]
@@ -30,7 +31,7 @@ const SupplyReadingList = ({ readings, isLoading, isElectricity, unit, onAdd, on
     if (isLoading) {
       return (
         <TableRow>
-          <TableCell colSpan={isElectricity ? 7 : 4} align='center'>
+          <TableCell colSpan={isElectricity ? 8 : 5} align='center'>
             <Typography color='text.secondary'>Cargando lecturas…</Typography>
           </TableCell>
         </TableRow>
@@ -40,7 +41,7 @@ const SupplyReadingList = ({ readings, isLoading, isElectricity, unit, onAdd, on
     if (readings.length === 0) {
       return (
         <TableRow>
-          <TableCell colSpan={isElectricity ? 7 : 4} align='center'>
+          <TableCell colSpan={isElectricity ? 8 : 5} align='center'>
             <Typography color='text.secondary' py={1}>
               Sin lecturas registradas. Pulsa&nbsp;
               <Typography
@@ -76,6 +77,15 @@ const SupplyReadingList = ({ readings, isLoading, isElectricity, unit, onAdd, on
             )
           : <TableCell align='right'>{reading.consumption ?? '—'}</TableCell>}
         <TableCell align='right'>
+          {Number.isFinite(reading.amount)
+            ? (
+              <Typography component='span' color={reading.amount < 0 ? 'error.main' : 'text.primary'}>
+                {format.euro(reading.amount, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              </Typography>
+              )
+            : '—'}
+        </TableCell>
+        <TableCell align='right'>
           <Stack direction='row' spacing={0} justifyContent='flex-end'>
             <Tooltip title='Editar lectura'>
               <IconButton size='small' aria-label='editar lectura' onClick={() => onEdit(reading)}>
@@ -109,8 +119,8 @@ const SupplyReadingList = ({ readings, isLoading, isElectricity, unit, onAdd, on
           stickyHeader
           aria-labelledby='supply-readings-table'
           sx={{
-            '& .MuiTableCell-root:first-child': { pl: 2 },
-            '& .MuiTableCell-root:last-child': { pr: 3 }
+            '& .MuiTableCell-root:first-of-type': { pl: 2 },
+            '& .MuiTableCell-root:last-of-type': { pr: 3 }
           }}
         >
           <TableHead>
@@ -126,6 +136,7 @@ const SupplyReadingList = ({ readings, isLoading, isElectricity, unit, onAdd, on
                   </>
                   )
                 : <TableCell align='right'>Consumo{unit ? ` (${unit})` : ''}</TableCell>}
+              <TableCell align='right'>Importe</TableCell>
               <TableCell align='right'>Acciones</TableCell>
             </TableRow>
           </TableHead>
