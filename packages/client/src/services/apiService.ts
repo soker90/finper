@@ -207,36 +207,15 @@ export const deleteSupply = (id: string): Promise<{ error?: string }> =>
   axios.delete(`${SUPPLIES}/${id}`).then(() => ({})).catch((error: any) => ({ error: error.message }))
 
 // Supply Readings
-const normalizeReadingAmount = (value: unknown): number | null => {
-  if (typeof value === 'number') return Number.isFinite(value) ? value : null
-  if (typeof value === 'string') {
-    const normalized = Number(value.replace(',', '.').trim())
-    return Number.isFinite(normalized) ? normalized : null
-  }
-  return null
-}
-
 export const addSupplyReading = (params: SupplyReadingInput): Promise<{ data?: any, error?: string }> =>
-  ((): Promise<{ data?: any, error?: string }> => {
-    const amount = normalizeReadingAmount(params.amount)
-    if (amount === null) return Promise.resolve({ error: 'El importe es obligatorio y debe ser un numero valido' })
-
-    const body = { ...params, amount }
-    return axios.post(SUPPLIES_READINGS, body)
-      .then((data: any) => ({ data }))
-      .catch((error: any) => ({ error: error.message }))
-  })()
+  axios.post(SUPPLIES_READINGS, params)
+    .then((data: any) => ({ data }))
+    .catch((error: any) => ({ error: error.message }))
 
 export const editSupplyReading = (id: string, params: SupplyReadingInput): Promise<{ data?: any, error?: string }> =>
-  ((): Promise<{ data?: any, error?: string }> => {
-    const amount = normalizeReadingAmount(params.amount)
-    if (amount === null) return Promise.resolve({ error: 'El importe es obligatorio y debe ser un numero valido' })
-
-    const body = { ...params, amount }
-    return axios.put(`${SUPPLIES_READINGS}/${id}`, body)
-      .then((data: any) => ({ data }))
-      .catch((error: any) => ({ error: error.message }))
-  })()
+  axios.put(`${SUPPLIES_READINGS}/${id}`, params)
+    .then((data: any) => ({ data }))
+    .catch((error: any) => ({ error: error.message }))
 
 export const deleteSupplyReading = (id: string): Promise<{ error?: string }> =>
   axios.delete(`${SUPPLIES_READINGS}/${id}`)

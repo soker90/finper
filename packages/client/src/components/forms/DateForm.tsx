@@ -25,9 +25,7 @@ const DateForm = ({ id, label, control, error, size = 2, ...others }: Props) => 
         control={control}
         rules={{ required: true }}
         render={({ field }) => {
-          const { onChange, value } = field
-          const pickerValue = value !== undefined && value !== null ? dayjs(value) : null
-
+          const { onChange } = field
           return (
             <DatePicker
               slotProps={{
@@ -36,9 +34,9 @@ const DateForm = ({ id, label, control, error, size = 2, ...others }: Props) => 
                   error
                 }
               }}
-              value={pickerValue}
-              onChange={(newValue) => onChange(newValue ? newValue.valueOf() : null)}
+              onChange={onChange}
               format='DD/MM/YYYY'
+              {...(field.value && { value: dayjs(field.value) })}
               {...others}
             />
           )
