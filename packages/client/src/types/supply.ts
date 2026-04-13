@@ -31,6 +31,7 @@ export interface SupplyReading {
   supplyId: string
   startDate: number
   endDate: number
+  amount: number
   consumption?: number
   consumptionPeak?: number
   consumptionFlat?: number
@@ -41,6 +42,7 @@ export interface SupplyReadingInput {
   supplyId: string
   startDate: number
   endDate: number
+  amount: number
   consumption?: number
   consumptionPeak?: number
   consumptionFlat?: number

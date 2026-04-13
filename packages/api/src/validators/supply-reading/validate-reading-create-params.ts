@@ -11,6 +11,7 @@ export const validateReadingCreateParams = async (data: Record<string, string | 
     supplyId: Joi.string().required(),
     startDate: Joi.number().required(),
     endDate: Joi.number().required(),
+    amount: Joi.number().invalid(NaN).required(),
     consumption: Joi.number().optional(),
     consumptionPeak: Joi.number().optional(),
     consumptionFlat: Joi.number().optional(),

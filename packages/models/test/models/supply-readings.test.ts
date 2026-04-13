@@ -7,6 +7,7 @@ const testSupplyReading = (expected: SupplyReadingDocument, received: SupplyRead
   expect(expected.supplyId.toString()).toBe(received.supplyId.toString())
   expect(expected.startDate).toBe(received.startDate)
   expect(expected.endDate).toBe(received.endDate)
+  expect(expected.amount).toBe(received.amount)
   expect(expected.user).toBe(received.user)
 }
 

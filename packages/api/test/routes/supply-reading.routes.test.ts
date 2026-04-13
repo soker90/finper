@@ -61,9 +61,48 @@ describe('SupplyReading Routes', () => {
           supplyId: supply._id.toString(),
           startDate: 1000,
           endDate: 2000,
+          amount: -15,
           consumption: 400
         })
         .expect(200)
+    })
+
+    test('when token is not provided, it should respond 401', async () => {
+      const supply = await insertSupply({ user })
+      await supertest(server.app).post(path)
+        .send({
+          supplyId: supply._id.toString(),
+          startDate: 1000,
+          endDate: 2000,
+          amount: 10,
+          consumption: 400
+        })
+        .expect(401)
+    })
+
+    test('missing amount returns 422', async () => {
+      const supply = await insertSupply({ user })
+      await supertest(server.app).post(path).auth(token, { type: 'bearer' })
+        .send({
+          supplyId: supply._id.toString(),
+          startDate: 1000,
+          endDate: 2000,
+          consumption: 400
+        })
+        .expect(422)
+    })
+
+    test('invalid amount type returns 422', async () => {
+      const supply = await insertSupply({ user })
+      await supertest(server.app).post(path).auth(token, { type: 'bearer' })
+        .send({
+          supplyId: supply._id.toString(),
+          startDate: 1000,
+          endDate: 2000,
+          amount: 'invalid',
+          consumption: 400
+        })
+        .expect(422)
     })
   })
 
@@ -83,9 +122,61 @@ describe('SupplyReading Routes', () => {
           supplyId: reading.supplyId.toString(),
           startDate: 1000,
           endDate: 2000,
+          amount: 0,
           consumption: 900
         })
         .expect(200)
+    })
+
+    test('when token is not provided, it should respond 401', async () => {
+      const reading = await insertSupplyReading({ user })
+      await supertest(server.app).put(path(reading._id.toString()))
+        .send({
+          supplyId: reading.supplyId.toString(),
+          startDate: 1000,
+          endDate: 2000,
+          amount: 0,
+          consumption: 900
+        })
+        .expect(401)
+    })
+
+    test('when reading does not exist in PUT, return 404', async () => {
+      const supply = await insertSupply({ user })
+      await supertest(server.app).put(path('662cc99403a45c3453b3bbed')).auth(token, { type: 'bearer' })
+        .send({
+          supplyId: supply._id.toString(),
+          startDate: 1000,
+          endDate: 2000,
+          amount: 40,
+          consumption: 900
+        })
+        .expect(404)
+    })
+
+    test('when another user reading in PUT, return 404', async () => {
+      const reading = await insertSupplyReading()
+      await supertest(server.app).put(path(reading._id.toString())).auth(token, { type: 'bearer' })
+        .send({
+          supplyId: reading.supplyId.toString(),
+          startDate: 1000,
+          endDate: 2000,
+          amount: 40,
+          consumption: 900
+        })
+        .expect(404)
+    })
+
+    test('missing amount in PUT returns 422', async () => {
+      const reading = await insertSupplyReading({ user })
+      await supertest(server.app).put(path(reading._id.toString())).auth(token, { type: 'bearer' })
+        .send({
+          supplyId: reading.supplyId.toString(),
+          startDate: 1000,
+          endDate: 2000,
+          consumption: 900
+        })
+        .expect(422)
     })
   })
 
@@ -101,6 +192,20 @@ describe('SupplyReading Routes', () => {
     test('success deleting reading', async () => {
       const reading = await insertSupplyReading({ user })
       await supertest(server.app).delete(path(reading._id.toString())).auth(token, { type: 'bearer' }).expect(204)
+    })
+
+    test('when token is not provided, it should respond 401', async () => {
+      const reading = await insertSupplyReading({ user })
+      await supertest(server.app).delete(path(reading._id.toString())).expect(401)
+    })
+
+    test('when reading does not exist in DELETE, return 404', async () => {
+      await supertest(server.app).delete(path('662cc99403a45c3453b3bbed')).auth(token, { type: 'bearer' }).expect(404)
+    })
+
+    test('when another user reading in DELETE, return 404', async () => {
+      const reading = await insertSupplyReading()
+      await supertest(server.app).delete(path(reading._id.toString())).auth(token, { type: 'bearer' }).expect(404)
     })
   })
 })

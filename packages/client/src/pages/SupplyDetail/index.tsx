@@ -19,6 +19,7 @@ import { SUPPLY_TYPE_LABELS, SUPPLY_TYPE_COLORS, SUPPLY_TYPE_UNITS, supplyDispla
 import SupplyReadingForm from '../Supplies/components/SupplyReadingForm'
 import SupplyReadingList from '../Supplies/components/SupplyReadingList'
 import RemoveModal from '../Supplies/components/RemoveModal'
+import { SupplyConsumptionChart, SupplyYearStats } from './components'
 
 type ModalState =
   | { type: 'add' }
@@ -58,6 +59,7 @@ const SupplyDetail = () => {
 
   const handleFormSubmit = (data: Omit<SupplyReadingInput, 'supplyId'>) => {
     const payload: SupplyReadingInput = { ...data, supplyId: supply!._id }
+
     return activeModal?.type === 'edit'
       ? updateReading(activeModal.data._id, payload)
       : createReading(payload)
@@ -138,6 +140,18 @@ const SupplyDetail = () => {
         onAdd={() => setActiveModal({ type: 'add' })}
         onEdit={(r) => setActiveModal({ type: 'edit', data: r })}
         onDelete={(r) => setActiveModal({ type: 'delete', data: r })}
+      />
+
+      <SupplyConsumptionChart
+        readings={filteredReadings}
+        isElectricity={supply.type === 'electricity'}
+        unit={SUPPLY_TYPE_UNITS[supply.type]}
+      />
+
+      <SupplyYearStats
+        readings={filteredReadings}
+        isElectricity={supply.type === 'electricity'}
+        unit={SUPPLY_TYPE_UNITS[supply.type]}
       />
 
       {/* Formulario add/edit */}
