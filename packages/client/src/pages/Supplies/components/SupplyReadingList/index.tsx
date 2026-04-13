@@ -41,7 +41,7 @@ const SupplyReadingList = ({ readings, isLoading, isElectricity, unit, onAdd, on
     if (readings.length === 0) {
       return (
         <TableRow>
-          <TableCell colSpan={isElectricity ? 8 : 5} align='center'>
+          <TableCell colSpan={isElectricity ? 7 : 5} align='center'>
             <Typography color='text.secondary' py={1}>
               Sin lecturas registradas. Pulsa&nbsp;
               <Typography
