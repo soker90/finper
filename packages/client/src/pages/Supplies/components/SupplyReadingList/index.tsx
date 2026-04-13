@@ -31,7 +31,7 @@ const SupplyReadingList = ({ readings, isLoading, isElectricity, unit, onAdd, on
     if (isLoading) {
       return (
         <TableRow>
-          <TableCell colSpan={isElectricity ? 8 : 5} align='center'>
+          <TableCell colSpan={isElectricity ? 7 : 5} align='center'>
             <Typography color='text.secondary'>Cargando lecturas…</Typography>
           </TableCell>
         </TableRow>
