@@ -236,6 +236,7 @@ export const insertSupplyReading = async (params: Record<string, any> = {}): Pro
     supplyId,
     startDate: params.startDate ?? faker.date.past().getTime(),
     endDate: params.endDate ?? faker.date.recent().getTime(),
+    amount: params.amount ?? faker.number.float({ min: -50, max: 250, multipleOf: 0.01 }),
     consumptionPeak: params.consumptionPeak ?? faker.number.int({ min: 10, max: 100 }),
     consumptionFlat: params.consumptionFlat ?? faker.number.int({ min: 10, max: 100 }),
     consumptionOffPeak: params.consumptionOffPeak ?? faker.number.int({ min: 10, max: 100 }),

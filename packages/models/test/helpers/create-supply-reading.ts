@@ -11,6 +11,7 @@ export default async (params: any = {}): Promise<HydratedDocument<ISupplyReading
     supplyId,
     startDate: faker.date.past().getTime(),
     endDate: faker.date.recent().getTime(),
+    amount: faker.number.float({ min: -50, max: 300, multipleOf: 0.01 }),
     consumption: faker.number.int({ min: 10, max: 100 }),
     user: faker.internet.username(),
     ...params

@@ -1,4 +1,4 @@
-import { PropertyModel, IProperty, PropertyDocument } from '@soker90/finper-models'
+import { PropertyModel, SupplyModel, SupplyReadingModel, IProperty, PropertyDocument } from '@soker90/finper-models'
 import Boom from '@hapi/boom'
 import { ERROR_MESSAGE } from '../i18n'
 
@@ -20,6 +20,14 @@ export default class PropertyService implements IPropertyService {
   }
 
   public async deleteProperty ({ id }: { id: string }): Promise<void> {
+    const supplies = await SupplyModel.find({ propertyId: id }).select('_id')
+    const supplyIds = supplies.map(({ _id }) => _id)
+
+    if (supplyIds.length > 0) {
+      await SupplyReadingModel.deleteMany({ supplyId: { $in: supplyIds } })
+      await SupplyModel.deleteMany({ propertyId: id })
+    }
+
     const deleted = await PropertyModel.findByIdAndDelete(id)
     if (!deleted) throw Boom.notFound(ERROR_MESSAGE.PROPERTY.NOT_FOUND).output
   }

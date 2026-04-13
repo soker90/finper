@@ -79,8 +79,10 @@ describe('SupplyDetail — initial state and rendering', () => {
     server.use(
       http.get('/supplies/readings/supply/:supplyId', () => HttpResponse.json([]))
     )
-    const { findByText } = renderFresh()
+    const { findByText, queryByText } = renderFresh()
     expect(await findByText(/sin lecturas registradas/i)).toBeDefined()
+    expect(queryByText('Resumen anual')).toBeNull()
+    expect(queryByText('Grafica de consumo')).toBeNull()
   })
 
   it('"Volver" button navigates to /suministros', async () => {

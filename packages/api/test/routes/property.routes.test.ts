@@ -1,9 +1,9 @@
 import supertest from 'supertest'
-import { PropertyModel, mongoose } from '@soker90/finper-models'
+import { PropertyModel, SupplyModel, SupplyReadingModel, mongoose } from '@soker90/finper-models'
 
 import { server } from '../../src/server'
 import { requestLogin } from '../request-login'
-import { insertProperty } from '../insert-data-to-model'
+import { insertProperty, insertSupply, insertSupplyReading } from '../insert-data-to-model'
 import { generateUsername } from '../generate-values'
 
 const testDatabase = require('../test-db')(mongoose)
@@ -11,7 +11,11 @@ const testDatabase = require('../test-db')(mongoose)
 describe('Property Routes', () => {
   beforeAll(() => testDatabase.connect())
   afterAll(() => testDatabase.close())
-  afterEach(() => PropertyModel.deleteMany({}))
+  afterEach(async () => {
+    await SupplyReadingModel.deleteMany({})
+    await SupplyModel.deleteMany({})
+    await PropertyModel.deleteMany({})
+  })
 
   describe('POST /api/supplies/properties', () => {
     const path = '/api/supplies/properties'
@@ -78,6 +82,22 @@ describe('Property Routes', () => {
     test('when success deleting a property', async () => {
       const property = await insertProperty({ user })
       await supertest(server.app).delete(path(property._id.toString())).auth(token, { type: 'bearer' }).expect(204)
+    })
+
+    test('when deleting property, it should delete related supplies and readings', async () => {
+      const property = await insertProperty({ user })
+      const supply = await insertSupply({ user, propertyId: property._id.toString() })
+      await insertSupplyReading({ user, supplyId: supply._id.toString(), amount: 12.45 })
+
+      await supertest(server.app).delete(path(property._id.toString())).auth(token, { type: 'bearer' }).expect(204)
+
+      const [suppliesCount, readingsCount] = await Promise.all([
+        SupplyModel.countDocuments({ propertyId: property._id }),
+        SupplyReadingModel.countDocuments({ supplyId: supply._id })
+      ])
+
+      expect(suppliesCount).toBe(0)
+      expect(readingsCount).toBe(0)
     })
   })
 })

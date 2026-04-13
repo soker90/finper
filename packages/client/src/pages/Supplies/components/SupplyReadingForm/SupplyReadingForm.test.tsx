@@ -25,6 +25,7 @@ const mockReading: SupplyReading = {
   supplyId: 'supply-water-1',
   startDate: NOW,
   endDate: NOW + 30 * 24 * 60 * 60 * 1000,
+  amount: 45.25,
   consumption: 150
 }
 
@@ -96,6 +97,18 @@ describe('SupplyReadingForm', () => {
     renderForm(mockWaterSupply, mockReading, onSubmit)
     fireEvent.submit(document.querySelector('form')!)
     await waitFor(() => expect(onSubmit).toHaveBeenCalled())
+    expect(onSubmit).toHaveBeenCalledWith(expect.objectContaining({ amount: 45.25 }))
+  })
+
+  it('parses decimal amount with comma in edit mode', async () => {
+    const onSubmit = vi.fn().mockResolvedValue({})
+    const { getByLabelText } = renderForm(mockWaterSupply, mockReading, onSubmit)
+
+    fireEvent.change(getByLabelText('Importe (€)'), { target: { value: '12,34' } })
+    fireEvent.submit(document.querySelector('form')!)
+
+    await waitFor(() => expect(onSubmit).toHaveBeenCalled())
+    expect(onSubmit).toHaveBeenCalledWith(expect.objectContaining({ amount: 12.34 }))
   })
 
   it('closes the form after a successful submit', async () => {
