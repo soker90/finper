@@ -10,6 +10,13 @@ export interface Supply {
   name?: string
   type: SupplyType
   propertyId: string
+  contractedPowerPeak?: number
+  contractedPowerOffPeak?: number
+  currentPricePowerPeak?: number
+  currentPricePowerOffPeak?: number
+  currentPriceEnergyPeak?: number
+  currentPriceEnergyFlat?: number
+  currentPriceEnergyOffPeak?: number
 }
 
 export interface PropertyWithSupplies extends Property {
@@ -24,6 +31,13 @@ export interface SupplyInput {
   name?: string
   type: SupplyType
   propertyId: string
+  contractedPowerPeak?: number
+  contractedPowerOffPeak?: number
+  currentPricePowerPeak?: number
+  currentPricePowerOffPeak?: number
+  currentPriceEnergyPeak?: number
+  currentPriceEnergyFlat?: number
+  currentPriceEnergyOffPeak?: number
 }
 
 export interface SupplyReading {

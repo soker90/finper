@@ -17,6 +17,7 @@ const Year = lazy(() => import('../pages/Year'))
 const Subscriptions = lazy(() => import('../pages/Subscriptions'))
 const Supplies = lazy(() => import('../pages/Supplies'))
 const SupplyDetail = lazy(() => import('../pages/SupplyDetail'))
+const CompareTariffsPage = lazy(() => import('../pages/SupplyDetail/CompareTariffsPage'))
 
 const MainRoutes = {
   path: '/',
@@ -86,6 +87,10 @@ const MainRoutes = {
     {
       path: 'suministros/:supplyId',
       element: <SupplyDetail />
+    },
+    {
+      path: 'suministros/:supplyId/comparar',
+      element: <CompareTariffsPage />
     }
   ]
 }

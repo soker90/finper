@@ -10,7 +10,7 @@ import {
   Stack,
   Typography
 } from '@mui/material'
-import { ArrowLeftOutlined, PlusOutlined } from '@ant-design/icons'
+import { ArrowLeftOutlined, PlusOutlined, ThunderboltOutlined } from '@ant-design/icons'
 import dayjs from 'dayjs'
 
 import { useSupplies, useSupplyReadings } from 'hooks'
@@ -101,13 +101,24 @@ const SupplyDetail = () => {
           />
         </Box>
 
-        <Button
-          variant='outlined'
-          startIcon={<PlusOutlined />}
-          onClick={() => setActiveModal({ type: 'add' })}
-        >
-          Añadir lectura
-        </Button>
+        <Stack direction='row' spacing={1}>
+          {supply.type === 'electricity' && (
+            <Button
+              variant='outlined'
+              startIcon={<ThunderboltOutlined />}
+              onClick={() => navigate(`/suministros/${supply._id}/comparar`)}
+            >
+              Comparar tarifas
+            </Button>
+          )}
+          <Button
+            variant='outlined'
+            startIcon={<PlusOutlined />}
+            onClick={() => setActiveModal({ type: 'add' })}
+          >
+            Añadir lectura
+          </Button>
+        </Stack>
       </Box>
 
       {/* Selector de año */}
