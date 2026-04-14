@@ -9,5 +9,10 @@
   "devDependencies": {
     "husky": "^9.1.7",
     "neostandard": "^0.12.2"
+  },
+  "pnpm": {
+    "overrides": {
+      "@types/express-serve-static-core": "5.1.0"
+    }
   }
 }
