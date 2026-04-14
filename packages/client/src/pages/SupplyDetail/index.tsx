@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router'
 import {
   Box,
@@ -44,11 +44,18 @@ const SupplyDetail = () => {
 
   const availableYears = useMemo(() => {
     const years = new Set(readings.map((r) => new Date(r.startDate).getFullYear()))
-    years.add(new Date().getFullYear())
     return [...years].sort((a, b) => b - a)
   }, [readings])
 
   const [selectedYear, setSelectedYear] = useState<number>(() => new Date().getFullYear())
+
+  // Sincronizar el año seleccionado con el más reciente disponible
+  useEffect(() => {
+    if (availableYears.length > 0 && !availableYears.includes(selectedYear)) {
+      setSelectedYear(availableYears[0])
+    }
+  }, [availableYears, selectedYear])
+
   const [activeModal, setActiveModal] = useState<ModalState | null>(null)
   const closeModal = () => setActiveModal(null)
 
@@ -122,25 +129,27 @@ const SupplyDetail = () => {
       </Box>
 
       {/* Selector de año */}
-      <Box display='flex' alignItems='center' gap={2}>
-        <Typography color='textSecondary'>
-          Año:
-        </Typography>
-        <Select
-          size='small'
-          value={selectedYear}
-          onChange={(e) => setSelectedYear(Number(e.target.value))}
-        >
-          {availableYears.map((y) => (
-            <MenuItem key={y} value={y}>
-              {y}
-            </MenuItem>
-          ))}
-        </Select>
-        <Typography color='textSecondary'>
-          {filteredReadings.length} lectura{filteredReadings.length !== 1 ? 's' : ''}
-        </Typography>
-      </Box>
+      {availableYears.length > 0 && (
+        <Box display='flex' alignItems='center' gap={2}>
+          <Typography color='textSecondary'>
+            Año:
+          </Typography>
+          <Select
+            size='small'
+            value={selectedYear}
+            onChange={(e) => setSelectedYear(Number(e.target.value))}
+          >
+            {availableYears.map((y) => (
+              <MenuItem key={y} value={y}>
+                {y}
+              </MenuItem>
+            ))}
+          </Select>
+          <Typography color='textSecondary'>
+            {filteredReadings.length} lectura{filteredReadings.length !== 1 ? 's' : ''}
+          </Typography>
+        </Box>
+      )}
 
       {/* Tabla de lecturas filtrada */}
       <SupplyReadingList
