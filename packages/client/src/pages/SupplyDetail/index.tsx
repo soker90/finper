@@ -5,17 +5,19 @@ import {
   Button,
   Chip,
   CircularProgress,
+  IconButton,
   MenuItem,
   Select,
   Stack,
   Typography
 } from '@mui/material'
-import { ArrowLeftOutlined, PlusOutlined, ThunderboltOutlined } from '@ant-design/icons'
+import { ArrowLeftOutlined, PlusOutlined, ThunderboltOutlined, EditOutlined } from '@ant-design/icons'
 import dayjs from 'dayjs'
 
 import { useSupplies, useSupplyReadings } from 'hooks'
-import { SupplyReading, SupplyReadingInput } from 'types'
+import { SupplyReading, SupplyReadingInput, SupplyInput } from 'types'
 import { SUPPLY_TYPE_LABELS, SUPPLY_TYPE_COLORS, SUPPLY_TYPE_UNITS, supplyDisplayName } from '../Supplies/utils/supply'
+import SupplyForm from '../Supplies/components/SupplyForm'
 import SupplyReadingForm from '../Supplies/components/SupplyReadingForm'
 import SupplyReadingList from '../Supplies/components/SupplyReadingList'
 import RemoveModal from '../Supplies/components/RemoveModal'
@@ -25,12 +27,13 @@ type ModalState =
   | { type: 'add' }
   | { type: 'edit'; data: SupplyReading }
   | { type: 'delete'; data: SupplyReading }
+  | { type: 'editSupply' }
 
 const SupplyDetail = () => {
   const { supplyId } = useParams<{ supplyId: string }>()
   const navigate = useNavigate()
 
-  const { properties, isLoading: loadingSupplies } = useSupplies()
+  const { properties, isLoading: loadingSupplies, updateSupply } = useSupplies()
   const supply = useMemo(() => {
     for (const prop of properties) {
       const found = prop.supplies.find((s) => s._id === supplyId)
@@ -72,6 +75,8 @@ const SupplyDetail = () => {
       : createReading(payload)
   }
 
+  const handleSupplySubmit = (data: SupplyInput) => updateSupply(supply!._id, data)
+
   if (loadingSupplies) {
     return (
       <Box display='flex' justifyContent='center' mt={6}>
@@ -106,6 +111,9 @@ const SupplyDetail = () => {
             color={SUPPLY_TYPE_COLORS[supply.type] ?? 'default'}
             size='small'
           />
+          <IconButton size='small' onClick={() => setActiveModal({ type: 'editSupply' })}>
+            <EditOutlined style={{ fontSize: '18px' }} />
+          </IconButton>
         </Box>
 
         <Stack direction='row' spacing={1}>
@@ -174,13 +182,23 @@ const SupplyDetail = () => {
         unit={SUPPLY_TYPE_UNITS[supply.type]}
       />
 
-      {/* Formulario add/edit */}
+      {/* Formulario add/edit reading */}
       {(activeModal?.type === 'add' || activeModal?.type === 'edit') && (
         <SupplyReadingForm
           supply={supply}
           reading={activeModal.type === 'edit' ? activeModal.data : undefined}
           onClose={closeModal}
           onSubmit={handleFormSubmit}
+        />
+      )}
+
+      {/* Formulario edit supply */}
+      {activeModal?.type === 'editSupply' && (
+        <SupplyForm
+          supply={supply}
+          propertyId={supply.propertyId}
+          onClose={closeModal}
+          onSubmit={handleSupplySubmit}
         />
       )}
 

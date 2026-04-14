@@ -17,41 +17,13 @@ export const validateSupplyCreateParams = async (data: Record<string, string>) =
     }),
     type: Joi.string().valid(...Object.values(SUPPLY_TYPE)).required(),
     user: Joi.string().required(),
-    contractedPowerPeak: Joi.when('type', {
-      is: SUPPLY_TYPE.ELECTRICITY,
-      then: Joi.number().required(),
-      otherwise: Joi.number().optional()
-    }),
-    contractedPowerOffPeak: Joi.when('type', {
-      is: SUPPLY_TYPE.ELECTRICITY,
-      then: Joi.number().required(),
-      otherwise: Joi.number().optional()
-    }),
-    currentPricePowerPeak: Joi.when('type', {
-      is: SUPPLY_TYPE.ELECTRICITY,
-      then: Joi.number().required(),
-      otherwise: Joi.number().optional()
-    }),
-    currentPricePowerOffPeak: Joi.when('type', {
-      is: SUPPLY_TYPE.ELECTRICITY,
-      then: Joi.number().required(),
-      otherwise: Joi.number().optional()
-    }),
-    currentPriceEnergyPeak: Joi.when('type', {
-      is: SUPPLY_TYPE.ELECTRICITY,
-      then: Joi.number().required(),
-      otherwise: Joi.number().optional()
-    }),
-    currentPriceEnergyFlat: Joi.when('type', {
-      is: SUPPLY_TYPE.ELECTRICITY,
-      then: Joi.number().required(),
-      otherwise: Joi.number().optional()
-    }),
-    currentPriceEnergyOffPeak: Joi.when('type', {
-      is: SUPPLY_TYPE.ELECTRICITY,
-      then: Joi.number().required(),
-      otherwise: Joi.number().optional()
-    })
+    contractedPowerPeak: Joi.number().optional(),
+    contractedPowerOffPeak: Joi.number().optional(),
+    currentPricePowerPeak: Joi.number().optional(),
+    currentPricePowerOffPeak: Joi.number().optional(),
+    currentPriceEnergyPeak: Joi.number().optional(),
+    currentPriceEnergyFlat: Joi.number().optional(),
+    currentPriceEnergyOffPeak: Joi.number().optional()
   })
 
   const { error, value } = schema.validate(data, { stripUnknown: true })
