@@ -2,15 +2,15 @@ import useSWR from 'swr'
 import { TARIFFS_COMPARISON } from 'constants/api-paths'
 
 export interface TariffComparison {
-  comercializadora: string
-  nombreTarifa: string
-  potenciaPunta: number
-  potenciaValle: number
-  energiaPunta: number
-  energiaLlana: number
-  energiaValle: number
-  totalAnualEstimado: number
-  ahorroAnualEstimado: number
+  retailer: string
+  tariffName: string
+  peakPower: number
+  offPeakPower: number
+  peakEnergy: number
+  flatEnergy: number
+  offPeakEnergy: number
+  estimatedAnnualTotal: number
+  estimatedAnnualSavings: number
   invoices: Array<{
     startDate: number
     endDate: number

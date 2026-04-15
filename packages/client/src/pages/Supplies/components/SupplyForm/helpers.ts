@@ -23,12 +23,14 @@ export const buildSubmitPayload = (
   isElectricity: boolean
 ): SupplyInput => ({
   ...data,
-  name: isOther ? data.name : undefined,
-  contractedPowerPeak: isElectricity ? data.contractedPowerPeak : undefined,
-  contractedPowerOffPeak: isElectricity ? data.contractedPowerOffPeak : undefined,
-  currentPricePowerPeak: isElectricity ? data.currentPricePowerPeak : undefined,
-  currentPricePowerOffPeak: isElectricity ? data.currentPricePowerOffPeak : undefined,
-  currentPriceEnergyPeak: isElectricity ? data.currentPriceEnergyPeak : undefined,
-  currentPriceEnergyFlat: isElectricity ? data.currentPriceEnergyFlat : undefined,
-  currentPriceEnergyOffPeak: isElectricity ? data.currentPriceEnergyOffPeak : undefined
+  ...(isOther && { name: data.name }),
+  ...(isElectricity && {
+    contractedPowerPeak: data.contractedPowerPeak,
+    contractedPowerOffPeak: data.contractedPowerOffPeak,
+    currentPricePowerPeak: data.currentPricePowerPeak,
+    currentPricePowerOffPeak: data.currentPricePowerOffPeak,
+    currentPriceEnergyPeak: data.currentPriceEnergyPeak,
+    currentPriceEnergyFlat: data.currentPriceEnergyFlat,
+    currentPriceEnergyOffPeak: data.currentPriceEnergyOffPeak
+  })
 })
