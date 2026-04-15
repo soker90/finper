@@ -1,9 +1,8 @@
 import { SupplyModel, SupplyReadingModel, SupplyReadingDocument, ISupplyReading } from '@soker90/finper-models'
 import Boom from '@hapi/boom'
 import { ERROR_MESSAGE } from '../i18n'
+import config from '../config'
 
-const TARIFFS_URL = 'https://soker90.github.io/tarifas-luz/tarifas.json'
-const CACHE_DURATION = 12 * 60 * 60 * 1000 // 12 hours
 const ONE_YEAR_MS = 365 * 24 * 60 * 60 * 1000
 
 // ── External API types (Spanish field names match the remote JSON) ─────────────
@@ -111,13 +110,13 @@ export default class TariffsService implements ITariffsService {
 
   private async fetchTariffs (): Promise<ITariffData> {
     const now = Date.now()
-    if (this.cachedTariffs && (now - this.lastFetch < CACHE_DURATION)) {
+    if (this.cachedTariffs && (now - this.lastFetch < config.tariffs.cacheDurationMs)) {
       return this.cachedTariffs
     }
 
     let freshData: ITariffData | null = null
     try {
-      const response = await fetch(TARIFFS_URL)
+      const response = await fetch(config.tariffs.apiUrl)
       if (response.ok) {
         const apiData = await response.json() as ITariffApiResponse
         freshData = this.mapApiResponse(apiData)

@@ -23,5 +23,9 @@ export default {
       host: 'https://logs-prod-eu-west-0.grafana.net',
       password: process.env.GRAFANA_LOGGER_PASSWORD || 'test'
     }
+  },
+  tariffs: {
+    apiUrl: process.env.TARIFFS_API_URL || 'https://soker90.github.io/tarifas-luz/tarifas.json',
+    cacheDurationMs: 12 * 60 * 60 * 1000 // 12 hours
   }
 }
