@@ -39,10 +39,10 @@ const SupplyDetail = () => {
   const { readings, isLoading: loadingReadings, createReading, updateReading, removeReading } =
     useSupplyReadings(supplyId ?? null)
 
-  const availableYears = useMemo(() => {
-    const years = new Set(readings.map((r) => new Date(r.startDate).getFullYear()))
-    return [...years].toSorted((a, b) => b - a)
-  }, [readings])
+  const availableYears = useMemo(
+    () => Array.from(new Set(readings.map((r) => new Date(r.startDate).getFullYear()))).toSorted((a, b) => b - a),
+    [readings]
+  )
 
   const [selectedYear, setSelectedYear] = useState<number>(() => new Date().getFullYear())
 
