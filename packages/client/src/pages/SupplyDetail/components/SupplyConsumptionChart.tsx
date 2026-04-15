@@ -40,7 +40,7 @@ const SupplyConsumptionChart = ({ readings, isElectricity, unit }: Props) => {
   if (data.length === 0) return null
 
   return (
-    <MainCard title='Grafica de consumo'>
+    <MainCard title='Gráfica de consumo'>
       <ResponsiveContainer width='100%' height={280}>
         <BarChart data={data}>
           <CartesianGrid strokeDasharray='3 3' stroke={theme.palette.divider} />

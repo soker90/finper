@@ -29,15 +29,15 @@ const SupplyReadingPreview = ({ readings, isElectricity, unit }: Props) => {
           Últimas lecturas
         </Typography>
         <List dense disablePadding>
-          {readings.map((r) => {
-            const dateLabel = `${dayjs(r.startDate).format('DD/MM/YY')} - ${dayjs(r.endDate).format('DD/MM/YY')}`
-            const amountColor = r.amount < 0 ? 'error.main' : 'text.secondary'
-            const amountLabel = Number.isFinite(r.amount)
-              ? format.euro(r.amount, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+          {readings.map((reading) => {
+            const dateLabel = `${dayjs(reading.startDate).format('DD/MM/YY')} - ${dayjs(reading.endDate).format('DD/MM/YY')}`
+            const amountColor = reading.amount < 0 ? 'error.main' : 'text.secondary'
+            const amountLabel = Number.isFinite(reading.amount)
+              ? format.euro(reading.amount, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
               : '-'
 
             return (
-              <ListItem key={r._id} disablePadding sx={{ py: 0.25 }}>
+              <ListItem key={reading._id} disablePadding sx={{ py: 0.25 }}>
                 <ListItemText
                   primary={
                     <Box>
@@ -46,7 +46,7 @@ const SupplyReadingPreview = ({ readings, isElectricity, unit }: Props) => {
                           {dateLabel}
                         </Typography>
                         <Typography variant='body2' fontWeight={600}>
-                          {getConsumptionLabel(r, isElectricity, unit)}
+                          {getConsumptionLabel(reading, isElectricity, unit)}
                         </Typography>
                       </Box>
                       <Typography variant='caption' color={amountColor}>
