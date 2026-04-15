@@ -100,7 +100,7 @@ describe('SupplyReadingForm', () => {
     expect(onSubmit).toHaveBeenCalledWith(expect.objectContaining({ amount: 45.25 }))
   })
 
-  it('parses decimal amount with comma in edit mode', async () => {
+  it('parses decimal amount with comma', async () => {
     const onSubmit = vi.fn().mockResolvedValue({})
     const { getByLabelText } = renderForm(mockWaterSupply, mockReading, onSubmit)
 

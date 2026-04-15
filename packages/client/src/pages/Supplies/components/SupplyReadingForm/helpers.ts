@@ -1,31 +1,23 @@
 import dayjs from 'dayjs'
 import { Supply, SupplyReadingInput } from 'types'
-import { ERROR_MESSAGES } from './config'
 
 interface FormValues {
   startDate: string | null
   endDate: string | null
-  amount?: string | number
-  consumption?: number
-  consumptionPeak?: number
-  consumptionFlat?: number
-  consumptionOffPeak?: number
+  amount: string
+  consumption: string
+  consumptionPeak: string
+  consumptionFlat: string
+  consumptionOffPeak: string
 }
 
-export const parseAmountInput = (value: unknown): number => {
-  if (typeof value === 'number') return value
-  if (typeof value !== 'string') return Number.NaN
-
+export const parseDecimalInput = (value: string): number => {
   const normalized = value.replace(',', '.').trim()
-  if (normalized === '') return Number.NaN
-
   return Number(normalized)
 }
 
-export const validateAmount = (value: unknown): boolean | string => {
-  const parsed = parseAmountInput(value)
-  return Number.isFinite(parsed) || ERROR_MESSAGES.amount.invalid
-}
+const parseOptionalDecimal = (value: string | undefined): number | undefined =>
+  value ? parseDecimalInput(value) : undefined
 
 export const buildSubmitPayload = (
   data: FormValues,
@@ -36,31 +28,31 @@ export const buildSubmitPayload = (
   return {
     startDate: dayjs(data.startDate!).startOf('day').valueOf(),
     endDate: dayjs(data.endDate!).startOf('day').valueOf(),
-    amount: parseAmountInput(data.amount),
+    amount: parseDecimalInput(data.amount),
     ...(isElectricity
       ? {
-          consumptionPeak: data.consumptionPeak !== undefined ? Number(data.consumptionPeak) : undefined,
-          consumptionFlat: data.consumptionFlat !== undefined ? Number(data.consumptionFlat) : undefined,
-          consumptionOffPeak: data.consumptionOffPeak !== undefined ? Number(data.consumptionOffPeak) : undefined
+          consumptionPeak: parseOptionalDecimal(data.consumptionPeak),
+          consumptionFlat: parseOptionalDecimal(data.consumptionFlat),
+          consumptionOffPeak: parseOptionalDecimal(data.consumptionOffPeak)
         }
       : {
-          consumption: data.consumption !== undefined ? Number(data.consumption) : undefined
+          consumption: parseOptionalDecimal(data.consumption)
         })
   }
 }
 
 export const getDefaultValues = (reading: any) => {
   if (!reading) {
-    return { startDate: null, endDate: null }
+    return { startDate: null, endDate: null, amount: '', consumption: '', consumptionPeak: '', consumptionFlat: '', consumptionOffPeak: '' }
   }
 
   return {
     startDate: dayjs(reading.startDate).format('YYYY-MM-DD'),
     endDate: dayjs(reading.endDate).format('YYYY-MM-DD'),
-    amount: reading.amount,
-    consumption: reading.consumption,
-    consumptionPeak: reading.consumptionPeak,
-    consumptionFlat: reading.consumptionFlat,
-    consumptionOffPeak: reading.consumptionOffPeak
+    amount: reading.amount?.toString() ?? '',
+    consumption: reading.consumption?.toString() ?? '',
+    consumptionPeak: reading.consumptionPeak?.toString() ?? '',
+    consumptionFlat: reading.consumptionFlat?.toString() ?? '',
+    consumptionOffPeak: reading.consumptionOffPeak?.toString() ?? ''
   }
 }
