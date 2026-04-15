@@ -268,9 +268,9 @@ describe('Supply Routes', () => {
 
       expect(Array.isArray(body)).toBeTruthy()
       expect(body.length).toBeGreaterThan(0)
-      expect(body[0]).toHaveProperty('comercializadora')
-      expect(body[0]).toHaveProperty('nombreTarifa')
-      expect(body[0]).toHaveProperty('ahorroAnualEstimado')
+      expect(body[0]).toHaveProperty('retailer')
+      expect(body[0]).toHaveProperty('tariffName')
+      expect(body[0]).toHaveProperty('estimatedAnnualSavings')
       expect(body[0]).toHaveProperty('invoices')
       expect(Array.isArray(body[0].invoices)).toBeTruthy()
       expect(body[0].invoices[0]).toHaveProperty('realAmount')
@@ -278,7 +278,7 @@ describe('Supply Routes', () => {
       expect(body[0].invoices[0]).toHaveProperty('newTariffSimulatedAmount')
 
       for (let i = 0; i < body.length - 1; i++) {
-        expect(body[i].ahorroAnualEstimado).toBeGreaterThanOrEqual(body[i + 1].ahorroAnualEstimado)
+        expect(body[i].estimatedAnnualSavings).toBeGreaterThanOrEqual(body[i + 1].estimatedAnnualSavings)
       }
     })
   })

@@ -3,12 +3,12 @@ import Boom from '@hapi/boom'
 import { ERROR_MESSAGE } from '../i18n'
 
 const TARIFFS_URL = 'https://soker90.github.io/tarifas-luz/tarifas.json'
-const CACHE_DURATION = 12 * 60 * 60 * 1000 // 12 horas
+const CACHE_DURATION = 12 * 60 * 60 * 1000 // 12 hours
 const ONE_YEAR_MS = 365 * 24 * 60 * 60 * 1000
 
-// ── Tipos internos ────────────────────────────────────────────────────────────
+// ── External API types (Spanish field names match the remote JSON) ─────────────
 
-interface ITariffData {
+interface ITariffApiResponse {
   datosGenerales: {
     iva: number
     impuestoElectrico: number
@@ -28,21 +28,34 @@ interface ITariffData {
   }>
 }
 
+// ── Internal types ────────────────────────────────────────────────────────────
+
 interface ITariffPrices {
-  potenciaPunta: number
-  potenciaValle: number
-  energiaPunta: number
-  energiaLlana: number
-  energiaValle: number
+  peakPower: number
+  offPeakPower: number
+  peakEnergy: number
+  flatEnergy: number
+  offPeakEnergy: number
 }
 
 interface ITaxConfig {
-  iva: number
-  impuestoElectrico: number
-  alquilerContador: number
+  vat: number
+  electricityTax: number
+  meterRental: number
 }
 
-// ── Tipos públicos (usados en la interfaz del servicio) ───────────────────────
+interface ITariffEntry {
+  retailer: string
+  tariffName: string
+  prices: ITariffPrices
+}
+
+interface ITariffData {
+  taxes: ITaxConfig
+  tariffs: ITariffEntry[]
+}
+
+// ── Public types (used in the service interface) ──────────────────────────────
 
 interface ISimulatedInvoice {
   startDate: number
@@ -53,15 +66,15 @@ interface ISimulatedInvoice {
 }
 
 export interface TariffComparisonResult {
-  comercializadora: string
-  nombreTarifa: string
-  potenciaPunta: number
-  potenciaValle: number
-  energiaPunta: number
-  energiaLlana: number
-  energiaValle: number
-  totalAnualEstimado: number
-  ahorroAnualEstimado: number
+  retailer: string
+  tariffName: string
+  peakPower: number
+  offPeakPower: number
+  peakEnergy: number
+  flatEnergy: number
+  offPeakEnergy: number
+  estimatedAnnualTotal: number
+  estimatedAnnualSavings: number
   invoices: ISimulatedInvoice[]
 }
 
@@ -69,11 +82,32 @@ export interface ITariffsService {
   compareTariffs(supplyId: string, user: string): Promise<TariffComparisonResult[]>
 }
 
-// ── Implementación ────────────────────────────────────────────────────────────
+// ── Implementation ────────────────────────────────────────────────────────────
 
 export default class TariffsService implements ITariffsService {
   private cachedTariffs: ITariffData | null = null
   private lastFetch: number = 0
+
+  private mapApiResponse (apiData: ITariffApiResponse): ITariffData {
+    return {
+      taxes: {
+        vat: apiData.datosGenerales.iva,
+        electricityTax: apiData.datosGenerales.impuestoElectrico,
+        meterRental: apiData.datosGenerales.alquilerContador
+      },
+      tariffs: apiData.tarifas.map(entry => ({
+        retailer: entry.comercializadora,
+        tariffName: entry.detalles.nombreTarifa,
+        prices: {
+          peakPower: entry.detalles.potenciaPunta,
+          offPeakPower: entry.detalles.potenciaValle,
+          peakEnergy: entry.detalles.energiaPunta,
+          flatEnergy: entry.detalles.energiaLlana,
+          offPeakEnergy: entry.detalles.energiaValle
+        }
+      }))
+    }
+  }
 
   private async fetchTariffs (): Promise<ITariffData> {
     const now = Date.now()
@@ -85,10 +119,11 @@ export default class TariffsService implements ITariffsService {
     try {
       const response = await fetch(TARIFFS_URL)
       if (response.ok) {
-        freshData = await response.json() as ITariffData
+        const apiData = await response.json() as ITariffApiResponse
+        freshData = this.mapApiResponse(apiData)
       }
     } catch {
-      // error de red — se intenta devolver la caché obsoleta
+      // network error — try returning stale cache
     }
 
     if (freshData) {
@@ -125,58 +160,58 @@ export default class TariffsService implements ITariffsService {
     contractedPowerPeak: number,
     contractedPowerOffPeak: number,
     prices: ITariffPrices,
-    diasFacturados: number,
+    billedDays: number,
     taxes: ITaxConfig
   ): number {
-    const costePotencia =
-      ((contractedPowerPeak * prices.potenciaPunta) + (contractedPowerOffPeak * prices.potenciaValle)) * diasFacturados
-    const costeEnergia =
-      ((reading.consumptionPeak || 0) * prices.energiaPunta) +
-      ((reading.consumptionFlat || 0) * prices.energiaLlana) +
-      ((reading.consumptionOffPeak || 0) * prices.energiaValle)
-    const subtotal = (costePotencia + costeEnergia) * (1 + taxes.impuestoElectrico)
-    return (subtotal + (taxes.alquilerContador * diasFacturados)) * (1 + taxes.iva)
+    const powerCost =
+      ((contractedPowerPeak * prices.peakPower) + (contractedPowerOffPeak * prices.offPeakPower)) * billedDays
+    const energyCost =
+      ((reading.consumptionPeak || 0) * prices.peakEnergy) +
+      ((reading.consumptionFlat || 0) * prices.flatEnergy) +
+      ((reading.consumptionOffPeak || 0) * prices.offPeakEnergy)
+    const subtotal = (powerCost + energyCost) * (1 + taxes.electricityTax)
+    return (subtotal + (taxes.meterRental * billedDays)) * (1 + taxes.vat)
   }
 
   private simulateTariff (
-    tariff: ITariffData['tarifas'][0],
+    tariff: ITariffEntry,
     readings: SupplyReadingDocument[],
     contractedPowerPeak: number,
     contractedPowerOffPeak: number,
     currentTariffPrices: ITariffPrices,
     taxes: ITaxConfig
   ): TariffComparisonResult {
-    const { potenciaPunta, potenciaValle, energiaPunta, energiaLlana, energiaValle } = tariff.detalles
-    const newTariffPrices: ITariffPrices = { potenciaPunta, potenciaValle, energiaPunta, energiaLlana, energiaValle }
+    const { peakPower, offPeakPower, peakEnergy, flatEnergy, offPeakEnergy } = tariff.prices
+    const newTariffPrices: ITariffPrices = { peakPower, offPeakPower, peakEnergy, flatEnergy, offPeakEnergy }
 
-    const invoices: ISimulatedInvoice[] = readings.map(r => {
-      const diasFacturados = (r.endDate - r.startDate) / (1000 * 60 * 60 * 24)
+    const invoices: ISimulatedInvoice[] = readings.map(reading => {
+      const billedDays = (reading.endDate - reading.startDate) / (1000 * 60 * 60 * 24)
       return {
-        startDate: r.startDate,
-        endDate: r.endDate,
-        realAmount: r.amount,
+        startDate: reading.startDate,
+        endDate: reading.endDate,
+        realAmount: reading.amount,
         currentTariffSimulatedAmount: Number(
-          this.calculateInvoiceCost(r, contractedPowerPeak, contractedPowerOffPeak, currentTariffPrices, diasFacturados, taxes).toFixed(2)
+          this.calculateInvoiceCost(reading, contractedPowerPeak, contractedPowerOffPeak, currentTariffPrices, billedDays, taxes).toFixed(2)
         ),
         newTariffSimulatedAmount: Number(
-          this.calculateInvoiceCost(r, contractedPowerPeak, contractedPowerOffPeak, newTariffPrices, diasFacturados, taxes).toFixed(2)
+          this.calculateInvoiceCost(reading, contractedPowerPeak, contractedPowerOffPeak, newTariffPrices, billedDays, taxes).toFixed(2)
         )
       }
     })
 
-    const totalAnualEstimado = Number(invoices.reduce((acc, inv) => acc + inv.newTariffSimulatedAmount, 0).toFixed(2))
-    const currentTotalSimulated = invoices.reduce((acc, inv) => acc + inv.currentTariffSimulatedAmount, 0)
+    const estimatedAnnualTotal = Number(invoices.reduce((total, invoice) => total + invoice.newTariffSimulatedAmount, 0).toFixed(2))
+    const currentTotalSimulated = invoices.reduce((total, invoice) => total + invoice.currentTariffSimulatedAmount, 0)
 
     return {
-      comercializadora: tariff.comercializadora,
-      nombreTarifa: tariff.detalles.nombreTarifa,
-      potenciaPunta,
-      potenciaValle,
-      energiaPunta,
-      energiaLlana,
-      energiaValle,
-      totalAnualEstimado,
-      ahorroAnualEstimado: Number((currentTotalSimulated - totalAnualEstimado).toFixed(2)),
+      retailer: tariff.retailer,
+      tariffName: tariff.tariffName,
+      peakPower,
+      offPeakPower,
+      peakEnergy,
+      flatEnergy,
+      offPeakEnergy,
+      estimatedAnnualTotal,
+      estimatedAnnualSavings: Number((currentTotalSimulated - estimatedAnnualTotal).toFixed(2)),
       invoices
     }
   }
@@ -190,21 +225,21 @@ export default class TariffsService implements ITariffsService {
       this.fetchTariffs()
     ])
 
-    const taxes: ITaxConfig = tariffData.datosGenerales
+    const { taxes } = tariffData
     const currentTariffPrices: ITariffPrices = {
-      potenciaPunta: supply.currentPricePowerPeak!,
-      potenciaValle: supply.currentPricePowerOffPeak!,
-      energiaPunta: supply.currentPriceEnergyPeak!,
-      energiaLlana: supply.currentPriceEnergyFlat!,
-      energiaValle: supply.currentPriceEnergyOffPeak!
+      peakPower: supply.currentPricePowerPeak!,
+      offPeakPower: supply.currentPricePowerOffPeak!,
+      peakEnergy: supply.currentPriceEnergyPeak!,
+      flatEnergy: supply.currentPriceEnergyFlat!,
+      offPeakEnergy: supply.currentPriceEnergyOffPeak!
     }
 
-    return tariffData.tarifas
-      .map(t => this.simulateTariff(
-        t, readings,
+    return tariffData.tariffs
+      .map(tariff => this.simulateTariff(
+        tariff, readings,
         supply.contractedPowerPeak!, supply.contractedPowerOffPeak!,
         currentTariffPrices, taxes
       ))
-      .toSorted((a, b) => b.ahorroAnualEstimado - a.ahorroAnualEstimado)
+      .toSorted((first, second) => second.estimatedAnnualSavings - first.estimatedAnnualSavings)
   }
 }
