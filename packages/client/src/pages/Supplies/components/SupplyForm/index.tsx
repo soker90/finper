@@ -22,7 +22,7 @@ const SupplyForm = ({ supply, propertyId, onClose, onSubmit }: Props) => {
     register,
     handleSubmit,
     control,
-    formState: { errors, isSubmitting },
+    formState: { errors },
     setError,
     clearErrors
   } = useForm<SupplyInput>({
