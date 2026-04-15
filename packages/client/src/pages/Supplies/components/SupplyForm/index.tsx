@@ -1,15 +1,14 @@
 import { useForm, useWatch } from 'react-hook-form'
 import { ModalGrid, InputForm, SelectForm } from 'components'
 import { Typography, Grid } from '@mui/material'
-import { SupplyInput, SupplyType, Supply } from 'types'
-
-const SUPPLY_TYPE_OPTIONS: { value: SupplyType; label: string }[] = [
-  { value: 'electricity', label: 'Electricidad' },
-  { value: 'water', label: 'Agua' },
-  { value: 'gas', label: 'Gas' },
-  { value: 'internet', label: 'Internet' },
-  { value: 'other', label: 'Otro' }
-]
+import { SupplyInput, Supply } from 'types'
+import {
+  SUPPLY_TYPE_OPTIONS,
+  CONTRACTED_POWER_FIELDS,
+  CURRENT_PRICES_FIELDS,
+  ElectricityFieldConfig
+} from './config'
+import { getDefaultValues, buildSubmitPayload } from './helpers'
 
 type Props = {
   supply?: Supply
@@ -20,20 +19,7 @@ type Props = {
 
 const SupplyForm = ({ supply, propertyId, onClose, onSubmit }: Props) => {
   const { register, handleSubmit, control, formState: { errors } } = useForm<SupplyInput>({
-    defaultValues: supply
-      ? {
-          name: supply.name,
-          type: supply.type,
-          propertyId: supply.propertyId,
-          contractedPowerPeak: supply.contractedPowerPeak,
-          contractedPowerOffPeak: supply.contractedPowerOffPeak,
-          currentPricePowerPeak: supply.currentPricePowerPeak,
-          currentPricePowerOffPeak: supply.currentPricePowerOffPeak,
-          currentPriceEnergyPeak: supply.currentPriceEnergyPeak,
-          currentPriceEnergyFlat: supply.currentPriceEnergyFlat,
-          currentPriceEnergyOffPeak: supply.currentPriceEnergyOffPeak
-        }
-      : { propertyId }
+    defaultValues: getDefaultValues(supply, propertyId)
   })
 
   const selectedType = useWatch({ control, name: 'type' })
@@ -41,21 +27,24 @@ const SupplyForm = ({ supply, propertyId, onClose, onSubmit }: Props) => {
   const isElectricity = selectedType === 'electricity'
 
   const handleFormSubmit = handleSubmit(async (data) => {
-    const result = await onSubmit({
-      ...data,
-      name: isOther ? data.name : undefined,
-      contractedPowerPeak: isElectricity ? data.contractedPowerPeak : undefined,
-      contractedPowerOffPeak: isElectricity ? data.contractedPowerOffPeak : undefined,
-      currentPricePowerPeak: isElectricity ? data.currentPricePowerPeak : undefined,
-      currentPricePowerOffPeak: isElectricity ? data.currentPricePowerOffPeak : undefined,
-      currentPriceEnergyPeak: isElectricity ? data.currentPriceEnergyPeak : undefined,
-      currentPriceEnergyFlat: isElectricity ? data.currentPriceEnergyFlat : undefined,
-      currentPriceEnergyOffPeak: isElectricity ? data.currentPriceEnergyOffPeak : undefined
-    })
-    if (!result?.error) {
-      onClose()
-    }
+    const result = await onSubmit(buildSubmitPayload(data, isOther, isElectricity))
+    if (!result?.error) onClose()
   })
+
+  const renderElectricityField = (field: ElectricityFieldConfig) => (
+    <InputForm
+      key={field.id}
+      id={field.id}
+      label={field.label}
+      placeholder={field.placeholder}
+      type='number'
+      inputProps={{ step: 'any' }}
+      size={field.size}
+      error={Boolean(errors[field.fieldName])}
+      errorText='Obligatorio'
+      {...register(field.fieldName, { required: isElectricity, valueAsNumber: true })}
+    />
+  )
 
   return (
     <ModalGrid
@@ -91,89 +80,15 @@ const SupplyForm = ({ supply, propertyId, onClose, onSubmit }: Props) => {
 
       {isElectricity && (
         <>
-          <InputForm
-            id='supply-power-peak'
-            label='Potencia Punta (kW)'
-            placeholder='Ej. 4.6'
-            type='number'
-            inputProps={{ step: 'any' }}
-            size={6}
-            error={Boolean(errors.contractedPowerPeak)}
-            errorText='Obligatorio'
-            {...register('contractedPowerPeak', { required: isElectricity, valueAsNumber: true })}
-          />
-          <InputForm
-            id='supply-power-offpeak'
-            label='Potencia Valle (kW)'
-            placeholder='Ej. 4.6'
-            type='number'
-            inputProps={{ step: 'any' }}
-            size={6}
-            error={Boolean(errors.contractedPowerOffPeak)}
-            errorText='Obligatorio'
-            {...register('contractedPowerOffPeak', { required: isElectricity, valueAsNumber: true })}
-          />
+          {CONTRACTED_POWER_FIELDS.map(renderElectricityField)}
 
           <Grid size={12}>
             <Typography variant='subtitle1' sx={{ mt: 2, fontWeight: 700 }}>
               Precios de tu tarifa actual
             </Typography>
           </Grid>
-          <InputForm
-            id='current-price-power-peak'
-            label='Precio Potencia Punta (€/kW/día)'
-            placeholder='Ej. 0.080533'
-            type='number'
-            inputProps={{ step: 'any' }}
-            size={6}
-            error={Boolean(errors.currentPricePowerPeak)}
-            errorText='Obligatorio'
-            {...register('currentPricePowerPeak', { required: isElectricity, valueAsNumber: true })}
-          />
-          <InputForm
-            id='current-price-power-offpeak'
-            label='Precio Potencia Valle (€/kW/día)'
-            placeholder='Ej. 0.007407'
-            type='number'
-            inputProps={{ step: 'any' }}
-            size={6}
-            error={Boolean(errors.currentPricePowerOffPeak)}
-            errorText='Obligatorio'
-            {...register('currentPricePowerOffPeak', { required: isElectricity, valueAsNumber: true })}
-          />
-          <InputForm
-            id='current-price-energy-peak'
-            label='Precio Energía Punta (€/kWh)'
-            placeholder='Ej. 0.187021'
-            type='number'
-            inputProps={{ step: 'any' }}
-            size={4}
-            error={Boolean(errors.currentPriceEnergyPeak)}
-            errorText='Obligatorio'
-            {...register('currentPriceEnergyPeak', { required: isElectricity, valueAsNumber: true })}
-          />
-          <InputForm
-            id='current-price-energy-flat'
-            label='Precio Energía Llana (€/kWh)'
-            placeholder='Ej. 0.135066'
-            type='number'
-            inputProps={{ step: 'any' }}
-            size={4}
-            error={Boolean(errors.currentPriceEnergyFlat)}
-            errorText='Obligatorio'
-            {...register('currentPriceEnergyFlat', { required: isElectricity, valueAsNumber: true })}
-          />
-          <InputForm
-            id='current-price-energy-offpeak'
-            label='Precio Energía Valle (€/kWh)'
-            placeholder='Ej. 0.085298'
-            type='number'
-            inputProps={{ step: 'any' }}
-            size={4}
-            error={Boolean(errors.currentPriceEnergyOffPeak)}
-            errorText='Obligatorio'
-            {...register('currentPriceEnergyOffPeak', { required: isElectricity, valueAsNumber: true })}
-          />
+
+          {CURRENT_PRICES_FIELDS.map(renderElectricityField)}
         </>
       )}
     </ModalGrid>
