@@ -13,7 +13,7 @@ import {
 } from '@mui/material'
 import { DownOutlined, UpOutlined } from '@ant-design/icons'
 import { TariffComparison } from 'hooks/useTariffsComparison'
-import { euro, dateShort } from 'utils/format'
+import { format } from 'utils'
 
 interface Props {
   row: TariffComparison
@@ -68,7 +68,7 @@ const TariffRow = ({ row, isBest }: Props) => {
         </TableCell>
         <TableCell align='right'>
           <Typography variant='h6' component='span' fontWeight={700} color={row.ahorroAnualEstimado > 0 ? 'success.main' : 'error.main'}>
-            {row.ahorroAnualEstimado > 0 ? 'Ahorro: ' : 'Coste: '}{euro(row.ahorroAnualEstimado)}/año
+            {row.ahorroAnualEstimado > 0 ? 'Ahorro: ' : 'Coste: '}{format.euro(Math.abs(row.ahorroAnualEstimado))}/año
           </Typography>
         </TableCell>
       </TableRow>
@@ -90,24 +90,24 @@ const TariffRow = ({ row, isBest }: Props) => {
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {row.invoices.map((invoice, index) => {
+                  {row.invoices.map((invoice) => {
                     const diff = invoice.currentTariffSimulatedAmount - invoice.newTariffSimulatedAmount
                     const isSaving = diff > 0
                     return (
-                      <TableRow key={index}>
+                      <TableRow key={invoice.startDate}>
                         <TableCell component='th' scope='row'>
                           <Typography variant='caption'>
-                            {dateShort(invoice.startDate)} - {dateShort(invoice.endDate)}
+                            {format.dateShort(invoice.startDate)} - {format.dateShort(invoice.endDate)}
                           </Typography>
                         </TableCell>
                         <TableCell align='right'>
-                          <Typography variant='caption'>{euro(invoice.realAmount)}</Typography>
+                          <Typography variant='caption'>{format.euro(invoice.realAmount)}</Typography>
                         </TableCell>
                         <TableCell align='right'>
-                          <Typography variant='caption' color='text.secondary'>{euro(invoice.currentTariffSimulatedAmount)}</Typography>
+                          <Typography variant='caption' color='text.secondary'>{format.euro(invoice.currentTariffSimulatedAmount)}</Typography>
                         </TableCell>
                         <TableCell align='right'>
-                          <Typography variant='caption' fontWeight={700}>{euro(invoice.newTariffSimulatedAmount)}</Typography>
+                          <Typography variant='caption' fontWeight={700}>{format.euro(invoice.newTariffSimulatedAmount)}</Typography>
                         </TableCell>
                         <TableCell align='right'>
                           <Typography
@@ -115,7 +115,7 @@ const TariffRow = ({ row, isBest }: Props) => {
                             fontWeight={700}
                             color={isSaving ? 'success.main' : 'error.main'}
                           >
-                            {isSaving ? '' : '+'}{euro(diff * -1)}
+                            {format.euro(Math.abs(diff))}
                           </Typography>
                         </TableCell>
                       </TableRow>

@@ -20,38 +20,23 @@ import {
 } from '@mui/material'
 import { ArrowLeftOutlined, ThunderboltOutlined, TrophyOutlined } from '@ant-design/icons'
 import { useTariffsComparison } from 'hooks/useTariffsComparison'
-import { useSupplies } from 'hooks'
+import { useSupply } from 'hooks'
 import { useMemo } from 'react'
 import { supplyDisplayName } from '../Supplies/utils/supply'
-import { euro } from 'utils/format'
+import { format } from 'utils'
 import TariffRow from './components/TariffRow'
 
 const CompareTariffsPage = () => {
   const { supplyId } = useParams<{ supplyId: string }>()
   const navigate = useNavigate()
 
-  const { properties } = useSupplies()
-  const supply = useMemo(() => {
-    for (const prop of properties) {
-      const found = prop.supplies.find((s) => s._id === supplyId)
-      if (found) return found
-    }
-    return null
-  }, [properties, supplyId])
-
+  const { supply } = useSupply(supplyId)
   const { comparison, error, isLoading } = useTariffsComparison(supplyId)
 
   const headerStats = useMemo(() => {
     if (!comparison || comparison.length === 0) return null
     const winner = comparison[0]
-    const totalRealAmount = winner.invoices.reduce((acc, inv) => acc + inv.realAmount, 0)
-    const annualSavings = totalRealAmount - winner.totalAnualEstimado
-
-    return {
-      winner,
-      annualSavings,
-      isSaving: annualSavings > 0
-    }
+    return { winner }
   }, [comparison])
 
   if (error) {
@@ -60,18 +45,17 @@ const CompareTariffsPage = () => {
         <Alert severity='error' variant='filled'>
           {error.response?.data?.message || 'Error al obtener la comparativa de tarifas.'}
         </Alert>
-        <Button startIcon={<ArrowLeftOutlined />} onClick={() => navigate(-1)}>Volver</Button>
+        <Button size='small' startIcon={<ArrowLeftOutlined />} onClick={() => navigate(-1)}>Volver</Button>
       </Stack>
     )
   }
 
   return (
-    <Stack spacing={4}>
+    <Stack spacing={3}>
       <Box display='flex' alignItems='center' justifyContent='space-between'>
         <Stack direction='row' alignItems='center' spacing={2}>
           <Button
-            variant='text'
-            color='secondary'
+            size='small'
             startIcon={<ArrowLeftOutlined />}
             onClick={() => navigate(-1)}
           >
@@ -109,17 +93,17 @@ const CompareTariffsPage = () => {
       {/* Hero Card: Sección Top */}
       {isLoading
         ? (
-          <Skeleton variant='rectangular' height={160} sx={{ borderRadius: 4 }} />
+          <Skeleton variant='rectangular' height={160} sx={{ borderRadius: 2 }} />
           )
         : headerStats
           ? (
             <Card
               sx={{
-                borderRadius: 4,
+                borderRadius: 2,
                 border: '2px solid',
                 borderColor: 'success.light',
                 bgcolor: 'success.lighter',
-                boxShadow: '0 8px 24px rgba(0,0,0,0.05)',
+                boxShadow: (theme: any) => theme.customShadows?.z1,
                 overflow: 'visible',
                 position: 'relative'
               }}
@@ -145,7 +129,7 @@ const CompareTariffsPage = () => {
               </Box>
               <CardContent sx={{ p: 4 }}>
                 <Grid container spacing={4} alignItems='center'>
-                  <Grid item xs={12} md={7}>
+                  <Grid size={{ xs: 12, md: 7 }}>
                     <Typography variant='overline' color='success.main' fontWeight={800} letterSpacing={1.2}>
                       RECOMENDACIÓN PERSONALIZADA
                     </Typography>
@@ -156,23 +140,27 @@ const CompareTariffsPage = () => {
                       Tarifa: {headerStats.winner.nombreTarifa}
                     </Typography>
                   </Grid>
-                  <Grid item xs={12} md={5}>
+                  <Grid size={{ xs: 12, md: 5 }}>
                     <Box
                       sx={{
-                        bgcolor: 'white',
+                        bgcolor: 'background.paper',
                         p: 3,
-                        borderRadius: 3,
+                        borderRadius: 2,
                         textAlign: 'center',
-                        boxShadow: '0 4px 12px rgba(0,0,0,0.03)',
+                        boxShadow: (theme: any) => theme.customShadows?.z1,
                         border: '1px solid',
                         borderColor: 'success.light'
                       }}
                     >
                       <Typography variant='body2' color='text.secondary' gutterBottom>
-                        Ahorro anual estimado
+                        {headerStats.winner.ahorroAnualEstimado > 0 ? 'Ahorro anual estimado' : 'Coste extra anual estimado'}
                       </Typography>
-                      <Typography variant='h2' color={headerStats.winner.ahorroAnualEstimado > 0 ? 'success.main' : 'error.main'} fontWeight={900}>
-                        {headerStats.winner.ahorroAnualEstimado > 0 ? '' : '+'}{euro(headerStats.winner.ahorroAnualEstimado)}
+                      <Typography
+                        variant='h2'
+                        color={headerStats.winner.ahorroAnualEstimado > 0 ? 'success.main' : 'error.main'}
+                        fontWeight={900}
+                      >
+                        {format.euro(Math.abs(headerStats.winner.ahorroAnualEstimado))}
                       </Typography>
                       <Typography variant='caption' color='text.secondary'>
                         Frente a proyección de tu tarifa hoy
@@ -235,7 +223,7 @@ const CompareTariffsPage = () => {
         </TableContainer>
       </Box>
 
-      <Box sx={{ bgcolor: 'info.lighter', p: 3, borderRadius: 3, border: '1px solid', borderColor: 'info.light' }}>
+      <Box sx={{ bgcolor: 'info.lighter', p: 3, borderRadius: 2, border: '1px solid', borderColor: 'info.light' }}>
         <Typography variant='subtitle2' gutterBottom fontWeight='700' color='info.main'>
           Sobre este análisis energético:
         </Typography>

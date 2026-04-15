@@ -1,4 +1,4 @@
-import { SupplyModel, SupplyReadingModel, SUPPLY_TYPE } from '@soker90/finper-models'
+import { SupplyModel, SupplyReadingModel, SUPPLY_TYPE, ISupplyReading } from '@soker90/finper-models'
 import Boom from '@hapi/boom'
 import { ERROR_MESSAGE } from '../i18n'
 
@@ -25,27 +25,56 @@ interface ITariffData {
   }>
 }
 
-let cachedTariffs: ITariffData | null = null
-let lastFetch: number = 0
+interface ITariffPrices {
+  potenciaPunta: number
+  potenciaValle: number
+  energiaPunta: number
+  energiaLlana: number
+  energiaValle: number
+}
 
 export default class TariffsService {
+  private cachedTariffs: ITariffData | null = null
+  private lastFetch: number = 0
+
   private async fetchTariffs (): Promise<ITariffData> {
     const now = Date.now()
-    if (cachedTariffs && (now - lastFetch < CACHE_DURATION)) {
-      return cachedTariffs
+    if (this.cachedTariffs && (now - this.lastFetch < CACHE_DURATION)) {
+      return this.cachedTariffs
     }
 
     try {
       const response = await fetch(TARIFFS_URL)
       if (!response.ok) throw new Error('Failed to fetch tariffs')
       const data = await response.json() as ITariffData
-      cachedTariffs = data
-      lastFetch = now
+      this.cachedTariffs = data
+      this.lastFetch = now
       return data
     } catch {
-      if (cachedTariffs) return cachedTariffs
+      if (this.cachedTariffs) return this.cachedTariffs
       throw Boom.badGateway('No se pudieron obtener las tarifas eléctricas').output
     }
+  }
+
+  private calculateInvoiceCost (
+    reading: Pick<ISupplyReading, 'consumptionPeak' | 'consumptionFlat' | 'consumptionOffPeak'>,
+    contractedPowerPeak: number,
+    contractedPowerOffPeak: number,
+    prices: ITariffPrices,
+    diasFacturados: number,
+    iva: number,
+    impuestoElectrico: number,
+    alquilerContador: number
+  ): number {
+    const costePotencia =
+      ((contractedPowerPeak * prices.potenciaPunta) + (contractedPowerOffPeak * prices.potenciaValle)) * diasFacturados
+    const costeEnergia =
+      ((reading.consumptionPeak || 0) * prices.energiaPunta) +
+      ((reading.consumptionFlat || 0) * prices.energiaLlana) +
+      ((reading.consumptionOffPeak || 0) * prices.energiaValle)
+    const baseImponible = costePotencia + costeEnergia
+    const totalConImpuestoElectrico = baseImponible * (1 + impuestoElectrico)
+    return (totalConImpuestoElectrico + (alquilerContador * diasFacturados)) * (1 + iva)
   }
 
   public async compareTariffs (supplyId: string, user: string) {
@@ -58,6 +87,16 @@ export default class TariffsService {
 
     if (supply.contractedPowerPeak === undefined || supply.contractedPowerOffPeak === undefined) {
       throw Boom.badRequest('El suministro debe tener configuradas las potencias contratadas (Punta y Valle)').output
+    }
+
+    if (
+      supply.currentPricePowerPeak === undefined ||
+      supply.currentPricePowerOffPeak === undefined ||
+      supply.currentPriceEnergyPeak === undefined ||
+      supply.currentPriceEnergyFlat === undefined ||
+      supply.currentPriceEnergyOffPeak === undefined
+    ) {
+      throw Boom.badRequest('El suministro debe tener configurados todos los precios actuales de energía y potencia').output
     }
 
     // Buscar la última lectura para determinar el periodo de 365 días
@@ -83,27 +122,28 @@ export default class TariffsService {
     const data = await this.fetchTariffs()
     const { iva, impuestoElectrico, alquilerContador } = data.datosGenerales
 
+    const currentTariffPrices: ITariffPrices = {
+      potenciaPunta: supply.currentPricePowerPeak,
+      potenciaValle: supply.currentPricePowerOffPeak,
+      energiaPunta: supply.currentPriceEnergyPeak,
+      energiaLlana: supply.currentPriceEnergyFlat,
+      energiaValle: supply.currentPriceEnergyOffPeak
+    }
+
     const comparison = data.tarifas.map(t => {
       const { potenciaPunta, potenciaValle, energiaPunta, energiaLlana, energiaValle } = t.detalles
+      const newTariffPrices: ITariffPrices = { potenciaPunta, potenciaValle, energiaPunta, energiaLlana, energiaValle }
 
       const simulatedInvoices = readings.map(r => {
         const diasFacturados = (r.endDate - r.startDate) / (1000 * 60 * 60 * 24)
-        // Simulación Tarifa Nueva
-        const calculateCost = (pPunta: number, pValle: number, ePunta: number, eLlana: number, eValle: number) => {
-          const costePotencia = ((supply.contractedPowerPeak! * pPunta) + (supply.contractedPowerOffPeak! * pValle)) * diasFacturados
-          const costeEnergia = ((r.consumptionPeak || 0) * ePunta) + ((r.consumptionFlat || 0) * eLlana) + ((r.consumptionOffPeak || 0) * eValle)
-          const baseImponible = costePotencia + costeEnergia
-          const totalConImpuestoElectrico = baseImponible * (1 + impuestoElectrico)
-          return (totalConImpuestoElectrico + (alquilerContador * diasFacturados)) * (1 + iva)
-        }
 
-        const newTariffSimulatedAmount = calculateCost(potenciaPunta, potenciaValle, energiaPunta, energiaLlana, energiaValle)
-        const currentTariffSimulatedAmount = calculateCost(
-          supply.currentPricePowerPeak!,
-          supply.currentPricePowerOffPeak!,
-          supply.currentPriceEnergyPeak!,
-          supply.currentPriceEnergyFlat!,
-          supply.currentPriceEnergyOffPeak!
+        const newTariffSimulatedAmount = this.calculateInvoiceCost(
+          r, supply.contractedPowerPeak!, supply.contractedPowerOffPeak!,
+          newTariffPrices, diasFacturados, iva, impuestoElectrico, alquilerContador
+        )
+        const currentTariffSimulatedAmount = this.calculateInvoiceCost(
+          r, supply.contractedPowerPeak!, supply.contractedPowerOffPeak!,
+          currentTariffPrices, diasFacturados, iva, impuestoElectrico, alquilerContador
         )
 
         return {

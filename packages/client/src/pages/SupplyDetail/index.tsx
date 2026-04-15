@@ -14,7 +14,7 @@ import {
 import { ArrowLeftOutlined, PlusOutlined, ThunderboltOutlined, EditOutlined } from '@ant-design/icons'
 import dayjs from 'dayjs'
 
-import { useSupplies, useSupplyReadings } from 'hooks'
+import { useSupplies, useSupply, useSupplyReadings } from 'hooks'
 import { SupplyReading, SupplyReadingInput, SupplyInput } from 'types'
 import { SUPPLY_TYPE_LABELS, SUPPLY_TYPE_COLORS, SUPPLY_TYPE_UNITS, supplyDisplayName } from '../Supplies/utils/supply'
 import SupplyForm from '../Supplies/components/SupplyForm'
@@ -33,14 +33,8 @@ const SupplyDetail = () => {
   const { supplyId } = useParams<{ supplyId: string }>()
   const navigate = useNavigate()
 
-  const { properties, isLoading: loadingSupplies, updateSupply } = useSupplies()
-  const supply = useMemo(() => {
-    for (const prop of properties) {
-      const found = prop.supplies.find((s) => s._id === supplyId)
-      if (found) return found
-    }
-    return null
-  }, [properties, supplyId])
+  const { isLoading: loadingSupplies, updateSupply } = useSupplies()
+  const { supply } = useSupply(supplyId)
 
   const { readings, isLoading: loadingReadings, createReading, updateReading, removeReading } =
     useSupplyReadings(supplyId ?? null)

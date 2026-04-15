@@ -221,8 +221,11 @@ export const insertSupply = async (params: Record<string, any> = {}): Promise<IS
   const propertyId = params.propertyId ?? (await insertProperty({ user }))._id
 
   return SupplyModel.create({
-    name: params.name ?? faker.company.name(),
-    type: params.type ?? SUPPLY_TYPE.ELECTRICITY,
+    // defaults sobreescribibles por cualquier campo de params
+    name: faker.company.name(),
+    type: SUPPLY_TYPE.ELECTRICITY,
+    ...params,
+    // campos que siempre se resuelven arriba y no pueden sobreescribirse
     propertyId,
     user
   }) as unknown as ISupply & { _id: any }
