@@ -21,7 +21,14 @@ export const validateSupplyEditParams = async (data: RequestUser) => {
       then: Joi.string().required(),
       otherwise: Joi.string().optional()
     }),
-    type: Joi.string().valid(...Object.values(SUPPLY_TYPE)).required()
+    type: Joi.string().valid(...Object.values(SUPPLY_TYPE)).required(),
+    contractedPowerPeak: Joi.number().optional(),
+    contractedPowerOffPeak: Joi.number().optional(),
+    currentPricePowerPeak: Joi.number().optional(),
+    currentPricePowerOffPeak: Joi.number().optional(),
+    currentPriceEnergyPeak: Joi.number().optional(),
+    currentPriceEnergyFlat: Joi.number().optional(),
+    currentPriceEnergyOffPeak: Joi.number().optional()
   })
 
   const { error, value } = schema.validate(data.body, { stripUnknown: true })

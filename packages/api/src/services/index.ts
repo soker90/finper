@@ -16,6 +16,7 @@ import SubscriptionCandidateService from './subscription-candidate.service'
 import PropertyService from './property.service'
 import SupplyService from './supply.service'
 import SupplyReadingService from './supply-reading.service'
+import TariffsService from './tariffs.service'
 
 export const accountService = new AccountService()
 export const authService = new AuthService(config.jwt)
@@ -34,3 +35,4 @@ export const subscriptionCandidateService = new SubscriptionCandidateService(sub
 export const propertyService = new PropertyService()
 export const supplyService = new SupplyService()
 export const supplyReadingService = new SupplyReadingService()
+export const tariffsService = new TariffsService()

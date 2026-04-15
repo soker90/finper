@@ -82,7 +82,7 @@ describe('SupplyDetail — initial state and rendering', () => {
     const { findByText, queryByText } = renderFresh()
     expect(await findByText(/sin lecturas registradas/i)).toBeDefined()
     expect(queryByText('Resumen anual')).toBeNull()
-    expect(queryByText('Grafica de consumo')).toBeNull()
+    expect(queryByText('Gráfica de consumo')).toBeNull()
   })
 
   it('"Volver" button navigates to /suministros', async () => {

@@ -105,9 +105,9 @@ const projectLoanPayments = (input: ProjectionInput): ProjectedPayment[] => {
   let period = startPeriod
 
   // Sort events ascending by date, filter only future events
-  const futureEvents = [...events]
+  const futureEvents = events
     .filter(e => e.date >= lastDate)
-    .sort((a, b) => a.date - b.date)
+    .toSorted((a, b) => a.date - b.date)
 
   const projected: ProjectedPayment[] = []
   let eventIdx = 0
@@ -173,7 +173,7 @@ export const buildAmortizationTable = (
   events: LoanEventInput[],
   startDate: number
 ): AmortizationRow[] => {
-  const sorted = [...realPayments].sort((a, b) => a.date - b.date)
+  const sorted = realPayments.toSorted((a, b) => a.date - b.date)
 
   const real: AmortizationRow[] = sorted.map((p, i) => ({
     _id: p._id?.toString(),
@@ -199,7 +199,7 @@ export const buildAmortizationTable = (
   const startPeriod = real.length + 1
 
   // Tasa vigente en el momento de la proyección (último evento cuya fecha ≤ nextProjectedDate)
-  const sortedEvents = [...events].sort((a, b) => a.date - b.date)
+  const sortedEvents = events.toSorted((a, b) => a.date - b.date)
   const lastEvent = sortedEvents.findLast(e => e.date <= nextProjectedDate)
   const currentRate = lastEvent?.newRate ?? interestRate
   const currentPayment = lastEvent?.newPayment ?? monthlyPayment

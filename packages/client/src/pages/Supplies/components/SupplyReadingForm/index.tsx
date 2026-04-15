@@ -1,17 +1,18 @@
 import { useForm } from 'react-hook-form'
-import dayjs from 'dayjs'
+import { Alert, Box } from '@mui/material'
 import { DateForm, InputForm, ModalGrid } from 'components'
 import { Supply, SupplyReading, SupplyReadingInput } from 'types'
-import { SUPPLY_TYPE_UNITS } from '../../utils/supply'
+import { COMMON_FIELDS, DECIMAL_PATTERN, ELECTRICITY_FIELDS, ERROR_MESSAGES, FieldConfig, getSupplyTypeField } from './config'
+import { buildSubmitPayload, getDefaultValues } from './helpers'
 
 interface FormValues {
   startDate: string | null
   endDate: string | null
-  amount?: string | number
-  consumption?: number
-  consumptionPeak?: number
-  consumptionFlat?: number
-  consumptionOffPeak?: number
+  amount: string
+  consumption: string
+  consumptionPeak: string
+  consumptionFlat: string
+  consumptionOffPeak: string
 }
 
 interface Props {
@@ -21,19 +22,8 @@ interface Props {
   onSubmit: (data: Omit<SupplyReadingInput, 'supplyId'>) => Promise<{ error?: string }>
 }
 
-const parseAmountInput = (value: unknown): number => {
-  if (typeof value === 'number') return value
-  if (typeof value !== 'string') return Number.NaN
-
-  const normalized = value.replace(',', '.').trim()
-  if (normalized === '') return Number.NaN
-
-  return Number(normalized)
-}
-
 const SupplyReadingForm = ({ supply, reading, onClose, onSubmit }: Props) => {
   const isElectricity = supply.type === 'electricity'
-  const unit = SUPPLY_TYPE_UNITS[supply.type]
 
   const {
     register,
@@ -43,46 +33,62 @@ const SupplyReadingForm = ({ supply, reading, onClose, onSubmit }: Props) => {
     setError,
     clearErrors
   } = useForm<FormValues>({
-    defaultValues: reading
-      ? {
-          startDate: dayjs(reading.startDate).format('YYYY-MM-DD'),
-          endDate: dayjs(reading.endDate).format('YYYY-MM-DD'),
-          amount: reading.amount,
-          consumption: reading.consumption,
-          consumptionPeak: reading.consumptionPeak,
-          consumptionFlat: reading.consumptionFlat,
-          consumptionOffPeak: reading.consumptionOffPeak
-        }
-      : { startDate: null, endDate: null }
+    defaultValues: getDefaultValues(reading)
   })
 
   const handleFormSubmit = handleSubmit(async (data) => {
-    const parsedAmount = parseAmountInput(data.amount)
-    if (!Number.isFinite(parsedAmount)) {
-      setError('amount', { type: 'validate', message: 'El importe es obligatorio y debe ser un numero valido' })
+    clearErrors()
+    const result = await onSubmit(buildSubmitPayload(data, supply))
+    if (result?.error) {
+      if (result.error.toLowerCase().includes('fecha')) {
+        setError('endDate', { type: 'manual', message: result.error })
+      } else {
+        setError('root', { type: 'manual', message: result.error })
+      }
       return
     }
+    onClose()
+  })
 
-    clearErrors('amount')
-
-    const payload = {
-      startDate: dayjs(data.startDate!).startOf('day').valueOf(),
-      endDate: dayjs(data.endDate!).startOf('day').valueOf(),
-      amount: parsedAmount,
-      ...(isElectricity
-        ? {
-            consumptionPeak: data.consumptionPeak !== undefined ? Number(data.consumptionPeak) : undefined,
-            consumptionFlat: data.consumptionFlat !== undefined ? Number(data.consumptionFlat) : undefined,
-            consumptionOffPeak: data.consumptionOffPeak !== undefined ? Number(data.consumptionOffPeak) : undefined
-          }
-        : {
-            consumption: data.consumption !== undefined ? Number(data.consumption) : undefined
-          })
+  const renderField = (field: FieldConfig) => {
+    if (field.type === 'date') {
+      return (
+        <DateForm
+          key={field.id}
+          id={field.id}
+          label={field.label}
+          placeholder={field.placeholder ?? ''}
+          error={!!errors[field.id as keyof FormValues]}
+          errorText={errors[field.id as keyof FormValues]?.message}
+          control={control}
+          size={field.size}
+        />
+      )
     }
 
-    const result = await onSubmit(payload)
-    if (!result?.error) onClose()
-  })
+    const fieldErrors = errors[field.id as keyof FormValues]
+
+    return (
+      <InputForm
+        key={field.id}
+        id={field.id}
+        label={field.label}
+        type='text'
+        size={field.size}
+        inputProps={field.inputProps}
+        error={!!fieldErrors}
+        errorText={fieldErrors?.message ?? ''}
+        {...register(field.id as keyof FormValues, {
+          ...(field.required && { required: ERROR_MESSAGES.required }),
+          pattern: { value: DECIMAL_PATTERN, message: ERROR_MESSAGES.invalidNumber }
+        })}
+      />
+    )
+  }
+
+  const consumptionFields = isElectricity
+    ? ELECTRICITY_FIELDS
+    : [getSupplyTypeField(supply.type)]
 
   return (
     <ModalGrid
@@ -93,80 +99,14 @@ const SupplyReadingForm = ({ supply, reading, onClose, onSubmit }: Props) => {
       actionDisabled={isSubmitting}
       cardSx={{ minWidth: 520 }}
     >
-      <DateForm
-        id='startDate'
-        label='Fecha inicio'
-        placeholder='DD/MM/YYYY'
-        error={!!errors.startDate}
-        control={control}
-        size={6}
-      />
-      <DateForm
-        id='endDate'
-        label='Fecha fin'
-        placeholder='DD/MM/YYYY'
-        error={!!errors.endDate}
-        control={control}
-        size={6}
-      />
+      {COMMON_FIELDS.map(renderField)}
+      {consumptionFields.map(renderField)}
 
-      <InputForm
-        id='amount'
-        label='Importe (€)'
-        type='text'
-        size={12}
-        inputProps={{ inputMode: 'decimal' }}
-        error={!!errors.amount}
-        errorText={errors.amount?.message ?? 'El importe es obligatorio y debe ser un numero valido'}
-        {...register('amount', {
-          required: true,
-          validate: (value) => Number.isFinite(parseAmountInput(value)) || 'El importe es obligatorio y debe ser un numero valido'
-        })}
-      />
-
-      {isElectricity
-        ? (
-          <>
-            <InputForm
-              id='consumptionPeak'
-              label='Punta (kWh)'
-              type='number'
-              size={4}
-              error={!!errors.consumptionPeak}
-              errorText={errors.consumptionPeak?.message ?? ''}
-              {...register('consumptionPeak', { valueAsNumber: true })}
-            />
-            <InputForm
-              id='consumptionFlat'
-              label='Llano (kWh)'
-              type='number'
-              size={4}
-              error={!!errors.consumptionFlat}
-              errorText={errors.consumptionFlat?.message ?? ''}
-              {...register('consumptionFlat', { valueAsNumber: true })}
-            />
-            <InputForm
-              id='consumptionOffPeak'
-              label='Valle (kWh)'
-              type='number'
-              size={4}
-              error={!!errors.consumptionOffPeak}
-              errorText={errors.consumptionOffPeak?.message ?? ''}
-              {...register('consumptionOffPeak', { valueAsNumber: true })}
-            />
-          </>
-          )
-        : (
-          <InputForm
-            id='consumption'
-            label={`Consumo${unit ? ` (${unit})` : ''}`}
-            type='number'
-            size={12}
-            error={!!errors.consumption}
-            errorText={errors.consumption?.message ?? ''}
-            {...register('consumption', { valueAsNumber: true })}
-          />
-          )}
+      {errors.root && (
+        <Box sx={{ gridColumn: '1 / -1', mt: 1 }}>
+          <Alert severity='error'>{errors.root.message}</Alert>
+        </Box>
+      )}
     </ModalGrid>
   )
 }

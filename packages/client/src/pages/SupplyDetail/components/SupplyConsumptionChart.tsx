@@ -26,8 +26,8 @@ const SupplyConsumptionChart = ({ readings, isElectricity, unit }: Props) => {
   const theme = useTheme()
 
   const data = useMemo(() => {
-    return [...readings]
-      .sort((a, b) => a.startDate - b.startDate)
+    return readings
+      .toSorted((a, b) => a.startDate - b.startDate)
       .map((reading) => ({
         label: dayjs(reading.startDate).format('MM/YY'),
         consumption: reading.consumption ?? 0,
@@ -40,7 +40,7 @@ const SupplyConsumptionChart = ({ readings, isElectricity, unit }: Props) => {
   if (data.length === 0) return null
 
   return (
-    <MainCard title='Grafica de consumo'>
+    <MainCard title='Gráfica de consumo'>
       <ResponsiveContainer width='100%' height={280}>
         <BarChart data={data}>
           <CartesianGrid strokeDasharray='3 3' stroke={theme.palette.divider} />

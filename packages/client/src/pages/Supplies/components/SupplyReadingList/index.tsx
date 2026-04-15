@@ -1,3 +1,4 @@
+import { useMemo } from 'react'
 import {
   IconButton,
   Stack,
@@ -11,10 +12,9 @@ import {
   Typography
 } from '@mui/material'
 import { DeleteOutlined, EditOutlined } from '@ant-design/icons'
-import dayjs from 'dayjs'
 import { MainCard } from 'components'
 import { SupplyReading } from 'types'
-import { format } from 'utils'
+import { getColumns } from './columns'
 
 interface Props {
   readings: SupplyReading[]
@@ -27,11 +27,15 @@ interface Props {
 }
 
 const SupplyReadingList = ({ readings, isLoading, isElectricity, unit, onAdd, onEdit, onDelete }: Props) => {
+  const columns = useMemo(() => getColumns({ isElectricity, unit }), [isElectricity, unit])
+  // +1 para la columna de acciones
+  const colSpan = columns.length + 1
+
   const renderBody = () => {
     if (isLoading) {
       return (
         <TableRow>
-          <TableCell colSpan={isElectricity ? 7 : 5} align='center'>
+          <TableCell colSpan={colSpan} align='center'>
             <Typography color='text.secondary'>Cargando lecturas…</Typography>
           </TableCell>
         </TableRow>
@@ -41,7 +45,7 @@ const SupplyReadingList = ({ readings, isLoading, isElectricity, unit, onAdd, on
     if (readings.length === 0) {
       return (
         <TableRow>
-          <TableCell colSpan={isElectricity ? 7 : 5} align='center'>
+          <TableCell colSpan={colSpan} align='center'>
             <Typography color='text.secondary' py={1}>
               Sin lecturas registradas. Pulsa&nbsp;
               <Typography
@@ -65,26 +69,11 @@ const SupplyReadingList = ({ readings, isLoading, isElectricity, unit, onAdd, on
         key={reading._id}
         sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
       >
-        <TableCell>{dayjs(reading.startDate).format('DD/MM/YYYY')}</TableCell>
-        <TableCell>{dayjs(reading.endDate).format('DD/MM/YYYY')}</TableCell>
-        {isElectricity
-          ? (
-            <>
-              <TableCell align='right'>{reading.consumptionPeak ?? '—'}</TableCell>
-              <TableCell align='right'>{reading.consumptionFlat ?? '—'}</TableCell>
-              <TableCell align='right'>{reading.consumptionOffPeak ?? '—'}</TableCell>
-            </>
-            )
-          : <TableCell align='right'>{reading.consumption ?? '—'}</TableCell>}
-        <TableCell align='right'>
-          {Number.isFinite(reading.amount)
-            ? (
-              <Typography component='span' color={reading.amount < 0 ? 'error.main' : 'text.primary'}>
-                {format.euro(reading.amount, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-              </Typography>
-              )
-            : '—'}
-        </TableCell>
+        {columns.map((col) => (
+          <TableCell key={col.id} align={col.align}>
+            {col.render(reading)}
+          </TableCell>
+        ))}
         <TableCell align='right'>
           <Stack direction='row' spacing={0} justifyContent='flex-end'>
             <Tooltip title='Editar lectura'>
@@ -125,18 +114,11 @@ const SupplyReadingList = ({ readings, isLoading, isElectricity, unit, onAdd, on
         >
           <TableHead>
             <TableRow>
-              <TableCell>Inicio</TableCell>
-              <TableCell>Fin</TableCell>
-              {isElectricity
-                ? (
-                  <>
-                    <TableCell align='right'>Punta (kWh)</TableCell>
-                    <TableCell align='right'>Llano (kWh)</TableCell>
-                    <TableCell align='right'>Valle (kWh)</TableCell>
-                  </>
-                  )
-                : <TableCell align='right'>Consumo{unit ? ` (${unit})` : ''}</TableCell>}
-              <TableCell align='right'>Importe</TableCell>
+              {columns.map((col) => (
+                <TableCell key={col.id} align={col.align}>
+                  {col.label}
+                </TableCell>
+              ))}
               <TableCell align='right'>Acciones</TableCell>
             </TableRow>
           </TableHead>

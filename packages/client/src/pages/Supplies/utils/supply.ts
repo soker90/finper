@@ -1,5 +1,7 @@
 import { Supply, SupplyType } from 'types'
 
+export type { SupplyType }
+
 export const SUPPLY_TYPE_LABELS: Record<SupplyType, string> = {
   electricity: 'Electricidad',
   water: 'Agua',

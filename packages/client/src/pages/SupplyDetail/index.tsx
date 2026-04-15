@@ -1,69 +1,52 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router'
-import {
-  Box,
-  Button,
-  Chip,
-  CircularProgress,
-  MenuItem,
-  Select,
-  Stack,
-  Typography
-} from '@mui/material'
-import { ArrowLeftOutlined, PlusOutlined } from '@ant-design/icons'
+import { Box, CircularProgress, Stack, Typography } from '@mui/material'
 import dayjs from 'dayjs'
 
-import { useSupplies, useSupplyReadings } from 'hooks'
-import { SupplyReading, SupplyReadingInput } from 'types'
-import { SUPPLY_TYPE_LABELS, SUPPLY_TYPE_COLORS, SUPPLY_TYPE_UNITS, supplyDisplayName } from '../Supplies/utils/supply'
+import { useSupplies, useSupply, useSupplyReadings } from 'hooks'
+import { SupplyInput } from 'types'
+import { SUPPLY_TYPE_UNITS } from '../Supplies/utils/supply'
+import SupplyForm from '../Supplies/components/SupplyForm'
 import SupplyReadingForm from '../Supplies/components/SupplyReadingForm'
 import SupplyReadingList from '../Supplies/components/SupplyReadingList'
 import RemoveModal from '../Supplies/components/RemoveModal'
 import { SupplyConsumptionChart, SupplyYearStats } from './components'
-
-type ModalState =
-  | { type: 'add' }
-  | { type: 'edit'; data: SupplyReading }
-  | { type: 'delete'; data: SupplyReading }
+import SupplyDetailHeader from './components/SupplyDetailHeader'
+import YearSelector from './components/YearSelector'
+import { useSupplyDetailModals } from './hooks/useSupplyDetailModals'
 
 const SupplyDetail = () => {
   const { supplyId } = useParams<{ supplyId: string }>()
   const navigate = useNavigate()
 
-  const { properties, isLoading: loadingSupplies } = useSupplies()
-  const supply = useMemo(() => {
-    for (const prop of properties) {
-      const found = prop.supplies.find((s) => s._id === supplyId)
-      if (found) return found
-    }
-    return null
-  }, [properties, supplyId])
-
+  const { isLoading: loadingSupplies, updateSupply } = useSupplies()
+  const { supply } = useSupply(supplyId)
   const { readings, isLoading: loadingReadings, createReading, updateReading, removeReading } =
     useSupplyReadings(supplyId ?? null)
 
-  const availableYears = useMemo(() => {
-    const years = new Set(readings.map((r) => new Date(r.startDate).getFullYear()))
-    years.add(new Date().getFullYear())
-    return [...years].sort((a, b) => b - a)
-  }, [readings])
+  const availableYears = useMemo(
+    () => Array.from(new Set(readings.map((reading) => new Date(reading.startDate).getFullYear()))).toSorted((a, b) => b - a),
+    [readings]
+  )
 
   const [selectedYear, setSelectedYear] = useState<number>(() => new Date().getFullYear())
-  const [activeModal, setActiveModal] = useState<ModalState | null>(null)
-  const closeModal = () => setActiveModal(null)
+
+  useEffect(() => {
+    if (availableYears.length > 0 && !availableYears.includes(selectedYear)) {
+      setSelectedYear(availableYears[0])
+    }
+  }, [availableYears, selectedYear])
 
   const filteredReadings = useMemo(
-    () => readings.filter((r) => new Date(r.startDate).getFullYear() === selectedYear),
+    () => readings.filter((reading) => new Date(reading.startDate).getFullYear() === selectedYear),
     [readings, selectedYear]
   )
 
-  const handleFormSubmit = (data: Omit<SupplyReadingInput, 'supplyId'>) => {
-    const payload: SupplyReadingInput = { ...data, supplyId: supply!._id }
-
-    return activeModal?.type === 'edit'
-      ? updateReading(activeModal.data._id, payload)
-      : createReading(payload)
-  }
+  const { activeModal, setActiveModal, closeModal, handleReadingSubmit } = useSupplyDetailModals({
+    supply: supply ?? null,
+    createReading,
+    updateReading
+  })
 
   if (loadingSupplies) {
     return (
@@ -83,63 +66,29 @@ const SupplyDetail = () => {
 
   return (
     <Stack spacing={3}>
-      {/* Cabecera */}
-      <Box display='flex' alignItems='center' justifyContent='space-between' flexWrap='wrap' gap={1}>
-        <Box display='flex' alignItems='center' gap={1}>
-          <Button
-            startIcon={<ArrowLeftOutlined />}
-            onClick={() => navigate('/suministros')}
-            size='small'
-          >
-            Volver
-          </Button>
-          <Typography variant='h4'>{supplyDisplayName(supply)}</Typography>
-          <Chip
-            label={SUPPLY_TYPE_LABELS[supply.type]}
-            color={SUPPLY_TYPE_COLORS[supply.type] ?? 'default'}
-            size='small'
-          />
-        </Box>
+      <SupplyDetailHeader
+        supply={supply}
+        onBack={() => navigate('/suministros')}
+        onAddReading={() => setActiveModal({ type: 'add' })}
+        onEditSupply={() => setActiveModal({ type: 'editSupply' })}
+        onCompareTariffs={() => navigate(`/suministros/${supply._id}/comparar`)}
+      />
 
-        <Button
-          variant='outlined'
-          startIcon={<PlusOutlined />}
-          onClick={() => setActiveModal({ type: 'add' })}
-        >
-          Añadir lectura
-        </Button>
-      </Box>
+      <YearSelector
+        years={availableYears}
+        selectedYear={selectedYear}
+        readingCount={filteredReadings.length}
+        onYearChange={setSelectedYear}
+      />
 
-      {/* Selector de año */}
-      <Box display='flex' alignItems='center' gap={2}>
-        <Typography color='textSecondary'>
-          Año:
-        </Typography>
-        <Select
-          size='small'
-          value={selectedYear}
-          onChange={(e) => setSelectedYear(Number(e.target.value))}
-        >
-          {availableYears.map((y) => (
-            <MenuItem key={y} value={y}>
-              {y}
-            </MenuItem>
-          ))}
-        </Select>
-        <Typography color='textSecondary'>
-          {filteredReadings.length} lectura{filteredReadings.length !== 1 ? 's' : ''}
-        </Typography>
-      </Box>
-
-      {/* Tabla de lecturas filtrada */}
       <SupplyReadingList
         readings={filteredReadings}
         isLoading={loadingReadings}
         isElectricity={supply.type === 'electricity'}
         unit={SUPPLY_TYPE_UNITS[supply.type]}
         onAdd={() => setActiveModal({ type: 'add' })}
-        onEdit={(r) => setActiveModal({ type: 'edit', data: r })}
-        onDelete={(r) => setActiveModal({ type: 'delete', data: r })}
+        onEdit={(reading) => setActiveModal({ type: 'edit', data: reading })}
+        onDelete={(reading) => setActiveModal({ type: 'delete', data: reading })}
       />
 
       <SupplyConsumptionChart
@@ -154,17 +103,24 @@ const SupplyDetail = () => {
         unit={SUPPLY_TYPE_UNITS[supply.type]}
       />
 
-      {/* Formulario add/edit */}
       {(activeModal?.type === 'add' || activeModal?.type === 'edit') && (
         <SupplyReadingForm
           supply={supply}
           reading={activeModal.type === 'edit' ? activeModal.data : undefined}
           onClose={closeModal}
-          onSubmit={handleFormSubmit}
+          onSubmit={handleReadingSubmit}
         />
       )}
 
-      {/* Confirmación borrado */}
+      {activeModal?.type === 'editSupply' && (
+        <SupplyForm
+          supply={supply}
+          propertyId={supply.propertyId}
+          onClose={closeModal}
+          onSubmit={(data: SupplyInput) => updateSupply(supply._id, data)}
+        />
+      )}
+
       {activeModal?.type === 'delete' && (
         <RemoveModal
           title='¿Eliminar lectura?'

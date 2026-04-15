@@ -1,4 +1,4 @@
-import { Grid, InputBaseComponentProps, InputLabel, Stack } from '@mui/material'
+import { FormHelperText, Grid, InputBaseComponentProps, InputLabel, Stack } from '@mui/material'
 import { DatePicker } from '@mui/x-date-pickers'
 import { Controller } from 'react-hook-form'
 import dayjs from 'dayjs'
@@ -8,6 +8,7 @@ interface Props {
   label: string
   placeholder: string
   error: boolean
+  errorText?: string
   type?: string
   inputProps?: InputBaseComponentProps,
   value?: string
@@ -16,7 +17,7 @@ interface Props {
   size?: number
 }
 
-const DateForm = ({ id, label, control, error, size = 2, ...others }: Props) => (
+const DateForm = ({ id, label, control, error, errorText, size = 2, ...others }: Props) => (
   <Grid size={{ md: size, xs: 12 }}>
     <Stack spacing={1}>
       <InputLabel htmlFor={id}>{label}</InputLabel>
@@ -42,6 +43,11 @@ const DateForm = ({ id, label, control, error, size = 2, ...others }: Props) => 
           )
         }}
       />
+      {error && (
+        <FormHelperText error>
+          {errorText}
+        </FormHelperText>
+      )}
     </Stack>
   </Grid>
 )

@@ -5,24 +5,29 @@ import { SupplyDocument } from '@soker90/finper-models'
 import {
   validateSupplyCreateParams,
   validateSupplyEditParams,
-  validateSupplyExist
+  validateSupplyExist,
+  validateSupplyForTariffComparison
 } from '../validators/supply'
 import { ISupplyService } from '../services/supply.service'
 import extractUser from '../helpers/extract-user'
+import { ITariffsService } from '../services/tariffs.service'
 import { RequestUser } from '../types'
 
 type ISupplyController = {
   loggerHandler: any,
   supplyService: ISupplyService,
+  tariffsService: ITariffsService
 }
 
 export class SupplyController {
   private logger
   private supplyService
+  private tariffsService
 
-  constructor ({ loggerHandler, supplyService }: ISupplyController) {
+  constructor ({ loggerHandler, supplyService, tariffsService }: ISupplyController) {
     this.logger = loggerHandler
     this.supplyService = supplyService
+    this.tariffsService = tariffsService
   }
 
   public async group (req: Request, res: Response, next: NextFunction): Promise<void> {
@@ -74,6 +79,20 @@ export class SupplyController {
       .then(this.supplyService.deleteSupply.bind(this.supplyService))
       .then(() => {
         res.sendStatus(204)
+      })
+      .catch((error) => {
+        next(error)
+      })
+  }
+
+  public async compareTariffs (req: Request, res: Response, next: NextFunction): Promise<void> {
+    const { id } = req.params
+    Promise.resolve(req.user as string)
+      .tap((user) => this.logger.logInfo(`/supplies/${id}/tariffs-comparison - compare tariffs for ${user}`))
+      .tap((user) => validateSupplyForTariffComparison({ id, user }))
+      .then((user) => this.tariffsService.compareTariffs(id, user))
+      .then((response) => {
+        res.send(response)
       })
       .catch((error) => {
         next(error)

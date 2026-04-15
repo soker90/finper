@@ -2,7 +2,7 @@ import { Router } from 'express'
 
 import loggerHandler from '../utils/logger'
 import { SupplyController } from '../controllers/supply.controller'
-import { supplyService } from '../services'
+import { supplyService, tariffsService } from '../services'
 import authMiddleware from '../middlewares/auth.middleware'
 
 export class SupplyRoutes {
@@ -10,6 +10,7 @@ export class SupplyRoutes {
 
   private supplyController: SupplyController = new SupplyController({
     supplyService,
+    tariffsService,
     loggerHandler: loggerHandler('SupplyController')
   })
 
@@ -35,6 +36,12 @@ export class SupplyRoutes {
       '/:id',
       authMiddleware,
       this.supplyController.edit.bind(this.supplyController)
+    )
+
+    this.router.get(
+      '/:id/tariffs-comparison',
+      authMiddleware,
+      this.supplyController.compareTariffs.bind(this.supplyController)
     )
 
     this.router.delete(
