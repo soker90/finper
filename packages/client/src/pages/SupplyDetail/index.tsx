@@ -4,7 +4,7 @@ import { Box, CircularProgress, Stack, Typography } from '@mui/material'
 import dayjs from 'dayjs'
 
 import { useSupplies, useSupply, useSupplyReadings } from 'hooks'
-import { SupplyReading, SupplyReadingInput, SupplyInput } from 'types'
+import { SupplyInput } from 'types'
 import { SUPPLY_TYPE_UNITS } from '../Supplies/utils/supply'
 import SupplyForm from '../Supplies/components/SupplyForm'
 import SupplyReadingForm from '../Supplies/components/SupplyReadingForm'
@@ -13,12 +13,7 @@ import RemoveModal from '../Supplies/components/RemoveModal'
 import { SupplyConsumptionChart, SupplyYearStats } from './components'
 import SupplyDetailHeader from './components/SupplyDetailHeader'
 import YearSelector from './components/YearSelector'
-
-type ModalState =
-  | { type: 'add' }
-  | { type: 'edit'; data: SupplyReading }
-  | { type: 'delete'; data: SupplyReading }
-  | { type: 'editSupply' }
+import { useSupplyDetailModals } from './hooks/useSupplyDetailModals'
 
 const SupplyDetail = () => {
   const { supplyId } = useParams<{ supplyId: string }>()
@@ -35,8 +30,6 @@ const SupplyDetail = () => {
   )
 
   const [selectedYear, setSelectedYear] = useState<number>(() => new Date().getFullYear())
-  const [activeModal, setActiveModal] = useState<ModalState | null>(null)
-  const closeModal = () => setActiveModal(null)
 
   useEffect(() => {
     if (availableYears.length > 0 && !availableYears.includes(selectedYear)) {
@@ -49,12 +42,11 @@ const SupplyDetail = () => {
     [readings, selectedYear]
   )
 
-  const handleReadingSubmit = (data: Omit<SupplyReadingInput, 'supplyId'>) => {
-    const payload: SupplyReadingInput = { ...data, supplyId: supply!._id }
-    return activeModal?.type === 'edit'
-      ? updateReading(activeModal.data._id, payload)
-      : createReading(payload)
-  }
+  const { activeModal, setActiveModal, closeModal, handleReadingSubmit } = useSupplyDetailModals({
+    supply,
+    createReading,
+    updateReading
+  })
 
   if (loadingSupplies) {
     return (

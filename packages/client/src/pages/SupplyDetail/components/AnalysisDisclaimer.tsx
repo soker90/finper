@@ -1,7 +1,11 @@
-import { Box, Typography } from '@mui/material'
+import { Typography } from '@mui/material'
+import { MainCard } from 'components'
 
 const AnalysisDisclaimer = () => (
-  <Box sx={{ bgcolor: 'info.lighter', p: 3, borderRadius: 2, border: '1px solid', borderColor: 'info.light' }}>
+  <MainCard
+    sx={{ bgcolor: 'info.lighter', border: '1px solid', borderColor: 'info.light' }}
+    contentSX={{ p: 3 }}
+  >
     <Typography variant='subtitle2' gutterBottom fontWeight='700' color='info.main'>
       Sobre este análisis energético:
     </Typography>
@@ -11,7 +15,7 @@ const AnalysisDisclaimer = () => (
       potencia, energía e impuestos de cada tarifa del mercado para darte una precisión del 100% sobre tu
       ahorro real.
     </Typography>
-  </Box>
+  </MainCard>
 )
 
 export default AnalysisDisclaimer
