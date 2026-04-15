@@ -43,7 +43,7 @@ const SupplyDetail = () => {
   )
 
   const { activeModal, setActiveModal, closeModal, handleReadingSubmit } = useSupplyDetailModals({
-    supply,
+    supply: supply ?? null,
     createReading,
     updateReading
   })

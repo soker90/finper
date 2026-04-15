@@ -3,7 +3,7 @@ import { Alert, Button, Skeleton, Stack } from '@mui/material'
 import { ArrowLeftOutlined } from '@ant-design/icons'
 import { useTariffsComparison } from 'hooks/useTariffsComparison'
 import { useSupply } from 'hooks'
-import { supplyDisplayName } from '../Supplies/utils/supply'
+
 import WinnerCard from './components/WinnerCard'
 import TariffComparisonTable from './components/TariffComparisonTable'
 import TariffPageHeader from './components/TariffPageHeader'
@@ -13,7 +13,7 @@ const CompareTariffsPage = () => {
   const { supplyId } = useParams<{ supplyId: string }>()
   const navigate = useNavigate()
 
-  const { supply } = useSupply(supplyId)
+  const { supply, property } = useSupply(supplyId)
   const { comparison, error, isLoading } = useTariffsComparison(supplyId)
 
   const winner = comparison?.[0]
@@ -32,8 +32,8 @@ const CompareTariffsPage = () => {
   return (
     <Stack spacing={3}>
       <TariffPageHeader
-        supplyName={supply ? supplyDisplayName(supply) : ''}
-        isLoading={isLoading}
+        propertyName={property ? property.name : ''}
+        supply={supply}
         onBack={() => navigate(-1)}
       />
 

@@ -8,7 +8,7 @@ export type ModalState =
   | { type: 'editSupply' }
 
 interface Params {
-  supply: Supply | undefined
+  supply: Supply | null | undefined
   createReading: (data: SupplyReadingInput) => Promise<unknown>
   updateReading: (id: string, data: SupplyReadingInput) => Promise<unknown>
 }
@@ -18,11 +18,19 @@ export const useSupplyDetailModals = ({ supply, createReading, updateReading }: 
 
   const closeModal = () => setActiveModal(null)
 
-  const handleReadingSubmit = (data: Omit<SupplyReadingInput, 'supplyId'>) => {
-    const payload: SupplyReadingInput = { ...data, supplyId: supply!._id }
-    return activeModal?.type === 'edit'
-      ? updateReading(activeModal.data._id, payload)
-      : createReading(payload)
+  const handleReadingSubmit = async (data: Omit<SupplyReadingInput, 'supplyId'>): Promise<{ error?: string }> => {
+    if (!supply) return { error: 'No hay suministro seleccionado.' }
+    const payload: SupplyReadingInput = { ...data, supplyId: supply._id }
+    try {
+      if (activeModal?.type === 'edit') {
+        await updateReading(activeModal.data._id, payload)
+      } else {
+        await createReading(payload)
+      }
+      return {}
+    } catch (e: any) {
+      return { error: e?.message || 'Error al guardar la lectura.' }
+    }
   }
 
   return { activeModal, setActiveModal, closeModal, handleReadingSubmit }
