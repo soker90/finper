@@ -42,9 +42,17 @@ export const ERROR_MESSAGE = {
     NOT_FOUND: 'El inmueble no existe'
   },
   SUPPLY: {
-    NOT_FOUND: 'El suministro no existe'
+    NOT_FOUND: 'El suministro no existe',
+    ELECTRICITY_ONLY: 'La comparación de tarifas solo está disponible para suministros eléctricos',
+    POWER_CONFIG_REQUIRED: 'El suministro debe tener configuradas las potencias contratadas (Punta y Valle)',
+    PRICES_CONFIG_REQUIRED: 'El suministro debe tener configurados todos los precios actuales de energía y potencia'
   },
   SUPPLY_READING: {
-    NOT_FOUND: 'La lectura del suministro no existe'
+    NOT_FOUND: 'La lectura del suministro no existe',
+    NO_READINGS_FOR_COMPARISON: 'El suministro no tiene lecturas registradas para realizar la comparación',
+    NO_READINGS_IN_LAST_YEAR: 'No se han encontrado lecturas en el último año para este suministro'
+  },
+  TARIFF: {
+    FETCH_ERROR: 'No se pudieron obtener las tarifas eléctricas'
   }
 }

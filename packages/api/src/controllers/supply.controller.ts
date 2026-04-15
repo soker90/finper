@@ -5,7 +5,8 @@ import { SupplyDocument } from '@soker90/finper-models'
 import {
   validateSupplyCreateParams,
   validateSupplyEditParams,
-  validateSupplyExist
+  validateSupplyExist,
+  validateSupplyForTariffComparison
 } from '../validators/supply'
 import { ISupplyService } from '../services/supply.service'
 import extractUser from '../helpers/extract-user'
@@ -88,6 +89,7 @@ export class SupplyController {
     const { id } = req.params
     Promise.resolve(req.user as string)
       .tap((user) => this.logger.logInfo(`/supplies/${id}/tariffs-comparison - compare tariffs for ${user}`))
+      .tap((user) => validateSupplyForTariffComparison({ id, user }))
       .then((user) => this.tariffsService.compareTariffs(id, user))
       .then((response) => {
         res.send(response)

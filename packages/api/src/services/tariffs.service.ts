@@ -1,4 +1,4 @@
-import { SupplyModel, SupplyReadingModel, SupplyReadingDocument, SupplyDocument, SUPPLY_TYPE, ISupplyReading } from '@soker90/finper-models'
+import { SupplyModel, SupplyReadingModel, SupplyReadingDocument, ISupplyReading } from '@soker90/finper-models'
 import Boom from '@hapi/boom'
 import { ERROR_MESSAGE } from '../i18n'
 
@@ -97,31 +97,13 @@ export default class TariffsService implements ITariffsService {
       return freshData
     }
     if (this.cachedTariffs) return this.cachedTariffs
-    throw Boom.badGateway('No se pudieron obtener las tarifas eléctricas').output
-  }
-
-  private validateSupplyForComparison (supply: SupplyDocument): void {
-    if (supply.type !== SUPPLY_TYPE.ELECTRICITY) {
-      throw Boom.badRequest('La comparación de tarifas solo está disponible para suministros eléctricos').output
-    }
-    if (supply.contractedPowerPeak === undefined || supply.contractedPowerOffPeak === undefined) {
-      throw Boom.badRequest('El suministro debe tener configuradas las potencias contratadas (Punta y Valle)').output
-    }
-    if (
-      supply.currentPricePowerPeak === undefined ||
-      supply.currentPricePowerOffPeak === undefined ||
-      supply.currentPriceEnergyPeak === undefined ||
-      supply.currentPriceEnergyFlat === undefined ||
-      supply.currentPriceEnergyOffPeak === undefined
-    ) {
-      throw Boom.badRequest('El suministro debe tener configurados todos los precios actuales de energía y potencia').output
-    }
+    throw Boom.badGateway(ERROR_MESSAGE.TARIFF.FETCH_ERROR).output
   }
 
   private async fetchYearReadings (supplyId: string, user: string): Promise<SupplyReadingDocument[]> {
     const lastReading = await SupplyReadingModel.findOne({ supplyId, user }).sort({ endDate: -1 })
     if (!lastReading) {
-      throw Boom.badRequest('El suministro no tiene lecturas registradas para realizar la comparación').output
+      throw Boom.badRequest(ERROR_MESSAGE.SUPPLY_READING.NO_READINGS_FOR_COMPARISON).output
     }
 
     const readings = await SupplyReadingModel.find({
@@ -132,7 +114,7 @@ export default class TariffsService implements ITariffsService {
     })
 
     if (readings.length === 0) {
-      throw Boom.badRequest('No se han encontrado lecturas en el último año para este suministro').output
+      throw Boom.badRequest(ERROR_MESSAGE.SUPPLY_READING.NO_READINGS_IN_LAST_YEAR).output
     }
 
     return readings
@@ -202,8 +184,6 @@ export default class TariffsService implements ITariffsService {
   public async compareTariffs (supplyId: string, user: string): Promise<TariffComparisonResult[]> {
     const supply = await SupplyModel.findOne({ _id: supplyId, user })
     if (!supply) throw Boom.notFound(ERROR_MESSAGE.SUPPLY.NOT_FOUND).output
-
-    this.validateSupplyForComparison(supply)
 
     const [readings, tariffData] = await Promise.all([
       this.fetchYearReadings(supplyId, user),
