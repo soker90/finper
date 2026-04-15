@@ -50,7 +50,8 @@ export const ERROR_MESSAGE = {
   SUPPLY_READING: {
     NOT_FOUND: 'La lectura del suministro no existe',
     NO_READINGS_FOR_COMPARISON: 'El suministro no tiene lecturas registradas para realizar la comparación',
-    NO_READINGS_IN_LAST_YEAR: 'No se han encontrado lecturas en el último año para este suministro'
+    NO_READINGS_IN_LAST_YEAR: 'No se han encontrado lecturas en el último año para este suministro',
+    INVALID_DATES: 'La fecha de fin debe ser posterior a la fecha de inicio'
   },
   TARIFF: {
     FETCH_ERROR: 'No se pudieron obtener las tarifas eléctricas'

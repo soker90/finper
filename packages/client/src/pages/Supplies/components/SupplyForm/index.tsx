@@ -1,6 +1,6 @@
 import { useForm, useWatch } from 'react-hook-form'
 import { ModalGrid, InputForm, SelectForm } from 'components'
-import { Typography, Grid } from '@mui/material'
+import { Typography, Grid, Alert, Box } from '@mui/material'
 import { SupplyInput, Supply } from 'types'
 import {
   SUPPLY_TYPE_OPTIONS,
@@ -18,7 +18,14 @@ type Props = {
 }
 
 const SupplyForm = ({ supply, propertyId, onClose, onSubmit }: Props) => {
-  const { register, handleSubmit, control, formState: { errors } } = useForm<SupplyInput>({
+  const {
+    register,
+    handleSubmit,
+    control,
+    formState: { errors, isSubmitting },
+    setError,
+    clearErrors
+  } = useForm<SupplyInput>({
     defaultValues: getDefaultValues(supply, propertyId)
   })
 
@@ -27,8 +34,13 @@ const SupplyForm = ({ supply, propertyId, onClose, onSubmit }: Props) => {
   const isElectricity = selectedType === 'electricity'
 
   const handleFormSubmit = handleSubmit(async (data) => {
+    clearErrors()
     const result = await onSubmit(buildSubmitPayload(data, isOther, isElectricity))
-    if (!result?.error) onClose()
+    if (result?.error) {
+      setError('root', { type: 'manual', message: result.error })
+      return
+    }
+    onClose()
   })
 
   const renderElectricityField = (field: ElectricityFieldConfig) => (
@@ -90,6 +102,12 @@ const SupplyForm = ({ supply, propertyId, onClose, onSubmit }: Props) => {
 
           {CURRENT_PRICES_FIELDS.map(renderElectricityField)}
         </>
+      )}
+
+      {errors.root && (
+        <Box sx={{ gridColumn: '1 / -1', mt: 1 }}>
+          <Alert severity='error'>{errors.root.message}</Alert>
+        </Box>
       )}
     </ModalGrid>
   )

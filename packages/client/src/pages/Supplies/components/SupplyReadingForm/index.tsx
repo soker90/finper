@@ -1,4 +1,5 @@
 import { useForm } from 'react-hook-form'
+import { Alert, Box } from '@mui/material'
 import { DateForm, InputForm, ModalGrid } from 'components'
 import { Supply, SupplyReading, SupplyReadingInput } from 'types'
 import { COMMON_FIELDS, DECIMAL_PATTERN, ELECTRICITY_FIELDS, ERROR_MESSAGES, FieldConfig, getSupplyTypeField } from './config'
@@ -28,14 +29,25 @@ const SupplyReadingForm = ({ supply, reading, onClose, onSubmit }: Props) => {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
-    control
+    control,
+    setError,
+    clearErrors
   } = useForm<FormValues>({
     defaultValues: getDefaultValues(reading)
   })
 
   const handleFormSubmit = handleSubmit(async (data) => {
+    clearErrors()
     const result = await onSubmit(buildSubmitPayload(data, supply))
-    if (!result?.error) onClose()
+    if (result?.error) {
+      if (result.error.toLowerCase().includes('fecha')) {
+        setError('endDate', { type: 'manual', message: result.error })
+      } else {
+        setError('root', { type: 'manual', message: result.error })
+      }
+      return
+    }
+    onClose()
   })
 
   const renderField = (field: FieldConfig) => {
@@ -47,6 +59,7 @@ const SupplyReadingForm = ({ supply, reading, onClose, onSubmit }: Props) => {
           label={field.label}
           placeholder={field.placeholder ?? ''}
           error={!!errors[field.id as keyof FormValues]}
+          errorText={errors[field.id as keyof FormValues]?.message}
           control={control}
           size={field.size}
         />
@@ -88,6 +101,12 @@ const SupplyReadingForm = ({ supply, reading, onClose, onSubmit }: Props) => {
     >
       {COMMON_FIELDS.map(renderField)}
       {consumptionFields.map(renderField)}
+
+      {errors.root && (
+        <Box sx={{ gridColumn: '1 / -1', mt: 1 }}>
+          <Alert severity='error'>{errors.root.message}</Alert>
+        </Box>
+      )}
     </ModalGrid>
   )
 }

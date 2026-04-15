@@ -1,5 +1,6 @@
 import Joi from 'joi'
 import Boom from '@hapi/boom'
+import { ERROR_MESSAGE } from '../../i18n'
 import { validateSupplyExist } from '../supply'
 
 export const validateReadingCreateParams = async (data: Record<string, string | number>) => {
@@ -10,7 +11,9 @@ export const validateReadingCreateParams = async (data: Record<string, string | 
   const schema = Joi.object({
     supplyId: Joi.string().required(),
     startDate: Joi.number().required(),
-    endDate: Joi.number().required(),
+    endDate: Joi.number().required().greater(Joi.ref('startDate')).messages({
+      'number.greater': ERROR_MESSAGE.SUPPLY_READING.INVALID_DATES
+    }),
     amount: Joi.number().invalid(NaN).required(),
     consumption: Joi.number().optional(),
     consumptionPeak: Joi.number().optional(),
