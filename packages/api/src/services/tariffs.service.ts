@@ -33,7 +33,11 @@ interface ITariffPrices {
   energiaValle: number
 }
 
-export default class TariffsService {
+export interface ITariffsService {
+  compareTariffs(supplyId: string, user: string): Promise<object[]>
+}
+
+export default class TariffsService implements ITariffsService {
   private cachedTariffs: ITariffData | null = null
   private lastFetch: number = 0
 

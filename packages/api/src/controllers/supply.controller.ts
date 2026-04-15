@@ -9,13 +9,13 @@ import {
 } from '../validators/supply'
 import { ISupplyService } from '../services/supply.service'
 import extractUser from '../helpers/extract-user'
-import TariffsService from '../services/tariffs.service'
+import { ITariffsService } from '../services/tariffs.service'
 import { RequestUser } from '../types'
 
 type ISupplyController = {
   loggerHandler: any,
   supplyService: ISupplyService,
-  tariffsService: TariffsService
+  tariffsService: ITariffsService
 }
 
 export class SupplyController {
