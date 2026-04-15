@@ -26,8 +26,8 @@ const SupplyConsumptionChart = ({ readings, isElectricity, unit }: Props) => {
   const theme = useTheme()
 
   const data = useMemo(() => {
-    return [...readings]
-      .sort((a, b) => a.startDate - b.startDate)
+    return readings
+      .toSorted((a, b) => a.startDate - b.startDate)
       .map((reading) => ({
         label: dayjs(reading.startDate).format('MM/YY'),
         consumption: reading.consumption ?? 0,

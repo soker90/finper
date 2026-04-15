@@ -19,8 +19,7 @@ const PensionCard = ({ pension, pensionReturnPct }: PensionCardProps) => {
   const theme = useTheme()
 
   const sparkline = (pension?.transactions ?? [])
-    .slice()
-    .sort((a, b) => a.date - b.date)
+    .toSorted((a, b) => a.date - b.date)
     .slice(-12)
     .map(t => ({
       date: new Date(t.date).toLocaleDateString('es-ES', { month: 'short', year: '2-digit' }),

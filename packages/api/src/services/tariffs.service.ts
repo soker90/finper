@@ -225,6 +225,6 @@ export default class TariffsService implements ITariffsService {
         supply.contractedPowerPeak!, supply.contractedPowerOffPeak!,
         currentTariffPrices, taxes
       ))
-      .sort((a, b) => b.ahorroAnualEstimado - a.ahorroAnualEstimado)
+      .toSorted((a, b) => b.ahorroAnualEstimado - a.ahorroAnualEstimado)
   }
 }
