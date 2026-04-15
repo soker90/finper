@@ -1,4 +1,4 @@
-import { Box, Button, Chip, IconButton, Typography } from '@mui/material'
+import { Box, Button, Chip, Typography } from '@mui/material'
 import { ArrowLeftOutlined, EditOutlined, PlusOutlined, ThunderboltOutlined } from '@ant-design/icons'
 import { Supply } from 'types'
 import { HeaderButtons } from 'components'
@@ -14,6 +14,7 @@ interface Props {
 
 const SupplyDetailHeader = ({ supply, onBack, onAddReading, onEditSupply, onCompareTariffs }: Props) => {
   const actionButtons = [
+    { Icon: EditOutlined, title: 'Editar', onClick: onEditSupply },
     ...(supply.type === 'electricity'
       ? [{ Icon: ThunderboltOutlined, title: 'Comparar tarifas', onClick: onCompareTariffs }]
       : []),
@@ -32,9 +33,6 @@ const SupplyDetailHeader = ({ supply, onBack, onAddReading, onEditSupply, onComp
           color={SUPPLY_TYPE_COLORS[supply.type] ?? 'default'}
           size='small'
         />
-        <IconButton size='small' onClick={onEditSupply}>
-          <EditOutlined style={{ fontSize: '18px' }} />
-        </IconButton>
       </Box>
       <HeaderButtons buttons={actionButtons} desktopSx={{}} />
     </Box>
