@@ -13,13 +13,14 @@ define help
     lint-api:                  lint the API
     lint-client:               lint the client
     lint-models:               lint the models.
+    seed-user:                 create initial user (USERNAME and PASSWORD required).
     test:                      run all tests.
     test-api:                  run all tests for the API.
     test-client:               run all tests for the client
     test-models:               run all tests for the models.
     start-api:                 launch api
     start-client:              launch client
-    clean:                    clean all build artifacts.
+    clean:                     clean all build artifacts.
 
 endef
 export help
@@ -44,6 +45,9 @@ lint-models:
 	@pnpm --filter @soker90/finper-models lint
 
 ## API ##
+seed-user:
+	@INIT_USERNAME=$(USERNAME) INIT_PASSWORD=$(PASSWORD) pnpm --filter @soker90/finper-api seed-user
+
 start-api:
 	@pnpm --filter @soker90/finper-api start
 

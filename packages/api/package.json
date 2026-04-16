@@ -12,7 +12,8 @@
     "build-ts": "tsc",
     "test": "NODE_ENV=test jest --maxWorkers=50% --silent",
     "lint": "eslint . --ext .ts",
-    "lint:fix": "eslint . --fix --ext .ts"
+    "lint:fix": "eslint . --fix --ext .ts",
+    "seed-user": "ts-node src/scripts/seed-user.ts"
   },
   "repository": {
     "type": "git",

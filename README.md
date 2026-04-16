@@ -33,6 +33,38 @@ Para arrancar el proyecto, necesitaras añadir las siguientes variables a tu arc
 
 `MONGODB` - Optional
 
+## Gestión de usuarios
+
+### Opción A — Script manual (desarrollo local)
+
+Con la API arrancada y la base de datos accesible:
+
+```bash
+make seed-user USERNAME=miusuario PASSWORD=mipassword
+```
+
+### Opción B — Endpoint REST `/api/auth/register`
+
+El endpoint está abierto y permite crear usuarios adicionales en cualquier momento.
+
+```bash
+curl -X POST http://localhost:3008/api/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{"username": "miusuario", "password": "mipassword"}'
+```
+
+Respuesta exitosa (`200 OK`):
+
+```json
+{ "token": "<jwt>" }
+```
+
+> **Reglas de validación:**
+> - `username`: entre 3 y 15 caracteres
+> - `password`: mínimo 5 caracteres
+
+---
+
 ## Arrancar en local
 
 Es necesario tener previamente instalado node 16 y mongodb arrancado.
@@ -94,4 +126,3 @@ make
 ## Licencia
 
 [GPLv3 o Superior](https://github.com/soker90/finper/blob/master/LICENSE)
-
