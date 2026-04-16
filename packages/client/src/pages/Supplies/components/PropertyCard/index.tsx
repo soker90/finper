@@ -56,7 +56,7 @@ const PropertyCard = ({
             </Tooltip>
           </Box>
         }
-        sx={{ mb: 3 }}
+        sx={{ mt: 3 }}
       >
         {property.supplies.length === 0
           ? (

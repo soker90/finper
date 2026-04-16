@@ -51,7 +51,7 @@ const Subscriptions = () => {
         desktopSx={{ marginTop: -7 }}
       />
 
-      <SubscriptionsSummary subscriptions={subscriptions} isLoading={isLoading} />
+      <SubscriptionsSummary subscriptions={subscriptions} />
 
       <CandidatesBanner candidates={candidates} onAssign={assign} onDismiss={dismiss} />
 
