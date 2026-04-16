@@ -180,7 +180,7 @@ export default class BudgetService implements IBudgetService {
     year,
     user
   }: { monthOrigin: number, yearOrigin: number, month: number, year: number, user: string }): Promise<boolean> {
-    const budgets = await BudgetModel.find({ user, month: monthOrigin, year: yearOrigin })
+    const budgets = await BudgetModel.find({ user, month: monthOrigin, year: yearOrigin }, 'category amount').lean()
 
     if (!budgets.length) {
       return false
@@ -194,7 +194,7 @@ export default class BudgetService implements IBudgetService {
       }
     }))
 
-    await BudgetModel.bulkWrite(operations as any)
+    await BudgetModel.bulkWrite(operations as mongoose.AnyBulkWriteOperation<IBudget>[])
     return true
   }
 }
