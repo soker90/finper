@@ -11,7 +11,7 @@ export interface ISupplyReadingService {
 
 export default class SupplyReadingService implements ISupplyReadingService {
   public async getSupplyReadings ({ supplyId, user }: { supplyId: string, user: string }): Promise<SupplyReadingDocument[]> {
-    return SupplyReadingModel.find({ supplyId, user }).sort({ startDate: 1 })
+    return SupplyReadingModel.find({ supplyId, user }).sort({ startDate: -1, endDate: -1 })
   }
 
   public async addReading (reading: ISupplyReading): Promise<SupplyReadingDocument> {
