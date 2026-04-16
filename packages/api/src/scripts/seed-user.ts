@@ -34,7 +34,7 @@ async function seed (): Promise<void> {
   const existing = await UserModel.findOne({ username })
 
   if (existing) {
-    console.log(`ℹ️   El usuario "${username}" ya existe. No se realizaron cambios.`)
+    console.log('ℹ️   El usuario ya existe. No se realizaron cambios.')
     await mongoose.connection.close()
     process.exit(0)
   }
