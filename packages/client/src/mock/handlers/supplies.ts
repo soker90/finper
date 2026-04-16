@@ -46,7 +46,10 @@ export const suppliesHandlers = [
 
   // Readings — rutas estáticas ANTES de /supplies/:id
   http.get('/supplies/readings/supply/:supplyId', ({ params }) => {
-    return HttpResponse.json(READINGS_LIST.filter(r => r.supplyId === params.supplyId))
+    const filtered = READINGS_LIST
+      .filter(r => r.supplyId === params.supplyId)
+      .toSorted((a, b) => b.startDate - a.startDate || b.endDate - a.endDate)
+    return HttpResponse.json(filtered)
   }),
   http.post('/supplies/readings', async ({ request }) => {
     const body = await request.json() as Record<string, any>

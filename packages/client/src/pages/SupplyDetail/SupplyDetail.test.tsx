@@ -55,7 +55,8 @@ describe('SupplyDetail — initial state and rendering', () => {
 
   it('renders the reading rows for the current year', async () => {
     const { findByText } = renderFresh()
-    const formatted = dayjs(READINGS_LIST[0].startDate).format('DD/MM/YYYY')
+    // La API devuelve descendente; READINGS_LIST[2] es la lectura más reciente
+    const formatted = dayjs(READINGS_LIST[2].startDate).format('DD/MM/YYYY')
     expect(await findByText(formatted)).toBeDefined()
   })
 
@@ -110,18 +111,19 @@ describe('Flow: reading CRUD in SupplyDetail', () => {
 
   it('click edit reading button opens form in edit mode with pre-filled values', async () => {
     const { findByText, findAllByRole } = renderFresh()
-    await findByText(dayjs(READINGS_LIST[0].startDate).format('DD/MM/YYYY'))
+    // Primera fila = lectura más reciente (índice 2 en orden ascendente)
+    await findByText(dayjs(READINGS_LIST[2].startDate).format('DD/MM/YYYY'))
 
     const editBtns = await findAllByRole('button', { name: /editar lectura/i })
     editBtns[0].click()
 
     expect(await findByText('Editar lectura')).toBeDefined()
-    expect(await findByText(String(READINGS_LIST[0].consumption))).toBeDefined()
+    expect(await findByText(String(READINGS_LIST[2].consumption))).toBeDefined()
   })
 
   it('edit reading → submit → modal closes', async () => {
     const { findByText, findAllByRole, queryByText } = renderFresh()
-    await findByText(dayjs(READINGS_LIST[0].startDate).format('DD/MM/YYYY'))
+    await findByText(dayjs(READINGS_LIST[2].startDate).format('DD/MM/YYYY'))
 
     const editBtns = await findAllByRole('button', { name: /editar lectura/i })
     editBtns[0].click()
@@ -134,13 +136,13 @@ describe('Flow: reading CRUD in SupplyDetail', () => {
 
   it('delete reading → confirm → row disappears from the table', async () => {
     const { findByText, findByRole, findAllByRole, queryByText } = renderFresh()
-    const firstDate = dayjs(READINGS_LIST[0].startDate).format('DD/MM/YYYY')
-    // Wait for initial load before overriding the handler
+    // Primera fila = lectura más reciente
+    const firstDate = dayjs(READINGS_LIST[2].startDate).format('DD/MM/YYYY')
     await findByText(firstDate)
 
     server.use(
       http.delete('/supplies/readings/:id', () => new HttpResponse(null, { status: 204 })),
-      http.get('/supplies/readings/supply/:supplyId', () => HttpResponse.json(READINGS_LIST.slice(1)))
+      http.get('/supplies/readings/supply/:supplyId', () => HttpResponse.json(READINGS_LIST.slice(0, 2).toSorted((a, b) => b.startDate - a.startDate || b.endDate - a.endDate)))
     )
 
     const deleteBtns = await findAllByRole('button', { name: /eliminar lectura/i })
@@ -157,7 +159,7 @@ describe('Flow: reading CRUD in SupplyDetail', () => {
       http.delete('/supplies/readings/:id', () => HttpResponse.json({}, { status: 500 }))
     )
     const { findByText, findByRole, findAllByRole } = renderFresh()
-    const firstDate = dayjs(READINGS_LIST[0].startDate).format('DD/MM/YYYY')
+    const firstDate = dayjs(READINGS_LIST[2].startDate).format('DD/MM/YYYY')
     await findByText(firstDate)
 
     const deleteBtns = await findAllByRole('button', { name: /eliminar lectura/i })
