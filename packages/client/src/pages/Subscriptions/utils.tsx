@@ -20,15 +20,15 @@ export const calcMonthly = (subs: Subscription[]) =>
   subs.reduce((acc, s) => acc + s.amount / s.cycle, 0)
 
 // --- Summary row ---
-type SummaryProps = { subscriptions: Subscription[]; isLoading: boolean }
+type SummaryProps = { subscriptions: Subscription[] }
 
-export const SubscriptionsSummary = ({ subscriptions, isLoading }: SummaryProps) => {
+export const SubscriptionsSummary = ({ subscriptions }: SummaryProps) => {
   const monthly = calcMonthly(subscriptions)
   const annual = monthly * 12
   const activeCount = subscriptions.length
 
   return (
-    <Grid container spacing={3} mb={3} mt={1}>
+    <Grid container spacing={3} mb={3} mt={2}>
       <Grid size={{ xs: 12, sm: 4 }}>
         <KpiCard
           title='Gasto mensual'

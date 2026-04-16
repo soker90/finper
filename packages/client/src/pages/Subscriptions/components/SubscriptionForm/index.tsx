@@ -77,6 +77,7 @@ const SubscriptionForm = ({ subscription, onClose, onSubmit }: Props) => {
         size={3}
         error={Boolean(errors.amount)}
         errorText='El importe debe ser mayor que 0'
+        inputProps={{ step: '0.01', min: '0.01' }}
         {...register('amount', { required: true, valueAsNumber: true, min: 0.01 })}
       />
 
