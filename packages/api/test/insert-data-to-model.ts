@@ -234,11 +234,13 @@ export const insertSupply = async (params: Record<string, any> = {}): Promise<IS
 export const insertSupplyReading = async (params: Record<string, any> = {}): Promise<ISupplyReading & { _id: any }> => {
   const user = (params.user ?? generateUsername()) as string
   const supplyId = params.supplyId ?? (await insertSupply({ user }))._id
+  const startDate = params.startDate ?? faker.date.past({ years: 1 }).getTime()
+  const endDate = params.endDate ?? faker.date.between({ from: startDate, to: Date.now() }).getTime()
 
   return SupplyReadingModel.create({
     supplyId,
-    startDate: params.startDate ?? faker.date.past().getTime(),
-    endDate: params.endDate ?? faker.date.recent().getTime(),
+    startDate,
+    endDate,
     amount: params.amount ?? faker.number.float({ min: -50, max: 250, multipleOf: 0.01 }),
     consumptionPeak: params.consumptionPeak ?? faker.number.int({ min: 10, max: 100 }),
     consumptionFlat: params.consumptionFlat ?? faker.number.int({ min: 10, max: 100 }),

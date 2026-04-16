@@ -46,8 +46,8 @@ const BudgetTable = ({
             }
           ]}
         />
+        {selectedBudget && <ModalEdit onClose={handleCloseEdit} budget={selectedBudget} month={month} year={year} />}
       </Grid>
-      {selectedBudget && <ModalEdit onClose={handleCloseEdit} budget={selectedBudget} month={month} year={year} />}
     </>
   )
 }

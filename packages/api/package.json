@@ -1,6 +1,6 @@
 {
   "name": "@soker90/finper-api",
-  "version": "1.8.1",
+  "version": "1.8.2",
   "description": "Finper API that stores endpoints consumed by a Finper client",
   "main": "src/server",
   "scripts": {
