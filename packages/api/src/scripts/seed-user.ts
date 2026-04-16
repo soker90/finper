@@ -40,7 +40,7 @@ async function seed (): Promise<void> {
   }
 
   await UserModel.create({ username, password })
-  console.log(`✅  Usuario "${username}" creado correctamente.`)
+  console.log('✅  Usuario creado correctamente.')
 
   await mongoose.connection.close()
   process.exit(0)
