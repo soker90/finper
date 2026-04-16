@@ -18,4 +18,6 @@ const budgetSchema = new Schema<IBudget>({
   user: { type: String, required: true }
 }, { versionKey: false })
 
+budgetSchema.index({ category: 1, year: 1, month: 1, user: 1 }, { unique: true })
+
 export const BudgetModel = model<IBudget>('Budget', budgetSchema)

@@ -50,12 +50,12 @@ export class BudgetController {
 
   public async copy (req: Request, res: Response, next: NextFunction): Promise<void> {
     Promise.resolve(req as RequestUser)
-      .tap(() => this.logger.logInfo('/copy - badget'))
+      .tap(() => this.logger.logInfo('/copy - budget'))
       .then(validateBudgetCopy)
       .then(this.budgetService.copy.bind(this.budgetService))
       .tap(() => this.logger.logInfo('Budget has been succesfully copied'))
       .then((response) => {
-        if (response === null) {
+        if (!response) {
           res.status(204).send()
         } else {
           res.status(201).send()
