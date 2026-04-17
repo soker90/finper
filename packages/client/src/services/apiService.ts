@@ -119,6 +119,10 @@ export const deleteDebt = (id: string): Promise<{ data?: any, error?: string }> 
   return axios.delete(`${DEBTS}/${id}`).then((data: any) => ({ data: data as Debt })).catch((error: any) => ({ error: extractError(error) }))
 }
 
+export const payDebt = (id: string, amount: number): Promise<{ data?: Debt | null, error?: string }> => {
+  return axios.post(`${DEBTS}/${id}/pay`, { amount }).then((data: any) => ({ data: data as Debt })).catch((error: any) => ({ error: extractError(error) }))
+}
+
 export const reviewTicket = (id: string): Promise<{ error?: string }> => {
   return axios.patch(`${TICKETS}/${id}`).then(() => ({})).catch((error: any) => ({ error: extractError(error) }))
 }

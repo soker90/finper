@@ -175,9 +175,9 @@ export default class DashboardService implements IDashboardService {
         { $group: { _id: null, total: { $sum: '$balance' } } }
       ]),
 
-      // 2. Suma de deudas sin fecha de pago (pendientes)
+      // 2. Suma de deudas pendientes
       DebtModel.aggregate([
-        { $match: { user, paymentDate: { $exists: false } } },
+        { $match: { user } },
         {
           $group: {
             _id: null,

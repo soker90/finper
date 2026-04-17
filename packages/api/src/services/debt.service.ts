@@ -13,6 +13,8 @@ export interface IDebtService {
 
   deleteDebt(id: string): Promise<void>
 
+  payDebt({ id, amount }: { id: string, amount: number }): Promise<DebtDocument | null>
+
 }
 
 export default class DebtService implements IDebtService {
@@ -30,8 +32,7 @@ export default class DebtService implements IDebtService {
     const debtsByPerson = await DebtModel.aggregate([
       {
         $match: {
-          user: userId,
-          paymentDate: { $exists: false }
+          user: userId
         }
       },
       {
@@ -77,5 +78,17 @@ export default class DebtService implements IDebtService {
   public async deleteDebt (id: string): Promise<void> {
     const deleted = await DebtModel.findByIdAndDelete(id)
     if (!deleted) throw Boom.notFound(ERROR_MESSAGE.DEBT.NOT_FOUND).output
+  }
+
+  public async payDebt ({ id, amount }: { id: string, amount: number }): Promise<DebtDocument | null> {
+    const debt = await DebtModel.findById<DebtDocument>(id)
+
+    const remaining = debt!.amount - amount
+    if (remaining <= 0) {
+      await DebtModel.findByIdAndDelete(id)
+      return null
+    }
+
+    return DebtModel.findByIdAndUpdate<DebtDocument>(id, { amount: remaining }, { returnDocument: 'after' })
   }
 }
