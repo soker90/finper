@@ -84,9 +84,9 @@ export default class StockService implements IStockService {
     )
   }
 
-  /** Rounds shares to 4 decimal places (e.g. fractional shares) */
+  /** Rounds shares to 6 decimal places (e.g. fractional shares) */
   private round4 (n: number): number {
-    return Math.round((Math.abs(n) + Number.EPSILON) * 10000) / 10000
+    return Math.round((Math.abs(n) + Number.EPSILON) * 1000000) / 1000000
   }
 
   private async buildPosition (ticker: string, ops: IStock[]): Promise<StockPosition | null> {
