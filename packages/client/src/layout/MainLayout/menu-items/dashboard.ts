@@ -9,7 +9,8 @@ import {
   FileImageOutlined,
   BankOutlined,
   SyncOutlined,
-  HomeOutlined
+  HomeOutlined,
+  StockOutlined
 } from '@ant-design/icons'
 import { BeachIcon } from 'components'
 
@@ -90,6 +91,14 @@ const dashboard = {
       type: 'item',
       url: '/pension',
       icon: BeachIcon,
+      breadcrumbs: true
+    },
+    {
+      id: 'stocks',
+      title: 'Acciones',
+      type: 'item',
+      url: '/acciones',
+      icon: StockOutlined,
       breadcrumbs: true
     },
     {

@@ -55,7 +55,8 @@
     "uuid": "13.0.0",
     "winston": "3.19.0",
     "winston-loki": "6.1.4",
-    "winston-transport": "4.9.0"
+    "winston-transport": "4.9.0",
+    "yahoo-finance2": "3.14.0"
   },
   "devDependencies": {
     "@faker-js/faker": "9.9.0",

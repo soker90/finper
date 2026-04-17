@@ -1,6 +1,6 @@
 import axios from 'axios'
-import { ACCOUNTS, BUDGETS, CATEGORIES, DEBTS, LOANS, LOAN_DETAIL, PENSIONS, TICKETS, TRANSACTIONS, SUBSCRIPTIONS, SUBSCRIPTION_CANDIDATES, SUPPLIES, SUPPLIES_PROPERTIES, SUPPLIES_READINGS } from 'constants/api-paths'
-import { Category, Transaction, TransactionType, Account, Pension, PensionTransaction, Debt, Loan, SubscriptionInput, SupplyReadingInput } from 'types'
+import { ACCOUNTS, BUDGETS, CATEGORIES, DEBTS, LOANS, LOAN_DETAIL, PENSIONS, TICKETS, TRANSACTIONS, SUBSCRIPTIONS, SUBSCRIPTION_CANDIDATES, SUPPLIES, SUPPLIES_PROPERTIES, SUPPLIES_READINGS, STOCKS } from 'constants/api-paths'
+import { Category, Transaction, TransactionType, Account, Pension, PensionTransaction, Debt, Loan, SubscriptionInput, SupplyReadingInput, StockPurchase } from 'types'
 
 const extractError = (error: any) => error.response?.data?.message || error.message
 
@@ -227,3 +227,10 @@ export const deleteSupplyReading = (id: string): Promise<{ error?: string }> =>
   axios.delete(`${SUPPLIES_READINGS}/${id}`)
     .then(() => ({}))
     .catch((error: any) => ({ error: extractError(error) }))
+
+// Stocks
+export const addStockApi = (params: Omit<StockPurchase, '_id'>): Promise<{ data?: StockPurchase, error?: string }> =>
+  axios.post(STOCKS, params).then((data: any) => ({ data })).catch((error: any) => ({ error: extractError(error) }))
+
+export const deleteStockApi = (id: string): Promise<{ error?: string }> =>
+  axios.delete(`${STOCKS}/${id}`).then(() => ({})).catch((error: any) => ({ error: extractError(error) }))

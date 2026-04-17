@@ -10,7 +10,8 @@ import {
   TRANSACTION,
   UserModel,
   PropertyModel, SupplyModel, SupplyReadingModel,
-  IProperty, ISupply, ISupplyReading, SUPPLY_TYPE
+  IProperty, ISupply, ISupplyReading, SUPPLY_TYPE,
+  StockModel, IStock, STOCK_TYPE
 } from '@soker90/finper-models'
 
 import {
@@ -247,4 +248,18 @@ export const insertSupplyReading = async (params: Record<string, any> = {}): Pro
     consumption: params.consumption ?? faker.number.int({ min: 10, max: 100 }),
     user
   }) as unknown as ISupplyReading & { _id: any }
+}
+
+export const insertStock = async (params: Record<string, any> = {}): Promise<IStock & { _id: string }> => {
+  const user = (params.user ?? generateUsername()) as string
+
+  return StockModel.create({
+    ticker: params.ticker ?? faker.string.alpha({ length: 4, casing: 'upper' }),
+    name: params.name ?? faker.company.name(),
+    shares: params.shares ?? faker.number.float({ min: 1, max: 100, multipleOf: 0.01 }),
+    price: params.price ?? faker.number.float({ min: 1, max: 500, multipleOf: 0.01 }),
+    type: params.type ?? STOCK_TYPE.Buy,
+    date: params.date ?? faker.date.past().getTime(),
+    user
+  }) as unknown as IStock & { _id: string }
 }

@@ -20,6 +20,7 @@ import { ISubscriptionCandidate, SubscriptionCandidateModel } from './models/sub
 import { IProperty, PropertyModel } from './models/properties'
 import { ISupply, SupplyModel, SUPPLY_TYPE, SupplyType } from './models/supplies'
 import { ISupplyReading, SupplyReadingModel } from './models/supply-readings'
+import { IStock, StockModel, STOCK_TYPE, StockType } from './models/stocks'
 
 export type { AccountDocument } from './models/accounts'
 export type { BudgetDocument } from './models/budgets'
@@ -37,6 +38,7 @@ export type { SubscriptionCandidateDocument } from './models/subscription-candid
 export type { PropertyDocument } from './models/properties'
 export type { SupplyDocument } from './models/supplies'
 export type { SupplyReadingDocument } from './models/supply-readings'
+export type { StockDocument } from './models/stocks'
 
 function connect (uri: string, options: Record<string, unknown>): void {
   if (isNil(mongoose)) {
@@ -68,6 +70,8 @@ export {
   TransactionType,
   SUPPLY_TYPE,
   SupplyType,
+  STOCK_TYPE,
+  StockType,
 
   IAccount,
   IBudget,
@@ -85,6 +89,7 @@ export {
   IProperty,
   ISupply,
   ISupplyReading,
+  IStock,
 
   AccountModel,
   BudgetModel,
@@ -101,5 +106,6 @@ export {
   UserModel,
   PropertyModel,
   SupplyModel,
-  SupplyReadingModel
+  SupplyReadingModel,
+  StockModel
 }

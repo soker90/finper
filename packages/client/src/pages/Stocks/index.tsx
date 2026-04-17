@@ -1,0 +1,64 @@
+import { useMemo, useState } from 'react'
+import { Grid } from '@mui/material'
+import { PlusOutlined } from '@ant-design/icons'
+
+import { HeaderButtons } from 'components'
+import { useStocks } from './hooks'
+import { StockStatCard, StocksTable, AddStockModal } from './components'
+
+const Stocks = () => {
+  const { positions, addStock, deleteStock } = useStocks()
+  const [showModal, setShowModal] = useState(false)
+
+  const summary = useMemo(() => {
+    const totalCost = positions.reduce((acc, p) => acc + p.totalCost, 0)
+    const totalValue = positions.every(p => p.currentValue !== null)
+      ? positions.reduce((acc, p) => acc + (p.currentValue ?? 0), 0)
+      : null
+    const totalGainLoss = totalValue !== null ? totalValue - totalCost : null
+    const totalGainLossPct = totalGainLoss !== null && totalCost > 0
+      ? Math.round((totalGainLoss / totalCost) * 10000) / 100
+      : null
+
+    return { totalCost, totalValue, totalGainLoss, totalGainLossPct }
+  }, [positions])
+
+  return (
+    <>
+      <HeaderButtons
+        buttons={[{
+          Icon: PlusOutlined,
+          title: 'Nueva compra',
+          onClick: () => setShowModal(true)
+        }]}
+        desktopSx={{ marginTop: -7 }}
+      />
+
+      <Grid container spacing={3} mb={2}>
+        <Grid size={{ xs: 6, sm: 4, md: 3 }}>
+          <StockStatCard title='Coste total' value={summary.totalCost} />
+        </Grid>
+        <Grid size={{ xs: 6, sm: 4, md: 3 }}>
+          <StockStatCard title='Valor actual' value={summary.totalValue} />
+        </Grid>
+        <Grid size={{ xs: 6, sm: 4, md: 3 }}>
+          <StockStatCard title='Ganancia / Pérdida' value={summary.totalGainLoss} colorize />
+        </Grid>
+        <Grid size={{ xs: 6, sm: 4, md: 3 }}>
+          <StockStatCard title='Rentabilidad (%)' value={summary.totalGainLossPct} currency={false} colorize />
+        </Grid>
+      </Grid>
+
+      <StocksTable positions={positions} onDeletePurchase={deleteStock} />
+
+      {showModal && (
+        <AddStockModal
+          onClose={() => setShowModal(false)}
+          onAdd={addStock}
+        />
+      )}
+    </>
+  )
+}
+
+export default Stocks
