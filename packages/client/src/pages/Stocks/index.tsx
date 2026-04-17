@@ -12,12 +12,16 @@ const Stocks = () => {
 
   const summary = useMemo(() => {
     const totalCost = positions.reduce((acc, p) => acc + p.totalCost, 0)
-    const totalValue = positions.every(p => p.currentValue !== null)
-      ? positions.reduce((acc, p) => acc + (p.currentValue ?? 0), 0)
+
+    const positionsWithPrice = positions.filter(p => p.currentValue !== null)
+    const totalValue = positionsWithPrice.length > 0
+      ? positionsWithPrice.reduce((acc, p) => acc + (p.currentValue ?? 0), 0)
       : null
-    const totalGainLoss = totalValue !== null ? totalValue - totalCost : null
-    const totalGainLossPct = totalGainLoss !== null && totalCost > 0
-      ? Math.round((totalGainLoss / totalCost) * 10000) / 100
+
+    const totalGainLoss = totalValue !== null ? totalValue - positionsWithPrice.reduce((acc, p) => acc + p.totalCost, 0) : null
+    const coveredCost = positionsWithPrice.reduce((acc, p) => acc + p.totalCost, 0)
+    const totalGainLossPct = totalGainLoss !== null && coveredCost > 0
+      ? Math.round((totalGainLoss / coveredCost) * 10000) / 100
       : null
 
     return { totalCost, totalValue, totalGainLoss, totalGainLossPct }

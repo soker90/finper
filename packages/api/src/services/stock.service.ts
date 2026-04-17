@@ -55,7 +55,9 @@ export default class StockService implements IStockService {
 
   private groupByTicker (operations: IStock[]): Map<string, IStock[]> {
     return operations.reduce((map, op) => {
-      map.set(op.ticker, [...(map.get(op.ticker) ?? []), op])
+      const tickerOps = map.get(op.ticker) ?? []
+      tickerOps.push(op)
+      map.set(op.ticker, tickerOps)
       return map
     }, new Map<string, IStock[]>())
   }
@@ -73,8 +75,8 @@ export default class StockService implements IStockService {
 
         // Sell: subtract shares and proportional cost (simplified weighted-average)
         const remainingShares = Math.max(acc.totalShares - op.shares, 0)
-        const avgCost = acc.totalCost / acc.totalShares
-        const remainingCost = Math.max(acc.totalCost - op.shares * avgCost, 0)
+        const avgCost = acc.totalShares > 0 ? acc.totalCost / acc.totalShares : 0
+        const remainingCost = remainingShares > 0 ? Math.max(acc.totalCost - op.shares * avgCost, 0) : 0
 
         return { totalShares: remainingShares, totalCost: remainingCost, purchases: acc.purchases }
       },

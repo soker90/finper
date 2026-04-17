@@ -22,7 +22,7 @@ export class YahooPriceProvider implements IStockPriceProvider {
 
     try {
       const quote = await this.yahooFinance.quote(ticker)
-      const price = (quote as any).regularMarketPrice ?? null
+      const price = (quote as any)?.regularMarketPrice ?? null
       if (price !== null) {
         this.cache.set(ticker, { price, ts: Date.now() })
       }
