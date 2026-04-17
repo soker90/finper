@@ -21,56 +21,20 @@ export interface IStockService {
   deleteStock(id: string, user: string): Promise<void>
 }
 
-// ─── Pure helpers ────────────────────────────────────────────────────────────
-
-/** Rounds shares to 4 decimal places (e.g. fractional shares) */
-function round4 (n: number): number {
-  return Math.round((Math.abs(n) + Number.EPSILON) * 10000) / 10000
-}
-
-function groupByTicker (operations: IStock[]): Map<string, IStock[]> {
-  return operations.reduce((map, op) => {
-    map.set(op.ticker, [...(map.get(op.ticker) ?? []), op])
-    return map
-  }, new Map<string, IStock[]>())
-}
-
 interface TickerAccumulator {
   totalShares: number
   totalCost: number
   purchases: IStock[]
 }
 
-function accumulateOperations (ops: IStock[]): TickerAccumulator {
-  return ops.reduce<TickerAccumulator>(
-    (acc, op) => {
-      if (op.type === STOCK_TYPE.Buy) {
-        return {
-          totalShares: acc.totalShares + op.shares,
-          totalCost: acc.totalCost + op.shares * op.price,
-          purchases: [...acc.purchases, op]
-        }
-      }
-
-      // Sell: subtract shares and proportional cost (simplified weighted-average)
-      const remainingShares = Math.max(acc.totalShares - op.shares, 0)
-      const avgCost = acc.totalCost / acc.totalShares
-      const remainingCost = Math.max(acc.totalCost - op.shares * avgCost, 0)
-
-      return { totalShares: remainingShares, totalCost: remainingCost, purchases: acc.purchases }
-    },
-    { totalShares: 0, totalCost: 0, purchases: [] }
-  )
-}
-
-// ─── Service ─────────────────────────────────────────────────────────────────
-
 export default class StockService implements IStockService {
   constructor (private readonly priceProvider: IStockPriceProvider = new YahooPriceProvider()) {}
 
+  // ── Public ───────────────────────────────────────────────────────────────────
+
   public async getStocks (user: string): Promise<StockPosition[]> {
     const operations = await StockModel.find({ user }).sort({ date: 1 })
-    const grouped = groupByTicker(operations)
+    const grouped = this.groupByTicker(operations)
 
     const positions = await Promise.all(
       [...grouped.entries()].map(([ticker, ops]) => this.buildPosition(ticker, ops))
@@ -79,8 +43,52 @@ export default class StockService implements IStockService {
     return positions.filter((pos): pos is StockPosition => pos !== null)
   }
 
+  public async addStock (stock: IStock): Promise<IStock> {
+    return StockModel.create(stock)
+  }
+
+  public async deleteStock (id: string, user: string): Promise<void> {
+    await StockModel.findOneAndDelete({ _id: id, user })
+  }
+
+  // ── Private ──────────────────────────────────────────────────────────────────
+
+  private groupByTicker (operations: IStock[]): Map<string, IStock[]> {
+    return operations.reduce((map, op) => {
+      map.set(op.ticker, [...(map.get(op.ticker) ?? []), op])
+      return map
+    }, new Map<string, IStock[]>())
+  }
+
+  private accumulateOperations (ops: IStock[]): TickerAccumulator {
+    return ops.reduce<TickerAccumulator>(
+      (acc, op) => {
+        if (op.type === STOCK_TYPE.Buy) {
+          return {
+            totalShares: acc.totalShares + op.shares,
+            totalCost: acc.totalCost + op.shares * op.price,
+            purchases: [...acc.purchases, op]
+          }
+        }
+
+        // Sell: subtract shares and proportional cost (simplified weighted-average)
+        const remainingShares = Math.max(acc.totalShares - op.shares, 0)
+        const avgCost = acc.totalCost / acc.totalShares
+        const remainingCost = Math.max(acc.totalCost - op.shares * avgCost, 0)
+
+        return { totalShares: remainingShares, totalCost: remainingCost, purchases: acc.purchases }
+      },
+      { totalShares: 0, totalCost: 0, purchases: [] }
+    )
+  }
+
+  /** Rounds shares to 4 decimal places (e.g. fractional shares) */
+  private round4 (n: number): number {
+    return Math.round((Math.abs(n) + Number.EPSILON) * 10000) / 10000
+  }
+
   private async buildPosition (ticker: string, ops: IStock[]): Promise<StockPosition | null> {
-    const { totalShares, totalCost, purchases } = accumulateOperations(ops)
+    const { totalShares, totalCost, purchases } = this.accumulateOperations(ops)
 
     if (totalShares <= 0) return null
 
@@ -95,7 +103,7 @@ export default class StockService implements IStockService {
     return {
       ticker,
       name: ops[ops.length - 1].name,
-      shares: round4(totalShares),
+      shares: this.round4(totalShares),
       avgCost: roundNumber(avgCost),
       totalCost: roundNumber(totalCost),
       currentPrice,
@@ -104,13 +112,5 @@ export default class StockService implements IStockService {
       gainLossPct,
       purchases
     }
-  }
-
-  public async addStock (stock: IStock): Promise<IStock> {
-    return StockModel.create(stock)
-  }
-
-  public async deleteStock (id: string, user: string): Promise<void> {
-    await StockModel.findOneAndDelete({ _id: id, user })
   }
 }
