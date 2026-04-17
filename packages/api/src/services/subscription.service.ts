@@ -59,10 +59,15 @@ export default class SubscriptionService implements ISubscriptionService {
   }
 
   async editSubscription (id: string, value: Partial<ISubscription>): Promise<SubscriptionDocument | null> {
-    return SubscriptionModel.findByIdAndUpdate(id, value, { returnDocument: 'after' })
+    const updated = await SubscriptionModel.findByIdAndUpdate(id, value, { returnDocument: 'after' })
+    if (updated && 'cycle' in value) {
+      await this.recalculateNextPaymentDate(id)
+    }
+    return updated
   }
 
   async deleteSubscription (id: string): Promise<void> {
+    await TransactionModel.updateMany({ subscriptionId: id }, { $unset: { subscriptionId: '' } })
     await SubscriptionModel.findByIdAndDelete(id)
   }
 
