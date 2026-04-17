@@ -45,30 +45,35 @@ const AddStockModal = ({ onClose, onAdd }: Props) => {
         placeholder='Introduce una fecha' id='date' label='Fecha'
         error={!!errors.date}
         control={control}
+        size={4}
       />
       <InputForm
         id='ticker' label='Ticker (ej: TEF.MC)' placeholder='TEF.MC'
         error={!!errors.ticker}
         {...register('ticker', { required: true })}
         errorText='Introduce el ticker de la acción'
+        size={4}
       />
       <InputForm
         id='name' label='Nombre empresa' placeholder='Telefónica'
         error={!!errors.name}
         {...register('name', { required: true })}
         errorText='Introduce el nombre de la empresa'
+        size={4}
       />
       <InputForm
         id='shares' label='Número de acciones' placeholder='100'
         error={!!errors.shares}
         {...register('shares', { required: true, valueAsNumber: true, min: 0.0001 })}
         errorText='Introduce un número válido'
+        size={6}
       />
       <InputForm
         id='price' label='Precio por acción (€)' placeholder='4.05'
         error={!!errors.price}
         {...register('price', { required: true, valueAsNumber: true, min: 0.0001 })}
         errorText='Introduce un número válido'
+        size={6}
       />
     </ModalGrid>
   )
