@@ -5,23 +5,19 @@ import { useState } from 'react'
 import { HeaderButtons } from 'components'
 import { Debt } from 'types'
 
-import { DebtCard, DebtTable, DebtEditModal, DebtRemoveModal } from './components'
+import { DebtCard, DebtTable, DebtEditModal, DebtRemoveModal, DebtPayModal } from './components'
 import { useDebts } from './hooks'
 
 const Debts = () => {
   const { from, to, debtsByPerson } = useDebts()
   const [selectedDebt, setSelectedDebt] = useState<Debt>()
   const [selectedForRemove, setSelectedForRemove] = useState<Debt>()
+  const [selectedForPay, setSelectedForPay] = useState<Debt>()
 
   const handleClickNew = () => setSelectedDebt({} as Debt)
-
-  const handleEdit = (debt: Debt) => {
-    setSelectedDebt(debt)
-  }
-
-  const handleDelete = (debt: Debt) => {
-    setSelectedForRemove(debt)
-  }
+  const handleEdit = (debt: Debt) => setSelectedDebt(debt)
+  const handleDelete = (debt: Debt) => setSelectedForRemove(debt)
+  const handlePay = (debt: Debt) => setSelectedForPay(debt)
 
   return (
     <>
@@ -37,8 +33,8 @@ const Debts = () => {
         ))}
       </Grid>
       <Grid container spacing={3}>
-        <DebtTable debts={from} title='Me deben' fromTitle='De' onEdit={handleEdit} onRemove={handleDelete} />
-        <DebtTable debts={to} title='Debo' fromTitle='A' onEdit={handleEdit} onRemove={handleDelete} />
+        <DebtTable debts={from} title='Me deben' fromTitle='De' onEdit={handleEdit} onRemove={handleDelete} onPay={handlePay} />
+        <DebtTable debts={to} title='Debo' fromTitle='A' onEdit={handleEdit} onRemove={handleDelete} onPay={handlePay} />
       </Grid>
       {Boolean(selectedDebt) && <DebtEditModal
         debt={selectedDebt}
@@ -46,6 +42,8 @@ const Debts = () => {
                                 />}
       {!!selectedForRemove &&
         <DebtRemoveModal debt={selectedForRemove} onClose={() => setSelectedForRemove(undefined)} />}
+      {!!selectedForPay &&
+        <DebtPayModal debt={selectedForPay} onClose={() => setSelectedForPay(undefined)} />}
     </>
   )
 }

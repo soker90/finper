@@ -95,7 +95,6 @@ export const insertDebt = async (params: Record<string, string | number> = {}): 
     from: params.from ?? faker.person.firstName(),
     date: params.date ?? faker.number.int(),
     amount: params.amount ?? faker.number.int(),
-    ...(params.paymentDate !== 0 && { paymentDate: params.paymentDate ?? faker.number.int() }),
     concept: params.concept ?? faker.lorem.words(4),
     type: params.type ?? (Math.random() > 0.5 ? DEBT.TO : DEBT.FROM),
     user: params.user ?? faker.internet.username().slice(MIN_LENGTH_USERNAME, MAX_USERNAME_LENGTH).toLowerCase()

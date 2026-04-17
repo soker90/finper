@@ -1,6 +1,6 @@
 import { TableMaterial } from '@soker90/react-mui-table'
 import { Grid } from '@mui/material'
-import { DeleteOutlined, EditOutlined } from '@ant-design/icons'
+import { DeleteOutlined, EditOutlined, EuroOutlined } from '@ant-design/icons'
 
 import { format } from 'utils'
 import { Debt } from 'types/debt'
@@ -11,21 +11,26 @@ interface Props {
   fromTitle: string
   onEdit: (debt: Debt) => void
   onRemove: (debt: Debt) => void
+  onPay: (debt: Debt) => void
 }
 
-const DebtTable = ({ debts, title, fromTitle, onEdit, onRemove }: Props) => (
+const DebtTable = ({ debts, title, fromTitle, onEdit, onRemove, onPay }: Props) => (
   <Grid size={{ xs: 12, lg: 6 }}>
     <TableMaterial
       columns={[
         { title: fromTitle, field: 'from' },
         { title: 'Fecha', render: ({ date }) => format.dateShort(date) },
-        { title: 'Cantidad', render: ({ amount }) => format.euro(amount) },
-        { title: 'Concepto', field: 'concept' },
-        { title: 'F. Pago', render: ({ paymentDate }) => format.dateShort(paymentDate) || 'Pendiente' }
+        { title: 'Pendiente', render: ({ amount }) => format.euro(amount) },
+        { title: 'Concepto', field: 'concept' }
       ]}
       data={debts}
       title={title}
       actions={[{
+        icon: EuroOutlined,
+        tooltip: 'Abonar',
+        onClick: onPay
+      },
+      {
         icon: EditOutlined,
         tooltip: 'Editar',
         onClick: onEdit

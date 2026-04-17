@@ -11,7 +11,6 @@ export interface IDebt {
   from: string
   date: number
   amount: number
-  paymentDate: number
   concept: string
   type: DebtType
   user: string
@@ -23,7 +22,6 @@ const debtSchema = new Schema<IDebt>({
   from: { type: String, required: true },
   date: { type: Number },
   amount: { type: Number, required: true },
-  paymentDate: { type: Number },
   concept: { type: String },
   type: { type: String, required: true, enum: [DEBT.FROM, DEBT.TO] },
   user: { type: String, required: true }

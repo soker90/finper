@@ -207,10 +207,9 @@ describe('Dashboard', () => {
       expect(response.body.totalBalance).toBe(1500)
     })
 
-    test('should compute totalDebts from unpaid debts only', async () => {
-      await insertDebt({ user, amount: 200, type: DEBT.TO, paymentDate: 0 })
-      await insertDebt({ user, amount: 300, type: DEBT.TO, paymentDate: 0 })
-      // Paid debt - should not count
+    test('should compute totalDebts from all pending debts', async () => {
+      await insertDebt({ user, amount: 200, type: DEBT.TO })
+      await insertDebt({ user, amount: 300, type: DEBT.TO })
       await insertDebt({ user, amount: 9999, type: DEBT.TO })
 
       const response = await supertest(server.app)
@@ -218,12 +217,12 @@ describe('Dashboard', () => {
         .auth(token, { type: 'bearer' })
         .expect(200)
 
-      expect(response.body.totalDebts).toBe(500)
+      expect(response.body.totalDebts).toBe(10499)
     })
 
     test('should compute netWorth as totalBalance minus totalDebts', async () => {
       await insertAccount({ user, balance: 1000, isActive: true })
-      await insertDebt({ user, amount: 200, type: DEBT.TO, paymentDate: 0 })
+      await insertDebt({ user, amount: 200, type: DEBT.TO })
 
       const response = await supertest(server.app)
         .get(path)
