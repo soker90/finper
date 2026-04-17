@@ -110,7 +110,8 @@ describe('Stocks', () => {
         shares: 100,
         price: 4.0,
         type: STOCK_TYPE.Buy,
-        date: Date.now()
+        date: Date.now(),
+        platform: 'DEGIRO'
       }
 
       const response = await supertest(server.app)
@@ -122,6 +123,7 @@ describe('Stocks', () => {
       expect(response.body).toHaveProperty('ticker', 'TEF.MC')
       expect(response.body).toHaveProperty('shares', 100)
       expect(response.body).toHaveProperty('type', STOCK_TYPE.Buy)
+      expect(response.body).toHaveProperty('platform', 'DEGIRO')
     })
 
     test('should return 422 when required fields are missing', async () => {

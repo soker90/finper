@@ -15,6 +15,7 @@ export interface IStock {
   type: StockType
   date: number
   user: string
+  platform: string
 }
 
 export type StockDocument = HydratedDocument<IStock>
@@ -26,7 +27,8 @@ const stockSchema = new Schema<IStock>({
   price: { type: Number, required: true },
   type: { type: String, enum: Object.values(STOCK_TYPE), required: true },
   date: { type: Number, required: true },
-  user: { type: String, required: true }
+  user: { type: String, required: true },
+  platform: { type: String, required: true }
 }, { versionKey: false })
 
 export const StockModel = model<IStock>('Stock', stockSchema)

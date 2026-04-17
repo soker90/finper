@@ -8,6 +8,7 @@ export interface StockPurchase {
   price: number
   type: StockOperationType
   date: number
+  platform: string
 }
 
 export interface StockPosition {

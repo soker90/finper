@@ -14,7 +14,8 @@ const AddStockModal = ({ onClose, onAdd }: Props) => {
       ticker: '',
       name: '',
       shares: '' as unknown as number,
-      price: '' as unknown as number
+      price: '' as unknown as number,
+      platform: ''
     }
   })
 
@@ -29,6 +30,7 @@ const AddStockModal = ({ onClose, onAdd }: Props) => {
       name: params.name.trim(),
       shares: Number(params.shares),
       price: Number(params.price),
+      platform: params.platform.trim(),
       type: 'buy',
       date: new Date(params.date).getTime()
     }
@@ -74,6 +76,13 @@ const AddStockModal = ({ onClose, onAdd }: Props) => {
         {...register('price', { required: true, valueAsNumber: true, min: 0.0001 })}
         errorText='Introduce un número válido'
         size={6}
+      />
+      <InputForm
+        id='platform' label='Plataforma' placeholder='DEGIRO'
+        error={!!errors.platform}
+        {...register('platform', { required: true })}
+        errorText='Introduce la plataforma'
+        size={12}
       />
     </ModalGrid>
   )
