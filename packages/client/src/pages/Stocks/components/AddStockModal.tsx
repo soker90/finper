@@ -66,6 +66,8 @@ const AddStockModal = ({ onClose, onAdd }: Props) => {
       <InputForm
         id='shares' label='Número de acciones' placeholder='100'
         error={!!errors.shares}
+        type='number'
+        inputProps={{ step: '0.0001', min: '0.0001' }}
         {...register('shares', { required: true, valueAsNumber: true, min: 0.0001 })}
         errorText='Introduce un número válido'
         size={6}
@@ -73,6 +75,8 @@ const AddStockModal = ({ onClose, onAdd }: Props) => {
       <InputForm
         id='price' label='Precio por acción (€)' placeholder='4.05'
         error={!!errors.price}
+        type='number'
+        inputProps={{ step: '0.01', min: '0.0001' }}
         {...register('price', { required: true, valueAsNumber: true, min: 0.0001 })}
         errorText='Introduce un número válido'
         size={6}
