@@ -223,6 +223,24 @@ describe('SubscriptionService', () => {
 
       expect(updated!.name).toBe(newName)
     })
+
+    test('recalculates nextPaymentDate when cycle is updated', async () => {
+      const user = generateUsername()
+      const account = await insertAccount({ user })
+      const category = await insertCategory({ user })
+      const sub = await insertSubscription({ user, accountId: account._id, categoryId: category._id, cycle: 1 })
+      const txDate = makeDate(2024, 3, 10)
+      await TransactionModel.create({ date: txDate, amount: 9.99, type: 'expense', category: category._id, account: account._id, subscriptionId: sub._id, user })
+
+      const result = await service.editSubscription(sub._id.toString(), { cycle: 3 })
+
+      const expectedDate = advanceDate(txDate, 3)
+      // el documento retornado ya refleja la nueva fecha
+      expect((result as any)?.nextPaymentDate).toBe(expectedDate)
+      // y la BD también está actualizada
+      const inDb = await SubscriptionModel.findById(sub._id).lean()
+      expect(inDb?.nextPaymentDate).toBe(expectedDate)
+    })
   })
 
   // ── deleteSubscription ──────────────────────────────────────────────────
@@ -239,6 +257,22 @@ describe('SubscriptionService', () => {
 
     test('does not throw when the id does not exist', async () => {
       await expect(service.deleteSubscription('62a39498c4497e1fe3c2bf35')).resolves.toBeUndefined()
+    })
+
+    test('unlinks all transactions linked to the subscription', async () => {
+      const user = generateUsername()
+      const account = await insertAccount({ user })
+      const category = await insertCategory({ user })
+      const sub = await insertSubscription({ user, accountId: account._id, categoryId: category._id })
+      const tx1 = await TransactionModel.create({ date: Date.now() - 10000, amount: 9.99, type: 'expense', category: category._id, account: account._id, subscriptionId: sub._id, user })
+      const tx2 = await TransactionModel.create({ date: Date.now(), amount: 9.99, type: 'expense', category: category._id, account: account._id, subscriptionId: sub._id, user })
+
+      await service.deleteSubscription(sub._id.toString())
+
+      const updated1 = await TransactionModel.findById(tx1._id).lean()
+      const updated2 = await TransactionModel.findById(tx2._id).lean()
+      expect((updated1 as any)?.subscriptionId).toBeUndefined()
+      expect((updated2 as any)?.subscriptionId).toBeUndefined()
     })
   })
 
@@ -496,7 +530,7 @@ describe('SubscriptionService', () => {
     })
 
     test('does nothing when the subscription does not exist', async () => {
-      await expect(service.recalculateNextPaymentDate('62a39498c4497e1fe3c2bf35')).resolves.toBeUndefined()
+      await expect(service.recalculateNextPaymentDate('62a39498c4497e1fe3c2bf35')).resolves.toBeNull()
     })
   })
 })
