@@ -232,10 +232,14 @@ describe('SubscriptionService', () => {
       const txDate = makeDate(2024, 3, 10)
       await TransactionModel.create({ date: txDate, amount: 9.99, type: 'expense', category: category._id, account: account._id, subscriptionId: sub._id, user })
 
-      await service.editSubscription(sub._id.toString(), { cycle: 3 })
+      const result = await service.editSubscription(sub._id.toString(), { cycle: 3 })
 
-      const updated = await SubscriptionModel.findById(sub._id).lean()
-      expect(updated?.nextPaymentDate).toBe(advanceDate(txDate, 3))
+      const expectedDate = advanceDate(txDate, 3)
+      // el documento retornado ya refleja la nueva fecha
+      expect((result as any)?.nextPaymentDate).toBe(expectedDate)
+      // y la BD también está actualizada
+      const inDb = await SubscriptionModel.findById(sub._id).lean()
+      expect(inDb?.nextPaymentDate).toBe(expectedDate)
     })
   })
 
@@ -526,7 +530,7 @@ describe('SubscriptionService', () => {
     })
 
     test('does nothing when the subscription does not exist', async () => {
-      await expect(service.recalculateNextPaymentDate('62a39498c4497e1fe3c2bf35')).resolves.toBeUndefined()
+      await expect(service.recalculateNextPaymentDate('62a39498c4497e1fe3c2bf35')).resolves.toBeNull()
     })
   })
 })

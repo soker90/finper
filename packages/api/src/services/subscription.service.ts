@@ -35,7 +35,7 @@ export interface ISubscriptionService {
   getMatchingTransactions(id: string, user: string): Promise<TransactionDocument[]>
   linkTransactions(id: string, transactionIds: string[]): Promise<void>
   unlinkTransaction(id: string, transactionId: string): Promise<void>
-  recalculateNextPaymentDate(subscriptionId: string): Promise<void>
+  recalculateNextPaymentDate(subscriptionId: string): Promise<number | null>
 }
 
 export default class SubscriptionService implements ISubscriptionService {
@@ -61,7 +61,7 @@ export default class SubscriptionService implements ISubscriptionService {
   async editSubscription (id: string, value: Partial<ISubscription>): Promise<SubscriptionDocument | null> {
     const updated = await SubscriptionModel.findByIdAndUpdate(id, value, { returnDocument: 'after' })
     if (updated && 'cycle' in value) {
-      await this.recalculateNextPaymentDate(id)
+      updated.nextPaymentDate = await this.recalculateNextPaymentDate(id)
     }
     return updated
   }
@@ -117,9 +117,9 @@ export default class SubscriptionService implements ISubscriptionService {
    * Recalcula nextPaymentDate basándose en el último pago registrado.
    * Si no hay pagos, nextPaymentDate = null (se desconoce la fecha).
    */
-  async recalculateNextPaymentDate (subscriptionId: string): Promise<void> {
+  async recalculateNextPaymentDate (subscriptionId: string): Promise<number | null> {
     const subscription = await SubscriptionModel.findById(subscriptionId)
-    if (!subscription) return
+    if (!subscription) return null
 
     const lastTx = await TransactionModel.findOne({ subscriptionId })
       .sort({ date: -1 })
@@ -127,5 +127,7 @@ export default class SubscriptionService implements ISubscriptionService {
     const nextPaymentDate = lastTx ? advanceDate(lastTx.date, subscription.cycle) : null
 
     await SubscriptionModel.findByIdAndUpdate(subscriptionId, { nextPaymentDate })
+
+    return nextPaymentDate
   }
 }
