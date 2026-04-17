@@ -76,8 +76,8 @@ const AddStockModal = ({ onClose, onAdd }: Props) => {
         id='price' label='Precio por acción (€)' placeholder='4.05'
         error={!!errors.price}
         type='number'
-        inputProps={{ step: '0.01', min: '0.0001' }}
-        {...register('price', { required: true, valueAsNumber: true, min: 0.0001 })}
+        inputProps={{ step: '0.01', min: '0' }}
+        {...register('price', { required: true, valueAsNumber: true, min: 0 })}
         errorText='Introduce un número válido'
         size={6}
       />

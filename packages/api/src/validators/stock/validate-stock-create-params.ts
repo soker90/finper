@@ -7,7 +7,7 @@ export const validateStockCreateParams = async (body: Omit<IStock, 'user'>) => {
     ticker: Joi.string().uppercase().required(),
     name: Joi.string().required(),
     shares: Joi.number().positive().required(),
-    price: Joi.number().positive().required(),
+    price: Joi.number().min(0).required(),
     type: Joi.string().valid(...Object.values(STOCK_TYPE)).required(),
     date: Joi.number().required(),
     platform: Joi.string().required()
