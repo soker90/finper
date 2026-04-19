@@ -11,6 +11,7 @@ const Debts = lazy(() => import('../pages/Debts'))
 const Loans = lazy(() => import('../pages/Loans'))
 const LoanDetail = lazy(() => import('../pages/Loans/LoanDetail'))
 const Pensions = lazy(() => import('../pages/Pensions'))
+const Stocks = lazy(() => import('../pages/Stocks'))
 const Transactions = lazy(() => import('../pages/Transactions'))
 const Tickets = lazy(() => import('../pages/Tickets'))
 const Year = lazy(() => import('../pages/Year'))
@@ -67,6 +68,10 @@ const MainRoutes = {
     {
       path: 'pension',
       element: <Pensions />
+    },
+    {
+      path: 'acciones',
+      element: <Stocks />
     },
     {
       path: 'prestamos',
