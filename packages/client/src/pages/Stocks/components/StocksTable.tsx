@@ -1,13 +1,13 @@
 import { useState } from 'react'
 import {
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
-  Collapse, IconButton, Typography, Chip
+  Collapse, IconButton, Typography, Chip, Box, Tooltip
 } from '@mui/material'
-import { DownOutlined, RightOutlined, DeleteOutlined } from '@ant-design/icons'
+import { DownOutlined, RightOutlined, DeleteOutlined, GiftOutlined } from '@ant-design/icons'
 import { MainCard } from 'components'
 import { format } from 'utils'
 import { StockPosition, StockPurchase } from 'types'
-
+import RemoveModal from './RemoveModal'
 interface Props {
   positions: StockPosition[]
   onDeletePurchase: (id: string) => void
@@ -16,7 +16,12 @@ interface Props {
 const PurchasesRow = ({ purchase, onDelete }: { purchase: StockPurchase, onDelete: (id: string) => void }) => (
   <TableRow sx={{ bgcolor: 'action.hover' }}>
     <TableCell />
-    <TableCell>{format.date(purchase.date)}</TableCell>
+    <TableCell>
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+        {format.date(purchase.date)}
+        {purchase.type === 'dividend' && <Chip label='Dividendo' color='primary' size='small' variant='outlined' sx={{ height: 20, fontSize: '0.7rem' }} />}
+      </Box>
+    </TableCell>
     <TableCell align='right'>{format.number(purchase.shares, { maximumFractionDigits: 4 })}</TableCell>
     <TableCell align='right'>{format.euro(purchase.price)}</TableCell>
     <TableCell align='right'>{format.euro(purchase.shares * purchase.price)}</TableCell>
@@ -46,7 +51,20 @@ const PositionRow = ({ position, onDeletePurchase }: { position: StockPosition, 
           <Typography fontWeight={600}>{position.ticker}</Typography>
           <Typography variant='caption' color='textSecondary'>{position.name}</Typography>
         </TableCell>
-        <TableCell align='right'>{format.number(position.shares, { maximumFractionDigits: 4 })}</TableCell>
+        <TableCell align='right'>
+          {position.dividendShares > 0
+            ? (
+              <Tooltip title={`${format.number(position.dividendShares, { maximumFractionDigits: 4 })} ganadas por dividendos`}>
+                <Box sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.5, cursor: 'help' }}>
+                  {format.number(position.shares, { maximumFractionDigits: 4 })}
+                  <GiftOutlined style={{ fontSize: 12, opacity: 0.7 }} />
+                </Box>
+              </Tooltip>
+              )
+            : (
+                format.number(position.shares, { maximumFractionDigits: 4 })
+              )}
+        </TableCell>
         <TableCell align='right'>{format.euro(position.avgCost)}</TableCell>
         <TableCell align='right'>{format.euro(position.totalCost)}</TableCell>
         <TableCell align='right'>
@@ -94,38 +112,56 @@ const PositionRow = ({ position, onDeletePurchase }: { position: StockPosition, 
   )
 }
 
-const StocksTable = ({ positions, onDeletePurchase }: Props) => (
-  <MainCard sx={{ mt: 2 }} content={false}>
-    <TableContainer>
-      <Table>
-        <TableHead>
-          <TableRow>
-            <TableCell />
-            <TableCell>Ticker / Empresa</TableCell>
-            <TableCell align='right'>Acciones</TableCell>
-            <TableCell align='right'>Coste medio</TableCell>
-            <TableCell align='right'>Coste total</TableCell>
-            <TableCell align='right'>Precio actual</TableCell>
-            <TableCell align='right'>Ganancia / Pérdida</TableCell>
-            <TableCell />
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {positions.length === 0
-            ? (
+const StocksTable = ({ positions, onDeletePurchase }: Props) => {
+  const [purchaseToDelete, setPurchaseToDelete] = useState<string | null>(null)
+
+  return (
+    <>
+      <MainCard sx={{ mt: 2 }} content={false}>
+        <TableContainer>
+          <Table>
+            <TableHead>
               <TableRow>
-                <TableCell colSpan={8} align='center'>
-                  <Typography color='textSecondary' py={2}>No hay posiciones registradas</Typography>
-                </TableCell>
+                <TableCell />
+                <TableCell>Ticker / Empresa</TableCell>
+                <TableCell align='right'>Acciones</TableCell>
+                <TableCell align='right'>Coste medio</TableCell>
+                <TableCell align='right'>Coste total</TableCell>
+                <TableCell align='right'>Precio actual</TableCell>
+                <TableCell align='right'>Ganancia / Pérdida</TableCell>
+                <TableCell />
               </TableRow>
-              )
-            : positions.map(pos => (
-              <PositionRow key={pos.ticker} position={pos} onDeletePurchase={onDeletePurchase} />
-            ))}
-        </TableBody>
-      </Table>
-    </TableContainer>
-  </MainCard>
-)
+            </TableHead>
+            <TableBody>
+              {positions.length === 0
+                ? (
+                  <TableRow>
+                    <TableCell colSpan={8} align='center'>
+                      <Typography color='textSecondary' py={2}>No hay posiciones registradas</Typography>
+                    </TableCell>
+                  </TableRow>
+                  )
+                : positions.map(pos => (
+                  <PositionRow key={pos.ticker} position={pos} onDeletePurchase={setPurchaseToDelete} />
+                ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      </MainCard>
+
+      {purchaseToDelete && (
+        <RemoveModal
+          title='Eliminar operación'
+          description='¿Estás seguro de que quieres eliminar esta operación de acciones?'
+          onClose={() => setPurchaseToDelete(null)}
+          onConfirm={() => {
+            onDeletePurchase(purchaseToDelete)
+            setPurchaseToDelete(null)
+          }}
+        />
+      )}
+    </>
+  )
+}
 
 export default StocksTable

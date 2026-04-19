@@ -1,4 +1,4 @@
-export type StockOperationType = 'buy' | 'sell'
+export type StockOperationType = 'buy' | 'sell' | 'dividend'
 
 export interface StockPurchase {
   _id?: string
@@ -15,6 +15,7 @@ export interface StockPosition {
   ticker: string
   name: string
   shares: number
+  dividendShares: number
   avgCost: number
   currentPrice: number | null
   totalCost: number

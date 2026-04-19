@@ -1,14 +1,15 @@
 import { useMemo, useState } from 'react'
 import { Grid } from '@mui/material'
-import { PlusOutlined } from '@ant-design/icons'
+import { PlusOutlined, GiftOutlined } from '@ant-design/icons'
+import { StockOperationType } from 'types'
 
-import { HeaderButtons } from 'components'
+import { HeaderButtons, LoadingList } from 'components'
 import { useStocks } from './hooks'
 import { StockStatCard, StocksTable, AddStockModal } from './components'
 
 const Stocks = () => {
-  const { positions, addStock, deleteStock } = useStocks()
-  const [showModal, setShowModal] = useState(false)
+  const { positions, addStock, deleteStock, isLoading } = useStocks()
+  const [showModal, setShowModal] = useState<StockOperationType | false>(false)
 
   const summary = useMemo(() => {
     const totalCost = positions.reduce((acc, p) => acc + p.totalCost, 0)
@@ -27,18 +28,29 @@ const Stocks = () => {
     return { totalCost, totalValue, totalGainLoss, totalGainLossPct }
   }, [positions])
 
+  if (isLoading) {
+    return <LoadingList />
+  }
+
   return (
     <>
       <HeaderButtons
-        buttons={[{
-          Icon: PlusOutlined,
-          title: 'Nueva compra',
-          onClick: () => setShowModal(true)
-        }]}
+        buttons={[
+          {
+            Icon: PlusOutlined,
+            title: 'Nueva compra',
+            onClick: () => setShowModal('buy')
+          },
+          {
+            Icon: GiftOutlined,
+            title: 'Añadir dividendo',
+            onClick: () => setShowModal('dividend')
+          }
+        ]}
         desktopSx={{ marginTop: -7 }}
       />
 
-      <Grid container spacing={3} mb={2}>
+      <Grid container spacing={3} my={3}>
         <Grid size={{ xs: 6, sm: 4, md: 3 }}>
           <StockStatCard title='Coste total' value={summary.totalCost} />
         </Grid>
@@ -57,6 +69,7 @@ const Stocks = () => {
 
       {showModal && (
         <AddStockModal
+          defaultType={showModal}
           onClose={() => setShowModal(false)}
           onAdd={addStock}
         />

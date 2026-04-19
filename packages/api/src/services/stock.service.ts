@@ -6,6 +6,7 @@ export interface StockPosition {
   ticker: string
   name: string
   shares: number
+  dividendShares: number
   avgCost: number
   currentPrice: number | null
   totalCost: number
@@ -23,6 +24,7 @@ export interface IStockService {
 
 interface TickerAccumulator {
   totalShares: number
+  dividendShares: number
   totalCost: number
   purchases: IStock[]
 }
@@ -65,9 +67,10 @@ export default class StockService implements IStockService {
   private accumulateOperations (ops: IStock[]): TickerAccumulator {
     return ops.reduce<TickerAccumulator>(
       (acc, op) => {
-        if (op.type === STOCK_TYPE.Buy) {
+        if (op.type === STOCK_TYPE.Buy || op.type === STOCK_TYPE.Dividend) {
           return {
             totalShares: acc.totalShares + op.shares,
+            dividendShares: acc.dividendShares + (op.type === STOCK_TYPE.Dividend ? op.shares : 0),
             totalCost: acc.totalCost + op.shares * op.price,
             purchases: [...acc.purchases, op]
           }
@@ -78,9 +81,9 @@ export default class StockService implements IStockService {
         const avgCost = acc.totalShares > 0 ? acc.totalCost / acc.totalShares : 0
         const remainingCost = remainingShares > 0 ? Math.max(acc.totalCost - op.shares * avgCost, 0) : 0
 
-        return { totalShares: remainingShares, totalCost: remainingCost, purchases: acc.purchases }
+        return { totalShares: remainingShares, dividendShares: acc.dividendShares, totalCost: remainingCost, purchases: acc.purchases }
       },
-      { totalShares: 0, totalCost: 0, purchases: [] }
+      { totalShares: 0, dividendShares: 0, totalCost: 0, purchases: [] }
     )
   }
 
@@ -90,7 +93,7 @@ export default class StockService implements IStockService {
   }
 
   private async buildPosition (ticker: string, ops: IStock[]): Promise<StockPosition | null> {
-    const { totalShares, totalCost, purchases } = this.accumulateOperations(ops)
+    const { totalShares, dividendShares, totalCost, purchases } = this.accumulateOperations(ops)
 
     if (totalShares <= 0) return null
 
@@ -106,6 +109,7 @@ export default class StockService implements IStockService {
       ticker,
       name: ops[ops.length - 1].name,
       shares: this.round4(totalShares),
+      dividendShares: this.round4(dividendShares),
       avgCost: roundNumber(avgCost),
       totalCost: roundNumber(totalCost),
       currentPrice,

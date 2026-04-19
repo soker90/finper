@@ -1,23 +1,29 @@
 import { useForm } from 'react-hook-form'
-import { ModalGrid, DateForm, InputForm } from 'components'
-import { StockPurchase } from 'types'
+import { ModalGrid, DateForm, InputForm, SelectForm } from 'components'
+import { StockOperationType, StockPurchase } from 'types'
 
 interface Props {
+  defaultType?: StockOperationType
   onClose: () => void
   onAdd: (stock: Omit<StockPurchase, '_id'>) => Promise<{ error?: string }>
 }
 
-const AddStockModal = ({ onClose, onAdd }: Props) => {
-  const { register, handleSubmit, formState: { errors }, control, setError } = useForm({
+const AddStockModal = ({ onClose, onAdd, defaultType = 'buy' }: Props) => {
+  const isDividend = defaultType === 'dividend'
+
+  const { register, handleSubmit, formState: { errors }, control, setError, watch } = useForm({
     defaultValues: {
       date: null as number | null,
       ticker: '',
       name: '',
       shares: '' as unknown as number,
-      price: '' as unknown as number,
+      priceMode: 'per_share',
+      price: (isDividend ? 0 : '') as unknown as number,
       platform: ''
     }
   })
+
+  const priceMode = watch('priceMode')
 
   const onSubmit = handleSubmit(async (params) => {
     if (!params.date) {
@@ -25,13 +31,16 @@ const AddStockModal = ({ onClose, onAdd }: Props) => {
       return
     }
 
+    const priceInput = Number(params.price)
+    const sharesInput = Number(params.shares)
+
     const payload: Omit<StockPurchase, '_id'> = {
       ticker: params.ticker.toUpperCase().trim(),
       name: params.name.trim(),
-      shares: Number(params.shares),
-      price: Number(params.price),
+      shares: sharesInput,
+      price: params.priceMode === 'total' && sharesInput > 0 ? priceInput / sharesInput : priceInput,
       platform: params.platform.trim(),
-      type: 'buy',
+      type: defaultType,
       date: new Date(params.date).getTime()
     }
 
@@ -40,9 +49,8 @@ const AddStockModal = ({ onClose, onAdd }: Props) => {
       onClose()
     }
   })
-
   return (
-    <ModalGrid show onClose={onClose} title='Nueva compra de acciones' action={onSubmit}>
+    <ModalGrid show onClose={onClose} title={isDividend ? 'Nuevo dividendo de acciones' : 'Nueva compra de acciones'} action={onSubmit}>
       <DateForm
         placeholder='Introduce una fecha' id='date' label='Fecha'
         error={!!errors.date}
@@ -64,22 +72,34 @@ const AddStockModal = ({ onClose, onAdd }: Props) => {
         size={4}
       />
       <InputForm
-        id='shares' label='Número de acciones' placeholder='100'
+        id='shares' label={isDividend ? 'Acciones recibidas' : 'Número de acciones'} placeholder='100'
         error={!!errors.shares}
         type='number'
-        inputProps={{ step: '0.000001', min: '0.000001' }}
-        {...register('shares', { required: true, valueAsNumber: true, min: 0.0001 })}
+        inputProps={{ step: 'any', min: '0' }}
+        {...register('shares', { required: true, valueAsNumber: true, min: 0 })}
         errorText='Introduce un número válido'
-        size={6}
+        size={4}
+      />
+      <SelectForm
+        id='priceMode' label='Modalidad de precio'
+        error={!!errors.priceMode}
+        {...register('priceMode')}
+        options={[
+          { label: 'Precio por acción', value: 'per_share' },
+          { label: 'Precio total', value: 'total' }
+        ]}
+        optionLabel='label'
+        optionValue='value'
+        size={4}
       />
       <InputForm
-        id='price' label='Precio por acción (€)' placeholder='4.05'
+        id='price' label={priceMode === 'total' ? 'Precio total (€)' : 'Precio por acción (€)'} placeholder={priceMode === 'total' ? '405' : '4.05'}
         error={!!errors.price}
         type='number'
-        inputProps={{ step: '0.01', min: '0' }}
+        inputProps={{ step: 'any', min: '0' }}
         {...register('price', { required: true, valueAsNumber: true, min: 0 })}
         errorText='Introduce un número válido'
-        size={6}
+        size={4}
       />
       <InputForm
         id='platform' label='Plataforma' placeholder='DEGIRO'
