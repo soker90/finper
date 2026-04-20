@@ -7,7 +7,9 @@ import SectionTitle from './SectionTitle'
 import { hoverCardSx } from './shared'
 
 const StocksWidget = () => {
-  const { summary, isLoading } = useStocksSummary()
+  const { summary, isLoading, error } = useStocksSummary()
+
+  if (error) return null
 
   if (!isLoading && !summary?.totalCost) return null
 
