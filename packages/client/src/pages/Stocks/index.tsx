@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { Grid } from '@mui/material'
-import { PlusOutlined, GiftOutlined } from '@ant-design/icons'
+import { PlusOutlined, GiftOutlined, FallOutlined } from '@ant-design/icons'
 import { StockOperationType } from 'types'
 
 import { HeaderButtons, LoadingList } from 'components'
@@ -45,6 +45,11 @@ const Stocks = () => {
             Icon: GiftOutlined,
             title: 'Añadir dividendo',
             onClick: () => setShowModal('dividend')
+          },
+          {
+            Icon: FallOutlined,
+            title: 'Registrar venta',
+            onClick: () => setShowModal('sell')
           }
         ]}
         desktopSx={{ marginTop: -7 }}

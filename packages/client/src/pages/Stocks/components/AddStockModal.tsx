@@ -10,6 +10,7 @@ interface Props {
 
 const AddStockModal = ({ onClose, onAdd, defaultType = 'buy' }: Props) => {
   const isDividend = defaultType === 'dividend'
+  const isSell = defaultType === 'sell'
 
   const { register, handleSubmit, formState: { errors }, control, setError, watch } = useForm({
     defaultValues: {
@@ -38,7 +39,7 @@ const AddStockModal = ({ onClose, onAdd, defaultType = 'buy' }: Props) => {
       ticker: params.ticker.toUpperCase().trim(),
       name: params.name.trim(),
       shares: sharesInput,
-      price: params.priceMode === 'total' && sharesInput > 0 ? priceInput / sharesInput : priceInput,
+      price: !isSell && params.priceMode === 'total' && sharesInput > 0 ? priceInput / sharesInput : priceInput,
       platform: params.platform.trim(),
       type: defaultType,
       date: new Date(params.date).getTime()
@@ -49,8 +50,15 @@ const AddStockModal = ({ onClose, onAdd, defaultType = 'buy' }: Props) => {
       onClose()
     }
   })
+
+  const modalTitle = isDividend
+    ? 'Nuevo dividendo de acciones'
+    : isSell
+      ? 'Registrar venta de acciones'
+      : 'Nueva compra de acciones'
+
   return (
-    <ModalGrid show onClose={onClose} title={isDividend ? 'Nuevo dividendo de acciones' : 'Nueva compra de acciones'} action={onSubmit}>
+    <ModalGrid show onClose={onClose} title={modalTitle} action={onSubmit}>
       <DateForm
         placeholder='Introduce una fecha' id='date' label='Fecha'
         error={!!errors.date}
@@ -72,7 +80,9 @@ const AddStockModal = ({ onClose, onAdd, defaultType = 'buy' }: Props) => {
         size={4}
       />
       <InputForm
-        id='shares' label={isDividend ? 'Acciones recibidas' : 'Número de acciones'} placeholder='100'
+        id='shares'
+        label={isDividend ? 'Acciones recibidas' : isSell ? 'Acciones vendidas' : 'Número de acciones'}
+        placeholder='100'
         error={!!errors.shares}
         type='number'
         inputProps={{ step: 'any', min: '0' }}
@@ -80,20 +90,24 @@ const AddStockModal = ({ onClose, onAdd, defaultType = 'buy' }: Props) => {
         errorText='Introduce un número válido'
         size={4}
       />
-      <SelectForm
-        id='priceMode' label='Modalidad de precio'
-        error={!!errors.priceMode}
-        {...register('priceMode')}
-        options={[
-          { label: 'Precio por acción', value: 'per_share' },
-          { label: 'Precio total', value: 'total' }
-        ]}
-        optionLabel='label'
-        optionValue='value'
-        size={4}
-      />
+      {!isSell && (
+        <SelectForm
+          id='priceMode' label='Modalidad de precio'
+          error={!!errors.priceMode}
+          {...register('priceMode')}
+          options={[
+            { label: 'Precio por acción', value: 'per_share' },
+            { label: 'Precio total', value: 'total' }
+          ]}
+          optionLabel='label'
+          optionValue='value'
+          size={4}
+        />
+      )}
       <InputForm
-        id='price' label={priceMode === 'total' ? 'Precio total (€)' : 'Precio por acción (€)'} placeholder={priceMode === 'total' ? '405' : '4.05'}
+        id='price'
+        label={isSell ? 'Precio de venta por acción (€)' : priceMode === 'total' ? 'Precio total (€)' : 'Precio por acción (€)'}
+        placeholder={isSell ? '4.50' : priceMode === 'total' ? '405' : '4.05'}
         error={!!errors.price}
         type='number'
         inputProps={{ step: 'any', min: '0' }}

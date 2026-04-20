@@ -20,6 +20,12 @@ export class StockRoutes {
 
   routes () {
     this.router.get(
+      '/summary',
+      authMiddleware,
+      this.stockController.summary.bind(this.stockController)
+    )
+
+    this.router.get(
       '/',
       authMiddleware,
       this.stockController.stocks.bind(this.stockController)

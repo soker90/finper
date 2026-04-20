@@ -20,6 +20,14 @@ export class StockController {
     this.stockService = stockService
   }
 
+  public async summary (req: Request, res: Response, next: NextFunction): Promise<void> {
+    Promise.resolve(req.user as string)
+      .tap((user: string) => this.logger.logInfo(`/stocks/summary - summary of ${user}`))
+      .then(this.stockService.getStocksSummary.bind(this.stockService))
+      .then(response => { res.send(response) })
+      .catch(error => { next(error) })
+  }
+
   public async stocks (req: Request, res: Response, next: NextFunction): Promise<void> {
     Promise.resolve(req.user as string)
       .tap((user: string) => this.logger.logInfo(`/stocks - list positions of ${user}`))

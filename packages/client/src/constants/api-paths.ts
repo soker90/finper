@@ -17,3 +17,4 @@ export const SUPPLIES_PROPERTIES = 'supplies/properties'
 export const SUPPLIES_READINGS = 'supplies/readings'
 export const TARIFFS_COMPARISON = (id: string) => `supplies/${id}/tariffs-comparison`
 export const STOCKS = 'stocks'
+export const STOCKS_SUMMARY = 'stocks/summary'

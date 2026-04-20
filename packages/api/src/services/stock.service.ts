@@ -16,8 +16,14 @@ export interface StockPosition {
   purchases: IStock[]
 }
 
+export interface StocksSummary {
+  totalCost: number
+  totalValue: number | null
+}
+
 export interface IStockService {
   getStocks(user: string): Promise<StockPosition[]>
+  getStocksSummary(user: string): Promise<StocksSummary>
   addStock(stock: IStock): Promise<IStock>
   deleteStock(id: string, user: string): Promise<void>
 }
@@ -51,6 +57,16 @@ export default class StockService implements IStockService {
 
   public async deleteStock (id: string, user: string): Promise<void> {
     await StockModel.findOneAndDelete({ _id: id, user })
+  }
+
+  public async getStocksSummary (user: string): Promise<StocksSummary> {
+    const positions = await this.getStocks(user)
+    const totalCost = roundNumber(positions.reduce((acc, p) => acc + p.totalCost, 0))
+    const hasNullPrice = positions.some(p => p.currentValue === null)
+    const totalValue = hasNullPrice
+      ? null
+      : roundNumber(positions.reduce((acc, p) => acc + (p.currentValue ?? 0), 0))
+    return { totalCost, totalValue }
   }
 
   // ── Private ──────────────────────────────────────────────────────────────────
