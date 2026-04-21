@@ -11,6 +11,13 @@ export interface TariffComparison {
   offPeakEnergy: number
   estimatedAnnualTotal: number
   estimatedAnnualSavings: number
+  firstYearTotal: number | null
+  discount?: {
+    tipo: 'porcentaje' | 'fijo'
+    valor: number
+    meses: number | null
+    soloNuevosClientes: boolean
+  } | null
   invoices: Array<{
     startDate: number
     endDate: number

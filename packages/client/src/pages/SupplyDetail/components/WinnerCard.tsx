@@ -1,5 +1,5 @@
 import { TariffComparison } from 'hooks/useTariffsComparison'
-import { Box, Grid, Typography } from '@mui/material'
+import { Box, Grid, Typography, Chip, Stack } from '@mui/material'
 import { TrophyOutlined } from '@ant-design/icons'
 import { MainCard } from 'components'
 import { format } from 'utils'
@@ -43,9 +43,20 @@ const WinnerCard = ({ winner }: Props) => (
         <Typography variant='overline' color='success.main' fontWeight={800} letterSpacing={1.2}>
           RECOMENDACIÓN PERSONALIZADA
         </Typography>
-        <Typography variant='h3' fontWeight={800} gutterBottom>
-          {winner.retailer}
-        </Typography>
+        <Stack direction='row' spacing={2} alignItems='center' sx={{ mb: 2 }}>
+          <Typography variant='h3' fontWeight={800} sx={{ mb: 0 }}>
+            {winner.retailer}
+          </Typography>
+          {winner.discount && (
+            <Chip
+              label={`${winner.discount.tipo === 'porcentaje' ? '-' : ''}${winner.discount.valor}${winner.discount.tipo === 'porcentaje' ? '%' : '€'}${winner.discount.meses ? ` / ${winner.discount.meses}m` : ''}${winner.discount.soloNuevosClientes ? ' ★nuevos' : ''}`}
+              color='secondary'
+              variant='filled'
+              size='small'
+              sx={{ fontWeight: 800 }}
+            />
+          )}
+        </Stack>
         <Typography variant='h6' color='text.secondary' fontWeight={500}>
           Tarifa: {winner.tariffName}
         </Typography>
@@ -68,9 +79,15 @@ const WinnerCard = ({ winner }: Props) => (
             variant='h2'
             color={winner.estimatedAnnualSavings > 0 ? 'success.main' : 'error.main'}
             fontWeight={900}
+            gutterBottom={winner.firstYearTotal !== null}
           >
             {format.euro(Math.abs(winner.estimatedAnnualSavings))}
           </Typography>
+          {winner.firstYearTotal !== null && (
+            <Typography variant='subtitle1' color='secondary' fontWeight={800} sx={{ mb: 1 }}>
+              1er año: {format.euro(winner.firstYearTotal)}
+            </Typography>
+          )}
           <Typography variant='caption' color='text.secondary'>
             Frente a proyección de tu tarifa hoy
           </Typography>
