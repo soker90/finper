@@ -75,6 +75,7 @@ class Server {
     db.connect(config.mongo)
   }
 
+  /* istanbul ignore next — start() is only called outside of test env */
   public start (): void {
     this.app.listen(this.app.get('port'), () => {
       console.log(`API is running at http://localhost:${this.app.get('port')}`)
@@ -84,6 +85,7 @@ class Server {
 
 export const server = new Server()
 
+/* istanbul ignore next — server.start() is skipped in test env */
 if (process.env.NODE_ENV !== 'test') {
   server.start()
 }

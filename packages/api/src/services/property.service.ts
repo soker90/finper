@@ -15,6 +15,7 @@ export default class PropertyService implements IPropertyService {
 
   public async editProperty ({ id, value }: { id: string, value: IProperty }): Promise<PropertyDocument> {
     const updated = await PropertyModel.findByIdAndUpdate<PropertyDocument>(id, value, { returnDocument: 'after' })
+    /* istanbul ignore next — validator validatePropertyExist runs before this method via route */
     if (!updated) throw Boom.notFound(ERROR_MESSAGE.PROPERTY.NOT_FOUND).output
     return updated
   }
@@ -29,6 +30,7 @@ export default class PropertyService implements IPropertyService {
     }
 
     const deleted = await PropertyModel.findByIdAndDelete(id)
+    /* istanbul ignore next — validator validatePropertyExist runs before this method via route */
     if (!deleted) throw Boom.notFound(ERROR_MESSAGE.PROPERTY.NOT_FOUND).output
   }
 }

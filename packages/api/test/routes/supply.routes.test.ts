@@ -281,5 +281,23 @@ describe('Supply Routes', () => {
         expect(body[i].estimatedAnnualSavings).toBeGreaterThanOrEqual(body[i + 1].estimatedAnnualSavings)
       }
     })
+
+    test('when all readings are older than 1 year, it should respond 400', async () => {
+      // Para que fetchYearReadings devuelva 0 resultados necesitamos una lectura cuyo
+      // endDate sea reciente pero cuyo startDate caiga ANTES de (endDate - 1 año).
+      // Así: startDate < lastReading.endDate - ONE_YEAR_MS → no incluida → readings = 0.
+      const supply = await insertSupply({ user, ...FULL_PRICE_SUPPLY })
+      await insertSupplyReading({
+        user,
+        supplyId: supply._id.toString(),
+        endDate: Date.now(),
+        startDate: Date.now() - 366 * 24 * 60 * 60 * 1000 // >365 días antes
+      })
+
+      await supertest(server.app)
+        .get(path(supply._id.toString()))
+        .auth(token, { type: 'bearer' })
+        .expect(400)
+    })
   })
 })

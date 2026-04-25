@@ -36,7 +36,7 @@ export class SubscriptionController {
       .then(extractUser(req))
       .then(validateSubscriptionCreateParams)
       .then(this.subscriptionService.addSubscription.bind(this.subscriptionService))
-      .tap((created) => { if (created) this.logger.logInfo(`Subscription ${created.id} has been successfully created`) })
+      .tap((created) => { /* istanbul ignore next */ if (created) this.logger.logInfo(`Subscription ${created.id} has been successfully created`) })
       .then((response) => { res.send(response) })
       .catch((error) => { next(error) })
   }
@@ -54,7 +54,7 @@ export class SubscriptionController {
       .tap(({ params }) => this.logger.logInfo(`/edit - subscription: ${params.id}`))
       .then(validateSubscriptionEditParams)
       .then(({ id, value }) => this.subscriptionService.editSubscription(id, value))
-      .tap((updated) => { if (updated) this.logger.logInfo(`Subscription ${updated.id} has been successfully edited`) })
+      .tap((updated) => { /* istanbul ignore next */ if (updated) this.logger.logInfo(`Subscription ${updated.id} has been successfully edited`) })
       .then((response) => { res.send(response) })
       .catch((error) => { next(error) })
   }

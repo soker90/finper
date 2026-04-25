@@ -135,6 +135,59 @@ describe('Stocks', () => {
     })
   })
 
+  describe('GET /stocks/summary', () => {
+    const path = '/api/stocks/summary'
+    let token: string
+    const user: string = generateUsername()
+
+    beforeAll(async () => {
+      token = await requestLogin(server.app, { username: user })
+    })
+
+    afterEach(async () => {
+      await StockModel.deleteMany({})
+    })
+
+    test('when token is not provided, it should response 401', async () => {
+      await supertest(server.app).get(path).expect(401)
+    })
+
+    test('when there are no stocks, it should return totalCost 0 and totalValue 0', async () => {
+      const response = await supertest(server.app)
+        .get(path)
+        .auth(token, { type: 'bearer' })
+        .expect(200)
+
+      expect(response.body.totalCost).toBe(0)
+      expect(response.body.totalValue).toBe(0)
+    })
+
+    test('should return aggregated totalCost and totalValue', async () => {
+      await insertStock({ user, ticker: 'TEF.MC', name: 'Telefónica', shares: 100, price: 4.0, type: STOCK_TYPE.Buy })
+
+      const response = await supertest(server.app)
+        .get(path)
+        .auth(token, { type: 'bearer' })
+        .expect(200)
+
+      expect(typeof response.body.totalCost).toBe('number')
+      expect(response.body.totalCost).toBeCloseTo(400, 0)
+      // mocked price provider returns 4.5 → currentValue = 100 * 4.5 = 450
+      expect(response.body.totalValue).toBeCloseTo(450, 0)
+    })
+
+    test('stocks of other users should not be included in the summary', async () => {
+      await insertStock({ ticker: 'ITX.MC', name: 'Inditex', shares: 10, price: 50, type: STOCK_TYPE.Buy })
+
+      const response = await supertest(server.app)
+        .get(path)
+        .auth(token, { type: 'bearer' })
+        .expect(200)
+
+      expect(response.body.totalCost).toBe(0)
+    })
+  })
+
   describe('DELETE /stocks/:id', () => {
     let token: string
     const user: string = generateUsername()

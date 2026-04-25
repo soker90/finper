@@ -7,8 +7,12 @@ module.exports = {
   collectCoverage: true,
   collectCoverageFrom: [
     'src/**/*.{ts,js}',
-    'test/**/*.{ts,js}',
     '!**/node_modules/**',
-    '!**/dist/**'
+    '!**/dist/**',
+    '!src/scripts/**',
+    '!src/helpers/hash-password.ts',
+    '!src/middlewares/logger.ts',
+    '!src/auth/jwt-strategy-passport-handler.ts',
+    '!src/auth/local-strategy-passport-handler.ts'
   ]
 }

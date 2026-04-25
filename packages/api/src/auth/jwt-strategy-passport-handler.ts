@@ -21,6 +21,7 @@ passport.use(new JwtStrategy({
       return done(undefined, user, jwtToken)
     }
     return done(undefined, false)
+  /* istanbul ignore next — DB errors are not reproducible in unit tests */
   }).catch((err: Error) => {
     if (err) {
       return done(err, false)

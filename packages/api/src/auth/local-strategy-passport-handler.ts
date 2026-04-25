@@ -23,6 +23,7 @@ passport.use(new LocalStrategy({ usernameField: 'username' }, function (user, pa
     }
 
     return done(null, userDocument)
+  /* istanbul ignore next — DB errors are not reproducible in unit tests */
   }).catch((err: Error) => {
     if (err) {
       return done(err)

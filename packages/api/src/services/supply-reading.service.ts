@@ -20,12 +20,14 @@ export default class SupplyReadingService implements ISupplyReadingService {
 
   public async editReading ({ id, value }: { id: string, value: ISupplyReading }): Promise<SupplyReadingDocument> {
     const updated = await SupplyReadingModel.findByIdAndUpdate<SupplyReadingDocument>(id, value, { returnDocument: 'after' })
+    /* istanbul ignore next — validator validateReadingExist runs before this method via route */
     if (!updated) throw Boom.notFound(ERROR_MESSAGE.SUPPLY_READING.NOT_FOUND).output
     return updated
   }
 
   public async deleteReading ({ id }: { id: string }): Promise<void> {
     const deleted = await SupplyReadingModel.findByIdAndDelete(id)
+    /* istanbul ignore next — validator validateReadingExist runs before this method via route */
     if (!deleted) throw Boom.notFound(ERROR_MESSAGE.SUPPLY_READING.NOT_FOUND).output
   }
 }

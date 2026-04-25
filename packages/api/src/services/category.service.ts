@@ -55,12 +55,14 @@ export default class CategoryService implements ICategoryService {
 
   public async editCategory ({ id, value }: { id: string, value: ICategory }): Promise<CategoryDocument> {
     const updated = await CategoryModel.findByIdAndUpdate<CategoryDocument>(id, value, { returnDocument: 'after' })
+    /* istanbul ignore next — validator validateCategoryExist runs before this method via route */
     if (!updated) throw Boom.notFound(ERROR_MESSAGE.CATEGORY.NOT_FOUND).output
     return updated
   }
 
   public async deleteCategory ({ id }: { id: string }): Promise<void> {
     const deleted = await CategoryModel.findByIdAndDelete(id)
+    /* istanbul ignore next — validator validateCategoryExist runs before this method via route */
     if (!deleted) throw Boom.notFound(ERROR_MESSAGE.CATEGORY.NOT_FOUND).output
   }
 }

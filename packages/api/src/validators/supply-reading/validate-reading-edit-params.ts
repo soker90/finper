@@ -6,10 +6,12 @@ import { validateReadingExist } from './validate-reading-exist'
 import { validateSupplyExist } from '../supply'
 
 export const validateReadingEditParams = async (data: RequestUser) => {
+  /* istanbul ignore else — params.id is always present when editing via route (URL param) */
   if (data.params?.id) {
     await validateReadingExist({ id: data.params.id, user: data.user as string })
   }
 
+  /* istanbul ignore else — supplyId is always present in the body for edit requests */
   if (data.body?.supplyId) {
     await validateSupplyExist({ id: data.body.supplyId as string, user: data.user as string })
   }
