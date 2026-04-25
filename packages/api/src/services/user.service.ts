@@ -19,6 +19,7 @@ export default class UserService implements IUserService {
     const credentialDocument = await this.UserModel.findOne({ username })
 
     if (credentialDocument) {
+      /* istanbul ignore else — credentialDocument.username always equals username since we find by username */
       if (credentialDocument.username === username) {
         throw Boom.conflict(ERROR_MESSAGE.USER.ALREADY_EXISTS).output
       }

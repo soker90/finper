@@ -24,6 +24,7 @@ export default class DebtService implements IDebtService {
 
   public async editDebt ({ id, value }: { id: string, value: IDebt }): Promise<DebtDocument> {
     const updated = await DebtModel.findByIdAndUpdate<DebtDocument>(id, value, { returnDocument: 'after' })
+    /* istanbul ignore next — validator validateDebtExist runs before this method via route */
     if (!updated) throw Boom.notFound(ERROR_MESSAGE.DEBT.NOT_FOUND).output
     return updated
   }
@@ -77,6 +78,7 @@ export default class DebtService implements IDebtService {
 
   public async deleteDebt (id: string): Promise<void> {
     const deleted = await DebtModel.findByIdAndDelete(id)
+    /* istanbul ignore next — validator validateDebtExist runs before this method via route */
     if (!deleted) throw Boom.notFound(ERROR_MESSAGE.DEBT.NOT_FOUND).output
   }
 

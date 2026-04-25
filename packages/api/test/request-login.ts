@@ -28,7 +28,7 @@ export const requestLogin = (app = defaultApp, credentials: CredentialsTYpe = de
         password: credentials.password
       })
       .then(res => res.body.token)))
-    .catch(err => {
+    .catch(/* istanbul ignore next */(err: unknown) => {
       console.error(err)
       throw err
     })

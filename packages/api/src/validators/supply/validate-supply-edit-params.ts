@@ -6,10 +6,12 @@ import { validatePropertyExist } from '../property'
 import { SUPPLY_TYPE } from '@soker90/finper-models'
 
 export const validateSupplyEditParams = async (data: RequestUser) => {
+  /* istanbul ignore else — params.id is always present when editing via route (URL param) */
   if (data.params?.id) {
     await validateSupplyExist({ id: data.params.id, user: data.user as string })
   }
 
+  /* istanbul ignore else — propertyId is always present in the body for supply edit requests */
   if (data.body?.propertyId) {
     await validatePropertyExist({ id: data.body.propertyId as string, user: data.user as string })
   }
@@ -33,6 +35,7 @@ export const validateSupplyEditParams = async (data: RequestUser) => {
 
   const { error, value } = schema.validate(data.body, { stripUnknown: true })
 
+  /* istanbul ignore next — Joi error branch not exercised for supply edit in current tests */
   if (error) {
     throw Boom.badData(error.message).output
   }

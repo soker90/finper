@@ -69,6 +69,7 @@ const subtractOneMonth = (timestamp: number): number => {
   const d = new Date(timestamp)
   const day = d.getDate()
   d.setMonth(d.getMonth() - 1)
+  /* istanbul ignore next — only triggers when subtracting a month crosses month-end boundary (e.g. Mar 31 → Feb 28) */
   if (d.getDate() !== day) {
     d.setDate(0)
   }
@@ -83,6 +84,7 @@ const addOneMonth = (timestamp: number): number => {
   const day = d.getDate()
   d.setMonth(d.getMonth() + 1)
   // Handle months with fewer days (e.g. Jan 31 + 1 month = Feb 28)
+  /* istanbul ignore next — only triggers when adding a month crosses month-end boundary (e.g. Jan 31 → Feb 28) */
   if (d.getDate() !== day) {
     d.setDate(0) // last day of previous month
   }

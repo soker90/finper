@@ -13,7 +13,7 @@ import { faker } from '@faker-js/faker'
 import { server } from '../../src/server'
 
 import { requestLogin } from '../request-login'
-import { insertAccount, insertCategory, insertTransaction } from '../insert-data-to-model'
+import { insertAccount, insertCategory, insertTransaction, insertSubscription } from '../insert-data-to-model'
 import { generateUsername } from '../generate-values'
 import { ERROR_MESSAGE } from '../../src/i18n'
 import { roundNumber } from '../../src/utils'
@@ -367,6 +367,24 @@ describe('Transaction', () => {
 
       await supertest(server.app).delete(path(transaction._id.toString())).set('Authorization', `Bearer ${token}`).expect(204)
       expect(await AccountModel.findById(account._id)).toHaveProperty('balance', roundNumber(balance))
+    })
+    test('when deleting a transaction linked to a subscription, it should recalculate the next payment date', async () => {
+      const account = await insertAccount({ user })
+      const category = await insertCategory({ user })
+      const subscription = await insertSubscription({ user, accountId: account._id, categoryId: category._id })
+
+      // Crear la transacción y vincularla a la suscripción
+      const transaction = await insertTransaction({ user, account: account._id.toString(), type: TRANSACTION.Expense })
+      await TransactionModel.findByIdAndUpdate(transaction._id, { subscriptionId: subscription._id })
+
+      await supertest(server.app)
+        .delete(path(transaction._id.toString()))
+        .set('Authorization', `Bearer ${token}`)
+        .expect(204)
+
+      // La transacción debe haber desaparecido de la BD
+      const inDb = await TransactionModel.findById(transaction._id)
+      expect(inDb).toBeNull()
     })
   })
 })

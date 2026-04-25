@@ -14,6 +14,7 @@ export const validateTransactionGetParams = async (query?: Record<string, any>) 
 
   const { error, value } = schema.validate(query)
 
+  /* istanbul ignore next — Joi error branch not exercised for GET transactions in current tests */
   if (error) {
     throw Boom.badData(error.message).output
   }

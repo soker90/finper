@@ -31,6 +31,7 @@ export default class SupplyService implements ISupplyService {
 
   public async editSupply ({ id, value }: { id: string, value: ISupply }): Promise<SupplyDocument> {
     const updated = await SupplyModel.findByIdAndUpdate<SupplyDocument>(id, value, { returnDocument: 'after' })
+    /* istanbul ignore next — validator validateSupplyExist runs before this method via route */
     if (!updated) throw Boom.notFound(ERROR_MESSAGE.SUPPLY.NOT_FOUND).output
     return updated
   }
@@ -38,6 +39,7 @@ export default class SupplyService implements ISupplyService {
   public async deleteSupply ({ id }: { id: string }): Promise<void> {
     await SupplyReadingModel.deleteMany({ supplyId: id })
     const deleted = await SupplyModel.findByIdAndDelete(id)
+    /* istanbul ignore next — validator validateSupplyExist runs before this method via route */
     if (!deleted) throw Boom.notFound(ERROR_MESSAGE.SUPPLY.NOT_FOUND).output
   }
 }

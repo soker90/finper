@@ -248,5 +248,16 @@ describe('Auth', () => {
         await supertest(server.app).get(path).set('Authorization', `Bearer ${token}`).expect(204)
       })
     })
+
+    test('when token is valid but user has been deleted, it should response 401', async () => {
+      const credentials = await insertCredentials()
+      const token = await requestLogin(server.app, { username: credentials.username })
+      await UserModel.deleteOne({ username: credentials.username })
+
+      await supertest(server.app)
+        .get(path)
+        .set('Authorization', `Bearer ${token}`)
+        .expect(401)
+    })
   })
 })
