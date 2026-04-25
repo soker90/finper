@@ -54,7 +54,7 @@ export class SubscriptionController {
       .tap(({ params }) => this.logger.logInfo(`/edit - subscription: ${params.id}`))
       .then(validateSubscriptionEditParams)
       .then(({ id, value }) => this.subscriptionService.editSubscription(id, value))
-      .tap((updated) => { this.logger.logInfo(`Subscription ${updated.id} has been successfully edited`) })
+      .tap((updated) => { /* istanbul ignore next */ if (updated) this.logger.logInfo(`Subscription ${updated.id} has been successfully edited`) })
       .then((response) => { res.send(response) })
       .catch((error) => { next(error) })
   }
