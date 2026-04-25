@@ -87,6 +87,13 @@ interface ISimulatedInvoice {
 export interface TariffComparisonResult {
   retailer: string
   tariffName: string
+  billingMonths: number
+  discount: {
+    tipo: 'porcentaje' | 'fijo'
+    valor: number
+    meses: number | null
+    soloNuevosClientes: boolean
+  } | null
   peakPower: number
   offPeakPower: number
   peakEnergy: number
@@ -117,9 +124,7 @@ export default class TariffsService implements ITariffsService {
         socialBonusPerDay: apiData.datosGenerales.bonoSocial ?? 0
       },
       tariffs: apiData.tarifas.map(entry => {
-        const includesSocialBonus = entry.detalles.incluyeBonoSocial !== undefined && entry.detalles.incluyeBonoSocial !== null
-          ? entry.detalles.incluyeBonoSocial
-          : !['enérgya', 'energya'].some(n => entry.comercializadora.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').includes(n))
+        const includesSocialBonus = entry.detalles.incluyeBonoSocial !== false
 
         return {
           retailer: entry.comercializadora,
@@ -178,7 +183,7 @@ export default class TariffsService implements ITariffsService {
       user,
       endDate: { $lte: lastReading.endDate },
       startDate: { $gte: lastReading.endDate - ONE_YEAR_MS }
-    })
+    }).sort({ endDate: -1 })
 
     if (readings.length === 0) {
       throw Boom.badRequest(ERROR_MESSAGE.SUPPLY_READING.NO_READINGS_IN_LAST_YEAR).output
@@ -223,7 +228,7 @@ export default class TariffsService implements ITariffsService {
     const newTariffPrices: ITariffPrices = { peakPower, offPeakPower, peakEnergy, flatEnergy, offPeakEnergy }
 
     const invoices: ISimulatedInvoice[] = readings.map(reading => {
-      const billedDays = (reading.endDate - reading.startDate) / (1000 * 60 * 60 * 24)
+      const billedDays = Math.max(1, Math.round((reading.endDate - reading.startDate) / (1000 * 60 * 60 * 24)))
       return {
         startDate: reading.startDate,
         endDate: reading.endDate,
@@ -256,6 +261,8 @@ export default class TariffsService implements ITariffsService {
     return {
       retailer: tariff.retailer,
       tariffName: tariff.tariffName,
+      billingMonths: tariff.billingMonths,
+      discount: tariff.discount,
       peakPower,
       offPeakPower,
       peakEnergy,

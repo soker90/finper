@@ -1,4 +1,4 @@
-export type SupplyType = 'electricity' | 'water' | 'gas' | 'internet' | 'other'
+export type SupplyType = 'electricity' | 'water' | 'gas' | 'other'
 
 export interface Property {
   _id: string

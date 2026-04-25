@@ -4,6 +4,13 @@ import { TARIFFS_COMPARISON } from 'constants/api-paths'
 export interface TariffComparison {
   retailer: string
   tariffName: string
+  billingMonths: number
+  discount: {
+    tipo: 'porcentaje' | 'fijo'
+    valor: number
+    meses: number | null
+    soloNuevosClientes: boolean
+  } | null
   peakPower: number
   offPeakPower: number
   peakEnergy: number
@@ -12,12 +19,6 @@ export interface TariffComparison {
   estimatedAnnualTotal: number
   estimatedAnnualSavings: number
   firstYearTotal: number | null
-  discount?: {
-    tipo: 'porcentaje' | 'fijo'
-    valor: number
-    meses: number | null
-    soloNuevosClientes: boolean
-  } | null
   invoices: Array<{
     startDate: number
     endDate: number

@@ -4,7 +4,6 @@ export const SUPPLY_TYPE_OPTIONS: { value: SupplyType; label: string }[] = [
   { value: 'electricity', label: 'Electricidad' },
   { value: 'water', label: 'Agua' },
   { value: 'gas', label: 'Gas' },
-  { value: 'internet', label: 'Internet' },
   { value: 'other', label: 'Otro' }
 ]
 
