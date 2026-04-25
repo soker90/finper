@@ -245,15 +245,18 @@ export default class TariffsService implements ITariffsService {
     const estimatedAnnualTotal = Number(invoices.reduce((total, invoice) => total + invoice.newTariffSimulatedAmount, 0).toFixed(2))
     const currentTotalSimulated = invoices.reduce((total, invoice) => total + invoice.currentTariffSimulatedAmount, 0)
 
-    // Calcular coste del primer año con descuento (si existe y tiene duración definida)
+    // Calcular coste del primer año con descuento:
+    // - meses === null significa descuento permanente → se aplica el año completo (12 meses)
+    // - meses > 12 → se limita a 12 para no descontar más de un año
     let firstYearTotal: number | null = null
     const { discount } = tariff
-    if (discount && discount.meses) {
+    if (discount) {
+      const mesesPrimerAno = discount.meses === null ? 12 : Math.min(discount.meses, 12)
       if (discount.tipo === 'porcentaje') {
-        const descuentoEuros = estimatedAnnualTotal * (discount.meses / 12) * (discount.valor / 100)
+        const descuentoEuros = estimatedAnnualTotal * (mesesPrimerAno / 12) * (discount.valor / 100)
         firstYearTotal = Number((estimatedAnnualTotal - descuentoEuros).toFixed(2))
       } else {
-        const numPeriodos = discount.meses / tariff.billingMonths
+        const numPeriodos = mesesPrimerAno / (tariff.billingMonths || 12)
         firstYearTotal = Number((estimatedAnnualTotal - discount.valor * numPeriodos).toFixed(2))
       }
     }
