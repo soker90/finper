@@ -12,6 +12,7 @@ interface ITariffApiResponse {
     iva: number
     impuestoElectrico: number
     alquilerContador: number
+    bonoSocial: number
   }
   tarifas: Array<{
     comercializadora: string
@@ -23,6 +24,14 @@ interface ITariffApiResponse {
       energiaPunta: number
       energiaLlana: number
       energiaValle: number
+      mantenimientoPrecio?: number
+      incluyeBonoSocial?: boolean
+      descuento?: {
+        tipo: 'porcentaje' | 'fijo'
+        valor: number
+        meses: number | null
+        soloNuevosClientes?: boolean
+      } | null
     }
   }>
 }
@@ -41,12 +50,23 @@ interface ITaxConfig {
   vat: number
   electricityTax: number
   meterRental: number
+  socialBonusPerDay: number
+}
+
+interface IDiscount {
+  tipo: 'porcentaje' | 'fijo'
+  valor: number
+  meses: number | null
+  soloNuevosClientes: boolean
 }
 
 interface ITariffEntry {
   retailer: string
   tariffName: string
+  billingMonths: number
   prices: ITariffPrices
+  includesSocialBonus: boolean
+  discount: IDiscount | null
 }
 
 interface ITariffData {
@@ -67,6 +87,13 @@ interface ISimulatedInvoice {
 export interface TariffComparisonResult {
   retailer: string
   tariffName: string
+  billingMonths: number
+  discount: {
+    tipo: 'porcentaje' | 'fijo'
+    valor: number
+    meses: number | null
+    soloNuevosClientes: boolean
+  } | null
   peakPower: number
   offPeakPower: number
   peakEnergy: number
@@ -74,6 +101,7 @@ export interface TariffComparisonResult {
   offPeakEnergy: number
   estimatedAnnualTotal: number
   estimatedAnnualSavings: number
+  firstYearTotal: number | null
   invoices: ISimulatedInvoice[]
 }
 
@@ -92,19 +120,29 @@ export default class TariffsService implements ITariffsService {
       taxes: {
         vat: apiData.datosGenerales.iva,
         electricityTax: apiData.datosGenerales.impuestoElectrico,
-        meterRental: apiData.datosGenerales.alquilerContador
+        meterRental: apiData.datosGenerales.alquilerContador,
+        socialBonusPerDay: apiData.datosGenerales.bonoSocial ?? 0
       },
-      tariffs: apiData.tarifas.map(entry => ({
-        retailer: entry.comercializadora,
-        tariffName: entry.detalles.nombreTarifa,
-        prices: {
-          peakPower: entry.detalles.potenciaPunta,
-          offPeakPower: entry.detalles.potenciaValle,
-          peakEnergy: entry.detalles.energiaPunta,
-          flatEnergy: entry.detalles.energiaLlana,
-          offPeakEnergy: entry.detalles.energiaValle
+      tariffs: apiData.tarifas.map(entry => {
+        const includesSocialBonus = entry.detalles.incluyeBonoSocial !== false
+
+        return {
+          retailer: entry.comercializadora,
+          tariffName: entry.detalles.nombreTarifa,
+          billingMonths: entry.detalles.mantenimientoPrecio ?? 12,
+          prices: {
+            peakPower: entry.detalles.potenciaPunta,
+            offPeakPower: entry.detalles.potenciaValle,
+            peakEnergy: entry.detalles.energiaPunta,
+            flatEnergy: entry.detalles.energiaLlana,
+            offPeakEnergy: entry.detalles.energiaValle
+          },
+          includesSocialBonus,
+          discount: entry.detalles.descuento
+            ? { ...entry.detalles.descuento, soloNuevosClientes: entry.detalles.descuento.soloNuevosClientes ?? false }
+            : null
         }
-      }))
+      })
     }
   }
 
@@ -145,7 +183,7 @@ export default class TariffsService implements ITariffsService {
       user,
       endDate: { $lte: lastReading.endDate },
       startDate: { $gte: lastReading.endDate - ONE_YEAR_MS }
-    })
+    }).sort({ endDate: -1 })
 
     if (readings.length === 0) {
       throw Boom.badRequest(ERROR_MESSAGE.SUPPLY_READING.NO_READINGS_IN_LAST_YEAR).output
@@ -160,7 +198,8 @@ export default class TariffsService implements ITariffsService {
     contractedPowerOffPeak: number,
     prices: ITariffPrices,
     billedDays: number,
-    taxes: ITaxConfig
+    taxes: ITaxConfig,
+    includesSocialBonus: boolean
   ): number {
     const powerCost =
       ((contractedPowerPeak * prices.peakPower) + (contractedPowerOffPeak * prices.offPeakPower)) * billedDays
@@ -168,8 +207,13 @@ export default class TariffsService implements ITariffsService {
       ((reading.consumptionPeak || 0) * prices.peakEnergy) +
       ((reading.consumptionFlat || 0) * prices.flatEnergy) +
       ((reading.consumptionOffPeak || 0) * prices.offPeakEnergy)
-    const subtotal = (powerCost + energyCost) * (1 + taxes.electricityTax)
-    return (subtotal + (taxes.meterRental * billedDays)) * (1 + taxes.vat)
+    // Impuesto Eléctrico: MAX(totalKWh × 0.001, (potencia + energía) × IEact)
+    const totalKwh = (reading.consumptionPeak || 0) + (reading.consumptionFlat || 0) + (reading.consumptionOffPeak || 0)
+    const electricityTaxAmount = Math.max(totalKwh * 0.001, (powerCost + energyCost) * taxes.electricityTax)
+    const socialBonusAmount = includesSocialBonus ? taxes.socialBonusPerDay * billedDays : 0
+    // TotalBruto = potencia + energía + impEléctrico + alquilerContador [+ bonoSocial]
+    const totalBruto = powerCost + energyCost + electricityTaxAmount + (taxes.meterRental * billedDays) + socialBonusAmount
+    return totalBruto * (1 + taxes.vat)
   }
 
   private simulateTariff (
@@ -184,16 +228,16 @@ export default class TariffsService implements ITariffsService {
     const newTariffPrices: ITariffPrices = { peakPower, offPeakPower, peakEnergy, flatEnergy, offPeakEnergy }
 
     const invoices: ISimulatedInvoice[] = readings.map(reading => {
-      const billedDays = (reading.endDate - reading.startDate) / (1000 * 60 * 60 * 24)
+      const billedDays = Math.max(1, Math.round((reading.endDate - reading.startDate) / (1000 * 60 * 60 * 24)))
       return {
         startDate: reading.startDate,
         endDate: reading.endDate,
         realAmount: reading.amount,
         currentTariffSimulatedAmount: Number(
-          this.calculateInvoiceCost(reading, contractedPowerPeak, contractedPowerOffPeak, currentTariffPrices, billedDays, taxes).toFixed(2)
+          this.calculateInvoiceCost(reading, contractedPowerPeak, contractedPowerOffPeak, currentTariffPrices, billedDays, taxes, tariff.includesSocialBonus).toFixed(2)
         ),
         newTariffSimulatedAmount: Number(
-          this.calculateInvoiceCost(reading, contractedPowerPeak, contractedPowerOffPeak, newTariffPrices, billedDays, taxes).toFixed(2)
+          this.calculateInvoiceCost(reading, contractedPowerPeak, contractedPowerOffPeak, newTariffPrices, billedDays, taxes, tariff.includesSocialBonus).toFixed(2)
         )
       }
     })
@@ -201,9 +245,27 @@ export default class TariffsService implements ITariffsService {
     const estimatedAnnualTotal = Number(invoices.reduce((total, invoice) => total + invoice.newTariffSimulatedAmount, 0).toFixed(2))
     const currentTotalSimulated = invoices.reduce((total, invoice) => total + invoice.currentTariffSimulatedAmount, 0)
 
+    // Calcular coste del primer año con descuento:
+    // - meses === null significa descuento permanente → se aplica el año completo (12 meses)
+    // - meses > 12 → se limita a 12 para no descontar más de un año
+    let firstYearTotal: number | null = null
+    const { discount } = tariff
+    if (discount) {
+      const mesesPrimerAno = discount.meses === null ? 12 : Math.min(discount.meses, 12)
+      if (discount.tipo === 'porcentaje') {
+        const descuentoEuros = estimatedAnnualTotal * (mesesPrimerAno / 12) * (discount.valor / 100)
+        firstYearTotal = Number((estimatedAnnualTotal - descuentoEuros).toFixed(2))
+      } else {
+        const numPeriodos = mesesPrimerAno / (tariff.billingMonths || 12)
+        firstYearTotal = Number((estimatedAnnualTotal - discount.valor * numPeriodos).toFixed(2))
+      }
+    }
+
     return {
       retailer: tariff.retailer,
       tariffName: tariff.tariffName,
+      billingMonths: tariff.billingMonths,
+      discount: tariff.discount,
       peakPower,
       offPeakPower,
       peakEnergy,
@@ -211,6 +273,7 @@ export default class TariffsService implements ITariffsService {
       offPeakEnergy,
       estimatedAnnualTotal,
       estimatedAnnualSavings: Number((currentTotalSimulated - estimatedAnnualTotal).toFixed(2)),
+      firstYearTotal,
       invoices
     }
   }

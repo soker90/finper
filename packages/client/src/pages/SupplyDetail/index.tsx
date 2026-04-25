@@ -10,7 +10,7 @@ import SupplyForm from '../Supplies/components/SupplyForm'
 import SupplyReadingForm from '../Supplies/components/SupplyReadingForm'
 import SupplyReadingList from '../Supplies/components/SupplyReadingList'
 import RemoveModal from '../Supplies/components/RemoveModal'
-import { SupplyConsumptionChart, SupplyYearStats } from './components'
+import { SupplyConsumptionChart, SupplyYearStats, SupplyTrendChart } from './components'
 import SupplyDetailHeader from './components/SupplyDetailHeader'
 import YearSelector from './components/YearSelector'
 import { useSupplyDetailModals } from './hooks/useSupplyDetailModals'
@@ -99,6 +99,12 @@ const SupplyDetail = () => {
 
       <SupplyYearStats
         readings={filteredReadings}
+        isElectricity={supply.type === 'electricity'}
+        unit={SUPPLY_TYPE_UNITS[supply.type]}
+      />
+
+      <SupplyTrendChart
+        readings={readings}
         isElectricity={supply.type === 'electricity'}
         unit={SUPPLY_TYPE_UNITS[supply.type]}
       />

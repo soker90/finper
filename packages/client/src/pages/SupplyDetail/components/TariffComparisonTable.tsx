@@ -24,7 +24,8 @@ const HEADER_COLUMNS = [
   { id: 'expand', label: '', align: 'left' as const, width: 40 },
   { id: 'tariff', label: 'Tarifa / Comercializadora', align: 'left' as const },
   { id: 'power', label: 'Potencia / Energía', align: 'center' as const },
-  { id: 'savings', label: 'Ahorro Anual Estimado', align: 'right' as const }
+  { id: 'cost', label: 'Coste Anual', align: 'right' as const },
+  { id: 'savings', label: 'Ahorro Estimado', align: 'right' as const }
 ]
 
 const TariffComparisonTable = ({ comparison, isLoading }: Props) => (

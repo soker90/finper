@@ -2,6 +2,7 @@ import { useState } from 'react'
 import {
   Box,
   Collapse,
+  Chip,
   IconButton,
   Table,
   TableBody,
@@ -30,6 +31,19 @@ import {
 interface Props {
   row: TariffComparison
   isBest: boolean
+}
+
+const BILLING_MONTHS_LABEL: Record<number, string> = {
+  1: 'Mensual',
+  2: 'Bimensual',
+  3: 'Trimestral',
+  6: 'Semestral',
+  12: 'Anual',
+}
+
+const BILLING_MONTHS_COLOR: Record<number, 'warning' | 'success' | 'default' | 'info'> = {
+  3: 'warning',
+  12: 'success',
 }
 
 const TariffRow = ({ row, isBest }: Props) => {
@@ -106,9 +120,29 @@ const TariffRow = ({ row, isBest }: Props) => {
             >
               {row.retailer}
             </Typography>
-            <Typography variant='body2' color='text.secondary'>
-              {row.tariffName}
-            </Typography>
+            <Stack direction='row' spacing={1} alignItems='center'>
+              <Typography variant='body2' color='text.secondary'>
+                {row.tariffName}
+              </Typography>
+              {row.billingMonths && (
+                <Chip
+                  label={BILLING_MONTHS_LABEL[row.billingMonths] ?? `${row.billingMonths}m`}
+                  size='small'
+                  color={BILLING_MONTHS_COLOR[row.billingMonths] ?? 'default'}
+                  variant='outlined'
+                  sx={{ height: 16, fontSize: '0.65rem', fontWeight: 700 }}
+                />
+              )}
+              {row.discount && (
+                <Chip
+                  label={`${row.discount.tipo === 'porcentaje' ? '-' : ''}${row.discount.valor}${row.discount.tipo === 'porcentaje' ? '%' : '€'}${row.discount.meses ? ` / ${row.discount.meses}m` : ''}${row.discount.soloNuevosClientes ? ' ★nuevos' : ''}`}
+                  size='small'
+                  color='secondary'
+                  variant='outlined'
+                  sx={{ height: 16, fontSize: '0.65rem', fontWeight: 700 }}
+                />
+              )}
+            </Stack>
           </Stack>
         </TableCell>
         <TableCell align='center'>
@@ -122,19 +156,31 @@ const TariffRow = ({ row, isBest }: Props) => {
           </Stack>
         </TableCell>
         <TableCell align='right'>
+          <Stack alignItems='flex-end'>
+            <Typography variant='subtitle1' fontWeight={700}>
+              {format.euro(row.estimatedAnnualTotal)}
+            </Typography>
+            {row.firstYearTotal !== null && (
+              <Typography variant='caption' color='secondary' fontWeight={700}>
+                1er año: {format.euro(row.firstYearTotal)}
+              </Typography>
+            )}
+          </Stack>
+        </TableCell>
+        <TableCell align='right'>
           <Typography
             variant='h6'
             component='span'
             fontWeight={700}
             color={getSavingsColor(row.estimatedAnnualSavings)}
           >
-            {savingsLabel === 'saving' ? `${TARIFF_ROW_LABELS.saving}: ` : `${TARIFF_ROW_LABELS.cost}: `}
-            {format.euro(Math.abs(row.estimatedAnnualSavings))}{TARIFF_ROW_LABELS.savingsPerYear}
+            {savingsLabel === 'saving' ? '+' : ''}
+            {format.euro(row.estimatedAnnualSavings)}
           </Typography>
         </TableCell>
       </TableRow>
       <TableRow>
-        <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={6}>
+        <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={5}>
           <Collapse in={open} timeout='auto' unmountOnExit>
             <Box sx={{ margin: 2, bgcolor: 'grey.50', p: 2, borderRadius: 2 }}>
               <Typography variant='subtitle2' gutterBottom component='div' fontWeight={700}>

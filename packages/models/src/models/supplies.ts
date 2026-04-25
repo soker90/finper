@@ -4,7 +4,6 @@ export const SUPPLY_TYPE = {
   ELECTRICITY: 'electricity',
   WATER: 'water',
   GAS: 'gas',
-  INTERNET: 'internet',
   OTHER: 'other'
 } as const
 
