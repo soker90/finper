@@ -211,7 +211,7 @@ export default class TariffsService implements ITariffsService {
       ((reading.consumptionPeak || 0) * prices.peakEnergy) +
       ((reading.consumptionFlat || 0) * prices.flatEnergy) +
       ((reading.consumptionOffPeak || 0) * prices.offPeakEnergy)
-    // Impuesto Elctrico: MAX(totalKWh  0.001, (potencia + energa)  IEact)
+    // Impuesto Eléctrico: MAX(totalKWh × 0.001, (potencia + energía) × IEact)
     /* istanbul ignore next */
     const totalKwh = (reading.consumptionPeak || 0) + (reading.consumptionFlat || 0) + (reading.consumptionOffPeak || 0)
     const electricityTaxAmount = Math.max(totalKwh * 0.001, (powerCost + energyCost) * taxes.electricityTax)
