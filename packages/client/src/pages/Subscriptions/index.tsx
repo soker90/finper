@@ -44,6 +44,16 @@ const Subscriptions = () => {
     mutate(`${SUBSCRIPTIONS}/${subscriptionId}/transactions`)
   }
 
+  const handleAssignCandidate = async (candidateId: string, subscriptionId: string) => {
+    const result = await assign(candidateId, subscriptionId)
+    if (!result.error) {
+      mutate(SUBSCRIPTIONS)
+      mutate(`${SUBSCRIPTIONS}/${subscriptionId}/transactions`)
+      mutate(`${SUBSCRIPTIONS}/${subscriptionId}/matching-transactions`)
+    }
+    return result
+  }
+
   return (
     <>
       <HeaderButtons
@@ -53,7 +63,7 @@ const Subscriptions = () => {
 
       <SubscriptionsSummary subscriptions={subscriptions} />
 
-      <CandidatesBanner candidates={candidates} onAssign={assign} onDismiss={dismiss} />
+      <CandidatesBanner candidates={candidates} onAssign={handleAssignCandidate} onDismiss={dismiss} />
 
       {isLoading && <SubscriptionsSkeleton />}
 
