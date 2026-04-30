@@ -49,6 +49,7 @@ const Subscriptions = () => {
     if (!result.error) {
       mutate(SUBSCRIPTIONS)
       mutate(`${SUBSCRIPTIONS}/${subscriptionId}/transactions`)
+      mutate(`${SUBSCRIPTIONS}/${subscriptionId}/matching-transactions`)
     }
     return result
   }
