@@ -42,17 +42,30 @@ export default class AccountService implements IAccountService {
   }
 
   public async transfer({ sourceId, destinationId, amount }: { sourceId: string, destinationId: string, amount: number }): Promise<void> {
-    const sourceAccount = await AccountModel.findById(sourceId)
-    const destinationAccount = await AccountModel.findById(destinationId)
+    const session = await AccountModel.startSession()
+    session.startTransaction()
 
-    if (!sourceAccount || !destinationAccount) return
+    try {
+      const sourceAccount = await AccountModel.findById(sourceId).session(session)
+      const destinationAccount = await AccountModel.findById(destinationId).session(session)
 
-    sourceAccount.balance -= amount
-    destinationAccount.balance += amount
+      /* istanbul ignore next — validator validateAccountExist runs before this method via route */
+      if (!sourceAccount || !destinationAccount) {
+        throw Boom.notFound(ERROR_MESSAGE.ACCOUNT.NOT_FOUND).output
+      }
 
-    await Promise.all([
-      sourceAccount.save(),
-      destinationAccount.save()
-    ])
+      sourceAccount.balance -= amount
+      destinationAccount.balance += amount
+
+      await sourceAccount.save({ session })
+      await destinationAccount.save({ session })
+
+      await session.commitTransaction()
+    } catch (error) {
+      await session.abortTransaction()
+      throw error
+    } finally {
+      await session.endSession()
+    }
   }
 }
