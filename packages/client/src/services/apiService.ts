@@ -20,6 +20,12 @@ export const addAccount = (params: { name?: string, bank?: string, balance?: num
   return axios.post(ACCOUNTS, params).then((data: any) => ({ data: data as Account })).catch((error: any) => ({ error: extractError(error) }))
 }
 
+export const transferAccountMoney = (params: { sourceId: string, destinationId: string, amount: number }): Promise<{
+  error?: string | undefined
+}> => {
+  return axios.post(`${ACCOUNTS}/transfer`, params).then(() => ({})).catch((error: any) => ({ error: extractError(error) }))
+}
+
 export const editCategory = (id: string, params: { name: string, type: string }): Promise<{
   data?: Category,
   error?: string | undefined
