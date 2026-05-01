@@ -77,7 +77,7 @@ export class AccountController {
 
   public async transfer (req: Request, res: Response, next: NextFunction): Promise<void> {
     Promise.resolve(req.body)
-      .tap(() => this.logger.logInfo(`/transfer - account transfer`))
+      .tap(() => this.logger.logInfo('/transfer - account transfer'))
       .then(validateAccountTransferParams)
       .then(extractUser(req))
       .tap(({ user, sourceId, destinationId }) => Promise.all([
@@ -85,7 +85,7 @@ export class AccountController {
         validateAccountExist(destinationId as string, user)
       ]))
       .then(this.accountService.transfer.bind(this.accountService))
-      .tap(() => this.logger.logInfo(`Account transfer has been successfully processed`))
+      .tap(() => this.logger.logInfo('Account transfer has been successfully processed'))
       .then(() => {
         res.status(200).send({ message: 'Transfer successful' })
       })
