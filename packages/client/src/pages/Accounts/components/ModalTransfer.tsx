@@ -23,7 +23,7 @@ interface TransferForm {
 
 const ModalTransfer = ({ accounts, show, onClose }: Props) => {
   const [error, setError] = useState<string | undefined>(undefined)
-  
+
   const { register, handleSubmit, formState: { errors }, watch, reset } = useForm<TransferForm>({
     defaultValues: {
       sourceId: '',
@@ -41,7 +41,7 @@ const ModalTransfer = ({ accounts, show, onClose }: Props) => {
     }
 
     const res = await transferAccountMoney(params)
-    
+
     if (res.error) {
       setError(res.error)
     } else {
@@ -69,7 +69,7 @@ const ModalTransfer = ({ accounts, show, onClose }: Props) => {
         options={activeAccounts} optionValue='_id' optionLabel='name'
         voidOption voidLabel='Selecciona cuenta'
       />
-      
+
       <SelectForm
         size={12}
         id='destinationId' label='Cuenta Destino' placeholder='Cuenta Destino'
