@@ -14,3 +14,115 @@
 - **Do not run `npm update`**, `npx npm-check-updates`, or any blind upgrade command. Review each update individually.
 - **Use deterministic installs**: prefer `pnpm install --frozen-lockfile` over `pnpm install` in CI and scripts.
 - **Always communicate in Spanish**: You must answer, explain, and summarize all your work strictily in conversational Spanish.
+- **Code and variables in English**: all variable names, function names, comments, and code must be written in English.
+
+---
+
+## Monorepo structure
+
+```
+packages/
+  models/   @soker90/finper-models  — Mongoose schemas, published to NPM
+  api/      @soker90/finper-api     — Express REST API, port 3008
+  client/   @soker90/finper-client  — React 19 + Vite SPA, port 5173
+```
+
+`api` depends on `models` via `workspace:*`. The API imports from `models/dist/` (compiled output), **not** from source. Without a models build, the API server won't start and imports fail at runtime.
+
+---
+
+## Commands (use `make`, not raw pnpm)
+
+```bash
+# Install
+pnpm install
+
+# Critical: build models BEFORE starting or building the API
+make build-models
+
+# Dev servers (run in separate terminals after build-models)
+make start-api       # http://localhost:3008
+make start-client    # http://localhost:5173
+
+# Build all
+make build-models && make build-api && make build-client
+
+# Tests (all packages in parallel)
+make test
+
+# Tests per package
+make test-models     # Jest + @shelf/jest-mongodb (in-memory MongoDB)
+make test-api        # Jest + @shelf/jest-mongodb
+make test-client     # Vitest (runs with --coverage by default)
+
+# Lint per package
+make lint-models
+make lint-api
+make lint-client
+```
+
+### Run a single test file
+
+```bash
+# API / models (Jest)
+pnpm --filter @soker90/finper-api exec jest src/controllers/account.test.ts
+pnpm --filter @soker90/finper-api exec jest --testNamePattern="should return 200"
+
+# Client (Vitest)
+pnpm --filter @soker90/finper-client exec vitest run src/pages/Accounts/Accounts.test.tsx
+pnpm --filter @soker90/finper-client exec vitest run -t "should render"
+pnpm --filter @soker90/finper-client exec vitest --watch   # watch mode, no coverage
+```
+
+### Typecheck (no dedicated script)
+
+```bash
+pnpm --filter @soker90/finper-client exec tsc --noEmit
+pnpm --filter @soker90/finper-api exec tsc --noEmit
+pnpm --filter @soker90/finper-models exec tsc --noEmit
+```
+
+---
+
+## Toolchain quirks
+
+- **Two test frameworks**: `api` and `models` use Jest (`jest.config.cjs`); `client` uses Vitest configured inside `vite.config.ts` — there is no separate `vitest.config.*`.
+- **In-memory MongoDB** (`@shelf/jest-mongodb`): downloads a MongoDB binary to `~/.cache/mongodb-binaries`. On Ubuntu 22+ requires `libssl1.1` installed manually (CI does this explicitly before tests).
+- **ESLint flat config** (`eslint.config.mjs`) in all three packages. No `.eslintrc`. Uses `neostandard` + `@typescript-eslint`.
+- **Path aliases in client**: defined in both `tsconfig.json` and `vite.config.ts` `resolve.alias`. Adding a new importable directory requires updating both files.
+- **React 19**: use `ref` as a regular prop (no `forwardRef`), `use()` instead of `useContext()`.
+- **PWA**: `vite-plugin-pwa` with `registerType: 'autoUpdate'`. Service worker registers automatically; may interfere in integration test environments.
+- **Node 24** required (`.nvmrc` + `"engines": { "node": ">=24.x" }` in api).
+- **`packageManager` pinned**: root `package.json` declares `pnpm@10.29.3`; `preinstall` script blocks npm/yarn.
+
+---
+
+## Environment variables
+
+Copy `.env.example` to `.env` at repo root:
+
+| Variable | Required | Notes |
+|---|---|---|
+| `DATABASE_NAME` | Yes | |
+| `DATABASE_HOST` | Yes | |
+| `JWT_SECRET` | Yes | |
+| `SALT_ROUNDS` | Yes | |
+| `MONGODB` | No | Overrides host+name if set |
+| `MONGODB_USER` / `MONGODB_PASS` | No | |
+| `TICKET_BOT_URL` / `TICKET_BOT_API_KEY` | No | Tickets module |
+
+Client also needs `packages/client/.env`:
+```dotenv
+VITE_API_HOST=http://localhost:3008/api/
+```
+No fallback is hardcoded; without this variable all API calls fail in development.
+
+---
+
+## Common agent mistakes
+
+- Running `make start-api` or building the API without first running `make build-models`.
+- Adding dependencies with `^` or `~` — always use exact versions.
+- Looking for a `vitest.config.*` in the client — it doesn't exist; Vitest config is in `vite.config.ts`.
+- Running `tsc` expecting a `typecheck` npm script — there isn't one; run `tsc --noEmit` directly.
+- Assuming `make test` is safe to debug a single failing test — it runs all packages in parallel; target the specific package instead.
