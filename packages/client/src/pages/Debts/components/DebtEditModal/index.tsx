@@ -83,7 +83,7 @@ const DebtEditModal = ({
       <InputForm
         id='concept' label='Concepto' placeholder='Introduce el concepto'
         error={!!errors.concept} {...register('concept', { required: true })}
-        errorText='Introduce un concept válido'
+        errorText='El concepto es obligatorio'
       />
 
     </ModalGrid>
