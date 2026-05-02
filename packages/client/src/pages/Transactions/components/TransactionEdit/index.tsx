@@ -70,6 +70,7 @@ const TransactionEdit = ({
           placeholder='Introduce una fecha' id='date' label='Fecha'
           error={!!errors.date}
           control={control}
+          size={2}
         />
 
         <SelectForm
