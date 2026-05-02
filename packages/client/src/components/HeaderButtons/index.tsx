@@ -15,7 +15,11 @@ const HeaderButtons = ({ buttons, desktopSx }: { buttons: ButtonProps[], desktop
   return (
     <Stack
       spacing={1} direction={isMobile ? 'column' : 'row'}
-      sx={[!isMobile && desktopSx, { display: 'flex', justifyContent: 'end' }]}
+      sx={[
+        !isMobile && desktopSx,
+        { display: 'flex', justifyContent: 'end' },
+        isMobile && { mt: 0, mb: 2 }
+      ]}
     >
       {buttons.map(({ Icon, title, onClick, disabled }: ButtonProps) => (
         <Button
