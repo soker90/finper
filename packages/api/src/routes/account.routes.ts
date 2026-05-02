@@ -31,6 +31,13 @@ export class AccountRoutes {
       this.accountController.accounts.bind(this.accountController)
     )
 
+    // POST /:id/adjust must be registered before PATCH /:id to avoid Express param conflicts
+    this.router.post(
+      '/:id/adjust',
+      authMiddleware,
+      this.accountController.adjust.bind(this.accountController)
+    )
+
     this.router.patch(
       '/:id',
       authMiddleware,
