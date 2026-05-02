@@ -1,9 +1,6 @@
 import { useState } from 'react'
-import {
-  Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
-  Typography
-} from '@mui/material'
-import { MainCard } from 'components'
+import { TableBody, TableCell, TableHead, TableRow, Typography } from '@mui/material'
+import { ScrollableTable } from 'components'
 import { StockPosition } from 'types'
 import RemoveModal from './RemoveModal'
 import PositionRow from './PositionRow'
@@ -18,37 +15,33 @@ const StocksTable = ({ positions, onDeletePurchase }: Props) => {
 
   return (
     <>
-      <MainCard sx={{ mt: 2 }} content={false}>
-        <TableContainer>
-          <Table>
-            <TableHead>
+      <ScrollableTable title='Posiciones' cardSx={{ mt: 2 }}>
+        <TableHead>
+          <TableRow>
+            <TableCell />
+            <TableCell>Ticker / Empresa</TableCell>
+            <TableCell align='right'>Acciones</TableCell>
+            <TableCell align='right'>Coste medio</TableCell>
+            <TableCell align='right'>Coste total</TableCell>
+            <TableCell align='right'>Precio actual</TableCell>
+            <TableCell align='right'>Ganancia / Pérdida</TableCell>
+            <TableCell />
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          {positions.length === 0
+            ? (
               <TableRow>
-                <TableCell />
-                <TableCell>Ticker / Empresa</TableCell>
-                <TableCell align='right'>Acciones</TableCell>
-                <TableCell align='right'>Coste medio</TableCell>
-                <TableCell align='right'>Coste total</TableCell>
-                <TableCell align='right'>Precio actual</TableCell>
-                <TableCell align='right'>Ganancia / Pérdida</TableCell>
-                <TableCell />
+                <TableCell colSpan={8} align='center'>
+                  <Typography color='textSecondary' py={2}>No hay posiciones registradas</Typography>
+                </TableCell>
               </TableRow>
-            </TableHead>
-            <TableBody>
-              {positions.length === 0
-                ? (
-                  <TableRow>
-                    <TableCell colSpan={8} align='center'>
-                      <Typography color='textSecondary' py={2}>No hay posiciones registradas</Typography>
-                    </TableCell>
-                  </TableRow>
-                  )
-                : positions.map(pos => (
-                  <PositionRow key={pos.ticker} position={pos} onDeletePurchase={setPurchaseToDelete} />
-                ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
-      </MainCard>
+              )
+            : positions.map(pos => (
+              <PositionRow key={pos.ticker} position={pos} onDeletePurchase={setPurchaseToDelete} />
+            ))}
+        </TableBody>
+      </ScrollableTable>
 
       {purchaseToDelete && (
         <RemoveModal

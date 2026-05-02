@@ -9,7 +9,8 @@ import {
   Divider,
   Button,
   SxProps,
-  Theme
+  Theme,
+  Box
 } from '@mui/material'
 
 interface Props {
@@ -56,13 +57,30 @@ const ModalGrid = ({
     <Modal
       onClose={onClose}
       open={show}
-      sx={{ margin: 'auto', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+      sx={{ p: 2, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
     >
-      <form onSubmit={handleFormSubmit}>
-        <Card sx={cardSx}>
+      <Box
+        component='form'
+        onSubmit={handleFormSubmit}
+        sx={{
+          width: '100%',
+          maxWidth: { xs: '100%', sm: 600, md: 800 },
+          maxHeight: '100%',
+          display: 'flex',
+          outline: 'none'
+        }}
+      >
+        <Card sx={{
+          ...cardSx,
+          width: '100%',
+          maxHeight: '100%',
+          display: 'flex',
+          flexDirection: 'column'
+        }}
+        >
           <CardHeader title={title} />
           <Divider />
-          <CardContent>
+          <CardContent sx={{ overflowY: 'auto' }}>
             <Grid
               container
               spacing={3}
@@ -71,11 +89,11 @@ const ModalGrid = ({
             </Grid>
           </CardContent>
           <Divider />
-          <CardActions>
+          <CardActions sx={{ p: 2, justifyContent: 'flex-end' }}>
             {actions?.map(_renderButton) || _renderButtons()}
           </CardActions>
         </Card>
-      </form>
+      </Box>
     </Modal>
   )
 }

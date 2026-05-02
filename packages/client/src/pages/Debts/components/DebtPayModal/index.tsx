@@ -25,7 +25,7 @@ const DebtPayModal = ({
   })
 
   return (
-    <ModalGrid show onClose={onClose} title={`Abonar deuda — ${debt.from}`} action={onSubmit} actionDisabled={isSubmitting} cardSx={{ minWidth: 480 }}>
+    <ModalGrid show onClose={onClose} title={`Abonar deuda — ${debt.from}`} action={onSubmit} actionDisabled={isSubmitting}>
       <InputForm
         id='amount'
         label='Importe abonado'

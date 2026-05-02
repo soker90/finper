@@ -57,7 +57,7 @@ const LoanAmortizationTable = ({ rows, onDeletePayment, onEditPayment, onPayPaym
         ref={containerRef}
         sx={{ maxHeight: MAX_TABLE_HEIGHT, overflow: 'auto' }}
       >
-        <Table size='small' stickyHeader>
+        <Table size='small' stickyHeader sx={{ '& td, & th': { whiteSpace: 'nowrap' } }}>
           <TableHead>
             <TableRow>
               <TableCell>Periodo</TableCell>

@@ -1,7 +1,6 @@
-import { TableMaterial } from '@soker90/react-mui-table'
 import { Grid } from '@mui/material'
 import { DeleteOutlined, EditOutlined, EuroOutlined } from '@ant-design/icons'
-
+import ScrollableTable, { Column, Action } from 'components/ScrollableTable'
 import { format } from 'utils'
 import { Debt } from 'types/debt'
 
@@ -14,34 +13,31 @@ interface Props {
   onPay: (debt: Debt) => void
 }
 
-const DebtTable = ({ debts, title, fromTitle, onEdit, onRemove, onPay }: Props) => (
-  <Grid size={{ xs: 12, lg: 6 }}>
-    <TableMaterial
-      columns={[
-        { title: fromTitle, field: 'from' },
-        { title: 'Fecha', render: ({ date }) => format.dateShort(date) },
-        { title: 'Pendiente', render: ({ amount }) => format.euro(amount) },
-        { title: 'Concepto', field: 'concept' }
-      ]}
-      data={debts}
-      title={title}
-      actions={[{
-        icon: EuroOutlined,
-        tooltip: 'Abonar',
-        onClick: onPay
-      },
-      {
-        icon: EditOutlined,
-        tooltip: 'Editar',
-        onClick: onEdit
-      },
-      {
-        icon: DeleteOutlined,
-        tooltip: 'Eliminar',
-        onClick: onRemove
-      }]}
-    />
-  </Grid>
-)
+const DebtTable = ({ debts, title, fromTitle, onEdit, onRemove, onPay }: Props) => {
+  const columns: Column<Debt>[] = [
+    { id: 'from', label: fromTitle },
+    { id: 'date', label: 'Fecha', render: (d) => format.dateShort(d.date) },
+    { id: 'amount', label: 'Pendiente', render: (d) => format.euro(d.amount), align: 'right' },
+    { id: 'concept', label: 'Concepto', field: 'concept' }
+  ]
+
+  const actions: Action<Debt>[] = [
+    { icon: EuroOutlined, tooltip: 'Abonar', onClick: onPay },
+    { icon: EditOutlined, tooltip: 'Editar', onClick: onEdit },
+    { icon: DeleteOutlined, tooltip: 'Eliminar', onClick: onRemove, color: 'error' }
+  ]
+
+  return (
+    <Grid size={{ xs: 12, lg: 6 }}>
+      <ScrollableTable
+        title={title}
+        columns={columns}
+        data={debts}
+        actions={actions}
+        keyExtractor={(d) => d._id ?? d.from}
+      />
+    </Grid>
+  )
+}
 
 export default DebtTable

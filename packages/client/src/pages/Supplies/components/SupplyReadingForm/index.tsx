@@ -97,7 +97,6 @@ const SupplyReadingForm = ({ supply, reading, onClose, onSubmit }: Props) => {
       onClose={onClose}
       action={handleFormSubmit}
       actionDisabled={isSubmitting}
-      cardSx={{ minWidth: 520 }}
     >
       {COMMON_FIELDS.map(renderField)}
       {consumptionFields.map(renderField)}
