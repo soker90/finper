@@ -74,7 +74,7 @@ const DeclarativeHead = <T,>({ columns, hasActions }: DeclarativeHeadProps<T>) =
 
 // ─── Action cell ─────────────────────────────────────────────────────────────
 
-function ActionCell<T>({ row, actions }: { row: T; actions: Action<T>[] }) {
+function ActionCell<T> ({ row, actions }: { row: T; actions: Action<T>[] }) {
   return (
     <TableCell align='right' sx={{ py: 0.5 }}>
       {actions.map(({ icon: Icon, tooltip, onClick, to, disabled, color }) => {
@@ -199,7 +199,7 @@ type RawProps = BaseProps & {
 
 type Props<T> = DeclarativeProps<T> | RawProps
 
-function ScrollableTableInner<T>(props: Props<T>) {
+function ScrollableTableInner<T> (props: Props<T>) {
   const {
     title,
     secondary,
@@ -210,16 +210,13 @@ function ScrollableTableInner<T>(props: Props<T>) {
     containerSx
   } = props
 
+  const columns = 'columns' in props ? props.columns : undefined
+  const actionsLength = 'actions' in props ? props.actions?.length : 0
+
   const head = useMemo(() => {
-    if (!('columns' in props) || !props.columns) return null
-    return (
-      <DeclarativeHead
-        columns={props.columns}
-        hasActions={!!props.actions?.length}
-      />
-    )
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, ['columns' in props ? props.columns : null, 'actions' in props ? props.actions?.length : 0])
+    if (!columns) return null
+    return <DeclarativeHead columns={columns} hasActions={!!actionsLength} />
+  }, [columns, actionsLength])
 
   const inner = 'columns' in props && props.columns && props.data !== undefined
     ? (
