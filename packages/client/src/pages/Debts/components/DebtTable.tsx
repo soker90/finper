@@ -15,15 +15,15 @@ interface Props {
 
 const DebtTable = ({ debts, title, fromTitle, onEdit, onRemove, onPay }: Props) => {
   const columns: Column<Debt>[] = [
-    { id: 'from',    label: fromTitle },
-    { id: 'date',    label: 'Fecha',     render: (d) => format.dateShort(d.date) },
-    { id: 'amount',  label: 'Pendiente', render: (d) => format.euro(d.amount), align: 'right' },
-    { id: 'concept', label: 'Concepto',  field: 'concept' }
+    { id: 'from', label: fromTitle },
+    { id: 'date', label: 'Fecha', render: (d) => format.dateShort(d.date) },
+    { id: 'amount', label: 'Pendiente', render: (d) => format.euro(d.amount), align: 'right' },
+    { id: 'concept', label: 'Concepto', field: 'concept' }
   ]
 
   const actions: Action<Debt>[] = [
-    { icon: EuroOutlined,   tooltip: 'Abonar',   onClick: onPay },
-    { icon: EditOutlined,   tooltip: 'Editar',   onClick: onEdit },
+    { icon: EuroOutlined, tooltip: 'Abonar', onClick: onPay },
+    { icon: EditOutlined, tooltip: 'Editar', onClick: onEdit },
     { icon: DeleteOutlined, tooltip: 'Eliminar', onClick: onRemove, color: 'error' }
   ]
 

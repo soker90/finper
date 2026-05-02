@@ -70,13 +70,14 @@ const ModalGrid = ({
           outline: 'none'
         }}
       >
-        <Card sx={{ 
-          width: '100%', 
-          maxHeight: '100%', 
-          display: 'flex', 
+        <Card sx={{
+          width: '100%',
+          maxHeight: '100%',
+          display: 'flex',
           flexDirection: 'column',
-          ...cardSx 
-        }}>
+          ...cardSx
+        }}
+        >
           <CardHeader title={title} />
           <Divider />
           <CardContent sx={{ overflowY: 'auto' }}>

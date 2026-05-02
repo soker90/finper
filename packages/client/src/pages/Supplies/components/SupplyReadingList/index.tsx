@@ -19,7 +19,7 @@ const SupplyReadingList = ({ readings, isLoading, isElectricity, unit, onAdd, on
   const columns = useMemo(() => getColumns({ isElectricity, unit }), [isElectricity, unit])
 
   const actions: Action<SupplyReading>[] = useMemo(() => [
-    { icon: EditOutlined,   tooltip: 'Editar lectura',   onClick: onEdit },
+    { icon: EditOutlined, tooltip: 'Editar lectura', onClick: onEdit },
     { icon: DeleteOutlined, tooltip: 'Eliminar lectura', onClick: onDelete, color: 'error' }
   ], [onEdit, onDelete])
 

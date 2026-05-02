@@ -4,12 +4,12 @@ import { format } from 'utils'
 import { PensionTransaction } from 'types'
 
 const COLUMNS: Column<PensionTransaction>[] = [
-  { id: 'date',          label: 'Fecha',          render: (t) => format.date(t.date) },
-  { id: 'companyAmount', label: 'Empresa (€)',     render: (t) => format.euro(t.companyAmount), align: 'right' },
-  { id: 'companyUnits',  label: 'Empresa (uds)',   field: 'companyUnits',                        align: 'right' },
-  { id: 'employeeAmount',label: 'Empleado (€)',    render: (t) => format.euro(t.employeeAmount), align: 'right' },
-  { id: 'employeeUnits', label: 'Empleado (uds)',  field: 'employeeUnits',                       align: 'right' },
-  { id: 'value',         label: 'Valor ud.',       render: (t) => format.euro(t.value),          align: 'right' }
+  { id: 'date', label: 'Fecha', render: (t) => format.date(t.date) },
+  { id: 'companyAmount', label: 'Empresa (€)', render: (t) => format.euro(t.companyAmount), align: 'right' },
+  { id: 'companyUnits', label: 'Empresa (uds)', field: 'companyUnits', align: 'right' },
+  { id: 'employeeAmount', label: 'Empleado (€)', render: (t) => format.euro(t.employeeAmount), align: 'right' },
+  { id: 'employeeUnits', label: 'Empleado (uds)', field: 'employeeUnits', align: 'right' },
+  { id: 'value', label: 'Valor ud.', render: (t) => format.euro(t.value), align: 'right' }
 ]
 
 interface Props {

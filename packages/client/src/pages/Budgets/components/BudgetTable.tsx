@@ -8,9 +8,9 @@ import { Budget } from 'types/budget'
 import { sortByAmountAndName } from '../utils'
 
 const COLUMNS: Column<Budget>[] = [
-  { id: 'name',      label: 'Categoría', field: 'name' },
-  { id: 'real',      label: 'Real',      render: (b) => format.euro(b.budgets[0].real),   align: 'right' },
-  { id: 'estimated', label: 'Estimado',  render: (b) => format.euro(b.budgets[0].amount), align: 'right' }
+  { id: 'name', label: 'Categoría', field: 'name' },
+  { id: 'real', label: 'Real', render: (b) => format.euro(b.budgets[0].real), align: 'right' },
+  { id: 'estimated', label: 'Estimado', render: (b) => format.euro(b.budgets[0].amount), align: 'right' }
 ]
 
 const BudgetTable = ({

@@ -13,8 +13,8 @@ interface ColumnContext {
 export const getColumns = ({ isElectricity, unit }: ColumnContext): Column<SupplyReading>[] => {
   const consumptionCols: Column<SupplyReading>[] = isElectricity
     ? [
-        { id: 'peak',    label: 'Punta (kWh)', align: 'right', render: (r) => r.consumptionPeak ?? '—' },
-        { id: 'flat',    label: 'Llano (kWh)', align: 'right', render: (r) => r.consumptionFlat ?? '—' },
+        { id: 'peak', label: 'Punta (kWh)', align: 'right', render: (r) => r.consumptionPeak ?? '—' },
+        { id: 'flat', label: 'Llano (kWh)', align: 'right', render: (r) => r.consumptionFlat ?? '—' },
         { id: 'offPeak', label: 'Valle (kWh)', align: 'right', render: (r) => r.consumptionOffPeak ?? '—' }
       ]
     : [
