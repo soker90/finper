@@ -43,6 +43,7 @@ const AccountsPieChart = ({ accounts, chartColors, isMobile }: AccountsPieChartP
               </Pie>
               <Tooltip content={<PieTooltip />} />
               <Legend
+                wrapperStyle={{ paddingTop: 16 }}
                 formatter={(value) => (
                   <Typography component='span' variant='body2'>{value}</Typography>
                 )}
