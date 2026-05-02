@@ -60,8 +60,8 @@ export interface DashboardStatsResult {
   projectedMonthlyExpense: number
   cashRunwayMonths: number
 
-  // Rankings del mes
-  topExpenseCategories: Array<{ name: string; amount: number }>
+  // Rankings del mes — topExpenseCategories incluye parentName para Treemap jerárquico
+  topExpenseCategories: Array<{ name: string; amount: number; parentName?: string }>
   topStores: Array<{ name: string; amount: number }>
 
   // Pensión
@@ -324,7 +324,7 @@ export default class DashboardService implements IDashboardService {
         { $sort: { _id: 1 } }
       ]),
 
-      // 8. Categorías de gasto del mes actual (todas, ordenadas por importe)
+      // 8. Categorías de gasto del mes actual — incluye parentName para Treemap jerárquico
       TransactionModel.aggregate([
         {
           $match: {
@@ -348,16 +348,26 @@ export default class DashboardService implements IDashboardService {
             as: 'categoryDoc'
           }
         },
+        // Resolve parent category name for hierarchical Treemap
+        {
+          $lookup: {
+            from: 'categories',
+            localField: 'categoryDoc.parent',
+            foreignField: '_id',
+            as: 'parentDoc'
+          }
+        },
         {
           $project: {
             _id: 0,
             name: { $ifNull: [{ $arrayElemAt: ['$categoryDoc.name', 0] }, 'Sin categoría'] },
+            parentName: { $ifNull: [{ $arrayElemAt: ['$parentDoc.name', 0] }, null] },
             amount: 1
           }
         }
       ]),
 
-      // 9. Tiendas de gasto del mes actual (todas, ordenadas por importe)
+      // 9. Tiendas de gasto del mes actual
       TransactionModel.aggregate([
         {
           $match: {
@@ -480,7 +490,7 @@ export default class DashboardService implements IDashboardService {
       : 0
 
     // ── Top categorías: solo las que tienen importe neto positivo ────────────
-    const topExpenseCategories = (topCategoriesAgg as Array<{ name: string; amount: number }>)
+    const topExpenseCategories = (topCategoriesAgg as Array<{ name: string; amount: number; parentName?: string }>)
       .filter(c => c.amount > 0)
 
     // ── Top tiendas: solo las que tienen importe neto positivo ───────────────
