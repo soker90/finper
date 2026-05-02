@@ -60,8 +60,8 @@ export interface DashboardStatsResult {
   projectedMonthlyExpense: number
   cashRunwayMonths: number
 
-  // Rankings del mes
-  topExpenseCategories: Array<{ name: string; amount: number }>
+  // Rankings del mes — topExpenseCategories incluye parentName para Treemap jerárquico
+  topExpenseCategories: Array<{ name: string; amount: number; parentName?: string }>
   topStores: Array<{ name: string; amount: number }>
 
   // Pensión
@@ -209,7 +209,7 @@ export default class DashboardService implements IDashboardService {
         { $group: { _id: null, total: { $sum: '$pendingAmount' } } }
       ]),
 
-      // 4. Ingresos y gastos del mes actual
+      // 4. Ingresos y gastos del mes actual (excluye categorías de sistema)
       TransactionModel.aggregate([
         {
           $match: {
@@ -219,25 +219,19 @@ export default class DashboardService implements IDashboardService {
           }
         },
         {
-          $group: {
-            _id: null,
-            income: {
-              $sum: { $cond: [{ $eq: ['$type', TRANSACTION.Income] }, '$amount', 0] }
-            },
-            expenses: {
-              $sum: { $cond: [{ $eq: ['$type', TRANSACTION.Expense] }, '$amount', 0] }
-            }
+          $lookup: {
+            from: 'categories',
+            localField: 'category',
+            foreignField: '_id',
+            as: 'categoryDoc'
           }
-        }
-      ]),
-
-      // 4. Ingresos y gastos del mes anterior
-      TransactionModel.aggregate([
+        },
         {
           $match: {
-            user,
-            date: { $gte: previousMonthStart, $lt: previousMonthEnd },
-            type: { $in: [TRANSACTION.Income, TRANSACTION.Expense] }
+            $or: [
+              { 'categoryDoc.isSystem': { $ne: true } },
+              { 'categoryDoc': { $size: 0 } }
+            ]
           }
         },
         {
@@ -253,13 +247,67 @@ export default class DashboardService implements IDashboardService {
         }
       ]),
 
-      // 5. Resumen mensual últimos 6 meses
+      // 4. Ingresos y gastos del mes anterior (excluye categorías de sistema)
+      TransactionModel.aggregate([
+        {
+          $match: {
+            user,
+            date: { $gte: previousMonthStart, $lt: previousMonthEnd },
+            type: { $in: [TRANSACTION.Income, TRANSACTION.Expense] }
+          }
+        },
+        {
+          $lookup: {
+            from: 'categories',
+            localField: 'category',
+            foreignField: '_id',
+            as: 'categoryDoc'
+          }
+        },
+        {
+          $match: {
+            $or: [
+              { 'categoryDoc.isSystem': { $ne: true } },
+              { 'categoryDoc': { $size: 0 } }
+            ]
+          }
+        },
+        {
+          $group: {
+            _id: null,
+            income: {
+              $sum: { $cond: [{ $eq: ['$type', TRANSACTION.Income] }, '$amount', 0] }
+            },
+            expenses: {
+              $sum: { $cond: [{ $eq: ['$type', TRANSACTION.Expense] }, '$amount', 0] }
+            }
+          }
+        }
+      ]),
+
+      // 5. Resumen mensual últimos 6 meses (excluye categorías de sistema)
       TransactionModel.aggregate([
         {
           $match: {
             user,
             date: { $gte: last6MonthsStart },
             type: { $in: [TRANSACTION.Income, TRANSACTION.Expense] }
+          }
+        },
+        {
+          $lookup: {
+            from: 'categories',
+            localField: 'category',
+            foreignField: '_id',
+            as: 'categoryDoc'
+          }
+        },
+        {
+          $match: {
+            $or: [
+              { 'categoryDoc.isSystem': { $ne: true } },
+              { 'categoryDoc': { $size: 0 } }
+            ]
           }
         },
         {
@@ -288,7 +336,7 @@ export default class DashboardService implements IDashboardService {
         }
       ]),
 
-      // 6. Gasto diario acumulado mes actual
+      // 6. Gasto diario acumulado mes actual (excluye categorías de sistema)
       TransactionModel.aggregate([
         {
           $match: {
@@ -298,6 +346,22 @@ export default class DashboardService implements IDashboardService {
           }
         },
         {
+          $lookup: {
+            from: 'categories',
+            localField: 'category',
+            foreignField: '_id',
+            as: 'categoryDoc'
+          }
+        },
+        {
+          $match: {
+            $or: [
+              { 'categoryDoc.isSystem': { $ne: true } },
+              { 'categoryDoc': { $size: 0 } }
+            ]
+          }
+        },
+        {
           $group: {
             _id: { $dayOfMonth: { date: { $toDate: '$date' }, timezone: TIMEZONE } },
             amount: { $sum: '$amount' }
@@ -306,7 +370,7 @@ export default class DashboardService implements IDashboardService {
         { $sort: { _id: 1 } }
       ]),
 
-      // 7. Gasto diario acumulado mes anterior
+      // 7. Gasto diario acumulado mes anterior (excluye categorías de sistema)
       TransactionModel.aggregate([
         {
           $match: {
@@ -316,6 +380,22 @@ export default class DashboardService implements IDashboardService {
           }
         },
         {
+          $lookup: {
+            from: 'categories',
+            localField: 'category',
+            foreignField: '_id',
+            as: 'categoryDoc'
+          }
+        },
+        {
+          $match: {
+            $or: [
+              { 'categoryDoc.isSystem': { $ne: true } },
+              { 'categoryDoc': { $size: 0 } }
+            ]
+          }
+        },
+        {
           $group: {
             _id: { $dayOfMonth: { date: { $toDate: '$date' }, timezone: TIMEZONE } },
             amount: { $sum: '$amount' }
@@ -324,7 +404,7 @@ export default class DashboardService implements IDashboardService {
         { $sort: { _id: 1 } }
       ]),
 
-      // 8. Categorías de gasto del mes actual (todas, ordenadas por importe)
+      // 8. Categorías de gasto del mes actual — excluye isSystem, incluye parentName para Treemap
       TransactionModel.aggregate([
         {
           $match: {
@@ -349,15 +429,33 @@ export default class DashboardService implements IDashboardService {
           }
         },
         {
+          $match: {
+            $or: [
+              { 'categoryDoc.isSystem': { $ne: true } },
+              { 'categoryDoc': { $size: 0 } }
+            ]
+          }
+        },
+        // Resolve parent category name for hierarchical Treemap
+        {
+          $lookup: {
+            from: 'categories',
+            localField: 'categoryDoc.parent',
+            foreignField: '_id',
+            as: 'parentDoc'
+          }
+        },
+        {
           $project: {
             _id: 0,
             name: { $ifNull: [{ $arrayElemAt: ['$categoryDoc.name', 0] }, 'Sin categoría'] },
+            parentName: { $ifNull: [{ $arrayElemAt: ['$parentDoc.name', 0] }, null] },
             amount: 1
           }
         }
       ]),
 
-      // 9. Tiendas de gasto del mes actual (todas, ordenadas por importe)
+      // 9. Tiendas de gasto del mes actual (excluye categorías de sistema)
       TransactionModel.aggregate([
         {
           $match: {
@@ -365,6 +463,22 @@ export default class DashboardService implements IDashboardService {
             date: { $gte: currentMonthStart, $lt: currentMonthEnd },
             type: TRANSACTION.Expense,
             store: { $exists: true, $ne: null }
+          }
+        },
+        {
+          $lookup: {
+            from: 'categories',
+            localField: 'category',
+            foreignField: '_id',
+            as: 'categoryDoc'
+          }
+        },
+        {
+          $match: {
+            $or: [
+              { 'categoryDoc.isSystem': { $ne: true } },
+              { 'categoryDoc': { $size: 0 } }
+            ]
           }
         },
         {
@@ -408,13 +522,29 @@ export default class DashboardService implements IDashboardService {
       // 11. Pensión: registros individuales (para sparkline)
       PensionModel.find({ user }).sort({ date: -1 }),
 
-      // 12. Presupuesto de gastos del mes actual (totales)
+      // 12. Presupuesto de gastos del mes actual (totales, excluye categorías de sistema)
       TransactionModel.aggregate([
         {
           $match: {
             user,
             date: { $gte: currentMonthStart, $lt: currentMonthEnd },
             type: TRANSACTION.Expense
+          }
+        },
+        {
+          $lookup: {
+            from: 'categories',
+            localField: 'category',
+            foreignField: '_id',
+            as: 'categoryDoc'
+          }
+        },
+        {
+          $match: {
+            $or: [
+              { 'categoryDoc.isSystem': { $ne: true } },
+              { 'categoryDoc': { $size: 0 } }
+            ]
           }
         },
         {
@@ -480,7 +610,7 @@ export default class DashboardService implements IDashboardService {
       : 0
 
     // ── Top categorías: solo las que tienen importe neto positivo ────────────
-    const topExpenseCategories = (topCategoriesAgg as Array<{ name: string; amount: number }>)
+    const topExpenseCategories = (topCategoriesAgg as Array<{ name: string; amount: number; parentName?: string }>)
       .filter(c => c.amount > 0)
 
     // ── Top tiendas: solo las que tienen importe neto positivo ───────────────
