@@ -71,11 +71,11 @@ const ModalGrid = ({
         }}
       >
         <Card sx={{
+          ...cardSx,
           width: '100%',
           maxHeight: '100%',
           display: 'flex',
-          flexDirection: 'column',
-          ...cardSx
+          flexDirection: 'column'
         }}
         >
           <CardHeader title={title} />

@@ -1,10 +1,10 @@
-import { useState } from 'react'
-import { Button, Card, CardActions, CardContent, CardHeader, Divider, Modal, Typography } from '@mui/material'
 import { mutate } from 'swr'
+import { Typography } from '@mui/material'
 
 import { LOANS, LOAN_DETAIL } from 'constants/api-paths'
 import { deleteLoanPayment } from 'services/apiService'
 import { AmortizationRow } from 'types'
+import { ConfirmModal } from 'components'
 
 import { useApiError } from '../../hooks'
 
@@ -15,49 +15,32 @@ interface Props {
 }
 
 const LoanDeletePaymentModal = ({ loanId, payment, onClose }: Props) => {
-  const [isDeleting, setIsDeleting] = useState(false)
   const { setApiError, ApiErrorMessage } = useApiError()
 
-  const handleDelete = async () => {
-    setIsDeleting(true)
-    try {
-      const { error } = await deleteLoanPayment(loanId, payment._id!)
-      if (error) { setApiError(error); return }
-      await mutate(LOAN_DETAIL(loanId))
-      await mutate(LOANS)
-      onClose()
-    } finally {
-      setIsDeleting(false)
-    }
+  const handleConfirm = async () => {
+    const { error } = await deleteLoanPayment(loanId, payment._id!)
+    if (error) { setApiError(error); return }
+    await mutate(LOAN_DETAIL(loanId))
+    await mutate(LOANS)
+    onClose()
   }
 
   const dateLabel = new Date(payment.date).toLocaleDateString('es-ES')
 
   return (
-    <Modal
+    <ConfirmModal
+      title='¿Eliminar cuota?'
+      description={
+        <Typography variant='body1' color='textSecondary'>
+          ¿Seguro que quieres eliminar la cuota del <b>{dateLabel}</b>?
+          Esta acción recalculará el capital pendiente del préstamo y no se puede deshacer.
+        </Typography>
+      }
+      onConfirm={handleConfirm}
       onClose={onClose}
-      open
-      sx={{ p: 2, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-    >
-      <Card sx={{ width: '100%', maxWidth: { xs: '100%', sm: 500 }, maxHeight: '100%', display: 'flex', flexDirection: 'column', outline: 'none' }}>
-        <CardHeader title='¿Eliminar cuota?' />
-        <Divider />
-        <CardContent sx={{ overflowY: 'auto' }}>
-          <Typography variant='body1' color='textSecondary'>
-            ¿Seguro que quieres eliminar la cuota del <b>{dateLabel}</b>?
-            Esta acción recalculará el capital pendiente del préstamo y no se puede deshacer.
-          </Typography>
-          {ApiErrorMessage}
-        </CardContent>
-        <Divider />
-        <CardActions sx={{ p: 2, justifyContent: 'space-between' }}>
-          <Button onClick={onClose}>Cancelar</Button>
-          <Button color='error' variant='contained' disabled={isDeleting} onClick={handleDelete}>
-            Eliminar
-          </Button>
-        </CardActions>
-      </Card>
-    </Modal>
+      extra={ApiErrorMessage}
+      actionsAlign='between'
+    />
   )
 }
 

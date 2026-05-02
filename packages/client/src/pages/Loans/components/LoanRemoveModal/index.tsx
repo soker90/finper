@@ -1,10 +1,10 @@
-import { useState } from 'react'
-import { Button, Card, CardActions, CardContent, CardHeader, Divider, Modal, Typography } from '@mui/material'
 import { mutate } from 'swr'
+import { Typography } from '@mui/material'
 
 import { LOANS } from 'constants/api-paths'
 import { deleteLoan } from 'services/apiService'
 import { Loan } from 'types'
+import { ConfirmModal } from 'components'
 
 import { useApiError } from '../../hooks'
 
@@ -14,44 +14,28 @@ interface Props {
 }
 
 const LoanRemoveModal = ({ loan, onClose }: Props) => {
-  const [isDeleting, setIsDeleting] = useState(false)
   const { setApiError, ApiErrorMessage } = useApiError()
 
-  const handleDelete = async () => {
-    setIsDeleting(true)
-    try {
-      const { error } = await deleteLoan(loan._id)
-      if (error) { setApiError(error); return }
-      onClose()
-      await mutate<Loan[]>(LOANS, (loans) => loans?.filter(l => l._id !== loan._id))
-    } finally {
-      setIsDeleting(false)
-    }
+  const handleConfirm = async () => {
+    const { error } = await deleteLoan(loan._id)
+    if (error) { setApiError(error); return }
+    onClose()
+    await mutate<Loan[]>(LOANS, (loans) => loans?.filter(l => l._id !== loan._id))
   }
 
   return (
-    <Modal
+    <ConfirmModal
+      title='¿Quieres borrar el préstamo?'
+      description={
+        <Typography variant='h6' color='textSecondary'>
+          ¿Seguro que quieres eliminar el préstamo <b>{loan.name}</b>?
+          Se borrarán también todos los pagos y eventos asociados. Esta acción no se puede deshacer.
+        </Typography>
+      }
+      onConfirm={handleConfirm}
       onClose={onClose}
-      open
-      sx={{ p: 2, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-    >
-      <Card sx={{ width: '100%', maxWidth: { xs: '100%', sm: 600, md: 800 }, maxHeight: '100%', display: 'flex', flexDirection: 'column', outline: 'none' }}>
-        <CardHeader title='¿Quieres borrar el préstamo?' />
-        <Divider />
-        <CardContent sx={{ overflowY: 'auto' }}>
-          <Typography variant='h6' color='textSecondary'>
-            ¿Seguro que quieres eliminar el préstamo <b>{loan.name}</b>?
-            Se borrarán también todos los pagos y eventos asociados. Esta acción no se puede deshacer.
-          </Typography>
-          {ApiErrorMessage}
-        </CardContent>
-        <Divider />
-        <CardActions sx={{ p: 2, justifyContent: 'flex-end' }}>
-          <Button onClick={onClose} disabled={isDeleting}>Cancelar</Button>
-          <Button color='error' variant='contained' disabled={isDeleting} onClick={handleDelete}>Eliminar</Button>
-        </CardActions>
-      </Card>
-    </Modal>
+      extra={ApiErrorMessage}
+    />
   )
 }
 
