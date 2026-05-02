@@ -57,7 +57,7 @@ const TransactionModal = ({ onClose, transaction }: Props) => {
         control={control}
       />
       <InputForm
-        id='value' label='Importe Empresa' placeholder='0'
+        id='companyAmount' label='Importe Empresa' placeholder='0'
         error={!!errors.companyAmount} {...register('companyAmount', {
           required: true,
           valueAsNumber: true
@@ -65,7 +65,7 @@ const TransactionModal = ({ onClose, transaction }: Props) => {
         errorText='Introduce un número válido'
       />
       <InputForm
-        id='value' label='Unidades Empresa' placeholder='0'
+        id='companyUnits' label='Unidades Empresa' placeholder='0'
         error={!!errors.companyUnits} {...register('companyUnits', {
           required: true,
           valueAsNumber: true
@@ -73,7 +73,7 @@ const TransactionModal = ({ onClose, transaction }: Props) => {
         errorText='Introduce un número válido'
       />
       <InputForm
-        id='value' label='Importe Empleado' placeholder='0'
+        id='employeeAmount' label='Importe Empleado' placeholder='0'
         error={!!errors.employeeAmount} {...register('employeeAmount', {
           required: true,
           valueAsNumber: true
@@ -81,7 +81,7 @@ const TransactionModal = ({ onClose, transaction }: Props) => {
         errorText='Introduce un número válido'
       />
       <InputForm
-        id='value' label='Unidades Empleado' placeholder='0'
+        id='employeeUnits' label='Unidades Empleado' placeholder='0'
         error={!!errors.employeeUnits} {...register('employeeUnits', {
           required: true,
           valueAsNumber: true

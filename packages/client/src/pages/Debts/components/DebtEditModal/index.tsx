@@ -69,6 +69,7 @@ const DebtEditModal = ({
         placeholder='Introduce una fecha' id='date' label='Fecha'
         error={!!errors.date}
         control={control}
+        size={4}
       />
 
       <InputForm
@@ -81,8 +82,8 @@ const DebtEditModal = ({
 
       <InputForm
         id='concept' label='Concepto' placeholder='Introduce el concepto'
-        error={!!errors.concept} {...register('concept', { required: true, minLength: 6 })}
-        errorText='Introduce un concept válido'
+        error={!!errors.concept} {...register('concept', { required: true })}
+        errorText='El concepto es obligatorio'
       />
 
     </ModalGrid>

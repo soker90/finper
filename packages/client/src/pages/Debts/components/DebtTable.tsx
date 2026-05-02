@@ -15,7 +15,7 @@ interface Props {
 
 const DebtTable = ({ debts, title, fromTitle, onEdit, onRemove, onPay }: Props) => {
   const columns: Column<Debt>[] = [
-    { id: 'from', label: fromTitle },
+    { id: 'from', label: fromTitle, field: 'from' },
     { id: 'date', label: 'Fecha', render: (d) => format.dateShort(d.date) },
     { id: 'amount', label: 'Pendiente', render: (d) => format.euro(d.amount), align: 'right' },
     { id: 'concept', label: 'Concepto', field: 'concept' }

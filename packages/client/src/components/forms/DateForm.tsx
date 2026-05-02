@@ -17,7 +17,7 @@ interface Props {
   size?: number
 }
 
-const DateForm = ({ id, label, control, error, errorText, size = 2, ...others }: Props) => (
+const DateForm = ({ id, label, control, error, errorText, size = 4, ...others }: Props) => (
   <Grid size={{ md: size, xs: 12 }}>
     <Stack spacing={1}>
       <InputLabel htmlFor={id}>{label}</InputLabel>
