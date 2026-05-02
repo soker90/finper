@@ -55,6 +55,7 @@ const TransactionModal = ({ onClose, transaction }: Props) => {
         placeholder='Introduce una fecha' id='date' label='Fecha'
         error={!!errors.date}
         control={control}
+        size={4}
       />
       <InputForm
         id='value' label='Importe Empresa' placeholder='0'
