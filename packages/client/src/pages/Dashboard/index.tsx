@@ -6,6 +6,7 @@ import { useBudgets } from '../Budgets/hooks'
 import { useChartColors } from './components/shared'
 import { DashboardSkeleton, DashboardError } from './components/DashboardStates'
 import KpiSummary from './components/KpiSummary'
+import NetWorthSection from './components/NetWorthSection'
 import TrendsSection from './components/TrendsSection'
 import SpendingRhythm from './components/SpendingRhythm'
 import BudgetSection from './components/budget'
@@ -45,6 +46,8 @@ const Dashboard = () => {
   return (
     <Grid container spacing={3}>
       <KpiSummary stats={stats} />
+
+      <NetWorthSection netWorth={stats.netWorth} />
 
       <TrendsSection stats={stats} tickets={tickets ?? []} chartHeight={chartHeight} />
 

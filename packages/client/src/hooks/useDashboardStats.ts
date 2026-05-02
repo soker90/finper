@@ -45,7 +45,7 @@ export interface DashboardStats {
   netWorth: number
   totalDebts: number
   savingsRate: number
-  topExpenseCategories: Array<{ name: string; amount: number }>
+  topExpenseCategories: Array<{ name: string; amount: number; parentName?: string }>
   topStores: Array<{ name: string; amount: number }>
   monthlyTrend: {
     income: { current: number; previous: number }
