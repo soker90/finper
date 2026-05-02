@@ -1,4 +1,4 @@
-import { Grid } from '@mui/material'
+import { Grid, Box } from '@mui/material'
 import { TableMaterial } from '@soker90/react-mui-table'
 import { EditOutlined } from '@ant-design/icons'
 import { useMemo, useState } from 'react'
@@ -30,22 +30,24 @@ const BudgetTable = ({
   return (
     <>
       <Grid size={{ xs: 12, lg: 6 }}>
-        <TableMaterial
-          columns={[
-            { title: 'Categoría', field: 'name' },
-            { title: 'Real', field: 'real', render: ({ budgets }) => format.euro(budgets[0].real) },
-            { title: 'Estimado', field: 'estimated', render: ({ budgets }) => format.euro(budgets[0].amount) }
-          ]}
-          data={orderBudgets}
-          title={title}
-          actions={[
-            {
-              onClick: handleEdit,
-              tooltip: 'Editar',
-              icon: EditOutlined
-            }
-          ]}
-        />
+        <Box sx={{ width: '100%', overflowX: 'auto' }}>
+          <TableMaterial
+            columns={[
+              { title: 'Categoría', field: 'name' },
+              { title: 'Real', field: 'real', render: ({ budgets }) => format.euro(budgets[0].real) },
+              { title: 'Estimado', field: 'estimated', render: ({ budgets }) => format.euro(budgets[0].amount) }
+            ]}
+            data={orderBudgets}
+            title={title}
+            actions={[
+              {
+                onClick: handleEdit,
+                tooltip: 'Editar',
+                icon: EditOutlined
+              }
+            ]}
+          />
+        </Box>
         {selectedBudget && <ModalEdit onClose={handleCloseEdit} budget={selectedBudget} month={month} year={year} />}
       </Grid>
     </>

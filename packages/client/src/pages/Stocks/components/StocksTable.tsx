@@ -20,7 +20,7 @@ const StocksTable = ({ positions, onDeletePurchase }: Props) => {
     <>
       <MainCard sx={{ mt: 2 }} content={false}>
         <TableContainer>
-          <Table>
+          <Table sx={{ '& td, & th': { whiteSpace: 'nowrap' } }}>
             <TableHead>
               <TableRow>
                 <TableCell />

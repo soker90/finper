@@ -35,7 +35,7 @@ const TariffComparisonTable = ({ comparison, isLoading }: Props) => (
     content={false}
   >
     <TableContainer>
-      <Table stickyHeader>
+      <Table stickyHeader sx={{ '& td, & th': { whiteSpace: 'nowrap' } }}>
         <TableHead>
           <TableRow>
             {HEADER_COLUMNS.map((column) => (

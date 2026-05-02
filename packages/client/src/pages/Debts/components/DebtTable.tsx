@@ -1,5 +1,5 @@
 import { TableMaterial } from '@soker90/react-mui-table'
-import { Grid } from '@mui/material'
+import { Grid, Box } from '@mui/material'
 import { DeleteOutlined, EditOutlined, EuroOutlined } from '@ant-design/icons'
 
 import { format } from 'utils'
@@ -16,31 +16,33 @@ interface Props {
 
 const DebtTable = ({ debts, title, fromTitle, onEdit, onRemove, onPay }: Props) => (
   <Grid size={{ xs: 12, lg: 6 }}>
-    <TableMaterial
-      columns={[
-        { title: fromTitle, field: 'from' },
-        { title: 'Fecha', render: ({ date }) => format.dateShort(date) },
-        { title: 'Pendiente', render: ({ amount }) => format.euro(amount) },
-        { title: 'Concepto', field: 'concept' }
-      ]}
-      data={debts}
-      title={title}
-      actions={[{
-        icon: EuroOutlined,
-        tooltip: 'Abonar',
-        onClick: onPay
-      },
-      {
-        icon: EditOutlined,
-        tooltip: 'Editar',
-        onClick: onEdit
-      },
-      {
-        icon: DeleteOutlined,
-        tooltip: 'Eliminar',
-        onClick: onRemove
-      }]}
-    />
+    <Box sx={{ width: '100%', overflowX: 'auto' }}>
+      <TableMaterial
+        columns={[
+          { title: fromTitle, field: 'from' },
+          { title: 'Fecha', render: ({ date }) => format.dateShort(date) },
+          { title: 'Pendiente', render: ({ amount }) => format.euro(amount) },
+          { title: 'Concepto', field: 'concept' }
+        ]}
+        data={debts}
+        title={title}
+        actions={[{
+          icon: EuroOutlined,
+          tooltip: 'Abonar',
+          onClick: onPay
+        },
+        {
+          icon: EditOutlined,
+          tooltip: 'Editar',
+          onClick: onEdit
+        },
+        {
+          icon: DeleteOutlined,
+          tooltip: 'Eliminar',
+          onClick: onRemove
+        }]}
+      />
+    </Box>
   </Grid>
 )
 
