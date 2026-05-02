@@ -86,6 +86,7 @@ function ActionCell<T> ({ row, actions }: { row: T; actions: Action<T>[] }) {
                 size='large'
                 color={color}
                 disabled={isDisabled}
+                aria-label={tooltip}
                 {...(onClick ? { onClick: () => onClick(row) } : {})}
                 {...(to ? { component: Link, to: to(row) } : {})}
               >
