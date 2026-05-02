@@ -26,6 +26,13 @@ export const transferAccountMoney = (params: { sourceId: string, destinationId: 
   return axios.post(`${ACCOUNTS}/transfer`, params).then(() => ({})).catch((error: any) => ({ error: extractError(error) }))
 }
 
+export const adjustAccountBalance = (id: string, realBalance: number): Promise<{
+  data?: Account,
+  error?: string | undefined
+}> => {
+  return axios.post(`${ACCOUNTS}/${id}/adjust`, { realBalance }).then((data: any) => ({ data: data as Account })).catch((error: any) => ({ error: extractError(error) }))
+}
+
 export const editCategory = (id: string, params: { name: string, type: string }): Promise<{
   data?: Category,
   error?: string | undefined
