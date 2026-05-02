@@ -11,7 +11,7 @@ interface NetWorthSectionProps {
 
 const NetWorthSection = ({ netWorth }: NetWorthSectionProps) => (
   <>
-    <SectionTitle>Evolución del patrimonio</SectionTitle>
+    <SectionTitle>Patrimonio Neto</SectionTitle>
 
     <Grow in timeout={450}>
       <Grid size={{ xs: 12 }}>

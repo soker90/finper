@@ -1,7 +1,17 @@
 import { Box, Typography } from '@mui/material'
 import { format } from 'utils'
 
-const StoreTooltip = ({ active, payload }: any) => {
+interface StoreTooltipProps {
+  active?: boolean
+  payload?: Array<{
+    value: number
+    payload: {
+      name: string
+    }
+  }>
+}
+
+const StoreTooltip = ({ active, payload }: StoreTooltipProps) => {
   if (!active || !payload?.length) return null
   const entry = payload[0]
 

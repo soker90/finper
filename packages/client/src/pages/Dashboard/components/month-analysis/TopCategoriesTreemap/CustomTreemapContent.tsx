@@ -1,5 +1,15 @@
-const CustomTreemapContent = (props: any) => {
-  const { x, y, width, height, name, depth, fill } = props
+interface CustomTreemapContentProps {
+  x?: number
+  y?: number
+  width?: number
+  height?: number
+  name?: string
+  depth?: number
+  fill?: string
+}
+
+const CustomTreemapContent = (props: CustomTreemapContentProps) => {
+  const { x = 0, y = 0, width = 0, height = 0, name = '', depth = 0, fill } = props
   const showLabel = width > 60 && height > 30 && depth > 0 && name !== 'Total'
 
   return (

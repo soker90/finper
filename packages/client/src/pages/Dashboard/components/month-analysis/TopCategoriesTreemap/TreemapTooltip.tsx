@@ -1,7 +1,19 @@
 import { Box, Typography } from '@mui/material'
 import { format } from 'utils'
 
-const TreemapTooltip = ({ active, payload }: any) => {
+interface TreemapTooltipProps {
+  active?: boolean
+  payload?: Array<{
+    payload: {
+      name: string
+      parentName?: string
+      amount?: number
+      value: number
+    }
+  }>
+}
+
+const TreemapTooltip = ({ active, payload }: TreemapTooltipProps) => {
   if (!active || !payload?.length) return null
   const item = payload[0]?.payload
   if (!item || item.name === 'Total') return null
