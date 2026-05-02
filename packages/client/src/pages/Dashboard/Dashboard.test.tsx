@@ -39,11 +39,11 @@ describe('Dashboard', () => {
   // ── KpiSummary ────────────────────────────────────────────────────────────
   describe('KpiSummary', () => {
     it('renders section title and 4 KPI card titles', async () => {
-      const { findByText } = render(<Dashboard />)
+      const { findByText, findAllByText } = render(<Dashboard />)
 
       expect(await findByText('Resumen')).toBeDefined()
       expect(await findByText('Balance Total')).toBeDefined()
-      expect(await findByText('Patrimonio Neto')).toBeDefined()
+      expect((await findAllByText('Patrimonio Neto')).length).toBeGreaterThan(0)
       expect(await findByText('Ingresos del Mes')).toBeDefined()
       expect(await findByText('Gastos del Mes')).toBeDefined()
     })
