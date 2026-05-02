@@ -16,7 +16,6 @@ interface AccountsPieChartProps {
 const AccountsPieChart = ({ accounts, chartColors, isMobile }: AccountsPieChartProps) => {
   const pieData = (accounts || [])
     .filter(a => a.balance > 0)
-    .slice(0, 7)
     .map(a => ({ name: a.name, value: a.balance }))
 
   const pieHeight = isMobile ? 200 : 240
