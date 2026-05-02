@@ -11,7 +11,7 @@ const PensionTransactionsTable = ({ transactions, onEdit }: {
   onEdit: (transaction: PensionTransaction) => void
 }) => (
   <MainCard sx={{ mt: 2 }} content={false}>
-    <Box sx={{ width: '100%', overflowX: 'auto' }}>
+    <Box sx={{ width: '100%', overflowX: 'auto', '& td, & th': { whiteSpace: 'nowrap' } }}>
       <TableMaterial
         columns={[
           { title: 'Fecha', render: ({ date }) => format.date(date) },

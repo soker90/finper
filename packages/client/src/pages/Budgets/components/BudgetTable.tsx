@@ -30,7 +30,7 @@ const BudgetTable = ({
   return (
     <>
       <Grid size={{ xs: 12, lg: 6 }}>
-        <Box sx={{ width: '100%', overflowX: 'auto' }}>
+        <Box sx={{ width: '100%', overflowX: 'auto', '& td, & th': { whiteSpace: 'nowrap' } }}>
           <TableMaterial
             columns={[
               { title: 'Categoría', field: 'name' },
