@@ -2,17 +2,15 @@ import { useMemo } from 'react'
 import {
   IconButton,
   Stack,
-  Table,
   TableBody,
   TableCell,
-  TableContainer,
   TableHead,
   TableRow,
   Tooltip,
   Typography
 } from '@mui/material'
 import { DeleteOutlined, EditOutlined } from '@ant-design/icons'
-import { MainCard } from 'components'
+import { ScrollableTable } from 'components'
 import { SupplyReading } from 'types'
 import { getColumns } from './columns'
 
@@ -28,7 +26,6 @@ interface Props {
 
 const SupplyReadingList = ({ readings, isLoading, isElectricity, unit, onAdd, onEdit, onDelete }: Props) => {
   const columns = useMemo(() => getColumns({ isElectricity, unit }), [isElectricity, unit])
-  // +1 para la columna de acciones
   const colSpan = columns.length + 1
 
   const renderBody = () => {
@@ -93,41 +90,28 @@ const SupplyReadingList = ({ readings, isLoading, isElectricity, unit, onAdd, on
   }
 
   return (
-    <MainCard title='Lecturas' content={false}>
-      <TableContainer
-        sx={{
-          width: '100%',
-          overflowX: 'auto',
-          position: 'relative',
-          display: 'block',
-          maxWidth: '100%',
-          '& td, & th': { whiteSpace: 'nowrap' }
-        }}
-      >
-        <Table
-          stickyHeader
-          aria-labelledby='supply-readings-table'
-          sx={{
-            '& .MuiTableCell-root:first-of-type': { pl: 2 },
-            '& .MuiTableCell-root:last-of-type': { pr: 3 }
-          }}
-        >
-          <TableHead>
-            <TableRow>
-              {columns.map((col) => (
-                <TableCell key={col.id} align={col.align}>
-                  {col.label}
-                </TableCell>
-              ))}
-              <TableCell align='right'>Acciones</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {renderBody()}
-          </TableBody>
-        </Table>
-      </TableContainer>
-    </MainCard>
+    <ScrollableTable
+      title='Lecturas'
+      stickyHeader
+      sx={{
+        '& .MuiTableCell-root:first-of-type': { pl: 2 },
+        '& .MuiTableCell-root:last-of-type': { pr: 3 }
+      }}
+    >
+      <TableHead>
+        <TableRow>
+          {columns.map((col) => (
+            <TableCell key={col.id} align={col.align}>
+              {col.label}
+            </TableCell>
+          ))}
+          <TableCell align='right'>Acciones</TableCell>
+        </TableRow>
+      </TableHead>
+      <TableBody>
+        {renderBody()}
+      </TableBody>
+    </ScrollableTable>
   )
 }
 
