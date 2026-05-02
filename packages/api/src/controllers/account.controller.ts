@@ -93,26 +93,4 @@ export class AccountController {
         next(error)
       })
   }
-
-  public async adjust (req: Request, res: Response, next: NextFunction): Promise<void> {
-    const { id } = req.params
-    const user = req.user as string
-    Promise.resolve({ realBalance: req.body.realBalance })
-      .tap(() => this.logger.logInfo(`/adjust - account: ${id}`))
-      .then(({ realBalance }) => {
-        if (realBalance === undefined || realBalance === null || isNaN(Number(realBalance))) {
-          throw { statusCode: 400, message: 'realBalance is required and must be a number' }
-        }
-        return { id, realBalance: Number(realBalance), user }
-      })
-      .tap(({ id: accountId }) => validateAccountExist(accountId, user))
-      .then(this.accountService.adjustBalance.bind(this.accountService))
-      .tap(() => this.logger.logInfo(`Account ${id} balance adjusted successfully`))
-      .then((response) => {
-        res.send(response)
-      })
-      .catch((error) => {
-        next(error)
-      })
-  }
 }
