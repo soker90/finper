@@ -22,7 +22,6 @@ const NetWorthSection = ({ netWorth }: NetWorthSectionProps) => (
             justifyContent='space-between'
             spacing={3}
           >
-            {/* KPI numérico */}
             <Stack spacing={0.5}>
               <Stack direction='row' alignItems='center' gap={1}>
                 <SafetyOutlined style={{ fontSize: 18, color: 'inherit' }} />
@@ -34,7 +33,7 @@ const NetWorthSection = ({ netWorth }: NetWorthSectionProps) => (
                 {format.euro(netWorth)}
               </Typography>
               <Typography variant='body2' color='textSecondary'>
-                Balance total menos deudas y préstamos pendientes
+                Cuentas + Acciones − Deudas − Préstamos
               </Typography>
             </Stack>
 

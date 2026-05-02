@@ -40,7 +40,7 @@ const KpiSummary = ({ stats }: KpiSummaryProps) => {
           <KpiCard
             title='Patrimonio Neto'
             value={format.euro(stats.netWorth)}
-            subtitle='Balance menos deudas'
+            subtitle='Cuentas + Acciones − Deudas − Préstamos'
             icon={<SafetyOutlined />}
             color='success'
           />

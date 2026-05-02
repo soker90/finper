@@ -1,4 +1,7 @@
 import { AccountModel, DebtModel, LoanModel, PensionModel, TransactionModel, TRANSACTION, type IPension } from '@soker90/finper-models'
+import StockService from './stock.service'
+
+const stockService = new StockService()
 
 export interface DailyExpense {
   day: number
@@ -33,6 +36,9 @@ export interface DashboardStatsResult {
   totalBalance: number
   totalDebts: number
   totalLoansPending: number
+  totalReceivable: number
+  totalStocksValue: number
+  totalStocksCost: number
   netWorth: number
 
   // Mes actual
@@ -167,7 +173,8 @@ export default class DashboardService implements IDashboardService {
       topStoresAgg,
       pensionStatsAgg,
       pensionTransactions,
-      currentMonthBudgetAgg
+      currentMonthBudgetAgg,
+      stocksResult
     ] = await Promise.all([
       // 1. Suma de saldos de cuentas activas
       AccountModel.aggregate([
@@ -433,7 +440,10 @@ export default class DashboardService implements IDashboardService {
             realExpenses: { $sum: '$amount' }
           }
         }
-      ])
+      ]),
+
+      // 13. Resumen de cartera de acciones (valor de mercado actual)
+      stockService.getStocksSummary(user)
     ])
 
     // ── Extraer escalares ────────────────────────────────────────────────────
@@ -441,7 +451,13 @@ export default class DashboardService implements IDashboardService {
     const totalDebts = Math.round((debtsResult[0]?.totalOwed ?? 0) * 100) / 100
     const totalReceivable = Math.round((debtsResult[0]?.totalReceivable ?? 0) * 100) / 100
     const totalLoansPending = Math.round((loansResult[0]?.total ?? 0) * 100) / 100
-    const netWorth = Math.round((totalBalance - totalDebts - totalLoansPending + totalReceivable) * 100) / 100
+
+    const totalStocksCost = Math.round((stocksResult?.totalCost ?? 0) * 100) / 100
+    const totalStocksValue = Math.round(((stocksResult?.totalValue ?? stocksResult?.totalCost) ?? 0) * 100) / 100
+
+    const netWorth = Math.round(
+      (totalBalance + totalStocksValue + totalReceivable - totalDebts - totalLoansPending) * 100
+    ) / 100
 
     const monthlyIncome = Math.round((currentMonthAgg[0]?.income ?? 0) * 100) / 100
     const monthlyExpenses = Math.round((currentMonthAgg[0]?.expenses ?? 0) * 100) / 100
@@ -475,7 +491,9 @@ export default class DashboardService implements IDashboardService {
       : 0
     const projectedMonthlyExpense = Math.round(dailyAvgExpense * daysInCurrentMonth * 100) / 100
 
-    // ── Colchón financiero: media de gastos de los últimos 3 meses con datos ─
+    // ── Colchón financiero: media de gastos de los últimos 3 meses ─
+    // Las transacciones 'not_computable' (transferencias internas) ya se excluyen
+    // de las agregaciones de transacciones al filtrar solo Income y Expense.
     const last3Expenses = last6MonthsAgg
       .slice(-3)
       .map((m: MonthlyData) => m.expenses)
@@ -549,6 +567,9 @@ export default class DashboardService implements IDashboardService {
       totalBalance,
       totalDebts,
       totalLoansPending,
+      totalReceivable,
+      totalStocksValue,
+      totalStocksCost,
       netWorth,
       monthlyIncome,
       monthlyExpenses,
