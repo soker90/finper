@@ -24,23 +24,22 @@ const DebtRemoveModal = ({
     <Modal
       onClose={onClose}
       open
-      sx={{ maxWidth: 800, margin: 'auto', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+      sx={{ p: 2, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
     >
-      <Card>
+      <Card sx={{ width: '100%', maxWidth: { xs: '100%', sm: 600, md: 800 }, maxHeight: '100%', display: 'flex', flexDirection: 'column', outline: 'none' }}>
         <CardHeader title='¿Quieres borrar la deuda?' />
         <Divider />
-        <CardContent>
+        <CardContent sx={{ overflowY: 'auto' }}>
           <Typography variant='h6' color='textSecondary'>
             ¿Seguro que quieres eliminar la deuda de {debt.from} por un importe de {debt.amount}€?
           </Typography>
         </CardContent>
         <Divider />
-        <CardActions>
+        <CardActions sx={{ p: 2, justifyContent: 'flex-end' }}>
           <Button onClick={onClose}>Cancelar</Button>
           <Button color='error' variant='contained' onClick={handleDeleteButton}>Eliminar</Button>
         </CardActions>
       </Card>
-
     </Modal>
   )
 }

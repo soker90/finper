@@ -37,12 +37,12 @@ const LoanDeletePaymentModal = ({ loanId, payment, onClose }: Props) => {
     <Modal
       onClose={onClose}
       open
-      sx={{ maxWidth: 500, margin: 'auto', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+      sx={{ p: 2, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
     >
-      <Card sx={{ mx: 2 }}>
+      <Card sx={{ width: '100%', maxWidth: { xs: '100%', sm: 500 }, maxHeight: '100%', display: 'flex', flexDirection: 'column', outline: 'none' }}>
         <CardHeader title='¿Eliminar cuota?' />
         <Divider />
-        <CardContent>
+        <CardContent sx={{ overflowY: 'auto' }}>
           <Typography variant='body1' color='textSecondary'>
             ¿Seguro que quieres eliminar la cuota del <b>{dateLabel}</b>?
             Esta acción recalculará el capital pendiente del préstamo y no se puede deshacer.
@@ -50,7 +50,7 @@ const LoanDeletePaymentModal = ({ loanId, payment, onClose }: Props) => {
           {ApiErrorMessage}
         </CardContent>
         <Divider />
-        <CardActions sx={{ justifyContent: 'space-between' }}>
+        <CardActions sx={{ p: 2, justifyContent: 'space-between' }}>
           <Button onClick={onClose}>Cancelar</Button>
           <Button color='error' variant='contained' disabled={isDeleting} onClick={handleDelete}>
             Eliminar

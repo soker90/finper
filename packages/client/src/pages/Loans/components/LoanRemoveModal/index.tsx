@@ -33,12 +33,12 @@ const LoanRemoveModal = ({ loan, onClose }: Props) => {
     <Modal
       onClose={onClose}
       open
-      sx={{ maxWidth: 800, margin: 'auto', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+      sx={{ p: 2, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
     >
-      <Card>
+      <Card sx={{ width: '100%', maxWidth: { xs: '100%', sm: 600, md: 800 }, maxHeight: '100%', display: 'flex', flexDirection: 'column', outline: 'none' }}>
         <CardHeader title='¿Quieres borrar el préstamo?' />
         <Divider />
-        <CardContent>
+        <CardContent sx={{ overflowY: 'auto' }}>
           <Typography variant='h6' color='textSecondary'>
             ¿Seguro que quieres eliminar el préstamo <b>{loan.name}</b>?
             Se borrarán también todos los pagos y eventos asociados. Esta acción no se puede deshacer.
@@ -46,7 +46,7 @@ const LoanRemoveModal = ({ loan, onClose }: Props) => {
           {ApiErrorMessage}
         </CardContent>
         <Divider />
-        <CardActions>
+        <CardActions sx={{ p: 2, justifyContent: 'flex-end' }}>
           <Button onClick={onClose} disabled={isDeleting}>Cancelar</Button>
           <Button color='error' variant='contained' disabled={isDeleting} onClick={handleDelete}>Eliminar</Button>
         </CardActions>
