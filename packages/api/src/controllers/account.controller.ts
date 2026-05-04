@@ -2,7 +2,7 @@ import { NextFunction, Request, Response } from 'express'
 
 import { IAccountService } from '../services/account.service'
 import { AccountDocument } from '@soker90/finper-models'
-import { validateAccountCreateParams, validateAccountEditParams, validateAccountExist, validateAccountTransferParams } from '../validators/account'
+import { validateAccountCreateParams, validateAccountEditParams, validateAccountExist, validateAccountTransferParams, validateAccountTransferExist } from '../validators/account'
 import '../auth/local-strategy-passport-handler'
 import extractUser from '../helpers/extract-user'
 import { RequestUser } from '../types'
@@ -80,10 +80,7 @@ export class AccountController {
       .tap(() => this.logger.logInfo('/transfer - account transfer'))
       .then(validateAccountTransferParams)
       .then(extractUser(req))
-      .tap(({ user, sourceId, destinationId }) => Promise.all([
-        validateAccountExist(sourceId as string, user),
-        validateAccountExist(destinationId as string, user)
-      ]))
+      .then(validateAccountTransferExist)
       .then(this.accountService.transfer.bind(this.accountService))
       .tap(() => this.logger.logInfo('Account transfer has been successfully processed'))
       .then(() => {
