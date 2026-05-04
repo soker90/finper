@@ -42,30 +42,30 @@ export default class AccountService implements IAccountService {
   }
 
   public async transfer ({ sourceId, destinationId, amount }: { sourceId: string, destinationId: string, amount: number }): Promise<void> {
-    const session = await AccountModel.startSession()
-    session.startTransaction()
+    const sourceResult = await AccountModel.findOneAndUpdate(
+      { _id: sourceId, balance: { $gte: amount } },
+      { $inc: { balance: -amount } },
+      { new: true }
+    )
+
+    if (!sourceResult) {
+      throw Boom.badRequest('Insufficient balance or source account not found').output
+    }
 
     try {
-      const sourceAccount = await AccountModel.findById(sourceId).session(session)
-      const destinationAccount = await AccountModel.findById(destinationId).session(session)
+      const destResult = await AccountModel.findByIdAndUpdate(
+        destinationId,
+        { $inc: { balance: amount } },
+        { new: true }
+      )
 
-      /* istanbul ignore next — validator validateAccountExist runs before this method via route */
-      if (!sourceAccount || !destinationAccount) {
+      if (!destResult) {
+        await AccountModel.findByIdAndUpdate(sourceId, { $inc: { balance: amount } })
         throw Boom.notFound(ERROR_MESSAGE.ACCOUNT.NOT_FOUND).output
       }
-
-      sourceAccount.balance -= amount
-      destinationAccount.balance += amount
-
-      await sourceAccount.save({ session })
-      await destinationAccount.save({ session })
-
-      await session.commitTransaction()
     } catch (error) {
-      await session.abortTransaction()
+      await AccountModel.findByIdAndUpdate(sourceId, { $inc: { balance: amount } })
       throw error
-    } finally {
-      await session.endSession()
     }
   }
 }
