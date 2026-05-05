@@ -1,129 +1,16 @@
 import { AccountModel, DebtModel, LoanModel, PensionModel, TransactionModel, TRANSACTION, type IPension } from '@soker90/finper-models'
+import { generateInsights } from '../utils/insights'
+import { computeHealthScore, computeBudgetAdherence } from './health-score'
+import { computeFilteredAvgMonthlyExpense, type MonthTransactionsRow } from './cash-runway'
+import {
+  aggregateCurrentMonthByCategory,
+  aggregateLast3MonthsByCategory,
+  aggregateLast3MonthsTransactions,
+  aggregateCurrentBudgets
+} from './aggregations'
+import type { DashboardStatsResult, IDashboardService, PensionSummary, DailyExpense } from './dashboard.types'
 
-export interface DailyExpense {
-  day: number
-  amount: number
-}
-
-export interface MonthlyData {
-  month: number   // 1-indexed
-  year: number
-  income: number
-  expenses: number
-}
-
-export interface HealthScore {
-  total: number
-  savingsRate: number
-  debtRatio: number
-  budgetAdherence: number
-  cashRunway: number
-  pensionReturn: number
-}
-
-export interface PensionSummary {
-  employeeAmount: number
-  companyAmount: number
-  total: number
-  transactions: IPension[]
-}
-
-export interface DashboardStatsResult {
-  // Cuentas y deudas
-  totalBalance: number
-  totalDebts: number
-  totalLoansPending: number
-  netWorth: number
-
-  // Mes actual
-  monthlyIncome: number
-  monthlyExpenses: number
-  savingsRate: number
-
-  // Tendencia vs mes anterior
-  monthlyTrend: {
-    income: { current: number; previous: number }
-    expenses: { current: number; previous: number }
-  }
-
-  // Últimos 6 meses (para la gráfica de barras)
-  last6Months: MonthlyData[]
-
-  // Velocidad de gasto (acumulado diario)
-  expenseVelocity: {
-    currentMonth: DailyExpense[]
-    previousMonth: DailyExpense[]
-  }
-
-  // Medias y proyecciones
-  dailyAvgExpense: number
-  projectedMonthlyExpense: number
-  cashRunwayMonths: number
-
-  // Rankings del mes — topExpenseCategories incluye parentName para Treemap jerárquico
-  topExpenseCategories: Array<{ name: string; amount: number; parentName?: string }>
-  topStores: Array<{ name: string; amount: number }>
-
-  // Pensión
-  pension: PensionSummary | null
-  pensionReturnPct: number
-
-  // Presupuesto del mes
-  budgetAdherencePct: number
-
-  // Health Score
-  healthScore: HealthScore
-}
-
-export interface IDashboardService {
-  getStats(params: { user: string }): Promise<DashboardStatsResult>
-}
-
-// ── Health Score ─────────────────────────────────────────────────────────────
-/**
- * Calcula el health score financiero a partir de 5 sub-scores ponderados.
- *
- * Pesos: savingsRate 25%, debtRatio 20%, budgetAdherence 20%,
- *        cashRunway 20%, pensionReturn 15%.
- */
-export const computeHealthScore = (
-  savingsRate: number,        // e.g. 15 → 15%
-  totalDebts: number,         // valor absoluto en moneda
-  totalBalance: number,       // valor absoluto en moneda
-  budgetAdherencePct: number, // 0–100
-  cashRunwayMonths: number,   // número de meses
-  pensionReturnPct: number    // e.g. 4.5 → 4.5%
-): HealthScore => {
-  const clamp = (v: number, min: number, max: number): number =>
-    Math.max(min, Math.min(max, v))
-
-  const savingsScore = Math.round(clamp(savingsRate / 20, 0, 1) * 100)
-  const debtScore = Math.round(Math.max(0, 1 - (totalBalance > 0 ? totalDebts / totalBalance : 1)) * 100)
-  const budgetScore = Math.round(Math.min(budgetAdherencePct, 100))
-  const runwayScore = Math.round(Math.min(cashRunwayMonths / 6, 1) * 100)
-  const pensionScore = Math.round(clamp(pensionReturnPct / 5, 0, 1) * 100)
-
-  const total = Math.round(
-    savingsScore * 0.25 +
-    debtScore * 0.20 +
-    budgetScore * 0.20 +
-    runwayScore * 0.20 +
-    pensionScore * 0.15
-  )
-
-  return {
-    total,
-    savingsRate: savingsScore,
-    debtRatio: debtScore,
-    budgetAdherence: budgetScore,
-    cashRunway: runwayScore,
-    pensionReturn: pensionScore
-  }
-}
-
-const TIMEZONE = 'Europe/Madrid'
-
-/** Construye el array de gasto acumulado diario a partir de un mapa día→importe */
+/** Builds the cumulative daily expense array from a day→amount map. */
 const buildCumulativeDailyExpenses = (
   dailyMap: Map<number, number>,
   daysInMonth: number
@@ -145,15 +32,19 @@ export default class DashboardService implements IDashboardService {
     const previousMonth = currentMonth === 0 ? 11 : currentMonth - 1
     const previousYear = currentMonth === 0 ? currentYear - 1 : currentYear
 
-    // ── Fechas en epoch ms para los $match ──────────────────────────────────
+    // Epoch timestamps for $match stages
     const currentMonthStart = new Date(currentYear, currentMonth, 1).getTime()
     const currentMonthEnd = new Date(currentYear, currentMonth + 1, 1).getTime()
     const previousMonthStart = new Date(previousYear, previousMonth, 1).getTime()
     const previousMonthEnd = new Date(currentYear, currentMonth, 1).getTime()
+    // last3MonthsStart is shared by two aggregations with different upper bounds:
+    //   - category insights  → uses currentMonthEnd  (includes current month data)
+    //   - cash runway        → uses currentMonthStart (only completed months)
+    const last3MonthsStart = new Date(currentYear, currentMonth - 3, 1).getTime()
     const last6MonthsStart = new Date(currentYear, currentMonth - 5, 1).getTime()
 
-    // ── Paralelo: balance de cuentas, suma de deudas, agregaciones de transacciones,
-    //             pensión y presupuesto del mes actual ──────────────────────────
+    const TIMEZONE = 'Europe/Madrid'
+
     const [
       accountsResult,
       debtsResult,
@@ -167,15 +58,19 @@ export default class DashboardService implements IDashboardService {
       topStoresAgg,
       pensionStatsAgg,
       pensionTransactions,
-      currentMonthBudgetAgg
+      currentMonthBudgetAgg,
+      currentMonthByCategoryAgg,
+      last3MonthsByCategoryAgg,
+      last3MonthsTransactionsAgg,
+      currentBudgetsAgg
     ] = await Promise.all([
-      // 1. Suma de saldos de cuentas activas
+      // 1. Sum of active account balances
       AccountModel.aggregate([
         { $match: { user, isActive: true } },
         { $group: { _id: null, total: { $sum: '$balance' } } }
       ]),
 
-      // 2. Suma de deudas pendientes
+      // 2. Sum of outstanding debts
       DebtModel.aggregate([
         { $match: { user } },
         {
@@ -203,13 +98,13 @@ export default class DashboardService implements IDashboardService {
         }
       ]),
 
-      // 3. Suma de capital pendiente de préstamos activos
+      // 3. Sum of pending capital on active loans
       LoanModel.aggregate([
         { $match: { user, pendingAmount: { $gt: 0 } } },
         { $group: { _id: null, total: { $sum: '$pendingAmount' } } }
       ]),
 
-      // 4. Ingresos y gastos del mes actual
+      // 4. Income and expenses for the current month
       TransactionModel.aggregate([
         {
           $match: {
@@ -231,7 +126,7 @@ export default class DashboardService implements IDashboardService {
         }
       ]),
 
-      // 4. Ingresos y gastos del mes anterior
+      // 5. Income and expenses for the previous month
       TransactionModel.aggregate([
         {
           $match: {
@@ -253,7 +148,7 @@ export default class DashboardService implements IDashboardService {
         }
       ]),
 
-      // 5. Resumen mensual últimos 6 meses
+      // 6. Monthly summary for the last 6 months
       TransactionModel.aggregate([
         {
           $match: {
@@ -288,7 +183,7 @@ export default class DashboardService implements IDashboardService {
         }
       ]),
 
-      // 6. Gasto diario acumulado mes actual
+      // 7. Daily expense totals for the current month (for velocity chart)
       TransactionModel.aggregate([
         {
           $match: {
@@ -306,7 +201,7 @@ export default class DashboardService implements IDashboardService {
         { $sort: { _id: 1 } }
       ]),
 
-      // 7. Gasto diario acumulado mes anterior
+      // 8. Daily expense totals for the previous month (for velocity chart)
       TransactionModel.aggregate([
         {
           $match: {
@@ -324,7 +219,7 @@ export default class DashboardService implements IDashboardService {
         { $sort: { _id: 1 } }
       ]),
 
-      // 8. Categorías de gasto del mes actual — incluye parentName para Treemap jerárquico
+      // 9. Top expense categories for the current month — includes parentName for hierarchical Treemap
       TransactionModel.aggregate([
         {
           $match: {
@@ -348,7 +243,6 @@ export default class DashboardService implements IDashboardService {
             as: 'categoryDoc'
           }
         },
-        // Resolve parent category name for hierarchical Treemap
         {
           $lookup: {
             from: 'categories',
@@ -367,7 +261,7 @@ export default class DashboardService implements IDashboardService {
         }
       ]),
 
-      // 9. Tiendas de gasto del mes actual
+      // 10. Top stores for the current month
       TransactionModel.aggregate([
         {
           $match: {
@@ -401,7 +295,7 @@ export default class DashboardService implements IDashboardService {
         }
       ]),
 
-      // 10. Pensión: totales acumulados
+      // 11. Pension: accumulated totals
       PensionModel.aggregate([
         { $match: { user } },
         {
@@ -415,10 +309,10 @@ export default class DashboardService implements IDashboardService {
         }
       ]).sort({ date: -1 }),
 
-      // 11. Pensión: registros individuales (para sparkline)
+      // 12. Pension: individual records (for sparkline)
       PensionModel.find({ user }).sort({ date: -1 }),
 
-      // 12. Presupuesto de gastos del mes actual (totales)
+      // 13. Total real expenses for the current month (for budget adherence)
       TransactionModel.aggregate([
         {
           $match: {
@@ -433,10 +327,22 @@ export default class DashboardService implements IDashboardService {
             realExpenses: { $sum: '$amount' }
           }
         }
-      ])
+      ]),
+
+      // 14. Current month expenses grouped by child category (for insights: anomaly detection)
+      aggregateCurrentMonthByCategory(user, currentMonthStart, currentMonthEnd),
+
+      // 15. Last 3-month average expense per child category (for insights: anomaly detection)
+      aggregateLast3MonthsByCategory(user, last3MonthsStart, currentMonthEnd),
+
+      // 16. Individual expense transactions grouped by month (for cash runway outlier filtering)
+      aggregateLast3MonthsTransactions(user, last3MonthsStart, currentMonthStart),
+
+      // 17. Configured budgets for the current month (for insights: velocity check)
+      aggregateCurrentBudgets(user, currentYear, currentMonth + 1)
     ])
 
-    // ── Extraer escalares ────────────────────────────────────────────────────
+    // Scalar extraction
     const totalBalance = Math.round((accountsResult[0]?.total ?? 0) * 100) / 100
     const totalDebts = Math.round((debtsResult[0]?.totalOwed ?? 0) * 100) / 100
     const totalReceivable = Math.round((debtsResult[0]?.totalReceivable ?? 0) * 100) / 100
@@ -452,7 +358,7 @@ export default class DashboardService implements IDashboardService {
       ? Math.round(((monthlyIncome - monthlyExpenses) / monthlyIncome) * 10000) / 100
       : 0
 
-    // ── Velocidad de gasto ───────────────────────────────────────────────────
+    // Expense velocity
     const daysInCurrentMonth = new Date(currentYear, currentMonth + 1, 0).getDate()
     const daysInPreviousMonth = new Date(previousYear, previousMonth + 1, 0).getDate()
 
@@ -468,36 +374,32 @@ export default class DashboardService implements IDashboardService {
       previousMonth: buildCumulativeDailyExpenses(previousVelocityMap, daysInPreviousMonth)
     }
 
-    // ── Gasto diario medio y proyección ─────────────────────────────────────
+    // Daily average and projection
     const dayOfMonth = now.getDate()
     const dailyAvgExpense = dayOfMonth > 0
       ? Math.round((monthlyExpenses / dayOfMonth) * 100) / 100
       : 0
     const projectedMonthlyExpense = Math.round(dailyAvgExpense * daysInCurrentMonth * 100) / 100
 
-    // ── Colchón financiero: media de gastos de los últimos 3 meses con datos ─
-    const last3Expenses = last6MonthsAgg
-      .slice(-3)
-      .map((m: MonthlyData) => m.expenses)
-      .filter((e: number) => e > 0)
+    // Cash runway with outlier filtering
+    const filteredAvgMonthlyExpense = computeFilteredAvgMonthlyExpense(
+      last3MonthsTransactionsAgg as MonthTransactionsRow[],
+      monthlyExpenses
+    )
 
-    const avgMonthlyExpense = last3Expenses.length > 0
-      ? last3Expenses.reduce((s: number, e: number) => s + e, 0) / last3Expenses.length
-      : monthlyExpenses
-
-    const cashRunwayMonths = avgMonthlyExpense > 0
-      ? Math.round((totalBalance / avgMonthlyExpense) * 10) / 10
+    const cashRunwayMonths = filteredAvgMonthlyExpense > 0
+      ? Math.round((totalBalance / filteredAvgMonthlyExpense) * 10) / 10
       : 0
 
-    // ── Top categorías: solo las que tienen importe neto positivo ────────────
+    // Top categories: only those with a positive net amount
     const topExpenseCategories = (topCategoriesAgg as Array<{ name: string; amount: number; parentName?: string }>)
       .filter(c => c.amount > 0)
 
-    // ── Top tiendas: solo las que tienen importe neto positivo ───────────────
+    // Top stores: only those with a positive net amount
     const topStores = (topStoresAgg as Array<{ name: string; amount: number }>)
       .filter(s => s.amount > 0)
 
-    // ── Pensión ──────────────────────────────────────────────────────────────
+    // Pension
     let pension: PensionSummary | null = null
     let pensionReturnPct = 0
 
@@ -523,19 +425,15 @@ export default class DashboardService implements IDashboardService {
       }
     }
 
-    // ── Adherencia al presupuesto ────────────────────────────────────────────
-    // Usamos el gasto real del mes actual como numerador.
-    // Si no hay datos de budget configurados devolvemos 100 (sin datos = "en presupuesto").
+    // Budget adherence
+    // Uses actual configured budgets when available, falls back to previous month expenses.
     const realExpenses = currentMonthBudgetAgg[0]?.realExpenses ?? 0
-    // budgetAdherencePct: 100 significa "gastado = 0" (perfecto), 0 significa "sin ingresos o sin presupuesto"
-    // Interpretamos: qué % del presupuesto marcado se ha gastado.
-    // Como no tenemos el importe presupuestado en este endpoint, usamos el mes anterior como referencia.
-    // Si monthlyExpenses <= prevExpenses → buena adherencia.
-    const budgetAdherencePct = prevExpenses > 0
-      ? Math.round(Math.max(0, (1 - (realExpenses - prevExpenses) / prevExpenses)) * 100)
-      : (realExpenses === 0 ? 100 : 50)
+    const totalBudgetAmount = (currentBudgetsAgg as Array<{ amount: number }>)
+      .reduce((sum, b) => sum + b.amount, 0)
 
-    // ── Health Score ─────────────────────────────────────────────────────────
+    const budgetAdherencePct = computeBudgetAdherence(realExpenses, totalBudgetAmount, prevExpenses)
+
+    // Health Score
     const healthScore = computeHealthScore(
       savingsRate,
       totalDebts + totalLoansPending,
@@ -544,6 +442,16 @@ export default class DashboardService implements IDashboardService {
       cashRunwayMonths,
       pensionReturnPct
     )
+
+    // Dynamic insights
+    const insights = generateInsights({
+      currentMonthByCategory: currentMonthByCategoryAgg,
+      last3MonthsByCategory: last3MonthsByCategoryAgg,
+      budgets: currentBudgetsAgg,
+      dayOfMonth,
+      daysInMonth: daysInCurrentMonth,
+      last6Months: last6MonthsAgg
+    })
 
     return {
       totalBalance,
@@ -567,7 +475,8 @@ export default class DashboardService implements IDashboardService {
       pension,
       pensionReturnPct,
       budgetAdherencePct,
-      healthScore
+      healthScore,
+      insights
     }
   }
 }

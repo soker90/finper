@@ -1,4 +1,4 @@
-import { computeHealthScore } from '../../src/services/dashboard.service'
+import { computeHealthScore } from '../../src/services/dashboard/health-score'
 
 describe('computeHealthScore', () => {
   test('all perfect inputs should yield a total near 100', () => {

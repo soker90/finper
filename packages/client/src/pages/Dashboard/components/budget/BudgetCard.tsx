@@ -19,7 +19,7 @@ interface BudgetCardProps {
 const toBudgetRows = (items: Budget[], allowOver: boolean): BudgetRow[] =>
   items
     .filter(b => b.budgets?.[0]?.amount > 0)
-    .slice(0, 6)
+    .slice(0, 10)
     .map(b => {
       const estimated = b.budgets?.[0]?.amount ?? 0
       const real = b.budgets?.[0]?.real ?? 0

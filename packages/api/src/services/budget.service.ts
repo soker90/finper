@@ -131,6 +131,9 @@ export default class BudgetService implements IBudgetService {
       month
     }))
 
+    const getRealValue = (item: any) => isNaN(month as number) ? (item.total ?? 0) : (item.budgets?.[0]?.real ?? 0)
+    categoriesByType.sort((a, b) => getRealValue(b) - getRealValue(a))
+
     if (categoriesByType.length > 0) {
       categoriesByType.push(this.getTotalsByMonth(categoriesByType))
     }

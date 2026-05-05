@@ -77,7 +77,13 @@ const DASHBOARD_STATS_DATA: DashboardStats = {
     budgetAdherence: faker.number.int({ min: 0, max: 100 }),
     cashRunway: faker.number.int({ min: 0, max: 100 }),
     pensionReturn: faker.number.int({ min: 0, max: 100 })
-  }
+  },
+  insights: faker.helpers.arrayElements([
+    { type: 'warning' as const, title: 'Gasto disparado', message: '🔴 Has gastado 450.00€ en Restaurantes este mes, un 35% más que tu media habitual.' },
+    { type: 'critical' as const, title: 'Presupuesto en riesgo', message: '⚠️ A tu ritmo actual, agotarás tu presupuesto de Supermercado en 5 días.' },
+    { type: 'success' as const, title: '¡Racha de ahorro!', message: '✅ ¡Buen trabajo! Has mantenido tu Tasa de Ahorro por encima del 20% durante 4 meses seguidos.' },
+    { type: 'info' as const, title: 'Consejo', message: 'Revisa tus gastos recurrentes para optimizar tu presupuesto.' }
+  ], { min: 0, max: 3 })
 }
 
 export const dashboardHandlers = [
