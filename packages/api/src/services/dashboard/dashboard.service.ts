@@ -1,238 +1,14 @@
-import { AccountModel, BudgetModel, DebtModel, LoanModel, PensionModel, TransactionModel, TRANSACTION, type IPension } from '@soker90/finper-models'
-import { generateInsights, type Insight, type MonthlyData } from './utils/insights'
-
-export type { MonthlyData }
-
-export interface DailyExpense {
-  day: number
-  amount: number
-}
-
-export interface HealthScore {
-  total: number
-  savingsRate: number
-  debtRatio: number
-  budgetAdherence: number
-  cashRunway: number
-  pensionReturn: number
-}
-
-export interface PensionSummary {
-  employeeAmount: number
-  companyAmount: number
-  total: number
-  transactions: IPension[]
-}
-
-export interface DashboardStatsResult {
-  // Accounts and debts
-  totalBalance: number
-  totalDebts: number
-  totalLoansPending: number
-  netWorth: number
-
-  // Current month
-  monthlyIncome: number
-  monthlyExpenses: number
-  savingsRate: number
-
-  // Trend vs previous month
-  monthlyTrend: {
-    income: { current: number; previous: number }
-    expenses: { current: number; previous: number }
-  }
-
-  // Last 6 months (for bar chart)
-  last6Months: MonthlyData[]
-
-  // Expense velocity (daily cumulative)
-  expenseVelocity: {
-    currentMonth: DailyExpense[]
-    previousMonth: DailyExpense[]
-  }
-
-  // Averages and projections
-  dailyAvgExpense: number
-  projectedMonthlyExpense: number
-  cashRunwayMonths: number
-
-  // Monthly rankings — topExpenseCategories includes parentName for hierarchical Treemap
-  topExpenseCategories: Array<{ name: string; amount: number; parentName?: string }>
-  topStores: Array<{ name: string; amount: number }>
-
-  // Pension
-  pension: PensionSummary | null
-  pensionReturnPct: number
-
-  // Monthly budget
-  budgetAdherencePct: number
-
-  // Health Score
-  healthScore: HealthScore
-
-  // Dynamic insights
-  insights: Insight[]
-}
-
-export interface IDashboardService {
-  getStats(params: { user: string }): Promise<DashboardStatsResult>
-}
-
-/**
- * Computes the financial health score from 5 weighted sub-scores.
- *
- * Weights: savingsRate 25%, debtRatio 20%, budgetAdherence 20%,
- *          cashRunway 20%, pensionReturn 15%.
- */
-export const computeHealthScore = (
-  savingsRate: number,        // e.g. 15 → 15%
-  totalDebts: number,         // absolute monetary value
-  totalBalance: number,       // absolute monetary value
-  budgetAdherencePct: number, // 0–100
-  cashRunwayMonths: number,   // number of months
-  pensionReturnPct: number    // e.g. 4.5 → 4.5%
-): HealthScore => {
-  const clamp = (v: number, min: number, max: number): number =>
-    Math.max(min, Math.min(max, v))
-
-  const savingsScore = Math.round(clamp(savingsRate / 20, 0, 1) * 100)
-  const debtScore = Math.round(Math.max(0, 1 - (totalBalance > 0 ? totalDebts / totalBalance : 1)) * 100)
-  const budgetScore = Math.round(Math.min(budgetAdherencePct, 100))
-  const runwayScore = Math.round(Math.min(cashRunwayMonths / 6, 1) * 100)
-  const pensionScore = Math.round(clamp(pensionReturnPct / 5, 0, 1) * 100)
-
-  const total = Math.round(
-    savingsScore * 0.25 +
-    debtScore * 0.20 +
-    budgetScore * 0.20 +
-    runwayScore * 0.20 +
-    pensionScore * 0.15
-  )
-
-  return {
-    total,
-    savingsRate: savingsScore,
-    debtRatio: debtScore,
-    budgetAdherence: budgetScore,
-    cashRunway: runwayScore,
-    pensionReturn: pensionScore
-  }
-}
-
-const TIMEZONE = 'Europe/Madrid'
-
-/** Current month expenses grouped by child category, with name */
-const aggregateCurrentMonthByCategory = (
-  user: string,
-  from: number,
-  to: number
-) => TransactionModel.aggregate([
-  { $match: { user, date: { $gte: from, $lt: to }, type: TRANSACTION.Expense } },
-  { $group: { _id: '$category', total: { $sum: '$amount' }, count: { $sum: 1 } } },
-  { $lookup: { from: 'categories', localField: '_id', foreignField: '_id', as: 'cat' } },
-  { $unwind: '$cat' },
-  { $project: { _id: 0, categoryId: '$_id', name: '$cat.name', total: 1, count: 1 } }
-])
-
-/** Monthly average expense per child category over the given range (excludes current month) */
-const aggregateLast3MonthsByCategory = (
-  user: string,
-  from: number,
-  to: number
-) => TransactionModel.aggregate([
-  { $match: { user, date: { $gte: from, $lt: to }, type: TRANSACTION.Expense } },
-  {
-    $group: {
-      _id: {
-        category: '$category',
-        year: { $year: { date: { $toDate: '$date' }, timezone: TIMEZONE } },
-        month: { $month: { date: { $toDate: '$date' }, timezone: TIMEZONE } }
-      },
-      total: { $sum: '$amount' }
-    }
-  },
-  { $group: { _id: '$_id.category', avgMonthly: { $avg: '$total' } } },
-  { $lookup: { from: 'categories', localField: '_id', foreignField: '_id', as: 'cat' } },
-  { $unwind: '$cat' },
-  { $project: { _id: 0, categoryId: '$_id', name: '$cat.name', avgMonthly: 1 } }
-])
-
-/** Individual expense transactions grouped by month, used for outlier filtering */
-const aggregateLast3MonthsTransactions = (
-  user: string,
-  from: number,
-  to: number
-) => TransactionModel.aggregate([
-  { $match: { user, date: { $gte: from, $lt: to }, type: TRANSACTION.Expense } },
-  {
-    $group: {
-      _id: {
-        year: { $year: { date: { $toDate: '$date' }, timezone: TIMEZONE } },
-        month: { $month: { date: { $toDate: '$date' }, timezone: TIMEZONE } }
-      },
-      transactions: { $push: '$amount' },
-      total: { $sum: '$amount' },
-      count: { $sum: 1 }
-    }
-  }
-])
-
-/** Current month budgets with category name */
-const aggregateCurrentBudgets = (
-  user: string,
-  year: number,
-  month: number   // 1-indexed
-) => BudgetModel.aggregate([
-  { $match: { user, year, month } },
-  { $lookup: { from: 'categories', localField: 'category', foreignField: '_id', as: 'cat' } },
-  { $unwind: '$cat' },
-  { $project: { _id: 0, categoryId: '$category', name: '$cat.name', amount: 1 } }
-])
-
-const OUTLIER_MULTIPLE = 3     // > 3x the mean transaction amount for the month → outlier
-const OUTLIER_SHARE = 0.30     // > 30% of the month's total expense → outlier
-
-export const isOutlier = (
-  amount: number,
-  monthTotal: number,
-  meanPerTransaction: number
-): boolean =>
-  amount > meanPerTransaction * OUTLIER_MULTIPLE ||
-  amount > monthTotal * OUTLIER_SHARE
-
-interface MonthTransactionsRow {
-  transactions: number[]
-  total: number
-  count: number
-}
-
-/** Returns the sum of non-outlier transactions for a single month. */
-export const filterMonthOutliers = (month: MonthTransactionsRow): number => {
-  const { transactions, total, count } = month
-  if (count === 0 || total === 0) return 0
-
-  const meanPerTransaction = total / count
-  return transactions
-    .filter(amount => !isOutlier(amount, total, meanPerTransaction))
-    .reduce((sum, amount) => sum + amount, 0)
-}
-
-/**
- * Computes the average monthly expense after removing outlier transactions.
- * Falls back to the provided value when there is no valid monthly data.
- */
-export const computeFilteredAvgMonthlyExpense = (
-  monthlyData: MonthTransactionsRow[],
-  fallback: number
-): number => {
-  const filteredTotals = monthlyData
-    .filter(m => m.count > 0 && m.total > 0)
-    .map(filterMonthOutliers)
-
-  return filteredTotals.length > 0
-    ? filteredTotals.reduce((sum, t) => sum + t, 0) / filteredTotals.length
-    : fallback
-}
+import { AccountModel, DebtModel, LoanModel, PensionModel, TransactionModel, TRANSACTION, type IPension } from '@soker90/finper-models'
+import { generateInsights } from '../utils/insights'
+import { computeHealthScore, computeBudgetAdherence } from './health-score'
+import { computeFilteredAvgMonthlyExpense, type MonthTransactionsRow } from './cash-runway'
+import {
+  aggregateCurrentMonthByCategory,
+  aggregateLast3MonthsByCategory,
+  aggregateLast3MonthsTransactions,
+  aggregateCurrentBudgets
+} from './aggregations'
+import type { DashboardStatsResult, IDashboardService, PensionSummary, DailyExpense } from './dashboard.types'
 
 /** Builds the cumulative daily expense array from a day→amount map. */
 const buildCumulativeDailyExpenses = (
@@ -261,8 +37,13 @@ export default class DashboardService implements IDashboardService {
     const currentMonthEnd = new Date(currentYear, currentMonth + 1, 1).getTime()
     const previousMonthStart = new Date(previousYear, previousMonth, 1).getTime()
     const previousMonthEnd = new Date(currentYear, currentMonth, 1).getTime()
-    const last3MonthsStart = new Date(currentYear, currentMonth - 2, 1).getTime()
+    // last3MonthsStart is shared by two aggregations with different upper bounds:
+    //   - category insights  → uses currentMonthEnd  (includes current month data)
+    //   - cash runway        → uses currentMonthStart (only completed months)
+    const last3MonthsStart = new Date(currentYear, currentMonth - 3, 1).getTime()
     const last6MonthsStart = new Date(currentYear, currentMonth - 5, 1).getTime()
+
+    const TIMEZONE = 'Europe/Madrid'
 
     const [
       accountsResult,
@@ -555,7 +336,7 @@ export default class DashboardService implements IDashboardService {
       aggregateLast3MonthsByCategory(user, last3MonthsStart, currentMonthEnd),
 
       // 16. Individual expense transactions grouped by month (for cash runway outlier filtering)
-      aggregateLast3MonthsTransactions(user, last3MonthsStart, currentMonthEnd),
+      aggregateLast3MonthsTransactions(user, last3MonthsStart, currentMonthStart),
 
       // 17. Configured budgets for the current month (for insights: velocity check)
       aggregateCurrentBudgets(user, currentYear, currentMonth + 1)
@@ -645,12 +426,12 @@ export default class DashboardService implements IDashboardService {
     }
 
     // Budget adherence
-    // Uses real expenses vs previous month as a proxy when no budget amount is configured.
-    // If monthlyExpenses <= prevExpenses → good adherence. Returns 100 when there is no prior data.
+    // Uses actual configured budgets when available, falls back to previous month expenses.
     const realExpenses = currentMonthBudgetAgg[0]?.realExpenses ?? 0
-    const budgetAdherencePct = prevExpenses > 0
-      ? Math.round(Math.max(0, (1 - (realExpenses - prevExpenses) / prevExpenses)) * 100)
-      : (realExpenses === 0 ? 100 : 50)
+    const totalBudgetAmount = (currentBudgetsAgg as Array<{ amount: number }>)
+      .reduce((sum, b) => sum + b.amount, 0)
+
+    const budgetAdherencePct = computeBudgetAdherence(realExpenses, totalBudgetAmount, prevExpenses)
 
     // Health Score
     const healthScore = computeHealthScore(

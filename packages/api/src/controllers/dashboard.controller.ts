@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from 'express'
 
 import '../auth/local-strategy-passport-handler'
-import { IDashboardService } from '../services/dashboard.service'
+import { IDashboardService } from '../services/dashboard'
 
 type IDashboardController = {
   loggerHandler: any
