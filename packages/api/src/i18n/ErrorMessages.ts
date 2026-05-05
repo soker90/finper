@@ -55,5 +55,11 @@ export const ERROR_MESSAGE = {
   },
   TARIFF: {
     FETCH_ERROR: 'No se pudieron obtener las tarifas eléctricas'
+  },
+  GOAL: {
+    NOT_FOUND: 'La meta no existe',
+    EXCEEDS_BALANCE: 'El total asignado a todas las metas supera el balance de las cuentas',
+    INVALID_AMOUNT: 'La cantidad debe ser mayor que 0',
+    INSUFFICIENT_FUNDS: 'No se puede retirar más dinero del asignado a la meta'
   }
 }

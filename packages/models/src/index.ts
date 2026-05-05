@@ -21,6 +21,7 @@ import { IProperty, PropertyModel } from './models/properties'
 import { ISupply, SupplyModel, SUPPLY_TYPE, SupplyType } from './models/supplies'
 import { ISupplyReading, SupplyReadingModel } from './models/supply-readings'
 import { IStock, StockModel, STOCK_TYPE, StockType } from './models/stocks'
+import { IGoal, GoalModel, GOAL_COLORS, GoalColor, GOAL_ICONS, GoalIcon } from './models/goals'
 
 export type { AccountDocument } from './models/accounts'
 export type { BudgetDocument } from './models/budgets'
@@ -39,6 +40,7 @@ export type { PropertyDocument } from './models/properties'
 export type { SupplyDocument } from './models/supplies'
 export type { SupplyReadingDocument } from './models/supply-readings'
 export type { StockDocument } from './models/stocks'
+export type { GoalDocument } from './models/goals'
 
 function connect (uri: string, options: Record<string, unknown>): void {
   if (isNil(mongoose)) {
@@ -73,6 +75,11 @@ export {
   STOCK_TYPE,
   StockType,
 
+  GOAL_COLORS,
+  GoalColor,
+  GOAL_ICONS,
+  GoalIcon,
+
   IAccount,
   IBudget,
   ICategory,
@@ -91,6 +98,8 @@ export {
   ISupplyReading,
   IStock,
 
+  IGoal,
+
   AccountModel,
   BudgetModel,
   CategoryModel,
@@ -107,5 +116,6 @@ export {
   PropertyModel,
   SupplyModel,
   SupplyReadingModel,
-  StockModel
+  StockModel,
+  GoalModel
 }

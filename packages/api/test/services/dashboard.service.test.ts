@@ -98,13 +98,13 @@ describe('computeHealthScore', () => {
     expect(result.total).toBe(62)
   })
 
-  test('all sub-scores are integers (Math.round applied)', () => {
+  test('all sub-scores are rounded to 2 decimals (roundNumber applied)', () => {
     const result = computeHealthScore(7, 1234, 5678, 67, 2.5, 1.7)
-    expect(Number.isInteger(result.total)).toBe(true)
-    expect(Number.isInteger(result.savingsRate)).toBe(true)
-    expect(Number.isInteger(result.debtRatio)).toBe(true)
-    expect(Number.isInteger(result.budgetAdherence)).toBe(true)
-    expect(Number.isInteger(result.cashRunway)).toBe(true)
-    expect(Number.isInteger(result.pensionReturn)).toBe(true)
+    expect(result.total).toBeCloseTo(51.24, 2)
+    expect(result.savingsRate).toBe(35)
+    expect(result.debtRatio).toBeCloseTo(78.27, 2)
+    expect(result.budgetAdherence).toBe(67)
+    expect(result.cashRunway).toBeCloseTo(41.67, 2)
+    expect(result.pensionReturn).toBe(34)
   })
 })
