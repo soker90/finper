@@ -371,12 +371,16 @@ describe('Dashboard', () => {
       const year = now.getFullYear()
       const month = now.getMonth()
 
-      // Set up 3 months of high savings rate to trigger the streak insight
+      // Set up 3 completed months of high savings rate to trigger the streak insight
+      const prevMonth3 = month - 3 < 0 ? month - 3 + 12 : month - 3
       const prevMonth2 = month - 2 < 0 ? month - 2 + 12 : month - 2
       const prevMonth1 = month - 1 < 0 ? month - 1 + 12 : month - 1
+      const prevYear3 = month - 3 < 0 ? year - 1 : year
       const prevYear2 = month - 2 < 0 ? year - 1 : year
       const prevYear1 = month - 1 < 0 ? year - 1 : year
 
+      await insertTransaction({ user, date: new Date(prevYear3, prevMonth3, 5).getTime(), amount: 1000, type: TRANSACTION.Income })
+      await insertTransaction({ user, date: new Date(prevYear3, prevMonth3, 6).getTime(), amount: 100, type: TRANSACTION.Expense })
       await insertTransaction({ user, date: new Date(prevYear2, prevMonth2, 5).getTime(), amount: 1000, type: TRANSACTION.Income })
       await insertTransaction({ user, date: new Date(prevYear2, prevMonth2, 6).getTime(), amount: 100, type: TRANSACTION.Expense })
       await insertTransaction({ user, date: new Date(prevYear1, prevMonth1, 5).getTime(), amount: 1000, type: TRANSACTION.Income })
@@ -411,25 +415,27 @@ describe('Dashboard', () => {
 
       const account = await insertAccount({ user, balance: 6000, isActive: true })
 
-      // 2 months ago: 4 transactions of 100€ + 1 outlier of 900€ (> 3x mean=220 → outlier)
+      // 3 months ago: 4 transactions of 100€ + 1 outlier of 900€ (> 3x mean=220 → outlier)
       // Without outlier: filtered total = 400€
+      const threeMonthsAgo = month - 3 < 0 ? month - 3 + 12 : month - 3
+      const threeMonthsAgoYear = month - 3 < 0 ? year - 1 : year
+      for (let i = 1; i <= 4; i++) {
+        await insertTransaction({ user, account: account._id, date: new Date(threeMonthsAgoYear, threeMonthsAgo, i).getTime(), amount: 100, type: TRANSACTION.Expense })
+      }
+      await insertTransaction({ user, account: account._id, date: new Date(threeMonthsAgoYear, threeMonthsAgo, 5).getTime(), amount: 900, type: TRANSACTION.Expense })
+
+      // 2 months ago: 4 transactions of 100€ (no outlier) → filtered total = 400€
       const twoMonthsAgo = month - 2 < 0 ? month - 2 + 12 : month - 2
       const twoMonthsAgoYear = month - 2 < 0 ? year - 1 : year
       for (let i = 1; i <= 4; i++) {
         await insertTransaction({ user, account: account._id, date: new Date(twoMonthsAgoYear, twoMonthsAgo, i).getTime(), amount: 100, type: TRANSACTION.Expense })
       }
-      await insertTransaction({ user, account: account._id, date: new Date(twoMonthsAgoYear, twoMonthsAgo, 5).getTime(), amount: 900, type: TRANSACTION.Expense })
 
       // 1 month ago: 4 transactions of 100€ (no outlier) → filtered total = 400€
       const oneMonthAgo = month - 1 < 0 ? month - 1 + 12 : month - 1
       const oneMonthAgoYear = month - 1 < 0 ? year - 1 : year
       for (let i = 1; i <= 4; i++) {
         await insertTransaction({ user, account: account._id, date: new Date(oneMonthAgoYear, oneMonthAgo, i).getTime(), amount: 100, type: TRANSACTION.Expense })
-      }
-
-      // Current month: 4 transactions of 100€ (no outlier) → filtered total = 400€
-      for (let i = 1; i <= 4; i++) {
-        await insertTransaction({ user, account: account._id, date: new Date(year, month, i).getTime(), amount: 100, type: TRANSACTION.Expense })
       }
 
       const response = await supertest(server.app)
@@ -451,10 +457,17 @@ describe('Dashboard', () => {
 
       // 1 transaction of 400€ in a month with total 1000€ → 40% of total → outlier
       // Remainder: 600€ → filtered = 600€
+      const threeMonthsAgo = month - 3 < 0 ? month - 3 + 12 : month - 3
+      const threeMonthsAgoYear = month - 3 < 0 ? year - 1 : year
+      await insertTransaction({ user, account: account._id, date: new Date(threeMonthsAgoYear, threeMonthsAgo, 1).getTime(), amount: 400, type: TRANSACTION.Expense })
+      for (let i = 2; i <= 7; i++) {
+        await insertTransaction({ user, account: account._id, date: new Date(threeMonthsAgoYear, threeMonthsAgo, i).getTime(), amount: 100, type: TRANSACTION.Expense })
+      }
+
+      // 2 months ago: 6 x 100€ = 600€ (no outlier)
       const twoMonthsAgo = month - 2 < 0 ? month - 2 + 12 : month - 2
       const twoMonthsAgoYear = month - 2 < 0 ? year - 1 : year
-      await insertTransaction({ user, account: account._id, date: new Date(twoMonthsAgoYear, twoMonthsAgo, 1).getTime(), amount: 400, type: TRANSACTION.Expense })
-      for (let i = 2; i <= 7; i++) {
+      for (let i = 1; i <= 6; i++) {
         await insertTransaction({ user, account: account._id, date: new Date(twoMonthsAgoYear, twoMonthsAgo, i).getTime(), amount: 100, type: TRANSACTION.Expense })
       }
 
@@ -463,11 +476,6 @@ describe('Dashboard', () => {
       const oneMonthAgoYear = month - 1 < 0 ? year - 1 : year
       for (let i = 1; i <= 6; i++) {
         await insertTransaction({ user, account: account._id, date: new Date(oneMonthAgoYear, oneMonthAgo, i).getTime(), amount: 100, type: TRANSACTION.Expense })
-      }
-
-      // Current month: 6 x 100€ = 600€ (no outlier)
-      for (let i = 1; i <= 6; i++) {
-        await insertTransaction({ user, account: account._id, date: new Date(year, month, i).getTime(), amount: 100, type: TRANSACTION.Expense })
       }
 
       const response = await supertest(server.app)
@@ -487,8 +495,8 @@ describe('Dashboard', () => {
 
       const account = await insertAccount({ user, balance: 1500, isActive: true })
 
-      // 3 uniform months of 500€ (no outlier) → avgFiltered=500 → cashRunway=3
-      for (let m = 0; m < 3; m++) {
+      // 3 uniform completed months of 500€ (no outlier) → avgFiltered=500 → cashRunway=3
+      for (let m = 1; m <= 3; m++) {
         const targetMonth = month - m < 0 ? month - m + 12 : month - m
         const targetYear = month - m < 0 ? year - 1 : year
         // 5 transactions of 100€: mean=100, total=500 → none is >3x100 nor >30% of 500
@@ -503,6 +511,45 @@ describe('Dashboard', () => {
         .expect(200)
 
       expect(response.body.cashRunwayMonths).toBe(3)
+    })
+
+    test('cash runway should NOT filter months with fewer than 5 transactions', async () => {
+      const now = new Date()
+      const year = now.getFullYear()
+      const month = now.getMonth()
+
+      const account = await insertAccount({ user, balance: 3000, isActive: true })
+
+      // 3 months ago: 3 transactions of 333€ each → each is ~33% of total (above 30%)
+      // but count < 5, so no filtering should happen → total = 999€
+      const threeMonthsAgo = month - 3 < 0 ? month - 3 + 12 : month - 3
+      const threeMonthsAgoYear = month - 3 < 0 ? year - 1 : year
+      for (let i = 1; i <= 3; i++) {
+        await insertTransaction({ user, account: account._id, date: new Date(threeMonthsAgoYear, threeMonthsAgo, i).getTime(), amount: 333, type: TRANSACTION.Expense })
+      }
+
+      // 2 months ago: 3 transactions of 100€ → total = 300€
+      const twoMonthsAgo = month - 2 < 0 ? month - 2 + 12 : month - 2
+      const twoMonthsAgoYear = month - 2 < 0 ? year - 1 : year
+      for (let i = 1; i <= 3; i++) {
+        await insertTransaction({ user, account: account._id, date: new Date(twoMonthsAgoYear, twoMonthsAgo, i).getTime(), amount: 100, type: TRANSACTION.Expense })
+      }
+
+      // 1 month ago: 3 transactions of 100€ → total = 300€
+      const oneMonthAgo = month - 1 < 0 ? month - 1 + 12 : month - 1
+      const oneMonthAgoYear = month - 1 < 0 ? year - 1 : year
+      for (let i = 1; i <= 3; i++) {
+        await insertTransaction({ user, account: account._id, date: new Date(oneMonthAgoYear, oneMonthAgo, i).getTime(), amount: 100, type: TRANSACTION.Expense })
+      }
+
+      const response = await supertest(server.app)
+        .get(path)
+        .auth(token, { type: 'bearer' })
+        .expect(200)
+
+      // avg = (999 + 300 + 300) / 3 ≈ 533, cashRunway = 3000 / 533 ≈ 5.6
+      expect(response.body.cashRunwayMonths).toBeGreaterThanOrEqual(5)
+      expect(response.body.cashRunwayMonths).toBeLessThanOrEqual(6)
     })
   })
 })
