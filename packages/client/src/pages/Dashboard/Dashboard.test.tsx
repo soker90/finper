@@ -120,8 +120,28 @@ describe('Dashboard', () => {
     })
   })
 
-  // ── HealthScoreSection ────────────────────────────────────────────────────
   describe('HealthScoreSection', () => {
+    const baseStats = {
+      totalBalance: 1000,
+      totalDebts: 0,
+      netWorth: 1000,
+      monthlyIncome: 2000,
+      monthlyExpenses: 500,
+      savingsRate: 75,
+      topExpenseCategories: [],
+      topStores: [],
+      monthlyTrend: { income: { current: 2000, previous: 1800 }, expenses: { current: 500, previous: 600 } },
+      last6Months: [],
+      dailyAvgExpense: 16,
+      projectedMonthlyExpense: 500,
+      cashRunwayMonths: 2,
+      expenseVelocity: { currentMonth: [], previousMonth: [] },
+      pension: null,
+      pensionReturnPct: 0,
+      budgetAdherencePct: 100,
+      healthScore: { total: 70, savingsRate: 80, debtRatio: 100, budgetAdherence: 100, cashRunway: 33, pensionReturn: 0 }
+    }
+
     it('renders section title and score card', async () => {
       const { findByText } = render(<Dashboard />)
 
@@ -146,6 +166,58 @@ describe('Dashboard', () => {
       const { findByText } = render(<Dashboard />)
 
       expect(await findByText('de 100')).toBeDefined()
+    })
+
+    it('renders insights from the backend as Alerts or empty state', async () => {
+      const { container, findByText } = renderWithFreshCache()
+
+      // Wait for the dashboard to finish loading
+      await findByText('Resumen')
+
+      // Either at least one MUI Alert is rendered (insights present) or the empty-state message
+      const alerts = container.querySelectorAll('.MuiAlert-root')
+      const hasEmptyState = await findByText('No hay consejos disponibles en este momento.')
+        .then(() => true)
+        .catch(() => false)
+
+      expect(alerts.length > 0 || hasEmptyState).toBe(true)
+    })
+
+    it('shows empty state message when insights array is empty', async () => {
+      server.use(
+        http.get('/dashboard/stats', () => HttpResponse.json({ ...baseStats, insights: [] }))
+      )
+
+      const { findByText } = renderWithFreshCache()
+      expect(await findByText('No hay consejos disponibles en este momento.')).toBeDefined()
+    })
+
+    it('renders insight titles and applies correct severity styles', async () => {
+      server.use(
+        http.get('/dashboard/stats', () => HttpResponse.json({
+          ...baseStats,
+          insights: [
+            { type: 'warning', title: 'Gasto disparado', message: 'Has gastado más de lo habitual en Restaurantes.' },
+            { type: 'success', title: '¡Racha de ahorro!', message: 'Llevas 3 meses ahorrando más del 20%.' },
+            { type: 'critical', title: 'Presupuesto en riesgo', message: 'Agotarás tu presupuesto de Ocio en 5 días.' }
+          ]
+        }))
+      )
+
+      const { findByText, container } = renderWithFreshCache()
+
+      expect(await findByText('Gasto disparado')).toBeDefined()
+      expect(await findByText('¡Racha de ahorro!')).toBeDefined()
+      expect(await findByText('Presupuesto en riesgo')).toBeDefined()
+
+      // MUI Alert severity classes
+      const warningAlert = container.querySelector('.MuiAlert-standardWarning, .MuiAlert-outlinedWarning')
+      const successAlert = container.querySelector('.MuiAlert-standardSuccess, .MuiAlert-outlinedSuccess')
+      const errorAlert = container.querySelector('.MuiAlert-standardError, .MuiAlert-outlinedError')
+
+      expect(warningAlert).not.toBeNull()
+      expect(successAlert).not.toBeNull()
+      expect(errorAlert).not.toBeNull()
     })
   })
 })

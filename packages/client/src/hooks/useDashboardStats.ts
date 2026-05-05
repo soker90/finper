@@ -22,6 +22,12 @@ export interface HealthScore {
   pensionReturn: number
 }
 
+export interface Insight {
+  type: 'warning' | 'info' | 'success' | 'critical'
+  title: string
+  message: string
+}
+
 export interface PensionTransaction {
   date: number
   employeeAmount: number
@@ -64,6 +70,7 @@ export interface DashboardStats {
   pensionReturnPct: number
   budgetAdherencePct: number
   healthScore: HealthScore
+  insights: Insight[]
 }
 
 export const useDashboardStats = (): {

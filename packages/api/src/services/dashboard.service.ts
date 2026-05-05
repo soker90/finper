@@ -1,15 +1,11 @@
-import { AccountModel, DebtModel, LoanModel, PensionModel, TransactionModel, TRANSACTION, type IPension } from '@soker90/finper-models'
+import { AccountModel, BudgetModel, DebtModel, LoanModel, PensionModel, TransactionModel, TRANSACTION, type IPension } from '@soker90/finper-models'
+import { generateInsights, type Insight, type MonthlyData } from './utils/insights'
+
+export type { MonthlyData }
 
 export interface DailyExpense {
   day: number
   amount: number
-}
-
-export interface MonthlyData {
-  month: number   // 1-indexed
-  year: number
-  income: number
-  expenses: number
 }
 
 export interface HealthScore {
@@ -29,69 +25,71 @@ export interface PensionSummary {
 }
 
 export interface DashboardStatsResult {
-  // Cuentas y deudas
+  // Accounts and debts
   totalBalance: number
   totalDebts: number
   totalLoansPending: number
   netWorth: number
 
-  // Mes actual
+  // Current month
   monthlyIncome: number
   monthlyExpenses: number
   savingsRate: number
 
-  // Tendencia vs mes anterior
+  // Trend vs previous month
   monthlyTrend: {
     income: { current: number; previous: number }
     expenses: { current: number; previous: number }
   }
 
-  // Últimos 6 meses (para la gráfica de barras)
+  // Last 6 months (for bar chart)
   last6Months: MonthlyData[]
 
-  // Velocidad de gasto (acumulado diario)
+  // Expense velocity (daily cumulative)
   expenseVelocity: {
     currentMonth: DailyExpense[]
     previousMonth: DailyExpense[]
   }
 
-  // Medias y proyecciones
+  // Averages and projections
   dailyAvgExpense: number
   projectedMonthlyExpense: number
   cashRunwayMonths: number
 
-  // Rankings del mes — topExpenseCategories incluye parentName para Treemap jerárquico
+  // Monthly rankings — topExpenseCategories includes parentName for hierarchical Treemap
   topExpenseCategories: Array<{ name: string; amount: number; parentName?: string }>
   topStores: Array<{ name: string; amount: number }>
 
-  // Pensión
+  // Pension
   pension: PensionSummary | null
   pensionReturnPct: number
 
-  // Presupuesto del mes
+  // Monthly budget
   budgetAdherencePct: number
 
   // Health Score
   healthScore: HealthScore
+
+  // Dynamic insights
+  insights: Insight[]
 }
 
 export interface IDashboardService {
   getStats(params: { user: string }): Promise<DashboardStatsResult>
 }
 
-// ── Health Score ─────────────────────────────────────────────────────────────
 /**
- * Calcula el health score financiero a partir de 5 sub-scores ponderados.
+ * Computes the financial health score from 5 weighted sub-scores.
  *
- * Pesos: savingsRate 25%, debtRatio 20%, budgetAdherence 20%,
- *        cashRunway 20%, pensionReturn 15%.
+ * Weights: savingsRate 25%, debtRatio 20%, budgetAdherence 20%,
+ *          cashRunway 20%, pensionReturn 15%.
  */
 export const computeHealthScore = (
   savingsRate: number,        // e.g. 15 → 15%
-  totalDebts: number,         // valor absoluto en moneda
-  totalBalance: number,       // valor absoluto en moneda
+  totalDebts: number,         // absolute monetary value
+  totalBalance: number,       // absolute monetary value
   budgetAdherencePct: number, // 0–100
-  cashRunwayMonths: number,   // número de meses
+  cashRunwayMonths: number,   // number of months
   pensionReturnPct: number    // e.g. 4.5 → 4.5%
 ): HealthScore => {
   const clamp = (v: number, min: number, max: number): number =>
@@ -123,7 +121,120 @@ export const computeHealthScore = (
 
 const TIMEZONE = 'Europe/Madrid'
 
-/** Construye el array de gasto acumulado diario a partir de un mapa día→importe */
+/** Current month expenses grouped by child category, with name */
+const aggregateCurrentMonthByCategory = (
+  user: string,
+  from: number,
+  to: number
+) => TransactionModel.aggregate([
+  { $match: { user, date: { $gte: from, $lt: to }, type: TRANSACTION.Expense } },
+  { $group: { _id: '$category', total: { $sum: '$amount' }, count: { $sum: 1 } } },
+  { $lookup: { from: 'categories', localField: '_id', foreignField: '_id', as: 'cat' } },
+  { $unwind: '$cat' },
+  { $project: { _id: 0, categoryId: '$_id', name: '$cat.name', total: 1, count: 1 } }
+])
+
+/** Monthly average expense per child category over the given range (excludes current month) */
+const aggregateLast3MonthsByCategory = (
+  user: string,
+  from: number,
+  to: number
+) => TransactionModel.aggregate([
+  { $match: { user, date: { $gte: from, $lt: to }, type: TRANSACTION.Expense } },
+  {
+    $group: {
+      _id: {
+        category: '$category',
+        year: { $year: { date: { $toDate: '$date' }, timezone: TIMEZONE } },
+        month: { $month: { date: { $toDate: '$date' }, timezone: TIMEZONE } }
+      },
+      total: { $sum: '$amount' }
+    }
+  },
+  { $group: { _id: '$_id.category', avgMonthly: { $avg: '$total' } } },
+  { $lookup: { from: 'categories', localField: '_id', foreignField: '_id', as: 'cat' } },
+  { $unwind: '$cat' },
+  { $project: { _id: 0, categoryId: '$_id', name: '$cat.name', avgMonthly: 1 } }
+])
+
+/** Individual expense transactions grouped by month, used for outlier filtering */
+const aggregateLast3MonthsTransactions = (
+  user: string,
+  from: number,
+  to: number
+) => TransactionModel.aggregate([
+  { $match: { user, date: { $gte: from, $lt: to }, type: TRANSACTION.Expense } },
+  {
+    $group: {
+      _id: {
+        year: { $year: { date: { $toDate: '$date' }, timezone: TIMEZONE } },
+        month: { $month: { date: { $toDate: '$date' }, timezone: TIMEZONE } }
+      },
+      transactions: { $push: '$amount' },
+      total: { $sum: '$amount' },
+      count: { $sum: 1 }
+    }
+  }
+])
+
+/** Current month budgets with category name */
+const aggregateCurrentBudgets = (
+  user: string,
+  year: number,
+  month: number   // 1-indexed
+) => BudgetModel.aggregate([
+  { $match: { user, year, month } },
+  { $lookup: { from: 'categories', localField: 'category', foreignField: '_id', as: 'cat' } },
+  { $unwind: '$cat' },
+  { $project: { _id: 0, categoryId: '$category', name: '$cat.name', amount: 1 } }
+])
+
+const OUTLIER_MULTIPLE = 3     // > 3x the mean transaction amount for the month → outlier
+const OUTLIER_SHARE = 0.30     // > 30% of the month's total expense → outlier
+
+export const isOutlier = (
+  amount: number,
+  monthTotal: number,
+  meanPerTransaction: number
+): boolean =>
+  amount > meanPerTransaction * OUTLIER_MULTIPLE ||
+  amount > monthTotal * OUTLIER_SHARE
+
+interface MonthTransactionsRow {
+  transactions: number[]
+  total: number
+  count: number
+}
+
+/** Returns the sum of non-outlier transactions for a single month. */
+export const filterMonthOutliers = (month: MonthTransactionsRow): number => {
+  const { transactions, total, count } = month
+  if (count === 0 || total === 0) return 0
+
+  const meanPerTransaction = total / count
+  return transactions
+    .filter(amount => !isOutlier(amount, total, meanPerTransaction))
+    .reduce((sum, amount) => sum + amount, 0)
+}
+
+/**
+ * Computes the average monthly expense after removing outlier transactions.
+ * Falls back to the provided value when there is no valid monthly data.
+ */
+export const computeFilteredAvgMonthlyExpense = (
+  monthlyData: MonthTransactionsRow[],
+  fallback: number
+): number => {
+  const filteredTotals = monthlyData
+    .filter(m => m.count > 0 && m.total > 0)
+    .map(filterMonthOutliers)
+
+  return filteredTotals.length > 0
+    ? filteredTotals.reduce((sum, t) => sum + t, 0) / filteredTotals.length
+    : fallback
+}
+
+/** Builds the cumulative daily expense array from a day→amount map. */
 const buildCumulativeDailyExpenses = (
   dailyMap: Map<number, number>,
   daysInMonth: number
@@ -145,15 +256,14 @@ export default class DashboardService implements IDashboardService {
     const previousMonth = currentMonth === 0 ? 11 : currentMonth - 1
     const previousYear = currentMonth === 0 ? currentYear - 1 : currentYear
 
-    // ── Fechas en epoch ms para los $match ──────────────────────────────────
+    // Epoch timestamps for $match stages
     const currentMonthStart = new Date(currentYear, currentMonth, 1).getTime()
     const currentMonthEnd = new Date(currentYear, currentMonth + 1, 1).getTime()
     const previousMonthStart = new Date(previousYear, previousMonth, 1).getTime()
     const previousMonthEnd = new Date(currentYear, currentMonth, 1).getTime()
+    const last3MonthsStart = new Date(currentYear, currentMonth - 2, 1).getTime()
     const last6MonthsStart = new Date(currentYear, currentMonth - 5, 1).getTime()
 
-    // ── Paralelo: balance de cuentas, suma de deudas, agregaciones de transacciones,
-    //             pensión y presupuesto del mes actual ──────────────────────────
     const [
       accountsResult,
       debtsResult,
@@ -167,15 +277,19 @@ export default class DashboardService implements IDashboardService {
       topStoresAgg,
       pensionStatsAgg,
       pensionTransactions,
-      currentMonthBudgetAgg
+      currentMonthBudgetAgg,
+      currentMonthByCategoryAgg,
+      last3MonthsByCategoryAgg,
+      last3MonthsTransactionsAgg,
+      currentBudgetsAgg
     ] = await Promise.all([
-      // 1. Suma de saldos de cuentas activas
+      // 1. Sum of active account balances
       AccountModel.aggregate([
         { $match: { user, isActive: true } },
         { $group: { _id: null, total: { $sum: '$balance' } } }
       ]),
 
-      // 2. Suma de deudas pendientes
+      // 2. Sum of outstanding debts
       DebtModel.aggregate([
         { $match: { user } },
         {
@@ -203,13 +317,13 @@ export default class DashboardService implements IDashboardService {
         }
       ]),
 
-      // 3. Suma de capital pendiente de préstamos activos
+      // 3. Sum of pending capital on active loans
       LoanModel.aggregate([
         { $match: { user, pendingAmount: { $gt: 0 } } },
         { $group: { _id: null, total: { $sum: '$pendingAmount' } } }
       ]),
 
-      // 4. Ingresos y gastos del mes actual
+      // 4. Income and expenses for the current month
       TransactionModel.aggregate([
         {
           $match: {
@@ -231,7 +345,7 @@ export default class DashboardService implements IDashboardService {
         }
       ]),
 
-      // 4. Ingresos y gastos del mes anterior
+      // 5. Income and expenses for the previous month
       TransactionModel.aggregate([
         {
           $match: {
@@ -253,7 +367,7 @@ export default class DashboardService implements IDashboardService {
         }
       ]),
 
-      // 5. Resumen mensual últimos 6 meses
+      // 6. Monthly summary for the last 6 months
       TransactionModel.aggregate([
         {
           $match: {
@@ -288,7 +402,7 @@ export default class DashboardService implements IDashboardService {
         }
       ]),
 
-      // 6. Gasto diario acumulado mes actual
+      // 7. Daily expense totals for the current month (for velocity chart)
       TransactionModel.aggregate([
         {
           $match: {
@@ -306,7 +420,7 @@ export default class DashboardService implements IDashboardService {
         { $sort: { _id: 1 } }
       ]),
 
-      // 7. Gasto diario acumulado mes anterior
+      // 8. Daily expense totals for the previous month (for velocity chart)
       TransactionModel.aggregate([
         {
           $match: {
@@ -324,7 +438,7 @@ export default class DashboardService implements IDashboardService {
         { $sort: { _id: 1 } }
       ]),
 
-      // 8. Categorías de gasto del mes actual — incluye parentName para Treemap jerárquico
+      // 9. Top expense categories for the current month — includes parentName for hierarchical Treemap
       TransactionModel.aggregate([
         {
           $match: {
@@ -348,7 +462,6 @@ export default class DashboardService implements IDashboardService {
             as: 'categoryDoc'
           }
         },
-        // Resolve parent category name for hierarchical Treemap
         {
           $lookup: {
             from: 'categories',
@@ -367,7 +480,7 @@ export default class DashboardService implements IDashboardService {
         }
       ]),
 
-      // 9. Tiendas de gasto del mes actual
+      // 10. Top stores for the current month
       TransactionModel.aggregate([
         {
           $match: {
@@ -401,7 +514,7 @@ export default class DashboardService implements IDashboardService {
         }
       ]),
 
-      // 10. Pensión: totales acumulados
+      // 11. Pension: accumulated totals
       PensionModel.aggregate([
         { $match: { user } },
         {
@@ -415,10 +528,10 @@ export default class DashboardService implements IDashboardService {
         }
       ]).sort({ date: -1 }),
 
-      // 11. Pensión: registros individuales (para sparkline)
+      // 12. Pension: individual records (for sparkline)
       PensionModel.find({ user }).sort({ date: -1 }),
 
-      // 12. Presupuesto de gastos del mes actual (totales)
+      // 13. Total real expenses for the current month (for budget adherence)
       TransactionModel.aggregate([
         {
           $match: {
@@ -433,10 +546,22 @@ export default class DashboardService implements IDashboardService {
             realExpenses: { $sum: '$amount' }
           }
         }
-      ])
+      ]),
+
+      // 14. Current month expenses grouped by child category (for insights: anomaly detection)
+      aggregateCurrentMonthByCategory(user, currentMonthStart, currentMonthEnd),
+
+      // 15. Last 3-month average expense per child category (for insights: anomaly detection)
+      aggregateLast3MonthsByCategory(user, last3MonthsStart, currentMonthEnd),
+
+      // 16. Individual expense transactions grouped by month (for cash runway outlier filtering)
+      aggregateLast3MonthsTransactions(user, last3MonthsStart, currentMonthEnd),
+
+      // 17. Configured budgets for the current month (for insights: velocity check)
+      aggregateCurrentBudgets(user, currentYear, currentMonth + 1)
     ])
 
-    // ── Extraer escalares ────────────────────────────────────────────────────
+    // Scalar extraction
     const totalBalance = Math.round((accountsResult[0]?.total ?? 0) * 100) / 100
     const totalDebts = Math.round((debtsResult[0]?.totalOwed ?? 0) * 100) / 100
     const totalReceivable = Math.round((debtsResult[0]?.totalReceivable ?? 0) * 100) / 100
@@ -452,7 +577,7 @@ export default class DashboardService implements IDashboardService {
       ? Math.round(((monthlyIncome - monthlyExpenses) / monthlyIncome) * 10000) / 100
       : 0
 
-    // ── Velocidad de gasto ───────────────────────────────────────────────────
+    // Expense velocity
     const daysInCurrentMonth = new Date(currentYear, currentMonth + 1, 0).getDate()
     const daysInPreviousMonth = new Date(previousYear, previousMonth + 1, 0).getDate()
 
@@ -468,36 +593,32 @@ export default class DashboardService implements IDashboardService {
       previousMonth: buildCumulativeDailyExpenses(previousVelocityMap, daysInPreviousMonth)
     }
 
-    // ── Gasto diario medio y proyección ─────────────────────────────────────
+    // Daily average and projection
     const dayOfMonth = now.getDate()
     const dailyAvgExpense = dayOfMonth > 0
       ? Math.round((monthlyExpenses / dayOfMonth) * 100) / 100
       : 0
     const projectedMonthlyExpense = Math.round(dailyAvgExpense * daysInCurrentMonth * 100) / 100
 
-    // ── Colchón financiero: media de gastos de los últimos 3 meses con datos ─
-    const last3Expenses = last6MonthsAgg
-      .slice(-3)
-      .map((m: MonthlyData) => m.expenses)
-      .filter((e: number) => e > 0)
+    // Cash runway with outlier filtering
+    const filteredAvgMonthlyExpense = computeFilteredAvgMonthlyExpense(
+      last3MonthsTransactionsAgg as MonthTransactionsRow[],
+      monthlyExpenses
+    )
 
-    const avgMonthlyExpense = last3Expenses.length > 0
-      ? last3Expenses.reduce((s: number, e: number) => s + e, 0) / last3Expenses.length
-      : monthlyExpenses
-
-    const cashRunwayMonths = avgMonthlyExpense > 0
-      ? Math.round((totalBalance / avgMonthlyExpense) * 10) / 10
+    const cashRunwayMonths = filteredAvgMonthlyExpense > 0
+      ? Math.round((totalBalance / filteredAvgMonthlyExpense) * 10) / 10
       : 0
 
-    // ── Top categorías: solo las que tienen importe neto positivo ────────────
+    // Top categories: only those with a positive net amount
     const topExpenseCategories = (topCategoriesAgg as Array<{ name: string; amount: number; parentName?: string }>)
       .filter(c => c.amount > 0)
 
-    // ── Top tiendas: solo las que tienen importe neto positivo ───────────────
+    // Top stores: only those with a positive net amount
     const topStores = (topStoresAgg as Array<{ name: string; amount: number }>)
       .filter(s => s.amount > 0)
 
-    // ── Pensión ──────────────────────────────────────────────────────────────
+    // Pension
     let pension: PensionSummary | null = null
     let pensionReturnPct = 0
 
@@ -523,19 +644,15 @@ export default class DashboardService implements IDashboardService {
       }
     }
 
-    // ── Adherencia al presupuesto ────────────────────────────────────────────
-    // Usamos el gasto real del mes actual como numerador.
-    // Si no hay datos de budget configurados devolvemos 100 (sin datos = "en presupuesto").
+    // Budget adherence
+    // Uses real expenses vs previous month as a proxy when no budget amount is configured.
+    // If monthlyExpenses <= prevExpenses → good adherence. Returns 100 when there is no prior data.
     const realExpenses = currentMonthBudgetAgg[0]?.realExpenses ?? 0
-    // budgetAdherencePct: 100 significa "gastado = 0" (perfecto), 0 significa "sin ingresos o sin presupuesto"
-    // Interpretamos: qué % del presupuesto marcado se ha gastado.
-    // Como no tenemos el importe presupuestado en este endpoint, usamos el mes anterior como referencia.
-    // Si monthlyExpenses <= prevExpenses → buena adherencia.
     const budgetAdherencePct = prevExpenses > 0
       ? Math.round(Math.max(0, (1 - (realExpenses - prevExpenses) / prevExpenses)) * 100)
       : (realExpenses === 0 ? 100 : 50)
 
-    // ── Health Score ─────────────────────────────────────────────────────────
+    // Health Score
     const healthScore = computeHealthScore(
       savingsRate,
       totalDebts + totalLoansPending,
@@ -544,6 +661,16 @@ export default class DashboardService implements IDashboardService {
       cashRunwayMonths,
       pensionReturnPct
     )
+
+    // Dynamic insights
+    const insights = generateInsights({
+      currentMonthByCategory: currentMonthByCategoryAgg,
+      last3MonthsByCategory: last3MonthsByCategoryAgg,
+      budgets: currentBudgetsAgg,
+      dayOfMonth,
+      daysInMonth: daysInCurrentMonth,
+      last6Months: last6MonthsAgg
+    })
 
     return {
       totalBalance,
@@ -567,7 +694,8 @@ export default class DashboardService implements IDashboardService {
       pension,
       pensionReturnPct,
       budgetAdherencePct,
-      healthScore
+      healthScore,
+      insights
     }
   }
 }
