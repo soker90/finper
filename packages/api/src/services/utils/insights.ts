@@ -115,14 +115,25 @@ const calcMonthlySavingsRate = (m: MonthlyData): number =>
 
 /**
  * Rule 3 — Savings streak reinforcement.
- * Counts consecutive months (from most recent) where the savings rate
+ * Counts consecutive completed months (in descending order) where the savings rate
  * meets or exceeds SAVINGS_RATE_TARGET and fires a success insight when
  * the streak reaches STREAK_THRESHOLD.
+ * Completed months are those strictly before the current month/year, making
+ * this robust even when the current month has no transactions and is absent
+ * from the data.
  */
 export const detectSavingsStreak = (last6Months: MonthlyData[]): Insight[] => {
+  const now = new Date()
+  const currentYear = now.getFullYear()
+  const currentMonth = now.getMonth() + 1  // 1-indexed to match MonthlyData
+
+  const completedMonths = last6Months.filter(
+    m => m.year < currentYear || (m.year === currentYear && m.month < currentMonth)
+  )
+
   let streak = 0
-  for (let i = last6Months.length - 1; i >= 0; i--) {
-    if (calcMonthlySavingsRate(last6Months[i]) >= SAVINGS_RATE_TARGET) streak++
+  for (let i = completedMonths.length - 1; i >= 0; i--) {
+    if (calcMonthlySavingsRate(completedMonths[i]) >= SAVINGS_RATE_TARGET) streak++
     else break
   }
 
@@ -131,7 +142,7 @@ export const detectSavingsStreak = (last6Months: MonthlyData[]): Insight[] => {
   return [{
     type: 'success' as const,
     title: '¡Racha de ahorro!',
-    message: `✅ ¡Buen trabajo! Has mantenido tu Tasa de Ahorro por encima del 20% durante ${streak} meses seguidos.`
+    message: `✅ ¡Buen trabajo! Has mantenido tu Tasa de Ahorro por encima del ${SAVINGS_RATE_TARGET}% durante ${streak} meses seguidos.`
   }]
 }
 
