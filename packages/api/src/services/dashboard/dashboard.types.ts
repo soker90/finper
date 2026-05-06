@@ -72,10 +72,6 @@ export interface DashboardStatsResult {
 
   // Dynamic insights
   insights: Insight[]
-
-  // Goals
-  totalAllocated: number
-  unallocatedBalance: number
 }
 
 export interface IDashboardService {

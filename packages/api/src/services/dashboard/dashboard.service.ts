@@ -1,4 +1,4 @@
-import { AccountModel, DebtModel, LoanModel, PensionModel, TransactionModel, GoalModel, TRANSACTION, type IPension } from '@soker90/finper-models'
+import { AccountModel, DebtModel, LoanModel, PensionModel, TransactionModel, TRANSACTION, type IPension } from '@soker90/finper-models'
 import { roundNumber } from '../../utils/roundNumber'
 import { generateInsights } from '../utils/insights'
 import { computeHealthScore, computeBudgetAdherence } from './health-score'
@@ -63,8 +63,7 @@ export default class DashboardService implements IDashboardService {
       currentMonthByCategoryAgg,
       last3MonthsByCategoryAgg,
       last3MonthsTransactionsAgg,
-      currentBudgetsAgg,
-      goalsResult
+      currentBudgetsAgg
     ] = await Promise.all([
       // 1. Sum of active account balances
       AccountModel.aggregate([
@@ -341,13 +340,7 @@ export default class DashboardService implements IDashboardService {
       aggregateLast3MonthsTransactions(user, last3MonthsStart, currentMonthStart),
 
       // 17. Configured budgets for the current month (for insights: velocity check)
-      aggregateCurrentBudgets(user, currentYear, currentMonth + 1),
-
-      // 18. Sum of allocated amounts across all goals
-      GoalModel.aggregate([
-        { $match: { user } },
-        { $group: { _id: null, total: { $sum: '$currentAmount' } } }
-      ])
+      aggregateCurrentBudgets(user, currentYear, currentMonth + 1)
     ])
 
     // Scalar extraction
@@ -355,8 +348,6 @@ export default class DashboardService implements IDashboardService {
     const totalDebts = roundNumber(debtsResult[0]?.totalOwed ?? 0)
     const totalReceivable = roundNumber(debtsResult[0]?.totalReceivable ?? 0)
     const totalLoansPending = roundNumber(loansResult[0]?.total ?? 0)
-    const totalAllocated = roundNumber(goalsResult[0]?.total ?? 0)
-    const unallocatedBalance = roundNumber(totalBalance - totalAllocated)
     const netWorth = roundNumber(totalBalance - totalDebts - totalLoansPending + totalReceivable)
 
     const monthlyIncome = roundNumber(currentMonthAgg[0]?.income ?? 0)
@@ -486,9 +477,7 @@ export default class DashboardService implements IDashboardService {
       pensionReturnPct,
       budgetAdherencePct,
       healthScore,
-      insights,
-      totalAllocated,
-      unallocatedBalance
+      insights
     }
   }
 }
