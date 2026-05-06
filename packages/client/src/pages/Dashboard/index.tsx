@@ -71,9 +71,9 @@ const Dashboard = () => {
 
       <LoansSection />
 
-      <StocksWidget />
-
       <GoalsWidget />
+
+      <StocksWidget />
     </Grid>
   )
 }
