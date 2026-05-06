@@ -25,6 +25,7 @@ import { PropertyRoutes } from './routes/property.routes'
 import { SupplyRoutes } from './routes/supply.routes'
 import { SupplyReadingRoutes } from './routes/supply-reading.routes'
 import { StockRoutes } from './routes/stock.routes'
+import { GoalRoutes } from './routes/goal.routes'
 
 global.Promise = require('bluebird')
 
@@ -57,6 +58,7 @@ class Server {
     this.app.use('/api/supplies/readings', new SupplyReadingRoutes().router)
     this.app.use('/api/supplies', new SupplyRoutes().router)
     this.app.use('/api/stocks', new StockRoutes().router)
+    this.app.use('/api/goals', new GoalRoutes().router)
   }
 
   public preMiddlewareConfig (): void {

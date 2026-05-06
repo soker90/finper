@@ -1,4 +1,5 @@
 import { AccountModel, DebtModel, LoanModel, PensionModel, TransactionModel, TRANSACTION, type IPension } from '@soker90/finper-models'
+import { roundNumber } from '../../utils/roundNumber'
 import { generateInsights } from '../utils/insights'
 import { computeHealthScore, computeBudgetAdherence } from './health-score'
 import { computeFilteredAvgMonthlyExpense, type MonthTransactionsRow } from './cash-runway'
@@ -19,7 +20,7 @@ const buildCumulativeDailyExpenses = (
   let cumulative = 0
   for (let d = 1; d <= daysInMonth; d++) {
     cumulative += dailyMap.get(d) ?? 0
-    result.push({ day: d, amount: Math.round(cumulative * 100) / 100 })
+    result.push({ day: d, amount: roundNumber(cumulative) })
   }
   return result
 }
@@ -343,16 +344,16 @@ export default class DashboardService implements IDashboardService {
     ])
 
     // Scalar extraction
-    const totalBalance = Math.round((accountsResult[0]?.total ?? 0) * 100) / 100
-    const totalDebts = Math.round((debtsResult[0]?.totalOwed ?? 0) * 100) / 100
-    const totalReceivable = Math.round((debtsResult[0]?.totalReceivable ?? 0) * 100) / 100
-    const totalLoansPending = Math.round((loansResult[0]?.total ?? 0) * 100) / 100
-    const netWorth = Math.round((totalBalance - totalDebts - totalLoansPending + totalReceivable) * 100) / 100
+    const totalBalance = roundNumber(accountsResult[0]?.total ?? 0)
+    const totalDebts = roundNumber(debtsResult[0]?.totalOwed ?? 0)
+    const totalReceivable = roundNumber(debtsResult[0]?.totalReceivable ?? 0)
+    const totalLoansPending = roundNumber(loansResult[0]?.total ?? 0)
+    const netWorth = roundNumber(totalBalance - totalDebts - totalLoansPending + totalReceivable)
 
-    const monthlyIncome = Math.round((currentMonthAgg[0]?.income ?? 0) * 100) / 100
-    const monthlyExpenses = Math.round((currentMonthAgg[0]?.expenses ?? 0) * 100) / 100
-    const prevIncome = Math.round((previousMonthAgg[0]?.income ?? 0) * 100) / 100
-    const prevExpenses = Math.round((previousMonthAgg[0]?.expenses ?? 0) * 100) / 100
+    const monthlyIncome = roundNumber(currentMonthAgg[0]?.income ?? 0)
+    const monthlyExpenses = roundNumber(currentMonthAgg[0]?.expenses ?? 0)
+    const prevIncome = roundNumber(previousMonthAgg[0]?.income ?? 0)
+    const prevExpenses = roundNumber(previousMonthAgg[0]?.expenses ?? 0)
 
     const savingsRate = monthlyIncome > 0
       ? Math.round(((monthlyIncome - monthlyExpenses) / monthlyIncome) * 10000) / 100
@@ -377,9 +378,9 @@ export default class DashboardService implements IDashboardService {
     // Daily average and projection
     const dayOfMonth = now.getDate()
     const dailyAvgExpense = dayOfMonth > 0
-      ? Math.round((monthlyExpenses / dayOfMonth) * 100) / 100
+      ? roundNumber(monthlyExpenses / dayOfMonth)
       : 0
-    const projectedMonthlyExpense = Math.round(dailyAvgExpense * daysInCurrentMonth * 100) / 100
+    const projectedMonthlyExpense = roundNumber(dailyAvgExpense * daysInCurrentMonth)
 
     // Cash runway with outlier filtering
     const filteredAvgMonthlyExpense = computeFilteredAvgMonthlyExpense(
@@ -410,7 +411,7 @@ export default class DashboardService implements IDashboardService {
         totalUnits: number
         lastValue: number
       }
-      const pensionTotal = Math.round((ps.lastValue ?? 0) * (ps.totalUnits ?? 0) * 100) / 100
+      const pensionTotal = roundNumber((ps.lastValue ?? 0) * (ps.totalUnits ?? 0))
       const pensionContributed = (ps.employeeAmount ?? 0) + (ps.companyAmount ?? 0)
 
       pensionReturnPct = pensionContributed > 0
@@ -418,8 +419,8 @@ export default class DashboardService implements IDashboardService {
         : 0
 
       pension = {
-        employeeAmount: Math.round((ps.employeeAmount ?? 0) * 100) / 100,
-        companyAmount: Math.round((ps.companyAmount ?? 0) * 100) / 100,
+        employeeAmount: roundNumber(ps.employeeAmount ?? 0),
+        companyAmount: roundNumber(ps.companyAmount ?? 0),
         total: pensionTotal,
         transactions: pensionTransactions as IPension[]
       }

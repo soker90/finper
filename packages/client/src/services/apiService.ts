@@ -1,6 +1,6 @@
 import axios from 'axios'
-import { ACCOUNTS, BUDGETS, CATEGORIES, DEBTS, LOANS, LOAN_DETAIL, PENSIONS, TICKETS, TRANSACTIONS, SUBSCRIPTIONS, SUBSCRIPTION_CANDIDATES, SUPPLIES, SUPPLIES_PROPERTIES, SUPPLIES_READINGS, STOCKS } from 'constants/api-paths'
-import { Category, Transaction, TransactionType, Account, Pension, PensionTransaction, Debt, Loan, SubscriptionInput, SupplyReadingInput, StockPurchase } from 'types'
+import { ACCOUNTS, BUDGETS, CATEGORIES, DEBTS, LOANS, LOAN_DETAIL, PENSIONS, TICKETS, TRANSACTIONS, SUBSCRIPTIONS, SUBSCRIPTION_CANDIDATES, SUPPLIES, SUPPLIES_PROPERTIES, SUPPLIES_READINGS, STOCKS, GOALS } from 'constants/api-paths'
+import { Category, Transaction, TransactionType, Account, Pension, PensionTransaction, Debt, Loan, SubscriptionInput, SupplyReadingInput, StockPurchase, Goal } from 'types'
 
 const extractError = (error: any) => error.response?.data?.message || error.message
 
@@ -240,3 +240,18 @@ export const addStockApi = (params: Omit<StockPurchase, '_id'>): Promise<{ data?
 
 export const deleteStockApi = (id: string): Promise<{ error?: string }> =>
   axios.delete(`${STOCKS}/${id}`).then(() => ({})).catch((error: any) => ({ error: extractError(error) }))
+
+export const addGoal = (params: { name: string, targetAmount: number, deadline?: string | null, color: string, icon: string }): Promise<{ data?: Goal, error?: string }> =>
+  axios.post(GOALS, params).then((data: any) => ({ data: data as Goal })).catch((error: any) => ({ error: extractError(error) }))
+
+export const editGoal = (id: string, params: { name?: string, targetAmount?: number, deadline?: string | null, color?: string, icon?: string }): Promise<{ data?: Goal, error?: string }> =>
+  axios.put(`${GOALS}/${id}`, params).then((data: any) => ({ data: data as Goal })).catch((error: any) => ({ error: extractError(error) }))
+
+export const deleteGoal = (id: string): Promise<{ error?: string }> =>
+  axios.delete(`${GOALS}/${id}`).then(() => ({})).catch((error: any) => ({ error: extractError(error) }))
+
+export const fundGoal = (id: string, amount: number): Promise<{ data?: Goal, error?: string }> =>
+  axios.post(`${GOALS}/${id}/fund`, { amount }).then((data: any) => ({ data: data as Goal })).catch((error: any) => ({ error: extractError(error) }))
+
+export const withdrawGoal = (id: string, amount: number): Promise<{ data?: Goal, error?: string }> =>
+  axios.post(`${GOALS}/${id}/withdraw`, { amount }).then((data: any) => ({ data: data as Goal })).catch((error: any) => ({ error: extractError(error) }))

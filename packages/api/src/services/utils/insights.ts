@@ -1,3 +1,5 @@
+import { roundNumber } from '../../utils/roundNumber'
+
 export interface Insight {
   type: 'warning' | 'info' | 'success' | 'critical'
   title: string
@@ -66,7 +68,7 @@ export const detectSpendingAnomalies = (
     return [{
       type: 'warning' as const,
       title: 'Gasto disparado',
-      message: `🔴 Has gastado ${cat.total.toFixed(2)}€ en ${cat.name} este mes, un ${Math.round(pctIncrease * 100)}% más que tu media habitual.`
+      message: `🔴 Has gastado ${cat.total.toFixed(2)}€ en ${cat.name} este mes, un ${roundNumber(pctIncrease * 100)}% más que tu media habitual.`
     }]
   })
 }

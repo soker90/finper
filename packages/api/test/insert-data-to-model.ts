@@ -11,7 +11,8 @@ import {
   UserModel,
   PropertyModel, SupplyModel, SupplyReadingModel,
   IProperty, ISupply, ISupplyReading, SUPPLY_TYPE,
-  StockModel, IStock, STOCK_TYPE
+  StockModel, IStock, STOCK_TYPE,
+  GoalModel, IGoal, GOAL_COLORS, GOAL_ICONS
 } from '@soker90/finper-models'
 
 import {
@@ -263,4 +264,16 @@ export const insertStock = async (params: Record<string, any> = {}): Promise<ISt
     platform: params.platform ?? 'DEGIRO',
     user
   }) as unknown as IStock & { _id: string }
+}
+
+export const insertGoal = async (params: Record<string, any> = {}): Promise<IGoal & { _id: string }> => {
+  return GoalModel.create({
+    name: params.name ?? faker.lorem.words(2),
+    targetAmount: params.targetAmount ?? faker.number.float({ min: 100, max: 10000, multipleOf: 0.01 }),
+    currentAmount: params.currentAmount ?? 0,
+    deadline: params.deadline ?? null,
+    color: params.color ?? faker.helpers.arrayElement(GOAL_COLORS),
+    icon: params.icon ?? faker.helpers.arrayElement(GOAL_ICONS),
+    user: params.user ?? faker.internet.userName().slice(MIN_LENGTH_USERNAME, MAX_USERNAME_LENGTH).toLowerCase()
+  }) as unknown as IGoal & { _id: string }
 }

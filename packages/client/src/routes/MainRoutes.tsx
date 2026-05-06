@@ -19,6 +19,7 @@ const Subscriptions = lazy(() => import('../pages/Subscriptions'))
 const Supplies = lazy(() => import('../pages/Supplies'))
 const SupplyDetail = lazy(() => import('../pages/SupplyDetail'))
 const CompareTariffsPage = lazy(() => import('../pages/SupplyDetail/CompareTariffsPage'))
+const Goals = lazy(() => import('../pages/Goals'))
 
 const MainRoutes = {
   path: '/',
@@ -96,6 +97,10 @@ const MainRoutes = {
     {
       path: 'suministros/:supplyId/comparar',
       element: <CompareTariffsPage />
+    },
+    {
+      path: 'metas',
+      element: <Goals />
     }
   ]
 }

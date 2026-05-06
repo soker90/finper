@@ -12,6 +12,7 @@ import { subscriptionsHandlers } from './subscriptions'
 import { suppliesHandlers } from './supplies'
 
 import { stocksHandlers } from './stocks'
+import { goalsHandlers } from './goals'
 
 export const handlers = [
   ...loginHandlers,
@@ -26,5 +27,6 @@ export const handlers = [
   ...loansHandlers,
   ...subscriptionsHandlers,
   ...suppliesHandlers,
-  ...stocksHandlers
+  ...stocksHandlers,
+  ...goalsHandlers
 ]
