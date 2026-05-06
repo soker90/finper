@@ -1,4 +1,3 @@
-import { roundNumber } from '../../utils/roundNumber'
 import type { HealthScore } from './dashboard.types'
 
 /**
@@ -18,13 +17,13 @@ export const computeHealthScore = (
   const clamp = (v: number, min: number, max: number): number =>
     Math.max(min, Math.min(max, v))
 
-  const savingsScore = roundNumber(clamp(savingsRate / 20, 0, 1) * 100)
-  const debtScore = roundNumber(Math.max(0, 1 - (totalBalance > 0 ? totalDebts / totalBalance : 1)) * 100)
-  const budgetScore = roundNumber(Math.min(budgetAdherencePct, 100))
-  const runwayScore = roundNumber(Math.min(cashRunwayMonths / 6, 1) * 100)
-  const pensionScore = roundNumber(clamp(pensionReturnPct / 5, 0, 1) * 100)
+  const savingsScore = Math.round(clamp(savingsRate / 20, 0, 1) * 100)
+  const debtScore = Math.round(Math.max(0, 1 - (totalBalance > 0 ? totalDebts / totalBalance : 1)) * 100)
+  const budgetScore = Math.round(Math.min(budgetAdherencePct, 100))
+  const runwayScore = Math.round(Math.min(cashRunwayMonths / 6, 1) * 100)
+  const pensionScore = Math.round(clamp(pensionReturnPct / 5, 0, 1) * 100)
 
-  const total = roundNumber(
+  const total = Math.round(
     savingsScore * 0.25 +
     debtScore * 0.20 +
     budgetScore * 0.20 +
@@ -55,10 +54,10 @@ export const computeBudgetAdherence = (
   prevExpenses: number
 ): number => {
   if (totalBudgetAmount > 0) {
-    return roundNumber(Math.max(0, (1 - (realExpenses - totalBudgetAmount) / totalBudgetAmount)) * 100)
+    return Math.round(Math.max(0, (1 - (realExpenses - totalBudgetAmount) / totalBudgetAmount)) * 100)
   }
   if (prevExpenses > 0) {
-    return roundNumber(Math.max(0, (1 - (realExpenses - prevExpenses) / prevExpenses)) * 100)
+    return Math.round(Math.max(0, (1 - (realExpenses - prevExpenses) / prevExpenses)) * 100)
   }
   return realExpenses === 0 ? 100 : 50
 }
