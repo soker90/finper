@@ -244,7 +244,7 @@ export const deleteStockApi = (id: string): Promise<{ error?: string }> =>
 export const addGoal = (params: { name: string, targetAmount: number, deadline?: string | null, color: string, icon: string }): Promise<{ data?: Goal, error?: string }> =>
   axios.post(GOALS, params).then((data: any) => ({ data: data as Goal })).catch((error: any) => ({ error: extractError(error) }))
 
-export const editGoal = (id: string, params: { name?: string, targetAmount?: number, currentAmount?: number, deadline?: string | null, color?: string, icon?: string }): Promise<{ data?: Goal, error?: string }> =>
+export const editGoal = (id: string, params: { name?: string, targetAmount?: number, deadline?: string | null, color?: string, icon?: string }): Promise<{ data?: Goal, error?: string }> =>
   axios.put(`${GOALS}/${id}`, params).then((data: any) => ({ data: data as Goal })).catch((error: any) => ({ error: extractError(error) }))
 
 export const deleteGoal = (id: string): Promise<{ error?: string }> =>

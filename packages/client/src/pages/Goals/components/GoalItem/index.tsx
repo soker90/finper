@@ -27,7 +27,7 @@ const GoalItem: FC<GoalItemProps> = ({ goal, forceExpand, cancelCreate }) => {
   const hideForm = useCallback(() => {
     cancelCreate?.()
     setExpand(false)
-  }, [goal._id])
+  }, [cancelCreate])
 
   const handleFund = (e: MouseEvent, mode: 'fund' | 'withdraw') => {
     e.stopPropagation()
@@ -83,7 +83,7 @@ const GoalItem: FC<GoalItemProps> = ({ goal, forceExpand, cancelCreate }) => {
           </Box>
         )}
         <Collapse in={expand} timeout='auto' unmountOnExit>
-          <Divider className={styles.divider} />
+          <Divider />
           <GoalEdit
             goal={goal}
             hideForm={hideForm}

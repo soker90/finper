@@ -9,7 +9,7 @@ export const GOAL_COLORS = [
   { value: '#607D8B', label: 'Gris azulado' },
   { value: '#E91E63', label: 'Rosa' },
   { value: '#FFC107', label: 'Amarillo' }
-] as const
+]
 
 export const GOAL_ICONS = [
   'DollarOutlined',
@@ -22,4 +22,4 @@ export const GOAL_ICONS = [
   'BankOutlined',
   'TrophyOutlined',
   'StarOutlined'
-] as const
+]
