@@ -89,8 +89,6 @@ pnpm --filter @soker90/finper-models exec tsc --noEmit
 - **Two test frameworks**: `api` and `models` use Jest (`jest.config.cjs`); `client` uses Vitest configured inside `vite.config.ts` — there is no separate `vitest.config.*`.
 - **In-memory MongoDB** (`@shelf/jest-mongodb`): downloads a MongoDB binary to `~/.cache/mongodb-binaries`. On Ubuntu 22+ requires `libssl1.1` installed manually (CI does this explicitly before tests).
 - **ESLint flat config** (`eslint.config.mjs`) in all three packages. No `.eslintrc`. Uses `neostandard` + `@typescript-eslint`.
-- **Path aliases in client**: defined in both `tsconfig.json` and `vite.config.ts` `resolve.alias`. Adding a new importable directory requires updating both files.
-- **React 19**: use `ref` as a regular prop (no `forwardRef`), `use()` instead of `useContext()`.
 - **PWA**: `vite-plugin-pwa` with `registerType: 'autoUpdate'`. Service worker registers automatically; may interfere in integration test environments.
 - **Node 24** required (`.nvmrc` + `"engines": { "node": ">=24.x" }` in api).
 - **`packageManager` pinned**: root `package.json` declares `pnpm@10.29.3`; `preinstall` script blocks npm/yarn.
@@ -126,3 +124,28 @@ No fallback is hardcoded; without this variable all API calls fail in developmen
 - Looking for a `vitest.config.*` in the client — it doesn't exist; Vitest config is in `vite.config.ts`.
 - Running `tsc` expecting a `typecheck` npm script — there isn't one; run `tsc --noEmit` directly.
 - Assuming `make test` is safe to debug a single failing test — it runs all packages in parallel; target the specific package instead.
+
+---
+
+## Mapa de documentación
+
+Para cualquier tarea no trivial, consultar primero el `AGENTS.md` del paquete afectado: contiene patrones, quirks y checklists detallados.
+
+### Contexto general (leer primero para tareas que cruzan paquetes)
+
+- [`docs/ARCHITECTURE.md`](./docs/ARCHITECTURE.md) — arquitectura del monorepo, flujo de petición end-to-end, build order, auth, persistencia, tooling, env vars, decisiones técnicas.
+- [`docs/DOMAIN.md`](./docs/DOMAIN.md) — modelo de dominio: entidades, relaciones, enums, convenciones transversales y glosario.
+- [`docs/API-CATALOG.md`](./docs/API-CATALOG.md) — catálogo completo de endpoints REST agrupado por recurso.
+
+### Documentación por paquete
+
+Cada `AGENTS.md` de paquete contiene **solo reglas críticas + checklist + comandos** (~70 líneas). El detalle (patrones, ejemplos, quirks completos) vive en `docs/<paquete>-patterns.md` y se carga bajo demanda.
+
+- [`packages/api/AGENTS.md`](./packages/api/AGENTS.md) → detalle en [`docs/api-patterns.md`](./docs/api-patterns.md).
+- [`packages/client/AGENTS.md`](./packages/client/AGENTS.md) → detalle en [`docs/client-patterns.md`](./docs/client-patterns.md).
+- [`packages/models/AGENTS.md`](./packages/models/AGENTS.md) → detalle en [`docs/models-patterns.md`](./docs/models-patterns.md).
+
+### Documentación técnica de módulos
+
+- [`docs/loan-module.md`](./docs/loan-module.md) — préstamos: amortización francesa, eventos, pagos ordinarios/extraordinarios.
+- [`docs/subscription-module.md`](./docs/subscription-module.md) — suscripciones: candidatos, vinculación de transacciones.
