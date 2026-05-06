@@ -250,7 +250,7 @@ describe('detectSavingsStreak', () => {
       makeMonth(1000, 750),  // 25%
       makeMonth(1000, 750),  // 25%
       makeMonth(1000, 750),  // 25%
-      makeMonth(1000, 900),  // current month (skipped by implementation)
+      makeCurrentMonth(1000, 900),  // current month (skipped by implementation)
     ]
     const result = detectSavingsStreak(months)
     expect(result).toHaveLength(1)
@@ -270,7 +270,10 @@ describe('detectSavingsStreak', () => {
   })
 
   test('reports correct streak length in message', () => {
-    const months = Array.from({ length: 6 }, () => makeMonth(1000, 750))
+    const months = [
+      ...Array.from({ length: 5 }, () => makeMonth(1000, 750)),
+      makeCurrentMonth(1000, 750)
+    ]
     const result = detectSavingsStreak(months)
     expect(result[0].message).toContain('5 meses')
   })
@@ -312,8 +315,7 @@ describe('detectSavingsStreak', () => {
       makeMonthsAgo(4, 1000, 750),  // 25% — qualifies
       makeMonthsAgo(3, 1000, 750),  // 25% — qualifies
       makeMonthsAgo(2, 1000, 750),  // 25% — qualifies (streak=3)
-      makeMonthsAgo(1, 1000, 750),  // current month (skipped by implementation)
-      // no current month entry
+      // current month absent
     ]
     const result = detectSavingsStreak(months)
     expect(result).toHaveLength(1)
