@@ -68,6 +68,21 @@ describe('Goal', () => {
       expect(res.body.targetAmount).toBeDefined()
       expect(res.body.currentAmount).toBe(0)
     })
+
+    test('when currentAmount exceeds total balance, it should response an error with status code 400', async () => {
+      await insertAccount({ user: 'testuser', balance: 50, isActive: true })
+      await supertest(server.app)
+        .post(path)
+        .set('Authorization', `Bearer ${token}`)
+        .send({
+          name: faker.lorem.words(2),
+          targetAmount: 1000,
+          currentAmount: 500,
+          color: faker.helpers.arrayElement(GOAL_COLORS),
+          icon: faker.helpers.arrayElement(GOAL_ICONS)
+        })
+        .expect(400)
+    })
   })
 
   describe('GET /', () => {
@@ -179,6 +194,17 @@ describe('Goal', () => {
         .expect(200)
 
       expect(res.body.name).toBe(newName)
+    })
+
+    test('when editing currentAmount that exceeds total balance, it should response an error with status code 400', async () => {
+      await insertAccount({ user, balance: 50, isActive: true })
+      const goal = await insertGoal({ user, currentAmount: 0, targetAmount: 1000 })
+
+      await supertest(server.app)
+        .put(`${path}/${goal._id}`)
+        .set('Authorization', `Bearer ${token}`)
+        .send({ currentAmount: 500 })
+        .expect(400)
     })
   })
 

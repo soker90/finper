@@ -250,6 +250,7 @@ describe('detectSavingsStreak', () => {
       makeMonth(1000, 750),  // 25%
       makeMonth(1000, 750),  // 25%
       makeMonth(1000, 750),  // 25%
+      makeMonth(1000, 900),  // current month (skipped by implementation)
     ]
     const result = detectSavingsStreak(months)
     expect(result).toHaveLength(1)
@@ -269,7 +270,7 @@ describe('detectSavingsStreak', () => {
   })
 
   test('reports correct streak length in message', () => {
-    const months = Array.from({ length: 5 }, () => makeMonth(1000, 750))
+    const months = Array.from({ length: 6 }, () => makeMonth(1000, 750))
     const result = detectSavingsStreak(months)
     expect(result[0].message).toContain('5 meses')
   })
@@ -307,10 +308,11 @@ describe('detectSavingsStreak', () => {
 
   test('fires streak when 3 completed months qualify and current month absent', () => {
     const months = [
-      makeMonthsAgo(4, 1000, 900),  // 10% — does not qualify
+      makeMonthsAgo(5, 1000, 900),  // 10% — does not qualify
+      makeMonthsAgo(4, 1000, 750),  // 25% — qualifies
       makeMonthsAgo(3, 1000, 750),  // 25% — qualifies
-      makeMonthsAgo(2, 1000, 750),  // 25% — qualifies
-      makeMonthsAgo(1, 1000, 750),  // 25% — qualifies (streak=3)
+      makeMonthsAgo(2, 1000, 750),  // 25% — qualifies (streak=3)
+      makeMonthsAgo(1, 1000, 750),  // current month (skipped by implementation)
       // no current month entry
     ]
     const result = detectSavingsStreak(months)
@@ -320,7 +322,7 @@ describe('detectSavingsStreak', () => {
   })
 
   test('message uses SAVINGS_RATE_TARGET constant value', () => {
-    const months = Array.from({ length: 3 }, () => makeMonth(1000, 750))
+    const months = Array.from({ length: 4 }, () => makeMonth(1000, 750))
     const result = detectSavingsStreak(months)
     expect(result[0].message).toContain('20%')
   })
@@ -349,8 +351,8 @@ describe('generateInsights', () => {
     // Rule 2: budget velocity
     const budgets = [makeBudget({ categoryId: 'cat-1', amount: 150 })]
 
-    // Rule 3: savings streak (3 qualifying completed months, all in the past)
-    const last6Months = Array.from({ length: 3 }, () => makeMonth(1000, 750))
+    // Rule 3: savings streak (3 qualifying completed months + 1 current month to skip)
+    const last6Months = Array.from({ length: 4 }, () => makeMonth(1000, 750))
 
     const result = generateInsights({
       currentMonthByCategory: current,
