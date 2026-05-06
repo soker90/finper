@@ -7,13 +7,12 @@ export const validateGoalEditParams = async ({
   params,
   body,
   user
-}: { params: Record<string, string>, body: Record<string, unknown>, user: string }): Promise<{ id: string, value: Record<string, unknown> }> => {
+}: { params: Record<string, string>, body: Record<string, unknown>, user: string }): Promise<{ id: string, user: string, value: Record<string, unknown> }> => {
   await validateGoalExist({ id: params.id, user })
 
   const schema = Joi.object({
     name: Joi.string(),
     targetAmount: Joi.number().positive(),
-    currentAmount: Joi.number().min(0),
     deadline: Joi.date().iso().allow(null),
     color: Joi.string().valid(...GOAL_COLORS),
     icon: Joi.string().valid(...GOAL_ICONS)
@@ -25,5 +24,5 @@ export const validateGoalEditParams = async ({
     throw Boom.badData(error.message).output
   }
 
-  return { id: params.id, value }
+  return { id: params.id, user, value }
 }

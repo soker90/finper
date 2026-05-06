@@ -196,15 +196,14 @@ describe('Goal', () => {
       expect(res.body.name).toBe(newName)
     })
 
-    test('when editing currentAmount that exceeds total balance, it should response an error with status code 400', async () => {
-      await insertAccount({ user, balance: 50, isActive: true })
+    test('when editing currentAmount, it should response an error with status code 422 (field is read-only)', async () => {
       const goal = await insertGoal({ user, currentAmount: 0, targetAmount: 1000 })
 
       await supertest(server.app)
         .put(`${path}/${goal._id}`)
         .set('Authorization', `Bearer ${token}`)
         .send({ currentAmount: 500 })
-        .expect(400)
+        .expect(422)
     })
   })
 

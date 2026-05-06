@@ -5,12 +5,12 @@ import { roundNumber } from '../utils/roundNumber'
 
 export interface IGoalService {
   addGoal(goal: IGoal): Promise<GoalDocument>
-  editGoal({ id, value }: { id: string, value: Partial<IGoal> }): Promise<GoalDocument>
+  editGoal({ id, user, value }: { id: string, user: string, value: Partial<IGoal> }): Promise<GoalDocument>
   getGoals(user: string): Promise<GoalDocument[]>
-  getGoal(id: string): Promise<GoalDocument | null>
-  deleteGoal(id: string): Promise<void>
-  fundGoal({ id, amount }: { id: string, amount: number }): Promise<GoalDocument>
-  withdrawGoal({ id, amount }: { id: string, amount: number }): Promise<GoalDocument>
+  getGoal({ id, user }: { id: string, user: string }): Promise<GoalDocument | null>
+  deleteGoal({ id, user }: { id: string, user: string }): Promise<void>
+  fundGoal({ id, user, amount }: { id: string, user: string, amount: number }): Promise<GoalDocument>
+  withdrawGoal({ id, user, amount }: { id: string, user: string, amount: number }): Promise<GoalDocument>
 }
 
 export default class GoalService implements IGoalService {
@@ -27,14 +27,12 @@ export default class GoalService implements IGoalService {
     return created
   }
 
-  public async editGoal ({ id, value }: { id: string, value: Partial<IGoal> }): Promise<GoalDocument> {
-    if (value.currentAmount !== undefined) {
-      const goal = await GoalModel.findById<GoalDocument>(id)
-      /* istanbul ignore next — validator validateGoalExist runs before this method via route */
-      if (!goal) throw Boom.notFound(ERROR_MESSAGE.GOAL.NOT_FOUND).output
-      await this.validateTotalAllocation(goal.user, id, value.currentAmount)
-    }
-    const updated = await GoalModel.findByIdAndUpdate<GoalDocument>(id, value, { returnDocument: 'after' })
+  public async editGoal ({ id, user, value }: { id: string, user: string, value: Partial<IGoal> }): Promise<GoalDocument> {
+    const updated = await GoalModel.findOneAndUpdate<GoalDocument>(
+      { _id: id, user },
+      value,
+      { returnDocument: 'after' }
+    )
     /* istanbul ignore next — validator validateGoalExist runs before this method via route */
     if (!updated) throw Boom.notFound(ERROR_MESSAGE.GOAL.NOT_FOUND).output
     return updated
@@ -44,18 +42,25 @@ export default class GoalService implements IGoalService {
     return GoalModel.find({ user })
   }
 
-  public async getGoal (id: string): Promise<GoalDocument | null> {
-    return GoalModel.findOne({ _id: id })
+  public async getGoal ({ id, user }: { id: string, user: string }): Promise<GoalDocument | null> {
+    return GoalModel.findOne({ _id: id, user })
   }
 
-  public async deleteGoal (id: string): Promise<void> {
-    const deleted = await GoalModel.findByIdAndDelete(id)
+  public async deleteGoal ({ id, user }: { id: string, user: string }): Promise<void> {
+    const deleted = await GoalModel.findOneAndDelete({ _id: id, user })
     /* istanbul ignore next — validator validateGoalExist runs before this method via route */
     if (!deleted) throw Boom.notFound(ERROR_MESSAGE.GOAL.NOT_FOUND).output
   }
 
-  public async fundGoal ({ id, amount }: { id: string, amount: number }): Promise<GoalDocument> {
-    const goal = await GoalModel.findById<GoalDocument>(id)
+  /**
+   * Funds a goal by increasing its currentAmount.
+   *
+   * Note: validateTotalAllocation + $inc are not atomic. Two concurrent fund
+   * operations could each pass the allocation check and end up exceeding
+   * total balance. Accepted limitation for a single-user application.
+   */
+  public async fundGoal ({ id, user, amount }: { id: string, user: string, amount: number }): Promise<GoalDocument> {
+    const goal = await GoalModel.findOne<GoalDocument>({ _id: id, user })
     /* istanbul ignore next — validator validateGoalExist runs before this method via route */
     if (!goal) throw Boom.notFound(ERROR_MESSAGE.GOAL.NOT_FOUND).output
 
@@ -63,7 +68,7 @@ export default class GoalService implements IGoalService {
     await this.validateTotalAllocation(goal.user, id, newAmount)
 
     const updated = await GoalModel.findOneAndUpdate<GoalDocument>(
-      { _id: id },
+      { _id: id, user },
       { $inc: { currentAmount: amount } },
       { returnDocument: 'after' }
     )
@@ -72,9 +77,9 @@ export default class GoalService implements IGoalService {
     return updated
   }
 
-  public async withdrawGoal ({ id, amount }: { id: string, amount: number }): Promise<GoalDocument> {
+  public async withdrawGoal ({ id, user, amount }: { id: string, user: string, amount: number }): Promise<GoalDocument> {
     const updated = await GoalModel.findOneAndUpdate<GoalDocument>(
-      { _id: id, currentAmount: { $gte: amount } },
+      { _id: id, user, currentAmount: { $gte: amount } },
       { $inc: { currentAmount: -amount } },
       { returnDocument: 'after' }
     )

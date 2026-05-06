@@ -1,10 +1,10 @@
 import { NextFunction, Request, Response } from 'express'
+import { GoalDocument } from '@soker90/finper-models'
 
 import '../auth/local-strategy-passport-handler'
 import extractUser from '../helpers/extract-user'
 import { RequestUser } from '../types'
 import { IGoalService } from '../services/goal.service'
-import { GoalDocument } from '@soker90/finper-models'
 import { validateGoalCreateParams, validateGoalEditParams, validateGoalExist, validateGoalFundParams } from '../validators/goal'
 
 type IGoalController = {
@@ -49,10 +49,11 @@ export class GoalController {
   }
 
   public async goal (req: Request, res: Response, next: NextFunction): Promise<void> {
-    Promise.resolve(req.params.id)
-      .tap((id) => this.logger.logInfo(`/goal - get goal: ${id}`))
-      .tap(validateGoalExist.bind(null, { id: req.params.id, user: req.user as string }))
-      .then(this.goalService.getGoal.bind(this.goalService))
+    Promise.resolve({ id: req.params.id })
+      .tap(({ id }) => this.logger.logInfo(`/goal - get goal: ${id}`))
+      .then(extractUser(req))
+      .tap(validateGoalExist)
+      .then(({ id, user }) => this.goalService.getGoal({ id, user }))
       .then(response => {
         res.send(response)
       }).catch(error => {
@@ -63,6 +64,7 @@ export class GoalController {
   public async edit (req: Request, res: Response, next: NextFunction): Promise<void> {
     Promise.resolve(req as RequestUser)
       .tap(({ params }) => this.logger.logInfo(`/edit - goal: ${params?.id}`))
+      .then(extractUser(req))
       .then(validateGoalEditParams)
       .then(this.goalService.editGoal.bind(this.goalService))
       .tap(({ _id }: GoalDocument) => this.logger.logInfo(`Goal ${_id} has been successfully edited`))
@@ -75,10 +77,11 @@ export class GoalController {
   }
 
   public async delete (req: Request, res: Response, next: NextFunction): Promise<void> {
-    Promise.resolve(req.params.id)
-      .tap((id) => this.logger.logInfo(`/delete - goal: ${id}`))
-      .tap(validateGoalExist.bind(null, { id: req.params.id, user: req.user as string }))
-      .then(this.goalService.deleteGoal.bind(this.goalService))
+    Promise.resolve({ id: req.params.id })
+      .tap(({ id }) => this.logger.logInfo(`/delete - goal: ${id}`))
+      .then(extractUser(req))
+      .tap(validateGoalExist)
+      .then(({ id, user }) => this.goalService.deleteGoal({ id, user }))
       .then(() => {
         res.status(204).send()
       })
@@ -90,6 +93,7 @@ export class GoalController {
   public async fund (req: Request, res: Response, next: NextFunction): Promise<void> {
     Promise.resolve(req as RequestUser)
       .tap(({ params }) => this.logger.logInfo(`/fund - goal: ${params?.id}`))
+      .then(extractUser(req))
       .then(validateGoalFundParams)
       .then(this.goalService.fundGoal.bind(this.goalService))
       .then((response) => {
@@ -103,6 +107,7 @@ export class GoalController {
   public async withdraw (req: Request, res: Response, next: NextFunction): Promise<void> {
     Promise.resolve(req as RequestUser)
       .tap(({ params }) => this.logger.logInfo(`/withdraw - goal: ${params?.id}`))
+      .then(extractUser(req))
       .then(validateGoalFundParams)
       .then(this.goalService.withdrawGoal.bind(this.goalService))
       .then((response) => {

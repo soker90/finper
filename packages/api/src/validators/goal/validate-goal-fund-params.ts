@@ -6,7 +6,7 @@ export const validateGoalFundParams = async ({
   params,
   body,
   user
-}: { params: Record<string, string>, body: Record<string, unknown>, user: string }): Promise<{ id: string, amount: number }> => {
+}: { params: Record<string, string>, body: Record<string, unknown>, user: string }): Promise<{ id: string, user: string, amount: number }> => {
   await validateGoalExist({ id: params.id, user })
 
   const schema = Joi.object({
@@ -19,5 +19,5 @@ export const validateGoalFundParams = async ({
     throw Boom.badData(error.message).output
   }
 
-  return { id: params.id, amount: value.amount }
+  return { id: params.id, user, amount: value.amount }
 }
