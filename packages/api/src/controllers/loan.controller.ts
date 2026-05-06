@@ -10,7 +10,8 @@ import {
   validateLoanPaymentParams,
   validateLoanEventParams,
   validateLoanEditPaymentParams,
-  validateLoanOrdinaryPaymentParams
+  validateLoanOrdinaryPaymentParams,
+  validateLoanSimulateParams
 } from '../validators/loan'
 
 interface ILogger {
@@ -131,6 +132,18 @@ export class LoanController {
       .tap(() => validateLoanExist({ id, user }))
       .then(validateLoanEditPaymentParams)
       .then((data) => this.loanService.editPayment(id, paymentId, data, user))
+      .then((response) => res.send(response))
+      .catch(next)
+  }
+
+  public async simulatePayoff (req: Request, res: Response, next: NextFunction): Promise<void> {
+    const { id } = req.params
+    const user = req.user as string
+    Promise.resolve(req.body)
+      .tap(() => this.logger.logInfo(`/loans/${id}/simulate-payoff`))
+      .tap(() => validateLoanExist({ id, user }))
+      .then(validateLoanSimulateParams)
+      .then(({ lumpSum }) => this.loanService.simulatePayoff(id, lumpSum, user))
       .then((response) => res.send(response))
       .catch(next)
   }

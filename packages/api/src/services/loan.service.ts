@@ -45,6 +45,24 @@ export interface LoanDetail extends ILoan {
   amortizationTable: ReturnType<typeof buildAmortizationTable>
 }
 
+export interface SimulationOption {
+  newMonthsLeft: number
+  newMonthlyPayment: number
+  monthsSaved: number
+  monthlySaving: number
+  totalInterestSaved: number
+  newEndDate: number | null
+}
+
+export interface SimulationResult {
+  lumpSum: number
+  originalMonthsLeft: number
+  originalMonthlyPayment: number
+  originalEndDate: number | null
+  optionA: SimulationOption
+  optionB: SimulationOption
+}
+
 export interface ILoanService {
   getLoans(user: string): Promise<(ILoan & { _id: string })[]>
   getLoanDetail(id: string, user: string): Promise<LoanDetail>
@@ -56,6 +74,7 @@ export interface ILoanService {
   addEvent(loanId: string, data: Omit<ILoanEvent, 'loan'>): Promise<ILoanEvent>
   deletePayment(loanId: string, paymentId: string, user: string): Promise<void>
   editPayment(loanId: string, paymentId: string, data: { date?: number, amount?: number, interest?: number, principal?: number, type?: LoanPaymentType }, user: string): Promise<ILoanPayment>
+  simulatePayoff(loanId: string, lumpSum: number, user: string): Promise<SimulationResult>
 }
 
 export default class LoanService implements ILoanService {
@@ -297,6 +316,97 @@ export default class LoanService implements ILoanService {
     }
 
     return leanDoc<ILoanPayment>(await LoanPaymentModel.findById(paymentId).lean())
+  }
+
+  async simulatePayoff (loanId: string, lumpSum: number, user: string): Promise<SimulationResult> {
+    const { loan, events, currentRate, currentPayment } = await this._getLoanWithRates(loanId, user)
+
+    if (lumpSum > loan.pendingAmount) {
+      throw Boom.badData('lumpSum cannot exceed pendingAmount').output
+    }
+
+    const eventInputs: LoanEventInput[] = events.map(e => ({
+      date: e.date,
+      newRate: e.newRate,
+      newPayment: e.newPayment
+    }))
+
+    const now = Date.now()
+    const newPending = roundNumber(loan.pendingAmount - lumpSum)
+
+    // Anchor projection to the last ordinary payment date so the next
+    // projected date aligns with the real payment schedule (e.g. every 20th).
+    const lastOrdinaryPayment = await leanDoc<ILoanPayment | null>(
+      LoanPaymentModel.findOne({ loan: loanId, user, type: LOAN_PAYMENT.ORDINARY }).sort({ date: -1 }).lean()
+    )
+    const projectionAnchor = lastOrdinaryPayment?.date ?? loan.startDate
+
+    // Base table: current scenario (no lump sum)
+    const baseTable = buildAmortizationTable(
+      [],
+      loan.pendingAmount,
+      currentRate,
+      currentPayment,
+      eventInputs,
+      now,
+      projectionAnchor
+    )
+    const baseInterest = roundNumber(baseTable.filter(r => r.isProjected).reduce((s, r) => s + r.interest, 0))
+    const originalMonthsLeft = baseTable.filter(r => r.isProjected).length
+    const originalEndDate = baseTable.length > 0 ? baseTable[baseTable.length - 1].date : null
+
+    // Option A: reduce term (same monthly payment, fewer months)
+    const optionATable = buildAmortizationTable(
+      [],
+      newPending,
+      currentRate,
+      currentPayment,
+      eventInputs,
+      now,
+      projectionAnchor
+    )
+    const optionAInterest = roundNumber(optionATable.filter(r => r.isProjected).reduce((s, r) => s + r.interest, 0))
+    const optionAMonthsLeft = optionATable.filter(r => r.isProjected).length
+
+    // Option B: reduce quota (same duration, lower monthly payment)
+    const newMonthlyPayment = calcMonthlyPayment(newPending, currentRate, originalMonthsLeft)
+    const adjustedEvents: LoanEventInput[] = eventInputs.map(e => ({
+      ...e,
+      newPayment: newMonthlyPayment
+    }))
+    const optionBTable = buildAmortizationTable(
+      [],
+      newPending,
+      currentRate,
+      newMonthlyPayment,
+      adjustedEvents,
+      now,
+      projectionAnchor
+    )
+    const optionBInterest = roundNumber(optionBTable.filter(r => r.isProjected).reduce((s, r) => s + r.interest, 0))
+
+    return {
+      lumpSum,
+      originalMonthsLeft,
+      originalMonthlyPayment: currentPayment,
+      originalEndDate,
+      optionA: {
+        newMonthsLeft: optionAMonthsLeft,
+        newMonthlyPayment: currentPayment,
+        monthsSaved: originalMonthsLeft - optionAMonthsLeft,
+        monthlySaving: 0,
+        totalInterestSaved: roundNumber(baseInterest - optionAInterest),
+        newEndDate: optionATable.length > 0 ? optionATable[optionATable.length - 1].date : null
+      },
+      optionB: {
+        newMonthsLeft: originalMonthsLeft,
+        newMonthlyPayment,
+        monthsSaved: 0,
+        monthlySaving: roundNumber(currentPayment - newMonthlyPayment),
+        totalInterestSaved: roundNumber(baseInterest - optionBInterest),
+        newEndDate: optionBTable.length > 0 ? optionBTable[optionBTable.length - 1].date : null
+      }
+    }
   }
 
   private async _registerPaymentMovement (loan: ILoan & { _id: string }, amount: number, date: number, user: string): Promise<void> {

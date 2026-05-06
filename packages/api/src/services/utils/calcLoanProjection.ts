@@ -173,7 +173,8 @@ export const buildAmortizationTable = (
   interestRate: number,
   monthlyPayment: number,
   events: LoanEventInput[],
-  startDate: number
+  startDate: number,
+  projectionStartDate?: number
 ): AmortizationRow[] => {
   const sorted = realPayments.toSorted((a, b) => a.date - b.date)
 
@@ -196,7 +197,7 @@ export const buildAmortizationTable = (
     .reverse()
     .find(p => p.type === LOAN_PAYMENT.ORDINARY)
 
-  const lastOrdinaryDate = lastOrdinaryReal?.date ?? subtractOneMonth(startDate)
+  const lastOrdinaryDate = lastOrdinaryReal?.date ?? projectionStartDate ?? subtractOneMonth(startDate)
   const nextProjectedDate = addOneMonth(lastOrdinaryDate)
   const startPeriod = real.length + 1
 
