@@ -7,7 +7,7 @@ import { BankIcon } from 'components/icons'
 import { useAccounts } from 'hooks'
 import { AmortizationRow } from 'types'
 
-import { LoanStatsPanel, LoanAmortizationTable, LoanFormModal, LoanPayModal, LoanAmortizeModal, LoanEventModal, LoanRemoveModal, LoanEditPaymentModal, LoanDeletePaymentModal } from '../components'
+import { LoanStatsPanel, LoanAmortizationTable, LoanSimulator, LoanFormModal, LoanPayModal, LoanAmortizeModal, LoanEventModal, LoanRemoveModal, LoanEditPaymentModal, LoanDeletePaymentModal } from '../components'
 import { useLoan } from '../hooks'
 
 type ModalState =
@@ -84,6 +84,13 @@ const LoanDetail = () => {
 
       {/* Stats */}
       <LoanStatsPanel stats={loan.stats} />
+
+      {/* Simulator */}
+      <LoanSimulator
+        loanId={id}
+        monthlyPayment={loan.stats.currentPayment}
+        pendingAmount={loan.pendingAmount}
+      />
 
       {/* Amortization table */}
       <LoanAmortizationTable

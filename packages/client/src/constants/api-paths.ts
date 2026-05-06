@@ -10,6 +10,7 @@ export const PENSIONS = 'pensions'
 export const TICKETS = 'tickets'
 export const LOANS = 'loans'
 export const LOAN_DETAIL = (id: string) => `loans/${id}`
+export const LOAN_SIMULATE = (id: string) => `loans/${id}/simulate-payoff`
 export const SUBSCRIPTIONS = 'subscriptions'
 export const SUBSCRIPTION_CANDIDATES = 'subscriptions/candidates'
 export const SUPPLIES = 'supplies'
