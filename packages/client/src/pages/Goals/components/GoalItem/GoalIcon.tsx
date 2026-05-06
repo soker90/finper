@@ -30,15 +30,17 @@ interface GoalIconProps {
   name: string
   color: string
   size?: number
+  className?: string
 }
 
-const GoalIcon = ({ name, color, size = 32 }: GoalIconProps) => {
+const GoalIcon = ({ name, color, size = 32, className }: GoalIconProps) => {
   const Icon = iconMap[name]
 
   if (!Icon) return null
 
   return (
     <Box
+      className={className}
       sx={{
         width: size,
         height: size,

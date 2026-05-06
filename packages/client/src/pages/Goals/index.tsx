@@ -1,10 +1,10 @@
 import { useState } from 'react'
-import { Stack, Typography } from '@mui/material'
 import { useGoals, useAccounts } from 'hooks'
 import GoalItem from './components/GoalItem'
-import { ListContainer } from './components/ListContainer'
+import { ListContainer } from '../Accounts/components/ListContainer'
 import { PlusOutlined } from '@ant-design/icons'
-import { MainCard, HeaderButtons, LoadingList } from 'components'
+import { HeaderButtons, LoadingList } from 'components'
+import { TotalCard } from './components'
 import { format } from 'utils'
 
 const Goals = () => {
@@ -18,7 +18,7 @@ const Goals = () => {
 
   const totalBalance = accounts.reduce((sum, a) => sum + a.balance, 0)
   const totalAllocated = goals.reduce((sum, g) => sum + g.currentAmount, 0)
-  const unallocated = totalBalance - totalAllocated
+  const unallocated = Math.max(0, totalBalance - totalAllocated)
 
   return (
     <>
@@ -29,20 +29,12 @@ const Goals = () => {
         desktopSx={{ marginTop: -7 }}
       />
 
-      <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} mb={3}>
-        <MainCard contentSX={{ p: 2.25 }} sx={{ maxWidth: { sm: 250 } }}>
-          <Stack spacing={0.5}>
-            <Typography variant='h4'>Total</Typography>
-            <Typography variant='h4' color='info.main'>{format.euro(totalBalance)}</Typography>
-          </Stack>
-        </MainCard>
-        <MainCard contentSX={{ p: 2.25 }} sx={{ maxWidth: { sm: 250 } }}>
-          <Stack spacing={0.5}>
-            <Typography variant='h4'>Sin asignar</Typography>
-            <Typography variant='h4' color='success.main'>{format.euro(Math.max(0, unallocated))}</Typography>
-          </Stack>
-        </MainCard>
-      </Stack>
+      <TotalCard
+        totalBalance={totalBalance}
+        totalAllocated={totalAllocated}
+        unallocated={unallocated}
+        format={format.euro}
+      />
 
       <ListContainer>
         {newGoal && (
@@ -58,9 +50,7 @@ const Goals = () => {
       </ListContainer>
 
       {!goals.length && !newGoal && (
-        <Typography variant='body1' color='textSecondary' textAlign='center' mt={4}>
-          No hay metas creadas
-        </Typography>
+        <p>No hay datos</p>
       )}
     </>
   )

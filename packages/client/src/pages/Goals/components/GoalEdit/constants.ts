@@ -1,14 +1,14 @@
 export const GOAL_COLORS = [
-  '#4CAF50',
-  '#2196F3',
-  '#9C27B0',
-  '#FF9800',
-  '#F44336',
-  '#00BCD4',
-  '#795548',
-  '#607D8B',
-  '#E91E63',
-  '#FFC107'
+  { value: '#4CAF50', label: 'Verde' },
+  { value: '#2196F3', label: 'Azul' },
+  { value: '#9C27B0', label: 'Morado' },
+  { value: '#FF9800', label: 'Naranja' },
+  { value: '#F44336', label: 'Rojo' },
+  { value: '#00BCD4', label: 'Cian' },
+  { value: '#795548', label: 'Marrón' },
+  { value: '#607D8B', label: 'Gris azulado' },
+  { value: '#E91E63', label: 'Rosa' },
+  { value: '#FFC107', label: 'Amarillo' }
 ] as const
 
 export const GOAL_ICONS = [

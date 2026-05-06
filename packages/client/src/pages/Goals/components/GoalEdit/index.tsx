@@ -8,7 +8,7 @@ import { addGoal, editGoal, deleteGoal } from 'services/apiService'
 import { GOALS } from 'constants/api-paths'
 import { GOAL_COLORS, GOAL_ICONS } from './constants'
 
-const colorOptions = GOAL_COLORS.map(color => ({ value: color, label: color }))
+const colorOptions = GOAL_COLORS.map(({ value, label }) => ({ value, label }))
 const iconOptions = GOAL_ICONS.map(icon => ({ value: icon, label: icon }))
 
 interface GoalEditProps {
