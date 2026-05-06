@@ -2,10 +2,11 @@ import { useState } from 'react'
 import { useGoals, useAccounts } from 'hooks'
 import GoalItem from './components/GoalItem'
 import { ListContainer } from '../Accounts/components/ListContainer'
-import { PlusOutlined } from '@ant-design/icons'
+import { PlusOutlined, TrophyOutlined } from '@ant-design/icons'
 import { HeaderButtons, LoadingList } from 'components'
 import { TotalCard } from './components'
 import { format } from 'utils'
+import { Box, Typography } from '@mui/material'
 
 const Goals = () => {
   const { goals, isLoading } = useGoals()
@@ -50,7 +51,12 @@ const Goals = () => {
       </ListContainer>
 
       {!goals.length && !newGoal && (
-        <p>No hay datos</p>
+        <Box textAlign='center' py={4}>
+          <TrophyOutlined style={{ fontSize: 48, color: '#bdbdbd', marginBottom: 16 }} />
+          <Typography color='text.secondary' variant='body1'>
+            Define tu primera meta y empieza a ahorrar para lo que más te importa
+          </Typography>
+        </Box>
       )}
     </>
   )

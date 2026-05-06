@@ -40,7 +40,7 @@ describe('Goals', () => {
       http.get('/accounts', () => HttpResponse.json(ACCOUNTS_LIST))
     )
     const { findByText } = renderFresh()
-    expect(await findByText('No hay datos')).toBeDefined()
+    expect(await findByText('Define tu primera meta y empieza a ahorrar para lo que más te importa')).toBeDefined()
   })
 
   it('renders one row per goal once data is loaded', async () => {
