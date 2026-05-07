@@ -22,18 +22,21 @@ type ModalState =
 const LoanDetail = () => {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
+  const { loan, isLoading } = useLoan(id ?? '')
+  const { accounts } = useAccounts()
+  const linkedAccount = accounts.find(account => account._id === loan?.account)
+
+  const [activeModal, setActiveModal] = useState<ModalState | null>(null)
+  const closeModal = () => setActiveModal(null)
+  const handleRemoveClose = () => {
+    closeModal()
+    navigate('/prestamos')
+  }
 
   if (!id) {
     navigate('/prestamos', { replace: true })
     return null
   }
-
-  const { loan, isLoading } = useLoan(id)
-  const { accounts } = useAccounts()
-  const linkedAccount = accounts.find(a => a._id === loan?.account)
-
-  const [activeModal, setActiveModal] = useState<ModalState | null>(null)
-  const closeModal = () => setActiveModal(null)
 
   if (isLoading) {
     return (
@@ -143,10 +146,7 @@ const LoanDetail = () => {
       {activeModal?.type === 'remove' && (
         <LoanRemoveModal
           loan={loan}
-          onClose={() => {
-            closeModal()
-            navigate('/prestamos')
-          }}
+          onClose={handleRemoveClose}
         />
       )}
     </Stack>
