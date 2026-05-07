@@ -516,12 +516,12 @@ export default class LoanService implements ILoanService {
     let accumulated = 0
     let pending = loan.initialAmount
 
-    const bulkOps = allPayments.map(p => {
-      accumulated = roundNumber(accumulated + p.principal)
-      pending = roundNumber(pending - p.principal)
+    const bulkOps = allPayments.map(payment => {
+      accumulated = roundNumber(accumulated + payment.principal)
+      pending = roundNumber(pending - payment.principal)
       return {
         updateOne: {
-          filter: { _id: p._id },
+          filter: { _id: payment._id },
           update: { accumulatedPrincipal: accumulated, pendingCapital: pending }
         }
       }
