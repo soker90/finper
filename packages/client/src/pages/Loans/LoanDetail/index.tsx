@@ -7,7 +7,7 @@ import { BankIcon } from 'components/icons'
 import { useAccounts } from 'hooks'
 import { AmortizationRow } from 'types'
 
-import { LoanStatsPanel, LoanAmortizationTable, LoanFormModal, LoanPayModal, LoanAmortizeModal, LoanEventModal, LoanRemoveModal, LoanEditPaymentModal, LoanDeletePaymentModal } from '../components'
+import { LoanStatsPanel, LoanAmortizationTable, LoanSimulator, LoanFormModal, LoanPayModal, LoanAmortizeModal, LoanEventModal, LoanRemoveModal, LoanEditPaymentModal, LoanDeletePaymentModal } from '../components'
 import { useLoan } from '../hooks'
 
 type ModalState =
@@ -22,18 +22,21 @@ type ModalState =
 const LoanDetail = () => {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
+  const { loan, isLoading } = useLoan(id ?? '')
+  const { accounts } = useAccounts()
+  const linkedAccount = accounts.find(account => account._id === loan?.account)
+
+  const [activeModal, setActiveModal] = useState<ModalState | null>(null)
+  const closeModal = () => setActiveModal(null)
+  const handleRemoveClose = () => {
+    closeModal()
+    navigate('/prestamos')
+  }
 
   if (!id) {
     navigate('/prestamos', { replace: true })
     return null
   }
-
-  const { loan, isLoading } = useLoan(id)
-  const { accounts } = useAccounts()
-  const linkedAccount = accounts.find(a => a._id === loan?.account)
-
-  const [activeModal, setActiveModal] = useState<ModalState | null>(null)
-  const closeModal = () => setActiveModal(null)
 
   if (isLoading) {
     return (
@@ -84,6 +87,13 @@ const LoanDetail = () => {
 
       {/* Stats */}
       <LoanStatsPanel stats={loan.stats} />
+
+      {/* Simulator */}
+      <LoanSimulator
+        loanId={id}
+        monthlyPayment={loan.stats.currentPayment}
+        pendingAmount={loan.pendingAmount}
+      />
 
       {/* Amortization table */}
       <LoanAmortizationTable
@@ -136,10 +146,7 @@ const LoanDetail = () => {
       {activeModal?.type === 'remove' && (
         <LoanRemoveModal
           loan={loan}
-          onClose={() => {
-            closeModal()
-            navigate('/prestamos')
-          }}
+          onClose={handleRemoveClose}
         />
       )}
     </Stack>

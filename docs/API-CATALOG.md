@@ -139,6 +139,7 @@ Routes: `goal.routes.ts`. Modelo: `Goal`.
 | POST | `/:id/pay` | Pago ordinario. |
 | POST | `/:id/amortize` | Pago extraordinario (amortización). |
 | POST | `/:id/events` | Añadir evento (cambio tipo/cuota). |
+| POST | `/:id/simulate-payoff` | Simulador de pago puntual (reduce tiempo / reduce cuota). |
 | PUT | `/:id/payments/:paymentId` | Editar pago. |
 | DELETE | `/:id/payments/:paymentId` | Eliminar pago. |
 

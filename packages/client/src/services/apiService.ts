@@ -1,6 +1,6 @@
 import axios from 'axios'
-import { ACCOUNTS, BUDGETS, CATEGORIES, DEBTS, LOANS, LOAN_DETAIL, PENSIONS, TICKETS, TRANSACTIONS, SUBSCRIPTIONS, SUBSCRIPTION_CANDIDATES, SUPPLIES, SUPPLIES_PROPERTIES, SUPPLIES_READINGS, STOCKS, GOALS } from 'constants/api-paths'
-import { Category, Transaction, TransactionType, Account, Pension, PensionTransaction, Debt, Loan, SubscriptionInput, SupplyReadingInput, StockPurchase, Goal } from 'types'
+import { ACCOUNTS, BUDGETS, CATEGORIES, DEBTS, LOANS, LOAN_DETAIL, LOAN_SIMULATE, PENSIONS, TICKETS, TRANSACTIONS, SUBSCRIPTIONS, SUBSCRIPTION_CANDIDATES, SUPPLIES, SUPPLIES_PROPERTIES, SUPPLIES_READINGS, STOCKS, GOALS } from 'constants/api-paths'
+import { Category, Transaction, TransactionType, Account, Pension, PensionTransaction, Debt, Loan, SubscriptionInput, SupplyReadingInput, StockPurchase, Goal, SimulationResult } from 'types'
 
 const extractError = (error: any) => error.response?.data?.message || error.message
 
@@ -173,6 +173,10 @@ export const editLoanPayment = (loanId: string, paymentId: string, params: {
   type?: 'ordinary' | 'extraordinary'
 }): Promise<{ error?: string }> => {
   return axios.put(`${LOAN_DETAIL(loanId)}/payments/${paymentId}`, params).then(() => ({})).catch((error: any) => ({ error: extractError(error) }))
+}
+
+export const simulateLoanPayoff = (id: string, lumpSum: number): Promise<{ data?: SimulationResult, error?: string }> => {
+  return axios.post(LOAN_SIMULATE(id), { lumpSum }).then((response: any) => ({ data: response.data as SimulationResult })).catch((error: any) => ({ error: extractError(error) }))
 }
 
 // Subscriptions

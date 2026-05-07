@@ -50,6 +50,15 @@ export const monthShort = (month: number): string => {
   return capitalize(d.toLocaleString('es-ES', { month: 'short' }))
 }
 
+export const monthsDiff = (months: number): string => {
+  if (months <= 0) return '0 meses'
+  const years = Math.floor(months / 12)
+  const remaining = months % 12
+  if (years === 0) return `${remaining} mes${remaining !== 1 ? 'es' : ''}`
+  if (remaining === 0) return `${years} año${years !== 1 ? 's' : ''}`
+  return `${years} año${years !== 1 ? 's' : ''} y ${remaining} mes${remaining !== 1 ? 'es' : ''}`
+}
+
 export const monthToNumber = (month?: number | string): string => {
   if (!month && month !== 0) return ''
   const date = new Date()
