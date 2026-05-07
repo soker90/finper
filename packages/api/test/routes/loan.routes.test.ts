@@ -634,7 +634,7 @@ describe('Loans', () => {
       expect(detailRes.body.stats.currentPayment).toBe(newPayment)
 
       // The projected rows should use the new rate (interest = pendingAmount * newRate/100/12)
-      const firstProjected = detailRes.body.amortizationTable.find((r: any) => r.isProjected)
+      const firstProjected = detailRes.body.amortizationTable.find((row: any) => row.isProjected)
       const expectedInterest = roundNumber(initialAmount * newRate / 100 / 12)
       expect(firstProjected.interest).toBe(expectedInterest)
     })

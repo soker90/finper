@@ -14,12 +14,8 @@ import {
   validateLoanSimulateParams
 } from '../validators/loan'
 
-interface ILogger {
-  logInfo(msg: string): void
-}
-
 type ILoanController = {
-  loggerHandler: ILogger
+  loggerHandler: any
   loanService: ILoanService
 }
 
