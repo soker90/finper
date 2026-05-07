@@ -1,7 +1,7 @@
 import { useState, useEffect, type ChangeEvent } from 'react'
 import { Box, Card, CardContent, Chip, Slider, Stack, TextField, Typography, CircularProgress, Alert } from '@mui/material'
 import { format } from 'utils'
-import { useDebouncedValue } from 'hooks/useDebouncedValue'
+import { useDebouncedValue } from 'hooks'
 import { SimulationResult } from 'types'
 import { simulateLoanPayoff } from 'services/apiService'
 
@@ -65,19 +65,19 @@ const LoanSimulator = ({ loanId, monthlyPayment, pendingAmount }: Props) => {
     return () => { cancelled = true }
   }, [loanId, debouncedLumpSum])
 
-  const handleSliderChange = (_: Event, value: number | number[]) => {
+  const handleSliderChange = (_sliderEvent: Event, value: number | number[]) => {
     setLumpSum(value as number)
   }
 
-  const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const raw = e.target.value
-    if (raw === '') {
+  const handleInputChange = (changeEvent: ChangeEvent<HTMLInputElement>) => {
+    const rawInputValue = changeEvent.target.value
+    if (rawInputValue === '') {
       setLumpSum(0)
       return
     }
-    const val = Math.floor(Number(raw))
-    if (!isNaN(val)) {
-      setLumpSum(Math.min(Math.max(0, val), maxAmount))
+    const parsedValue = Math.floor(Number(rawInputValue))
+    if (!isNaN(parsedValue)) {
+      setLumpSum(Math.min(Math.max(0, parsedValue), maxAmount))
     } else {
       setLumpSum(0)
     }
@@ -102,7 +102,7 @@ const LoanSimulator = ({ loanId, monthlyPayment, pendingAmount }: Props) => {
               max={maxAmount}
               step={1}
               valueLabelDisplay='auto'
-              valueLabelFormat={(v) => format.euro(v)}
+              valueLabelFormat={format.euro}
               sx={{ flex: 1 }}
             />
             <TextField
