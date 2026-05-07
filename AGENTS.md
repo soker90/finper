@@ -15,6 +15,7 @@
 - **Use deterministic installs**: prefer `pnpm install --frozen-lockfile` over `pnpm install` in CI and scripts.
 - **Always communicate in Spanish**: You must answer, explain, and summarize all your work strictily in conversational Spanish.
 - **Code and variables in English**: all variable names, function names, comments, and code must be written in English.
+- **Descriptive variable names**: never use single letters (like `a`, `b`, `x`, `i`, `j`) as variable names except for well-known loop counters (`i`, `j`, `k`). Always use descriptive, self-explanatory names.
 
 ---
 
