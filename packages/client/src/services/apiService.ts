@@ -176,7 +176,7 @@ export const editLoanPayment = (loanId: string, paymentId: string, params: {
 }
 
 export const simulateLoanPayoff = (id: string, lumpSum: number): Promise<{ data?: SimulationResult, error?: string }> => {
-  return axios.post(LOAN_SIMULATE(id), { lumpSum }).then((data: any) => ({ data: data.data as SimulationResult })).catch((error: any) => ({ error: extractError(error) }))
+  return axios.post(LOAN_SIMULATE(id), { lumpSum }).then((response: any) => ({ data: response.data as SimulationResult })).catch((error: any) => ({ error: extractError(error) }))
 }
 
 // Subscriptions
