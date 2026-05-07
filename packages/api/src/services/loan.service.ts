@@ -88,10 +88,10 @@ export default class LoanService implements ILoanService {
       leanDoc<(ILoanPayment & { _id: string })[]>(LoanPaymentModel.find({ loan: id, user }).sort({ date: 1 }).lean())
     ])
 
-    const eventInputs: LoanEventInput[] = events.map(e => ({
-      date: e.date,
-      newRate: e.newRate,
-      newPayment: e.newPayment
+    const eventInputs: LoanEventInput[] = events.map(event => ({
+      date: event.date,
+      newRate: event.newRate,
+      newPayment: event.newPayment
     }))
 
     const table = buildAmortizationTable(
@@ -120,7 +120,7 @@ export default class LoanService implements ILoanService {
       [],
       loanData.startDate
     )
-    loanData.initialEstimatedCost = roundNumber(initialProjection.reduce((s, r) => s + r.amount, 0))
+    loanData.initialEstimatedCost = roundNumber(initialProjection.reduce((sum, row) => sum + row.amount, 0))
     return leanDoc<ILoan & { _id: string }>(LoanModel.create(loanData))
   }
 
@@ -144,8 +144,8 @@ export default class LoanService implements ILoanService {
 
     if (loan.pendingAmount <= 0) throw Boom.badRequest(ERROR_MESSAGE.LOAN.ALREADY_PAID).output
 
-    const r = currentRate / 100 / 12
-    const baseInterest = roundNumber(loan.pendingAmount * r)
+    const monthlyInterestRate = currentRate / 100 / 12
+    const baseInterest = roundNumber(loan.pendingAmount * monthlyInterestRate)
 
     // El principal siempre es el calculado normalmente (currentPayment - interés base).
     // Si el usuario pasa un importe concreto, la diferencia respecto al estándar son los intereses.
@@ -325,20 +325,23 @@ export default class LoanService implements ILoanService {
       throw Boom.badData('lumpSum cannot exceed pendingAmount').output
     }
 
-    const eventInputs: LoanEventInput[] = events.map(e => ({
-      date: e.date,
-      newRate: e.newRate,
-      newPayment: e.newPayment
+    const eventInputs: LoanEventInput[] = events.map(event => ({
+      date: event.date,
+      newRate: event.newRate,
+      newPayment: event.newPayment
     }))
 
     const newPending = roundNumber(loan.pendingAmount - lumpSum)
 
     // Anchor projection to the last ordinary payment date so the next
     // projected date aligns with the real payment schedule (e.g. every 20th).
+    // When no payments exist, pass undefined so buildAmortizationTable uses
+    // subtractOneMonth(startDate) internally — this makes the first projected
+    // payment fall exactly on startDate (same day of month).
     const lastOrdinaryPayment = await leanDoc<ILoanPayment | null>(
       LoanPaymentModel.findOne({ loan: loanId, user, type: LOAN_PAYMENT.ORDINARY }).sort({ date: -1 }).lean()
     )
-    const projectionAnchor = lastOrdinaryPayment?.date ?? loan.startDate
+    const projectionAnchor = lastOrdinaryPayment?.date
 
     // Base table: current scenario (no lump sum).
     // Use loan.startDate (not Date.now()) so projected dates match the main amortization table.
@@ -351,8 +354,8 @@ export default class LoanService implements ILoanService {
       loan.startDate,
       projectionAnchor
     )
-    const baseInterest = roundNumber(baseTable.filter(r => r.isProjected).reduce((s, r) => s + r.interest, 0))
-    const originalMonthsLeft = baseTable.filter(r => r.isProjected).length
+    const baseInterest = roundNumber(baseTable.filter(row => row.isProjected).reduce((sum, row) => sum + row.interest, 0))
+    const originalMonthsLeft = baseTable.filter(row => row.isProjected).length
     const originalEndDate = baseTable.length > 0 ? baseTable[baseTable.length - 1].date : null
 
     // Option A: reduce term (same monthly payment, fewer months)
@@ -365,13 +368,16 @@ export default class LoanService implements ILoanService {
       loan.startDate,
       projectionAnchor
     )
-    const optionAInterest = roundNumber(optionATable.filter(r => r.isProjected).reduce((s, r) => s + r.interest, 0))
-    const optionAMonthsLeft = optionATable.filter(r => r.isProjected).length
+    const optionAInterest = roundNumber(optionATable.filter(row => row.isProjected).reduce((sum, row) => sum + row.interest, 0))
+    const optionAMonthsLeft = optionATable.filter(row => row.isProjected).length
 
     // Option B: reduce quota (same duration, lower monthly payment)
+    if (originalMonthsLeft === 0) {
+      throw Boom.badData('Loan is already fully paid').output
+    }
     const newMonthlyPayment = calcMonthlyPayment(newPending, currentRate, originalMonthsLeft)
-    const adjustedEvents: LoanEventInput[] = eventInputs.map(e => ({
-      ...e,
+    const adjustedEvents: LoanEventInput[] = eventInputs.map(event => ({
+      ...event,
       newPayment: newMonthlyPayment
     }))
     const optionBTable = buildAmortizationTable(
@@ -383,7 +389,7 @@ export default class LoanService implements ILoanService {
       loan.startDate,
       projectionAnchor
     )
-    const optionBInterest = roundNumber(optionBTable.filter(r => r.isProjected).reduce((s, r) => s + r.interest, 0))
+    const optionBInterest = roundNumber(optionBTable.filter(row => row.isProjected).reduce((sum, row) => sum + row.interest, 0))
 
     return {
       lumpSum,
@@ -399,9 +405,9 @@ export default class LoanService implements ILoanService {
         newEndDate: optionATable.length > 0 ? optionATable[optionATable.length - 1].date : null
       },
       optionB: {
-        newMonthsLeft: originalMonthsLeft,
+        newMonthsLeft: optionBTable.filter(row => row.isProjected).length,
         newMonthlyPayment,
-        monthsSaved: 0,
+        monthsSaved: originalMonthsLeft - optionBTable.filter(row => row.isProjected).length,
         monthlySaving: roundNumber(currentPayment - newMonthlyPayment),
         totalInterestSaved: roundNumber(baseInterest - optionBInterest),
         newEndDate: optionBTable.length > 0 ? optionBTable[optionBTable.length - 1].date : null
@@ -427,7 +433,7 @@ export default class LoanService implements ILoanService {
       leanDoc<ILoanEvent[]>(LoanEventModel.find({ loan: id, user }).sort({ date: 1 }).lean()),
       leanDoc<ILoanPayment | null>(LoanPaymentModel.findOne({ loan: id, user }).sort({ date: -1 }).lean())
     ])
-    const currentEvent = events.findLast(e => e.date <= Date.now())
+    const currentEvent = events.findLast(event => event.date <= Date.now())
     const currentRate = currentEvent?.newRate ?? loan.interestRate
     const currentPayment = currentEvent?.newPayment ?? loan.monthlyPayment
     return { loan, events, lastPayment, currentRate, currentPayment }
@@ -439,21 +445,21 @@ export default class LoanService implements ILoanService {
     currentRate: number
     currentPayment: number
   }): LoanStats {
-    const realRows = table.filter(r => !r.isProjected)
-    const projectedRows = table.filter(r => r.isProjected)
+    const realRows = table.filter(row => !row.isProjected)
+    const projectedRows = table.filter(row => row.isProjected)
 
-    const ordinaryPayments = realRows.filter(r => r.type === LOAN_PAYMENT.ORDINARY)
-    const extraordinaryPayments = realRows.filter(r => r.type === LOAN_PAYMENT.EXTRAORDINARY)
+    const ordinaryPayments = realRows.filter(row => row.type === LOAN_PAYMENT.ORDINARY)
+    const extraordinaryPayments = realRows.filter(row => row.type === LOAN_PAYMENT.EXTRAORDINARY)
 
-    const paidPrincipal = roundNumber(realRows.reduce((s, r) => s + r.principal, 0))
-    const paidInterest = roundNumber(realRows.reduce((s, r) => s + r.interest, 0))
+    const paidPrincipal = roundNumber(realRows.reduce((sum, row) => sum + row.principal, 0))
+    const paidInterest = roundNumber(realRows.reduce((sum, row) => sum + row.interest, 0))
     const pendingPrincipal = loan.pendingAmount
-    const estimatedPendingInterest = roundNumber(projectedRows.reduce((s, r) => s + r.interest, 0))
-    const totalCostToDate = roundNumber(realRows.reduce((s, r) => s + r.amount, 0))
-    const estimatedTotalCost = roundNumber(totalCostToDate + projectedRows.reduce((s, r) => s + r.amount, 0))
+    const estimatedPendingInterest = roundNumber(projectedRows.reduce((sum, row) => sum + row.interest, 0))
+    const totalCostToDate = roundNumber(realRows.reduce((sum, row) => sum + row.amount, 0))
+    const estimatedTotalCost = roundNumber(totalCostToDate + projectedRows.reduce((sum, row) => sum + row.amount, 0))
 
-    const totalOrdinaryAmount = roundNumber(ordinaryPayments.reduce(/* istanbul ignore next */(s, r) => s + r.amount, 0))
-    const totalExtraordinaryAmount = roundNumber(extraordinaryPayments.reduce(/* istanbul ignore next */(s, r) => s + r.amount, 0))
+    const totalOrdinaryAmount = roundNumber(ordinaryPayments.reduce(/* istanbul ignore next */(sum, row) => sum + row.amount, 0))
+    const totalExtraordinaryAmount = roundNumber(extraordinaryPayments.reduce(/* istanbul ignore next */(sum, row) => sum + row.amount, 0))
 
     /* istanbul ignore next — initialEstimatedCost is always set when loan is created */
     const savedByExtraordinary = roundNumber((loan.initialEstimatedCost ?? 0) - estimatedTotalCost)

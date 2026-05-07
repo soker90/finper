@@ -47,48 +47,48 @@ const monthlyRate = (annualRate: number): number => annualRate / 100 / 12
  * C = P * r(1+r)^n / ((1+r)^n - 1)
  */
 export const calcMonthlyPayment = (principal: number, annualRate: number, months: number): number => {
-  const r = monthlyRate(annualRate)
-  if (r === 0) return roundNumber(principal / months)
-  return roundNumber(principal * (r * Math.pow(1 + r, months)) / (Math.pow(1 + r, months) - 1))
+  const monthlyInterestRate = monthlyRate(annualRate)
+  if (monthlyInterestRate === 0) return roundNumber(principal / months)
+  return roundNumber(principal * (monthlyInterestRate * Math.pow(1 + monthlyInterestRate, months)) / (Math.pow(1 + monthlyInterestRate, months) - 1))
 }
 
 /**
  * Calculates remaining months given principal, rate and monthly payment
  */
 export const calcRemainingMonths = (principal: number, annualRate: number, payment: number): number => {
-  const r = monthlyRate(annualRate)
-  if (r === 0) return Math.ceil(principal / payment)
-  if (payment <= principal * r) return Infinity // payment does not cover interest
-  return Math.ceil(-Math.log(1 - (principal * r) / payment) / Math.log(1 + r))
+  const monthlyInterestRate = monthlyRate(annualRate)
+  if (monthlyInterestRate === 0) return Math.ceil(principal / payment)
+  if (payment <= principal * monthlyInterestRate) return Infinity // payment does not cover interest
+  return Math.ceil(-Math.log(1 - (principal * monthlyInterestRate) / payment) / Math.log(1 + monthlyInterestRate))
 }
 
 /**
  * Subtracts one month from a timestamp, keeping the same day of month
  */
 const subtractOneMonth = (timestamp: number): number => {
-  const d = new Date(timestamp)
-  const day = d.getDate()
-  d.setMonth(d.getMonth() - 1)
+  const currentDate = new Date(timestamp)
+  const dayOfMonth = currentDate.getDate()
+  currentDate.setMonth(currentDate.getMonth() - 1)
   /* istanbul ignore next — only triggers when subtracting a month crosses month-end boundary (e.g. Mar 31 → Feb 28) */
-  if (d.getDate() !== day) {
-    d.setDate(0)
+  if (currentDate.getDate() !== dayOfMonth) {
+    currentDate.setDate(0)
   }
-  return d.getTime()
+  return currentDate.getTime()
 }
 
 /**
  * Adds one month to a timestamp, keeping the same day of month
  */
 const addOneMonth = (timestamp: number): number => {
-  const d = new Date(timestamp)
-  const day = d.getDate()
-  d.setMonth(d.getMonth() + 1)
+  const currentDate = new Date(timestamp)
+  const dayOfMonth = currentDate.getDate()
+  currentDate.setMonth(currentDate.getMonth() + 1)
   // Handle months with fewer days (e.g. Jan 31 + 1 month = Feb 28)
   /* istanbul ignore next — only triggers when adding a month crosses month-end boundary (e.g. Jan 31 → Feb 28) */
-  if (d.getDate() !== day) {
-    d.setDate(0) // last day of previous month
+  if (currentDate.getDate() !== dayOfMonth) {
+    currentDate.setDate(0) // last day of previous month
   }
-  return d.getTime()
+  return currentDate.getTime()
 }
 
 /**
@@ -108,8 +108,8 @@ const projectLoanPayments = (input: ProjectionInput): ProjectedPayment[] => {
 
   // Sort events ascending by date, filter only future events
   const futureEvents = events
-    .filter(e => e.date >= lastDate)
-    .toSorted((a, b) => a.date - b.date)
+    .filter(event => event.date >= lastDate)
+    .toSorted((eventA, eventB) => eventA.date - eventB.date)
 
   const projected: ProjectedPayment[] = []
   let eventIdx = 0
@@ -124,8 +124,8 @@ const projectLoanPayments = (input: ProjectionInput): ProjectedPayment[] => {
       eventIdx++
     }
 
-    const r = monthlyRate(rate)
-    const interestPart = roundNumber(pending * r)
+    const monthlyInterestRate = monthlyRate(rate)
+    const interestPart = roundNumber(pending * monthlyInterestRate)
     const principalPart = roundNumber(Math.min(payment - interestPart, pending))
     const totalAmount = roundNumber(interestPart + principalPart)
     pending = roundNumber(pending - principalPart)
@@ -176,18 +176,18 @@ export const buildAmortizationTable = (
   startDate: number,
   projectionStartDate?: number
 ): AmortizationRow[] => {
-  const sorted = realPayments.toSorted((a, b) => a.date - b.date)
+  const sorted = realPayments.toSorted((paymentA, paymentB) => paymentA.date - paymentB.date)
 
-  const real: AmortizationRow[] = sorted.map((p, i) => ({
-    _id: p._id?.toString(),
-    period: i + 1,
-    date: p.date,
-    amount: p.amount,
-    interest: p.interest,
-    principal: p.principal,
-    accumulatedPrincipal: p.accumulatedPrincipal,
-    pendingCapital: p.pendingCapital,
-    type: p.type,
+  const real: AmortizationRow[] = sorted.map((payment, index) => ({
+    _id: payment._id?.toString(),
+    period: index + 1,
+    date: payment.date,
+    amount: payment.amount,
+    interest: payment.interest,
+    principal: payment.principal,
+    accumulatedPrincipal: payment.accumulatedPrincipal,
+    pendingCapital: payment.pendingCapital,
+    type: payment.type,
     isProjected: false
   }))
 
@@ -195,15 +195,15 @@ export const buildAmortizationTable = (
   // Extraordinary payments must not shift the schedule.
   const lastOrdinaryReal = [...sorted]
     .reverse()
-    .find(p => p.type === LOAN_PAYMENT.ORDINARY)
+    .find(payment => payment.type === LOAN_PAYMENT.ORDINARY)
 
   const lastOrdinaryDate = lastOrdinaryReal?.date ?? projectionStartDate ?? subtractOneMonth(startDate)
   const nextProjectedDate = addOneMonth(lastOrdinaryDate)
   const startPeriod = real.length + 1
 
   // Tasa vigente en el momento de la proyección (último evento cuya fecha ≤ nextProjectedDate)
-  const sortedEvents = events.toSorted((a, b) => a.date - b.date)
-  const lastEvent = sortedEvents.findLast(e => e.date <= nextProjectedDate)
+  const sortedEvents = events.toSorted((eventA, eventB) => eventA.date - eventB.date)
+  const lastEvent = sortedEvents.findLast(event => event.date <= nextProjectedDate)
   const currentRate = lastEvent?.newRate ?? interestRate
   const currentPayment = lastEvent?.newPayment ?? monthlyPayment
 
@@ -217,18 +217,18 @@ export const buildAmortizationTable = (
   })
 
   // Calculate accumulated principal for projected rows
-  let accum = real[real.length - 1]?.accumulatedPrincipal ?? 0
-  const projected: AmortizationRow[] = projectedRaw.map(p => {
-    accum = roundNumber(accum + p.principal)
+  let accumulatedPrincipal = real[real.length - 1]?.accumulatedPrincipal ?? 0
+  const projected: AmortizationRow[] = projectedRaw.map(projectedPayment => {
+    accumulatedPrincipal = roundNumber(accumulatedPrincipal + projectedPayment.principal)
     return {
-      period: p.period,
-      date: p.date,
-      amount: p.amount,
-      interest: p.interest,
-      principal: p.principal,
-      accumulatedPrincipal: accum,
-      pendingCapital: p.pendingCapital,
-      type: p.type,
+      period: projectedPayment.period,
+      date: projectedPayment.date,
+      amount: projectedPayment.amount,
+      interest: projectedPayment.interest,
+      principal: projectedPayment.principal,
+      accumulatedPrincipal,
+      pendingCapital: projectedPayment.pendingCapital,
+      type: projectedPayment.type,
       isProjected: true
     }
   })
