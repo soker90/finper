@@ -17,6 +17,8 @@ const renderSimulator = (props: Partial<Parameters<typeof LoanSimulator>[0]> = {
   return render(<LoanSimulator {...defaultProps} />)
 }
 
+const getAmountInput = (): HTMLInputElement => screen.getByRole('spinbutton', { name: 'Importe' })
+
 describe('LoanSimulator', () => {
   it('renders the simulator title', () => {
     renderSimulator()
@@ -25,7 +27,7 @@ describe('LoanSimulator', () => {
 
   it('renders the slider and input', () => {
     renderSimulator()
-    expect(screen.getByLabelText(/importe/i)).toBeDefined()
+    expect(getAmountInput()).toBeDefined()
   })
 
   it('does not call API when lumpSum is 0', () => {
@@ -50,8 +52,7 @@ describe('LoanSimulator', () => {
     )
 
     renderSimulator()
-    const input = screen.getByLabelText(/importe/i) as HTMLInputElement
-    fireEvent.change(input, { target: { value: '2000' } })
+    fireEvent.change(getAmountInput(), { target: { value: '2000' } })
 
     await waitFor(() => {
       expect(capturedBody).toEqual({ lumpSum: 2000 })
@@ -66,8 +67,7 @@ describe('LoanSimulator', () => {
     )
 
     renderSimulator()
-    const input = screen.getByLabelText(/importe/i) as HTMLInputElement
-    fireEvent.change(input, { target: { value: '2000' } })
+    fireEvent.change(getAmountInput(), { target: { value: '2000' } })
 
     await waitFor(() => {
       expect(screen.getByText('Reducir tiempo')).toBeDefined()
@@ -87,8 +87,7 @@ describe('LoanSimulator', () => {
     )
 
     renderSimulator()
-    const input = screen.getByLabelText(/importe/i) as HTMLInputElement
-    fireEvent.change(input, { target: { value: '2000' } })
+    fireEvent.change(getAmountInput(), { target: { value: '2000' } })
 
     await waitFor(() => {
       expect(screen.getByText(/error/i)).toBeDefined()
@@ -97,23 +96,20 @@ describe('LoanSimulator', () => {
 
   it('syncs slider and input values', () => {
     renderSimulator()
-    const input = screen.getByLabelText(/importe/i) as HTMLInputElement
-    fireEvent.change(input, { target: { value: '2500' } })
-    expect(input.value).toBe('2500')
+    fireEvent.change(getAmountInput(), { target: { value: '2500' } })
+    expect(getAmountInput().value).toBe('2500')
   })
 
   it('clamps input value to pendingAmount maximum', () => {
     renderSimulator()
-    const input = screen.getByLabelText(/importe/i) as HTMLInputElement
-    fireEvent.change(input, { target: { value: '15000' } })
-    expect(input.value).toBe('10000')
+    fireEvent.change(getAmountInput(), { target: { value: '15000' } })
+    expect(getAmountInput().value).toBe('10000')
   })
 
   it('sets lumpSum to 0 when input is cleared', () => {
     renderSimulator()
-    const input = screen.getByLabelText(/importe/i) as HTMLInputElement
-    fireEvent.change(input, { target: { value: '2000' } })
-    fireEvent.change(input, { target: { value: '' } })
-    expect(input.value).toBe('0')
+    fireEvent.change(getAmountInput(), { target: { value: '2000' } })
+    fireEvent.change(getAmountInput(), { target: { value: '' } })
+    expect(getAmountInput().value).toBe('0')
   })
 })

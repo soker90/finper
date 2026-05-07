@@ -1,9 +1,9 @@
-import { useState, useEffect, type ChangeEvent } from 'react'
-import { Box, Card, CardContent, Chip, Slider, Stack, TextField, Typography, CircularProgress, Alert } from '@mui/material'
+import { useState, type ChangeEvent } from 'react'
+import { Box, Card, CardContent, Slider, Stack, TextField, Typography, CircularProgress, Alert } from '@mui/material'
 import { format } from 'utils'
 import { useDebouncedValue } from 'hooks'
-import { SimulationResult } from 'types'
-import { simulateLoanPayoff } from 'services/apiService'
+import { useLoanSimulation } from '../hooks'
+import SimulationOptionCard from './SimulationOptionCard'
 
 interface Props {
   loanId: string
@@ -13,57 +13,12 @@ interface Props {
 
 const DEBOUNCE_MS = 400
 
-const formatMonthsDiff = (months: number): string => {
-  if (months <= 0) return '0 meses'
-  const years = Math.floor(months / 12)
-  const remaining = months % 12
-  if (years === 0) return `${remaining} mes${remaining !== 1 ? 'es' : ''}`
-  if (remaining === 0) return `${years} año${years !== 1 ? 's' : ''}`
-  return `${years} año${years !== 1 ? 's' : ''} y ${remaining} mes${remaining !== 1 ? 'es' : ''}`
-}
-
 const LoanSimulator = ({ loanId, monthlyPayment, pendingAmount }: Props) => {
   const [lumpSum, setLumpSum] = useState(0)
   const debouncedLumpSum = useDebouncedValue(lumpSum, DEBOUNCE_MS)
-  const [result, setResult] = useState<SimulationResult | null>(null)
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const { result, loading, error } = useLoanSimulation(loanId, debouncedLumpSum)
 
   const maxAmount = Math.floor(pendingAmount)
-
-  useEffect(() => {
-    if (debouncedLumpSum <= 0) {
-      setResult(null)
-      setError(null)
-      return
-    }
-
-    let cancelled = false
-    setLoading(true)
-    setError(null)
-
-    simulateLoanPayoff(loanId, debouncedLumpSum)
-      .then((res) => {
-        if (cancelled) return
-        if (res.error) {
-          setError(res.error)
-          setResult(null)
-        } else {
-          setResult(res.data ?? null)
-        }
-      })
-      .catch(() => {
-        if (!cancelled) {
-          setError('Error al calcular la simulación')
-          setResult(null)
-        }
-      })
-      .finally(() => {
-        if (!cancelled) setLoading(false)
-      })
-
-    return () => { cancelled = true }
-  }, [loanId, debouncedLumpSum])
 
   const handleSliderChange = (_sliderEvent: Event, value: number | number[]) => {
     setLumpSum(value as number)
@@ -103,6 +58,7 @@ const LoanSimulator = ({ loanId, monthlyPayment, pendingAmount }: Props) => {
               step={1}
               valueLabelDisplay='auto'
               valueLabelFormat={format.euro}
+              aria-label='Importe del pago puntual'
               sx={{ flex: 1 }}
             />
             <TextField
@@ -126,48 +82,31 @@ const LoanSimulator = ({ loanId, monthlyPayment, pendingAmount }: Props) => {
 
           {result && !loading && (
             <Stack spacing={2}>
-              <Typography variant='body2' color='textSecondary'>
-                Pago puntual: {format.euro(result.lumpSum)} — Capital restante: {format.euro(pendingAmount - result.lumpSum)}
-              </Typography>
+              <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} useFlexGap flexWrap='wrap'>
+                <Typography variant='body2' color='textSecondary'>
+                  Pago puntual: {format.euro(result.lumpSum)} — Capital restante: {format.euro(pendingAmount - result.lumpSum)}
+                </Typography>
+                {result.originalEndDate && (
+                  <Typography variant='body2' color='textSecondary'>
+                    Fin actual: {format.date(result.originalEndDate)}
+                  </Typography>
+                )}
+              </Stack>
 
               <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
-                {/* Option A: reduce term */}
-                <Card sx={{ flex: 1, bgcolor: 'success.50' }} variant='outlined'>
-                  <CardContent>
-                    <Stack direction='row' alignItems='center' spacing={1} mb={1}>
-                      <Typography variant='subtitle2'>Reducir tiempo</Typography>
-                      <Chip label='Misma cuota' size='small' variant='outlined' />
-                    </Stack>
-                    <Typography variant='h5' color='success.main'>
-                      {formatMonthsDiff(result.optionA.monthsSaved)}
-                    </Typography>
-                    <Typography variant='body2' color='textSecondary'>
-                      Fin: {result.optionA.newEndDate ? format.date(result.optionA.newEndDate) : '-'}
-                    </Typography>
-                    <Typography variant='body2' color='success.dark'>
-                      Ahorro: {format.euro(result.optionA.totalInterestSaved)}
-                    </Typography>
-                  </CardContent>
-                </Card>
-
-                {/* Option B: reduce quota */}
-                <Card sx={{ flex: 1, bgcolor: 'info.50' }} variant='outlined'>
-                  <CardContent>
-                    <Stack direction='row' alignItems='center' spacing={1} mb={1}>
-                      <Typography variant='subtitle2'>Reducir cuota</Typography>
-                      <Chip label='Mismo plazo' size='small' variant='outlined' />
-                    </Stack>
-                    <Typography variant='h5' color='info.main'>
-                      {format.euro(result.optionB.monthlySaving)}/mes
-                    </Typography>
-                    <Typography variant='body2' color='textSecondary'>
-                      {format.euro(result.originalMonthlyPayment)} → {format.euro(result.optionB.newMonthlyPayment)}
-                    </Typography>
-                    <Typography variant='body2' color='info.dark'>
-                      Ahorro: {format.euro(result.optionB.totalInterestSaved)}
-                    </Typography>
-                  </CardContent>
-                </Card>
+                <SimulationOptionCard
+                  title='Reducir tiempo'
+                  chipLabel='Misma cuota'
+                  option={result.optionA}
+                  variant='reduceTerm'
+                />
+                <SimulationOptionCard
+                  title='Reducir cuota'
+                  chipLabel='Mismo plazo'
+                  option={result.optionB}
+                  variant='reduceQuota'
+                  originalMonthlyPayment={result.originalMonthlyPayment}
+                />
               </Stack>
             </Stack>
           )}
