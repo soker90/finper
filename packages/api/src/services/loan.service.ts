@@ -331,7 +331,6 @@ export default class LoanService implements ILoanService {
       newPayment: e.newPayment
     }))
 
-    const now = Date.now()
     const newPending = roundNumber(loan.pendingAmount - lumpSum)
 
     // Anchor projection to the last ordinary payment date so the next
@@ -341,14 +340,15 @@ export default class LoanService implements ILoanService {
     )
     const projectionAnchor = lastOrdinaryPayment?.date ?? loan.startDate
 
-    // Base table: current scenario (no lump sum)
+    // Base table: current scenario (no lump sum).
+    // Use loan.startDate (not Date.now()) so projected dates match the main amortization table.
     const baseTable = buildAmortizationTable(
       [],
       loan.pendingAmount,
       currentRate,
       currentPayment,
       eventInputs,
-      now,
+      loan.startDate,
       projectionAnchor
     )
     const baseInterest = roundNumber(baseTable.filter(r => r.isProjected).reduce((s, r) => s + r.interest, 0))
@@ -362,7 +362,7 @@ export default class LoanService implements ILoanService {
       currentRate,
       currentPayment,
       eventInputs,
-      now,
+      loan.startDate,
       projectionAnchor
     )
     const optionAInterest = roundNumber(optionATable.filter(r => r.isProjected).reduce((s, r) => s + r.interest, 0))
@@ -380,7 +380,7 @@ export default class LoanService implements ILoanService {
       currentRate,
       newMonthlyPayment,
       adjustedEvents,
-      now,
+      loan.startDate,
       projectionAnchor
     )
     const optionBInterest = roundNumber(optionBTable.filter(r => r.isProjected).reduce((s, r) => s + r.interest, 0))
