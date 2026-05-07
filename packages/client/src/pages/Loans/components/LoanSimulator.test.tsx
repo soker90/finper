@@ -2,33 +2,10 @@
 import { describe, expect, it } from 'vitest'
 import { http, HttpResponse } from 'msw'
 import { fireEvent, screen, waitFor } from '@testing-library/react'
-import { SWRConfig } from 'swr'
 import { server } from '../../../mock/server'
 import { render } from '../../../test/testUtils'
+import { MOCK_SIMULATION_RESULT } from '../../../mock/fixtures/loan-simulation'
 import LoanSimulator from './LoanSimulator'
-
-const MOCK_RESPONSE = {
-  lumpSum: 2000,
-  originalMonthsLeft: 60,
-  originalMonthlyPayment: 200,
-  originalEndDate: new Date('2030-12-01').getTime(),
-  optionA: {
-    newMonthsLeft: 48,
-    newMonthlyPayment: 200,
-    monthsSaved: 12,
-    monthlySaving: 0,
-    totalInterestSaved: 500,
-    newEndDate: new Date('2029-12-01').getTime()
-  },
-  optionB: {
-    newMonthsLeft: 60,
-    newMonthlyPayment: 170,
-    monthsSaved: 0,
-    monthlySaving: 30,
-    totalInterestSaved: 300,
-    newEndDate: new Date('2030-12-01').getTime()
-  }
-}
 
 const renderSimulator = (props: Partial<Parameters<typeof LoanSimulator>[0]> = {}) => {
   const defaultProps = {
@@ -37,11 +14,7 @@ const renderSimulator = (props: Partial<Parameters<typeof LoanSimulator>[0]> = {
     pendingAmount: 10000,
     ...props
   }
-  return render(
-    <SWRConfig value={{ provider: () => new Map() }}>
-      <LoanSimulator {...defaultProps} />
-    </SWRConfig>
-  )
+  return render(<LoanSimulator {...defaultProps} />)
 }
 
 describe('LoanSimulator', () => {
@@ -60,7 +33,7 @@ describe('LoanSimulator', () => {
     server.use(
       http.post('/loans/loan1/simulate-payoff', () => {
         called = true
-        return HttpResponse.json(MOCK_RESPONSE)
+        return HttpResponse.json(MOCK_SIMULATION_RESULT)
       })
     )
     renderSimulator()
@@ -68,11 +41,11 @@ describe('LoanSimulator', () => {
   })
 
   it('calls the API with debounced value after input interaction', async () => {
-    let capturedBody: any = null
+    let capturedBody: { lumpSum?: number } | null = null
     server.use(
       http.post('/loans/loan1/simulate-payoff', async ({ request }) => {
-        capturedBody = await request.json()
-        return HttpResponse.json(MOCK_RESPONSE)
+        capturedBody = await request.json() as { lumpSum?: number }
+        return HttpResponse.json(MOCK_SIMULATION_RESULT)
       })
     )
 
@@ -88,7 +61,7 @@ describe('LoanSimulator', () => {
   it('displays both options after successful API call', async () => {
     server.use(
       http.post('/loans/loan1/simulate-payoff', () => {
-        return HttpResponse.json(MOCK_RESPONSE)
+        return HttpResponse.json(MOCK_SIMULATION_RESULT)
       })
     )
 
