@@ -1,12 +1,13 @@
 import { useEffect, useState } from 'react'
 import { Box, Grid, InputLabel, MenuItem, Select, Stack, Typography } from '@mui/material'
 import { useTagsStats, useAvailableTagYears } from 'hooks'
+import Loader from 'components/Loader'
 import TagCard from './components/TagCard'
 
 const CostCenters = () => {
   const { years, isLoading: yearsLoading } = useAvailableTagYears()
   const [year, setYear] = useState<number | null>(null)
-  const { tagStats, isLoading: statsLoading } = useTagsStats(year ?? new Date().getFullYear())
+  const { tagStats, isLoading: statsLoading } = useTagsStats(year)
 
   useEffect(() => {
     if (years.length > 0 && year === null) {
@@ -20,11 +21,7 @@ const CostCenters = () => {
     <Stack spacing={2}>
       <Typography variant='h3'>Centros de Coste</Typography>
 
-      {yearsLoading && (
-        <Box py={4} textAlign='center'>
-          <Typography color='text.secondary'>Cargando...</Typography>
-        </Box>
-      )}
+      {yearsLoading && <Loader />}
 
       {!yearsLoading && years.length === 0 && (
         <Box py={4} textAlign='center'>

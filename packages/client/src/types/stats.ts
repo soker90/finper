@@ -1,3 +1,5 @@
+import { Transaction } from './transaction'
+
 export interface TagCategoryBreakdown {
   categoryId: string
   categoryName: string
@@ -30,5 +32,5 @@ export interface TagDetail {
   totalAmount: number
   transactionCount: number
   byCategory: TagCategoryBreakdown[]
-  transactions: any[]
+  transactions: Transaction[]
 }

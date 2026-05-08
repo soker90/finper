@@ -39,8 +39,8 @@ describe('Stats', () => {
 
     test('when the user has transactions with tags, it should return unique sorted tags', async () => {
       await TransactionModel.deleteMany({ user })
-      await insertTransaction({ user, type: TRANSACTION.Expense, tags: ['juan', 'viaje-japon'] as any })
-      await insertTransaction({ user, type: TRANSACTION.Expense, tags: ['juan', 'casa'] as any })
+      await insertTransaction({ user, type: TRANSACTION.Expense, tags: ['juan', 'viaje-japon'] })
+      await insertTransaction({ user, type: TRANSACTION.Expense, tags: ['juan', 'casa'] })
       const response = await supertest(server.app).get(path).auth(token, { type: 'bearer' })
       expect(response.statusCode).toBe(200)
       expect(response.body).toEqual(['casa', 'juan', 'viaje-japon'])
@@ -243,6 +243,101 @@ describe('Stats', () => {
       expect(response.body.byCategory).toHaveLength(1)
       expect(response.body.byCategory[0].categoryName).toBe(category.name)
       expect(response.body.transactions).toHaveLength(1)
+    })
+  })
+
+  describe('GET /api/stats/tags/years', () => {
+    const path = '/api/stats/tags/years'
+    let token: string
+    const user = generateUsername()
+
+    beforeAll(async () => {
+      token = await requestLogin(server.app, { username: user })
+    })
+
+    afterAll(() => testDatabase.cleanAll())
+
+    test('when token is not provided, it should response an error with status code 401', async () => {
+      await supertest(server.app).get(path).expect(401)
+    })
+
+    test('when the user has no tagged transactions, it should return an empty array', async () => {
+      await supertest(server.app).get(path).auth(token, { type: 'bearer' }).expect(200, [])
+    })
+
+    test('when the user has tagged expenses, it should return unique years sorted descending', async () => {
+      await TransactionModel.deleteMany({ user })
+      const category = await insertCategory({ user, type: TRANSACTION.Expense })
+      const account = await insertAccount({ user })
+
+      await TransactionModel.create({
+        date: new Date(2023, 5, 15).getTime(),
+        category: category._id,
+        amount: 100,
+        type: TRANSACTION.Expense,
+        account: account._id,
+        tags: ['viaje'],
+        user
+      })
+
+      await TransactionModel.create({
+        date: new Date(2025, 5, 15).getTime(),
+        category: category._id,
+        amount: 200,
+        type: TRANSACTION.Expense,
+        account: account._id,
+        tags: ['viaje'],
+        user
+      })
+
+      const response = await supertest(server.app).get(path).auth(token, { type: 'bearer' })
+      expect(response.statusCode).toBe(200)
+      expect(response.body).toEqual([2025, 2023])
+    })
+
+    test('it should not include years from untagged transactions', async () => {
+      await TransactionModel.deleteMany({ user })
+      const category = await insertCategory({ user, type: TRANSACTION.Expense })
+      const account = await insertAccount({ user })
+
+      await TransactionModel.create({
+        date: new Date(2024, 5, 15).getTime(),
+        category: category._id,
+        amount: 100,
+        type: TRANSACTION.Expense,
+        account: account._id,
+        tags: [],
+        user
+      })
+
+      const response = await supertest(server.app).get(path).auth(token, { type: 'bearer' })
+      expect(response.statusCode).toBe(200)
+      expect(response.body).toHaveLength(0)
+    })
+  })
+
+  describe('GET /api/stats/tags/:tagName/:year — invalid year param', () => {
+    let token: string
+    const user = generateUsername()
+
+    beforeAll(async () => {
+      token = await requestLogin(server.app, { username: user })
+    })
+
+    afterAll(() => testDatabase.cleanAll())
+
+    test('when year param is not a number, it should return 422', async () => {
+      await supertest(server.app)
+        .get('/api/stats/tags/juan/notanumber')
+        .auth(token, { type: 'bearer' })
+        .expect(422)
+    })
+
+    test('when year param is below 1900, it should return 422', async () => {
+      await supertest(server.app)
+        .get('/api/stats/tags/juan/1899')
+        .auth(token, { type: 'bearer' })
+        .expect(422)
     })
   })
 })

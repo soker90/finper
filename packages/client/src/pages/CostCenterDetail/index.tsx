@@ -5,6 +5,7 @@ import { ArrowLeftOutlined } from '@ant-design/icons'
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts'
 import { useTagHistoric, useTagDetail } from 'hooks'
 import { format } from 'utils'
+import Loader from 'components/Loader'
 import CategoryBreakdownTable from './components/CategoryBreakdownTable'
 import TagTransactionList from './components/TagTransactionList'
 
@@ -48,11 +49,7 @@ const CostCenterDetail = () => {
         )}
       </Stack>
 
-      {isLoading && (
-        <Box py={4} textAlign='center'>
-          <Typography color='text.secondary'>Cargando...</Typography>
-        </Box>
-      )}
+      {isLoading && <Loader />}
 
       {!isLoading && !selectedYear && tagHistoric && (
         <>
@@ -79,8 +76,8 @@ const CostCenterDetail = () => {
                     <YAxis />
                     <Tooltip formatter={tooltipFormatter} />
                     <Bar dataKey='totalAmount' radius={[4, 4, 0, 0]}>
-                      {tagHistoric.years.map((_, index) => (
-                        <Cell key={index} fill={BAR_COLORS[index % BAR_COLORS.length]} />
+                      {tagHistoric.years.map((yearData, index) => (
+                        <Cell key={yearData.year} fill={BAR_COLORS[index % BAR_COLORS.length]} />
                       ))}
                     </Bar>
                   </BarChart>

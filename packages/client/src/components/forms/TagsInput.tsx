@@ -1,12 +1,6 @@
 import { Autocomplete, Chip, Grid, InputLabel, Stack, TextField } from '@mui/material'
 import { Control, Controller } from 'react-hook-form'
-
-const sanitizeTag = (tag: string): string =>
-  tag.trim().toLowerCase()
-    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-    .replace(/[^a-z0-9-]/g, '-')
-    .replace(/-+/g, '-')
-    .replace(/^-|-$/g, '')
+import { sanitizeTag } from 'utils/sanitizeTag'
 
 interface TagsInputProps {
   name: string

@@ -31,7 +31,7 @@ const TagTransactionList = ({ transactions }: { transactions: Transaction[] }) =
                 ))}
               </Stack>
               <Typography variant='h5' color={AMOUNT_COLORS[transaction.type] || 'text.primary'}>
-                -{format.euro(transaction.amount)}
+                {transaction.type === 'expense' ? '-' : '+'}{format.euro(transaction.amount)}
               </Typography>
             </Stack>
             {transaction.note && (
