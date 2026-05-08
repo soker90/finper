@@ -1,48 +1,65 @@
-import { Box, Chip, Paper, Stack, Typography } from '@mui/material'
+import { Chip, Table, TableBody, TableCell, TableHead, TableRow, Typography } from '@mui/material'
+import { MainCard } from 'components'
 import { Transaction } from 'types'
 import { format } from 'utils'
 
 const AMOUNT_COLORS: Record<string, string> = {
   expense: 'error.main',
   income: 'success.main',
-  not_computable: 'secondary.main'
+  not_computable: 'text.secondary'
 }
 
 const TagTransactionList = ({ transactions }: { transactions: Transaction[] }) => {
   return (
-    <Box>
-      <Typography variant='h5' mb={2}>Movimientos ({transactions.length})</Typography>
-      <Stack spacing={1}>
-        {transactions.map((transaction) => (
-          <Paper key={transaction._id} sx={{ p: 2 }}>
-            <Stack direction='row' justifyContent='space-between' alignItems='center'>
-              <Stack direction='row' spacing={2} alignItems='center'>
+    <MainCard title={`Movimientos (${transactions.length})`} divider>
+      <Table size='small'>
+        <TableHead>
+          <TableRow>
+            <TableCell>Fecha</TableCell>
+            <TableCell>Categoría</TableCell>
+            <TableCell>Comercio</TableCell>
+            <TableCell>Etiquetas</TableCell>
+            <TableCell align='right'>Importe</TableCell>
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          {transactions.map((transaction) => (
+            <TableRow key={transaction._id} sx={{ '&:last-child td': { border: 0 } }}>
+              <TableCell sx={{ whiteSpace: 'nowrap', color: 'text.secondary' }}>
+                <Typography variant='body2'>{format.date(transaction.date)}</Typography>
+              </TableCell>
+              <TableCell>
+                <Typography variant='body2'>{transaction.category?.name}</Typography>
+              </TableCell>
+              <TableCell>
                 <Typography variant='body2' color='text.secondary'>
-                  {format.date(transaction.date)}
+                  {transaction.store?.name ?? '—'}
                 </Typography>
-                <Typography variant='body1'>{transaction.category?.name}</Typography>
-                {transaction.store && (
-                  <Typography variant='body2' color='text.secondary'>
-                    ({transaction.store.name})
+              </TableCell>
+              <TableCell>
+                {transaction.tags?.map((tag) => (
+                  <Chip key={tag} label={tag} size='small' variant='outlined' sx={{ mr: 0.5 }} />
+                ))}
+              </TableCell>
+              <TableCell align='right' sx={{ whiteSpace: 'nowrap' }}>
+                <Typography
+                  variant='body2'
+                  fontWeight={600}
+                  color={AMOUNT_COLORS[transaction.type] ?? 'text.primary'}
+                >
+                  {transaction.type === 'expense' ? '-' : '+'}{format.euro(transaction.amount)}
+                </Typography>
+                {transaction.note && (
+                  <Typography variant='caption' color='text.secondary' display='block'>
+                    {transaction.note}
                   </Typography>
                 )}
-                {transaction.tags?.map((tag) => (
-                  <Chip key={tag} label={tag} size='small' variant='outlined' />
-                ))}
-              </Stack>
-              <Typography variant='h5' color={AMOUNT_COLORS[transaction.type] || 'text.primary'}>
-                {transaction.type === 'expense' ? '-' : '+'}{format.euro(transaction.amount)}
-              </Typography>
-            </Stack>
-            {transaction.note && (
-              <Typography variant='body2' color='text.secondary' mt={0.5}>
-                {transaction.note}
-              </Typography>
-            )}
-          </Paper>
-        ))}
-      </Stack>
-    </Box>
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </MainCard>
   )
 }
 

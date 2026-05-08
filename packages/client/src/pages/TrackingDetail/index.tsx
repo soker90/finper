@@ -1,198 +1,71 @@
-import { useState } from 'react'
-import { useParams, useNavigate } from 'react-router'
-import { Box, Button, Card, CardContent, Chip, Collapse, Grid, Stack, Typography } from '@mui/material'
-import { ArrowLeftOutlined, DownOutlined, UpOutlined } from '@ant-design/icons'
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts'
+import { useParams } from 'react-router'
+import { Stack } from '@mui/material'
 import { useTagHistoric, useTagDetail } from 'hooks'
-import { format } from 'utils'
 import Loader from 'components/Loader'
+import TrackingDetailHeader from './components/TrackingDetailHeader'
+import HistoricBarChart from './components/HistoricBarChart'
+import YearGrid from './components/YearGrid'
+import HistoricCollapsible from './components/HistoricCollapsible'
 import CategoryBreakdownTable from './components/CategoryBreakdownTable'
 import TagTransactionList from './components/TagTransactionList'
 
-const BAR_COLORS = ['#1976d2', '#2196f3', '#42a5f5', '#64b5f6', '#90caf9']
-
-const tooltipFormatter = (value: unknown) => format.euro(Number(value))
-
 const TrackingDetail = () => {
   const { tagName, year: yearParam } = useParams<{ tagName: string; year?: string }>()
-  const navigate = useNavigate()
 
-  // Convert route param year to number if present and valid
   const paramYearNumber = yearParam ? Number(yearParam) : null
   const routeYear = paramYearNumber && !Number.isNaN(paramYearNumber) ? paramYearNumber : null
-
-  // local state to control showing historic below when on a year route
-  const [showHistoric, setShowHistoric] = useState(false)
+  const isYearRoute = !!routeYear
 
   const { tagHistoric, isLoading: historicLoading } = useTagHistoric(tagName || '')
   const { tagDetail, isLoading: detailLoading } = useTagDetail(tagName || '', routeYear)
 
-  const isYearRoute = !!routeYear
   const isLoading = isYearRoute ? detailLoading : historicLoading
+
+  // Totals resolved once data is available (0 while loading — header hides them when loading)
+  const historicTotal = tagHistoric?.totalAmount ?? 0
+  const historicCount = tagHistoric?.years.reduce((sum, year) => sum + year.transactionCount, 0)
+  const detailTotal = tagDetail?.totalAmount ?? 0
+  const detailCount = tagDetail?.transactionCount
 
   return (
     <Stack spacing={3}>
-      <Stack direction='row' spacing={2} alignItems='center'>
-        <Typography variant='h4'>{tagName}</Typography>
-      </Stack>
 
-      <Stack direction='row' spacing={2} alignItems='center'>
-        <Button startIcon={<ArrowLeftOutlined />} onClick={() => navigate('/seguimientos')} size='small'>
-          Volver
-        </Button>
-      </Stack>
+      {/* Cabecera siempre visible: título + botón volver (incluso durante loading) */}
+      <TrackingDetailHeader
+        tagName={tagName || ''}
+        year={routeYear ?? undefined}
+        totalAmount={isYearRoute ? detailTotal : historicTotal}
+        transactionCount={isYearRoute ? detailCount : historicCount}
+        isHistoric={!isYearRoute}
+        loading={isLoading}
+      />
 
       {isLoading && <Loader />}
 
-      {!isLoading && !isYearRoute && tagHistoric && (
+      {/* Vista histórica (sin año en la ruta) */}
+      {!isLoading && !isYearRoute && tagHistoric && tagHistoric.years.length > 0 && (
         <>
-          <Stack direction='row' spacing={2} alignItems='baseline'>
-            <Typography variant='h5' color='text.secondary'>
-              Total acumulado: <Typography component='span' variant='h4' color='error.main'>{format.euro(tagHistoric.totalAmount)}</Typography>
-            </Typography>
-          </Stack>
-
-          {tagHistoric.years.length > 0 && (
-            <>
-              <Box height={300}>
-                <ResponsiveContainer width='100%' height='100%'>
-                  <BarChart
-                    data={tagHistoric.years}
-                    onClick={(data) => {
-                      if (data?.activeLabel) {
-                        // navigate to year route
-                        navigate(`/seguimientos/${tagName}/${data.activeLabel}`)
-                      }
-                    }}
-                    style={{ cursor: 'pointer' }}
-                  >
-                    <XAxis dataKey='year' />
-                    <YAxis />
-                    <Tooltip formatter={tooltipFormatter} />
-                    <Bar dataKey='totalAmount' radius={[4, 4, 0, 0]}>
-                      {tagHistoric.years.map((yearData, index) => (
-                        <Cell key={yearData.year} fill={BAR_COLORS[index % BAR_COLORS.length]} />
-                      ))}
-                    </Bar>
-                  </BarChart>
-                </ResponsiveContainer>
-              </Box>
-
-              <Grid container spacing={2}>
-                {tagHistoric.years.map((yearData) => (
-                  <Grid key={yearData.year} size={{ xs: 6, sm: 3 }}>
-                    <Box
-                      p={2}
-                      border={1}
-                      borderColor='divider'
-                      borderRadius={1}
-                      sx={{ cursor: 'pointer', '&:hover': { bgcolor: 'action.hover' } }}
-                      onClick={() => navigate(`/seguimientos/${tagName}/${yearData.year}`)}
-                    >
-                      <Typography variant='h6'>{yearData.year}</Typography>
-                      <Typography variant='h5' color='error.main'>{format.euro(yearData.totalAmount)}</Typography>
-                      <Chip label={`${yearData.transactionCount} mov.`} size='small' />
-                    </Box>
-                  </Grid>
-                ))}
-              </Grid>
-            </>
-          )}
+          <HistoricBarChart tagName={tagName || ''} years={tagHistoric.years} height={280} />
+          <YearGrid tagName={tagName || ''} years={tagHistoric.years} />
         </>
       )}
 
-      {/* When on a year route, show the detail for that year */}
+      {/* Vista de año concreto */}
       {!isLoading && isYearRoute && tagDetail && (
         <>
-          <Stack direction='row' spacing={2} alignItems='baseline'>
-            <Chip label={routeYear} color='primary' />
-            <Typography variant='h5' color='text.secondary'>
-              Total: <Typography component='span' variant='h4' color='error.main'>{format.euro(tagDetail.totalAmount)}</Typography>
-            </Typography>
-            <Chip label={`${tagDetail.transactionCount} movimientos`} />
-          </Stack>
-
-          <CategoryBreakdownTable categories={tagDetail.byCategory} totalAmount={tagDetail.totalAmount} />
+          <CategoryBreakdownTable
+            categories={tagDetail.byCategory}
+            totalAmount={tagDetail.totalAmount}
+          />
 
           <TagTransactionList transactions={tagDetail.transactions} />
 
-          {/* show historic below if user asked for it */}
-          {isYearRoute && tagHistoric && tagHistoric.years.length > 1 && (
-            <Card>
-              <Box
-                onClick={() => setShowHistoric(prev => !prev)}
-                sx={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  p: 2,
-                  cursor: 'pointer',
-                  '&:hover': { bgcolor: 'action.hover' }
-                }}
-              >
-                <Stack direction='row' spacing={2} alignItems='center' flex={1}>
-                  <Typography variant='h6'>Histórico completo</Typography>
-                  <Typography variant='body2' color='text.secondary'>
-                    {format.euro(tagHistoric.totalAmount)}
-                  </Typography>
-                </Stack>
-                {showHistoric ? <UpOutlined /> : <DownOutlined />}
-              </Box>
-
-              <Collapse in={showHistoric} timeout='auto' unmountOnExit>
-                <CardContent sx={{ pt: 0, pb: 2 }}>
-                  <Stack spacing={2}>
-                    {/* Gráfica compacta */}
-                    <Box height={160}>
-                      <ResponsiveContainer width='100%' height='100%'>
-                        <BarChart
-                          data={tagHistoric.years}
-                          onClick={(data) => {
-                            if (data?.activeLabel) {
-                              navigate(`/seguimientos/${tagName}/${data.activeLabel}`)
-                            }
-                          }}
-                          style={{ cursor: 'pointer' }}
-                          margin={{ top: 8, right: 8, left: 0, bottom: 0 }}
-                        >
-                          <XAxis dataKey='year' />
-                          <YAxis width={40} />
-                          <Tooltip formatter={tooltipFormatter} />
-                          <Bar dataKey='totalAmount' radius={[4, 4, 0, 0]}>
-                            {tagHistoric.years.map((yearData, index) => (
-                              <Cell key={yearData.year} fill={BAR_COLORS[index % BAR_COLORS.length]} />
-                            ))}
-                          </Bar>
-                        </BarChart>
-                      </ResponsiveContainer>
-                    </Box>
-
-                    {/* Grid compacta de cards de años */}
-                    <Grid container spacing={1}>
-                      {tagHistoric.years.map((yearData) => (
-                        <Grid key={yearData.year} size={{ xs: 6, sm: 4, md: 3 }}>
-                          <Box
-                            p={1}
-                            border={1}
-                            borderColor='divider'
-                            borderRadius={1}
-                            sx={{ cursor: 'pointer', '&:hover': { bgcolor: 'action.hover' } }}
-                            onClick={() => navigate(`/seguimientos/${tagName}/${yearData.year}`)}
-                          >
-                            <Typography variant='body2' fontWeight={600}>{yearData.year}</Typography>
-                            <Typography variant='body2' color='error.main'>{format.euro(yearData.totalAmount)}</Typography>
-                            <Chip label={`${yearData.transactionCount} mov.`} size='small' sx={{ mt: 0.5 }} />
-                          </Box>
-                        </Grid>
-                      ))}
-                    </Grid>
-                  </Stack>
-                </CardContent>
-              </Collapse>
-            </Card>
+          {tagHistoric && tagHistoric.years.length > 1 && (
+            <HistoricCollapsible tagName={tagName || ''} tagHistoric={tagHistoric} />
           )}
         </>
       )}
+
     </Stack>
   )
 }
