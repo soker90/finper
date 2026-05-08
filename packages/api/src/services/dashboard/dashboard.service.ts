@@ -1,7 +1,7 @@
 import { AccountModel, DebtModel, LoanModel, PensionModel, TransactionModel, TRANSACTION, type IPension } from '@soker90/finper-models'
 import { roundNumber } from '../../utils/roundNumber'
 import { generateInsights } from '../utils/insights'
-import { computeHealthScore, computeBudgetAdherence } from './health-score'
+import { computeHealthScore, computeBudgetAdherence, computeHistoricalSavingsRate } from './health-score'
 import { computeFilteredAvgMonthlyExpense, type MonthTransactionsRow } from './cash-runway'
 import {
   aggregateCurrentMonthByCategory,
@@ -359,6 +359,15 @@ export default class DashboardService implements IDashboardService {
       ? Math.round(((monthlyIncome - monthlyExpenses) / monthlyIncome) * 10000) / 100
       : 0
 
+    // Historical savings rate: avg of last 3 completed months to avoid
+    // distortion caused by the in-progress current month (partial expenses).
+    const historicalSavingsRate = computeHistoricalSavingsRate(
+      last6MonthsAgg,
+      currentMonth,
+      currentYear,
+      savingsRate
+    )
+
     // Expense velocity
     const daysInCurrentMonth = new Date(currentYear, currentMonth + 1, 0).getDate()
     const daysInPreviousMonth = new Date(previousYear, previousMonth + 1, 0).getDate()
@@ -436,7 +445,7 @@ export default class DashboardService implements IDashboardService {
 
     // Health Score
     const healthScore = computeHealthScore(
-      savingsRate,
+      historicalSavingsRate,
       totalDebts + totalLoansPending,
       totalBalance,
       budgetAdherencePct,

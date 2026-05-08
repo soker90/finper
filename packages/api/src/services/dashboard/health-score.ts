@@ -1,13 +1,60 @@
-import type { HealthScore } from './dashboard.types'
+import type { HealthScore, MonthlyData } from './dashboard.types'
+
+/**
+ * Computes the savings score using a progressive scale:
+ * - 0–5%:   0–30 pts  (danger zone)
+ * - 5–15%:  30–70 pts (healthy zone)
+ * - 15–30%: 70–100 pts (excellent zone)
+ * - >30%:   100 pts
+ * - <=0%:   0 pts (no savings or negative rate)
+ */
+export const computeSavingsScore = (rate: number): number => {
+  if (rate <= 0) return 0
+  if (rate < 5) return Math.round((rate / 5) * 30)
+  if (rate < 15) return Math.round(30 + ((rate - 5) / 10) * 40)
+  if (rate < 30) return Math.round(70 + ((rate - 15) / 15) * 30)
+  return 100
+}
+
+/**
+ * Computes the historical savings rate as the arithmetic mean of the savings rate
+ * of the last completed months (up to 3). Months with no income are excluded.
+ * Falls back to the current month's savings rate when no historical data is available.
+ */
+export const computeHistoricalSavingsRate = (
+  last6Months: MonthlyData[],
+  currentMonthIndex: number,  // 0-indexed month of "now" (0 = Jan, 11 = Dec)
+  currentYear: number,
+  fallback: number
+): number => {
+  const completedMonths = last6Months.filter(monthData => {
+    // Exclude the current in-progress month
+    const isCurrentMonth = monthData.month === currentMonthIndex + 1 && monthData.year === currentYear
+    return !isCurrentMonth && monthData.income > 0
+  })
+
+  const recentMonths = completedMonths.slice(-3)
+  if (recentMonths.length === 0) return fallback
+
+  const totalRate = recentMonths.reduce((sum, monthData) => {
+    const monthRate = ((monthData.income - monthData.expenses) / monthData.income) * 100
+    return sum + monthRate
+  }, 0)
+
+  return Math.round((totalRate / recentMonths.length) * 100) / 100
+}
 
 /**
  * Computes the financial health score from 5 weighted sub-scores.
  *
  * Weights: savingsRate 25%, debtRatio 20%, budgetAdherence 20%,
  *          cashRunway 20%, pensionReturn 15%.
+ *
+ * savingsRate should be the historical rate (avg of last 3 completed months)
+ * to avoid distortion from the in-progress current month.
  */
 export const computeHealthScore = (
-  savingsRate: number,        // e.g. 15 → 15%
+  savingsRate: number,        // historical avg savings rate (last 3 completed months)
   totalDebts: number,         // absolute monetary value
   totalBalance: number,       // absolute monetary value
   budgetAdherencePct: number, // 0–100
@@ -17,7 +64,7 @@ export const computeHealthScore = (
   const clamp = (v: number, min: number, max: number): number =>
     Math.max(min, Math.min(max, v))
 
-  const savingsScore = Math.round(clamp(savingsRate / 20, 0, 1) * 100)
+  const savingsScore = computeSavingsScore(savingsRate)
   const debtScore = Math.round(Math.max(0, 1 - (totalBalance > 0 ? totalDebts / totalBalance : 1)) * 100)
   const budgetScore = Math.round(Math.min(budgetAdherencePct, 100))
   const runwayScore = Math.round(Math.min(cashRunwayMonths / 6, 1) * 100)
