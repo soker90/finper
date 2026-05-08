@@ -82,8 +82,19 @@ describe('TrackingDetail', () => {
       http.get('*/stats/tags/viaje-japon', () => HttpResponse.json(TAG_HISTORIC)),
       http.get('*/stats/tags/viaje-japon/2025', () => HttpResponse.json(TAG_DETAIL))
     )
-    const { findByText } = renderWithTag('viaje-japon')
-    // The historic view loads first; year cards are visible
+    const { findByText } = renderWithTag('viaje-japon/2025')
+    // Year detail should show the year as chip and total (formatted as "3400 €")
     expect(await findByText('2025')).toBeDefined()
+    expect(await findByText(/3400/)).toBeDefined()
+  })
+
+  it('shows collapsible historic card when on year detail view with multiple years', async () => {
+    server.use(
+      http.get('*/stats/tags/viaje-japon', () => HttpResponse.json(TAG_HISTORIC)),
+      http.get('*/stats/tags/viaje-japon/2025', () => HttpResponse.json(TAG_DETAIL))
+    )
+    const { findByText } = renderWithTag('viaje-japon/2025')
+    // Wait for the year detail to load, then check for "Histórico completo" card header
+    expect(await findByText('Histórico completo')).toBeDefined()
   })
 })
