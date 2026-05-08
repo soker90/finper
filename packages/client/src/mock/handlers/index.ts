@@ -13,6 +13,7 @@ import { suppliesHandlers } from './supplies'
 
 import { stocksHandlers } from './stocks'
 import { goalsHandlers } from './goals'
+import { wealthHandlers } from './wealth'
 
 export const handlers = [
   ...loginHandlers,
@@ -28,5 +29,6 @@ export const handlers = [
   ...subscriptionsHandlers,
   ...suppliesHandlers,
   ...stocksHandlers,
-  ...goalsHandlers
+  ...goalsHandlers,
+  ...wealthHandlers
 ]

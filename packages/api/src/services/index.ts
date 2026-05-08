@@ -19,6 +19,7 @@ import SupplyReadingService from './supply-reading.service'
 import TariffsService from './tariffs.service'
 import StockService from './stock.service'
 import GoalService from './goal.service'
+import WealthService from './wealth.service'
 
 export const accountService = new AccountService()
 export const authService = new AuthService(config.jwt)
@@ -40,3 +41,4 @@ export const supplyReadingService = new SupplyReadingService()
 export const tariffsService = new TariffsService()
 export const stockService = new StockService()
 export const goalService = new GoalService()
+export const wealthService = new WealthService()

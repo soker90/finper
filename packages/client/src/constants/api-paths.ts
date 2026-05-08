@@ -20,3 +20,4 @@ export const TARIFFS_COMPARISON = (id: string) => `supplies/${id}/tariffs-compar
 export const STOCKS = 'stocks'
 export const STOCKS_SUMMARY = 'stocks/summary'
 export const GOALS = 'goals'
+export const WEALTH_FIRE_PROJECTION = (params: string) => `wealth/fire-projection?${params}`

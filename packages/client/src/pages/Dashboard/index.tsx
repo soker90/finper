@@ -15,6 +15,7 @@ import HealthScoreSection from './components/health-score'
 import LoansSection from './components/LoansSection'
 import StocksWidget from './components/StocksWidget'
 import GoalsWidget from './components/GoalsWidget'
+import FireProjection from './components/FireProjection'
 
 const now = new Date()
 const currentYear = String(now.getFullYear())
@@ -72,6 +73,8 @@ const Dashboard = () => {
       <LoansSection />
 
       <GoalsWidget />
+
+      <FireProjection chartHeight={chartHeight} />
 
       <StocksWidget />
     </Grid>
