@@ -1,6 +1,6 @@
 import { Autocomplete, Chip, Grid, InputLabel, Stack, TextField } from '@mui/material'
 import { Control, Controller } from 'react-hook-form'
-import { sanitizeTag } from 'utils/sanitizeTag'
+import { sanitizeTag } from 'utils'
 
 interface TagsInputProps {
   name: string

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { sanitizeTag } from './sanitizeTag'
+import { sanitizeTag } from 'utils'
 
 describe('sanitizeTag', () => {
   it('converts to lowercase', () => {
