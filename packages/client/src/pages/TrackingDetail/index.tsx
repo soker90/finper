@@ -14,14 +14,21 @@ const BAR_COLORS = ['#1976d2', '#2196f3', '#42a5f5', '#64b5f6', '#90caf9']
 const tooltipFormatter = (value: unknown) => format.euro(Number(value))
 
 const TrackingDetail = () => {
-  const { tagName } = useParams<{ tagName: string }>()
+  const { tagName, year: yearParam } = useParams<{ tagName: string; year?: string }>()
   const navigate = useNavigate()
-  const [selectedYear, setSelectedYear] = useState<number | null>(null)
+
+  // Convert route param year to number if present and valid
+  const paramYearNumber = yearParam ? Number(yearParam) : null
+  const routeYear = paramYearNumber && !Number.isNaN(paramYearNumber) ? paramYearNumber : null
+
+  // local state to control showing historic below when on a year route
+  const [showHistoric, setShowHistoric] = useState(false)
 
   const { tagHistoric, isLoading: historicLoading } = useTagHistoric(tagName || '')
-  const { tagDetail, isLoading: detailLoading } = useTagDetail(tagName || '', selectedYear)
+  const { tagDetail, isLoading: detailLoading } = useTagDetail(tagName || '', routeYear)
 
-  const isLoading = selectedYear ? detailLoading : historicLoading
+  const isYearRoute = !!routeYear
+  const isLoading = isYearRoute ? detailLoading : historicLoading
 
   return (
     <Stack spacing={3}>
@@ -33,20 +40,17 @@ const TrackingDetail = () => {
         <Button startIcon={<ArrowLeftOutlined />} onClick={() => navigate('/seguimientos')} size='small'>
           Volver
         </Button>
-        {selectedYear && (
-          <Button
-            onClick={() => setSelectedYear(null)}
-            variant='text'
-            size='small'
-          >
-            Ver histórico completo
+
+        {isYearRoute && tagHistoric && tagHistoric.years.length > 1 && (
+          <Button onClick={() => setShowHistoric(true)} variant='text' size='small'>
+            Histórico completo
           </Button>
         )}
       </Stack>
 
       {isLoading && <Loader />}
 
-      {!isLoading && !selectedYear && tagHistoric && (
+      {!isLoading && !isYearRoute && tagHistoric && (
         <>
           <Stack direction='row' spacing={2} alignItems='baseline'>
             <Typography variant='h5' color='text.secondary'>
@@ -62,7 +66,8 @@ const TrackingDetail = () => {
                     data={tagHistoric.years}
                     onClick={(data) => {
                       if (data?.activeLabel) {
-                        setSelectedYear(Number(data.activeLabel))
+                        // navigate to year route
+                        navigate(`/seguimientos/${tagName}/${data.activeLabel}`)
                       }
                     }}
                     style={{ cursor: 'pointer' }}
@@ -88,7 +93,7 @@ const TrackingDetail = () => {
                       borderColor='divider'
                       borderRadius={1}
                       sx={{ cursor: 'pointer', '&:hover': { bgcolor: 'action.hover' } }}
-                      onClick={() => setSelectedYear(yearData.year)}
+                      onClick={() => navigate(`/seguimientos/${tagName}/${yearData.year}`)}
                     >
                       <Typography variant='h6'>{yearData.year}</Typography>
                       <Typography variant='h5' color='error.main'>{format.euro(yearData.totalAmount)}</Typography>
@@ -102,10 +107,11 @@ const TrackingDetail = () => {
         </>
       )}
 
-      {!isLoading && selectedYear && tagDetail && (
+      {/* When on a year route, show the detail for that year */}
+      {!isLoading && isYearRoute && tagDetail && (
         <>
           <Stack direction='row' spacing={2} alignItems='baseline'>
-            <Chip label={selectedYear} color='primary' />
+            <Chip label={routeYear} color='primary' />
             <Typography variant='h5' color='text.secondary'>
               Total: <Typography component='span' variant='h4' color='error.main'>{format.euro(tagDetail.totalAmount)}</Typography>
             </Typography>
@@ -115,6 +121,29 @@ const TrackingDetail = () => {
           <CategoryBreakdownTable categories={tagDetail.byCategory} totalAmount={tagDetail.totalAmount} />
 
           <TagTransactionList transactions={tagDetail.transactions} />
+
+          {/* show historic below if user asked for it */}
+          {showHistoric && tagHistoric && (
+            <>
+              <Stack direction='row' spacing={2} alignItems='baseline'>
+                <Typography variant='h5' color='text.secondary'>
+                  Total acumulado: <Typography component='span' variant='h4' color='error.main'>{format.euro(tagHistoric.totalAmount)}</Typography>
+                </Typography>
+              </Stack>
+
+              <Grid container spacing={2}>
+                {tagHistoric.years.map((yearData) => (
+                  <Grid key={yearData.year} size={{ xs: 6, sm: 3 }}>
+                    <Box p={2} border={1} borderColor='divider' borderRadius={1}>
+                      <Typography variant='h6'>{yearData.year}</Typography>
+                      <Typography variant='h5' color='error.main'>{format.euro(yearData.totalAmount)}</Typography>
+                      <Chip label={`${yearData.transactionCount} mov.`} size='small' />
+                    </Box>
+                  </Grid>
+                ))}
+              </Grid>
+            </>
+          )}
         </>
       )}
     </Stack>

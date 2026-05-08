@@ -58,7 +58,7 @@ const Trackings = () => {
         <Grid container spacing={3}>
           {tagStats.map((tagStat) => (
             <Grid key={tagStat.tag} size={{ xs: 12, sm: 6, md: 4 }}>
-              <TrackingCard tagStat={tagStat} />
+              <TrackingCard tagStat={tagStat} year={year} />
             </Grid>
           ))}
         </Grid>

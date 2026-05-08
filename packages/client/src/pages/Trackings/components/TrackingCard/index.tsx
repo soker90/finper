@@ -8,14 +8,19 @@ const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8', '#82CA9D'
 
 const tooltipFormatter = (value: unknown) => format.euro(Number(value))
 
-const TrackingCard = ({ tagStat }: { tagStat: TagSummary }) => {
+const TrackingCard = ({ tagStat, year }: { tagStat: TagSummary; year?: number | null }) => {
   const navigate = useNavigate()
 
+  const handleClick = () => {
+    if (year) {
+      navigate(`/seguimientos/${tagStat.tag}/${year}`)
+    } else {
+      navigate(`/seguimientos/${tagStat.tag}`)
+    }
+  }
+
   return (
-    <Card
-      sx={{ cursor: 'pointer', '&:hover': { boxShadow: 6 } }}
-      onClick={() => navigate(`/seguimientos/${tagStat.tag}`)}
-    >
+    <Card sx={{ cursor: 'pointer', '&:hover': { boxShadow: 6 } }} onClick={handleClick}>
       <CardContent>
         <Stack spacing={1}>
           <Stack direction='row' justifyContent='space-between' alignItems='center'>

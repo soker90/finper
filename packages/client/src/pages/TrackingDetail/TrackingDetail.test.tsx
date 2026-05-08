@@ -2,13 +2,9 @@
 import { describe, expect, it } from 'vitest'
 import { http, HttpResponse } from 'msw'
 import { SWRConfig } from 'swr'
-import { MemoryRouter, Route, Routes } from 'react-router'
-import { render } from '@testing-library/react'
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
-import ThemeCustomization from 'themes/index'
-import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider'
-import { SwrProvider } from 'contexts/index'
-import { AuthProvider } from 'contexts/AuthContext'
+import { Route, Routes } from 'react-router'
+import { render } from '../../test/testUtils'
+// test helpers are provided by the repo wrapper in testUtils — this file uses that wrapper via render
 import { server } from '../../mock/server'
 import TrackingDetail from './index'
 import 'dayjs/locale/es'
@@ -34,24 +30,18 @@ const TAG_DETAIL = {
   transactions: []
 }
 
-const renderWithTag = (tagName: string) =>
-  render(
+const renderWithTag = (tagName: string, initialEntry?: string) => {
+  // set the browser location so the BrowserRouter wrapper in testUtils uses it
+  window.history.pushState({}, 'Test page', initialEntry ?? `/seguimientos/${tagName}`)
+  return render(
     <SWRConfig value={{ provider: () => new Map(), dedupingInterval: 0 }}>
-      <AuthProvider>
-        <MemoryRouter initialEntries={[`/seguimientos/${tagName}`]}>
-          <ThemeCustomization>
-            <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale='es'>
-              <SwrProvider>
-                <Routes>
-                  <Route path='/seguimientos/:tagName' element={<TrackingDetail />} />
-                </Routes>
-              </SwrProvider>
-            </LocalizationProvider>
-          </ThemeCustomization>
-        </MemoryRouter>
-      </AuthProvider>
+      <Routes>
+        <Route path='/seguimientos/:tagName/:year' element={<TrackingDetail />} />
+        <Route path='/seguimientos/:tagName' element={<TrackingDetail />} />
+      </Routes>
     </SWRConfig>
   )
+}
 
 describe('TrackingDetail', () => {
   it('renders the tag name as page title', () => {

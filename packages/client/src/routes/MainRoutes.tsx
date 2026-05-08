@@ -109,6 +109,10 @@ const MainRoutes = {
       element: <Trackings />
     },
     {
+      path: 'seguimientos/:tagName/:year',
+      element: <TrackingDetail />
+    },
+    {
       path: 'seguimientos/:tagName',
       element: <TrackingDetail />
     }
