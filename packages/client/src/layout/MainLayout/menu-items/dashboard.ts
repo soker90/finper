@@ -11,7 +11,8 @@ import {
   SyncOutlined,
   HomeOutlined,
   StockOutlined,
-  TrophyOutlined
+  TrophyOutlined,
+  TagsOutlined
 } from '@ant-design/icons'
 import { BeachIcon } from 'components'
 
@@ -132,6 +133,14 @@ const dashboard = {
       type: 'item',
       url: '/metas',
       icon: TrophyOutlined,
+      breadcrumbs: true
+    },
+    {
+      id: 'cost-centers',
+      title: 'Proyectos',
+      type: 'item',
+      url: '/proyectos',
+      icon: TagsOutlined,
       breadcrumbs: true
     }
   ]

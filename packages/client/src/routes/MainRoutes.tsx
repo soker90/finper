@@ -20,6 +20,8 @@ const Supplies = lazy(() => import('../pages/Supplies'))
 const SupplyDetail = lazy(() => import('../pages/SupplyDetail'))
 const CompareTariffsPage = lazy(() => import('../pages/SupplyDetail/CompareTariffsPage'))
 const Goals = lazy(() => import('../pages/Goals'))
+const CostCenters = lazy(() => import('../pages/CostCenters'))
+const CostCenterDetail = lazy(() => import('../pages/CostCenterDetail'))
 
 const MainRoutes = {
   path: '/',
@@ -101,6 +103,14 @@ const MainRoutes = {
     {
       path: 'metas',
       element: <Goals />
+    },
+    {
+      path: 'proyectos',
+      element: <CostCenters />
+    },
+    {
+      path: 'proyectos/:tagName',
+      element: <CostCenterDetail />
     }
   ]
 }
