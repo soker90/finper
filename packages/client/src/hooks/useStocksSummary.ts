@@ -11,11 +11,11 @@ export const useStocksSummary = (): {
   isLoading: boolean
   error: any
 } => {
-  const { data, error } = useSWR<StocksSummary>(STOCKS_SUMMARY)
+  const { data, error, isLoading } = useSWR<StocksSummary>(STOCKS_SUMMARY)
 
   return {
     summary: data ?? null,
-    isLoading: data === undefined && !error,
+    isLoading,
     error
   }
 }

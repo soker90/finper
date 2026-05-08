@@ -13,6 +13,7 @@ export const validateTransactionCreateParams = async (params: Record<string, str
     account: Joi.string().required(),
     note: Joi.string(),
     store: Joi.string(),
+    tags: Joi.array().items(Joi.string().max(30)).max(10).optional(),
     user: Joi.string()
   })
 

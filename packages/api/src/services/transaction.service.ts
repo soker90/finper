@@ -1,7 +1,7 @@
 import { AccountModel, ITransaction, TransactionModel, TransactionDocument } from '@soker90/finper-models'
 import Boom from '@hapi/boom'
 import { getTransactionAmount } from './utils'
-import { roundNumber } from '../utils'
+import { roundNumber, sanitizeTags } from '../utils'
 import SubscriptionCandidateService from './subscription-candidate.service'
 import SubscriptionService from './subscription.service'
 import { ERROR_MESSAGE } from '../i18n'
@@ -41,7 +41,8 @@ const updateAcoountBalance = async (account: string, amount: number) => {
 
 export default class TransactionService implements ITransactionService {
   public async addTransaction (params: ITransaction): Promise<TransactionDocument> {
-    return TransactionModel.create(params).then(async transaction => {
+    const sanitized = { ...params, tags: sanitizeTags(params.tags) }
+    return TransactionModel.create(sanitized).then(async transaction => {
       const amount = getTransactionAmount(transaction)
       await updateAcoountBalance(transaction.account.toString(), amount)
 
@@ -58,7 +59,8 @@ export default class TransactionService implements ITransactionService {
     if (!oldTransaction) throw Boom.notFound(ERROR_MESSAGE.TRANSACTION.NOT_FOUND).output
     const oldAmount = getTransactionAmount(oldTransaction)
 
-    const transaction = await TransactionModel.findByIdAndUpdate<TransactionDocument>(id, value, { returnDocument: 'after' })
+    const sanitizedValue = { ...value, tags: sanitizeTags(value.tags) }
+    const transaction = await TransactionModel.findByIdAndUpdate<TransactionDocument>(id, sanitizedValue, { returnDocument: 'after' })
     /* istanbul ignore next — race condition only: document was found moments before */
     if (!transaction) throw Boom.notFound(ERROR_MESSAGE.TRANSACTION.NOT_FOUND).output
     const newAmount = getTransactionAmount(transaction)

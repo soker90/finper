@@ -3,7 +3,7 @@ import { Account } from 'types'
 import { ACCOUNTS } from 'constants/api-paths'
 
 export const useAccounts = (): { accounts: Account[], isLoading: boolean, error: any } => {
-  const { data, error } = useSWR(ACCOUNTS)
+  const { data, error, isLoading } = useSWR(ACCOUNTS)
 
-  return { accounts: data || [], isLoading: !data, error }
+  return { accounts: data || [], isLoading, error }
 }

@@ -78,7 +78,7 @@ export const insertStore = async (params: Record<string, string> = {}): Promise<
   })
 }
 
-export const insertTransaction = async (params: Record<string, string | number> = {}): Promise<any> => {
+export const insertTransaction = async (params: Record<string, string | number | string[]> = {}): Promise<any> => {
   const user = (params.user ?? faker.internet.userName().slice(MIN_LENGTH_USERNAME, MAX_USERNAME_LENGTH).toLowerCase()) as string
   return TransactionModel.create({
     date: params.date ?? faker.date.past().getTime(),
@@ -88,6 +88,7 @@ export const insertTransaction = async (params: Record<string, string | number> 
     account: params.account ?? (await insertAccount({ user })),
     note: params.note ?? faker.lorem.sentence(),
     store: params.store ?? (await insertStore({ user })),
+    tags: params.tags ?? [],
     user
   })
 }

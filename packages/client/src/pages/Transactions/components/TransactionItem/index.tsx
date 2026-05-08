@@ -1,5 +1,5 @@
 import { FC, useCallback, useState } from 'react'
-import { Collapse, Divider, Paper, Stack, Typography, useMediaQuery, useTheme } from '@mui/material'
+import { Chip, Collapse, Divider, Paper, Stack, Typography, useMediaQuery, useTheme } from '@mui/material'
 import { Transaction } from 'types'
 import { format } from 'utils'
 
@@ -39,9 +39,12 @@ const TransactionItem: FC<TransactionItemProps> = ({ transaction, forceExpand, c
               />
               <span>{format.dateShort(transaction.date)}</span>
             </div>
-            <Stack spacing={1} direction='row' pr={isDesktop ? '50%' : undefined}>
+            <Stack spacing={1} direction='row' alignItems='center' pr={isDesktop ? '50%' : undefined}>
               <Typography variant='body1'>{transaction.category?.name}</Typography>
               {transaction.store && <Typography variant='body1'>({transaction.store?.name})</Typography>}
+              {transaction.tags?.map((tag) => (
+                <Chip key={tag} label={tag} size='small' variant='outlined' />
+              ))}
             </Stack>
             <Typography
               variant='h4'

@@ -7,10 +7,11 @@ import { DateForm, InputForm, SelectForm, SelectGroupForm } from 'components'
 import { addTransaction, deleteTransaction, editTransaction } from 'services/apiService'
 import { TRANSACTIONS } from 'constants/api-paths'
 import { Transaction, TRANSACTION } from 'types/transaction'
-import { useAccounts, useGroupedCategories, useStores } from 'hooks'
+import { useAccounts, useGroupedCategories, useStores, useAvailableTags } from 'hooks'
 import './style.module.css'
 import { TYPES_TRANSACTIONS_ENTRIES } from 'constants/transactions'
 import AutocompleteForm from 'components/forms/AutocompleteForm'
+import TagsInput from 'components/forms/TagsInput'
 
 const TransactionEdit = ({
   transaction,
@@ -27,12 +28,14 @@ const TransactionEdit = ({
       date: transaction?.date || null,
       amount: transaction?.amount,
       type: transaction?.type || TRANSACTION.Expense,
-      store: transaction?.store?.name || ''
+      store: transaction?.store?.name || '',
+      tags: transaction?.tags || []
     }
   })
   const { categories } = useGroupedCategories()
   const { accounts } = useAccounts()
   const { stores } = useStores()
+  const { tags: availableTags } = useAvailableTags()
 
   const onSubmit = handleSubmit(async (params) => {
     const formattedParams = {
@@ -42,7 +45,8 @@ const TransactionEdit = ({
       amount: params.amount,
       type: params.type,
       ...(params.note && { note: params.note }),
-      ...(params.store && { store: params.store })
+      ...(params.store && { store: params.store }),
+      ...(params.tags?.length && { tags: params.tags })
     }
     const {
       error
@@ -121,11 +125,19 @@ const TransactionEdit = ({
           {...(transaction?.store && { defaultValue: transaction?.store })}
         />
 
+        <TagsInput
+          name='tags'
+          control={control}
+          availableTags={availableTags}
+          label='Etiquetas'
+          size={2}
+        />
+
         <InputForm
           id='note' label='Nota' placeholder='Nota'
           error={!!errors.note} {...register('note')}
           errorText='Introduce una nota válida'
-          size={12}
+          size={10}
         />
 
         {error && (

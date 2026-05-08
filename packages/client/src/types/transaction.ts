@@ -24,4 +24,5 @@ export interface Transaction {
   store?: {
     name: string,
   },
+  tags?: string[],
 }
