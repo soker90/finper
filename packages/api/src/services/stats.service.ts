@@ -73,7 +73,7 @@ export default class StatsService implements IStatsService {
             $push: {
               categoryId: { $toString: '$_id.category' },
               categoryName: { $ifNull: ['$categoryDoc.name', 'Sin categoría'] },
-              amount: { $round: ['$amount', 2] },
+              amount: '$amount',
               count: '$count'
             }
           }
@@ -83,7 +83,7 @@ export default class StatsService implements IStatsService {
         $project: {
           _id: 0,
           tag: '$_id',
-          totalAmount: { $round: ['$totalAmount', 2] },
+          totalAmount: 1,
           transactionCount: 1,
           byCategory: 1
         }
@@ -91,7 +91,14 @@ export default class StatsService implements IStatsService {
       { $sort: { totalAmount: -1 } }
     ])
 
-    return categoryBreakdown
+    return categoryBreakdown.map((item: any) => ({
+      ...item,
+      totalAmount: roundNumber(item.totalAmount),
+      byCategory: item.byCategory.map((cat: any) => ({
+        ...cat,
+        amount: roundNumber(cat.amount)
+      }))
+    }))
   }
 
   public async getTagHistoric (user: string, tagName: string): Promise<TagHistoric> {
@@ -157,13 +164,13 @@ export default class StatsService implements IStatsService {
             as: 'category'
           }
         },
-        { $unwind: '$category' },
+        { $unwind: { path: '$category', preserveNullAndEmptyArrays: true } },
         {
           $project: {
             _id: 0,
             categoryId: { $toString: '$_id' },
-            categoryName: '$category.name',
-            amount: { $round: ['$amount', 2] },
+            categoryName: { $ifNull: ['$category.name', 'Sin categoría'] },
+            amount: 1,
             count: 1
           }
         },
@@ -180,7 +187,11 @@ export default class StatsService implements IStatsService {
         .sort({ date: -1 })
     ])
 
-    const totalAmount = categoryResults.reduce((sum: number, c: any) => sum + c.amount, 0)
+    const byCategory = categoryResults.map((cat: any) => ({
+      ...cat,
+      amount: roundNumber(cat.amount)
+    }))
+    const totalAmount = byCategory.reduce((sum: number, cat: any) => sum + cat.amount, 0)
     const transactionCount = transactions.length
 
     return {
@@ -188,7 +199,7 @@ export default class StatsService implements IStatsService {
       year,
       totalAmount: roundNumber(totalAmount),
       transactionCount,
-      byCategory: categoryResults,
+      byCategory,
       transactions
     }
   }
