@@ -1,15 +1,16 @@
 import { useNavigate } from 'react-router'
-import { Card, CardContent, Chip, Stack, Typography } from '@mui/material'
+import { Chip, Stack, Typography } from '@mui/material'
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts'
+import { MainCard } from 'components'
 import { TagSummary } from 'types'
 import { format } from 'utils'
-
-const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8', '#82CA9D', '#FFC0CB', '#A52A2A']
+import { hoverCardSx, useChartColors, ColorDot } from '../../../Dashboard/components/shared'
 
 const tooltipFormatter = (value: unknown) => format.euro(Number(value))
 
 const TrackingCard = ({ tagStat, year }: { tagStat: TagSummary; year?: number | null }) => {
   const navigate = useNavigate()
+  const chartColors = useChartColors()
 
   const handleClick = () => {
     if (year) {
@@ -20,58 +21,64 @@ const TrackingCard = ({ tagStat, year }: { tagStat: TagSummary; year?: number | 
   }
 
   return (
-    <Card sx={{ cursor: 'pointer', '&:hover': { boxShadow: 6 } }} onClick={handleClick}>
-      <CardContent>
-        <Stack spacing={1}>
-          <Stack direction='row' justifyContent='space-between' alignItems='center'>
-            <Typography variant='h5'>{tagStat.tag}</Typography>
-            <Chip label={`${tagStat.transactionCount} mov.`} size='small' />
-          </Stack>
-          <Typography variant='h4' color='error.main'>
-            {format.euro(tagStat.totalAmount)}
-          </Typography>
-          {tagStat.byCategory.length > 0 && (
-            <ResponsiveContainer width='100%' height={200}>
-              <PieChart>
-                <Pie
-                  data={tagStat.byCategory}
-                  dataKey='amount'
-                  nameKey='categoryName'
-                  cx='50%'
-                  cy='50%'
-                  innerRadius={50}
-                  outerRadius={80}
-                  paddingAngle={2}
-                >
-                  {tagStat.byCategory.map((_, index) => (
-                    <Cell key={index} fill={COLORS[index % COLORS.length]} />
-                  ))}
-                </Pie>
-                <Tooltip formatter={tooltipFormatter} />
-              </PieChart>
-            </ResponsiveContainer>
-          )}
-          {tagStat.byCategory.length > 0 && (
-            <Stack spacing={0.5}>
-              {tagStat.byCategory.slice(0, 4).map((cat, index) => (
-                <Stack key={cat.categoryId} direction='row' justifyContent='space-between' alignItems='center'>
-                  <Stack direction='row' spacing={1} alignItems='center'>
-                    <Chip
-                      size='small'
-                      sx={{ bgcolor: COLORS[index % COLORS.length], width: 12, height: 12, borderRadius: '50%' }}
-                    />
-                    <Typography variant='body2'>{cat.categoryName}</Typography>
-                  </Stack>
-                  <Typography variant='body2' color='text.secondary'>
-                    {format.euro(cat.amount)}
-                  </Typography>
-                </Stack>
-              ))}
-            </Stack>
-          )}
+    <MainCard
+      contentSX={{ p: 2.25 }}
+      sx={{ ...hoverCardSx, cursor: 'pointer' }}
+      onClick={handleClick}
+    >
+      <Stack spacing={1.5}>
+        {/* Header: nombre + conteo */}
+        <Stack direction='row' justifyContent='space-between' alignItems='center'>
+          <Typography variant='h5' fontWeight={600}>{tagStat.tag}</Typography>
+          <Chip label={`${tagStat.transactionCount} mov.`} size='small' variant='outlined' />
         </Stack>
-      </CardContent>
-    </Card>
+
+        {/* Total */}
+        <Typography variant='h4' color='text.primary'>
+          {format.euro(tagStat.totalAmount)}
+        </Typography>
+
+        {/* Donut chart */}
+        {tagStat.byCategory.length > 0 && (
+          <ResponsiveContainer width='100%' height={180}>
+            <PieChart>
+              <Pie
+                data={tagStat.byCategory}
+                dataKey='amount'
+                nameKey='categoryName'
+                cx='50%'
+                cy='50%'
+                innerRadius={48}
+                outerRadius={76}
+                paddingAngle={2}
+              >
+                {tagStat.byCategory.map((_, index) => (
+                  <Cell key={index} fill={chartColors[index % chartColors.length]} />
+                ))}
+              </Pie>
+              <Tooltip formatter={tooltipFormatter} />
+            </PieChart>
+          </ResponsiveContainer>
+        )}
+
+        {/* Leyenda de categorías */}
+        {tagStat.byCategory.length > 0 && (
+          <Stack spacing={0.75}>
+            {tagStat.byCategory.slice(0, 4).map((cat, index) => (
+              <Stack key={cat.categoryId} direction='row' justifyContent='space-between' alignItems='center'>
+                <Stack direction='row' spacing={1} alignItems='center'>
+                  <ColorDot color={chartColors[index % chartColors.length]} size={10} />
+                  <Typography variant='body2' color='text.secondary'>{cat.categoryName}</Typography>
+                </Stack>
+                <Typography variant='body2' fontWeight={500}>
+                  {format.euro(cat.amount)}
+                </Typography>
+              </Stack>
+            ))}
+          </Stack>
+        )}
+      </Stack>
+    </MainCard>
   )
 }
 
