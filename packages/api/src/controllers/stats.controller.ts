@@ -2,7 +2,6 @@ import { NextFunction, Request, Response } from 'express'
 
 import '../auth/local-strategy-passport-handler'
 import { IStatsService } from '../services/stats.service'
-import { TagHistoric, TagDetail } from '../types/stats.types'
 
 type IStatsController = {
   loggerHandler: any,
@@ -57,17 +56,29 @@ export class StatsController {
       })
   }
 
+  public async getTagHistoric (req: Request, res: Response, next: NextFunction): Promise<void> {
+    const user = req.user as string
+    const tagName = req.params.tagName
+
+    Promise.resolve(user)
+      .tap(() => this.logger.logInfo(`/tags/${tagName} - get tag historic`))
+      .then((u) => this.statsService.getTagHistoric(u, tagName))
+      .then((response) => {
+        res.send(response)
+      })
+      .catch((error) => {
+        next(error)
+      })
+  }
+
   public async getTagDetail (req: Request, res: Response, next: NextFunction): Promise<void> {
     const user = req.user as string
     const tagName = req.params.tagName
-    const year = req.query.year ? Number(req.query.year) : null
+    const year = Number(req.params.year)
 
     Promise.resolve(user)
-      .tap(() => this.logger.logInfo(`/tags/${tagName} - get tag detail`))
-      .then((u): Promise<TagHistoric | TagDetail> => year
-        ? this.statsService.getTagDetail(u, tagName, year)
-        : this.statsService.getTagHistoric(u, tagName)
-      )
+      .tap(() => this.logger.logInfo(`/tags/${tagName}/${year} - get tag detail`))
+      .then((u) => this.statsService.getTagDetail(u, tagName, year))
       .then((response) => {
         res.send(response)
       })

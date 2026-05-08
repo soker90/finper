@@ -40,6 +40,12 @@ export class StatsRoutes {
     this.router.get(
       '/tags/:tagName',
       authMiddleware,
+      this.statsController.getTagHistoric.bind(this.statsController)
+    )
+
+    this.router.get(
+      '/tags/:tagName/:year',
+      authMiddleware,
       this.statsController.getTagDetail.bind(this.statsController)
     )
   }

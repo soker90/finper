@@ -218,7 +218,7 @@ describe('Stats', () => {
       expect(response.body.years[1].year).toBe(2024)
     })
 
-    test('when called with year, it should return detail for that year', async () => {
+    test('when called with year in path, it should return detail for that year', async () => {
       await TransactionModel.deleteMany({ user })
       const category = await insertCategory({ user, type: TRANSACTION.Expense })
       const account = await insertAccount({ user })
@@ -234,7 +234,7 @@ describe('Stats', () => {
         user
       })
 
-      const response = await supertest(server.app).get('/api/stats/tags/viaje-japon?year=2025').auth(token, { type: 'bearer' })
+      const response = await supertest(server.app).get('/api/stats/tags/viaje-japon/2025').auth(token, { type: 'bearer' })
       expect(response.statusCode).toBe(200)
       expect(response.body.tag).toBe('viaje-japon')
       expect(response.body.year).toBe(2025)
