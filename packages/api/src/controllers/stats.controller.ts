@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from 'express'
 
-import '../auth/local-strategy-passport-handler'
 import { IStatsService } from '../services/stats.service'
+import { validateStatsYearParam } from '../validators/stats'
 
 type IStatsController = {
   loggerHandler: any,
@@ -17,7 +17,7 @@ export class StatsController {
     this.statsService = statsService
   }
 
-  public async getAvailableTags (req: Request, res: Response, next: NextFunction): Promise<void> {
+  public getAvailableTags (req: Request, res: Response, next: NextFunction): void {
     Promise.resolve(req.user as string)
       .tap(() => this.logger.logInfo('/tags/available - list available tags'))
       .then(this.statsService.getAvailableTags.bind(this.statsService))
@@ -29,7 +29,7 @@ export class StatsController {
       })
   }
 
-  public async getAvailableYears (req: Request, res: Response, next: NextFunction): Promise<void> {
+  public getAvailableYears (req: Request, res: Response, next: NextFunction): void {
     Promise.resolve(req.user as string)
       .tap(() => this.logger.logInfo('/tags/years - list available years'))
       .then(this.statsService.getAvailableYears.bind(this.statsService))
@@ -41,7 +41,7 @@ export class StatsController {
       })
   }
 
-  public async getTagsSummary (req: Request, res: Response, next: NextFunction): Promise<void> {
+  public getTagsSummary (req: Request, res: Response, next: NextFunction): void {
     const user = req.user as string
     const year = req.query.year ? Number(req.query.year) : new Date().getFullYear()
 
@@ -56,7 +56,7 @@ export class StatsController {
       })
   }
 
-  public async getTagHistoric (req: Request, res: Response, next: NextFunction): Promise<void> {
+  public getTagHistoric (req: Request, res: Response, next: NextFunction): void {
     const user = req.user as string
     const tagName = req.params.tagName
 
@@ -71,12 +71,13 @@ export class StatsController {
       })
   }
 
-  public async getTagDetail (req: Request, res: Response, next: NextFunction): Promise<void> {
+  public getTagDetail (req: Request, res: Response, next: NextFunction): void {
     const user = req.user as string
     const tagName = req.params.tagName
     const year = Number(req.params.year)
 
     Promise.resolve(user)
+      .tap(() => validateStatsYearParam(year))
       .tap(() => this.logger.logInfo(`/tags/${tagName}/${year} - get tag detail`))
       .then((u) => this.statsService.getTagDetail(u, tagName, year))
       .then((response) => {
