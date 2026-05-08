@@ -10,7 +10,7 @@ export const useTickets = (): {
   removeTicket: (id: string) => Promise<{ error?: string }>
   markReviewed: (id: string) => Promise<{ error?: string }>
 } => {
-  const { data, error, mutate } = useSWR<{ tickets: Ticket[], total: number }>(TICKETS)
+  const { data, error, mutate, isLoading } = useSWR<{ tickets: Ticket[], total: number }>(TICKETS)
 
   const removeTicket = async (id: string) => {
     const result = await deleteTicket(id)
@@ -33,5 +33,5 @@ export const useTickets = (): {
     return result
   }
 
-  return { tickets: data?.tickets ?? [], isLoading: !data && !error, error, removeTicket, markReviewed }
+  return { tickets: data?.tickets ?? [], isLoading, error, removeTicket, markReviewed }
 }

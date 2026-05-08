@@ -3,7 +3,7 @@ import { Goal } from 'types'
 import { GOALS } from 'constants/api-paths'
 
 export const useGoals = (): { goals: Goal[], isLoading: boolean, error: any } => {
-  const { data, error } = useSWR(GOALS)
+  const { data, error, isLoading } = useSWR(GOALS)
 
-  return { goals: data || [], isLoading: !data && !error, error }
+  return { goals: data || [], isLoading, error }
 }

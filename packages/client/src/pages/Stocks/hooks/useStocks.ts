@@ -10,7 +10,7 @@ export const useStocks = (): {
   addStock: (stock: Omit<StockPurchase, '_id'>) => Promise<{ error?: string }>
   deleteStock: (id: string) => Promise<{ error?: string }>
 } => {
-  const { data, error } = useSWR<StockPosition[]>(STOCKS)
+  const { data, error, isLoading } = useSWR<StockPosition[]>(STOCKS)
   const { mutate } = useSWRConfig()
 
   const addStock = async (stock: Omit<StockPurchase, '_id'>) => {
@@ -31,7 +31,7 @@ export const useStocks = (): {
 
   return {
     positions: data ?? [],
-    isLoading: !data && !error,
+    isLoading,
     error,
     addStock,
     deleteStock

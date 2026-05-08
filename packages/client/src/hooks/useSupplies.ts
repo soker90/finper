@@ -11,7 +11,7 @@ import {
 } from 'services/apiService'
 
 export const useSupplies = () => {
-  const { data, error, mutate } = useSWR<PropertyWithSupplies[]>(SUPPLIES)
+  const { data, error, mutate, isLoading } = useSWR<PropertyWithSupplies[]>(SUPPLIES)
 
   const createProperty = async (params: PropertyInput) => {
     const result = await addProperty(params)
@@ -51,7 +51,7 @@ export const useSupplies = () => {
 
   return {
     properties: data ?? [],
-    isLoading: !data && !error,
+    isLoading,
     error,
     createProperty,
     updateProperty,
