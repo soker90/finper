@@ -79,12 +79,12 @@ describe('TrackingDetail', () => {
     expect(await findByText('2024')).toBeDefined()
   })
 
-  it('renders the back button to navigate to seguimientos', () => {
+  it('renders the back button to navigate back', () => {
     server.use(
       http.get('*/stats/tags/viaje-japon', () => HttpResponse.json(TAG_HISTORIC))
     )
     const { getByText } = renderWithTag('viaje-japon')
-    expect(getByText(/volver a seguimientos/i)).toBeDefined()
+    expect(getByText(/volver/i)).toBeDefined()
   })
 
   it('shows detail view when year detail data is available', async () => {

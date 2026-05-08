@@ -36,13 +36,13 @@ const renderFresh = () =>
   )
 
 describe('Trackings', () => {
-  it('renders the page title', () => {
+  it('renders the empty state when no years', async () => {
     server.use(
       http.get('*/stats/tags/years', () => HttpResponse.json([])),
       http.get('*/stats/tags', () => HttpResponse.json([]))
     )
-    const { getByText } = renderFresh()
-    expect(getByText('Seguimientos')).toBeDefined()
+    const { findByText } = renderFresh()
+    expect(await findByText(/no hay etiquetas en ning\u00fan a\u00f1o/i)).toBeDefined()
   })
 
   it('shows empty state when user has no tagged transactions', async () => {

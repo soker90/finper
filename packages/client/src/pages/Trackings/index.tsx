@@ -19,7 +19,6 @@ const Trackings = () => {
 
   return (
     <Stack spacing={2}>
-      <Typography variant='h3'>Seguimientos</Typography>
 
       {yearsLoading && <Loader />}
 

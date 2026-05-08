@@ -26,17 +26,12 @@ const TrackingDetail = () => {
   return (
     <Stack spacing={3}>
       <Stack direction='row' spacing={2} alignItems='center'>
-        <Typography variant='h3'>Seguimiento: {tagName}</Typography>
+        <Typography variant='h4'>{tagName}</Typography>
       </Stack>
 
       <Stack direction='row' spacing={2} alignItems='center'>
-        <Button
-          startIcon={<ArrowLeftOutlined />}
-          onClick={() => navigate('/seguimientos')}
-          variant='outlined'
-          size='small'
-        >
-          Volver a Seguimientos
+        <Button startIcon={<ArrowLeftOutlined />} onClick={() => navigate('/seguimientos')} size='small'>
+          Volver
         </Button>
         {selectedYear && (
           <Button
