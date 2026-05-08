@@ -62,6 +62,69 @@ describe('Transaction', () => {
         .expect(422)
     })
 
+    test('when success creating an transaction with tags, tags are sanitized and stored', async () => {
+      const response = await supertest(server.app)
+        .post(path)
+        .set('Authorization', `Bearer ${token}`)
+        .send({
+          date: faker.date.past().getTime(),
+          category: (await insertCategory({ user }))._id.toString(),
+          amount: faker.finance.amount(),
+          type: TRANSACTION.Expense,
+          account: (await insertAccount({ user }))._id.toString(),
+          tags: [' Juan ', '#VIAJE-japon', 'juan']
+        })
+        .expect(200)
+
+      expect(response.body.tags).toEqual(['juan', 'viaje-japon'])
+    })
+
+    test('when creating a transaction without tags, tags defaults to empty array', async () => {
+      const response = await supertest(server.app)
+        .post(path)
+        .set('Authorization', `Bearer ${token}`)
+        .send({
+          date: faker.date.past().getTime(),
+          category: (await insertCategory({ user }))._id.toString(),
+          amount: faker.finance.amount(),
+          type: TRANSACTION.Expense,
+          account: (await insertAccount({ user }))._id.toString()
+        })
+        .expect(200)
+
+      expect(response.body.tags).toEqual([])
+    })
+
+    test('when creating a transaction with more than 10 tags, it should response 422', async () => {
+      await supertest(server.app)
+        .post(path)
+        .set('Authorization', `Bearer ${token}`)
+        .send({
+          date: faker.date.past().getTime(),
+          category: (await insertCategory({ user }))._id.toString(),
+          amount: faker.finance.amount(),
+          type: TRANSACTION.Expense,
+          account: (await insertAccount({ user }))._id.toString(),
+          tags: ['t1', 't2', 't3', 't4', 't5', 't6', 't7', 't8', 't9', 't10', 't11']
+        })
+        .expect(422)
+    })
+
+    test('when creating a transaction with a tag longer than 30 chars, it should response 422', async () => {
+      await supertest(server.app)
+        .post(path)
+        .set('Authorization', `Bearer ${token}`)
+        .send({
+          date: faker.date.past().getTime(),
+          category: (await insertCategory({ user }))._id.toString(),
+          amount: faker.finance.amount(),
+          type: TRANSACTION.Expense,
+          account: (await insertAccount({ user }))._id.toString(),
+          tags: ['a'.repeat(31)]
+        })
+        .expect(422)
+    })
+
     test('when the account is of other user, it should response an error with status code 404', async () => {
       await supertest(server.app)
         .post(path)
@@ -247,6 +310,27 @@ describe('Transaction', () => {
         .set('Authorization', `Bearer ${token}`)
         .send(params)
         .expect(200)
+    })
+
+    test('when editing a transaction with tags, tags are sanitized and updated', async () => {
+      const transaction: ITransaction = await insertTransaction({ user: username })
+
+      const params = {
+        date: faker.date.past().getTime(),
+        category: (await insertCategory({ user: username }))._id.toString(),
+        amount: faker.number.int(),
+        type: TRANSACTION.Expense,
+        account: (await insertAccount({ user: username }))._id.toString(),
+        tags: [' Viaje ', 'JAPON', 'viaje']
+      }
+
+      const response = await supertest(server.app)
+        .put(path(transaction._id.toString()))
+        .set('Authorization', `Bearer ${token}`)
+        .send(params)
+        .expect(200)
+
+      expect(response.body.tags).toEqual(['viaje', 'japon'])
     })
 
     test.each([{

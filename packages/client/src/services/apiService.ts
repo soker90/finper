@@ -73,7 +73,8 @@ export const addTransaction = (params: {
   category: string,
   account: string,
   note?: string,
-  type: TransactionType
+  type: TransactionType,
+  tags?: string[]
 }): Promise<{ data?: any, error?: string }> => {
   return axios.post(`${TRANSACTIONS}`, params).then((data: any) => ({ data: data as Transaction })).catch((error: any) => ({ error: extractError(error) }))
 }
@@ -84,7 +85,8 @@ export const editTransaction = (id: string, params: {
   category: string,
   account: string,
   note?: string,
-  type: TransactionType
+  type: TransactionType,
+  tags?: string[]
 }): Promise<{ data?: any, error?: string }> => {
   return axios.put(`${TRANSACTIONS}/${id}`, params).then((data: any) => ({ data: data as Transaction })).catch((error: any) => ({ error: extractError(error) }))
 }
