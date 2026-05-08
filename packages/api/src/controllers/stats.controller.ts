@@ -2,6 +2,7 @@ import { NextFunction, Request, Response } from 'express'
 
 import '../auth/local-strategy-passport-handler'
 import { IStatsService } from '../services/stats.service'
+import { TagHistoric, TagDetail } from '../types/stats.types'
 
 type IStatsController = {
   loggerHandler: any,
@@ -61,15 +62,17 @@ export class StatsController {
     const tagName = req.params.tagName
     const year = req.query.year ? Number(req.query.year) : null
 
-    this.logger.logInfo(`/tags/${tagName} - get tag detail`)
-
-    try {
-      const response = year
-        ? await this.statsService.getTagDetail(user, tagName, year)
-        : await this.statsService.getTagHistoric(user, tagName)
-      res.send(response)
-    } catch (error) {
-      next(error)
-    }
+    Promise.resolve(user)
+      .tap(() => this.logger.logInfo(`/tags/${tagName} - get tag detail`))
+      .then((u): Promise<TagHistoric | TagDetail> => year
+        ? this.statsService.getTagDetail(u, tagName, year)
+        : this.statsService.getTagHistoric(u, tagName)
+      )
+      .then((response) => {
+        res.send(response)
+      })
+      .catch((error) => {
+        next(error)
+      })
   }
 }
