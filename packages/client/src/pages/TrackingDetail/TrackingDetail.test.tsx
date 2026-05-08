@@ -10,7 +10,7 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider'
 import { SwrProvider } from 'contexts/index'
 import { AuthProvider } from 'contexts/AuthContext'
 import { server } from '../../mock/server'
-import CostCenterDetail from './index'
+import TrackingDetail from './index'
 import 'dayjs/locale/es'
 
 const TAG_HISTORIC = {
@@ -38,12 +38,12 @@ const renderWithTag = (tagName: string) =>
   render(
     <SWRConfig value={{ provider: () => new Map(), dedupingInterval: 0 }}>
       <AuthProvider>
-        <MemoryRouter initialEntries={[`/proyectos/${tagName}`]}>
+        <MemoryRouter initialEntries={[`/seguimientos/${tagName}`]}>
           <ThemeCustomization>
             <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale='es'>
               <SwrProvider>
                 <Routes>
-                  <Route path='/proyectos/:tagName' element={<CostCenterDetail />} />
+                  <Route path='/seguimientos/:tagName' element={<TrackingDetail />} />
                 </Routes>
               </SwrProvider>
             </LocalizationProvider>
@@ -53,7 +53,7 @@ const renderWithTag = (tagName: string) =>
     </SWRConfig>
   )
 
-describe('CostCenterDetail', () => {
+describe('TrackingDetail', () => {
   it('renders the tag name as page title', () => {
     server.use(
       http.get('*/stats/tags/viaje-japon', () => HttpResponse.json(TAG_HISTORIC))
@@ -79,12 +79,12 @@ describe('CostCenterDetail', () => {
     expect(await findByText('2024')).toBeDefined()
   })
 
-  it('renders the back button to navigate to proyectos', () => {
+  it('renders the back button to navigate to seguimientos', () => {
     server.use(
       http.get('*/stats/tags/viaje-japon', () => HttpResponse.json(TAG_HISTORIC))
     )
     const { getByText } = renderWithTag('viaje-japon')
-    expect(getByText(/volver a proyectos/i)).toBeDefined()
+    expect(getByText(/volver a seguimientos/i)).toBeDefined()
   })
 
   it('shows detail view when year detail data is available', async () => {

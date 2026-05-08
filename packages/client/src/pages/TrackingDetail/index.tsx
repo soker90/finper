@@ -13,7 +13,7 @@ const BAR_COLORS = ['#1976d2', '#2196f3', '#42a5f5', '#64b5f6', '#90caf9']
 
 const tooltipFormatter = (value: unknown) => format.euro(Number(value))
 
-const CostCenterDetail = () => {
+const TrackingDetail = () => {
   const { tagName } = useParams<{ tagName: string }>()
   const navigate = useNavigate()
   const [selectedYear, setSelectedYear] = useState<number | null>(null)
@@ -26,17 +26,17 @@ const CostCenterDetail = () => {
   return (
     <Stack spacing={3}>
       <Stack direction='row' spacing={2} alignItems='center'>
-        <Typography variant='h3'>Proyecto: {tagName}</Typography>
+        <Typography variant='h3'>Seguimiento: {tagName}</Typography>
       </Stack>
 
       <Stack direction='row' spacing={2} alignItems='center'>
         <Button
           startIcon={<ArrowLeftOutlined />}
-          onClick={() => navigate('/proyectos')}
+          onClick={() => navigate('/seguimientos')}
           variant='outlined'
           size='small'
         >
-          Volver a Proyectos
+          Volver a Seguimientos
         </Button>
         {selectedYear && (
           <Button
@@ -126,4 +126,4 @@ const CostCenterDetail = () => {
   )
 }
 
-export default CostCenterDetail
+export default TrackingDetail

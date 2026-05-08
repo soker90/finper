@@ -2,9 +2,9 @@ import { useEffect, useState } from 'react'
 import { Box, Grid, InputLabel, MenuItem, Select, Stack, Typography } from '@mui/material'
 import { useTagsStats, useAvailableTagYears } from 'hooks'
 import Loader from 'components/Loader'
-import TagCard from './components/TagCard'
+import TrackingCard from './components/TrackingCard'
 
-const CostCenters = () => {
+const Trackings = () => {
   const { years, isLoading: yearsLoading } = useAvailableTagYears()
   const [year, setYear] = useState<number | null>(null)
   const { tagStats, isLoading: statsLoading } = useTagsStats(year)
@@ -19,14 +19,14 @@ const CostCenters = () => {
 
   return (
     <Stack spacing={2}>
-      <Typography variant='h3'>Centros de Coste</Typography>
+      <Typography variant='h3'>Seguimientos</Typography>
 
       {yearsLoading && <Loader />}
 
       {!yearsLoading && years.length === 0 && (
         <Box py={4} textAlign='center'>
           <Typography color='text.secondary'>
-            No hay etiquetas en ningún año. Añade etiquetas a tus movimientos para ver los centros de coste.
+            No hay etiquetas en ningún año. Añade etiquetas a tus movimientos para ver tus seguimientos.
           </Typography>
         </Box>
       )}
@@ -59,7 +59,7 @@ const CostCenters = () => {
         <Grid container spacing={3}>
           {tagStats.map((tagStat) => (
             <Grid key={tagStat.tag} size={{ xs: 12, sm: 6, md: 4 }}>
-              <TagCard tagStat={tagStat} />
+              <TrackingCard tagStat={tagStat} />
             </Grid>
           ))}
         </Grid>
@@ -68,4 +68,4 @@ const CostCenters = () => {
   )
 }
 
-export default CostCenters
+export default Trackings

@@ -136,10 +136,10 @@ const dashboard = {
       breadcrumbs: true
     },
     {
-      id: 'cost-centers',
-      title: 'Proyectos',
+      id: 'trackings',
+      title: 'Seguimientos',
       type: 'item',
-      url: '/proyectos',
+      url: '/seguimientos',
       icon: TagsOutlined,
       breadcrumbs: true
     }

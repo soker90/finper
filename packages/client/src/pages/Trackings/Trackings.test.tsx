@@ -4,7 +4,7 @@ import { http, HttpResponse } from 'msw'
 import { SWRConfig } from 'swr'
 import { server } from '../../mock/server'
 import { render } from '../../test/testUtils'
-import CostCenters from './index'
+import Trackings from './index'
 
 const TAG_YEARS = [2026, 2025]
 
@@ -31,18 +31,18 @@ const TAG_STATS = [
 const renderFresh = () =>
   render(
     <SWRConfig value={{ provider: () => new Map(), dedupingInterval: 0 }}>
-      <CostCenters />
+      <Trackings />
     </SWRConfig>
   )
 
-describe('CostCenters', () => {
+describe('Trackings', () => {
   it('renders the page title', () => {
     server.use(
       http.get('*/stats/tags/years', () => HttpResponse.json([])),
       http.get('*/stats/tags', () => HttpResponse.json([]))
     )
     const { getByText } = renderFresh()
-    expect(getByText('Centros de Coste')).toBeDefined()
+    expect(getByText('Seguimientos')).toBeDefined()
   })
 
   it('shows empty state when user has no tagged transactions', async () => {

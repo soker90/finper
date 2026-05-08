@@ -8,13 +8,13 @@ const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8', '#82CA9D'
 
 const tooltipFormatter = (value: unknown) => format.euro(Number(value))
 
-const TagCard = ({ tagStat }: { tagStat: TagSummary }) => {
+const TrackingCard = ({ tagStat }: { tagStat: TagSummary }) => {
   const navigate = useNavigate()
 
   return (
     <Card
       sx={{ cursor: 'pointer', '&:hover': { boxShadow: 6 } }}
-      onClick={() => navigate(`/proyectos/${tagStat.tag}`)}
+      onClick={() => navigate(`/seguimientos/${tagStat.tag}`)}
     >
       <CardContent>
         <Stack spacing={1}>
@@ -70,4 +70,4 @@ const TagCard = ({ tagStat }: { tagStat: TagSummary }) => {
   )
 }
 
-export default TagCard
+export default TrackingCard
