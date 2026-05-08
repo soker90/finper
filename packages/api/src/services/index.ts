@@ -8,6 +8,7 @@ import DebtService from './debt.service'
 import LoanService from './loan.service'
 import PensionService from './pension.service'
 import StoreService from './stores.service'
+import StatsService from './stats.service'
 import TicketService from './ticket.service'
 import TransactionService from './transaction.service'
 import UserService from './user.service'
@@ -29,6 +30,7 @@ export const debtService = new DebtService()
 export const loanService = new LoanService()
 export const pensionService = new PensionService()
 export const storeService = new StoreService()
+export const statsService = new StatsService()
 export const ticketService = new TicketService()
 export const transactionService = new TransactionService()
 export const userService = new UserService()
