@@ -130,14 +130,14 @@ const TransactionEdit = ({
           control={control}
           availableTags={availableTags}
           label='Etiquetas'
-          size={6}
+          size={2}
         />
 
         <InputForm
           id='note' label='Nota' placeholder='Nota'
           error={!!errors.note} {...register('note')}
           errorText='Introduce una nota válida'
-          size={6}
+          size={10}
         />
 
         {error && (

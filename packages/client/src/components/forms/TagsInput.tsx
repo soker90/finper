@@ -54,7 +54,7 @@ const TagsInput = ({ name, control, availableTags, label = 'Etiquetas', size = 4
                 <TextField
                   {...params}
                   id={name}
-                  placeholder={field.value?.length ? '' : 'Añadir etiqueta'}
+                  placeholder={field.value?.length ? '' : 'Añadir etiqueta con intro'}
                 />
               )}
             />
