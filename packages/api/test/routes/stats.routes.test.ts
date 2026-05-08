@@ -41,11 +41,9 @@ describe('Stats', () => {
       await TransactionModel.deleteMany({ user })
       await insertTransaction({ user, type: TRANSACTION.Expense, tags: ['juan', 'viaje-japon'] as any })
       await insertTransaction({ user, type: TRANSACTION.Expense, tags: ['juan', 'casa'] as any })
-      await insertTransaction({ user, type: TRANSACTION.Income, tags: ['salario'] as any })
-
       const response = await supertest(server.app).get(path).auth(token, { type: 'bearer' })
       expect(response.statusCode).toBe(200)
-      expect(response.body).toEqual(['casa', 'juan', 'salario', 'viaje-japon'])
+      expect(response.body).toEqual(['casa', 'juan', 'viaje-japon'])
     })
   })
 

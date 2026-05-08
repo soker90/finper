@@ -1,5 +1,6 @@
 import { TransactionModel, TRANSACTION } from '@soker90/finper-models'
 import { TagSummary, TagHistoric, TagDetail, TagYearSummary } from '../types/stats.types'
+import { roundNumber } from '../utils/roundNumber'
 
 export interface IStatsService {
   getAvailableTags(user: string): Promise<string[]>
@@ -12,7 +13,7 @@ export interface IStatsService {
 export default class StatsService implements IStatsService {
   public async getAvailableTags (user: string): Promise<string[]> {
     const results = await TransactionModel.aggregate([
-      { $match: { user, tags: { $exists: true, $ne: [] } } },
+      { $match: { user, type: TRANSACTION.Expense, tags: { $exists: true, $ne: [] } } },
       { $unwind: '$tags' },
       { $group: { _id: '$tags' } },
       { $sort: { _id: 1 } },
@@ -34,8 +35,8 @@ export default class StatsService implements IStatsService {
   }
 
   public async getTagsSummary (user: string, year: number): Promise<TagSummary[]> {
-    const startOfYear = new Date(year, 0, 1).getTime()
-    const endOfYear = new Date(year + 1, 0, 1).getTime() - 1
+    const startOfYear = Date.UTC(year, 0, 1)
+    const endOfYear = Date.UTC(year + 1, 0, 1) - 1
 
     const categoryBreakdown = await TransactionModel.aggregate([
       {
@@ -114,7 +115,7 @@ export default class StatsService implements IStatsService {
 
     const years: TagYearSummary[] = results.map((r: any) => ({
       year: r._id,
-      totalAmount: Math.round(r.totalAmount * 100) / 100,
+      totalAmount: roundNumber(r.totalAmount),
       transactionCount: r.transactionCount
     }))
 
@@ -122,14 +123,14 @@ export default class StatsService implements IStatsService {
 
     return {
       tag: tagName,
-      totalAmount: Math.round(totalAmount * 100) / 100,
+      totalAmount: roundNumber(totalAmount),
       years
     }
   }
 
   public async getTagDetail (user: string, tagName: string, year: number): Promise<TagDetail> {
-    const startOfYear = new Date(year, 0, 1).getTime()
-    const endOfYear = new Date(year + 1, 0, 1).getTime() - 1
+    const startOfYear = Date.UTC(year, 0, 1)
+    const endOfYear = Date.UTC(year + 1, 0, 1) - 1
 
     const [categoryResults, transactions] = await Promise.all([
       TransactionModel.aggregate([
@@ -185,7 +186,7 @@ export default class StatsService implements IStatsService {
     return {
       tag: tagName,
       year,
-      totalAmount: Math.round(totalAmount * 100) / 100,
+      totalAmount: roundNumber(totalAmount),
       transactionCount,
       byCategory: categoryResults,
       transactions
