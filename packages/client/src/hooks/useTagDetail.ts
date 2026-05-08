@@ -4,6 +4,6 @@ import { TagDetail } from 'types'
 
 export const useTagDetail = (tagName: string, year: number | null) => {
   const key = tagName && year ? STATS_TAG_DETAIL(tagName, year) : null
-  const { data, error } = useSWR<TagDetail>(key)
-  return { tagDetail: data ?? null, isLoading: data === undefined && !error, error }
+  const { data, error, isLoading } = useSWR<TagDetail>(key)
+  return { tagDetail: data ?? null, isLoading, error }
 }
