@@ -137,7 +137,7 @@ const TransactionEdit = ({
           id='note' label='Nota' placeholder='Nota'
           error={!!errors.note} {...register('note')}
           errorText='Introduce una nota válida'
-          size={12}
+          size={6}
         />
 
         {error && (

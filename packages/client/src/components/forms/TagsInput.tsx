@@ -55,7 +55,6 @@ const TagsInput = ({ name, control, availableTags, label = 'Etiquetas', size = 4
                   {...params}
                   id={name}
                   placeholder={field.value?.length ? '' : 'Añadir etiqueta'}
-                  size='small'
                 />
               )}
             />
