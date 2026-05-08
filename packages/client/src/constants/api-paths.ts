@@ -24,3 +24,4 @@ export const STATS_TAGS = 'stats/tags'
 export const STATS_TAGS_AVAILABLE = 'stats/tags/available'
 export const STATS_TAGS_YEARS = 'stats/tags/years'
 export const STATS_TAG_DETAIL = (tagName: string) => `stats/tags/${tagName}`
+export const STATS_TAG_YEAR_DETAIL = (tagName: string, year: number) => `stats/tags/${tagName}/${year}`

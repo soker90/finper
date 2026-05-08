@@ -41,5 +41,19 @@ export const statsHandlers = [
         { year: 2024, totalAmount: 1900, transactionCount: 29 }
       ]
     })
+  }),
+  http.get('*/stats/tags/:tagName/:year', ({ params }) => {
+    const { tagName, year } = params
+    return HttpResponse.json({
+      tag: tagName,
+      year: Number(year),
+      totalAmount: 2400.00,
+      transactionCount: 34,
+      byCategory: [
+        { categoryId: '4', categoryName: 'Viajes', amount: 1600.00, count: 18 },
+        { categoryId: '5', categoryName: 'Comida', amount: 800.00, count: 16 }
+      ],
+      transactions: []
+    })
   })
 ]
