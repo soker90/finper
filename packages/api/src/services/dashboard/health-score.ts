@@ -1,3 +1,4 @@
+import { roundNumber } from '../../utils/roundNumber'
 import type { HealthScore, MonthlyData } from './dashboard.types'
 
 /**
@@ -49,7 +50,7 @@ export const computeHistoricalSavingsRate = ({
     return sum + monthRate
   }, 0)
 
-  return Math.round((totalRate / recentMonths.length) * 100) / 100
+  return roundNumber(totalRate / recentMonths.length)
 }
 
 /**
