@@ -40,11 +40,10 @@ const AutocompleteForm = ({
         <InputLabel htmlFor={id}>{label}</InputLabel>
         <Autocomplete
           disableClearable
-          sx={{ input: { height: 8 } }}
           freeSolo
           selectOnFocus
           options={options}
-          getOptionLabel={(option: any) => option[optionLabel]}
+          getOptionLabel={(option: any) => typeof option === 'string' ? option : option[optionLabel]}
           fullWidth
           noOptionsText=''
           defaultValue={defaultValue}

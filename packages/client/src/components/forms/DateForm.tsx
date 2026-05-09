@@ -33,6 +33,13 @@ const DateForm = ({ id, label, control, error, errorText, size = 4, ...others }:
                 textField: {
                   variant: 'outlined',
                   error
+                },
+                field: {
+                  sx: {
+                    '& .MuiPickersSectionList-root': {
+                      padding: '10.5px 14px'
+                    }
+                  }
                 }
               }}
               onChange={onChange}
