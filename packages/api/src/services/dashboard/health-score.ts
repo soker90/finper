@@ -9,7 +9,7 @@ import type { HealthScore, MonthlyData } from './dashboard.types'
  * - <=0%:   0 pts (no savings or negative rate)
  */
 export const computeSavingsScore = (rate: number): number => {
-  if (rate <= 0) return 0
+  if (rate <= 0 || Number.isNaN(rate)) return 0
   if (rate < 5) return Math.round((rate / 5) * 30)
   if (rate < 15) return Math.round(30 + ((rate - 5) / 10) * 40)
   if (rate < 30) return Math.round(70 + ((rate - 15) / 15) * 30)
@@ -28,9 +28,10 @@ export const computeHistoricalSavingsRate = (
   fallback: number
 ): number => {
   const completedMonths = last6Months.filter(monthData => {
-    // Exclude the current in-progress month
-    const isCurrentMonth = monthData.month === currentMonthIndex + 1 && monthData.year === currentYear
-    return !isCurrentMonth && monthData.income > 0
+    // Only include strictly past months to avoid distortion from future-dated transactions
+    const isPastMonth = monthData.year < currentYear ||
+      (monthData.year === currentYear && monthData.month < currentMonthIndex + 1)
+    return isPastMonth && monthData.income > 0
   })
 
   const recentMonths = completedMonths.slice(-3)

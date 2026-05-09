@@ -7,6 +7,10 @@ describe('computeSavingsScore', () => {
     expect(computeSavingsScore(-100)).toBe(0)
   })
 
+  test('NaN rate returns 0 instead of 100', () => {
+    expect(computeSavingsScore(NaN)).toBe(0)
+  })
+
   test('rate in 0–5% range maps to 0–30 pts', () => {
     // 0% → 0, 5% → 30
     expect(computeSavingsScore(0)).toBe(0)
@@ -78,6 +82,17 @@ describe('computeHistoricalSavingsRate', () => {
       { month: 1, year: 2026, income: 0, expenses: 300 },
     ]
     expect(computeHistoricalSavingsRate(months, currentMonth, currentYear, 25)).toBe(25)
+  })
+
+  test('excludes future-dated months', () => {
+    const months = [
+      { month: 6, year: 2026, income: 2000, expenses: 500 },  // future (June) → excluded
+      { month: 7, year: 2026, income: 2000, expenses: 400 },  // future (July) → excluded
+      { month: 4, year: 2026, income: 2000, expenses: 1200 }, // April → 40%
+      { month: 3, year: 2026, income: 2000, expenses: 1400 }, // March → 30%
+    ]
+    // Only April and March qualify: (40 + 30) / 2 = 35%
+    expect(computeHistoricalSavingsRate(months, currentMonth, currentYear, 0)).toBe(35)
   })
 })
 
