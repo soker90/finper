@@ -40,7 +40,6 @@ const AutocompleteForm = ({
         <InputLabel htmlFor={id}>{label}</InputLabel>
         <Autocomplete
           disableClearable
-          sx={{ input: { height: 8 } }}
           freeSolo
           selectOnFocus
           options={options}
