@@ -4,10 +4,11 @@ import { Alert, FormHelperText, Grid } from '@mui/material'
 import { mutate } from 'swr'
 
 import { ModalGrid, DateForm, InputForm, SelectForm, SelectGroupForm } from 'components'
+import AutocompleteForm from 'components/forms/AutocompleteForm'
 import { addTransaction } from 'services/apiService'
 import { TRANSACTIONS } from 'constants/api-paths'
 import { Ticket, TransactionType, TRANSACTION } from 'types'
-import { useAccounts, useGroupedCategories, useTickets } from 'hooks'
+import { useAccounts, useGroupedCategories, useTickets, useStores } from 'hooks'
 import { TYPES_TRANSACTIONS_ENTRIES } from 'constants/transactions'
 
 interface Props {
@@ -27,6 +28,7 @@ interface FormValues {
 const ReviewModal = ({ ticket, onClose }: Props) => {
   const { accounts } = useAccounts()
   const { categories } = useGroupedCategories()
+  const { stores } = useStores()
   const { markReviewed } = useTickets()
   const [error, setError] = useState<string | undefined>(undefined)
 
@@ -119,11 +121,14 @@ const ReviewModal = ({ ticket, onClose }: Props) => {
         size={2}
       />
 
-      <InputForm
-        id='store' label='Comercio' placeholder='Nombre del comercio'
-        error={!!errors.store} {...register('store')}
-        errorText=''
+      <AutocompleteForm
+        options={stores}
+        optionLabel='name' id='store' label='Comercio'
+        placeholder='Comercio'
+        error={!!errors.store}
+        errorText='Introduce un comercio válido'
         size={2}
+        {...register('store')}
       />
 
       {ticket.payment_method && (
