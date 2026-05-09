@@ -91,7 +91,7 @@ const ScoreGauge = ({ healthScore }: ScoreGaugeProps) => {
                 {item.label}
               </Typography>
               <Tooltip title={item.tooltip} arrow placement='top'>
-                <InfoCircleOutlined style={{ fontSize: 13, color: 'rgba(0,0,0,0.38)', marginLeft: 3, cursor: 'default' }} />
+                <InfoCircleOutlined style={{ fontSize: 13, color: theme.palette.text.secondary, marginLeft: 3, cursor: 'default' }} />
               </Tooltip>
             </Stack>
             <LinearProgress
