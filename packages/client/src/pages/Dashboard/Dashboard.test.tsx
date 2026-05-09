@@ -67,7 +67,7 @@ describe('Dashboard', () => {
     it('renders Tasa de Ahorro and Deudas Totales labels', async () => {
       const { findByText } = render(<Dashboard />)
 
-      expect(await findByText('Tasa de Ahorro')).toBeDefined()
+      expect(await findByText('Tasa de Ahorro (mes actual)')).toBeDefined()
       expect(await findByText('Deudas Totales')).toBeDefined()
     })
   })

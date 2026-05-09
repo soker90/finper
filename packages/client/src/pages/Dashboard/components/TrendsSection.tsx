@@ -110,7 +110,7 @@ const TrendsSection = ({ stats, tickets, chartHeight }: TrendsSectionProps) => {
 
               {/* Tasa de ahorro */}
               <MiniKpi
-                title='Tasa de Ahorro'
+                title='Tasa de Ahorro (mes actual)'
                 value={`${stats.savingsRate.toFixed(1)}%`}
                 icon={<DollarOutlined />}
                 color={stats.savingsRate >= 20 ? 'success' : 'warning'}
