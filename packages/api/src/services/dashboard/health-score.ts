@@ -16,17 +16,24 @@ export const computeSavingsScore = (rate: number): number => {
   return 100
 }
 
+interface ComputeHistoricalSavingsRateParams {
+  last6Months: MonthlyData[]
+  currentMonthIndex: number  // 0-indexed month of "now" (0 = Jan, 11 = Dec)
+  currentYear: number
+  fallback: number
+}
+
 /**
  * Computes the historical savings rate as the arithmetic mean of the savings rate
  * of the last completed months (up to 3). Months with no income are excluded.
  * Falls back to the current month's savings rate when no historical data is available.
  */
-export const computeHistoricalSavingsRate = (
-  last6Months: MonthlyData[],
-  currentMonthIndex: number,  // 0-indexed month of "now" (0 = Jan, 11 = Dec)
-  currentYear: number,
-  fallback: number
-): number => {
+export const computeHistoricalSavingsRate = ({
+  last6Months,
+  currentMonthIndex,
+  currentYear,
+  fallback
+}: ComputeHistoricalSavingsRateParams): number => {
   const completedMonths = last6Months.filter(monthData => {
     // Only include strictly past months to avoid distortion from future-dated transactions
     const isPastMonth = monthData.year < currentYear ||

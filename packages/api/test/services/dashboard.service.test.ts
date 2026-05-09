@@ -43,7 +43,7 @@ describe('computeHistoricalSavingsRate', () => {
   const currentYear = 2026
 
   test('returns fallback when no months with income are available', () => {
-    expect(computeHistoricalSavingsRate([], currentMonth, currentYear, 15)).toBe(15)
+    expect(computeHistoricalSavingsRate({ last6Months: [], currentMonthIndex: currentMonth, currentYear, fallback: 15 })).toBe(15)
   })
 
   test('excludes the current in-progress month', () => {
@@ -52,7 +52,7 @@ describe('computeHistoricalSavingsRate', () => {
       { month: 4, year: 2026, income: 2000, expenses: 1200 }, // April → 40%
     ]
     // Only April qualifies: (2000-1200)/2000 * 100 = 40%
-    expect(computeHistoricalSavingsRate(months, currentMonth, currentYear, 0)).toBe(40)
+    expect(computeHistoricalSavingsRate({ last6Months: months, currentMonthIndex: currentMonth, currentYear, fallback: 0 })).toBe(40)
   })
 
   test('excludes months with no income', () => {
@@ -62,7 +62,7 @@ describe('computeHistoricalSavingsRate', () => {
       { month: 1, year: 2026, income: 2000, expenses: 1800 }, // 10%
     ]
     // avg of 20% and 10% = 15%
-    expect(computeHistoricalSavingsRate(months, currentMonth, currentYear, 0)).toBe(15)
+    expect(computeHistoricalSavingsRate({ last6Months: months, currentMonthIndex: currentMonth, currentYear, fallback: 0 })).toBe(15)
   })
 
   test('uses only the last 3 completed months', () => {
@@ -73,7 +73,7 @@ describe('computeHistoricalSavingsRate', () => {
       { month: 2, year: 2026, income: 2000, expenses: 1600 },  // 20%
     ]
     // avg of last 3: (40 + 30 + 20) / 3 ≈ 30
-    expect(computeHistoricalSavingsRate(months, currentMonth, currentYear, 0)).toBe(30)
+    expect(computeHistoricalSavingsRate({ last6Months: months, currentMonthIndex: currentMonth, currentYear, fallback: 0 })).toBe(30)
   })
 
   test('returns fallback when all months are zero income', () => {
@@ -81,7 +81,7 @@ describe('computeHistoricalSavingsRate', () => {
       { month: 2, year: 2026, income: 0, expenses: 500 },
       { month: 1, year: 2026, income: 0, expenses: 300 },
     ]
-    expect(computeHistoricalSavingsRate(months, currentMonth, currentYear, 25)).toBe(25)
+    expect(computeHistoricalSavingsRate({ last6Months: months, currentMonthIndex: currentMonth, currentYear, fallback: 25 })).toBe(25)
   })
 
   test('excludes future-dated months', () => {
@@ -92,7 +92,7 @@ describe('computeHistoricalSavingsRate', () => {
       { month: 3, year: 2026, income: 2000, expenses: 1400 }, // March → 30%
     ]
     // Only April and March qualify: (40 + 30) / 2 = 35%
-    expect(computeHistoricalSavingsRate(months, currentMonth, currentYear, 0)).toBe(35)
+    expect(computeHistoricalSavingsRate({ last6Months: months, currentMonthIndex: currentMonth, currentYear, fallback: 0 })).toBe(35)
   })
 })
 

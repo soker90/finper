@@ -361,12 +361,12 @@ export default class DashboardService implements IDashboardService {
 
     // Historical savings rate: avg of last 3 completed months to avoid
     // distortion caused by the in-progress current month (partial expenses).
-    const historicalSavingsRate = computeHistoricalSavingsRate(
-      last6MonthsAgg,
-      currentMonth,
+    const historicalSavingsRate = computeHistoricalSavingsRate({
+      last6Months: last6MonthsAgg,
+      currentMonthIndex: currentMonth,
       currentYear,
-      savingsRate
-    )
+      fallback: savingsRate
+    })
 
     // Expense velocity
     const daysInCurrentMonth = new Date(currentYear, currentMonth + 1, 0).getDate()
