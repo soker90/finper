@@ -20,6 +20,7 @@ const MonthAnalysis = ({ stats, chartColors }: MonthAnalysisProps) => (
 
     <TopStoresChart
       items={stats.topStores}
+      chartColors={chartColors}
       growTimeout={1350}
     />
   </>
