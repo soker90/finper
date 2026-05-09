@@ -44,7 +44,7 @@ const AutocompleteForm = ({
           freeSolo
           selectOnFocus
           options={options}
-          getOptionLabel={(option: any) => option[optionLabel]}
+          getOptionLabel={(option: any) => typeof option === 'string' ? option : option[optionLabel]}
           fullWidth
           noOptionsText=''
           defaultValue={defaultValue}

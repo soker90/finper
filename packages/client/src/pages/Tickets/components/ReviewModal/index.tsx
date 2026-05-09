@@ -129,6 +129,7 @@ const ReviewModal = ({ ticket, onClose }: Props) => {
         errorText='Introduce un comercio válido'
         size={2}
         {...register('store')}
+        {...(ticket.store && { defaultValue: ticket.store })}
       />
 
       {ticket.payment_method && (
