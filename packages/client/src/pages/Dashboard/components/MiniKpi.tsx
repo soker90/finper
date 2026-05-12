@@ -9,7 +9,14 @@ interface MiniKpiProps {
 }
 
 const MiniKpi = ({ title, value, icon, color = 'primary' }: MiniKpiProps) => (
-  <Stack direction='row' alignItems='center' spacing={1.5} sx={{ py: 1 }}>
+  <Stack
+    direction='row'
+    spacing={1.5}
+    sx={{
+      alignItems: 'center',
+      py: 1
+    }}
+  >
     <Avatar sx={{ bgcolor: `${color}.lighter`, color: `${color}.main`, width: 32, height: 32 }}>
       {icon}
     </Avatar>

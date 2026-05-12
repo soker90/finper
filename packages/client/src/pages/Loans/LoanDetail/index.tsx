@@ -40,7 +40,13 @@ const LoanDetail = () => {
 
   if (isLoading) {
     return (
-      <Box display='flex' justifyContent='center' mt={6}>
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'center',
+          mt: 6
+        }}
+      >
         <CircularProgress />
       </Box>
     )
@@ -48,8 +54,13 @@ const LoanDetail = () => {
 
   if (!loan) {
     return (
-      <Typography color='textSecondary' mt={4} textAlign='center'>
-        Préstamo no encontrado.
+      <Typography
+        color='textSecondary'
+        sx={{
+          mt: 4,
+          textAlign: 'center'
+        }}
+      >Préstamo no encontrado.
       </Typography>
     )
   }
@@ -57,8 +68,22 @@ const LoanDetail = () => {
   return (
     <Stack spacing={3}>
       {/* Header */}
-      <Box display='flex' alignItems='center' justifyContent='space-between' flexWrap='wrap' gap={1}>
-        <Box display='flex' alignItems='center' gap={1}>
+      <Box
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          flexWrap: 'wrap',
+          gap: 1
+        }}
+      >
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 1
+          }}
+        >
           <Button
             startIcon={<ArrowLeftOutlined />}
             onClick={() => navigate('/prestamos')}
@@ -69,7 +94,11 @@ const LoanDetail = () => {
           <Typography variant='h4'>{loan.name}</Typography>
           <BankIcon name={linkedAccount?.bank ?? ''} width={24} height={24} />
         </Box>
-        <Stack direction='row' spacing={1} flexWrap='wrap'>
+        <Stack
+          direction='row' spacing={1} sx={{
+            flexWrap: 'wrap'
+          }}
+        >
           <Button variant='outlined' onClick={() => setActiveModal({ type: 'amortize' })}>
             Amortización extra
           </Button>
@@ -84,17 +113,14 @@ const LoanDetail = () => {
           </Button>
         </Stack>
       </Box>
-
       {/* Stats */}
       <LoanStatsPanel stats={loan.stats} />
-
       {/* Simulator */}
       <LoanSimulator
         loanId={id}
         monthlyPayment={loan.stats.currentPayment}
         pendingAmount={loan.pendingAmount}
       />
-
       {/* Amortization table */}
       <LoanAmortizationTable
         rows={loan.amortizationTable}
@@ -102,7 +128,6 @@ const LoanDetail = () => {
         onEditPayment={(row) => setActiveModal({ type: 'editPayment', data: row })}
         onPayPayment={(row) => setActiveModal({ type: 'pay', data: row })}
       />
-
       {/* Modals */}
       {activeModal?.type === 'deletePayment' && (
         <LoanDeletePaymentModal

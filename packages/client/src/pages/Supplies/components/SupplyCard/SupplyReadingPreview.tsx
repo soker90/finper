@@ -25,7 +25,7 @@ const SupplyReadingPreview = ({ readings, isElectricity, unit }: Props) => {
     <>
       <Divider />
       <Box sx={{ bgcolor: 'action.hover', borderRadius: 1, px: 1, py: 0.5, mx: -1 }}>
-        <Typography variant='body2' color='textSecondary' fontWeight={600} display='block' mb={0.5}>
+        <Typography variant='body2' color='textSecondary' sx={{ fontWeight: 600, display: 'block', mb: 0.5 }}>
           Últimas lecturas
         </Typography>
         <List dense disablePadding>
@@ -41,11 +41,11 @@ const SupplyReadingPreview = ({ readings, isElectricity, unit }: Props) => {
                 <ListItemText
                   primary={
                     <Box>
-                      <Box display='flex' justifyContent='space-between' alignItems='center'>
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                         <Typography variant='body2' color='textSecondary'>
                           {dateLabel}
                         </Typography>
-                        <Typography variant='body2' fontWeight={600}>
+                        <Typography variant='body2' sx={{ fontWeight: 600 }}>
                           {getConsumptionLabel(reading, isElectricity, unit)}
                         </Typography>
                       </Box>

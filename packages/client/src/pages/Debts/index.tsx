@@ -25,7 +25,14 @@ const Debts = () => {
         buttons={[{ Icon: PlusOutlined, title: 'Nueva', onClick: handleClickNew }]}
         desktopSx={{ marginTop: -7 }}
       />
-      <Grid container spacing={3} mb={2} mt={2}>
+      <Grid
+        container
+        spacing={3}
+        sx={{
+          mb: 2,
+          mt: 2
+        }}
+      >
         {debtsByPerson.map((debt) => (
           <Grid size={{ xs: 6, sm: 4, md: 3, lg: 2 }} key={debt._id}>
             <DebtCard person={debt._id} amount={debt.total} />

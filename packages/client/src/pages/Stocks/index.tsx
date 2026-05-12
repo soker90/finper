@@ -54,8 +54,11 @@ const Stocks = () => {
         ]}
         desktopSx={{ marginTop: -7 }}
       />
-
-      <Grid container spacing={3} my={3}>
+      <Grid
+        container spacing={3} sx={{
+          my: 3
+        }}
+      >
         <Grid size={{ xs: 6, sm: 4, md: 3 }}>
           <StockStatCard title='Coste total' value={summary.totalCost} />
         </Grid>
@@ -69,9 +72,7 @@ const Stocks = () => {
           <StockStatCard title='Rentabilidad (%)' value={summary.totalGainLossPct} currency={false} colorize />
         </Grid>
       </Grid>
-
       <StocksTable positions={positions} onDeletePurchase={deleteStock} />
-
       {showModal && (
         <AddStockModal
           defaultType={showModal}

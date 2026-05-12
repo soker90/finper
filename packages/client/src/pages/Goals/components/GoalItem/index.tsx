@@ -42,7 +42,7 @@ const GoalItem: FC<GoalItemProps> = ({ goal, forceExpand, cancelCreate }) => {
             <GoalIcon name={goal.icon} color={goal.color} className={styles.goalIcon} />
             <span>{goal.name}</span>
           </div>
-          <Box display='flex' alignItems='center' gap={0.5}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
             {goal._id && (
               <>
                 <IconButton
@@ -69,14 +69,14 @@ const GoalItem: FC<GoalItemProps> = ({ goal, forceExpand, cancelCreate }) => {
           </Box>
         </ItemContent>
         {goal._id && (
-          <Box px={2} pb={1.5}>
+          <Box sx={{ px: 2, pb: 1.5 }}>
             <LinearProgress
               variant='determinate'
               value={progress}
               sx={{ height: 8, borderRadius: 3, backgroundColor: theme.palette.grey[200] }}
               color={progress >= 100 ? 'success' : 'primary'}
             />
-            <Typography variant='caption' color='textSecondary' display='block' mt={0.5}>
+            <Typography variant='caption' color='textSecondary' sx={{ display: 'block', mt: 0.5 }}>
               {progress}% — {format.euro(goal.currentAmount)} / {format.euro(goal.targetAmount)}
               {goal.deadline && ` • ${new Date(goal.deadline).toLocaleDateString('es-ES')}`}
             </Typography>

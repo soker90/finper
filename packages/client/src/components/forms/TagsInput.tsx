@@ -1,9 +1,11 @@
 import { Autocomplete, Chip, Grid, InputLabel, Stack, TextField } from '@mui/material'
+
 import { Control, Controller } from 'react-hook-form'
 import { sanitizeTag } from 'utils'
 
 interface TagsInputProps {
   name: string
+
   control: Control<any>
   availableTags: string[]
   label?: string
@@ -31,9 +33,9 @@ const TagsInput = ({ name, control, availableTags, label = 'Etiquetas', size = 4
                   .filter(Boolean)
                 field.onChange([...new Set(sanitized)])
               }}
-              renderTags={(value: readonly string[], getTagProps) =>
+              renderValue={(value: readonly string[], getItemProps) =>
                 value.map((option: string, index: number) => {
-                  const { key, ...tagProps } = getTagProps({ index })
+                  const { key, ...tagProps } = getItemProps({ index })
                   return (
                     <Chip
                       key={key}

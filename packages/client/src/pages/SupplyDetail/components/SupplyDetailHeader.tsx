@@ -22,8 +22,22 @@ const SupplyDetailHeader = ({ supply, onBack, onAddReading, onEditSupply, onComp
   ]
 
   return (
-    <Box display='flex' alignItems='center' justifyContent='space-between' flexWrap='wrap' gap={1}>
-      <Box display='flex' alignItems='center' gap={1}>
+    <Box
+      sx={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        flexWrap: 'wrap',
+        gap: 1
+      }}
+    >
+      <Box
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 1
+        }}
+      >
         <Button startIcon={<ArrowLeftOutlined />} onClick={onBack} size='small'>
           Volver
         </Button>

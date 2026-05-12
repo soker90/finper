@@ -25,8 +25,17 @@ const StoreTooltip = ({ active, payload }: StoreTooltipProps) => {
         minWidth: 140
       }}
     >
-      <Typography variant='body2' fontWeight={600}>{entry.payload.name}</Typography>
-      <Typography variant='body1' fontWeight={700} color='primary'>
+      <Typography
+        variant='body2' sx={{
+          fontWeight: 600
+        }}
+      >{entry.payload.name}
+      </Typography>
+      <Typography
+        variant='body1' color='primary' sx={{
+          fontWeight: 700
+        }}
+      >
         {format.euro(Number(entry.value))}
       </Typography>
     </Box>

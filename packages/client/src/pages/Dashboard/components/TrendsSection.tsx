@@ -35,7 +35,6 @@ const TrendsSection = ({ stats, tickets, ticketsEnabled, ticketsLoading, chartHe
   return (
     <>
       <SectionTitle>Tendencias</SectionTitle>
-
       <Grow in timeout={800}>
         <Grid size={{ xs: 12, md: 8 }}>
           <MainCard title='Ingresos vs Gastos — últimos 6 meses' sx={hoverCardSx}>
@@ -74,7 +73,6 @@ const TrendsSection = ({ stats, tickets, ticketsEnabled, ticketsLoading, chartHe
           </MainCard>
         </Grid>
       </Grow>
-
       <Grow in timeout={900}>
         <Grid size={{ xs: 12, md: 4 }}>
           <MainCard
@@ -85,7 +83,14 @@ const TrendsSection = ({ stats, tickets, ticketsEnabled, ticketsLoading, chartHe
               {/* Tickets */}
               {ticketsEnabled && (
                 <>
-                  <Stack direction='row' alignItems='center' spacing={1.5} sx={{ py: 1 }}>
+                  <Stack
+                    direction='row'
+                    spacing={1.5}
+                    sx={{
+                      alignItems: 'center',
+                      py: 1
+                    }}
+                  >
                     <Avatar sx={{ bgcolor: tickets.length > 0 ? 'warning.lighter' : 'success.lighter', width: 32, height: 32 }}>
                       <FileTextOutlined style={{ fontSize: 14, color: tickets.length > 0 ? '#faad14' : '#52c41a' }} />
                     </Avatar>

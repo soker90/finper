@@ -24,7 +24,12 @@ const SupplyReadingList = ({ readings, isLoading, isElectricity, unit, onAdd, on
   ], [onEdit, onDelete])
 
   const emptyNode = (
-    <Typography color='text.secondary' py={1}>
+    <Typography
+      sx={{
+        color: 'text.secondary',
+        py: 1
+      }}
+    >
       Sin lecturas registradas. Pulsa&nbsp;
       <Typography
         component='span'
@@ -51,7 +56,11 @@ const SupplyReadingList = ({ readings, isLoading, isElectricity, unit, onAdd, on
       actions={actions}
       keyExtractor={(r) => r._id}
       emptyNode={isLoading
-        ? <Typography color='text.secondary'>Cargando lecturas…</Typography>
+        ? (
+          <Typography sx={{ color: 'text.secondary' }}>
+            Cargando lecturas…
+          </Typography>
+          )
         : emptyNode}
     />
   )

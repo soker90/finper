@@ -31,7 +31,13 @@ const TopCategoriesTreemap = ({ items, chartColors, growTimeout = 1300 }: TopCat
             title='Top gastos por categoría'
             sx={hoverCardSx}
             secondary={
-              <Stack direction='row' alignItems='center' gap={1}>
+              <Stack
+                direction='row'
+                sx={{
+                  alignItems: 'center',
+                  gap: 1
+                }}
+              >
                 <Typography variant='body2' color='textSecondary'>Este mes</Typography>
                 <Button
                   size='small'
@@ -67,7 +73,6 @@ const TopCategoriesTreemap = ({ items, chartColors, growTimeout = 1300 }: TopCat
           </MainCard>
         </Grid>
       </Grow>
-
       <CategoryBreakdownModal
         open={modalOpen}
         onClose={() => setModalOpen(false)}

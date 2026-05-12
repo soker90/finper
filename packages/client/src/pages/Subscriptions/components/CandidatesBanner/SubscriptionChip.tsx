@@ -37,7 +37,13 @@ const SubscriptionChip = ({ sub, disabled, onAssign }: Props) => (
       >
         {sub.name.charAt(0)}
       </Avatar>
-      <Typography variant='caption' fontWeight={600} color='primary.main'>
+      <Typography
+        variant='caption'
+        sx={{
+          fontWeight: 600,
+          color: 'primary.main'
+        }}
+      >
         {sub.name}
       </Typography>
       <Typography variant='caption' color='textSecondary'>

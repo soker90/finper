@@ -6,9 +6,11 @@ import { styles } from './styles'
 const SlashScreen = () => (
   <Container>
     <Box
-      display='flex'
-      justifyContent='center'
-      mb={6}
+      sx={{
+        display: 'flex',
+        justifyContent: 'center',
+        mb: 6
+      }}
     >
       <Logo sx={styles.logo} />
     </Box>

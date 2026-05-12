@@ -50,7 +50,13 @@ const SupplyDetail = () => {
 
   if (loadingSupplies) {
     return (
-      <Box display='flex' justifyContent='center' mt={6}>
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'center',
+          mt: 6
+        }}
+      >
         <CircularProgress />
       </Box>
     )
@@ -58,8 +64,13 @@ const SupplyDetail = () => {
 
   if (!supply) {
     return (
-      <Typography color='textSecondary' mt={4} textAlign='center'>
-        Suministro no encontrado.
+      <Typography
+        color='textSecondary'
+        sx={{
+          mt: 4,
+          textAlign: 'center'
+        }}
+      >Suministro no encontrado.
       </Typography>
     )
   }

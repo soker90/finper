@@ -11,7 +11,14 @@ const TransacionsFilter = ({ filters, setFilter, resetFilter }: FilterParams) =>
   const { accounts } = useAccounts()
   const { stores } = useStores()
   return (
-    <Grid container spacing={1} mt={1} mb={1}>
+    <Grid
+      container
+      spacing={1}
+      sx={{
+        mt: 1,
+        mb: 1
+      }}
+    >
       <SelectForm
         id='account' label='Cuenta'
         options={accounts || []}
@@ -65,7 +72,6 @@ const TransacionsFilter = ({ filters, setFilter, resetFilter }: FilterParams) =>
         <Button startIcon={<ClearOutlined />} size='small' onClick={resetFilter}>Limpiar</Button>
       </Grid>
     </Grid>
-
   )
 }
 

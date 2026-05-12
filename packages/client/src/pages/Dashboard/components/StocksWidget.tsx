@@ -16,12 +16,17 @@ const StocksWidget = () => {
   return (
     <>
       <SectionTitle>Cartera de acciones</SectionTitle>
-
       <Grow in timeout={400}>
         <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <MainCard contentSX={{ p: 2.25 }} sx={hoverCardSx}>
             <Stack spacing={0.5}>
-              <Stack direction='row' alignItems='center' justifyContent='space-between'>
+              <Stack
+                direction='row'
+                sx={{
+                  alignItems: 'center',
+                  justifyContent: 'space-between'
+                }}
+              >
                 <Typography variant='body1' color='textSecondary'>Coste invertido</Typography>
                 <Avatar sx={{ bgcolor: 'primary.lighter', color: 'primary.main', width: 36, height: 36 }}>
                   <FundOutlined />
@@ -35,12 +40,17 @@ const StocksWidget = () => {
           </MainCard>
         </Grid>
       </Grow>
-
       <Grow in timeout={500}>
         <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <MainCard contentSX={{ p: 2.25 }} sx={hoverCardSx}>
             <Stack spacing={0.5}>
-              <Stack direction='row' alignItems='center' justifyContent='space-between'>
+              <Stack
+                direction='row'
+                sx={{
+                  alignItems: 'center',
+                  justifyContent: 'space-between'
+                }}
+              >
                 <Typography variant='body1' color='textSecondary'>Valor actual</Typography>
                 <Avatar sx={{ bgcolor: 'success.lighter', color: 'success.main', width: 36, height: 36 }}>
                   <FundOutlined />

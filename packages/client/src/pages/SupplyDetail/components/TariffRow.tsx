@@ -72,15 +72,14 @@ const TariffRow = ({ row, isBest }: Props) => {
           </Typography>
         </TableCell>
         <TableCell align='right'>
-          <Typography variant='caption' fontWeight={700}>
+          <Typography variant='caption' sx={{ fontWeight: 700 }}>
             {format.euro(invoice.newTariffSimulatedAmount)}
           </Typography>
         </TableCell>
         <TableCell align='right'>
           <Typography
             variant='caption'
-            fontWeight={700}
-            color={getSavingsColor(difference)}
+            sx={{ fontWeight: 700, color: getSavingsColor(difference) }}
           >
             {format.euro(Math.abs(difference))}
           </Typography>
@@ -115,12 +114,11 @@ const TariffRow = ({ row, isBest }: Props) => {
           <Stack>
             <Typography
               variant='subtitle1'
-              fontWeight={getPriceTextColor(isBest)}
-              color={getPriceTitleColor(isBest)}
+              sx={{ fontWeight: getPriceTextColor(isBest), color: getPriceTitleColor(isBest) }}
             >
               {row.retailer}
             </Typography>
-            <Stack direction='row' spacing={1} alignItems='center'>
+            <Stack direction='row' spacing={1} sx={{ alignItems: 'center' }}>
               <Typography variant='body2' color='text.secondary'>
                 {row.tariffName}
               </Typography>
@@ -146,8 +144,8 @@ const TariffRow = ({ row, isBest }: Props) => {
           </Stack>
         </TableCell>
         <TableCell align='center'>
-          <Stack spacing={0.5} alignItems='center'>
-            <Typography variant='caption' fontWeight={600} sx={{ bgcolor: 'grey.100', px: 1, borderRadius: 1 }}>
+          <Stack spacing={0.5} sx={{ alignItems: 'center' }}>
+            <Typography variant='caption' sx={{ fontWeight: 600, bgcolor: 'grey.100', px: 1, borderRadius: 1 }}>
               P: {row.peakPower} / {row.offPeakPower}
             </Typography>
             <Typography variant='caption' color='text.secondary'>
@@ -156,12 +154,12 @@ const TariffRow = ({ row, isBest }: Props) => {
           </Stack>
         </TableCell>
         <TableCell align='right'>
-          <Stack alignItems='flex-end'>
-            <Typography variant='subtitle1' fontWeight={700}>
+          <Stack sx={{ alignItems: 'flex-end' }}>
+            <Typography variant='subtitle1' sx={{ fontWeight: 700 }}>
               {format.euro(row.estimatedAnnualTotal)}
             </Typography>
             {row.firstYearTotal !== null && (
-              <Typography variant='caption' color='secondary' fontWeight={700}>
+              <Typography variant='caption' color='secondary' sx={{ fontWeight: 700 }}>
                 1er año: {format.euro(row.firstYearTotal)}
               </Typography>
             )}
@@ -171,8 +169,7 @@ const TariffRow = ({ row, isBest }: Props) => {
           <Typography
             variant='h6'
             component='span'
-            fontWeight={700}
-            color={getSavingsColor(row.estimatedAnnualSavings)}
+            sx={{ fontWeight: 700, color: getSavingsColor(row.estimatedAnnualSavings) }}
           >
             {savingsLabel === 'saving' ? '+' : ''}
             {format.euro(row.estimatedAnnualSavings)}
@@ -183,7 +180,7 @@ const TariffRow = ({ row, isBest }: Props) => {
         <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={5}>
           <Collapse in={open} timeout='auto' unmountOnExit>
             <Box sx={{ margin: 2, bgcolor: 'grey.50', p: 2, borderRadius: 2 }}>
-              <Typography variant='subtitle2' gutterBottom component='div' fontWeight={700}>
+              <Typography variant='subtitle2' gutterBottom component='div' sx={{ fontWeight: 700 }}>
                 {TARIFF_ROW_LABELS.projectionTitle}
               </Typography>
               <Table size='small' aria-label='invoices'>
@@ -191,7 +188,7 @@ const TariffRow = ({ row, isBest }: Props) => {
                   <TableRow>
                     {INVOICE_TABLE_COLUMNS.map((column) => (
                       <TableCell key={column.id} align={column.align}>
-                        <Typography variant='caption' fontWeight={700}>
+                        <Typography variant='caption' sx={{ fontWeight: 700 }}>
                           {column.label}
                         </Typography>
                       </TableCell>

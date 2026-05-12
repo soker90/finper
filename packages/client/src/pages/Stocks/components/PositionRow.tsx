@@ -26,7 +26,11 @@ const PositionRow = ({ position, onDeletePurchase }: Props) => {
           </IconButton>
         </TableCell>
         <TableCell>
-          <Typography fontWeight={600}>{position.ticker}</Typography>
+          <Typography sx={{
+            fontWeight: 600
+          }}
+          >{position.ticker}
+          </Typography>
           <Typography variant='caption' color='textSecondary'>{position.name}</Typography>
         </TableCell>
         <TableCell align='right'>

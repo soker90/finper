@@ -37,24 +37,33 @@ const Supplies = () => {
         buttons={[{ Icon: PlusOutlined, title: 'Nuevo inmueble', onClick: () => setShowPropertyForm(true) }]}
         desktopSx={{ marginTop: -7, marginBottom: 2 }}
       />
-
       {isLoading && (
         <Box sx={{ py: 4, textAlign: 'center' }}>
-          <Typography color='text.secondary'>Cargando suministros…</Typography>
+          <Typography sx={{
+            color: 'text.secondary'
+          }}
+          >Cargando suministros…
+          </Typography>
         </Box>
       )}
-
       {!isLoading && properties.length === 0 && (
         <Box sx={{ py: 8, textAlign: 'center' }}>
-          <Typography variant='h6' color='text.secondary' gutterBottom>
+          <Typography
+            variant='h6' gutterBottom sx={{
+              color: 'text.secondary'
+            }}
+          >
             Aún no tienes inmuebles
           </Typography>
-          <Typography variant='body2' color='text.secondary'>
+          <Typography
+            variant='body2' sx={{
+              color: 'text.secondary'
+            }}
+          >
             Pulsa «Nuevo inmueble» para empezar a registrar tus suministros.
           </Typography>
         </Box>
       )}
-
       {!isLoading && properties.map((property) => (
         <PropertyCard
           key={property._id}
@@ -66,7 +75,6 @@ const Supplies = () => {
           onDeleteSupply={removeSupply}
         />
       ))}
-
       {(showPropertyForm || Boolean(editProperty)) && (
         <PropertyForm
           property={editProperty}

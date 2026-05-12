@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useForm } from 'react-hook-form'
+import { useForm, type Control } from 'react-hook-form'
 import { Button, FormHelperText, Grid } from '@mui/material'
 import { mutate } from 'swr'
 
@@ -127,7 +127,7 @@ const TransactionEdit = ({
 
         <TagsInput
           name='tags'
-          control={control}
+          control={control as unknown as Control<any>}
           availableTags={availableTags}
           label='Etiquetas'
           size={2}

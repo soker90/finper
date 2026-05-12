@@ -22,10 +22,10 @@ export default function TableCell (theme: Theme) {
         root: {
           fontSize: '0.875rem',
           padding: 12,
-          borderColor: theme.palette.divider
-        },
-        sizeSmall: {
-          padding: 8
+          borderColor: theme.palette.divider,
+          '&.MuiTableCell-sizeSmall': {
+            padding: 8
+          }
         },
         head: {
           fontSize: '0.75rem',

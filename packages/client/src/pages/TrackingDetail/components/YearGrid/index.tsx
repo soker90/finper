@@ -27,10 +27,22 @@ const YearGrid = ({ tagName, years, compact = false }: YearGridProps) => {
             onClick={() => navigate(`/seguimientos/${tagName}/${yearData.year}`)}
           >
             <Stack spacing={0.5}>
-              <Typography variant={compact ? 'body2' : 'h6'} fontWeight={600} color='text.secondary'>
+              <Typography
+                variant={compact ? 'body2' : 'h6'}
+                sx={{
+                  fontWeight: 600,
+                  color: 'text.secondary'
+                }}
+              >
                 {yearData.year}
               </Typography>
-              <Typography variant={compact ? 'body1' : 'h5'} fontWeight={600} color='text.primary'>
+              <Typography
+                variant={compact ? 'body1' : 'h5'}
+                sx={{
+                  fontWeight: 600,
+                  color: 'text.primary'
+                }}
+              >
                 {format.euro(yearData.totalAmount)}
               </Typography>
               <Chip label={`${yearData.transactionCount} mov.`} size='small' variant='outlined' sx={{ alignSelf: 'flex-start' }} />

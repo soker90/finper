@@ -36,15 +36,15 @@ const WinnerCard = ({ winner }: Props) => (
       }}
     >
       <TrophyOutlined />
-      <Typography variant='caption' fontWeight={700}>MEJOR OPCIÓN</Typography>
+      <Typography variant='caption' sx={{ fontWeight: 700 }}>MEJOR OPCIÓN</Typography>
     </Box>
-    <Grid container spacing={4} alignItems='center' sx={{ p: 4 }}>
+    <Grid container spacing={4} sx={{ alignItems: 'center', p: 4 }}>
       <Grid size={{ xs: 12, md: 7 }}>
-        <Typography variant='overline' color='success.main' fontWeight={800} letterSpacing={1.2}>
+        <Typography variant='overline' color='success.main' sx={{ fontWeight: 800, letterSpacing: 1.2 }}>
           RECOMENDACIÓN PERSONALIZADA
         </Typography>
-        <Stack direction='row' spacing={2} alignItems='center' sx={{ mb: 2 }}>
-          <Typography variant='h3' fontWeight={800} sx={{ mb: 0 }}>
+        <Stack direction='row' spacing={2} sx={{ alignItems: 'center', mb: 2 }}>
+          <Typography variant='h3' sx={{ fontWeight: 800, mb: 0 }}>
             {winner.retailer}
           </Typography>
           {winner.discount && (
@@ -57,7 +57,7 @@ const WinnerCard = ({ winner }: Props) => (
             />
           )}
         </Stack>
-        <Typography variant='h6' color='text.secondary' fontWeight={500}>
+        <Typography variant='h6' color='text.secondary' sx={{ fontWeight: 500 }}>
           Tarifa: {winner.tariffName}
         </Typography>
       </Grid>
@@ -78,13 +78,13 @@ const WinnerCard = ({ winner }: Props) => (
           <Typography
             variant='h2'
             color={winner.estimatedAnnualSavings > 0 ? 'success.main' : 'error.main'}
-            fontWeight={900}
+            sx={{ fontWeight: 900 }}
             gutterBottom={winner.firstYearTotal !== null}
           >
             {format.euro(Math.abs(winner.estimatedAnnualSavings))}
           </Typography>
           {winner.firstYearTotal !== null && (
-            <Typography variant='subtitle1' color='secondary' fontWeight={800} sx={{ mb: 1 }}>
+            <Typography variant='subtitle1' color='secondary' sx={{ fontWeight: 800, mb: 1 }}>
               1er año: {format.euro(winner.firstYearTotal)}
             </Typography>
           )}

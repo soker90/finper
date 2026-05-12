@@ -48,8 +48,16 @@ const LoanSimulator = ({ loanId, monthlyPayment, pendingAmount }: Props) => {
           ¿Qué pasa si hago un pago puntual de capital?
         </Typography>
 
-        <Stack spacing={2} mt={2}>
-          <Stack direction='row' spacing={2} alignItems='center'>
+        <Stack
+          spacing={2} sx={{
+            mt: 2
+          }}
+        >
+          <Stack
+            direction='row' spacing={2} sx={{
+              alignItems: 'center'
+            }}
+          >
             <Slider
               value={lumpSum}
               onChange={handleSliderChange}
@@ -65,7 +73,7 @@ const LoanSimulator = ({ loanId, monthlyPayment, pendingAmount }: Props) => {
               type='number'
               value={lumpSum}
               onChange={handleInputChange}
-              inputProps={{ min: 0, max: maxAmount, step: 1 }}
+              slotProps={{ htmlInput: { min: 0, max: maxAmount, step: 1 } }}
               label='Importe'
               size='small'
               sx={{ width: 140 }}
@@ -73,7 +81,13 @@ const LoanSimulator = ({ loanId, monthlyPayment, pendingAmount }: Props) => {
           </Stack>
 
           {loading && (
-            <Box display='flex' justifyContent='center' py={2}>
+            <Box
+              sx={{
+                display: 'flex',
+                justifyContent: 'center',
+                py: 2
+              }}
+            >
               <CircularProgress size={24} />
             </Box>
           )}
@@ -82,7 +96,11 @@ const LoanSimulator = ({ loanId, monthlyPayment, pendingAmount }: Props) => {
 
           {result && !loading && (
             <Stack spacing={2}>
-              <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} useFlexGap flexWrap='wrap'>
+              <Stack
+                direction={{ xs: 'column', sm: 'row' }} spacing={1} useFlexGap sx={{
+                  flexWrap: 'wrap'
+                }}
+              >
                 <Typography variant='body2' color='textSecondary'>
                   Pago puntual: {format.euro(result.lumpSum)} — Capital restante: {format.euro(pendingAmount - result.lumpSum)}
                 </Typography>

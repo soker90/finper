@@ -33,7 +33,12 @@ const StocksTable = ({ positions, onDeletePurchase }: Props) => {
             ? (
               <TableRow>
                 <TableCell colSpan={8} align='center'>
-                  <Typography color='textSecondary' py={2}>No hay posiciones registradas</Typography>
+                  <Typography
+                    color='textSecondary' sx={{
+                      py: 2
+                    }}
+                  >No hay posiciones registradas
+                  </Typography>
                 </TableCell>
               </TableRow>
               )
@@ -42,7 +47,6 @@ const StocksTable = ({ positions, onDeletePurchase }: Props) => {
             ))}
         </TableBody>
       </ScrollableTable>
-
       {purchaseToDelete && (
         <RemoveModal
           title='Eliminar operación'

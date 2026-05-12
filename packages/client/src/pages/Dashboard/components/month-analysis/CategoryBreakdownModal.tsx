@@ -31,14 +31,19 @@ const CategoryBreakdownModal = ({
   return (
     <Dialog open={open} onClose={onClose} maxWidth='xs' fullWidth>
       <DialogTitle>
-        <Stack direction='row' alignItems='center' justifyContent='space-between'>
+        <Stack
+          direction='row'
+          sx={{
+            alignItems: 'center',
+            justifyContent: 'space-between'
+          }}
+        >
           <Typography variant='h6'>{title}</Typography>
           <IconButton size='small' onClick={onClose}>
             <CloseOutlined />
           </IconButton>
         </Stack>
       </DialogTitle>
-
       <DialogContent dividers>
         {items.length === 0
           ? (
@@ -53,19 +58,39 @@ const CategoryBreakdownModal = ({
                   <Stack
                     key={item.name}
                     direction='row'
-                    alignItems='center'
-                    justifyContent='space-between'
                     spacing={1}
+                    sx={{
+                      alignItems: 'center',
+                      justifyContent: 'space-between'
+                    }}
                   >
-                    <Stack direction='row' alignItems='center' gap={1} sx={{ minWidth: 0 }}>
+                    <Stack
+                      direction='row'
+                      sx={{
+                        alignItems: 'center',
+                        gap: 1,
+                        minWidth: 0
+                      }}
+                    >
                       <ColorDot color={color} size={10} />
                       <Typography variant='body2' noWrap>{item.name}</Typography>
                     </Stack>
-                    <Stack direction='row' alignItems='center' spacing={1.5} sx={{ flexShrink: 0 }}>
+                    <Stack
+                      direction='row'
+                      spacing={1.5}
+                      sx={{
+                        alignItems: 'center',
+                        flexShrink: 0
+                      }}
+                    >
                       <Typography variant='body2' color='textSecondary'>
                         {pct.toFixed(1)}%
                       </Typography>
-                      <Typography variant='body2' fontWeight={600}>
+                      <Typography
+                        variant='body2' sx={{
+                          fontWeight: 600
+                        }}
+                      >
                         {format.euro(item.amount)}
                       </Typography>
                     </Stack>

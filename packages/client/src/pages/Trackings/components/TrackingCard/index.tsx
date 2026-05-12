@@ -28,13 +28,28 @@ const TrackingCard = ({ tagStat, year }: { tagStat: TagSummary; year?: number | 
     >
       <Stack spacing={1.5}>
         {/* Header: nombre + conteo */}
-        <Stack direction='row' justifyContent='space-between' alignItems='center'>
-          <Typography variant='h5' fontWeight={600}>{tagStat.tag}</Typography>
+        <Stack
+          direction='row'
+          sx={{
+            justifyContent: 'space-between',
+            alignItems: 'center'
+          }}
+        >
+          <Typography
+            variant='h5' sx={{
+              fontWeight: 600
+            }}
+          >{tagStat.tag}
+          </Typography>
           <Chip label={`${tagStat.transactionCount} mov.`} size='small' variant='outlined' />
         </Stack>
 
         {/* Total */}
-        <Typography variant='h4' color='text.primary'>
+        <Typography
+          variant='h4' sx={{
+            color: 'text.primary'
+          }}
+        >
           {format.euro(tagStat.totalAmount)}
         </Typography>
 
@@ -65,12 +80,32 @@ const TrackingCard = ({ tagStat, year }: { tagStat: TagSummary; year?: number | 
         {tagStat.byCategory.length > 0 && (
           <Stack spacing={0.75}>
             {tagStat.byCategory.slice(0, 4).map((cat, index) => (
-              <Stack key={cat.categoryId} direction='row' justifyContent='space-between' alignItems='center'>
-                <Stack direction='row' spacing={1} alignItems='center'>
+              <Stack
+                key={cat.categoryId}
+                direction='row'
+                sx={{
+                  justifyContent: 'space-between',
+                  alignItems: 'center'
+                }}
+              >
+                <Stack
+                  direction='row' spacing={1} sx={{
+                    alignItems: 'center'
+                  }}
+                >
                   <ColorDot color={chartColors[index % chartColors.length]} size={10} />
-                  <Typography variant='body2' color='text.secondary'>{cat.categoryName}</Typography>
+                  <Typography
+                    variant='body2' sx={{
+                      color: 'text.secondary'
+                    }}
+                  >{cat.categoryName}
+                  </Typography>
                 </Stack>
-                <Typography variant='body2' fontWeight={500}>
+                <Typography
+                  variant='body2' sx={{
+                    fontWeight: 500
+                  }}
+                >
                   {format.euro(cat.amount)}
                 </Typography>
               </Stack>

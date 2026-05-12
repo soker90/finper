@@ -12,7 +12,6 @@ import Palette from './palette'
 import Typography from './typography'
 import CustomShadows from './shadows'
 import componentsOverride from './overrides'
-import { Theme } from '@emotion/react'
 
 // ==============================|| DEFAULT THEME - MAIN  ||============================== //
 
@@ -49,11 +48,11 @@ export default function ThemeCustomization ({ children }: { children: JSX.Elemen
   )
 
   const themes = createTheme(themeOptions, esES, coreEsES)
-  const components = componentsOverride(themes as Theme)
+  const components = componentsOverride(themes)
 
   return (
     <StyledEngineProvider injectFirst>
-      <ThemeProvider theme={{ ...themes, components }}>
+      <ThemeProvider theme={createTheme(themes, { components })}>
         <CssBaseline />
         {children}
       </ThemeProvider>

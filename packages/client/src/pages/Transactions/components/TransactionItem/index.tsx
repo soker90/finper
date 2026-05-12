@@ -39,7 +39,7 @@ const TransactionItem: FC<TransactionItemProps> = ({ transaction, forceExpand, c
               />
               <span>{format.dateShort(transaction.date)}</span>
             </div>
-            <Stack spacing={1} direction='row' alignItems='center' pr={isDesktop ? '50%' : undefined}>
+            <Stack spacing={1} direction='row' sx={{ alignItems: 'center', pr: isDesktop ? '50%' : undefined }}>
               <Typography variant='body1'>{transaction.category?.name}</Typography>
               {transaction.store && <Typography variant='body1'>({transaction.store?.name})</Typography>}
               {transaction.tags?.map((tag) => (

@@ -29,12 +29,25 @@ const TreemapTooltip = ({ active, payload }: TreemapTooltipProps) => {
       }}
     >
       {item.parentName && (
-        <Typography variant='caption' color='textSecondary' display='block'>
+        <Typography
+          variant='caption' color='textSecondary' sx={{
+            display: 'block'
+          }}
+        >
           {item.parentName}
         </Typography>
       )}
-      <Typography variant='body2' fontWeight={600}>{item.name}</Typography>
-      <Typography variant='body1' fontWeight={700} color='primary'>
+      <Typography
+        variant='body2' sx={{
+          fontWeight: 600
+        }}
+      >{item.name}
+      </Typography>
+      <Typography
+        variant='body1' color='primary' sx={{
+          fontWeight: 700
+        }}
+      >
         {format.euro(Number(item.amount ?? item.value))}
       </Typography>
     </Box>

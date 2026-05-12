@@ -44,13 +44,12 @@ const TagTransactionList = ({ transactions }: { transactions: Transaction[] }) =
               <TableCell align='right' sx={{ whiteSpace: 'nowrap' }}>
                 <Typography
                   variant='body2'
-                  fontWeight={600}
-                  color={AMOUNT_COLORS[transaction.type] ?? 'text.primary'}
+                  sx={{ fontWeight: 600, color: AMOUNT_COLORS[transaction.type] ?? 'text.primary' }}
                 >
                   {transaction.type === 'expense' ? '-' : '+'}{format.euro(transaction.amount)}
                 </Typography>
                 {transaction.note && (
-                  <Typography variant='caption' color='text.secondary' display='block'>
+                  <Typography variant='caption' color='text.secondary' sx={{ display: 'block' }}>
                     {transaction.note}
                   </Typography>
                 )}

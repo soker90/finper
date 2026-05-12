@@ -28,7 +28,14 @@ export const SubscriptionsSummary = ({ subscriptions }: SummaryProps) => {
   const activeCount = subscriptions.length
 
   return (
-    <Grid container spacing={3} mb={3} mt={2}>
+    <Grid
+      container
+      spacing={3}
+      sx={{
+        mb: 3,
+        mt: 2
+      }}
+    >
       <Grid size={{ xs: 12, sm: 4 }}>
         <KpiCard
           title='Gasto mensual'

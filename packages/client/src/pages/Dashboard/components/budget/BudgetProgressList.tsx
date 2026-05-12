@@ -23,7 +23,7 @@ const BudgetProgressList = ({
     <Stack spacing={2}>
       {rows.map(row => (
         <Box key={row.name}>
-          <Stack direction='row' justifyContent='space-between' sx={{ mb: 0.5 }}>
+          <Stack direction='row' sx={{ justifyContent: 'space-between', mb: 0.5 }}>
             <Typography variant='body1'>{row.name}</Typography>
             <Typography variant='body1' color={row.over ? 'error.main' : 'textSecondary'}>
               {format.euro(row.real)}
