@@ -8,12 +8,14 @@ const BAR_HEIGHTS = [120, 200, 80, 160, 220, 100, 180, 240, 90, 150, 210, 70]
 
 export const BudgetCardSkeleton = () => (
   <Grid size={{ xs: 12, md: 4 }}>
-    <Skeleton variant='rounded' height={240} sx={{ borderRadius: 2 }} />
+    <MainCard sx={{ height: 240, borderRadius: 2 }}>
+      <Skeleton variant='rounded' height='100%' />
+    </MainCard>
   </Grid>
 )
 
-export const PieChartSkeleton = () => (
-  <Stack alignItems='center' justifyContent='center' sx={{ height: 270 }}>
+export const PieChartSkeleton = ({ height = 270 }: { height?: number }) => (
+  <Stack alignItems='center' justifyContent='center' sx={{ height }}>
     <Skeleton variant='circular' width={160} height={160} />
     <Stack spacing={1} sx={{ mt: 3, width: '100%', px: 2 }}>
       {[...Array(3)].map((_, i) => (

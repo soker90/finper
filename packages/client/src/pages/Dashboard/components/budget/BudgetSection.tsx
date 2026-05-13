@@ -7,6 +7,7 @@ import AccountsPieChart from './AccountsPieChart'
 import PensionCard from './PensionCard'
 import { BudgetCardSkeleton, PieChartSkeleton } from '../DashboardStates'
 import MainCard from 'components/MainCard'
+import { hoverCardSx } from '../shared'
 
 interface BudgetSectionProps {
   stats: DashboardStats
@@ -71,8 +72,8 @@ const BudgetSection = ({
         <Stack spacing={3}>
           {accountsLoading
             ? (
-              <MainCard title='Distribución por cuentas'>
-                <PieChartSkeleton />
+              <MainCard title='Distribución por cuentas' sx={hoverCardSx}>
+                <PieChartSkeleton height={isMobile ? 280 : 270} />
               </MainCard>
               )
             : (

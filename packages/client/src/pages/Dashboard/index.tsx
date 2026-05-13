@@ -26,7 +26,7 @@ const Dashboard = () => {
   const chartColors = useChartColors()
 
   const { stats, loading, error, retry } = useDashboardStats()
-  const { tickets, ticketsEnabled } = useTickets()
+  const { tickets, ticketsEnabled, isLoading: ticketsLoading } = useTickets()
   const { accounts, isLoading: accountsLoading } = useAccounts()
   const {
     expenses: budgetExpenses,
@@ -45,7 +45,7 @@ const Dashboard = () => {
     <Grid container spacing={3}>
       <KpiSummary stats={stats} />
 
-      <TrendsSection stats={stats} tickets={tickets ?? []} ticketsEnabled={ticketsEnabled} chartHeight={chartHeight} />
+      <TrendsSection stats={stats} tickets={tickets ?? []} ticketsEnabled={ticketsEnabled} ticketsLoading={ticketsLoading} chartHeight={chartHeight} />
 
       <SpendingRhythm stats={stats} chartHeight={chartHeight} />
 

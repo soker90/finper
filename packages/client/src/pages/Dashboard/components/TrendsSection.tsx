@@ -18,10 +18,11 @@ interface TrendsSectionProps {
   stats: DashboardStats
   tickets: Ticket[]
   ticketsEnabled: boolean
+  ticketsLoading: boolean
   chartHeight: number
 }
 
-const TrendsSection = ({ stats, tickets, ticketsEnabled, chartHeight }: TrendsSectionProps) => {
+const TrendsSection = ({ stats, tickets, ticketsEnabled, ticketsLoading, chartHeight }: TrendsSectionProps) => {
   const theme = useTheme()
   const navigate = useNavigate()
 
@@ -90,7 +91,7 @@ const TrendsSection = ({ stats, tickets, ticketsEnabled, chartHeight }: TrendsSe
                     </Avatar>
                     <Box sx={{ flex: 1, minWidth: 0 }}>
                       <Typography variant='body2' color='textSecondary'>Tickets pendientes</Typography>
-                      <Typography variant='subtitle1'>{tickets.length}</Typography>
+                      <Typography variant='subtitle1'>{ticketsLoading ? '...' : tickets.length}</Typography>
                     </Box>
                     {tickets.length > 0 && (
                       <Button
