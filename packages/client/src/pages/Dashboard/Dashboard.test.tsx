@@ -221,10 +221,10 @@ describe('Dashboard', () => {
       expect(await findByText('¡Racha de ahorro!')).toBeDefined()
       expect(await findByText('Presupuesto en riesgo')).toBeDefined()
 
-      // MUI Alert severity classes
-      const warningAlert = container.querySelector('.MuiAlert-standardWarning, .MuiAlert-outlinedWarning')
-      const successAlert = container.querySelector('.MuiAlert-standardSuccess, .MuiAlert-outlinedSuccess')
-      const errorAlert = container.querySelector('.MuiAlert-standardError, .MuiAlert-outlinedError')
+      // MUI Alert severity classes (v9: uses colorX + variant classes)
+      const warningAlert = container.querySelector('.MuiAlert-colorWarning')
+      const successAlert = container.querySelector('.MuiAlert-colorSuccess')
+      const errorAlert = container.querySelector('.MuiAlert-colorError')
 
       expect(warningAlert).not.toBeNull()
       expect(successAlert).not.toBeNull()

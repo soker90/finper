@@ -57,7 +57,7 @@ const SupplyYearStats = ({ readings, isElectricity, unit }: Props) => {
 
         <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <Typography variant='caption' color='text.secondary'>Periodo de mayor consumo</Typography>
-          <Typography variant='body1' fontWeight={600}>
+          <Typography variant='body1' sx={{ fontWeight: 600 }}>
             {dayjs(topReading.startDate).format('DD/MM/YYYY')} - {dayjs(topReading.endDate).format('DD/MM/YYYY')}
           </Typography>
         </Grid>

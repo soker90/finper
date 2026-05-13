@@ -15,7 +15,13 @@ export interface KpiCardProps {
 const KpiCard = ({ title, value, subtitle, icon, trend, color = 'primary' }: KpiCardProps) => (
   <MainCard contentSX={{ p: 2.25 }} sx={hoverCardSx}>
     <Stack spacing={0.5}>
-      <Stack direction='row' alignItems='center' justifyContent='space-between'>
+      <Stack
+        direction='row'
+        sx={{
+          alignItems: 'center',
+          justifyContent: 'space-between'
+        }}
+      >
         <Typography variant='body1' color='textSecondary'>
           {title}
         </Typography>
@@ -23,7 +29,11 @@ const KpiCard = ({ title, value, subtitle, icon, trend, color = 'primary' }: Kpi
           {icon}
         </Avatar>
       </Stack>
-      <Stack direction='row' alignItems='center'>
+      <Stack
+        direction='row' sx={{
+          alignItems: 'center'
+        }}
+      >
         <Typography variant='h4'>{value}</Typography>
         {trend}
       </Stack>

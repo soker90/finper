@@ -16,7 +16,11 @@ const DrawerHeader = ({ open }: { open: boolean }) => {
       paddingBottom: theme.spacing(1.5)
     }}
     >
-      <Stack direction='row' spacing={1} alignItems='center'>
+      <Stack
+        direction='row' spacing={1} sx={{
+          alignItems: 'center'
+        }}
+      >
         <Logo />
         <Chip
           label={`v${__APP_VERSION__}`}

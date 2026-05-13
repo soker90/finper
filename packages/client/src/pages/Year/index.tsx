@@ -15,7 +15,11 @@ const Budgets = () => {
   return (
     <>
       <Header year={year ?? ''} />
-      <Grid container spacing={3} mb={3}>
+      <Grid
+        container spacing={3} sx={{
+          mb: 3
+        }}
+      >
         <Grid size={{ xs: 12, md: 4 }}>
           <YearCard title='Ingresos' data={incomes?.at?.(-1)?.total} color='info' />
         </Grid>
@@ -30,11 +34,15 @@ const Budgets = () => {
       <MainCard sx={{ mt: 2 }} content={false}>
         <YearTable data={expenses} />
       </MainCard>
-      <Typography variant='h5' mt={2}>INGRESOS</Typography>
+      <Typography
+        variant='h5' sx={{
+          mt: 2
+        }}
+      >INGRESOS
+      </Typography>
       <MainCard sx={{ mt: 2 }} content={false}>
         <YearTable data={incomes} />
       </MainCard>
-
     </>
   )
 }

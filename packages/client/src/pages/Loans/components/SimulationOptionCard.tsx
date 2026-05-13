@@ -36,7 +36,7 @@ const SimulationOptionCard = ({ title, chipLabel, option, variant, originalMonth
   return (
     <Card sx={{ flex: 1, bgcolor: `${config.color}.50` }} variant='outlined'>
       <CardContent>
-        <Stack direction='row' alignItems='center' spacing={1} mb={1}>
+        <Stack direction='row' sx={{ alignItems: 'center', mb: 1 }} spacing={1}>
           <Typography variant='subtitle2'>{title}</Typography>
           <Chip label={chipLabel} size='small' variant='outlined' />
         </Stack>

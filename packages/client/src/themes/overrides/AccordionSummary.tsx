@@ -1,5 +1,5 @@
 import { RightOutlined } from '@ant-design/icons'
-import { Theme } from '@emotion/react'
+import { type Theme } from '@mui/material/styles'
 
 export default function AccordionSummary (theme: Theme) {
   const { palette, spacing } = theme

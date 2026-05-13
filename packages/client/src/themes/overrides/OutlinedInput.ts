@@ -1,4 +1,4 @@
-import { Theme } from '@emotion/react'
+import { type Theme } from '@mui/material/styles'
 
 import getColors from 'utils/getColors'
 import getShadow from 'utils/getShadow'
@@ -36,19 +36,19 @@ export default function OutlinedInput (theme: Theme) {
           ...getColor({ variant: 'primary', theme }),
           '&.Mui-error': {
             ...getColor({ variant: 'error', theme })
-          }
+          },
+          '&.MuiOutlinedInput-colorSecondary': getColor({ variant: 'secondary', theme }),
+          '&.MuiOutlinedInput-colorError': getColor({ variant: 'error', theme }),
+          '&.MuiOutlinedInput-colorWarning': getColor({ variant: 'warning', theme }),
+          '&.MuiOutlinedInput-colorInfo': getColor({ variant: 'info', theme }),
+          '&.MuiOutlinedInput-colorSuccess': getColor({ variant: 'success', theme })
         },
         inputSizeSmall: {
           padding: '7.5px 8px 7.5px 12px'
         },
         inputMultiline: {
           padding: 0
-        },
-        colorSecondary: getColor({ variant: 'secondary', theme }),
-        colorError: getColor({ variant: 'error', theme }),
-        colorWarning: getColor({ variant: 'warning', theme }),
-        colorInfo: getColor({ variant: 'info', theme }),
-        colorSuccess: getColor({ variant: 'success', theme })
+        }
       }
     }
   }

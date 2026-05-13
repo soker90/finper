@@ -16,7 +16,6 @@ const GoalsWidget = () => {
   return (
     <>
       <SectionTitle>Metas de ahorro</SectionTitle>
-
       {goals.map((goal, i) => {
         const progress = goal.targetAmount > 0
           ? Math.min(Math.round((goal.currentAmount / goal.targetAmount) * 100), 100)
@@ -31,7 +30,13 @@ const GoalsWidget = () => {
                 onClick={() => navigate('/metas')}
               >
                 <Stack spacing={1}>
-                  <Box display='flex' justifyContent='space-between' alignItems='center'>
+                  <Box
+                    sx={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center'
+                    }}
+                  >
                     <Typography variant='h6' color='textSecondary' noWrap>
                       {goal.name}
                     </Typography>
@@ -42,7 +47,11 @@ const GoalsWidget = () => {
 
                   <Typography variant='h4'>
                     {format.euro(goal.currentAmount)}
-                    <Typography component='span' variant='body2' color='textSecondary' ml={1}>
+                    <Typography
+                      component='span' variant='body2' color='textSecondary' sx={{
+                        ml: 1
+                      }}
+                    >
                       ahorrado
                     </Typography>
                   </Typography>
@@ -54,7 +63,12 @@ const GoalsWidget = () => {
                     color={progress >= 100 ? 'success' : 'primary'}
                   />
 
-                  <Box display='flex' justifyContent='space-between'>
+                  <Box
+                    sx={{
+                      display: 'flex',
+                      justifyContent: 'space-between'
+                    }}
+                  >
                     <Typography variant='caption' color='textSecondary'>
                       Objetivo: {format.euro(goal.targetAmount)}
                     </Typography>

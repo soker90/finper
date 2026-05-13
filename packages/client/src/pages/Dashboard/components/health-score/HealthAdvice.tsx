@@ -15,8 +15,11 @@ interface HealthAdviceProps {
 const HealthAdvice = ({ insights }: HealthAdviceProps) => {
   if (insights.length === 0) {
     return (
-      <Typography variant='body2' color='text.secondary'>
-        No hay consejos disponibles en este momento.
+      <Typography
+        variant='body2' sx={{
+          color: 'text.secondary'
+        }}
+      >No hay consejos disponibles en este momento.
       </Typography>
     )
   }

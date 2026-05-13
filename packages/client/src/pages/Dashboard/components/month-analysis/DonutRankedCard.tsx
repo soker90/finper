@@ -48,7 +48,13 @@ const DonutRankedCard = ({
             title={title}
             sx={hoverCardSx}
             secondary={
-              <Stack direction='row' alignItems='center' gap={1}>
+              <Stack
+                direction='row'
+                sx={{
+                  alignItems: 'center',
+                  gap: 1
+                }}
+              >
                 {secondary}
                 <Button
                   size='small'
@@ -96,12 +102,28 @@ const DonutRankedCard = ({
                       const color = itemColor(item.name, i)
                       return (
                         <Box key={item.name}>
-                          <Stack direction='row' justifyContent='space-between' sx={{ mb: 0.5 }}>
-                            <Stack direction='row' alignItems='center' gap={0.75}>
+                          <Stack
+                            direction='row'
+                            sx={{
+                              justifyContent: 'space-between',
+                              mb: 0.5
+                            }}
+                          >
+                            <Stack
+                              direction='row'
+                              sx={{
+                                alignItems: 'center',
+                                gap: 0.75
+                              }}
+                            >
                               <ColorDot color={color} size={10} />
                               <Typography variant='body2'>{item.name}</Typography>
                             </Stack>
-                            <Typography variant='body2' fontWeight={600}>
+                            <Typography
+                              variant='body2' sx={{
+                                fontWeight: 600
+                              }}
+                            >
                               {format.euro(item.amount)}
                             </Typography>
                           </Stack>
@@ -123,7 +145,6 @@ const DonutRankedCard = ({
           </MainCard>
         </Grid>
       </Grow>
-
       <CategoryBreakdownModal
         open={modalOpen}
         onClose={() => setModalOpen(false)}

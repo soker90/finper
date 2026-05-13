@@ -56,7 +56,11 @@ const GoalEdit = ({ goal, hideForm, isNew }: GoalEditProps) => {
 
   return (
     <form onSubmit={onSubmit}>
-      <Grid container spacing={3} p={2}>
+      <Grid
+        container spacing={3} sx={{
+          p: 2
+        }}
+      >
         <InputForm
           id='name' label='Nombre' placeholder='Nombre de la meta'
           error={!!errors.name} {...register('name', { required: true, minLength: 3 })}

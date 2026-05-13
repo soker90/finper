@@ -25,7 +25,10 @@ const HistoricBarChart = ({ tagName, years, height = 280, compact = false }: His
   }
 
   return (
-    <Box height={height}>
+    <Box sx={{
+      height
+    }}
+    >
       <ResponsiveContainer width='100%' height='100%'>
         <BarChart
           data={years}

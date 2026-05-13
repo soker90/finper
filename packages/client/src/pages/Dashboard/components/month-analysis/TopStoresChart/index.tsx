@@ -30,8 +30,20 @@ const TopStoresChart = ({ items, chartColors, growTimeout = 1350 }: TopStoresCha
             title='Top tiendas'
             sx={hoverCardSx}
             secondary={
-              <Stack direction='row' alignItems='center' gap={1}>
-                <Stack direction='row' alignItems='center' gap={0.5}>
+              <Stack
+                direction='row'
+                sx={{
+                  alignItems: 'center',
+                  gap: 1
+                }}
+              >
+                <Stack
+                  direction='row'
+                  sx={{
+                    alignItems: 'center',
+                    gap: 0.5
+                  }}
+                >
                   <ShopOutlined style={{ fontSize: 14 }} />
                   <Typography variant='body2' color='textSecondary'>Este mes</Typography>
                 </Stack>
@@ -92,7 +104,6 @@ const TopStoresChart = ({ items, chartColors, growTimeout = 1350 }: TopStoresCha
           </MainCard>
         </Grid>
       </Grow>
-
       <CategoryBreakdownModal
         open={modalOpen}
         onClose={() => setModalOpen(false)}

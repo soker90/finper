@@ -19,11 +19,19 @@ const Trackings = () => {
 
   return (
     <Stack spacing={3}>
-
       {/* Selector de año (el título lo aporta el Breadcrumbs del layout) */}
       {years.length > 0 && (
-        <Stack direction='row' alignItems='center' spacing={1}>
-          <Typography variant='body2' color='text.secondary'>Año</Typography>
+        <Stack
+          direction='row' spacing={1} sx={{
+            alignItems: 'center'
+          }}
+        >
+          <Typography
+            variant='body2' sx={{
+              color: 'text.secondary'
+            }}
+          >Año
+          </Typography>
           <Select
             id='year-select'
             value={year ?? ''}
@@ -37,25 +45,37 @@ const Trackings = () => {
           </Select>
         </Stack>
       )}
-
       {yearsLoading && <Loader />}
-
       {!yearsLoading && years.length === 0 && (
-        <Box py={6} textAlign='center'>
-          <Typography color='text.secondary'>
+        <Box
+          sx={{
+            py: 6,
+            textAlign: 'center'
+          }}
+        >
+          <Typography sx={{
+            color: 'text.secondary'
+          }}
+          >
             No hay etiquetas en ningún año. Añade etiquetas a tus movimientos para ver tus seguimientos.
           </Typography>
         </Box>
       )}
-
       {!isLoading && year && tagStats.length === 0 && (
-        <Box py={6} textAlign='center'>
-          <Typography color='text.secondary'>
+        <Box
+          sx={{
+            py: 6,
+            textAlign: 'center'
+          }}
+        >
+          <Typography sx={{
+            color: 'text.secondary'
+          }}
+          >
             No hay etiquetas para este año.
           </Typography>
         </Box>
       )}
-
       {tagStats.length > 0 && (
         <Grid container spacing={3}>
           {tagStats.map((tagStat) => (

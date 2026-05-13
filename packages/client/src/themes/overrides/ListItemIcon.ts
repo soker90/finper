@@ -1,4 +1,4 @@
-import { Theme } from '@emotion/react'
+import { type Theme } from '@mui/material/styles'
 
 export default function ListItemIcon (theme: Theme) {
   return {

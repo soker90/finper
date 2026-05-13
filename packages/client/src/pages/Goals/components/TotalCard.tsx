@@ -16,13 +16,29 @@ const TotalCard = ({ totalBalance, totalAllocated, unallocated, format }: Props)
   return (
     <MainCard contentSX={{ p: 2.25 }} sx={{ mb: 2, mt: { xs: 2, sm: 2 } }}>
       <Stack spacing={1}>
-        <Box display='flex' justifyContent='space-between' alignItems={{ xs: 'flex-start', sm: 'center' }} flexDirection={{ xs: 'column', sm: 'row' }} gap={0.5}>
+        <Box
+          sx={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: { xs: 'flex-start', sm: 'center' },
+            flexDirection: { xs: 'column', sm: 'row' },
+            gap: 0.5
+          }}
+        >
           <Typography variant='h6' color='textSecondary'>
             Saldo disponible para metas
           </Typography>
-          <Typography variant='h4' color='success.main'>
+          <Typography
+            variant='h4' sx={{
+              color: 'success.main'
+            }}
+          >
             {format(unallocated)}
-            <Typography component='span' variant='body2' color='textSecondary' ml={1}>
+            <Typography
+              component='span' variant='body2' color='textSecondary' sx={{
+                ml: 1
+              }}
+            >
               sin asignar
             </Typography>
           </Typography>
@@ -35,7 +51,12 @@ const TotalCard = ({ totalBalance, totalAllocated, unallocated, format }: Props)
           color='primary'
         />
 
-        <Box display='flex' justifyContent='space-between'>
+        <Box
+          sx={{
+            display: 'flex',
+            justifyContent: 'space-between'
+          }}
+        >
           <Typography variant='caption' color='textSecondary'>
             Asignado: {format(totalAllocated)}
           </Typography>

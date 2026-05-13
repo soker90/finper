@@ -45,7 +45,7 @@ const ScoreGauge = ({ healthScore }: ScoreGaugeProps) => {
   ]
 
   return (
-    <Stack alignItems='center' spacing={1}>
+    <Stack sx={{ alignItems: 'center' }} spacing={1}>
       <Box sx={{ position: 'relative', width: '100%', maxWidth: 200 }}>
         <ResponsiveContainer width='100%' height={180}>
           <RadialBarChart
@@ -76,7 +76,7 @@ const ScoreGauge = ({ healthScore }: ScoreGaugeProps) => {
             textAlign: 'center'
           }}
         >
-          <Typography variant='h3' fontWeight={700} color={`${getScoreColor(healthScore.total)}.main`}>
+          <Typography variant='h3' sx={{ fontWeight: 700, color: `${getScoreColor(healthScore.total)}.main` }}>
             {healthScore.total}
           </Typography>
           <Typography variant='caption' color='textSecondary'>de 100</Typography>
@@ -85,8 +85,8 @@ const ScoreGauge = ({ healthScore }: ScoreGaugeProps) => {
 
       <Stack spacing={0.75} sx={{ width: '100%', pt: 1 }}>
         {SCORE_ITEMS.map(item => (
-          <Stack key={item.label} direction='row' alignItems='center' spacing={1}>
-            <Stack direction='row' alignItems='center' sx={{ minWidth: 100 }}>
+          <Stack key={item.label} direction='row' sx={{ alignItems: 'center' }} spacing={1}>
+            <Stack direction='row' sx={{ alignItems: 'center', minWidth: 100 }}>
               <Typography variant='body2' color='textSecondary'>
                 {item.label}
               </Typography>
@@ -100,7 +100,7 @@ const ScoreGauge = ({ healthScore }: ScoreGaugeProps) => {
               color={getScoreColor(healthScore[item.key])}
               sx={{ flex: 1, borderRadius: 1, height: 5 }}
             />
-            <Typography variant='body2' fontWeight={600} sx={{ minWidth: 28, textAlign: 'right' }}>
+            <Typography variant='body2' sx={{ fontWeight: 600, minWidth: 28, textAlign: 'right' }}>
               {healthScore[item.key]}
             </Typography>
           </Stack>

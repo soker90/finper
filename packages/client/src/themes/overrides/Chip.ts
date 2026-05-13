@@ -1,4 +1,4 @@
-import { Theme } from '@emotion/react'
+import { type Theme } from '@mui/material/styles'
 import getColors from 'utils/getColors'
 
 function getColor ({ color, theme }: { color: string, theme: Theme }) {
@@ -45,11 +45,11 @@ export default function Chip (theme: Theme) {
           '&.MuiChip-colorError': getColor({ color: 'error', theme }),
           '&.MuiChip-colorInfo': getColor({ color: 'info', theme }),
           '&.MuiChip-colorSuccess': getColor({ color: 'success', theme }),
-          '&.MuiChip-colorWarning': getColor({ color: 'warning', theme })
-        },
-        sizeLarge: {
-          fontSize: '1rem',
-          height: 40
+          '&.MuiChip-colorWarning': getColor({ color: 'warning', theme }),
+          '&.MuiChip-sizeLarge': {
+            fontSize: '1rem',
+            height: 40
+          }
         },
         light: {
           ...defaultLightChip,

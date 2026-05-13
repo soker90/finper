@@ -9,13 +9,31 @@ interface Props {
 }
 
 const TariffPageHeader = ({ propertyName, supply, onBack }: Props) => (
-  <Box display='flex' alignItems='center' justifyContent='space-between' flexWrap='wrap' gap={1}>
-    <Box display='flex' alignItems='center' gap={1.5}>
+  <Box
+    sx={{
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      flexWrap: 'wrap',
+      gap: 1
+    }}
+  >
+    <Box
+      sx={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: 1.5
+      }}
+    >
       <Button startIcon={<ArrowLeftOutlined />} onClick={onBack} size='small'>
         Volver
       </Button>
       <Stack spacing={0.25}>
-        <Stack direction='row' alignItems='center' spacing={1}>
+        <Stack
+          direction='row' spacing={1} sx={{
+            alignItems: 'center'
+          }}
+        >
           <Typography variant='h4'>{propertyName}</Typography>
           <Chip
             icon={<ThunderboltOutlined />}
@@ -25,7 +43,11 @@ const TariffPageHeader = ({ propertyName, supply, onBack }: Props) => (
           />
         </Stack>
         {supply?.name && (
-          <Typography variant='body2' color='text.secondary'>
+          <Typography
+            variant='body2' sx={{
+              color: 'text.secondary'
+            }}
+          >
             {supply.name}
           </Typography>
         )}

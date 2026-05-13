@@ -29,14 +29,12 @@ const Goals = () => {
         ]}
         desktopSx={{ marginTop: -7 }}
       />
-
       <TotalCard
         totalBalance={totalBalance}
         totalAllocated={totalAllocated}
         unallocated={unallocated}
         format={format.euro}
       />
-
       <ListContainer>
         {newGoal && (
           <GoalItem
@@ -49,11 +47,19 @@ const Goals = () => {
           <GoalItem key={goal._id} goal={goal} />
         ))}
       </ListContainer>
-
       {!goals.length && !newGoal && (
-        <Box textAlign='center' py={4}>
+        <Box
+          sx={{
+            textAlign: 'center',
+            py: 4
+          }}
+        >
           <TrophyOutlined style={{ fontSize: 48, color: '#bdbdbd', marginBottom: 16 }} />
-          <Typography color='text.secondary' variant='body1'>
+          <Typography
+            variant='body1' sx={{
+              color: 'text.secondary'
+            }}
+          >
             Define tu primera meta y empieza a ahorrar para lo que más te importa
           </Typography>
         </Box>

@@ -129,7 +129,12 @@ const DeclarativeBody = <T,>({
         <TableRow>
           <TableCell colSpan={colSpan} align='center'>
             {emptyNode ?? (
-              <Typography color='text.secondary' py={2}>
+              <Typography
+                sx={{
+                  color: 'text.secondary',
+                  py: 2
+                }}
+              >
                 {emptyText}
               </Typography>
             )}

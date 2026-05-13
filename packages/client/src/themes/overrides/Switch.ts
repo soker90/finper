@@ -1,4 +1,4 @@
-import { Theme } from '@emotion/react'
+import { type Theme } from '@mui/material/styles'
 
 function getSizeStyle (size: string) {
   switch (size) {
@@ -74,11 +74,9 @@ export default function Switch (theme: Theme) {
           '& ~ .MuiFormControlLabel-label': {
             margin: 6
           },
-          ...switchStyle(theme, 'medium')
-        },
-        sizeLarge: { ...switchStyle(theme, 'large') },
-        sizeSmall: {
-          ...switchStyle(theme, 'small')
+          ...switchStyle(theme, 'medium'),
+          '&.MuiSwitch-sizeLarge': { ...switchStyle(theme, 'large') },
+          '&.MuiSwitch-sizeSmall': { ...switchStyle(theme, 'small') }
         }
       }
     }

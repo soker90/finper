@@ -32,16 +32,32 @@ const Loans = () => {
         <Alert severity='error' sx={{ mt: 2 }}>Error al cargar los préstamos: {error.message}</Alert>
       )}
       {isLoading && (
-        <Box display='flex' justifyContent='center' mt={4}>
+        <Box
+          sx={{
+            display: 'flex',
+            justifyContent: 'center',
+            mt: 4
+          }}
+        >
           <CircularProgress />
         </Box>
       )}
       {!isLoading && loans.length === 0 && (
-        <Typography color='textSecondary' mt={4} textAlign='center'>
+        <Typography
+          color='textSecondary'
+          sx={{
+            mt: 4,
+            textAlign: 'center'
+          }}
+        >
           No hay préstamos registrados.
         </Typography>
       )}
-      <Grid container spacing={3} mt={1}>
+      <Grid
+        container spacing={3} sx={{
+          mt: 1
+        }}
+      >
         {loans.map((loan) => (
           <Grid size={{ xs: 12, sm: 6, md: 4 }} key={loan._id}>
             <LoanCard
@@ -52,7 +68,6 @@ const Loans = () => {
           </Grid>
         ))}
       </Grid>
-
       {Boolean(selectedForEdit) && (
         <LoanFormModal
           loan={selectedForEdit}

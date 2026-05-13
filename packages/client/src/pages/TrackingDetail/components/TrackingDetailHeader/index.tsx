@@ -33,22 +33,42 @@ const TrackingDetailHeader = ({
       >
         Volver
       </Button>
-
       {/* Título + chip de año */}
-      <Stack direction='row' alignItems='center' spacing={2} flexWrap='wrap'>
+      <Stack
+        direction='row'
+        spacing={2}
+        sx={{
+          alignItems: 'center',
+          flexWrap: 'wrap'
+        }}
+      >
         <Typography variant='h3'>{tagName}</Typography>
         {year && <Chip label={year} color='primary' size='small' />}
       </Stack>
-
       {/* Total + conteo (skeleton mientras carga) */}
       {loading
         ? <Skeleton variant='text' width={180} height={36} />
         : (
-          <Stack direction='row' alignItems='baseline' spacing={2} flexWrap='wrap'>
-            <Typography variant='body1' color='text.secondary'>
+          <Stack
+            direction='row'
+            spacing={2}
+            sx={{
+              alignItems: 'baseline',
+              flexWrap: 'wrap'
+            }}
+          >
+            <Typography
+              variant='body1' sx={{
+                color: 'text.secondary'
+              }}
+            >
               {isHistoric ? 'Total acumulado' : 'Total'}
             </Typography>
-            <Typography variant='h4' color='text.primary'>
+            <Typography
+              variant='h4' sx={{
+                color: 'text.primary'
+              }}
+            >
               {format.euro(totalAmount)}
             </Typography>
             {transactionCount !== undefined && (

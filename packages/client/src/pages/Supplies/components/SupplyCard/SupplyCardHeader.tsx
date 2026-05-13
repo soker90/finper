@@ -11,8 +11,21 @@ type Props = {
 }
 
 const SupplyCardHeader = ({ supply, onEdit, onDelete }: Props) => (
-  <Box display='flex' justifyContent='space-between' alignItems='center'>
-    <Stack direction='row' spacing={1} alignItems='center' minWidth={0}>
+  <Box
+    sx={{
+      display: 'flex',
+      justifyContent: 'space-between',
+      alignItems: 'center'
+    }}
+  >
+    <Stack
+      direction='row'
+      spacing={1}
+      sx={{
+        alignItems: 'center',
+        minWidth: 0
+      }}
+    >
       <Chip
         label={SUPPLY_TYPE_LABELS[supply.type]}
         color={SUPPLY_TYPE_COLORS[supply.type] ?? 'default'}

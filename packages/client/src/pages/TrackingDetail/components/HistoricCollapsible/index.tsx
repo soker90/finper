@@ -32,9 +32,22 @@ const HistoricCollapsible = ({ tagName, tagHistoric }: HistoricCollapsibleProps)
           transition: 'background-color 0.15s ease'
         }}
       >
-        <Stack direction='row' spacing={2} alignItems='center'>
-          <Typography variant='subtitle1' fontWeight={600}>Histórico completo</Typography>
-          <Typography variant='body2' color='text.secondary'>
+        <Stack
+          direction='row' spacing={2} sx={{
+            alignItems: 'center'
+          }}
+        >
+          <Typography
+            variant='subtitle1' sx={{
+              fontWeight: 600
+            }}
+          >Histórico completo
+          </Typography>
+          <Typography
+            variant='body2' sx={{
+              color: 'text.secondary'
+            }}
+          >
             {format.euro(tagHistoric.totalAmount)} acumulados
           </Typography>
         </Stack>
@@ -42,7 +55,6 @@ const HistoricCollapsible = ({ tagName, tagHistoric }: HistoricCollapsibleProps)
           {isExpanded ? <UpOutlined /> : <DownOutlined />}
         </Box>
       </Box>
-
       <Collapse in={isExpanded} timeout='auto' unmountOnExit>
         <Divider />
         <CardContent sx={{ pt: 2 }}>

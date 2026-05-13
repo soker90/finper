@@ -60,7 +60,14 @@ const PropertyCard = ({
       >
         {property.supplies.length === 0
           ? (
-            <Typography variant='body2' color='text.secondary' sx={{ textAlign: 'center', py: 2 }}>
+            <Typography
+              variant='body2'
+              sx={{
+                color: 'text.secondary',
+                textAlign: 'center',
+                py: 2
+              }}
+            >
               Sin suministros. Pulsa&nbsp;
               <Typography
                 component='span'
@@ -88,7 +95,6 @@ const PropertyCard = ({
             </Grid>
             )}
       </MainCard>
-
       {showSupplyForm && (
         <SupplyForm
           propertyId={property._id}
@@ -96,7 +102,6 @@ const PropertyCard = ({
           onSubmit={onCreateSupply}
         />
       )}
-
       {showRemoveProperty && (
         <RemoveModal
           title='¿Eliminar inmueble?'

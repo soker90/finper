@@ -14,7 +14,7 @@ interface Props {
   autoFocus?: boolean
 }
 
-const InputForm = ({ id, label, errorText, size = 4, ...others }: Props, ref: Ref<HTMLInputElement>) => (
+const InputForm = ({ id, label, errorText, size = 4, inputProps, ...others }: Props, ref: Ref<HTMLInputElement>) => (
   <Grid size={{ md: size, xs: 12 }}>
     <Stack spacing={1}>
       <InputLabel htmlFor={id}>{label}</InputLabel>
@@ -22,6 +22,7 @@ const InputForm = ({ id, label, errorText, size = 4, ...others }: Props, ref: Re
         id={id}
         fullWidth
         ref={ref}
+        slotProps={{ input: inputProps }}
         {...others}
       />
       {others.error && (
