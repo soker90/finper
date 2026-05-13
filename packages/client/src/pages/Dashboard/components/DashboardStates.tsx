@@ -15,11 +15,11 @@ export const BudgetCardSkeleton = () => (
 )
 
 export const PieChartSkeleton = ({ height = 270 }: { height?: number }) => (
-  <Stack alignItems='center' justifyContent='center' sx={{ height }}>
+  <Stack sx={{ height, alignItems: 'center', justifyContent: 'center' }}>
     <Skeleton variant='circular' width={160} height={160} />
     <Stack spacing={1} sx={{ mt: 3, width: '100%', px: 2 }}>
       {[...Array(3)].map((_, i) => (
-        <Stack key={i} direction='row' alignItems='center' spacing={1}>
+        <Stack key={i} direction='row' spacing={1} sx={{ alignItems: 'center' }}>
           <Skeleton variant='circular' width={12} height={12} />
           <Skeleton variant='text' width='60%' height={16} />
         </Stack>
