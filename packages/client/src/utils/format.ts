@@ -1,24 +1,37 @@
 import { capitalize } from 'utils/index'
 
-export const euro = (cell: number, options = {}) => {
-  const n = new Intl.NumberFormat('es-ES', {
+const euroFormatter = new Intl.NumberFormat('es-ES', {
+  style: 'currency',
+  currency: 'EUR',
+  minimumFractionDigits: 0,
+  maximumFractionDigits: 2
+})
+
+const numberFormatter = new Intl.NumberFormat('es-ES', {
+  currency: 'EUR',
+  minimumFractionDigits: 0,
+  maximumFractionDigits: 2
+})
+
+export const euro = (cell: number, options?: Intl.NumberFormatOptions) => {
+  if (!options) return euroFormatter.format(cell)
+  return new Intl.NumberFormat('es-ES', {
     style: 'currency',
     currency: 'EUR',
     minimumFractionDigits: 0,
     maximumFractionDigits: 2,
     ...options
-  })
-  return n.format(cell)
+  }).format(cell)
 }
 
-export const number = (cell: number, options = {}) => {
-  const n = new Intl.NumberFormat('es-ES', {
+export const number = (cell: number, options?: Intl.NumberFormatOptions) => {
+  if (!options) return numberFormatter.format(cell)
+  return new Intl.NumberFormat('es-ES', {
     currency: 'EUR',
     minimumFractionDigits: 0,
     maximumFractionDigits: 2,
     ...options
-  })
-  return n.format(cell)
+  }).format(cell)
 }
 
 export const dateShort = (cell: number) => {

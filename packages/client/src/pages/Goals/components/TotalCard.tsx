@@ -61,7 +61,7 @@ const TotalCard = ({ totalBalance, totalAllocated, unallocated, format }: Props)
             Asignado: {format(totalAllocated)}
           </Typography>
           <Typography variant='caption' color='textSecondary'>
-            Total: {format(totalBalance)} — {progress}% asignado
+            Total: {format(totalBalance)} ({progress}% asignado)
           </Typography>
         </Box>
       </Stack>

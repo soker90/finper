@@ -13,7 +13,7 @@ const LoansSection = () => {
 
   if (!activeLoans.length) return null
 
-  const handleClick = (loan: Loan) => {
+  const handleNavigateToLoan = (loan: Loan) => {
     navigate(`/prestamos/${loan._id}`)
   }
 
@@ -24,7 +24,7 @@ const LoansSection = () => {
         <Grid key={loan._id} size={{ xs: 12, sm: 6, md: 4 }}>
           <Grow in timeout={400 + i * 150}>
             <div>
-              <LoanCard loan={loan} onClick={handleClick} />
+              <LoanCard loan={loan} onClick={handleNavigateToLoan} />
             </div>
           </Grow>
         </Grid>

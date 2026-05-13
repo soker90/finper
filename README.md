@@ -4,6 +4,7 @@ Finper es una aplicación para gestionar finanzas personales: cuentas, movimient
 
 [![js-standard-style](https://img.shields.io/badge/code%20style-standard-brightgreen.svg)](http://standardjs.com)
 [![codecov](https://codecov.io/gh/soker90/finper/branch/master/graph/badge.svg?token=gWKDyCALuU)](https://codecov.io/gh/soker90/finper)
+[![React Doctor](https://www.react.doctor/share/badge?p=%40soker90%2Ffinper-client&s=80&w=117&f=87)](https://www.react.doctor/share?p=%40soker90%2Ffinper-client&s=80&w=117&f=87)
 
 ## Tabla de contenidos
 

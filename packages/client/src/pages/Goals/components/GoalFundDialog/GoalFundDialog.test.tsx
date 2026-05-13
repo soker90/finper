@@ -29,17 +29,17 @@ const renderDialog = (props: Partial<Parameters<typeof GoalFundDialog>[0]> = {})
 describe('GoalFundDialog', () => {
   it('renders the title in fund mode with current and target amounts', () => {
     const { getByText } = renderDialog()
-    expect(getByText(/Añadir fondos — Coche/)).toBeDefined()
+    expect(getByText(/Añadir fondos: Coche/)).toBeDefined()
   })
 
   it('renders the title in withdraw mode', () => {
     const { getByText } = renderDialog({ mode: 'withdraw' })
-    expect(getByText(/Retirar fondos — Coche/)).toBeDefined()
+    expect(getByText(/Retirar fondos: Coche/)).toBeDefined()
   })
 
   it('does not render content when "open" is false', () => {
     const { queryByText } = renderDialog({ open: false })
-    expect(queryByText(/Añadir fondos — Coche/)).toBeNull()
+    expect(queryByText(/Añadir fondos: Coche/)).toBeNull()
   })
 
   it('calls onClose when the cancel button is clicked', () => {

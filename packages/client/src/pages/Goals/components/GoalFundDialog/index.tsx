@@ -47,8 +47,8 @@ const GoalFundDialog = ({ goal, open, onClose, mode }: GoalFundDialogProps) => {
   })
 
   const title = mode === 'fund'
-    ? `Añadir fondos — ${goal.name} (${format.euro(goal.currentAmount)} / ${format.euro(goal.targetAmount)})`
-    : `Retirar fondos — ${goal.name} (${format.euro(goal.currentAmount)} / ${format.euro(goal.targetAmount)})`
+    ? `Añadir fondos: ${goal.name} (${format.euro(goal.currentAmount)} / ${format.euro(goal.targetAmount)})`
+    : `Retirar fondos: ${goal.name} (${format.euro(goal.currentAmount)} / ${format.euro(goal.targetAmount)})`
 
   return (
     <ModalGrid

@@ -23,7 +23,7 @@ const Transactions = () => {
   // TODO: Refactor this
   const pages: any = []
   for (let i = 0; i < numPages; i++) {
-    pages.push(<TransactionsPage index={i} filters={filters} key={i} />)
+    pages.push(<TransactionsPage index={i} filters={filters} key={`page-${i}`} />)
   }
 
   return (
@@ -51,7 +51,7 @@ const Transactions = () => {
           />}
         {pages}
       </ListContainer>
-      <Button variant='outlined' fullWidth onClick={() => setNumPages(numPages + 1)}>Cargar más</Button>
+      <Button variant='outlined' fullWidth onClick={() => setNumPages(prev => prev + 1)}>Cargar más</Button>
     </>
   )
 }

@@ -6,14 +6,14 @@ import { useBudgets } from '../Budgets/hooks'
 import { useChartColors } from './components/shared'
 import { DashboardSkeleton, DashboardError } from './components/DashboardStates'
 import KpiSummary from './components/KpiSummary'
+import LoansSection from './components/LoansSection'
+import GoalsWidget from './components/GoalsWidget'
 import TrendsSection from './components/TrendsSection'
 import SpendingRhythm from './components/SpendingRhythm'
 import BudgetSection from './components/budget'
 import MonthAnalysis from './components/month-analysis'
 import HealthScoreSection from './components/health-score'
-import LoansSection from './components/LoansSection'
 import StocksWidget from './components/StocksWidget'
-import GoalsWidget from './components/GoalsWidget'
 
 const now = new Date()
 const currentYear = String(now.getFullYear())

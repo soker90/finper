@@ -60,13 +60,13 @@ describe('GoalItem', () => {
   it('opens the fund dialog when the add-funds button is clicked', async () => {
     const { getByTitle, findByText } = renderItem()
     fireEvent.click(getByTitle('Añadir fondos'))
-    expect(await findByText(/Añadir fondos —/)).toBeDefined()
+    expect(await findByText(/Añadir fondos:/)).toBeDefined()
   })
 
   it('opens the withdraw dialog when the remove-funds button is clicked', async () => {
     const { getByTitle, findByText } = renderItem()
     fireEvent.click(getByTitle('Retirar fondos'))
-    expect(await findByText(/Retirar fondos —/)).toBeDefined()
+    expect(await findByText(/Retirar fondos:/)).toBeDefined()
   })
 
   it('caps the progress at 100% when currentAmount exceeds targetAmount', () => {

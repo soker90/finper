@@ -21,7 +21,10 @@ const YearTable = ({ data }: Props) => {
     >
       <TableHeaderMonths />
       <TableBody sx={{ 'tr:last-child': { backgroundColor: theme.palette.primary.lighter } }}>
-        {data?.filter(({ total }) => Boolean(total))?.map((row: Budget) => (
+        {data?.reduce<Budget[]>((acc, row) => {
+          if (row.total) acc.push(row)
+          return acc
+        }, []).map((row: Budget) => (
           <TableRow
             hover
             sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
@@ -30,8 +33,8 @@ const YearTable = ({ data }: Props) => {
             <TableCell component='td' id={row.name} scope='row' align='left'>
               {row.name}
             </TableCell>
-            {row.budgets.map((budget: any, index: number) => (
-              <TableCell component='th' key={index} scope='row' align='left'>
+            {row.budgets.map((budget: any) => (
+              <TableCell component='th' key={`${row.name}-${budget.month ?? budget.year}`} scope='row' align='left'>
                 {format.euro(budget.real)}
               </TableCell>
             ))}

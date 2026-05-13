@@ -41,7 +41,7 @@ const ModalGrid = ({
   )
 
   const _renderButton = ({ value, ...rest }: any, index: number): ReactNode => (
-    <Button key={index} {...rest}>
+    <Button key={`modal-action-${index}`} {...rest}>
       {value}
     </Button>
   )

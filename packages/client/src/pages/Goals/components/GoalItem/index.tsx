@@ -77,7 +77,7 @@ const GoalItem: FC<GoalItemProps> = ({ goal, forceExpand, cancelCreate }) => {
               color={progress >= 100 ? 'success' : 'primary'}
             />
             <Typography variant='caption' color='textSecondary' sx={{ display: 'block', mt: 0.5 }}>
-              {progress}% — {format.euro(goal.currentAmount)} / {format.euro(goal.targetAmount)}
+              {progress}% ({format.euro(goal.currentAmount)} / {format.euro(goal.targetAmount)})
               {goal.deadline && ` • ${new Date(goal.deadline).toLocaleDateString('es-ES')}`}
             </Typography>
           </Box>
