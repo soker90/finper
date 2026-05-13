@@ -56,6 +56,9 @@ export const ERROR_MESSAGE = {
   TARIFF: {
     FETCH_ERROR: 'No se pudieron obtener las tarifas eléctricas'
   },
+  TICKET: {
+    MODULE_NOT_CONFIGURED: 'El módulo de tickets no está configurado'
+  },
   GOAL: {
     NOT_FOUND: 'La meta no existe',
     EXCEEDS_BALANCE: 'El total asignado a todas las metas supera el balance de las cuentas',

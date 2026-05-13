@@ -21,11 +21,20 @@ type ModalState =
   | { type: 'delete'; data: Ticket }
 
 const Tickets = () => {
-  const { tickets, isLoading, error } = useTickets()
+  const { tickets, ticketsEnabled, isLoading, error } = useTickets()
   const [activeModal, setActiveModal] = useState<ModalState | null>(null)
   const closeModal = () => setActiveModal(null)
 
   if (isLoading) return <Typography>Cargando tickets...</Typography>
+
+  if (!ticketsEnabled) {
+    return (
+      <Alert severity='warning'>
+        El módulo de tickets no está configurado en este servidor.
+      </Alert>
+    )
+  }
+
   if (error) return <Alert severity='error'>Error al cargar tickets: {error.message}</Alert>
 
   return (

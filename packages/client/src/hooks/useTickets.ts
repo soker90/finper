@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react'
 import useSWR from 'swr'
 import { Ticket } from 'types'
 import { TICKETS } from 'constants/api-paths'
@@ -5,12 +6,20 @@ import { deleteTicket, reviewTicket } from 'services/apiService'
 
 export const useTickets = (): {
   tickets: Ticket[]
+  ticketsEnabled: boolean
   isLoading: boolean
   error: any
   removeTicket: (id: string) => Promise<{ error?: string }>
   markReviewed: (id: string) => Promise<{ error?: string }>
 } => {
-  const { data, error, mutate, isLoading } = useSWR<{ tickets: Ticket[], total: number }>(TICKETS)
+  const [swrKey, setSwrKey] = useState<string | null>(TICKETS)
+  const { data, error, mutate, isLoading } = useSWR<{ tickets: Ticket[], total: number }>(swrKey)
+
+  useEffect(() => {
+    if (error?.status === 503) {
+      setSwrKey(null)
+    }
+  }, [error])
 
   const removeTicket = async (id: string) => {
     const result = await deleteTicket(id)
@@ -33,5 +42,12 @@ export const useTickets = (): {
     return result
   }
 
-  return { tickets: data?.tickets ?? [], isLoading, error, removeTicket, markReviewed }
+  return {
+    tickets: data?.tickets ?? [],
+    ticketsEnabled: swrKey !== null,
+    isLoading,
+    error,
+    removeTicket,
+    markReviewed
+  }
 }

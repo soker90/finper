@@ -17,10 +17,11 @@ import { hoverCardSx } from './shared'
 interface TrendsSectionProps {
   stats: DashboardStats
   tickets: Ticket[]
+  ticketsEnabled: boolean
   chartHeight: number
 }
 
-const TrendsSection = ({ stats, tickets, chartHeight }: TrendsSectionProps) => {
+const TrendsSection = ({ stats, tickets, ticketsEnabled, chartHeight }: TrendsSectionProps) => {
   const theme = useTheme()
   const navigate = useNavigate()
 
@@ -81,32 +82,36 @@ const TrendsSection = ({ stats, tickets, chartHeight }: TrendsSectionProps) => {
           >
             <Stack spacing={1} sx={{ flex: 1, justifyContent: 'space-around' }}>
               {/* Tickets */}
-              <Stack direction='row' alignItems='center' spacing={1.5} sx={{ py: 1 }}>
-                <Avatar sx={{ bgcolor: tickets.length > 0 ? 'warning.lighter' : 'success.lighter', width: 32, height: 32 }}>
-                  <FileTextOutlined style={{ fontSize: 14, color: tickets.length > 0 ? '#faad14' : '#52c41a' }} />
-                </Avatar>
-                <Box sx={{ flex: 1, minWidth: 0 }}>
-                  <Typography variant='body2' color='textSecondary'>Tickets pendientes</Typography>
-                  <Typography variant='subtitle1'>{tickets.length}</Typography>
-                </Box>
-                {tickets.length > 0 && (
-                  <Button
-                    variant='outlined'
-                    size='small'
-                    color='warning'
-                    onClick={() => navigate('/tickets')}
-                    startIcon={<ClockCircleOutlined />}
-                    sx={{ whiteSpace: 'nowrap' }}
-                  >
-                    Revisar
-                  </Button>
-                )}
-                {tickets.length === 0 && (
-                  <Chip size='small' label='Al día' color='success' />
-                )}
-              </Stack>
+              {ticketsEnabled && (
+                <>
+                  <Stack direction='row' alignItems='center' spacing={1.5} sx={{ py: 1 }}>
+                    <Avatar sx={{ bgcolor: tickets.length > 0 ? 'warning.lighter' : 'success.lighter', width: 32, height: 32 }}>
+                      <FileTextOutlined style={{ fontSize: 14, color: tickets.length > 0 ? '#faad14' : '#52c41a' }} />
+                    </Avatar>
+                    <Box sx={{ flex: 1, minWidth: 0 }}>
+                      <Typography variant='body2' color='textSecondary'>Tickets pendientes</Typography>
+                      <Typography variant='subtitle1'>{tickets.length}</Typography>
+                    </Box>
+                    {tickets.length > 0 && (
+                      <Button
+                        variant='outlined'
+                        size='small'
+                        color='warning'
+                        onClick={() => navigate('/tickets')}
+                        startIcon={<ClockCircleOutlined />}
+                        sx={{ whiteSpace: 'nowrap' }}
+                      >
+                        Revisar
+                      </Button>
+                    )}
+                    {tickets.length === 0 && (
+                      <Chip size='small' label='Al día' color='success' />
+                    )}
+                  </Stack>
 
-              <Divider />
+                  <Divider />
+                </>
+              )}
 
               {/* Tasa de ahorro */}
               <MiniKpi

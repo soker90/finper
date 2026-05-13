@@ -1,5 +1,6 @@
 import { NextFunction, Request, Response } from 'express'
 import { ITicketService } from '../services/ticket.service'
+import { ERROR_MESSAGE } from '../i18n/ErrorMessages'
 
 type ITicketController = {
   loggerHandler: any
@@ -16,6 +17,11 @@ export class TicketController {
   }
 
   public async list (req: Request, res: Response, next: NextFunction): Promise<void> {
+    if (!this.ticketService.isConfigured()) {
+      res.status(503).json({ message: ERROR_MESSAGE.TICKET.MODULE_NOT_CONFIGURED })
+      return
+    }
+
     const status = (req.query.status as string) || 'pending'
 
     Promise.resolve(status)
@@ -28,6 +34,11 @@ export class TicketController {
   }
 
   public async review (req: Request, res: Response, next: NextFunction): Promise<void> {
+    if (!this.ticketService.isConfigured()) {
+      res.status(503).json({ message: ERROR_MESSAGE.TICKET.MODULE_NOT_CONFIGURED })
+      return
+    }
+
     const { id } = req.params
 
     Promise.resolve(id)
@@ -40,6 +51,11 @@ export class TicketController {
   }
 
   public async destroy (req: Request, res: Response, next: NextFunction): Promise<void> {
+    if (!this.ticketService.isConfigured()) {
+      res.status(503).json({ message: ERROR_MESSAGE.TICKET.MODULE_NOT_CONFIGURED })
+      return
+    }
+
     const { id } = req.params
 
     Promise.resolve(id)
