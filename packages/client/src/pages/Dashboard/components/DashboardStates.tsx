@@ -4,7 +4,29 @@ import MainCard from 'components/MainCard'
 
 const BAR_HEIGHTS = [120, 200, 80, 160, 220, 100, 180, 240, 90, 150, 210, 70]
 
-// ── Loading skeleton ──────────────────────────────────────────────────────────
+// ── Granular skeletons ────────────────────────────────────────────────────────
+
+export const BudgetCardSkeleton = () => (
+  <Grid size={{ xs: 12, md: 4 }}>
+    <Skeleton variant='rounded' height={240} sx={{ borderRadius: 2 }} />
+  </Grid>
+)
+
+export const PieChartSkeleton = () => (
+  <Stack alignItems='center' justifyContent='center' sx={{ height: 270 }}>
+    <Skeleton variant='circular' width={160} height={160} />
+    <Stack spacing={1} sx={{ mt: 3, width: '100%', px: 2 }}>
+      {[...Array(3)].map((_, i) => (
+        <Stack key={i} direction='row' alignItems='center' spacing={1}>
+          <Skeleton variant='circular' width={12} height={12} />
+          <Skeleton variant='text' width='60%' height={16} />
+        </Stack>
+      ))}
+    </Stack>
+  </Stack>
+)
+
+// ── Full loading skeleton ─────────────────────────────────────────────────────
 export const DashboardSkeleton = () => (
   <Grid container spacing={3}>
     {[...Array(4)].map((_, i) => (
