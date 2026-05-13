@@ -58,10 +58,21 @@ describe('Dashboard', () => {
       expect(await findByText(/Ingresos vs Gastos/)).toBeDefined()
     })
 
-    it('renders Tickets pendientes label', async () => {
+    it('renders Tickets pendientes label when module is enabled', async () => {
       const { findByText } = render(<Dashboard />)
 
       expect(await findByText('Tickets pendientes')).toBeDefined()
+    })
+
+    it('hides tickets widget when endpoint returns 503', async () => {
+      server.use(
+        http.get('/tickets', () => HttpResponse.json({ message: 'Tickets module not configured' }, { status: 503 }))
+      )
+
+      const { findByText, queryByText } = renderWithFreshCache()
+      await findByText('Tendencias')
+
+      expect(queryByText('Tickets pendientes')).toBeNull()
     })
 
     it('renders Tasa de Ahorro and Deudas Totales labels', async () => {

@@ -4,6 +4,8 @@ import { faker } from '@faker-js/faker'
 
 import { server } from '../../src/server'
 import { requestLogin } from '../request-login'
+import { ticketService } from '../../src/services'
+import { ERROR_MESSAGE } from '../../src/i18n/ErrorMessages'
 
 const testDatabase = require('../test-db')(mongoose)
 
@@ -28,8 +30,21 @@ describe('Ticket', () => {
       token = await requestLogin(server.app)
     })
 
+    beforeEach(() => {
+      jest.spyOn(ticketService, 'isConfigured').mockReturnValue(true)
+    })
+
     test('when token is not provided, it should response an error with status code 401', async () => {
       await supertest(server.app).get(path).expect(401)
+    })
+
+    test('when module is not configured, it should respond with status code 503', async () => {
+      jest.spyOn(ticketService, 'isConfigured').mockReturnValue(false)
+
+      await supertest(server.app)
+        .get(path)
+        .auth(token, { type: 'bearer' })
+        .expect(503, { message: ERROR_MESSAGE.TICKET.MODULE_NOT_CONFIGURED })
     })
 
     test('when bot responds ok, it should return the tickets with status code 200', async () => {
@@ -75,8 +90,21 @@ describe('Ticket', () => {
       token = await requestLogin(server.app)
     })
 
+    beforeEach(() => {
+      jest.spyOn(ticketService, 'isConfigured').mockReturnValue(true)
+    })
+
     test('when token is not provided, it should response an error with status code 401', async () => {
       await supertest(server.app).patch(path('any')).expect(401)
+    })
+
+    test('when module is not configured, it should respond with status code 503', async () => {
+      jest.spyOn(ticketService, 'isConfigured').mockReturnValue(false)
+
+      await supertest(server.app)
+        .patch(path(faker.string.uuid()))
+        .auth(token, { type: 'bearer' })
+        .expect(503, { message: ERROR_MESSAGE.TICKET.MODULE_NOT_CONFIGURED })
     })
 
     test('when bot responds ok, it should response with status code 200', async () => {
@@ -107,8 +135,21 @@ describe('Ticket', () => {
       token = await requestLogin(server.app)
     })
 
+    beforeEach(() => {
+      jest.spyOn(ticketService, 'isConfigured').mockReturnValue(true)
+    })
+
     test('when token is not provided, it should response an error with status code 401', async () => {
       await supertest(server.app).delete(path('any')).expect(401)
+    })
+
+    test('when module is not configured, it should respond with status code 503', async () => {
+      jest.spyOn(ticketService, 'isConfigured').mockReturnValue(false)
+
+      await supertest(server.app)
+        .delete(path(faker.string.uuid()))
+        .auth(token, { type: 'bearer' })
+        .expect(503, { message: ERROR_MESSAGE.TICKET.MODULE_NOT_CONFIGURED })
     })
 
     test('when bot responds ok, it should response with status code 204', async () => {

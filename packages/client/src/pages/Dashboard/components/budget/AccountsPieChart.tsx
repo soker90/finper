@@ -18,7 +18,7 @@ const AccountsPieChart = ({ accounts, chartColors, isMobile }: AccountsPieChartP
     .filter(a => a.balance > 0)
     .map(a => ({ name: a.name, value: a.balance }))
 
-  const pieHeight = isMobile ? 200 : 240
+  const pieHeight = isMobile ? 280 : 270
 
   return (
     <MainCard title='Distribución por cuentas' sx={hoverCardSx}>
@@ -29,7 +29,7 @@ const AccountsPieChart = ({ accounts, chartColors, isMobile }: AccountsPieChartP
               <Pie
                 data={pieData}
                 cx='50%'
-                cy='50%'
+                cy={isMobile ? '38%' : '50%'}
                 innerRadius={isMobile ? 45 : 50}
                 outerRadius={isMobile ? 70 : 80}
                 paddingAngle={3}
@@ -43,7 +43,10 @@ const AccountsPieChart = ({ accounts, chartColors, isMobile }: AccountsPieChartP
               </Pie>
               <Tooltip content={<PieTooltip />} />
               <Legend
-                wrapperStyle={{ paddingTop: 16 }}
+                verticalAlign='bottom'
+                layout={isMobile ? 'vertical' : 'horizontal'}
+                align={isMobile ? 'left' : 'center'}
+                wrapperStyle={{ paddingTop: isMobile ? 24 : 32 }}
                 formatter={(value) => (
                   <Typography component='span' variant='body2'>{value}</Typography>
                 )}
