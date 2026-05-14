@@ -1,3 +1,4 @@
+import { useMemo } from 'react'
 import { TableBody, TableCell, TableRow, useTheme } from '@mui/material'
 import TableHeaderMonths from './TableHeaderMonths'
 import { ScrollableTable } from 'components'
@@ -11,10 +12,10 @@ interface Props {
 
 const YearTable = ({ data }: Props) => {
   const theme = useTheme() as Theme
-  const filteredRows = (data ?? []).reduce<Budget[]>((acc, row) => {
-    if (row.total) acc.push(row)
-    return acc
-  }, [])
+  const filteredRows = useMemo(
+    () => (data ?? []).filter((row) => Boolean(row.total)),
+    [data]
+  )
   return (
     <ScrollableTable
       stickyHeader
