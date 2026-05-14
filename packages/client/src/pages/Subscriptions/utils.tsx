@@ -70,7 +70,7 @@ export const SubscriptionsSummary = ({ subscriptions }: SummaryProps) => {
 // --- Empty state ---
 export const SubscriptionsEmpty = ({ onNew }: { onNew: () => void }) => (
   <Alert severity='info' sx={{ cursor: 'pointer', mt: 1 }} onClick={onNew}>
-    No tienes suscripciones todavía. Pulsa "Nueva" para añadir la primera — Finper detectará automáticamente sus pagos.
+    No tienes suscripciones todavía. Pulsa "Nueva" para añadir la primera. Finper detectará automáticamente sus pagos.
   </Alert>
 )
 
@@ -78,7 +78,8 @@ export const SubscriptionsEmpty = ({ onNew }: { onNew: () => void }) => (
 export const SubscriptionsSkeleton = ({ count = 4 }: { count?: number }) => (
   <Grid container spacing={2}>
     {[...Array(count)].map((_, i) => (
-      <Grid key={i} size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
+      // react-doctor-disable-next-line react-doctor/no-array-index-as-key
+      <Grid key={`subscription-skeleton-${i}`} size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
         <Skeleton variant='rounded' height={175} />
       </Grid>
     ))}

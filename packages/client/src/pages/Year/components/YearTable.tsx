@@ -1,3 +1,4 @@
+import { useMemo } from 'react'
 import { TableBody, TableCell, TableRow, useTheme } from '@mui/material'
 import TableHeaderMonths from './TableHeaderMonths'
 import { ScrollableTable } from 'components'
@@ -11,6 +12,10 @@ interface Props {
 
 const YearTable = ({ data }: Props) => {
   const theme = useTheme() as Theme
+  const filteredRows = useMemo(
+    () => (data ?? []).filter((row) => Boolean(row.total)),
+    [data]
+  )
   return (
     <ScrollableTable
       stickyHeader
@@ -21,7 +26,7 @@ const YearTable = ({ data }: Props) => {
     >
       <TableHeaderMonths />
       <TableBody sx={{ 'tr:last-child': { backgroundColor: theme.palette.primary.lighter } }}>
-        {data?.filter(({ total }) => Boolean(total))?.map((row: Budget) => (
+        {filteredRows.map((row: Budget) => (
           <TableRow
             hover
             sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
@@ -30,8 +35,8 @@ const YearTable = ({ data }: Props) => {
             <TableCell component='td' id={row.name} scope='row' align='left'>
               {row.name}
             </TableCell>
-            {row.budgets.map((budget: any, index: number) => (
-              <TableCell component='th' key={index} scope='row' align='left'>
+            {row.budgets.map((budget: any) => (
+              <TableCell component='th' key={`${row.name}-${budget.month ?? budget.year}`} scope='row' align='left'>
                 {format.euro(budget.real)}
               </TableCell>
             ))}

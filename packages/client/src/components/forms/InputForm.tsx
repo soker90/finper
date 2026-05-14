@@ -1,5 +1,5 @@
 import { FormHelperText, Grid, InputLabel, InputBaseComponentProps, OutlinedInput, Stack } from '@mui/material'
-import { forwardRef, Ref } from 'react'
+import { type Ref } from 'react'
 
 interface Props {
   id: string
@@ -12,9 +12,10 @@ interface Props {
   size?: number,
   defaultValue?: number | string
   autoFocus?: boolean
+  ref?: Ref<HTMLInputElement>
 }
 
-const InputForm = ({ id, label, errorText, size = 4, inputProps, ...others }: Props, ref: Ref<HTMLInputElement>) => (
+const InputForm = ({ id, label, errorText, size = 4, inputProps, ref, ...others }: Props) => (
   <Grid size={{ md: size, xs: 12 }}>
     <Stack spacing={1}>
       <InputLabel htmlFor={id}>{label}</InputLabel>
@@ -34,4 +35,4 @@ const InputForm = ({ id, label, errorText, size = 4, inputProps, ...others }: Pr
   </Grid>
 )
 
-export default forwardRef(InputForm)
+export default InputForm

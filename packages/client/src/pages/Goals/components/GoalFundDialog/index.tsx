@@ -24,14 +24,14 @@ const GoalFundDialog = ({ goal, open, onClose, mode }: GoalFundDialogProps) => {
     defaultValues: { amount: '' }
   })
 
-  useEffect(() => {
-    if (open) reset()
-  }, [open])
-
   const handleClose = () => {
     reset()
     onClose()
   }
+
+  useEffect(() => {
+    if (open) reset()
+  }, [open, reset])
 
   const onSubmit = handleSubmit(async ({ amount }) => {
     const numAmount = Number(amount)
@@ -47,8 +47,8 @@ const GoalFundDialog = ({ goal, open, onClose, mode }: GoalFundDialogProps) => {
   })
 
   const title = mode === 'fund'
-    ? `Añadir fondos — ${goal.name} (${format.euro(goal.currentAmount)} / ${format.euro(goal.targetAmount)})`
-    : `Retirar fondos — ${goal.name} (${format.euro(goal.currentAmount)} / ${format.euro(goal.targetAmount)})`
+    ? `Añadir fondos: ${goal.name} (${format.euro(goal.currentAmount)} / ${format.euro(goal.targetAmount)})`
+    : `Retirar fondos: ${goal.name} (${format.euro(goal.currentAmount)} / ${format.euro(goal.targetAmount)})`
 
   return (
     <ModalGrid

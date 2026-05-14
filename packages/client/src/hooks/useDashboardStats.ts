@@ -1,7 +1,7 @@
 import useSWR from 'swr'
 import { DASHBOARD_STATS } from 'constants/api-paths'
 
-export interface MonthlyData {
+interface MonthlyData {
   month: number   // 1-indexed
   year: number
   income: number

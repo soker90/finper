@@ -41,7 +41,7 @@ export const STOCKS_LIST = [
   makePosition('SAN.MC', 'Santander')
 ]
 
-export const STOCKS_SUMMARY_DATA = {
+const STOCKS_SUMMARY_DATA = {
   totalCost: parseFloat(STOCKS_LIST.reduce((acc, p) => acc + p.totalCost, 0).toFixed(2)),
   totalValue: parseFloat(STOCKS_LIST.reduce((acc, p) => acc + (p.currentValue ?? 0), 0).toFixed(2))
 }

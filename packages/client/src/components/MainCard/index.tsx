@@ -9,19 +9,21 @@ const headerSX = {
   '& .MuiCardHeader-action': { m: '0px auto', alignSelf: 'center' }
 }
 
+const EMPTY_SX = {}
+
 const MainCard = (
   {
     border = false,
     boxShadow: boxShadowProp,
     children,
     content = true,
-    contentSX = {},
+    contentSX = EMPTY_SX,
     darkTitle,
     divider = true,
     elevation,
     secondary,
     shadow,
-    sx = {},
+    sx = EMPTY_SX,
     title,
     codeHighlight,
     ...others

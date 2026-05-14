@@ -6,7 +6,7 @@ import {
   Stack,
   NativeSelect
 } from '@mui/material'
-import { ChangeEvent, forwardRef, Ref } from 'react'
+import { type ChangeEvent, type Ref } from 'react'
 import type { NativeSelectInputProps } from '@mui/material/NativeSelect/NativeSelectInput'
 
 interface Props {
@@ -29,6 +29,7 @@ interface Props {
   voidOption?: boolean
   value?: any
   defaultValue?: string
+  ref?: Ref<HTMLInputElement>
 }
 
 const SelectForm = ({
@@ -43,8 +44,9 @@ const SelectForm = ({
   voidLabel = ' --- ',
   voidValue = '',
   voidOption,
+  ref,
   ...others
-}: Props, ref: Ref<HTMLInputElement>) => (
+}: Props) => (
   <Grid size={{ md: size, xs: 12 }}>
     <Stack spacing={1}>
       <InputLabel htmlFor={id}>{label}</InputLabel>
@@ -73,4 +75,4 @@ const SelectForm = ({
   </Grid>
 )
 
-export default forwardRef(SelectForm)
+export default SelectForm

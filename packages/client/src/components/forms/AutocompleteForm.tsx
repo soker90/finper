@@ -5,7 +5,7 @@ import {
   Stack,
   Autocomplete, TextField
 } from '@mui/material'
-import { forwardRef, Ref, SyntheticEvent } from 'react'
+import { type Ref, type SyntheticEvent } from 'react'
 
 interface Props {
   id: string
@@ -21,6 +21,7 @@ interface Props {
   name?: string
   onBlur?: any
   defaultValue?: any
+  ref?: Ref<HTMLInputElement>
 }
 
 const AutocompleteForm = ({
@@ -32,8 +33,9 @@ const AutocompleteForm = ({
   errorText,
   value,
   defaultValue,
+  ref,
   ...others
-}: Props, ref: Ref<HTMLInputElement>) => {
+}: Props) => {
   return (
     <Grid size={{ md: size, xs: 12 }}>
       <Stack spacing={1}>
@@ -60,4 +62,4 @@ const AutocompleteForm = ({
   )
 }
 
-export default forwardRef(AutocompleteForm)
+export default AutocompleteForm

@@ -1,7 +1,7 @@
 import { http, HttpResponse } from 'msw'
 import { faker } from '@faker-js/faker'
 
-export const BUDGETS_LIST = {
+const BUDGETS_LIST = {
   expenses: Array.from({ length: 3 }, () => ({
     name: faker.commerce.department(),
     id: faker.database.mongodbObjectId(),

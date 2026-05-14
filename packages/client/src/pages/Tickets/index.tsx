@@ -25,7 +25,7 @@ const Tickets = () => {
   const [activeModal, setActiveModal] = useState<ModalState | null>(null)
   const closeModal = () => setActiveModal(null)
 
-  if (isLoading) return <Typography>Cargando tickets...</Typography>
+  if (isLoading) return <Typography>Cargando tickets…</Typography>
 
   if (!ticketsEnabled) {
     return (

@@ -1,7 +1,7 @@
 import { http, HttpResponse } from 'msw'
 import { faker } from '@faker-js/faker'
 
-export const TRANSACTIONS_LIST = Array.from({ length: 5 }, () => ({
+const TRANSACTIONS_LIST = Array.from({ length: 5 }, () => ({
   _id: faker.database.mongodbObjectId(),
   date: faker.date.recent({ days: 30 }).getTime(),
   category: {

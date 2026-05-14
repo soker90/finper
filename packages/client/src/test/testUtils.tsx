@@ -31,6 +31,4 @@ const AllTheProviders = ({ children }: { children: ReactNode }) => {
 const customRender = (ui: any, options?: RenderOptions) =>
   render(ui, { wrapper: AllTheProviders, ...options })
 
-export type { RenderOptions } from '@testing-library/react'
-
 export { customRender as render }

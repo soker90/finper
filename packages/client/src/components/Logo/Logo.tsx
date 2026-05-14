@@ -2,6 +2,36 @@ import { useTheme } from '@mui/material/styles'
 import { Theme } from '@emotion/react'
 import { PropsWithoutRef } from 'react'
 
+const textStyle = {
+  fontStyle: 'normal',
+  fontVariant: 'normal',
+  fontWeight: 550,
+  fontStretch: 'normal',
+  fontSize: '18.6667px',
+  fontFamily: "'Public Sans'",
+  fontVariantLigatures: 'normal',
+  fontVariantCaps: 'normal',
+  fontVariantNumeric: 'normal',
+  fontVariantEastAsian: 'normal'
+} as const
+
+const tspanStyle = {
+  fill: '#000',
+  fillOpacity: 0.85098
+} as const
+
+const italicTextStyle = {
+  fontStyle: 'italic',
+  fontWeight: 300,
+  fontSize: '40px',
+  fontFamily: "'Public Sans'",
+  strokeWidth: 0.553158
+} as const
+
+const tspanStrokeStyle = {
+  strokeWidth: 0.553158
+} as const
+
 const Logo = (props: PropsWithoutRef<any>) => {
   const theme = useTheme() as Theme
 
@@ -47,43 +77,21 @@ const Logo = (props: PropsWithoutRef<any>) => {
       </defs>
       <text
         xmlSpace='preserve'
-        style={{
-          fontStyle: 'normal',
-          fontVariant: 'normal',
-          fontWeight: 550,
-          fontStretch: 'normal',
-          fontSize: '18.6667px',
-          fontFamily: "'Public Sans'",
-          fontVariantLigatures: 'normal',
-          fontVariantCaps: 'normal',
-          fontVariantNumeric: 'normal',
-          fontVariantEastAsian: 'normal',
-          fill: theme.palette.common.black
-        }}
+        style={{ ...textStyle, fill: theme.palette.common.black }}
         x={47.122}
         y={22.424}
       >
         <tspan
           x={47.122}
           y={22.424}
-          style={{
-            fill: '#000',
-            fillOpacity: 0.85098
-          }}
+          style={tspanStyle}
         >
           finper
         </tspan>
       </text>
       <text
         xmlSpace='preserve'
-        style={{
-          fontStyle: 'italic',
-          fontWeight: 300,
-          fontSize: '40px',
-          fontFamily: "'Public Sans'",
-          fill: theme.palette.primary.main,
-          strokeWidth: 0.553158
-        }}
+        style={{ ...italicTextStyle, fill: theme.palette.primary.main }}
         x={-0.627}
         y={47.977}
         transform='scale(1.8 .53382)'
@@ -91,9 +99,7 @@ const Logo = (props: PropsWithoutRef<any>) => {
         <tspan
           x={0}
           y={45}
-          style={{
-            strokeWidth: 0.553158
-          }}
+          style={tspanStrokeStyle}
         >
           f
         </tspan>
