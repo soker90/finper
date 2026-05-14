@@ -1,5 +1,6 @@
 import { capitalize } from 'utils/index'
 
+// Base formatters for the common case (no options) — created once at module level
 const euroFormatter = new Intl.NumberFormat('es-ES', {
   style: 'currency',
   currency: 'EUR',
@@ -13,44 +14,41 @@ const numberFormatter = new Intl.NumberFormat('es-ES', {
   maximumFractionDigits: 2
 })
 
-const euroFormatterCache = new Map<string, Intl.NumberFormat>()
-const numberFormatterCache = new Map<string, Intl.NumberFormat>()
+// Cache for the rare call sites that pass custom options
+const formatterCache = new Map<string, Intl.NumberFormat>()
 
-const getEuroFormatter = (options: Intl.NumberFormatOptions): Intl.NumberFormat => {
-  const cacheKey = JSON.stringify(options)
-  if (!euroFormatterCache.has(cacheKey)) {
-    euroFormatterCache.set(cacheKey, new Intl.NumberFormat('es-ES', {
-      style: 'currency',
-      currency: 'EUR',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 2,
-      ...options
-    }))
+const getCachedFormatter = (
+  baseOptions: Intl.NumberFormatOptions,
+  overrides: Intl.NumberFormatOptions
+): Intl.NumberFormat => {
+  const cacheKey = JSON.stringify(overrides)
+  if (!formatterCache.has(cacheKey)) {
+    formatterCache.set(cacheKey, new Intl.NumberFormat('es-ES', { ...baseOptions, ...overrides }))
   }
-  return euroFormatterCache.get(cacheKey)!
+  return formatterCache.get(cacheKey)!
 }
 
-const getNumberFormatter = (options: Intl.NumberFormatOptions): Intl.NumberFormat => {
-  const cacheKey = JSON.stringify(options)
-  if (!numberFormatterCache.has(cacheKey)) {
-    numberFormatterCache.set(cacheKey, new Intl.NumberFormat('es-ES', {
-      currency: 'EUR',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 2,
-      ...options
-    }))
-  }
-  return numberFormatterCache.get(cacheKey)!
+const EURO_BASE_OPTIONS: Intl.NumberFormatOptions = {
+  style: 'currency',
+  currency: 'EUR',
+  minimumFractionDigits: 0,
+  maximumFractionDigits: 2
 }
 
-export const euro = (cell: number, options?: Intl.NumberFormatOptions) => {
+const NUMBER_BASE_OPTIONS: Intl.NumberFormatOptions = {
+  currency: 'EUR',
+  minimumFractionDigits: 0,
+  maximumFractionDigits: 2
+}
+
+export const euro = (cell: number, options?: Intl.NumberFormatOptions): string => {
   if (!options) return euroFormatter.format(cell)
-  return getEuroFormatter(options).format(cell)
+  return getCachedFormatter(EURO_BASE_OPTIONS, options).format(cell)
 }
 
-export const number = (cell: number, options?: Intl.NumberFormatOptions) => {
+export const number = (cell: number, options?: Intl.NumberFormatOptions): string => {
   if (!options) return numberFormatter.format(cell)
-  return getNumberFormatter(options).format(cell)
+  return getCachedFormatter(NUMBER_BASE_OPTIONS, options).format(cell)
 }
 
 export const dateShort = (cell: number) => {
