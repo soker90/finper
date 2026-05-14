@@ -8,14 +8,12 @@ export const useSupply = (supplyId: string | undefined): { supply: Supply | null
   const { supply, property } = useMemo(() => {
     if (!supplyId) return { supply: null, property: null }
 
-    const supplyIndex = new Map<string, { supply: Supply; property: Property }>()
     for (const prop of properties) {
-      for (const s of prop.supplies) {
-        supplyIndex.set(s._id, { supply: s, property: { _id: prop._id, name: prop.name } })
-      }
+      const found = prop.supplies.find((s) => s._id === supplyId)
+      if (found) return { supply: found, property: { _id: prop._id, name: prop.name } }
     }
 
-    return supplyIndex.get(supplyId) ?? { supply: null, property: null }
+    return { supply: null, property: null }
   }, [properties, supplyId])
 
   return { supply, property, isLoading }
