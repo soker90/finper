@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { mutate } from 'swr'
 import { Goal } from 'types'
@@ -27,6 +28,10 @@ const GoalFundDialog = ({ goal, open, onClose, mode }: GoalFundDialogProps) => {
     reset()
     onClose()
   }
+
+  useEffect(() => {
+    if (open) reset()
+  }, [open, reset])
 
   const onSubmit = handleSubmit(async ({ amount }) => {
     const numAmount = Number(amount)
@@ -59,6 +64,7 @@ const GoalFundDialog = ({ goal, open, onClose, mode }: GoalFundDialogProps) => {
         inputProps={{ step: 'any', min: 0.01 }}
         error={!!errors.amount}
         errorText='Introduce una cantidad válida'
+        autoFocus
         size={12}
         {...register('amount', { required: true, min: 0.01, valueAsNumber: false })}
       />
