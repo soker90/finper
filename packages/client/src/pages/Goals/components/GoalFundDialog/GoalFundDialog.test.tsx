@@ -5,7 +5,7 @@ import { fireEvent, screen, waitFor } from '@testing-library/react'
 import { SWRConfig } from 'swr'
 import { server } from '../../../../mock/server'
 import { render } from '../../../../test/testUtils'
-import GoalFundDialog from './index'
+import GoalFundDialog from '.'
 
 const GOAL = {
   _id: 'g1',

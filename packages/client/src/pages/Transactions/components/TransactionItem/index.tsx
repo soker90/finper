@@ -17,7 +17,8 @@ interface TransactionItemProps {
 }
 
 const TransactionItem: FC<TransactionItemProps> = ({ transaction, forceExpand, cancelCreate, query }) => {
-  const [expand, setExpand] = useState(forceExpand)
+  const [expand, setExpand] = useState(false)
+  const isExpanded = forceExpand ?? expand
   const theme = useTheme()
 
   const isDesktop = useMediaQuery(theme.breakpoints.up('md'))
@@ -53,7 +54,7 @@ const TransactionItem: FC<TransactionItemProps> = ({ transaction, forceExpand, c
             </Typography>
           </ItemContent>
         )}
-        <Collapse in={expand} timeout='auto' unmountOnExit>
+        <Collapse in={isExpanded} timeout='auto' unmountOnExit>
           <Divider className={styles.divider} />
           <TransactionEdit transaction={transaction} hideForm={hideForm} query={query} />
 

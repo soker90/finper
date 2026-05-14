@@ -23,7 +23,8 @@ interface CategoryItemProps {
 
 const CategoryItem: FC<CategoryItemProps> = ({ category, forceExpand, cancelCreate, rootCategories }) => {
   const theme = useTheme()
-  const [expand, setExpand] = useState(forceExpand)
+  const [expand, setExpand] = useState(false)
+  const isExpanded = forceExpand ?? expand
 
   const hideForm = useCallback(() => {
     cancelCreate?.()
@@ -49,7 +50,7 @@ const CategoryItem: FC<CategoryItemProps> = ({ category, forceExpand, cancelCrea
           >{CATEGORY_TYPE[category.type]}
           </Typography>
         </ItemContent>
-        <Collapse in={expand} timeout='auto' unmountOnExit>
+        <Collapse in={isExpanded} timeout='auto' unmountOnExit>
           <Divider className={styles.divider} />
           <CategorytEdit
             category={category} hideForm={hideForm} isNew={forceExpand}

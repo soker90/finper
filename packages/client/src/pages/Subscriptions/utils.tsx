@@ -78,6 +78,7 @@ export const SubscriptionsEmpty = ({ onNew }: { onNew: () => void }) => (
 export const SubscriptionsSkeleton = ({ count = 4 }: { count?: number }) => (
   <Grid container spacing={2}>
     {[...Array(count)].map((_, i) => (
+      // react-doctor-disable-next-line react-doctor/no-array-index-as-key
       <Grid key={`subscription-skeleton-${i}`} size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
         <Skeleton variant='rounded' height={175} />
       </Grid>

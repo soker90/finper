@@ -3,7 +3,7 @@ export interface RankedItem {
   amount: number
 }
 
-export const OTHERS_LABEL = 'Otros'
+const OTHERS_LABEL = 'Otros'
 export const OTHERS_COLOR = '#bdbdbd'
 
 /**

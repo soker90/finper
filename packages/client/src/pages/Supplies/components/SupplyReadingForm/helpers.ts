@@ -11,7 +11,7 @@ interface FormValues {
   consumptionOffPeak: string
 }
 
-export const parseDecimalInput = (value: string): number => {
+const parseDecimalInput = (value: string): number => {
   const normalized = value.replace(',', '.').trim()
   return Number(normalized)
 }

@@ -1,4 +1,4 @@
-import { type JSX, useEffect, useRef, useState } from 'react'
+import { type JSX, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router'
 
 import SplashScreen from 'components/SplashScreen'
@@ -7,7 +7,6 @@ import useAuth from 'hooks/useAuth'
 
 const Auth = ({ children }: { children: any }): JSX.Element => {
   const [isInitialized, setInitialized] = useState(false)
-  const isLoadingRef = useRef(true)
   const { handleLogout, setAccessToken } = useAuth()
   const navigate = useNavigate()
 
@@ -28,7 +27,6 @@ const Auth = ({ children }: { children: any }): JSX.Element => {
         // initialize dashboard
       }
 
-      isLoadingRef.current = false
       setInitialized(true)
     }
 

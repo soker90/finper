@@ -13,25 +13,44 @@ const numberFormatter = new Intl.NumberFormat('es-ES', {
   maximumFractionDigits: 2
 })
 
+const euroFormatterCache = new Map<string, Intl.NumberFormat>()
+const numberFormatterCache = new Map<string, Intl.NumberFormat>()
+
+const getEuroFormatter = (options: Intl.NumberFormatOptions): Intl.NumberFormat => {
+  const cacheKey = JSON.stringify(options)
+  if (!euroFormatterCache.has(cacheKey)) {
+    euroFormatterCache.set(cacheKey, new Intl.NumberFormat('es-ES', {
+      style: 'currency',
+      currency: 'EUR',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 2,
+      ...options
+    }))
+  }
+  return euroFormatterCache.get(cacheKey)!
+}
+
+const getNumberFormatter = (options: Intl.NumberFormatOptions): Intl.NumberFormat => {
+  const cacheKey = JSON.stringify(options)
+  if (!numberFormatterCache.has(cacheKey)) {
+    numberFormatterCache.set(cacheKey, new Intl.NumberFormat('es-ES', {
+      currency: 'EUR',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 2,
+      ...options
+    }))
+  }
+  return numberFormatterCache.get(cacheKey)!
+}
+
 export const euro = (cell: number, options?: Intl.NumberFormatOptions) => {
   if (!options) return euroFormatter.format(cell)
-  return new Intl.NumberFormat('es-ES', {
-    style: 'currency',
-    currency: 'EUR',
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 2,
-    ...options
-  }).format(cell)
+  return getEuroFormatter(options).format(cell)
 }
 
 export const number = (cell: number, options?: Intl.NumberFormatOptions) => {
   if (!options) return numberFormatter.format(cell)
-  return new Intl.NumberFormat('es-ES', {
-    currency: 'EUR',
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 2,
-    ...options
-  }).format(cell)
+  return getNumberFormatter(options).format(cell)
 }
 
 export const dateShort = (cell: number) => {

@@ -1,6 +1,6 @@
 import { type Theme, type PaletteColor } from '@mui/material/styles'
 
-export type ExtendedPaletteColor = PaletteColor & { lighter: string; darker: string }
+type ExtendedPaletteColor = PaletteColor & { lighter: string; darker: string }
 
 const getColors = (theme: Theme, color: string): ExtendedPaletteColor => {
   switch (color) {

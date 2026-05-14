@@ -1,6 +1,6 @@
 import { TRANSACTION } from 'types/transaction'
 
-export const TYPES_TRANSACTIONS = {
+const TYPES_TRANSACTIONS = {
   [TRANSACTION.Income]: 'Ingreso',
   [TRANSACTION.Expense]: 'Gasto',
   [TRANSACTION.NotComputable]: 'No computable'

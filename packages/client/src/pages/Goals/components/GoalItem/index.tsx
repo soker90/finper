@@ -17,7 +17,8 @@ interface GoalItemProps {
 
 const GoalItem: FC<GoalItemProps> = ({ goal, forceExpand, cancelCreate }) => {
   const theme = useTheme()
-  const [expand, setExpand] = useState(forceExpand)
+  const [expand, setExpand] = useState(false)
+  const isExpanded = forceExpand ?? expand
   const [fundMode, setFundMode] = useState<'fund' | 'withdraw' | null>(null)
 
   const progress = goal.targetAmount > 0
@@ -33,6 +34,10 @@ const GoalItem: FC<GoalItemProps> = ({ goal, forceExpand, cancelCreate }) => {
     e.stopPropagation()
     setFundMode(mode)
   }
+
+  const deadlineLabel = goal.deadline
+    ? new Date(goal.deadline).toLocaleDateString('es-ES')
+    : null
 
   return (
     <>
@@ -78,11 +83,11 @@ const GoalItem: FC<GoalItemProps> = ({ goal, forceExpand, cancelCreate }) => {
             />
             <Typography variant='caption' color='textSecondary' sx={{ display: 'block', mt: 0.5 }}>
               {progress}% ({format.euro(goal.currentAmount)} / {format.euro(goal.targetAmount)})
-              {goal.deadline && ` • ${new Date(goal.deadline).toLocaleDateString('es-ES')}`}
+              {goal.deadline && <span suppressHydrationWarning> • {deadlineLabel}</span>}
             </Typography>
           </Box>
         )}
-        <Collapse in={expand} timeout='auto' unmountOnExit>
+        <Collapse in={isExpanded} timeout='auto' unmountOnExit>
           <Divider />
           <GoalEdit
             goal={goal}

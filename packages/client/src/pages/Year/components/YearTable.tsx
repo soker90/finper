@@ -11,6 +11,10 @@ interface Props {
 
 const YearTable = ({ data }: Props) => {
   const theme = useTheme() as Theme
+  const filteredRows = (data ?? []).reduce<Budget[]>((acc, row) => {
+    if (row.total) acc.push(row)
+    return acc
+  }, [])
   return (
     <ScrollableTable
       stickyHeader
@@ -21,10 +25,7 @@ const YearTable = ({ data }: Props) => {
     >
       <TableHeaderMonths />
       <TableBody sx={{ 'tr:last-child': { backgroundColor: theme.palette.primary.lighter } }}>
-        {data?.reduce<Budget[]>((acc, row) => {
-          if (row.total) acc.push(row)
-          return acc
-        }, []).map((row: Budget) => (
+        {filteredRows.map((row: Budget) => (
           <TableRow
             hover
             sx={{ '&:last-child td, &:last-child th': { border: 0 } }}

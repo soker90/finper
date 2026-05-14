@@ -11,6 +11,7 @@ import TransacionsFilter from './components/TransacionsFilter'
 
 const Transactions = () => {
   const [newTransaction, setNewTransaction] = useState(false)
+  // react-doctor-disable-next-line react-doctor/rerender-state-only-in-handlers
   const [numPages, setNumPages] = useState(1)
   const { filters, setFilter, resetFilter } = useFilters()
 
@@ -23,6 +24,7 @@ const Transactions = () => {
   // TODO: Refactor this
   const pages: any = []
   for (let i = 0; i < numPages; i++) {
+    // react-doctor-disable-next-line react-doctor/no-array-index-as-key
     pages.push(<TransactionsPage index={i} filters={filters} key={`page-${i}`} />)
   }
 

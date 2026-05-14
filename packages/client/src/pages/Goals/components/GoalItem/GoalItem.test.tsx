@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest'
 import { fireEvent } from '@testing-library/react'
 import { SWRConfig } from 'swr'
 import { render } from '../../../../test/testUtils'
-import GoalItem from './index'
+import GoalItem from '.'
 
 const GOAL = {
   _id: 'g1',
