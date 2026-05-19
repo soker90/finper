@@ -10,10 +10,12 @@ import SupplyForm from '../Supplies/components/SupplyForm'
 import SupplyReadingForm from '../Supplies/components/SupplyReadingForm'
 import SupplyReadingList from '../Supplies/components/SupplyReadingList'
 import RemoveModal from '../Supplies/components/RemoveModal'
-import { SupplyConsumptionChart, SupplyYearStats, SupplyTrendChart } from './components'
+import { SupplyYearStats } from './components'
 import SupplyDetailHeader from './components/SupplyDetailHeader'
 import YearSelector from './components/YearSelector'
 import { useSupplyDetailModals } from './hooks/useSupplyDetailModals'
+import SupplyConsumptionChart from './components/SupplyConsumptionChart'
+import SupplyTrendChart from './components/SupplyTrendChart'
 
 const SupplyDetail = () => {
   const { supplyId } = useParams<{ supplyId: string }>()

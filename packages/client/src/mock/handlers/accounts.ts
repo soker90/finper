@@ -1,7 +1,7 @@
 import { http, HttpResponse } from 'msw'
 import { faker } from '@faker-js/faker'
 
-export const ACCOUNTS_LIST = Array.from({ length: 3 }, () => ({
+const ACCOUNTS_LIST = Array.from({ length: 3 }, () => ({
   _id: faker.database.mongodbObjectId(),
   name: faker.finance.accountName(),
   bank: faker.company.name(),

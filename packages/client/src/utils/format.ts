@@ -1,24 +1,54 @@
 import { capitalize } from 'utils/index'
 
-export const euro = (cell: number, options = {}) => {
-  const n = new Intl.NumberFormat('es-ES', {
-    style: 'currency',
-    currency: 'EUR',
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 2,
-    ...options
-  })
-  return n.format(cell)
+// Base formatters for the common case (no options) — created once at module level
+const euroFormatter = new Intl.NumberFormat('es-ES', {
+  style: 'currency',
+  currency: 'EUR',
+  minimumFractionDigits: 0,
+  maximumFractionDigits: 2
+})
+
+const numberFormatter = new Intl.NumberFormat('es-ES', {
+  currency: 'EUR',
+  minimumFractionDigits: 0,
+  maximumFractionDigits: 2
+})
+
+// Cache for the rare call sites that pass custom options
+const formatterCache = new Map<string, Intl.NumberFormat>()
+
+const getCachedFormatter = (
+  baseOptions: Intl.NumberFormatOptions,
+  overrides: Intl.NumberFormatOptions
+): Intl.NumberFormat => {
+  const cacheKey = JSON.stringify(overrides)
+  if (!formatterCache.has(cacheKey)) {
+    formatterCache.set(cacheKey, new Intl.NumberFormat('es-ES', { ...baseOptions, ...overrides }))
+  }
+  return formatterCache.get(cacheKey)!
 }
 
-export const number = (cell: number, options = {}) => {
-  const n = new Intl.NumberFormat('es-ES', {
-    currency: 'EUR',
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 2,
-    ...options
-  })
-  return n.format(cell)
+const EURO_BASE_OPTIONS: Intl.NumberFormatOptions = {
+  style: 'currency',
+  currency: 'EUR',
+  minimumFractionDigits: 0,
+  maximumFractionDigits: 2
+}
+
+const NUMBER_BASE_OPTIONS: Intl.NumberFormatOptions = {
+  currency: 'EUR',
+  minimumFractionDigits: 0,
+  maximumFractionDigits: 2
+}
+
+export const euro = (cell: number, options?: Intl.NumberFormatOptions): string => {
+  if (!options) return euroFormatter.format(cell)
+  return getCachedFormatter(EURO_BASE_OPTIONS, options).format(cell)
+}
+
+export const number = (cell: number, options?: Intl.NumberFormatOptions): string => {
+  if (!options) return numberFormatter.format(cell)
+  return getCachedFormatter(NUMBER_BASE_OPTIONS, options).format(cell)
 }
 
 export const dateShort = (cell: number) => {

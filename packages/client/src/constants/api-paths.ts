@@ -20,7 +20,6 @@ export const TARIFFS_COMPARISON = (id: string) => `supplies/${id}/tariffs-compar
 export const STOCKS = 'stocks'
 export const STOCKS_SUMMARY = 'stocks/summary'
 export const GOALS = 'goals'
-export const STATS_TAGS = 'stats/tags'
 export const STATS_TAGS_BY_YEAR = (year: number) => `stats/tags?year=${year}`
 export const STATS_TAGS_AVAILABLE = 'stats/tags/available'
 export const STATS_TAGS_YEARS = 'stats/tags/years'

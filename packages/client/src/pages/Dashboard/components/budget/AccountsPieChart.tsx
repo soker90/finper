@@ -14,9 +14,9 @@ interface AccountsPieChartProps {
 }
 
 const AccountsPieChart = ({ accounts, chartColors, isMobile }: AccountsPieChartProps) => {
-  const pieData = (accounts || [])
-    .filter(a => a.balance > 0)
-    .map(a => ({ name: a.name, value: a.balance }))
+  const pieData = (accounts ?? [])
+    .filter((account) => account.balance > 0)
+    .map((account) => ({ name: account.name, value: account.balance }))
 
   const pieHeight = isMobile ? 280 : 270
 

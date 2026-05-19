@@ -28,7 +28,7 @@ const HealthAdvice = ({ insights }: HealthAdviceProps) => {
     <Stack spacing={2}>
       {insights.map((insight) => (
         <Alert key={`${insight.type}-${insight.title}`} severity={SEVERITY_MAP[insight.type]} variant='outlined'>
-          <strong>{insight.title}</strong>{' '}— {insight.message}
+          <strong>{insight.title}</strong>{': '}{insight.message}
         </Alert>
       ))}
     </Stack>

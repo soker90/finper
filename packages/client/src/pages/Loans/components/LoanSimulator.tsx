@@ -65,7 +65,7 @@ const LoanSimulator = ({ loanId, monthlyPayment, pendingAmount }: Props) => {
               max={maxAmount}
               step={1}
               valueLabelDisplay='auto'
-              valueLabelFormat={format.euro}
+              valueLabelFormat={(value) => format.euro(value)}
               aria-label='Importe del pago puntual'
               sx={{ flex: 1 }}
             />
@@ -102,7 +102,7 @@ const LoanSimulator = ({ loanId, monthlyPayment, pendingAmount }: Props) => {
                 }}
               >
                 <Typography variant='body2' color='textSecondary'>
-                  Pago puntual: {format.euro(result.lumpSum)} — Capital restante: {format.euro(pendingAmount - result.lumpSum)}
+                  Pago puntual: {format.euro(result.lumpSum)} · Capital restante: {format.euro(pendingAmount - result.lumpSum)}
                 </Typography>
                 {result.originalEndDate && (
                   <Typography variant='body2' color='textSecondary'>

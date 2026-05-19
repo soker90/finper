@@ -15,7 +15,7 @@ const MainLayout = () => {
   const theme = useTheme()
   const matchDownLG = useMediaQuery(theme.breakpoints.down('xl'))
 
-  const [open, setOpen] = useState(false)
+  const [open, setOpen] = useState(!matchDownLG)
   const handleDrawerToggle = () => {
     setOpen(state => !state)
   }

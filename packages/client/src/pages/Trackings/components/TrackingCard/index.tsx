@@ -12,7 +12,7 @@ const TrackingCard = ({ tagStat, year }: { tagStat: TagSummary; year?: number | 
   const navigate = useNavigate()
   const chartColors = useChartColors()
 
-  const handleClick = () => {
+  const handleNavigateToDetail = () => {
     if (year) {
       navigate(`/seguimientos/${tagStat.tag}/${year}`)
     } else {
@@ -24,7 +24,7 @@ const TrackingCard = ({ tagStat, year }: { tagStat: TagSummary; year?: number | 
     <MainCard
       contentSX={{ p: 2.25 }}
       sx={{ ...hoverCardSx, cursor: 'pointer' }}
-      onClick={handleClick}
+      onClick={handleNavigateToDetail}
     >
       <Stack spacing={1.5}>
         {/* Header: nombre + conteo */}
@@ -68,7 +68,7 @@ const TrackingCard = ({ tagStat, year }: { tagStat: TagSummary; year?: number | 
                 paddingAngle={2}
               >
                 {tagStat.byCategory.map((_, index) => (
-                  <Cell key={index} fill={chartColors[index % chartColors.length]} />
+                  <Cell key={`cell-${tagStat.byCategory[index]?.categoryId ?? index}`} fill={chartColors[index % chartColors.length]} />
                 ))}
               </Pie>
               <Tooltip formatter={tooltipFormatter} />

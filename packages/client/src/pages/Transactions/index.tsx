@@ -51,7 +51,7 @@ const Transactions = () => {
           />}
         {pages}
       </ListContainer>
-      <Button variant='outlined' fullWidth onClick={() => setNumPages(numPages + 1)}>Cargar más</Button>
+      <Button variant='outlined' fullWidth onClick={() => setNumPages(prev => prev + 1)}>Cargar más</Button>
     </>
   )
 }

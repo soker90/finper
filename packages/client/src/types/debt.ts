@@ -3,7 +3,7 @@ export const DEBT = {
   TO: 'to',
 } as const
 
-export type DebtType = typeof DEBT[keyof typeof DEBT]
+type DebtType = typeof DEBT[keyof typeof DEBT]
 
 export interface Debt {
   _id?: string;

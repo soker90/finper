@@ -18,8 +18,8 @@ export const PieChartSkeleton = ({ height = 270 }: { height?: number }) => (
   <Stack sx={{ height, alignItems: 'center', justifyContent: 'center' }}>
     <Skeleton variant='circular' width={160} height={160} />
     <Stack spacing={1} sx={{ mt: 3, width: '100%', px: 2 }}>
-      {[...Array(3)].map((_, i) => (
-        <Stack key={i} direction='row' spacing={1} sx={{ alignItems: 'center' }}>
+      {Array.from({ length: 3 }, (_, i) => (
+        <Stack key={`pie-legend-${i}`} direction='row' spacing={1} sx={{ alignItems: 'center' }}>
           <Skeleton variant='circular' width={12} height={12} />
           <Skeleton variant='text' width='60%' height={16} />
         </Stack>
@@ -31,7 +31,7 @@ export const PieChartSkeleton = ({ height = 270 }: { height?: number }) => (
 // ── Full loading skeleton ─────────────────────────────────────────────────────
 export const DashboardSkeleton = () => (
   <Grid container spacing={3}>
-    {[...Array(4)].map((_, i) => (
+    {Array.from({ length: 4 }, (_, i) => (
       <Grid key={`kpi-${i}`} size={{ xs: 12, sm: 6, md: 3 }}>
         <MainCard contentSX={{ p: 2.25 }}>
           <Stack spacing={1}>
@@ -62,8 +62,8 @@ export const DashboardSkeleton = () => (
             height: 260
           }}
         >
-          {[...Array(12)].map((_, i) => (
-            <Skeleton key={`bar-${i}`} variant='rounded' width='100%' height={BAR_HEIGHTS[i]} sx={{ borderRadius: 1 }} />
+          {BAR_HEIGHTS.map((barHeight) => (
+            <Skeleton key={`bar-${barHeight}`} variant='rounded' width='100%' height={barHeight} sx={{ borderRadius: 1 }} />
           ))}
         </Stack>
       </MainCard>
@@ -71,7 +71,7 @@ export const DashboardSkeleton = () => (
     <Grid size={{ xs: 12, md: 4 }}>
       <MainCard>
         <Stack spacing={2.5} sx={{ py: 1 }}>
-          {[...Array(3)].map((_, i) => (
+          {Array.from({ length: 3 }, (_, i) => (
             <Stack
               key={`mini-${i}`} direction='row' spacing={1.5} sx={{
                 alignItems: 'center'
@@ -87,8 +87,8 @@ export const DashboardSkeleton = () => (
         </Stack>
       </MainCard>
     </Grid>
-    {[5, 4, 3].map((md, i) => (
-      <Grid key={`skel-card-${i}`} size={{ xs: 12, md }}>
+    {[5, 4, 3].map((md) => (
+      <Grid key={`skel-card-${md}`} size={{ xs: 12, md }}>
         <Skeleton variant='rounded' height={240} sx={{ borderRadius: 2 }} />
       </Grid>
     ))}

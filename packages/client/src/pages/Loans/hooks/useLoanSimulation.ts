@@ -1,6 +1,39 @@
-import { useState, useEffect } from 'react'
+import { useEffect, useReducer } from 'react'
 import { type SimulationResult } from 'types'
 import { simulateLoanPayoff } from 'services/apiService'
+
+interface SimulationState {
+  result: SimulationResult | null
+  loading: boolean
+  error: string | null
+}
+
+type SimulationAction =
+  | { type: 'loading' }
+  | { type: 'success'; payload: SimulationResult | null }
+  | { type: 'error'; payload: string }
+  | { type: 'reset' }
+
+const initialState: SimulationState = {
+  result: null,
+  loading: false,
+  error: null
+}
+
+const simulationReducer = (state: SimulationState, action: SimulationAction): SimulationState => {
+  switch (action.type) {
+    case 'loading':
+      return { result: null, loading: true, error: null }
+    case 'success':
+      return { result: action.payload, loading: false, error: null }
+    case 'error':
+      return { result: null, loading: false, error: action.payload }
+    case 'reset':
+      return initialState
+    default:
+      return state
+  }
+}
 
 interface UseLoanSimulationReturn {
   result: SimulationResult | null
@@ -9,43 +42,34 @@ interface UseLoanSimulationReturn {
 }
 
 export const useLoanSimulation = (loanId: string, lumpSum: number): UseLoanSimulationReturn => {
-  const [result, setResult] = useState<SimulationResult | null>(null)
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const [state, dispatch] = useReducer(simulationReducer, initialState)
 
   useEffect(() => {
     if (lumpSum <= 0) {
-      setResult(null)
-      setError(null)
+      dispatch({ type: 'reset' })
       return
     }
 
     let cancelled = false
-    setLoading(true)
-    setError(null)
+    dispatch({ type: 'loading' })
 
     simulateLoanPayoff(loanId, lumpSum)
       .then((response) => {
         if (cancelled) return
         if (response.error) {
-          setError(response.error)
-          setResult(null)
+          dispatch({ type: 'error', payload: response.error })
         } else {
-          setResult(response.data ?? null)
+          dispatch({ type: 'success', payload: response.data ?? null })
         }
       })
       .catch(() => {
         if (!cancelled) {
-          setError('Error al calcular la simulación')
-          setResult(null)
+          dispatch({ type: 'error', payload: 'Error al calcular la simulación' })
         }
-      })
-      .finally(() => {
-        if (!cancelled) setLoading(false)
       })
 
     return () => { cancelled = true }
   }, [loanId, lumpSum])
 
-  return { result, loading, error }
+  return state
 }

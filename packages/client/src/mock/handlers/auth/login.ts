@@ -4,7 +4,7 @@ export const LOGIN_USERNAMES = {
   success: 'success',
 } as const
 
-export type LoginUsernames = typeof LOGIN_USERNAMES[keyof typeof LOGIN_USERNAMES]
+type LoginUsernames = typeof LOGIN_USERNAMES[keyof typeof LOGIN_USERNAMES]
 
 interface LoginRequest {
   username: LoginUsernames,

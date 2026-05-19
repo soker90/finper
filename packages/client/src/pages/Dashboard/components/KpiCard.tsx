@@ -3,7 +3,7 @@ import { Stack, Typography, Avatar } from '@mui/material'
 import MainCard from 'components/MainCard'
 import { hoverCardSx } from './shared'
 
-export interface KpiCardProps {
+interface KpiCardProps {
   title: string
   value: string
   subtitle: string

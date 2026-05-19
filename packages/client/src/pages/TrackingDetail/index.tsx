@@ -3,11 +3,11 @@ import { Stack } from '@mui/material'
 import { useTagHistoric, useTagDetail } from 'hooks'
 import Loader from 'components/Loader'
 import TrackingDetailHeader from './components/TrackingDetailHeader'
-import HistoricBarChart from './components/HistoricBarChart'
 import YearGrid from './components/YearGrid'
 import HistoricCollapsible from './components/HistoricCollapsible'
 import CategoryBreakdownTable from './components/CategoryBreakdownTable'
 import TagTransactionList from './components/TagTransactionList'
+import HistoricBarChart from './components/HistoricBarChart'
 
 const TrackingDetail = () => {
   const { tagName, year: yearParam } = useParams<{ tagName: string; year?: string }>()

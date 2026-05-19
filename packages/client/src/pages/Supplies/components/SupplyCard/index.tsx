@@ -12,9 +12,6 @@ import RemoveModal from '../RemoveModal'
 import SupplyCardHeader from './SupplyCardHeader'
 import SupplyReadingPreview from './SupplyReadingPreview'
 
-// Re-exportar para backward-compat
-export { SUPPLY_TYPE_LABELS, supplyDisplayName } from '../../utils/supply'
-
 type Props = {
   supply: Supply
   propertyId: string

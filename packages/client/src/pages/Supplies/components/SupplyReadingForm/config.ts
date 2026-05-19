@@ -7,7 +7,7 @@ export const ERROR_MESSAGES = {
   invalidNumber: 'Introduce un número válido'
 }
 
-export const FIELD_LABELS = {
+const FIELD_LABELS = {
   startDate: 'Fecha inicio',
   endDate: 'Fecha fin',
   amount: 'Importe (€)',

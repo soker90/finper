@@ -28,9 +28,10 @@ const TagsInput = ({ name, control, availableTags, label = 'Etiquetas', size = 4
               options={availableTags}
               value={field.value || []}
               onChange={(_, newValue) => {
-                const sanitized = newValue
-                  .map((v: string) => typeof v === 'string' ? sanitizeTag(v) : v)
-                  .filter(Boolean)
+                const sanitized = newValue.flatMap((v: string) => {
+                  const tag = typeof v === 'string' ? sanitizeTag(v) : v
+                  return tag ? [tag] : []
+                })
                 field.onChange([...new Set(sanitized)])
               }}
               renderValue={(value: readonly string[], getItemProps) =>
