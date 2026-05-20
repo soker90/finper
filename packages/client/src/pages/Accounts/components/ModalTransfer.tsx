@@ -32,6 +32,7 @@ const ModalTransfer = ({ accounts, show, onClose }: Props) => {
     }
   })
 
+  // eslint-disable-next-line react-hooks/incompatible-library -- react-hook-form watch() is safe here; no compiler-incompatible pattern
   const sourceId = watch('sourceId')
 
   const onSubmit = handleSubmit(async (params) => {

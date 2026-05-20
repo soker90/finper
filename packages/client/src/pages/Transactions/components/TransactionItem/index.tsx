@@ -1,4 +1,4 @@
-import { FC, useCallback, useState } from 'react'
+import { FC, useState } from 'react'
 import { Chip, Collapse, Divider, Paper, Stack, Typography, useMediaQuery, useTheme } from '@mui/material'
 import { Transaction } from 'types'
 import { format } from 'utils'
@@ -23,10 +23,10 @@ const TransactionItem: FC<TransactionItemProps> = ({ transaction, forceExpand, c
 
   const isDesktop = useMediaQuery(theme.breakpoints.up('md'))
 
-  const hideForm = useCallback(() => {
+  const hideForm = () => {
     cancelCreate?.()
     setExpand(false)
-  }, [transaction?._id])
+  }
 
   return (
     <>

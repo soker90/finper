@@ -49,6 +49,7 @@ const LoanFormModal = ({ loan, onClose }: Props) => {
 
   useEffect(() => {
     reset(defaultValues)
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- reset(defaultValues) on external prop change; defaultValues is rebuilt each render by design
   }, [reset, loan, accounts, categories])
 
   const onSubmit = handleSubmit(async (params) => {

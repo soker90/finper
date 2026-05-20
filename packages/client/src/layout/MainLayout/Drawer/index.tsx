@@ -1,5 +1,3 @@
-import { useMemo } from 'react'
-
 import { useTheme } from '@mui/material/styles'
 import { Box, Drawer, useMediaQuery } from '@mui/material'
 
@@ -8,14 +6,15 @@ import DrawerContent from './DrawerContent'
 import MiniDrawerStyled from './MiniDrawerStyled'
 import { drawerWidth } from 'config'
 
+const DRAWER_CONTENT = <DrawerContent />
+
 const MainDrawer = ({ open, handleDrawerToggle, window }: any) => {
   const theme = useTheme()
   const matchDownMD = useMediaQuery(theme.breakpoints.down('lg'))
 
   const container = window !== undefined ? () => window().document.body : undefined
 
-  const drawerContent = useMemo(() => <DrawerContent />, [])
-  const drawerHeader = useMemo(() => <DrawerHeader open={open} />, [open])
+  const drawerHeader = <DrawerHeader open={open} />
 
   return (
     <Box component='nav' sx={{ flexShrink: { md: 0 }, zIndex: 1300 }} aria-label='mailbox folders'>
@@ -23,7 +22,7 @@ const MainDrawer = ({ open, handleDrawerToggle, window }: any) => {
         ? (
           <MiniDrawerStyled variant='permanent' open={open}>
             {drawerHeader}
-            {drawerContent}
+            {DRAWER_CONTENT}
           </MiniDrawerStyled>
           )
         : (
@@ -45,7 +44,7 @@ const MainDrawer = ({ open, handleDrawerToggle, window }: any) => {
             })}
           >
             {open && drawerHeader}
-            {open && drawerContent}
+            {open && DRAWER_CONTENT}
           </Drawer>
           )}
     </Box>

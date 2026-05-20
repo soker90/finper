@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { Box, Grid, MenuItem, Select, Stack, Typography } from '@mui/material'
 import { useTagsStats, useAvailableTagYears } from 'hooks'
 import Loader from 'components/Loader'
@@ -6,14 +6,11 @@ import TrackingCard from './components/TrackingCard'
 
 const Trackings = () => {
   const { years, isLoading: yearsLoading } = useAvailableTagYears()
-  const [year, setYear] = useState<number | null>(null)
+  const [userYear, setUserYear] = useState<number | null>(null)
+  // Derive the selected year during render: use explicit user choice if still valid,
+  // otherwise fall back to the most recent available year.
+  const year = userYear !== null && years.includes(userYear) ? userYear : (years[0] ?? null)
   const { tagStats, isLoading: statsLoading } = useTagsStats(year)
-
-  useEffect(() => {
-    if (years.length > 0 && year === null) {
-      setYear(years[0])
-    }
-  }, [years, year])
 
   const isLoading = yearsLoading || statsLoading
 
@@ -36,7 +33,7 @@ const Trackings = () => {
             id='year-select'
             value={year ?? ''}
             size='small'
-            onChange={(e) => setYear(Number(e.target.value))}
+            onChange={(e) => setUserYear(Number(e.target.value))}
             sx={{ minWidth: 90 }}
           >
             {years.map((yearOption) => (

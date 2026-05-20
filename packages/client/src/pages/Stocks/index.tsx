@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useState } from 'react'
 import { Grid } from '@mui/material'
 import { PlusOutlined, GiftOutlined, FallOutlined } from '@ant-design/icons'
 import { StockOperationType } from 'types'
@@ -11,7 +11,7 @@ const Stocks = () => {
   const { positions, addStock, deleteStock, isLoading } = useStocks()
   const [showModal, setShowModal] = useState<StockOperationType | false>(false)
 
-  const summary = useMemo(() => {
+  const summary = (() => {
     const totalCost = positions.reduce((acc, p) => acc + p.totalCost, 0)
 
     const positionsWithPrice = positions.filter(p => p.currentValue !== null)
@@ -26,7 +26,7 @@ const Stocks = () => {
       : null
 
     return { totalCost, totalValue, totalGainLoss, totalGainLossPct }
-  }, [positions])
+  })()
 
   if (isLoading) {
     return <LoadingList />

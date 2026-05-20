@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useState } from 'react'
 import { Button, Grid, IconButton, Typography } from '@mui/material'
 import { Link } from 'react-router'
 import { LeftOutlined, RightOutlined } from '@ant-design/icons'
@@ -17,10 +17,8 @@ interface Props {
 
 const Header = ({ month = '', year }: Props) => {
   const [copyInProgress, setCopyInProgress] = useState(false)
-  const urlToday = useMemo(() => {
-    const now = new Date()
-    return `/presupuestos/${now.getFullYear()}/${now.getMonth()}`
-  }, [])
+  const now = new Date()
+  const urlToday = `/presupuestos/${now.getFullYear()}/${now.getMonth()}`
 
   const handleCopy = async () => {
     setCopyInProgress(true)

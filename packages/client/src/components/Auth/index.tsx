@@ -31,6 +31,7 @@ const Auth = ({ children }: { children: any }): JSX.Element => {
     }
 
     initAuth()
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional bootstrap effect: runs once on mount to init auth interceptors
   }, [])
 
   if (!isInitialized) return <SplashScreen />

@@ -1,4 +1,4 @@
-import { FC, useCallback, useState } from 'react'
+import { FC, useState } from 'react'
 import { Collapse, Divider, Paper, Typography, useTheme } from '@mui/material'
 import { Account } from 'types'
 
@@ -19,10 +19,10 @@ const AccountItem: FC<AccountItemProps> = ({ account, forceExpand, cancelCreate 
   const [expand, setExpand] = useState(false)
   const isExpanded = forceExpand ?? expand
 
-  const hideForm = useCallback(() => {
+  const hideForm = () => {
     cancelCreate?.()
     setExpand(false)
-  }, [account._id])
+  }
 
   return (
     <>

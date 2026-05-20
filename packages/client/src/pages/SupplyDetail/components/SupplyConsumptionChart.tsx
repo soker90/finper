@@ -1,4 +1,3 @@
-import { useMemo } from 'react'
 import { Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import {
@@ -27,17 +26,15 @@ const SupplyConsumptionChart = ({ readings, isElectricity, unit }: Props) => {
   const theme = useTheme()
   const colors = getElectricityColors(theme)
 
-  const data = useMemo(() =>
-    readings
-      .toReversed()
-      .map((reading) => ({
-        label: dayjs(reading.startDate).format('MM/YY'),
-        consumption: reading.consumption ?? 0,
-        peak: reading.consumptionPeak ?? 0,
-        flat: reading.consumptionFlat ?? 0,
-        offPeak: reading.consumptionOffPeak ?? 0
-      }))
-  , [readings])
+  const data = readings
+    .toReversed()
+    .map((reading) => ({
+      label: dayjs(reading.startDate).format('MM/YY'),
+      consumption: reading.consumption ?? 0,
+      peak: reading.consumptionPeak ?? 0,
+      flat: reading.consumptionFlat ?? 0,
+      offPeak: reading.consumptionOffPeak ?? 0
+    }))
 
   if (data.length === 0) return null
 

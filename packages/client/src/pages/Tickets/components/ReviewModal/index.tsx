@@ -47,6 +47,7 @@ const ReviewModal = ({ ticket, onClose }: Props) => {
     setError(undefined)
 
     const transactionParams = {
+      // eslint-disable-next-line react-hooks/purity -- Date.now() is called inside a submit handler, not during render
       date: params.date ? new Date(params.date).getTime() : Date.now(),
       amount: params.amount,
       account: params.account,
