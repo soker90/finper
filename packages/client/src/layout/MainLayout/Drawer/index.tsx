@@ -6,13 +6,14 @@ import DrawerContent from './DrawerContent'
 import MiniDrawerStyled from './MiniDrawerStyled'
 import { drawerWidth } from 'config'
 
+const DRAWER_CONTENT = <DrawerContent />
+
 const MainDrawer = ({ open, handleDrawerToggle, window }: any) => {
   const theme = useTheme()
   const matchDownMD = useMediaQuery(theme.breakpoints.down('lg'))
 
   const container = window !== undefined ? () => window().document.body : undefined
 
-  const drawerContent = <DrawerContent />
   const drawerHeader = <DrawerHeader open={open} />
 
   return (
@@ -21,7 +22,7 @@ const MainDrawer = ({ open, handleDrawerToggle, window }: any) => {
         ? (
           <MiniDrawerStyled variant='permanent' open={open}>
             {drawerHeader}
-            {drawerContent}
+            {DRAWER_CONTENT}
           </MiniDrawerStyled>
           )
         : (
@@ -43,7 +44,7 @@ const MainDrawer = ({ open, handleDrawerToggle, window }: any) => {
             })}
           >
             {open && drawerHeader}
-            {open && drawerContent}
+            {open && DRAWER_CONTENT}
           </Drawer>
           )}
     </Box>
