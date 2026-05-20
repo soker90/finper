@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useState } from 'react'
 import { Grid } from '@mui/material'
 import { EditOutlined } from '@ant-design/icons'
 import ScrollableTable, { Column, Action } from 'components/ScrollableTable'
@@ -19,7 +19,7 @@ const BudgetTable = ({
   year,
   month
 }: { budgets: Budget[], title: string, year: string, month: string }) => {
-  const orderBudgets = useMemo(() => budgets.toSorted(sortByAmountAndName), [budgets])
+  const orderBudgets = budgets.toSorted(sortByAmountAndName)
   const [selectedBudget, setSelectedBudget] = useState<{ category: string, amount: number } | null>(null)
 
   const handleEdit = (item: Budget) => {

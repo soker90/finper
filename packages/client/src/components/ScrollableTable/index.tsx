@@ -1,4 +1,4 @@
-import { memo, ReactNode, useMemo } from 'react'
+import { ReactNode } from 'react'
 import {
   IconButton,
   Table,
@@ -26,7 +26,7 @@ interface ContainerProps {
   children: ReactNode
 }
 
-const TableWrapper = memo(({ containerSx, stickyHeader, size, sx, children }: ContainerProps) => (
+const TableWrapper = ({ containerSx, stickyHeader, size, sx, children }: ContainerProps) => (
   <TableContainer
     sx={[
       {
@@ -50,7 +50,7 @@ const TableWrapper = memo(({ containerSx, stickyHeader, size, sx, children }: Co
       {children}
     </Table>
   </TableContainer>
-))
+)
 
 // ─── Declarative head ─────────────────────────────────────────────────────────
 
@@ -219,10 +219,9 @@ function ScrollableTableInner<T> (props: Props<T>) {
   const columns = 'columns' in props ? props.columns : undefined
   const actionsLength = 'actions' in props ? props.actions?.length : 0
 
-  const head = useMemo(() => {
-    if (!columns) return null
-    return <DeclarativeHead columns={columns} hasActions={!!actionsLength} />
-  }, [columns, actionsLength])
+  const head = columns
+    ? <DeclarativeHead columns={columns} hasActions={!!actionsLength} />
+    : null
 
   const inner = 'columns' in props && props.columns && props.data !== undefined
     ? (
@@ -266,6 +265,4 @@ function ScrollableTableInner<T> (props: Props<T>) {
 // Re-export types for consumers
 export type { Column, Action } from './types'
 
-const ScrollableTable = memo(ScrollableTableInner) as typeof ScrollableTableInner
-
-export default ScrollableTable
+export default ScrollableTableInner as typeof ScrollableTableInner

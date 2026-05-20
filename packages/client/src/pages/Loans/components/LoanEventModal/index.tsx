@@ -27,6 +27,7 @@ const LoanEventModal = ({ loan, onClose }: Props) => {
 
   const onSubmit = handleSubmit(async (params) => {
     const { error } = await addLoanEvent(loan._id, {
+      // eslint-disable-next-line react-hooks/purity -- Date.now() is called inside a submit handler, not during render
       date: params.date ? inputToTimestamp(params.date) : Date.now(),
       newRate: Number(params.newRate),
       newPayment: Number(params.newPayment)

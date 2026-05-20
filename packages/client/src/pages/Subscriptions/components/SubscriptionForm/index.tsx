@@ -39,6 +39,7 @@ const SubscriptionForm = ({ subscription, onClose, onSubmit }: Props) => {
 
   useEffect(() => {
     reset(defaultValues)
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- reset(defaultValues) on external prop change; defaultValues is rebuilt each render by design
   }, [reset, subscription, accounts, categories])
 
   const handleFormSubmit = handleSubmit(async (data) => {

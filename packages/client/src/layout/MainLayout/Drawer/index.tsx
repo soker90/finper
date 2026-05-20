@@ -1,5 +1,3 @@
-import { useMemo } from 'react'
-
 import { useTheme } from '@mui/material/styles'
 import { Box, Drawer, useMediaQuery } from '@mui/material'
 
@@ -14,8 +12,8 @@ const MainDrawer = ({ open, handleDrawerToggle, window }: any) => {
 
   const container = window !== undefined ? () => window().document.body : undefined
 
-  const drawerContent = useMemo(() => <DrawerContent />, [])
-  const drawerHeader = useMemo(() => <DrawerHeader open={open} />, [open])
+  const drawerContent = <DrawerContent />
+  const drawerHeader = <DrawerHeader open={open} />
 
   return (
     <Box component='nav' sx={{ flexShrink: { md: 0 }, zIndex: 1300 }} aria-label='mailbox folders'>

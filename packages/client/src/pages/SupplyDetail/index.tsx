@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react'
+import { useState } from 'react'
 import { useParams, useNavigate } from 'react-router'
 import { Box, CircularProgress, Stack, Typography } from '@mui/material'
 import dayjs from 'dayjs'
@@ -26,23 +26,15 @@ const SupplyDetail = () => {
   const { readings, isLoading: loadingReadings, createReading, updateReading, removeReading } =
     useSupplyReadings(supplyId ?? null)
 
-  const availableYears = useMemo(
-    () => Array.from(new Set(readings.map((reading) => new Date(reading.startDate).getFullYear()))).toSorted((a, b) => b - a),
-    [readings]
-  )
+  const availableYears = Array.from(new Set(readings.map((reading) => new Date(reading.startDate).getFullYear()))).toSorted((a, b) => b - a)
 
-  const [selectedYear, setSelectedYear] = useState<number>(() => new Date().getFullYear())
+  const [userYear, setUserYear] = useState<number | null>(null)
+  // Derive selectedYear during render: use userYear if still available, otherwise default to most recent
+  const selectedYear = userYear !== null && availableYears.includes(userYear)
+    ? userYear
+    : (availableYears[0] ?? new Date().getFullYear())
 
-  useEffect(() => {
-    if (availableYears.length > 0 && !availableYears.includes(selectedYear)) {
-      setSelectedYear(availableYears[0])
-    }
-  }, [availableYears, selectedYear])
-
-  const filteredReadings = useMemo(
-    () => readings.filter((reading) => new Date(reading.startDate).getFullYear() === selectedYear),
-    [readings, selectedYear]
-  )
+  const filteredReadings = readings.filter((reading) => new Date(reading.startDate).getFullYear() === selectedYear)
 
   const { activeModal, setActiveModal, closeModal, handleReadingSubmit } = useSupplyDetailModals({
     supply: supply ?? null,
@@ -91,7 +83,7 @@ const SupplyDetail = () => {
         years={availableYears}
         selectedYear={selectedYear}
         readingCount={filteredReadings.length}
-        onYearChange={setSelectedYear}
+        onYearChange={setUserYear}
       />
 
       <SupplyReadingList

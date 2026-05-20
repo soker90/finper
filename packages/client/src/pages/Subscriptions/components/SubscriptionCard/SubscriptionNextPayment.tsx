@@ -30,6 +30,7 @@ const SubscriptionNextPayment = ({ nextPaymentDate }: Props) => {
     )
   }
 
+  // eslint-disable-next-line react-hooks/purity -- intentional: "days remaining" chip must reflect the moment of render
   const days = Math.ceil((nextPaymentDate - Date.now()) / (1000 * 60 * 60 * 24))
 
   return (

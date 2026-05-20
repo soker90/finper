@@ -34,24 +34,10 @@ export default [
     },
     rules: {
       "react/react-in-jsx-scope": "off",
-      // React Compiler diagnostic rules: keep visible but non-blocking until
-      // pre-existing tech debt (setState in effect, impure render, etc.) is
-      // cleaned up incrementally. The compiler itself still runs at build
-      // time and applies its optimizations or bails out per-component.
-      "react-hooks/set-state-in-effect": "warn",
-      "react-hooks/set-state-in-render": "warn",
-      "react-hooks/purity": "warn",
-      "react-hooks/immutability": "warn",
-      "react-hooks/preserve-manual-memoization": "warn",
+      // react-hooks/incompatible-library stays as warn: false positives from
+      // react-hook-form watch() and @tanstack/react-virtual useVirtualizer.
+      // All other React Compiler diagnostic rules use the preset default (error).
       "react-hooks/incompatible-library": "warn",
-      "react-hooks/refs": "warn",
-      "react-hooks/static-components": "warn",
-      "react-hooks/use-memo": "warn",
-      "react-hooks/void-use-memo": "warn",
-      "react-hooks/error-boundaries": "warn",
-      "react-hooks/globals": "warn",
-      "react-hooks/gating": "warn",
-      "react-hooks/config": "warn",
     },
     settings: {
       react: {

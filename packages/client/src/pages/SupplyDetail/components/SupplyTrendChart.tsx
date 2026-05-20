@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback } from 'react'
+import { useState } from 'react'
 import { Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import type { LegendPayload } from 'recharts'
@@ -40,7 +40,7 @@ const SupplyTrendChart = ({ readings, isElectricity, unit }: Props) => {
   const colors = getElectricityColors(theme)
   const [opacity, setOpacity] = useState<Record<ElecKey, number>>(DEFAULT_OPACITY)
 
-  const data = useMemo(() => {
+  const data = (() => {
     if (!readings.length) return []
     const windowMs = isElectricity ? ONE_YEAR_MS : ONE_YEAR_MS * 2
     const cutoff = readings[0].endDate - windowMs
@@ -54,14 +54,14 @@ const SupplyTrendChart = ({ readings, isElectricity, unit }: Props) => {
         offPeak: r.consumptionOffPeak ?? 0,
         consumption: r.consumption ?? 0
       }))
-  }, [readings, isElectricity])
+  })()
 
-  const handleLegendMouseEnter = useCallback((o: LegendPayload) => {
+  const handleLegendMouseEnter = (o: LegendPayload) => {
     if (!isElecKey(o.dataKey)) return
     setOpacity({ ...DIM_OPACITY, [o.dataKey]: 1 })
-  }, [])
+  }
 
-  const handleLegendMouseLeave = useCallback(() => setOpacity(DEFAULT_OPACITY), [])
+  const handleLegendMouseLeave = () => setOpacity(DEFAULT_OPACITY)
 
   if (data.length === 0) return null
 

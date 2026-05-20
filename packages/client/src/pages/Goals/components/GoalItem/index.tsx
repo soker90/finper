@@ -1,4 +1,4 @@
-import { FC, useCallback, useState, MouseEvent } from 'react'
+import { FC, useState, MouseEvent } from 'react'
 import { Collapse, Divider, Paper, Typography, LinearProgress, Box, IconButton, useTheme } from '@mui/material'
 import { PlusOutlined, MinusOutlined } from '@ant-design/icons'
 import { Goal } from 'types'
@@ -25,10 +25,10 @@ const GoalItem: FC<GoalItemProps> = ({ goal, forceExpand, cancelCreate }) => {
     ? Math.min(Math.round((goal.currentAmount / goal.targetAmount) * 100), 100)
     : 0
 
-  const hideForm = useCallback(() => {
+  const hideForm = () => {
     cancelCreate?.()
     setExpand(false)
-  }, [cancelCreate])
+  }
 
   const handleFund = (e: MouseEvent, mode: 'fund' | 'withdraw') => {
     e.stopPropagation()

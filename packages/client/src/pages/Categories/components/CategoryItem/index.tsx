@@ -1,4 +1,4 @@
-import { FC, useCallback, useState } from 'react'
+import { FC, useState } from 'react'
 import { Chip, Collapse, Divider, Paper, Typography, useTheme } from '@mui/material'
 
 import { Category } from 'types'
@@ -26,10 +26,10 @@ const CategoryItem: FC<CategoryItemProps> = ({ category, forceExpand, cancelCrea
   const [expand, setExpand] = useState(false)
   const isExpanded = forceExpand ?? expand
 
-  const hideForm = useCallback(() => {
+  const hideForm = () => {
     cancelCreate?.()
     setExpand(false)
-  }, [category._id])
+  }
 
   return (
     <>

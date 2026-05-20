@@ -24,6 +24,7 @@ const AddStockModal = ({ onClose, onAdd, defaultType = 'buy' }: Props) => {
     }
   })
 
+  // eslint-disable-next-line react-hooks/incompatible-library -- react-hook-form watch() is safe here; no compiler-incompatible pattern
   const priceMode = watch('priceMode')
 
   const onSubmit = handleSubmit(async (params) => {

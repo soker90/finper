@@ -1,4 +1,3 @@
-import { useState, useEffect } from 'react'
 import useSWR from 'swr'
 import { Ticket } from 'types'
 import { TICKETS } from 'constants/api-paths'
@@ -12,14 +11,11 @@ export const useTickets = (): {
   removeTicket: (id: string) => Promise<{ error?: string }>
   markReviewed: (id: string) => Promise<{ error?: string }>
 } => {
-  const [swrKey, setSwrKey] = useState<string | null>(TICKETS)
-  const { data, error, mutate, isLoading } = useSWR<{ tickets: Ticket[], total: number }>(swrKey)
+  const { data, error, mutate, isLoading } = useSWR<{ tickets: Ticket[], total: number }>(TICKETS)
 
-  useEffect(() => {
-    if (error?.status === 503) {
-      setSwrKey(null)
-    }
-  }, [error])
+  // Disable fetching when the tickets service is unavailable (503).
+  // Derived during render instead of state+effect to avoid an extra cycle.
+  const ticketsEnabled = error?.status !== 503
 
   const removeTicket = async (id: string) => {
     const result = await deleteTicket(id)
@@ -44,7 +40,7 @@ export const useTickets = (): {
 
   return {
     tickets: data?.tickets ?? [],
-    ticketsEnabled: swrKey !== null,
+    ticketsEnabled,
     isLoading,
     error,
     removeTicket,

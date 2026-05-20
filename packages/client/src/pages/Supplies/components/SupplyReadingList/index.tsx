@@ -1,4 +1,3 @@
-import { useMemo } from 'react'
 import { Typography } from '@mui/material'
 import { DeleteOutlined, EditOutlined } from '@ant-design/icons'
 import ScrollableTable, { Action } from 'components/ScrollableTable'
@@ -16,12 +15,12 @@ interface Props {
 }
 
 const SupplyReadingList = ({ readings, isLoading, isElectricity, unit, onAdd, onEdit, onDelete }: Props) => {
-  const columns = useMemo(() => getColumns({ isElectricity, unit }), [isElectricity, unit])
+  const columns = getColumns({ isElectricity, unit })
 
-  const actions: Action<SupplyReading>[] = useMemo(() => [
+  const actions: Action<SupplyReading>[] = [
     { icon: EditOutlined, tooltip: 'Editar lectura', onClick: onEdit },
     { icon: DeleteOutlined, tooltip: 'Eliminar lectura', onClick: onDelete, color: 'error' }
-  ], [onEdit, onDelete])
+  ]
 
   const emptyNode = (
     <Typography
