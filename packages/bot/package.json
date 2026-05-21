@@ -1,0 +1,30 @@
+{
+  "name": "@soker90/finper-bot",
+  "version": "1.0.0",
+  "description": "Telegram bot that processes receipt photos and extracts data using Gemini Vision",
+  "private": true,
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "lint": "eslint ./src",
+    "lint:fix": "eslint ./src --fix",
+    "type-check": "tsc --noEmit",
+    "db:migrate:local": "wrangler d1 execute ticket-bot-db --local --file=./schema.sql",
+    "db:migrate:remote": "wrangler d1 execute ticket-bot-db --remote --file=./schema.sql",
+    "setup:webhook": "tsx scripts/setup-webhook.ts"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "4.20260317.1",
+    "@typescript-eslint/eslint-plugin": "8.57.1",
+    "@typescript-eslint/parser": "8.57.1",
+    "eslint": "9.39.4",
+    "globals": "17.6.0",
+    "neostandard": "0.13.0",
+    "tsx": "4.21.0",
+    "typescript": "5.9.3",
+    "wrangler": "4.75.0"
+  },
+  "dependencies": {
+    "hono": "4.12.14"
+  }
+}
