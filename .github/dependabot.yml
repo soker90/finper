@@ -10,9 +10,7 @@ updates:
     schedule:
       interval: "daily"
     cooldown:
-      semver-patch: "1 day"
-      semver-minor: "7 days"
-      semver-major: "7 days"
+      default-days: 7
     labels:
       - "github-actions"
       - "dependencies"
@@ -23,9 +21,9 @@ updates:
     schedule:
       interval: "weekly"
     cooldown:
-      semver-patch: "1 day"
-      semver-minor: "7 days"
-      semver-major: "7 days"
+      semver-patch-days: 1
+      semver-minor-days: 7
+      semver-major-days: 7
     labels:
       - "api"
       - "dependencies"
@@ -36,9 +34,9 @@ updates:
     schedule:
       interval: "weekly"
     cooldown:
-      semver-patch: "1 day"
-      semver-minor: "7 days"
-      semver-major: "7 days"
+      semver-patch-days: 1
+      semver-minor-days: 7
+      semver-major-days: 7
     labels:
       - "ui"
       - "dependencies"
@@ -49,9 +47,9 @@ updates:
     schedule:
       interval: "weekly"
     cooldown:
-      semver-patch: "1 day"
-      semver-minor: "7 days"
-      semver-major: "7 days"
+      semver-patch-days: 1
+      semver-minor-days: 7
+      semver-major-days: 7
     labels:
       - "models"
       - "dependencies"
@@ -62,9 +60,9 @@ updates:
     schedule:
       interval: "weekly"
     cooldown:
-      semver-patch: "1 day"
-      semver-minor: "7 days"
-      semver-major: "7 days"
+      semver-patch-days: 1
+      semver-minor-days: 7
+      semver-major-days: 7
     labels:
       - "bot"
       - "dependencies"
