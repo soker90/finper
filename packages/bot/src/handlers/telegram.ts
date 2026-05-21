@@ -119,7 +119,7 @@ export async function telegramWebhookHandler (c: Context<{ Bindings: Env }>): Pr
           const lines = ['👥 <b>Usuarios con acceso:</b>', '']
           lines.push(`• <code>${adminUserId}</code> — admin (tú)`)
           for (const u of users) {
-            const date = new Date(u.added_at).toLocaleDateString('es-ES')
+            const date = formatDate(u.added_at)
             lines.push(`• <code>${u.user_id}</code> — añadido el ${date}`)
           }
           await sendTelegramMessage(chatId, lines.join('\n'), c.env.TELEGRAM_BOT_TOKEN)
