@@ -7,7 +7,8 @@ import { requestLogin } from '../request-login'
 import { insertSupply, insertProperty, insertSupplyReading } from '../insert-data-to-model'
 import { generateUsername } from '../generate-values'
 
-const testDatabase = require('../test-db')(mongoose)
+import createTestDatabase from '../test-db'
+const testDatabase = createTestDatabase(mongoose)
 
 const MOCK_TARIFFS_RESPONSE = {
   datosGenerales: { iva: 0.21, impuestoElectrico: 0.0511269632, alquilerContador: 0.026557 },

@@ -14,7 +14,8 @@ jest.mock('../../src/services/stock-price.provider', () => ({
   IStockPriceProvider: {}
 }))
 
-const testDatabase = require('../test-db')(mongoose)
+import createTestDatabase from '../test-db'
+const testDatabase = createTestDatabase(mongoose)
 
 describe('Stocks', () => {
   beforeAll(() => testDatabase.connect())

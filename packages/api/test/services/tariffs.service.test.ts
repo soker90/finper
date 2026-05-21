@@ -3,7 +3,8 @@ import TariffsService from '../../src/services/tariffs.service'
 import { insertSupply, insertSupplyReading } from '../insert-data-to-model'
 import { generateUsername } from '../generate-values'
 
-const testDatabase = require('../test-db')(mongoose)
+import createTestDatabase from '../test-db'
+const testDatabase = createTestDatabase(mongoose)
 
 // Helpers compartidos
 const FULL_PRICE_SUPPLY = {

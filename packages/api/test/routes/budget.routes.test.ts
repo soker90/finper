@@ -12,7 +12,8 @@ import { insertBudget, insertCategory, insertTransaction } from '../insert-data-
 import { generateUsername } from '../generate-values'
 import { ERROR_MESSAGE } from '../../src/i18n'
 
-const testDatabase = require('../test-db')(mongoose)
+import createTestDatabase from '../test-db'
+const testDatabase = createTestDatabase(mongoose)
 
 describe('Budget', () => {
   beforeAll(() => testDatabase.connect())

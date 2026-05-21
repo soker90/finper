@@ -4,6 +4,9 @@ module.exports = {
   transform: {
     '^.+\\.ts?$': ['ts-jest', { diagnostics: false }]
   },
+  transformIgnorePatterns: [
+    '/node_modules/(?!(@faker-js/faker)/)'
+  ],
   collectCoverage: true,
   collectCoverageFrom: [
     'src/**/*.{ts,js}',

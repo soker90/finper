@@ -19,7 +19,8 @@ import { ERROR_MESSAGE } from '../../src/i18n'
 import { roundNumber } from '../../src/utils'
 import { getTransactionAmount } from '../../src/services/utils'
 
-const testDatabase = require('../test-db')(mongoose)
+import createTestDatabase from '../test-db'
+const testDatabase = createTestDatabase(mongoose)
 
 describe('Transaction', () => {
   beforeAll(() => testDatabase.connect())

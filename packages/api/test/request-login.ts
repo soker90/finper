@@ -4,7 +4,7 @@ import supertest from 'supertest'
 import { insertCredentials } from './insert-data-to-model'
 
 const defaultCredentials = {
-  username: faker.internet.userName().slice(0, MAX_USERNAME_LENGTH).toLowerCase(),
+  username: faker.internet.username().slice(0, MAX_USERNAME_LENGTH).toLowerCase(),
   password: faker.internet.password({ length: MIN_PASSWORD_LENGTH - 1 })
 }
 

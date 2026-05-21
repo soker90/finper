@@ -12,7 +12,8 @@ import { insertAccount } from '../insert-data-to-model'
 import { generateUsername } from '../generate-values'
 import { ERROR_MESSAGE } from '../../src/i18n'
 
-const testDatabase = require('../test-db')(mongoose)
+import createTestDatabase from '../test-db'
+const testDatabase = createTestDatabase(mongoose)
 
 describe('Account', () => {
   beforeAll(() => testDatabase.connect())

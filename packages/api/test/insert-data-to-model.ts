@@ -36,7 +36,7 @@ export async function insertCredentials (params: Record<string, string | boolean
 
   return await UserModel.create({
     password: faker.internet.password({ length: MIN_PASSWORD_LENGTH }),
-    username: faker.internet.userName().slice(0, MAX_USERNAME_LENGTH).toLowerCase(),
+    username: faker.internet.username().slice(0, MAX_USERNAME_LENGTH).toLowerCase(),
     ...parsedParams
   })
 }
@@ -47,7 +47,7 @@ export const insertAccount = async (params: { name?: string, bank?: string, bala
     bank: params.bank ?? faker.lorem.word(),
     balance: params.balance ?? faker.number.int(),
     isActive: params.isActive ?? faker.datatype.boolean(),
-    user: params.user ?? faker.internet.userName().slice(MIN_LENGTH_USERNAME, MAX_USERNAME_LENGTH).toLowerCase()
+    user: params.user ?? faker.internet.username().slice(MIN_LENGTH_USERNAME, MAX_USERNAME_LENGTH).toLowerCase()
   }) as unknown as IAccount & { _id: string }
 }
 
@@ -74,12 +74,12 @@ export const insertCategory = async (params: Record<string, any> = {}): Promise<
 export const insertStore = async (params: Record<string, string> = {}): Promise<IStore> => {
   return StoreModel.create({
     name: params.name ?? faker.company.name(),
-    user: params.user ?? faker.internet.userName().slice(MIN_LENGTH_USERNAME, MAX_USERNAME_LENGTH).toLowerCase()
+    user: params.user ?? faker.internet.username().slice(MIN_LENGTH_USERNAME, MAX_USERNAME_LENGTH).toLowerCase()
   })
 }
 
 export const insertTransaction = async (params: Record<string, string | number | string[]> = {}): Promise<any> => {
-  const user = (params.user ?? faker.internet.userName().slice(MIN_LENGTH_USERNAME, MAX_USERNAME_LENGTH).toLowerCase()) as string
+  const user = (params.user ?? faker.internet.username().slice(MIN_LENGTH_USERNAME, MAX_USERNAME_LENGTH).toLowerCase()) as string
   return TransactionModel.create({
     date: params.date ?? faker.date.past().getTime(),
     category: params.category ?? (await insertCategory({ user })),
@@ -275,6 +275,6 @@ export const insertGoal = async (params: Record<string, any> = {}): Promise<IGoa
     deadline: params.deadline ?? null,
     color: params.color ?? faker.helpers.arrayElement(GOAL_COLORS),
     icon: params.icon ?? faker.helpers.arrayElement(GOAL_ICONS),
-    user: params.user ?? faker.internet.userName().slice(MIN_LENGTH_USERNAME, MAX_USERNAME_LENGTH).toLowerCase()
+    user: params.user ?? faker.internet.username().slice(MIN_LENGTH_USERNAME, MAX_USERNAME_LENGTH).toLowerCase()
   }) as unknown as IGoal & { _id: string }
 }
