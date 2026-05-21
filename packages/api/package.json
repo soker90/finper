@@ -59,8 +59,11 @@
     "yahoo-finance2": "3.14.0"
   },
   "devDependencies": {
+    "@babel/core": "7.29.0",
+    "@babel/preset-env": "7.29.3",
     "@faker-js/faker": "10.4.0",
     "@shelf/jest-mongodb": "6.0.2",
+    "babel-jest": "30.4.1",
     "@tsconfig/node22": "22.0.5",
     "@types/bcrypt": "6.0.0",
     "@types/bluebird-global": "3.5.18",
