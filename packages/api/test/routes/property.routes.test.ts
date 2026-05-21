@@ -6,7 +6,8 @@ import { requestLogin } from '../request-login'
 import { insertProperty, insertSupply, insertSupplyReading } from '../insert-data-to-model'
 import { generateUsername } from '../generate-values'
 
-const testDatabase = require('../test-db')(mongoose)
+import createTestDatabase from '../test-db'
+const testDatabase = createTestDatabase(mongoose)
 
 describe('Property Routes', () => {
   beforeAll(() => testDatabase.connect())

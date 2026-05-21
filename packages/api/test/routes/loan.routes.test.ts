@@ -17,7 +17,8 @@ import { generateUsername } from '../generate-values'
 import { roundNumber } from '../../src/utils/roundNumber'
 import { calcMonthlyPayment, calcRemainingMonths } from '../../src/services/utils/calcLoanProjection'
 
-const testDatabase = require('../test-db')(mongoose)
+import createTestDatabase from '../test-db'
+const testDatabase = createTestDatabase(mongoose)
 
 describe('Loans', () => {
   beforeAll(() => testDatabase.connect())

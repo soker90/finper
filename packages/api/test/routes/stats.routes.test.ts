@@ -11,7 +11,8 @@ import { requestLogin } from '../request-login'
 import { insertAccount, insertCategory, insertTransaction } from '../insert-data-to-model'
 import { generateUsername } from '../generate-values'
 
-const testDatabase = require('../test-db')(mongoose)
+import createTestDatabase from '../test-db'
+const testDatabase = createTestDatabase(mongoose)
 
 describe('Stats', () => {
   beforeAll(() => testDatabase.connect())

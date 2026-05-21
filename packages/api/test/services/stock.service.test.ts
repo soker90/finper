@@ -4,7 +4,8 @@ import { IStockPriceProvider } from '../../src/services/stock-price.provider'
 import { insertStock } from '../insert-data-to-model'
 import { generateUsername } from '../generate-values'
 
-const testDatabase = require('../test-db')(mongoose)
+import createTestDatabase from '../test-db'
+const testDatabase = createTestDatabase(mongoose)
 
 // ── Price provider stub ───────────────────────────────────────────────────────
 const makeProvider = (price: number | null = 10): IStockPriceProvider => ({

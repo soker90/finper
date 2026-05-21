@@ -4,7 +4,8 @@ import CategoryService from '../../src/services/category.service'
 import { insertCategory } from '../insert-data-to-model'
 import { generateUsername } from '../generate-values'
 
-const testDatabase = require('../test-db')(mongoose)
+import createTestDatabase from '../test-db'
+const testDatabase = createTestDatabase(mongoose)
 
 describe('CategoryService', () => {
   const service = new CategoryService()

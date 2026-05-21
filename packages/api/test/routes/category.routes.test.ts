@@ -13,7 +13,8 @@ import { insertCategory } from '../insert-data-to-model'
 import { ERROR_MESSAGE } from '../../src/i18n'
 import { generateUsername } from '../generate-values'
 
-const testDatabase = require('../test-db')(mongoose)
+import createTestDatabase from '../test-db'
+const testDatabase = createTestDatabase(mongoose)
 
 describe('Category', () => {
   beforeAll(() => testDatabase.connect())

@@ -10,10 +10,11 @@ import { insertCredentials } from '../insert-data-to-model'
 import { MAX_USERNAME_LENGTH, MIN_PASSWORD_LENGTH } from '../../src/config/inputs'
 import { requestLogin } from '../request-login'
 
-const testDatabase = require('../test-db')(mongoose)
+import createTestDatabase from '../test-db'
+const testDatabase = createTestDatabase(mongoose)
 
 function getUsername (): string {
-  return faker.internet.userName().slice(0, MAX_USERNAME_LENGTH)
+  return faker.internet.username().slice(0, MAX_USERNAME_LENGTH)
 }
 
 describe('Auth', () => {
@@ -61,7 +62,7 @@ describe('Auth', () => {
       await supertest(server.app)
         .post(path)
         .send({
-          username: faker.internet.userName()
+          username: faker.internet.username()
         })
         .expect(422)
     })
@@ -70,7 +71,7 @@ describe('Auth', () => {
       await supertest(server.app)
         .post(path)
         .send({
-          username: faker.internet.userName(),
+          username: faker.internet.username(),
           password: faker.internet.password({ length: MIN_PASSWORD_LENGTH - 1 })
         })
         .expect(422)
@@ -79,7 +80,7 @@ describe('Auth', () => {
     describe('when trying to create another account with an existing username', () => {
       let response: supertest.Response
 
-      const username = faker.internet.userName().slice(0, MAX_USERNAME_LENGTH)
+      const username = faker.internet.username().slice(0, MAX_USERNAME_LENGTH)
 
       beforeAll(async () => {
         await insertCredentials({ username, password: faker.internet.password({ length: MIN_PASSWORD_LENGTH - 1 }) })
@@ -149,7 +150,7 @@ describe('Auth', () => {
     test('when no password param provided, it should response an error with status code 422', async () => {
       await supertest(server.app)
         .post(path)
-        .send({ username: faker.internet.userName() })
+        .send({ username: faker.internet.username() })
         .expect(422)
     })
 
@@ -162,7 +163,7 @@ describe('Auth', () => {
         response = await supertest(server.app)
           .post(path)
           .send({
-            username: faker.internet.userName(),
+            username: faker.internet.username(),
             password: faker.internet.password({ length: MIN_PASSWORD_LENGTH })
           })
       })

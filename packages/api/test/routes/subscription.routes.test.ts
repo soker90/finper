@@ -18,7 +18,8 @@ import {
 } from '../insert-data-to-model'
 import { generateUsername } from '../generate-values'
 
-const testDatabase = require('../test-db')(mongoose)
+import createTestDatabase from '../test-db'
+const testDatabase = createTestDatabase(mongoose)
 
 describe('Subscriptions', () => {
   beforeAll(() => testDatabase.connect())

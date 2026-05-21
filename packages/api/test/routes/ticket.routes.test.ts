@@ -7,7 +7,8 @@ import { requestLogin } from '../request-login'
 import { ticketService } from '../../src/services'
 import { ERROR_MESSAGE } from '../../src/i18n/ErrorMessages'
 
-const testDatabase = require('../test-db')(mongoose)
+import createTestDatabase from '../test-db'
+const testDatabase = createTestDatabase(mongoose)
 
 const mockFetch = (ok: boolean, body: object = {}) =>
   jest.spyOn(global, 'fetch').mockResolvedValueOnce({

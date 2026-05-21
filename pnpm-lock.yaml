@@ -81,9 +81,15 @@ importers:
         specifier: 3.14.0
         version: 3.14.0
     devDependencies:
+      '@babel/core':
+        specifier: 7.29.0
+        version: 7.29.0
+      '@babel/preset-env':
+        specifier: 7.29.3
+        version: 7.29.3(@babel/core@7.29.0)
       '@faker-js/faker':
-        specifier: 9.9.0
-        version: 9.9.0
+        specifier: 10.4.0
+        version: 10.4.0
       '@shelf/jest-mongodb':
         specifier: 6.0.2
         version: 6.0.2(@swc/core@1.15.11)(jest-environment-node@30.4.1)(mongodb@7.1.1(snappy@7.3.3(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)))(snappy@7.3.3(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0))
@@ -138,6 +144,9 @@ importers:
       '@typescript-eslint/parser':
         specifier: ^8.59.3
         version: 8.59.3(eslint@9.39.2)(typescript@5.9.3)
+      babel-jest:
+        specifier: 30.4.1
+        version: 30.4.1(@babel/core@7.29.0)
       eslint:
         specifier: 9.39.2
         version: 9.39.2
@@ -1538,10 +1547,6 @@ packages:
   '@faker-js/faker@10.4.0':
     resolution: {integrity: sha512-sDBWI3yLy8EcDzgobvJTWq1MJYzAkQdpjXuPukga9wXonhpMRvd1Izuo2Qgwey2OiEoRIBr35RMU9HJRoOHzpw==}
     engines: {node: ^20.19.0 || ^22.13.0 || ^23.5.0 || >=24.0.0, npm: '>=10'}
-
-  '@faker-js/faker@9.9.0':
-    resolution: {integrity: sha512-OEl393iCOoo/z8bMezRlJu+GlRGlsKbUAN7jKB6LhnKoqKve5DXRpalbItIIcwnCjs1k/FOPjFzcA6Qn+H+YbA==}
-    engines: {node: '>=18.0.0', npm: '>=9.0.0'}
 
   '@hapi/address@5.1.1':
     resolution: {integrity: sha512-A+po2d/dVoY7cYajycYI43ZbYMXukuopIsqCjh5QzsBCipDtdofHntljDlpccMjIfTy6UOkg+5KPriwYch2bXA==}
@@ -5384,9 +5389,6 @@ packages:
   lodash.sortby@4.7.0:
     resolution: {integrity: sha512-HDWXG8isMntAyRF5vZ7xKuEvOhT4AhlRt/3czTSjvGUxjYCBVRQY48ViDHyfYz9VIoBkW4TMGQNapx+l3RUwdA==}
 
-  lodash@4.17.23:
-    resolution: {integrity: sha512-LgVTMpQtIopCi79SJeDiP0TfWi5CNEc/L/aRdTh3yIvmZXTnheWpKjSZhnvMl8iXbC1tFg9gdHHDMLoV7CnG+w==}
-
   lodash@4.18.1:
     resolution: {integrity: sha512-dMInicTPVE8d1e5otfwmmjlxkZoUpiVLwyeTdUsi/Caj/gfzzblBcCE5sRHV/AsjuCmxWrte2TNGSYuCeCq+0Q==}
 
@@ -8391,8 +8393,6 @@ snapshots:
       levn: 0.4.1
 
   '@faker-js/faker@10.4.0': {}
-
-  '@faker-js/faker@9.9.0': {}
 
   '@hapi/address@5.1.1':
     dependencies:
@@ -13122,8 +13122,6 @@ snapshots:
 
   lodash.sortby@4.7.0: {}
 
-  lodash@4.17.23: {}
-
   lodash@4.18.1: {}
 
   logform@2.7.0:
@@ -15074,7 +15072,7 @@ snapshots:
       fast-json-stable-stringify: 2.1.0
       fs-extra: 9.1.0
       glob: 11.1.0
-      lodash: 4.17.23
+      lodash: 4.18.1
       pretty-bytes: 5.6.0
       rollup: 2.80.0
       source-map: 0.8.0-beta.0
