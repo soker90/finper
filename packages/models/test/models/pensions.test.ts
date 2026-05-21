@@ -3,7 +3,8 @@ import {
 } from '../../src'
 import createPension from '../helpers/create-pension'
 
-const testDatabase = require('../test-db')(mongoose)
+import createTestDatabase from '../test-db.js'
+const testDatabase = createTestDatabase(mongoose)
 
 const testBudget = (expected: PensionDocument, received: PensionDocument) => {
   expect(expected.date).toBe(received.date)

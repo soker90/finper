@@ -4,7 +4,8 @@ import {
 } from '../../src'
 import createDebt from '../helpers/create-debt'
 
-const testDatabase = require('../test-db')(mongoose)
+import createTestDatabase from '../test-db.js'
+const testDatabase = createTestDatabase(mongoose)
 
 const testDebt = (expected: DebtDocument, received: DebtDocument) => {
   expect(expected.from).toBe(received.from)

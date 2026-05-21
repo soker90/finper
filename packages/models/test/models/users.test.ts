@@ -7,7 +7,8 @@ import {
 import createUser from '../helpers/create-user'
 import { UserDocument } from '../../src/models/users'
 
-const testDatabase = require('../test-db')(mongoose)
+import createTestDatabase from '../test-db.js'
+const testDatabase = createTestDatabase(mongoose)
 
 describe('Users', () => {
   beforeAll(() => testDatabase.connect())

@@ -5,7 +5,8 @@ import {
 import createStore from '../helpers/create-store'
 import { faker } from '@faker-js/faker'
 
-const testDatabase = require('../test-db')(mongoose)
+import createTestDatabase from '../test-db.js'
+const testDatabase = createTestDatabase(mongoose)
 
 const testDebt = (expected: StoreDocument, received: StoreDocument) => {
   expect(expected.name).toBe(received.name)

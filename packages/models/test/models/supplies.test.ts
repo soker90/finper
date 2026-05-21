@@ -1,7 +1,8 @@
 import { SupplyModel, SupplyDocument, mongoose } from '../../src'
 import createSupply from '../helpers/create-supply'
 
-const testDatabase = require('../test-db')(mongoose)
+import createTestDatabase from '../test-db.js'
+const testDatabase = createTestDatabase(mongoose)
 
 const testSupply = (expected: SupplyDocument, received: SupplyDocument) => {
   expect(expected.name).toBe(received.name)
