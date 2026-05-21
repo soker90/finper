@@ -17,7 +17,6 @@ updates:
 
   - package-ecosystem: "npm"
     directory: "/packages/api"
-    package-manager: "pnpm"
     schedule:
       interval: "weekly"
     cooldown:
@@ -30,7 +29,6 @@ updates:
 
   - package-ecosystem: "npm"
     directory: "/packages/client"
-    package-manager: "pnpm"
     schedule:
       interval: "weekly"
     cooldown:
@@ -43,7 +41,6 @@ updates:
 
   - package-ecosystem: "npm"
     directory: "/packages/models"
-    package-manager: "pnpm"
     schedule:
       interval: "weekly"
     cooldown:
@@ -56,7 +53,6 @@ updates:
 
   - package-ecosystem: "npm"
     directory: "/packages/bot"
-    package-manager: "pnpm"
     schedule:
       interval: "weekly"
     cooldown:
