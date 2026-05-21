@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useState } from 'react'
 import { Button, Grid, IconButton, Typography } from '@mui/material'
 import { Link } from 'react-router'
 import { LeftOutlined, RightOutlined } from '@ant-design/icons'
@@ -17,10 +17,8 @@ interface Props {
 
 const Header = ({ month = '', year }: Props) => {
   const [copyInProgress, setCopyInProgress] = useState(false)
-  const urlToday = useMemo(() => {
-    const now = new Date()
-    return `/presupuestos/${now.getFullYear()}/${now.getMonth()}`
-  }, [])
+  const now = new Date()
+  const urlToday = `/presupuestos/${now.getFullYear()}/${now.getMonth()}`
 
   const handleCopy = async () => {
     setCopyInProgress(true)
@@ -49,7 +47,11 @@ const Header = ({ month = '', year }: Props) => {
           >
             <LeftOutlined />
           </IconButton>
-          <Typography typography='h3'>{monthToNumber(month)} {year} </Typography>
+          <Typography sx={{
+            typography: 'h3'
+          }}
+          >{monthToNumber(month)} {year}
+          </Typography>
           <IconButton
             color='primary' aria-label='derecha' size='large' component={Link}
             to={getUrlMonth(year, parseInt(month) + 1)} disabled={!month} data-testid='right-arrow'

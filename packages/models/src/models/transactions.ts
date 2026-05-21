@@ -19,6 +19,7 @@ export interface ITransaction {
   note?: string
   store?: Types.ObjectId
   subscriptionId?: Types.ObjectId
+  tags?: string[]
   user: string
 }
 
@@ -35,7 +36,10 @@ const transactionSchema = new Schema<ITransaction>({
   note: { type: String },
   store: { type: Schema.Types.ObjectId, ref: 'Store' },
   subscriptionId: { type: Schema.Types.ObjectId, ref: 'Subscription' },
+  tags: { type: [String], default: [] },
   user: { type: String, required: true }
 }, { versionKey: false })
+
+transactionSchema.index({ user: 1, tags: 1, type: 1, date: 1 })
 
 export const TransactionModel = model<ITransaction>('Transaction', transactionSchema)

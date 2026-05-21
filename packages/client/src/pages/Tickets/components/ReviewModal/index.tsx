@@ -4,10 +4,11 @@ import { Alert, FormHelperText, Grid } from '@mui/material'
 import { mutate } from 'swr'
 
 import { ModalGrid, DateForm, InputForm, SelectForm, SelectGroupForm } from 'components'
+import AutocompleteForm from 'components/forms/AutocompleteForm'
 import { addTransaction } from 'services/apiService'
 import { TRANSACTIONS } from 'constants/api-paths'
 import { Ticket, TransactionType, TRANSACTION } from 'types'
-import { useAccounts, useGroupedCategories, useTickets } from 'hooks'
+import { useAccounts, useGroupedCategories, useTickets, useStores } from 'hooks'
 import { TYPES_TRANSACTIONS_ENTRIES } from 'constants/transactions'
 
 interface Props {
@@ -27,6 +28,7 @@ interface FormValues {
 const ReviewModal = ({ ticket, onClose }: Props) => {
   const { accounts } = useAccounts()
   const { categories } = useGroupedCategories()
+  const { stores } = useStores()
   const { markReviewed } = useTickets()
   const [error, setError] = useState<string | undefined>(undefined)
 
@@ -45,6 +47,7 @@ const ReviewModal = ({ ticket, onClose }: Props) => {
     setError(undefined)
 
     const transactionParams = {
+      // eslint-disable-next-line react-hooks/purity -- Date.now() is called inside a submit handler, not during render
       date: params.date ? new Date(params.date).getTime() : Date.now(),
       amount: params.amount,
       account: params.account,
@@ -80,6 +83,7 @@ const ReviewModal = ({ ticket, onClose }: Props) => {
         placeholder='Fecha del ticket' id='date' label='Fecha'
         error={!!errors.date}
         control={control}
+        size={6}
       />
 
       <SelectForm
@@ -89,7 +93,7 @@ const ReviewModal = ({ ticket, onClose }: Props) => {
         optionLabel='name'
         error={!!errors.account} {...register('account', { required: true })}
         errorText='Selecciona una cuenta'
-        size={2}
+        size={6}
       />
 
       <SelectForm
@@ -97,7 +101,7 @@ const ReviewModal = ({ ticket, onClose }: Props) => {
         options={TYPES_TRANSACTIONS_ENTRIES}
         optionValue={0}
         optionLabel={1}
-        size={2}
+        size={6}
         error={!!errors.type} {...register('type', { required: true })}
       />
 
@@ -108,7 +112,7 @@ const ReviewModal = ({ ticket, onClose }: Props) => {
         optionLabel='name'
         error={!!errors.category} {...register('category', { required: true })}
         errorText='Selecciona una categoría'
-        size={2}
+        size={6}
       />
 
       <InputForm
@@ -116,14 +120,18 @@ const ReviewModal = ({ ticket, onClose }: Props) => {
         error={!!errors.amount} {...register('amount', { required: true, valueAsNumber: true })}
         errorText='Introduce un importe válido'
         type='number' inputProps={{ step: 'any' }}
-        size={2}
+        size={6}
       />
 
-      <InputForm
-        id='store' label='Comercio' placeholder='Nombre del comercio'
-        error={!!errors.store} {...register('store')}
-        errorText=''
-        size={2}
+      <AutocompleteForm
+        options={stores}
+        optionLabel='name' id='store' label='Comercio'
+        placeholder='Comercio'
+        error={!!errors.store}
+        errorText='Introduce un comercio válido'
+        size={6}
+        {...register('store')}
+        {...(ticket.store && { defaultValue: ticket.store })}
       />
 
       {ticket.payment_method && (

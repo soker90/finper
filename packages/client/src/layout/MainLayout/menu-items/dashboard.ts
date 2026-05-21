@@ -8,7 +8,11 @@ import {
   ProfileOutlined,
   FileImageOutlined,
   BankOutlined,
-  SyncOutlined
+  SyncOutlined,
+  HomeOutlined,
+  StockOutlined,
+  TrophyOutlined,
+  TagsOutlined
 } from '@ant-design/icons'
 import { BeachIcon } from 'components'
 
@@ -92,6 +96,14 @@ const dashboard = {
       breadcrumbs: true
     },
     {
+      id: 'stocks',
+      title: 'Acciones',
+      type: 'item',
+      url: '/acciones',
+      icon: StockOutlined,
+      breadcrumbs: true
+    },
+    {
       id: 'loans',
       title: 'Préstamos',
       type: 'item',
@@ -105,6 +117,30 @@ const dashboard = {
       type: 'item',
       url: '/suscripciones',
       icon: SyncOutlined,
+      breadcrumbs: true
+    },
+    {
+      id: 'supplies',
+      title: 'Suministros',
+      type: 'item',
+      url: '/suministros',
+      icon: HomeOutlined,
+      breadcrumbs: true
+    },
+    {
+      id: 'goals',
+      title: 'Metas',
+      type: 'item',
+      url: '/metas',
+      icon: TrophyOutlined,
+      breadcrumbs: true
+    },
+    {
+      id: 'trackings',
+      title: 'Seguimientos',
+      type: 'item',
+      url: '/seguimientos',
+      icon: TagsOutlined,
       breadcrumbs: true
     }
   ]

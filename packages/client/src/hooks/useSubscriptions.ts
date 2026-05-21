@@ -11,7 +11,7 @@ export const useSubscriptions = (): {
   updateSubscription: (id: string, params: Partial<SubscriptionInput>) => Promise<{ error?: string }>
   removeSubscription: (id: string) => Promise<{ error?: string }>
 } => {
-  const { data, error, mutate } = useSWR<Subscription[]>(SUBSCRIPTIONS)
+  const { data, error, mutate, isLoading } = useSWR<Subscription[]>(SUBSCRIPTIONS)
 
   const createSubscription = async (params: SubscriptionInput) => {
     const result = await addSubscription(params)
@@ -42,7 +42,7 @@ export const useSubscriptions = (): {
 
   return {
     subscriptions: data ?? [],
-    isLoading: !data && !error,
+    isLoading,
     error,
     createSubscription,
     updateSubscription,

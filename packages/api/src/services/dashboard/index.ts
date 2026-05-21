@@ -1,0 +1,5 @@
+export { default } from './dashboard.service'
+export type { DashboardStatsResult, IDashboardService, PensionSummary, DailyExpense, HealthScore } from './dashboard.types'
+export type { MonthlyData } from '../utils/insights'
+export { computeHealthScore, computeBudgetAdherence } from './health-score'
+export { isOutlier, filterMonthOutliers, computeFilteredAvgMonthlyExpense, type MonthTransactionsRow } from './cash-runway'

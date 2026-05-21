@@ -17,7 +17,8 @@ export const validateTransactionEditParams = async ({
     type: Joi.string().valid(TRANSACTION.Income, TRANSACTION.Expense, TRANSACTION.NotComputable).required(),
     account: Joi.string().required(),
     note: Joi.string(),
-    store: Joi.string()
+    store: Joi.string(),
+    tags: Joi.array().items(Joi.string().max(30)).max(10).optional()
   })
 
   const { error, value } = schema.validate(body)

@@ -1,4 +1,4 @@
-import { Theme } from '@emotion/react'
+import { type Theme } from '@mui/material/styles'
 import { alpha } from '@mui/material'
 import getColors from 'utils/getColors'
 import getShadow from 'utils/getShadow'

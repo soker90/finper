@@ -1,5 +1,5 @@
-import { FC, useCallback, useState } from 'react'
-import { Collapse, Divider, Paper, Stack, Typography, useMediaQuery, useTheme } from '@mui/material'
+import { FC, useState } from 'react'
+import { Chip, Collapse, Divider, Paper, Stack, Typography, useMediaQuery, useTheme } from '@mui/material'
 import { Transaction } from 'types'
 import { format } from 'utils'
 
@@ -17,15 +17,16 @@ interface TransactionItemProps {
 }
 
 const TransactionItem: FC<TransactionItemProps> = ({ transaction, forceExpand, cancelCreate, query }) => {
-  const [expand, setExpand] = useState(forceExpand)
+  const [expand, setExpand] = useState(false)
+  const isExpanded = forceExpand ?? expand
   const theme = useTheme()
 
   const isDesktop = useMediaQuery(theme.breakpoints.up('md'))
 
-  const hideForm = useCallback(() => {
+  const hideForm = () => {
     cancelCreate?.()
     setExpand(false)
-  }, [transaction?._id])
+  }
 
   return (
     <>
@@ -39,9 +40,12 @@ const TransactionItem: FC<TransactionItemProps> = ({ transaction, forceExpand, c
               />
               <span>{format.dateShort(transaction.date)}</span>
             </div>
-            <Stack spacing={1} direction='row' pr={isDesktop ? '50%' : undefined}>
+            <Stack spacing={1} direction='row' sx={{ alignItems: 'center', pr: isDesktop ? '50%' : undefined }}>
               <Typography variant='body1'>{transaction.category?.name}</Typography>
               {transaction.store && <Typography variant='body1'>({transaction.store?.name})</Typography>}
+              {transaction.tags?.map((tag) => (
+                <Chip key={tag} label={tag} size='small' variant='outlined' />
+              ))}
             </Stack>
             <Typography
               variant='h4'
@@ -50,7 +54,7 @@ const TransactionItem: FC<TransactionItemProps> = ({ transaction, forceExpand, c
             </Typography>
           </ItemContent>
         )}
-        <Collapse in={expand} timeout='auto' unmountOnExit>
+        <Collapse in={isExpanded} timeout='auto' unmountOnExit>
           <Divider className={styles.divider} />
           <TransactionEdit transaction={transaction} hideForm={hideForm} query={query} />
 

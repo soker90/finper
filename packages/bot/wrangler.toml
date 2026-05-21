@@ -1,0 +1,23 @@
+name = "ticket-bot"
+main = "src/index.ts"
+compatibility_date = "2024-12-01"
+compatibility_flags = ["nodejs_compat"]
+
+[[d1_databases]]
+binding = "DB"
+database_name = "ticket-bot-db"
+database_id = "fe6a4da3-861f-4ced-b334-a5df66290ebe"
+
+[[r2_buckets]]
+binding = "TICKET_IMAGES"
+bucket_name = "ticket-bot-images"
+
+[vars]
+ENVIRONMENT = "production"
+
+# Secrets set via: wrangler secret put <NAME>
+# TELEGRAM_BOT_TOKEN
+# TELEGRAM_SECRET_TOKEN        (webhook secret, generate once: openssl rand -hex 32)
+# TELEGRAM_ADMIN_USER_ID       (your Telegram user ID, get it from @userinfobot)
+# GEMINI_API_KEY               (https://aistudio.google.com/apikey)
+# API_SECRET_KEY               (for finper-api to authenticate: openssl rand -hex 32)

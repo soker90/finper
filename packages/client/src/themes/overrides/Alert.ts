@@ -1,5 +1,5 @@
 import { alpha } from '@mui/material'
-import { Theme } from '@emotion/react'
+import { type Theme } from '@mui/material/styles'
 import getColors from 'utils/getColors'
 
 function getColorStyle ({ color, theme }: { color: string, theme: Theme }) {

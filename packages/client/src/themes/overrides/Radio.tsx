@@ -1,6 +1,6 @@
 import { Box } from '@mui/material'
 import getColors from 'utils/getColors'
-import { Theme } from '@emotion/react'
+import { type Theme } from '@mui/material/styles'
 
 function getColorStyle ({ color, theme }: { color: string, theme: Theme }) {
   const colors = getColors(theme, color)
@@ -103,14 +103,14 @@ export default function Radio (theme: Theme) {
           },
           '&.size-large': {
             ...radioStyle('large')
-          }
-        },
-        colorPrimary: getColorStyle({ color: 'primary', theme }),
-        colorSecondary: getColorStyle({ color: 'secondary', theme }),
-        colorSuccess: getColorStyle({ color: 'success', theme }),
-        colorWarning: getColorStyle({ color: 'warning', theme }),
-        colorInfo: getColorStyle({ color: 'info', theme }),
-        colorError: getColorStyle({ color: 'error', theme })
+          },
+          '&.MuiRadio-colorPrimary': getColorStyle({ color: 'primary', theme }),
+          '&.MuiRadio-colorSecondary': getColorStyle({ color: 'secondary', theme }),
+          '&.MuiRadio-colorSuccess': getColorStyle({ color: 'success', theme }),
+          '&.MuiRadio-colorWarning': getColorStyle({ color: 'warning', theme }),
+          '&.MuiRadio-colorInfo': getColorStyle({ color: 'info', theme }),
+          '&.MuiRadio-colorError': getColorStyle({ color: 'error', theme })
+        }
       }
     }
   }

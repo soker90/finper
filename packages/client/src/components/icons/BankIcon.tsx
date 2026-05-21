@@ -1,4 +1,4 @@
-import { FC, Fragment, lazy, useMemo } from 'react'
+import { FC, Fragment, lazy } from 'react'
 import gourmet from 'assets/img/banks/up_spain.png'
 
 const amazon = lazy(() => import('./AmazonIcon'))
@@ -11,6 +11,8 @@ const waylet = lazy(() => import('./WayletIcon'))
 const revolut = lazy(() => import('./RevolutIcon'))
 const bankinter = lazy(() => import('./BankinterIcon'))
 const bbva = lazy(() => import('./BBVAIcon'))
+const sabadell = lazy(() => import('./SabadellIcon'))
+const paypal = lazy(() => import('./PaypalIcon'))
 
 type BankIconsProps = {
   name: string
@@ -30,11 +32,13 @@ const Icons: Record<string, FC<any>> = {
   gourmet: (props) => <img src={gourmet} alt='goutmet' {...props} />,
   revolut,
   bankinter,
-  bbva
+  bbva,
+  sabadell,
+  paypal
 }
 
 const BankIcon: FC<BankIconsProps> = ({ name, ...props }) => {
-  const Icon = useMemo(() => Icons[name?.toLowerCase()] || Fragment, [name])
+  const Icon = Icons[name?.toLowerCase()] || Fragment
   if (!name) return null
   return <Icon {...props} />
 }

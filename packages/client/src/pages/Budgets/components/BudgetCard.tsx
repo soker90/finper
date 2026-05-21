@@ -21,7 +21,11 @@ const BudgetCard = ({ title, total, estimated, percentage, color, isPositive, te
         <Typography variant='h6' color='textSecondary'>
           {title}
         </Typography>
-        <Grid container alignItems='center'>
+        <Grid
+          container sx={{
+            alignItems: 'center'
+          }}
+        >
           <Grid>
             <Typography variant='h4' color='inherit' data-testid={`total-${testId}`}>
               {format.euro(total)}

@@ -634,7 +634,7 @@ describe('Loans', () => {
       expect(detailRes.body.stats.currentPayment).toBe(newPayment)
 
       // The projected rows should use the new rate (interest = pendingAmount * newRate/100/12)
-      const firstProjected = detailRes.body.amortizationTable.find((r: any) => r.isProjected)
+      const firstProjected = detailRes.body.amortizationTable.find((row: any) => row.isProjected)
       const expectedInterest = roundNumber(initialAmount * newRate / 100 / 12)
       expect(firstProjected.interest).toBe(expectedInterest)
     })
@@ -904,6 +904,147 @@ describe('Loans', () => {
 
       const tx = await TransactionModel.findOne({ user, account: account._id, amount: paymentAmount })
       expect(tx!.date).toBe(newDate)
+    })
+  })
+
+  // ─── POST /:id/simulate-payoff ────────────────────────────────────────────
+  describe('POST /api/loans/:id/simulate-payoff', () => {
+    const path = (id: string) => `/api/loans/${id}/simulate-payoff`
+    let token: string
+    const user = generateUsername()
+
+    beforeAll(async () => {
+      token = await requestLogin(server.app, { username: user })
+    })
+
+    test('when token is not provided, it should respond 401', async () => {
+      await supertest(server.app).post(path('62a39498c4497e1fe3c2bf35')).expect(401)
+    })
+
+    test('when id is not a valid ObjectId, it should respond 400', async () => {
+      await supertest(server.app)
+        .post(path('not-a-valid-id'))
+        .auth(token, { type: 'bearer' })
+        .send({ lumpSum: 100 })
+        .expect(400)
+    })
+
+    test('when loan does not exist, it should respond 404', async () => {
+      await supertest(server.app)
+        .post(path('62a39498c4497e1fe3c2bf35'))
+        .auth(token, { type: 'bearer' })
+        .send({ lumpSum: 100 })
+        .expect(404)
+    })
+
+    test('when loan belongs to another user, it should respond 404', async () => {
+      const loan = await insertLoan()
+      await supertest(server.app)
+        .post(path(loan._id.toString()))
+        .auth(token, { type: 'bearer' })
+        .send({ lumpSum: 100 })
+        .expect(404)
+    })
+
+    test('when lumpSum is missing, it should respond 422', async () => {
+      const loan = await insertLoan({ user })
+      await supertest(server.app)
+        .post(path(loan._id.toString()))
+        .auth(token, { type: 'bearer' })
+        .send({})
+        .expect(422)
+    })
+
+    test('when lumpSum is negative, it should respond 422', async () => {
+      const loan = await insertLoan({ user })
+      await supertest(server.app)
+        .post(path(loan._id.toString()))
+        .auth(token, { type: 'bearer' })
+        .send({ lumpSum: -50 })
+        .expect(422)
+    })
+
+    test('when lumpSum is 0, it should respond 422', async () => {
+      const loan = await insertLoan({ user })
+      await supertest(server.app)
+        .post(path(loan._id.toString()))
+        .auth(token, { type: 'bearer' })
+        .send({ lumpSum: 0 })
+        .expect(422)
+    })
+
+    test('when lumpSum exceeds pendingAmount, it should respond 422', async () => {
+      const loan = await insertLoan({ user, initialAmount: 10000, interestRate: 3, monthlyPayment: 200 })
+      await supertest(server.app)
+        .post(path(loan._id.toString()))
+        .auth(token, { type: 'bearer' })
+        .send({ lumpSum: 15000 })
+        .expect(422)
+    })
+
+    test('when lumpSum is valid, it should return both options with correct structure', async () => {
+      const loan = await insertLoan({ user, initialAmount: 10000, interestRate: 3, monthlyPayment: 200 })
+      const res = await supertest(server.app)
+        .post(path(loan._id.toString()))
+        .auth(token, { type: 'bearer' })
+        .send({ lumpSum: 2000 })
+        .expect(200)
+
+      expect(res.body.lumpSum).toBe(2000)
+      expect(res.body.originalMonthsLeft).toBeGreaterThan(0)
+      expect(res.body.originalMonthlyPayment).toBe(200)
+      expect(res.body.originalEndDate).toBeGreaterThan(0)
+
+      // Option A: reduce term
+      expect(res.body.optionA.newMonthsLeft).toBeLessThan(res.body.originalMonthsLeft)
+      expect(res.body.optionA.monthsSaved).toBeGreaterThan(0)
+      expect(res.body.optionA.newMonthlyPayment).toBe(200)
+      expect(res.body.optionA.monthlySaving).toBe(0)
+      expect(res.body.optionA.totalInterestSaved).toBeGreaterThan(0)
+      expect(res.body.optionA.newEndDate).toBeGreaterThan(0)
+
+      // Option B: reduce quota
+      expect(res.body.optionB.newMonthsLeft).toBe(res.body.originalMonthsLeft)
+      expect(res.body.optionB.monthsSaved).toBe(0)
+      expect(res.body.optionB.newMonthlyPayment).toBeLessThan(200)
+      expect(res.body.optionB.monthlySaving).toBeGreaterThan(0)
+      expect(res.body.optionB.totalInterestSaved).toBeGreaterThan(0)
+      expect(res.body.optionB.newEndDate).toBeGreaterThan(0)
+    })
+
+    test('when lumpSum equals pendingAmount, option A should finish in 1 month', async () => {
+      const loan = await insertLoan({ user, initialAmount: 10000, interestRate: 3, monthlyPayment: 200 })
+      const res = await supertest(server.app)
+        .post(path(loan._id.toString()))
+        .auth(token, { type: 'bearer' })
+        .send({ lumpSum: 10000 })
+        .expect(200)
+
+      expect(res.body.optionA.newMonthsLeft).toBeLessThanOrEqual(1)
+      expect(res.body.optionA.totalInterestSaved).toBeGreaterThan(0)
+    })
+
+    test('when loan has events, they should be applied in the simulation', async () => {
+      const loan = await insertLoan({ user, initialAmount: 10000, interestRate: 3, monthlyPayment: 200 })
+      const loanId = loan._id.toString()
+
+      await LoanEventModel.create({
+        loan: loanId,
+        date: Date.now() + 86400000 * 30,
+        newRate: 5,
+        newPayment: 250,
+        user
+      })
+
+      const res = await supertest(server.app)
+        .post(path(loanId))
+        .auth(token, { type: 'bearer' })
+        .send({ lumpSum: 2000 })
+        .expect(200)
+
+      expect(res.body.originalMonthsLeft).toBeGreaterThan(0)
+      expect(res.body.optionA.newMonthsLeft).toBeLessThan(res.body.originalMonthsLeft)
+      expect(res.body.optionB.newMonthlyPayment).toBeGreaterThan(0)
     })
   })
 })

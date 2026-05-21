@@ -9,6 +9,10 @@ updates:
     directory: "/"
     schedule:
       interval: "daily"
+    cooldown:
+      semver-patch: "1 day"
+      semver-minor: "7 days"
+      semver-major: "7 days"
     labels:
       - "github-actions"
       - "dependencies"
@@ -17,6 +21,10 @@ updates:
     directory: "/packages/api" # Location of package manifests
     schedule:
       interval: "weekly"
+    cooldown:
+      semver-patch: "1 day"
+      semver-minor: "7 days"
+      semver-major: "7 days"
     labels:
       - "api"
       - "dependencies"
@@ -25,6 +33,10 @@ updates:
     directory: "/packages/client" # Location of package manifests
     schedule:
       interval: "weekly"
+    cooldown:
+      semver-patch: "1 day"
+      semver-minor: "7 days"
+      semver-major: "7 days"
     labels:
       - "ui"
       - "dependencies"
@@ -33,6 +45,10 @@ updates:
     directory: "/packages/models" # Location of package manifests
     schedule:
       interval: "weekly"
+    cooldown:
+      semver-patch: "1 day"
+      semver-minor: "7 days"
+      semver-major: "7 days"
     labels:
       - "models"
       - "dependencies"

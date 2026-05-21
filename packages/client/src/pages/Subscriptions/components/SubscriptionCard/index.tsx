@@ -36,7 +36,11 @@ const SubscriptionCard = ({ subscription, onEdit, onDelete, onSearchPayments, on
 
         <Typography variant='h4' color='inherit'>
           {format.euro(subscription.amount)}
-          <Typography component='span' variant='body2' color='textSecondary' ml={1}>
+          <Typography
+            component='span' variant='body2' color='textSecondary' sx={{
+              ml: 1
+            }}
+          >
             / {getCycleLabel(subscription.cycle)}
           </Typography>
         </Typography>

@@ -6,7 +6,7 @@ import authService from 'services/authService'
 import useAuth from 'hooks/useAuth'
 
 const Auth = ({ children }: { children: any }): JSX.Element => {
-  const [isLoading, setLoading] = useState(true)
+  const [isInitialized, setInitialized] = useState(false)
   const { handleLogout, setAccessToken } = useAuth()
   const navigate = useNavigate()
 
@@ -27,13 +27,14 @@ const Auth = ({ children }: { children: any }): JSX.Element => {
         // initialize dashboard
       }
 
-      setLoading(false)
+      setInitialized(true)
     }
 
     initAuth()
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional bootstrap effect: runs once on mount to init auth interceptors
   }, [])
 
-  if (isLoading) return <SplashScreen />
+  if (!isInitialized) return <SplashScreen />
 
   return children
 }

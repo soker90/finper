@@ -48,5 +48,11 @@ export class DebtRoutes {
       authMiddleware,
       this.debtController.delete.bind(this.debtController)
     )
+
+    this.router.post(
+      '/:id/pay',
+      authMiddleware,
+      this.debtController.pay.bind(this.debtController)
+    )
   }
 }

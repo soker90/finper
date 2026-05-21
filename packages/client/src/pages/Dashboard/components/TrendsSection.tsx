@@ -17,10 +17,12 @@ import { hoverCardSx } from './shared'
 interface TrendsSectionProps {
   stats: DashboardStats
   tickets: Ticket[]
+  ticketsEnabled: boolean
+  ticketsLoading: boolean
   chartHeight: number
 }
 
-const TrendsSection = ({ stats, tickets, chartHeight }: TrendsSectionProps) => {
+const TrendsSection = ({ stats, tickets, ticketsEnabled, ticketsLoading, chartHeight }: TrendsSectionProps) => {
   const theme = useTheme()
   const navigate = useNavigate()
 
@@ -33,7 +35,6 @@ const TrendsSection = ({ stats, tickets, chartHeight }: TrendsSectionProps) => {
   return (
     <>
       <SectionTitle>Tendencias</SectionTitle>
-
       <Grow in timeout={800}>
         <Grid size={{ xs: 12, md: 8 }}>
           <MainCard title='Ingresos vs Gastos — últimos 6 meses' sx={hoverCardSx}>
@@ -72,7 +73,6 @@ const TrendsSection = ({ stats, tickets, chartHeight }: TrendsSectionProps) => {
           </MainCard>
         </Grid>
       </Grow>
-
       <Grow in timeout={900}>
         <Grid size={{ xs: 12, md: 4 }}>
           <MainCard
@@ -81,36 +81,47 @@ const TrendsSection = ({ stats, tickets, chartHeight }: TrendsSectionProps) => {
           >
             <Stack spacing={1} sx={{ flex: 1, justifyContent: 'space-around' }}>
               {/* Tickets */}
-              <Stack direction='row' alignItems='center' spacing={1.5} sx={{ py: 1 }}>
-                <Avatar sx={{ bgcolor: tickets.length > 0 ? 'warning.lighter' : 'success.lighter', width: 32, height: 32 }}>
-                  <FileTextOutlined style={{ fontSize: 14, color: tickets.length > 0 ? '#faad14' : '#52c41a' }} />
-                </Avatar>
-                <Box sx={{ flex: 1, minWidth: 0 }}>
-                  <Typography variant='body2' color='textSecondary'>Tickets pendientes</Typography>
-                  <Typography variant='subtitle1'>{tickets.length}</Typography>
-                </Box>
-                {tickets.length > 0 && (
-                  <Button
-                    variant='outlined'
-                    size='small'
-                    color='warning'
-                    onClick={() => navigate('/tickets')}
-                    startIcon={<ClockCircleOutlined />}
-                    sx={{ whiteSpace: 'nowrap' }}
+              {ticketsEnabled && (
+                <>
+                  <Stack
+                    direction='row'
+                    spacing={1.5}
+                    sx={{
+                      alignItems: 'center',
+                      py: 1
+                    }}
                   >
-                    Revisar
-                  </Button>
-                )}
-                {tickets.length === 0 && (
-                  <Chip size='small' label='Al día' color='success' />
-                )}
-              </Stack>
+                    <Avatar sx={{ bgcolor: tickets.length > 0 ? 'warning.lighter' : 'success.lighter', width: 32, height: 32 }}>
+                      <FileTextOutlined style={{ fontSize: 14, color: tickets.length > 0 ? '#faad14' : '#52c41a' }} />
+                    </Avatar>
+                    <Box sx={{ flex: 1, minWidth: 0 }}>
+                      <Typography variant='body2' color='textSecondary'>Tickets pendientes</Typography>
+                      <Typography variant='subtitle1'>{ticketsLoading ? '...' : tickets.length}</Typography>
+                    </Box>
+                    {tickets.length > 0 && (
+                      <Button
+                        variant='outlined'
+                        size='small'
+                        color='warning'
+                        onClick={() => navigate('/tickets')}
+                        startIcon={<ClockCircleOutlined />}
+                        sx={{ whiteSpace: 'nowrap' }}
+                      >
+                        Revisar
+                      </Button>
+                    )}
+                    {tickets.length === 0 && (
+                      <Chip size='small' label='Al día' color='success' />
+                    )}
+                  </Stack>
 
-              <Divider />
+                  <Divider />
+                </>
+              )}
 
               {/* Tasa de ahorro */}
               <MiniKpi
-                title='Tasa de Ahorro'
+                title='Tasa de Ahorro (mes actual)'
                 value={`${stats.savingsRate.toFixed(1)}%`}
                 icon={<DollarOutlined />}
                 color={stats.savingsRate >= 20 ? 'success' : 'warning'}

@@ -8,7 +8,11 @@ import {
   IUser, LoanModel, LoanPaymentModel, LOAN_PAYMENT, PensionModel, StoreModel,
   SubscriptionCandidateModel, SubscriptionModel, TransactionModel,
   TRANSACTION,
-  UserModel
+  UserModel,
+  PropertyModel, SupplyModel, SupplyReadingModel,
+  IProperty, ISupply, ISupplyReading, SUPPLY_TYPE,
+  StockModel, IStock, STOCK_TYPE,
+  GoalModel, IGoal, GOAL_COLORS, GOAL_ICONS
 } from '@soker90/finper-models'
 
 import {
@@ -74,7 +78,7 @@ export const insertStore = async (params: Record<string, string> = {}): Promise<
   })
 }
 
-export const insertTransaction = async (params: Record<string, string | number> = {}): Promise<any> => {
+export const insertTransaction = async (params: Record<string, string | number | string[]> = {}): Promise<any> => {
   const user = (params.user ?? faker.internet.userName().slice(MIN_LENGTH_USERNAME, MAX_USERNAME_LENGTH).toLowerCase()) as string
   return TransactionModel.create({
     date: params.date ?? faker.date.past().getTime(),
@@ -84,6 +88,7 @@ export const insertTransaction = async (params: Record<string, string | number> 
     account: params.account ?? (await insertAccount({ user })),
     note: params.note ?? faker.lorem.sentence(),
     store: params.store ?? (await insertStore({ user })),
+    tags: params.tags ?? [],
     user
   })
 }
@@ -93,7 +98,6 @@ export const insertDebt = async (params: Record<string, string | number> = {}): 
     from: params.from ?? faker.person.firstName(),
     date: params.date ?? faker.number.int(),
     amount: params.amount ?? faker.number.int(),
-    ...(params.paymentDate !== 0 && { paymentDate: params.paymentDate ?? faker.number.int() }),
     concept: params.concept ?? faker.lorem.words(4),
     type: params.type ?? (Math.random() > 0.5 ? DEBT.TO : DEBT.FROM),
     user: params.user ?? faker.internet.username().slice(MIN_LENGTH_USERNAME, MAX_USERNAME_LENGTH).toLowerCase()
@@ -203,4 +207,74 @@ export const insertSubscriptionCandidate = async (params: Record<string, any> = 
     subscriptionIds: [subscription._id],
     user
   }) as unknown as ISubscriptionCandidate & { _id: any }
+}
+
+export const insertProperty = async (params: Record<string, any> = {}): Promise<IProperty & { _id: any }> => {
+  const user = (params.user ?? generateUsername()) as string
+
+  return PropertyModel.create({
+    name: params.name ?? faker.location.streetAddress(),
+    user
+  }) as unknown as IProperty & { _id: any }
+}
+
+export const insertSupply = async (params: Record<string, any> = {}): Promise<ISupply & { _id: any }> => {
+  const user = (params.user ?? generateUsername()) as string
+  const propertyId = params.propertyId ?? (await insertProperty({ user }))._id
+
+  return SupplyModel.create({
+    // defaults sobreescribibles por cualquier campo de params
+    name: faker.company.name(),
+    type: SUPPLY_TYPE.ELECTRICITY,
+    ...params,
+    // campos que siempre se resuelven arriba y no pueden sobreescribirse
+    propertyId,
+    user
+  }) as unknown as ISupply & { _id: any }
+}
+
+export const insertSupplyReading = async (params: Record<string, any> = {}): Promise<ISupplyReading & { _id: any }> => {
+  const user = (params.user ?? generateUsername()) as string
+  const supplyId = params.supplyId ?? (await insertSupply({ user }))._id
+  const startDate = params.startDate ?? faker.date.past({ years: 1 }).getTime()
+  const endDate = params.endDate ?? faker.date.between({ from: startDate, to: Date.now() }).getTime()
+
+  return SupplyReadingModel.create({
+    supplyId,
+    startDate,
+    endDate,
+    amount: params.amount ?? faker.number.float({ min: -50, max: 250, multipleOf: 0.01 }),
+    consumptionPeak: params.consumptionPeak ?? faker.number.int({ min: 10, max: 100 }),
+    consumptionFlat: params.consumptionFlat ?? faker.number.int({ min: 10, max: 100 }),
+    consumptionOffPeak: params.consumptionOffPeak ?? faker.number.int({ min: 10, max: 100 }),
+    consumption: params.consumption ?? faker.number.int({ min: 10, max: 100 }),
+    user
+  }) as unknown as ISupplyReading & { _id: any }
+}
+
+export const insertStock = async (params: Record<string, any> = {}): Promise<IStock & { _id: string }> => {
+  const user = (params.user ?? generateUsername()) as string
+
+  return StockModel.create({
+    ticker: params.ticker ?? faker.string.alpha({ length: 4, casing: 'upper' }),
+    name: params.name ?? faker.company.name(),
+    shares: params.shares ?? faker.number.float({ min: 1, max: 100, multipleOf: 0.01 }),
+    price: params.price ?? faker.number.float({ min: 1, max: 500, multipleOf: 0.01 }),
+    type: params.type ?? STOCK_TYPE.Buy,
+    date: params.date ?? faker.date.past().getTime(),
+    platform: params.platform ?? 'DEGIRO',
+    user
+  }) as unknown as IStock & { _id: string }
+}
+
+export const insertGoal = async (params: Record<string, any> = {}): Promise<IGoal & { _id: string }> => {
+  return GoalModel.create({
+    name: params.name ?? faker.lorem.words(2),
+    targetAmount: params.targetAmount ?? faker.number.float({ min: 100, max: 10000, multipleOf: 0.01 }),
+    currentAmount: params.currentAmount ?? 0,
+    deadline: params.deadline ?? null,
+    color: params.color ?? faker.helpers.arrayElement(GOAL_COLORS),
+    icon: params.icon ?? faker.helpers.arrayElement(GOAL_ICONS),
+    user: params.user ?? faker.internet.userName().slice(MIN_LENGTH_USERNAME, MAX_USERNAME_LENGTH).toLowerCase()
+  }) as unknown as IGoal & { _id: string }
 }

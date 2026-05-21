@@ -27,7 +27,7 @@ export interface IBudgetService {
     month,
     year,
     user
-  }: { monthOrigin: number, yearOrigin: number, month: number, year: number, user: string }): Promise<IBudget[] | null>
+  }: { monthOrigin: number, yearOrigin: number, month: number, year: number, user: string }): Promise<boolean>
 }
 
 export default class BudgetService implements IBudgetService {
@@ -131,6 +131,9 @@ export default class BudgetService implements IBudgetService {
       month
     }))
 
+    const getRealValue = (item: any) => isNaN(month as number) ? (item.total ?? 0) : (item.budgets?.[0]?.real ?? 0)
+    categoriesByType.sort((a, b) => getRealValue(b) - getRealValue(a))
+
     if (categoriesByType.length > 0) {
       categoriesByType.push(this.getTotalsByMonth(categoriesByType))
     }
@@ -166,33 +169,35 @@ export default class BudgetService implements IBudgetService {
     }
   }
 
-  async editBudget ({ category, year, month, user, amount }: IBudget): Promise<IBudget> {
+  public async editBudget ({ category, year, month, user, amount }: IBudget): Promise<IBudget> {
     return await BudgetModel.findOneAndUpdate({ category, year, month, user }, { amount }, {
       returnDocument: 'after',
       upsert: true
     }) as unknown as IBudget
   }
 
-  async copy ({
+  public async copy ({
     monthOrigin,
     yearOrigin,
     month,
     year,
     user
-  }: { monthOrigin: number, yearOrigin: number, month: number, year: number, user: string }): Promise<IBudget[] | null> {
-    const budgets = await BudgetModel.find({ user, month: monthOrigin, year: yearOrigin })
-    const copyBudgets = budgets.map(budget => ({
-      year,
-      month,
-      category: budget.category,
-      amount: budget.amount,
-      user
-    }))
+  }: { monthOrigin: number, yearOrigin: number, month: number, year: number, user: string }): Promise<boolean> {
+    const budgets = await BudgetModel.find({ user, month: monthOrigin, year: yearOrigin }, 'category amount').lean()
 
-    if (!copyBudgets.length) {
-      return null
+    if (!budgets.length) {
+      return false
     }
 
-    return BudgetModel.insertMany(copyBudgets)
+    const operations = budgets.map(budget => ({
+      updateOne: {
+        filter: { category: budget.category, year, month, user },
+        update: { $set: { amount: budget.amount } },
+        upsert: true
+      }
+    }))
+
+    await BudgetModel.bulkWrite(operations as mongoose.AnyBulkWriteOperation<IBudget>[])
+    return true
   }
 }

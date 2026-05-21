@@ -63,7 +63,7 @@ const LinkTransactionsModal = ({ subscription, onClose, onLinked }: Props) => {
     >
       <Box sx={{ width: '100%', gridColumn: '1 / -1' }}>
         {isLoading && (
-          <Box display='flex' justifyContent='center' py={3}>
+          <Box sx={{ display: 'flex', justifyContent: 'center', py: 3 }}>
             <CircularProgress size={28} />
           </Box>
         )}
@@ -80,7 +80,7 @@ const LinkTransactionsModal = ({ subscription, onClose, onLinked }: Props) => {
 
         {!isLoading && transactions && transactions.length > 0 && (
           <>
-            <Typography variant='caption' color='textSecondary' display='block' mb={1}>
+            <Typography variant='caption' color='textSecondary' sx={{ display: 'block', mb: 1 }}>
               {transactions.length} movimiento{transactions.length > 1 ? 's' : ''} encontrado{transactions.length > 1 ? 's' : ''} · misma categoría y cuenta
             </Typography>
             <Box sx={{ maxHeight: 360, overflowY: 'auto', pr: 0.5 }}>
@@ -109,11 +109,11 @@ const LinkTransactionsModal = ({ subscription, onClose, onLinked }: Props) => {
                       </ListItemIcon>
                       <ListItemText
                         primary={
-                          <Box display='flex' justifyContent='space-between' alignItems='center'>
-                            <Typography variant='body2' fontWeight={checked ? 600 : 400}>
+                          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <Typography variant='body2' sx={{ fontWeight: checked ? 600 : 400 }}>
                               {format.date(tx.date)}
                             </Typography>
-                            <Typography variant='body2' fontWeight={600} color={checked ? 'primary.main' : 'inherit'}>
+                            <Typography variant='body2' sx={{ fontWeight: 600, color: checked ? 'primary.main' : 'inherit' }}>
                               {format.euro(tx.amount)}
                             </Typography>
                           </Box>

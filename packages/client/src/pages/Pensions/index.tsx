@@ -30,7 +30,11 @@ const Pension = () => {
         }]}
         desktopSx={{ marginTop: -7 }}
       />
-      <Grid container spacing={3} mb={2}>
+      <Grid
+        container spacing={3} sx={{
+          mb: 2
+        }}
+      >
         {STATS.map((stat) => (
           <Grid size={{ xs: 6, sm: 4, md: 3, lg: 2 }} key={stat.title}>
             <PensionStatCard title={stat.title} amount={pension[stat.value]} currency={stat.currency} />

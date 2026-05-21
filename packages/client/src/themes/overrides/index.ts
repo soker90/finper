@@ -1,4 +1,4 @@
-import { Theme } from '@emotion/react'
+import { type Theme } from '@mui/material/styles'
 
 import Accordion from './Accordion'
 import AccordionDetails from './AccordionDetails'
@@ -24,7 +24,6 @@ import LinearProgress from './LinearProgress'
 import Link from './Link'
 import ListItemButton from './ListItemButton'
 import ListItemIcon from './ListItemIcon'
-import LoadingButton from './LoadingButton'
 import OutlinedInput from './OutlinedInput'
 import Pagination from './Pagination'
 import PaginationItem from './PaginationItem'
@@ -41,7 +40,6 @@ import TablePagination from './TablePagination'
 import TableRow from './TableRow'
 import Tabs from './Tabs'
 import ToggleButton from './ToggleButton'
-import TreeItem from './TreeItem'
 import Typography from './Typography'
 
 export default function ComponentsOverrides (theme: Theme): any {
@@ -70,7 +68,6 @@ export default function ComponentsOverrides (theme: Theme): any {
     ...Link(),
     ...ListItemButton(theme),
     ...ListItemIcon(theme),
-    ...LoadingButton(),
     ...OutlinedInput(theme),
     ...Pagination(),
     ...PaginationItem(theme),
@@ -87,7 +84,6 @@ export default function ComponentsOverrides (theme: Theme): any {
     ...TableRow(),
     ...Tabs(),
     ...ToggleButton(theme),
-    ...TreeItem(),
     ...Typography()
   }
 }

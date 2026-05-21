@@ -7,7 +7,10 @@ import {
   CardActions,
   Grid,
   Divider,
-  Button
+  Button,
+  SxProps,
+  Theme,
+  Box
 } from '@mui/material'
 
 interface Props {
@@ -18,10 +21,11 @@ interface Props {
   action?: any
   actions?: any
   actionDisabled?: boolean
+  cardSx?: SxProps<Theme>
 }
 
 const ModalGrid = ({
-  show, title, children, action, actions, onClose, actionDisabled
+  show, title, children, action, actions, onClose, actionDisabled, cardSx
 }: Props) => {
   const _renderButtons = () => (
     <>
@@ -36,8 +40,8 @@ const ModalGrid = ({
     </>
   )
 
-  const _renderButton = ({ value, ...rest }: any, index: number): ReactNode => (
-    <Button key={index} {...rest}>
+  const _renderButton = ({ value, ...rest }: any): ReactNode => (
+    <Button key={`modal-action-${value}`} {...rest}>
       {value}
     </Button>
   )
@@ -53,13 +57,30 @@ const ModalGrid = ({
     <Modal
       onClose={onClose}
       open={show}
-      sx={{ margin: 'auto', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+      sx={{ p: 2, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
     >
-      <form onSubmit={handleFormSubmit}>
-        <Card>
+      <Box
+        component='form'
+        onSubmit={handleFormSubmit}
+        sx={{
+          width: '100%',
+          maxWidth: { xs: '100%', sm: 600, md: 800 },
+          maxHeight: '100%',
+          display: 'flex',
+          outline: 'none'
+        }}
+      >
+        <Card sx={{
+          ...cardSx,
+          width: '100%',
+          maxHeight: '100%',
+          display: 'flex',
+          flexDirection: 'column'
+        }}
+        >
           <CardHeader title={title} />
           <Divider />
-          <CardContent>
+          <CardContent sx={{ overflowY: 'auto' }}>
             <Grid
               container
               spacing={3}
@@ -68,11 +89,11 @@ const ModalGrid = ({
             </Grid>
           </CardContent>
           <Divider />
-          <CardActions>
+          <CardActions sx={{ p: 2, justifyContent: 'flex-end' }}>
             {actions?.map(_renderButton) || _renderButtons()}
           </CardActions>
         </Card>
-      </form>
+      </Box>
     </Modal>
   )
 }

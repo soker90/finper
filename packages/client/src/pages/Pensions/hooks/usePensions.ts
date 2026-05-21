@@ -9,7 +9,7 @@ export const usePensions = (): {
   addPension: (pension: Pension) => void,
   editPension: (id: string, pension: Pension) => void,
 } => {
-  const { data, error } = useSWR<Pension>(PENSIONS)
+  const { data, error, isLoading } = useSWR<Pension>(PENSIONS)
 
   const addPension = (pension: Pension) => {
 
@@ -20,7 +20,7 @@ export const usePensions = (): {
 
   return {
     pension: data,
-    isLoading: !data && !error,
+    isLoading,
     error,
     addPension,
     editPension

@@ -13,7 +13,7 @@ export const useTransactions = ({
   filters
 }: UseTransactions): { transactions: Transaction[], isLoading: boolean, error: any, query: string } => {
   const query = `${TRANSACTIONS}${objectToParams({ page: index, ...filters })}`
-  const { data, error } = useSWR(query)
+  const { data, error, isLoading } = useSWR(query)
 
-  return { transactions: data, isLoading: !data, error, query }
+  return { transactions: data, isLoading, error, query }
 }

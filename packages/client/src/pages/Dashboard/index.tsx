@@ -6,12 +6,14 @@ import { useBudgets } from '../Budgets/hooks'
 import { useChartColors } from './components/shared'
 import { DashboardSkeleton, DashboardError } from './components/DashboardStates'
 import KpiSummary from './components/KpiSummary'
+import LoansSection from './components/LoansSection'
+import GoalsWidget from './components/GoalsWidget'
 import TrendsSection from './components/TrendsSection'
 import SpendingRhythm from './components/SpendingRhythm'
 import BudgetSection from './components/budget'
 import MonthAnalysis from './components/month-analysis'
 import HealthScoreSection from './components/health-score'
-import LoansSection from './components/LoansSection'
+import StocksWidget from './components/StocksWidget'
 
 const now = new Date()
 const currentYear = String(now.getFullYear())
@@ -24,7 +26,7 @@ const Dashboard = () => {
   const chartColors = useChartColors()
 
   const { stats, loading, error, retry } = useDashboardStats()
-  const { tickets, isLoading: ticketsLoading } = useTickets()
+  const { tickets, ticketsEnabled, isLoading: ticketsLoading } = useTickets()
   const { accounts, isLoading: accountsLoading } = useAccounts()
   const {
     expenses: budgetExpenses,
@@ -34,9 +36,7 @@ const Dashboard = () => {
     isLoading: budgetLoading
   } = useBudgets({ year: currentYear, month: currentMonthIndex })
 
-  const isLoading = loading || ticketsLoading || accountsLoading || budgetLoading
-
-  if (isLoading) return <DashboardSkeleton />
+  if (loading) return <DashboardSkeleton />
   if (error || !stats) return <DashboardError error={error} onRetry={retry} />
 
   const chartHeight = isMobile ? 200 : isTablet ? 260 : 300
@@ -45,17 +45,19 @@ const Dashboard = () => {
     <Grid container spacing={3}>
       <KpiSummary stats={stats} />
 
-      <TrendsSection stats={stats} tickets={tickets ?? []} chartHeight={chartHeight} />
+      <TrendsSection stats={stats} tickets={tickets ?? []} ticketsEnabled={ticketsEnabled} ticketsLoading={ticketsLoading} chartHeight={chartHeight} />
 
       <SpendingRhythm stats={stats} chartHeight={chartHeight} />
 
       <BudgetSection
         stats={stats}
         accounts={accounts ?? []}
+        accountsLoading={accountsLoading}
         budgetExpenses={budgetExpenses}
         budgetIncomes={budgetIncomes}
         totalsExpenses={totalsExpenses}
         totalsIncomes={totalsIncomes}
+        budgetLoading={budgetLoading}
         chartColors={chartColors}
         isMobile={isMobile}
       />
@@ -65,6 +67,10 @@ const Dashboard = () => {
       <HealthScoreSection stats={stats} />
 
       <LoansSection />
+
+      <GoalsWidget />
+
+      <StocksWidget />
     </Grid>
   )
 }

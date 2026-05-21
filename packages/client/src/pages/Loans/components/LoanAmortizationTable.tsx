@@ -38,6 +38,7 @@ const LoanAmortizationTable = ({ rows, onDeletePayment, onEditPayment, onPayPaym
   const containerRef = useRef<HTMLDivElement>(null)
   const firstProjectedRow = onPayPayment ? rows.find(r => r.isProjected) : undefined
 
+  // eslint-disable-next-line react-hooks/incompatible-library -- @tanstack/react-virtual useVirtualizer is safe; compiler bails out per-component
   const virtualizer = useVirtualizer({
     count: rows.length,
     getScrollElement: () => containerRef.current,
@@ -57,7 +58,7 @@ const LoanAmortizationTable = ({ rows, onDeletePayment, onEditPayment, onPayPaym
         ref={containerRef}
         sx={{ maxHeight: MAX_TABLE_HEIGHT, overflow: 'auto' }}
       >
-        <Table size='small' stickyHeader>
+        <Table size='small' stickyHeader sx={{ '& td, & th': { whiteSpace: 'nowrap' } }}>
           <TableHead>
             <TableRow>
               <TableCell>Periodo</TableCell>

@@ -150,6 +150,33 @@ describe('Category', () => {
         .send(params)
         .expect(200)
     })
+
+    test('when parent in body does not exist, it should respond 404', async () => {
+      const category: ICategory = await insertCategory({ user })
+      await supertest(server.app)
+        .patch(path(category._id.toString()))
+        .set('Authorization', `Bearer ${token}`)
+        .send({
+          name: faker.commerce.department(),
+          type: TRANSACTION.Expense,
+          parent: '62a39498c4497e1fe3c2bf35'
+        })
+        .expect(404)
+    })
+
+    test('when parent in body exists, it should edit the category and respond 200', async () => {
+      const root = await insertCategory({ user, root: true })
+      const category: ICategory = await insertCategory({ user })
+      await supertest(server.app)
+        .patch(path(category._id.toString()))
+        .set('Authorization', `Bearer ${token}`)
+        .send({
+          name: faker.commerce.department(),
+          type: TRANSACTION.Expense,
+          parent: root._id.toString()
+        })
+        .expect(200)
+    })
   })
 
   describe('DELETE /:id', () => {
@@ -182,6 +209,38 @@ describe('Category', () => {
       const category: ICategory = await insertCategory()
 
       await supertest(server.app).delete(path(category._id.toString())).set('Authorization', `Bearer ${token}`).expect(404)
+    })
+  })
+
+  describe('GET /grouped', () => {
+    const path = '/api/categories/grouped'
+    let token: string
+    const user = generateUsername()
+
+    beforeAll(async () => {
+      token = await requestLogin(server.app, { username: user })
+    })
+
+    afterEach(() => CategoryModel.deleteMany({}))
+
+    test('when token is not provided, it should response an error with status code 401', async () => {
+      await supertest(server.app).get(path).expect(401)
+    })
+
+    test('when there are no categories, it should return an empty array', async () => {
+      await supertest(server.app).get(path).auth(token, { type: 'bearer' }).expect(200, [])
+    })
+
+    test('returns root categories with their children', async () => {
+      // insertCategory sin root:true crea padre + hijo automáticamente
+      const child = await insertCategory({ user })
+      const rootId = (child as any).parent._id.toString()
+
+      const response = await supertest(server.app).get(path).auth(token, { type: 'bearer' }).expect(200)
+
+      const found = response.body.find((r: any) => r._id === rootId)
+      expect(found).toBeDefined()
+      expect(Array.isArray(found.children)).toBe(true)
     })
   })
 })

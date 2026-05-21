@@ -22,6 +22,7 @@ export default (app: Application): void => {
     })
   ]
 
+  /* istanbul ignore next — Loki transport only runs in production */
   if (process.env.NODE_ENV === 'production') {
     transportList.push(new LokiTransport({
       format: prettyPrint(),

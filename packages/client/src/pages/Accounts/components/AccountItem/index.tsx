@@ -1,4 +1,4 @@
-import { FC, useCallback, useState } from 'react'
+import { FC, useState } from 'react'
 import { Collapse, Divider, Paper, Typography, useTheme } from '@mui/material'
 import { Account } from 'types'
 
@@ -16,12 +16,13 @@ interface AccountItemProps {
 
 const AccountItem: FC<AccountItemProps> = ({ account, forceExpand, cancelCreate }) => {
   const theme = useTheme()
-  const [expand, setExpand] = useState(forceExpand)
+  const [expand, setExpand] = useState(false)
+  const isExpanded = forceExpand ?? expand
 
-  const hideForm = useCallback(() => {
+  const hideForm = () => {
     cancelCreate?.()
     setExpand(false)
-  }, [account._id])
+  }
 
   return (
     <>
@@ -37,10 +38,9 @@ const AccountItem: FC<AccountItemProps> = ({ account, forceExpand, cancelCreate 
           >{format.euro(account.balance)}
           </Typography>
         </ItemContent>
-        <Collapse in={expand} timeout='auto' unmountOnExit>
+        <Collapse in={isExpanded} timeout='auto' unmountOnExit>
           <Divider className={styles.divider} />
           <AccountEdit account={account} hideForm={hideForm} isNew={forceExpand} />
-
         </Collapse>
       </Paper>
 

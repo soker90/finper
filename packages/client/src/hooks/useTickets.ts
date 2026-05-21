@@ -5,12 +5,17 @@ import { deleteTicket, reviewTicket } from 'services/apiService'
 
 export const useTickets = (): {
   tickets: Ticket[]
+  ticketsEnabled: boolean
   isLoading: boolean
   error: any
   removeTicket: (id: string) => Promise<{ error?: string }>
   markReviewed: (id: string) => Promise<{ error?: string }>
 } => {
-  const { data, error, mutate } = useSWR<{ tickets: Ticket[], total: number }>(TICKETS)
+  const { data, error, mutate, isLoading } = useSWR<{ tickets: Ticket[], total: number }>(TICKETS)
+
+  // Disable fetching when the tickets service is unavailable (503).
+  // Derived during render instead of state+effect to avoid an extra cycle.
+  const ticketsEnabled = error?.status !== 503
 
   const removeTicket = async (id: string) => {
     const result = await deleteTicket(id)
@@ -33,5 +38,12 @@ export const useTickets = (): {
     return result
   }
 
-  return { tickets: data?.tickets ?? [], isLoading: !data && !error, error, removeTicket, markReviewed }
+  return {
+    tickets: data?.tickets ?? [],
+    ticketsEnabled,
+    isLoading,
+    error,
+    removeTicket,
+    markReviewed
+  }
 }

@@ -11,10 +11,20 @@ interface Props {
 const YearCard = ({ title, data = 0, color }: Props) => (
   <MainCard contentSX={{ p: 2.25 }}>
     <Stack spacing={0.5}>
-      <Typography variant='h6' fontWeight='bold' fontSize='medium'>
+      <Typography
+        variant='h6'
+        sx={{
+          fontWeight: 'bold',
+          fontSize: 'medium'
+        }}
+      >
         {title}
       </Typography>
-      <Grid container alignItems='center'>
+      <Grid
+        container sx={{
+          alignItems: 'center'
+        }}
+      >
         <Grid>
           <Typography variant='h4' sx={{ color: `${color || 'primary'}.main` }}>
             {format.euro(data)}

@@ -20,7 +20,7 @@ COPY --chown=node:node packages/api ./packages/api
 COPY --chown=node:node packages/models ./packages/models
 RUN pnpm --filter @soker90/finper-models build
 RUN pnpm --filter @soker90/finper-api build
-RUN pnpm deploy --filter @soker90/finper-api --prod /home/node/deploy
+RUN pnpm deploy --filter @soker90/finper-api --prod --legacy /home/node/deploy
 
 # STAGE 2 - Producción
 FROM node:24-alpine

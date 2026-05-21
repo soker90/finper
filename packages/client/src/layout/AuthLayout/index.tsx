@@ -11,9 +11,9 @@ const AuthLayout = () => (
       <AuthBackground />
       <Grid
         container
-        direction='column'
-        justifyContent='flex-end'
         sx={{
+          flexDirection: 'column',
+          justifyContent: 'flex-end',
           minHeight: '100vh'
         }}
       >
@@ -24,9 +24,11 @@ const AuthLayout = () => (
           <Grid
             size={12}
             container
-            justifyContent='center'
-            alignItems='center'
-            sx={{ minHeight: 'calc(100vh - 60px)' }}
+            sx={{
+              justifyContent: 'center',
+              alignItems: 'center',
+              minHeight: 'calc(100vh - 60px)'
+            }}
           >
             <Grid>
               <AuthCard><Outlet /></AuthCard>

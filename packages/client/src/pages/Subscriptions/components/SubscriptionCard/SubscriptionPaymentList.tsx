@@ -16,7 +16,15 @@ const SubscriptionPaymentList = ({ transactions, subscriptionId, onUnlinkTransac
     <>
       <Divider />
       <Box sx={{ bgcolor: 'action.hover', borderRadius: 1, px: 1, py: 0.5, mx: -1 }}>
-        <Typography variant='caption' color='textSecondary' fontWeight={600} display='block' mb={0.5}>
+        <Typography
+          variant='caption'
+          color='textSecondary'
+          sx={{
+            fontWeight: 600,
+            display: 'block',
+            mb: 0.5
+          }}
+        >
           Últimos pagos
         </Typography>
         <List dense disablePadding>
@@ -24,12 +32,28 @@ const SubscriptionPaymentList = ({ transactions, subscriptionId, onUnlinkTransac
             <ListItem key={t._id} disablePadding sx={{ py: 0.25 }}>
               <ListItemText
                 primary={
-                  <Box display='flex' justifyContent='space-between' alignItems='center'>
+                  <Box
+                    sx={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center'
+                    }}
+                  >
                     <Typography variant='caption' color='textSecondary'>
                       {format.date(t.date)}
                     </Typography>
-                    <Box display='flex' alignItems='center' gap={0.5}>
-                      <Typography variant='caption' fontWeight={600}>
+                    <Box
+                      sx={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 0.5
+                      }}
+                    >
+                      <Typography
+                        variant='caption' sx={{
+                          fontWeight: 600
+                        }}
+                      >
                         {format.euro(t.amount)}
                       </Typography>
                       <Tooltip title='Desvincular'>

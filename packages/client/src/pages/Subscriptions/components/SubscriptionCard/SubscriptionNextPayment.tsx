@@ -21,16 +21,26 @@ type Props = {
 const SubscriptionNextPayment = ({ nextPaymentDate }: Props) => {
   if (!nextPaymentDate) {
     return (
-      <Typography variant='caption' color='textSecondary' fontStyle='italic'>
-        Sin pagos registrados
+      <Typography
+        variant='caption' color='textSecondary' sx={{
+          fontStyle: 'italic'
+        }}
+      >Sin pagos registrados
       </Typography>
     )
   }
 
+  // eslint-disable-next-line react-hooks/purity -- intentional: "days remaining" chip must reflect the moment of render
   const days = Math.ceil((nextPaymentDate - Date.now()) / (1000 * 60 * 60 * 24))
 
   return (
-    <Box display='flex' justifyContent='space-between' alignItems='center'>
+    <Box
+      sx={{
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center'
+      }}
+    >
       <Typography variant='caption' color='textSecondary'>
         {format.date(nextPaymentDate)}
       </Typography>

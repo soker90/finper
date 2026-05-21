@@ -21,7 +21,13 @@ const LoanCard = ({ loan, linkedAccount, onClick }: Props) => {
       onClick={() => onClick(loan)}
     >
       <Stack spacing={1}>
-        <Box display='flex' justifyContent='space-between' alignItems='center'>
+        <Box
+          sx={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center'
+          }}
+        >
           <Typography variant='h6' color='textSecondary' noWrap>
             {loan.name}
           </Typography>
@@ -30,7 +36,11 @@ const LoanCard = ({ loan, linkedAccount, onClick }: Props) => {
 
         <Typography variant='h4' color='inherit'>
           {format.euro(loan.pendingAmount)}
-          <Typography component='span' variant='body2' color='textSecondary' ml={1}>
+          <Typography
+            component='span' variant='body2' color='textSecondary' sx={{
+              ml: 1
+            }}
+          >
             pendiente
           </Typography>
         </Typography>
@@ -42,7 +52,12 @@ const LoanCard = ({ loan, linkedAccount, onClick }: Props) => {
           color='primary'
         />
 
-        <Box display='flex' justifyContent='space-between'>
+        <Box
+          sx={{
+            display: 'flex',
+            justifyContent: 'space-between'
+          }}
+        >
           <Typography variant='caption' color='textSecondary'>
             Cuota: {format.euro(loan.monthlyPayment)}/mes
           </Typography>

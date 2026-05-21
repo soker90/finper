@@ -11,10 +11,17 @@ const Debts = lazy(() => import('../pages/Debts'))
 const Loans = lazy(() => import('../pages/Loans'))
 const LoanDetail = lazy(() => import('../pages/Loans/LoanDetail'))
 const Pensions = lazy(() => import('../pages/Pensions'))
+const Stocks = lazy(() => import('../pages/Stocks'))
 const Transactions = lazy(() => import('../pages/Transactions'))
 const Tickets = lazy(() => import('../pages/Tickets'))
 const Year = lazy(() => import('../pages/Year'))
 const Subscriptions = lazy(() => import('../pages/Subscriptions'))
+const Supplies = lazy(() => import('../pages/Supplies'))
+const SupplyDetail = lazy(() => import('../pages/SupplyDetail'))
+const CompareTariffsPage = lazy(() => import('../pages/SupplyDetail/CompareTariffsPage'))
+const Goals = lazy(() => import('../pages/Goals'))
+const Trackings = lazy(() => import('../pages/Trackings'))
+const TrackingDetail = lazy(() => import('../pages/TrackingDetail'))
 
 const MainRoutes = {
   path: '/',
@@ -66,6 +73,10 @@ const MainRoutes = {
       element: <Pensions />
     },
     {
+      path: 'acciones',
+      element: <Stocks />
+    },
+    {
       path: 'prestamos',
       element: <Loans />
     },
@@ -76,6 +87,34 @@ const MainRoutes = {
     {
       path: 'suscripciones',
       element: <Subscriptions />
+    },
+    {
+      path: 'suministros',
+      element: <Supplies />
+    },
+    {
+      path: 'suministros/:supplyId',
+      element: <SupplyDetail />
+    },
+    {
+      path: 'suministros/:supplyId/comparar',
+      element: <CompareTariffsPage />
+    },
+    {
+      path: 'metas',
+      element: <Goals />
+    },
+    {
+      path: 'seguimientos',
+      element: <Trackings />
+    },
+    {
+      path: 'seguimientos/:tagName/:year',
+      element: <TrackingDetail />
+    },
+    {
+      path: 'seguimientos/:tagName',
+      element: <TrackingDetail />
     }
   ]
 }

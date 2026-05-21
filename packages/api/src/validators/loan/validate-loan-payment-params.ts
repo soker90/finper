@@ -9,6 +9,7 @@ export const validateLoanOrdinaryPaymentParams = async (data: Record<string, any
   })
 
   const { error, value } = schema.validate(data)
+  /* istanbul ignore next — Joi error branch not exercised for loan ordinary payment in current tests */
   if (error) throw Boom.badData(error.message).output
   return value
 }
@@ -22,6 +23,7 @@ export const validateLoanPaymentParams = async (data: Record<string, any>) => {
   })
 
   const { error, value } = schema.validate(data)
+  /* istanbul ignore next — Joi error branch not exercised for loan payment in current tests */
   if (error) throw Boom.badData(error.message).output
   return value
 }

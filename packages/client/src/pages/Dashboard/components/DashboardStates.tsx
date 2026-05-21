@@ -4,14 +4,44 @@ import MainCard from 'components/MainCard'
 
 const BAR_HEIGHTS = [120, 200, 80, 160, 220, 100, 180, 240, 90, 150, 210, 70]
 
-// ── Loading skeleton ──────────────────────────────────────────────────────────
+// ── Granular skeletons ────────────────────────────────────────────────────────
+
+export const BudgetCardSkeleton = () => (
+  <Grid size={{ xs: 12, md: 4 }}>
+    <MainCard sx={{ height: 240, borderRadius: 2 }}>
+      <Skeleton variant='rounded' height='100%' />
+    </MainCard>
+  </Grid>
+)
+
+export const PieChartSkeleton = ({ height = 270 }: { height?: number }) => (
+  <Stack sx={{ height, alignItems: 'center', justifyContent: 'center' }}>
+    <Skeleton variant='circular' width={160} height={160} />
+    <Stack spacing={1} sx={{ mt: 3, width: '100%', px: 2 }}>
+      {Array.from({ length: 3 }, (_, i) => (
+        <Stack key={`pie-legend-${i}`} direction='row' spacing={1} sx={{ alignItems: 'center' }}>
+          <Skeleton variant='circular' width={12} height={12} />
+          <Skeleton variant='text' width='60%' height={16} />
+        </Stack>
+      ))}
+    </Stack>
+  </Stack>
+)
+
+// ── Full loading skeleton ─────────────────────────────────────────────────────
 export const DashboardSkeleton = () => (
   <Grid container spacing={3}>
-    {[...Array(4)].map((_, i) => (
+    {Array.from({ length: 4 }, (_, i) => (
       <Grid key={`kpi-${i}`} size={{ xs: 12, sm: 6, md: 3 }}>
         <MainCard contentSX={{ p: 2.25 }}>
           <Stack spacing={1}>
-            <Stack direction='row' justifyContent='space-between' alignItems='center'>
+            <Stack
+              direction='row'
+              sx={{
+                justifyContent: 'space-between',
+                alignItems: 'center'
+              }}
+            >
               <Skeleton variant='text' width='60%' height={20} />
               <Skeleton variant='circular' width={36} height={36} />
             </Stack>
@@ -24,9 +54,16 @@ export const DashboardSkeleton = () => (
     <Grid size={{ xs: 12, md: 8 }}>
       <MainCard>
         <Skeleton variant='text' width='30%' height={20} sx={{ mb: 1 }} />
-        <Stack direction='row' alignItems='flex-end' spacing={1} sx={{ height: 260 }}>
-          {[...Array(12)].map((_, i) => (
-            <Skeleton key={`bar-${i}`} variant='rounded' width='100%' height={BAR_HEIGHTS[i]} sx={{ borderRadius: 1 }} />
+        <Stack
+          direction='row'
+          spacing={1}
+          sx={{
+            alignItems: 'flex-end',
+            height: 260
+          }}
+        >
+          {BAR_HEIGHTS.map((barHeight) => (
+            <Skeleton key={`bar-${barHeight}`} variant='rounded' width='100%' height={barHeight} sx={{ borderRadius: 1 }} />
           ))}
         </Stack>
       </MainCard>
@@ -34,8 +71,12 @@ export const DashboardSkeleton = () => (
     <Grid size={{ xs: 12, md: 4 }}>
       <MainCard>
         <Stack spacing={2.5} sx={{ py: 1 }}>
-          {[...Array(3)].map((_, i) => (
-            <Stack key={`mini-${i}`} direction='row' alignItems='center' spacing={1.5}>
+          {Array.from({ length: 3 }, (_, i) => (
+            <Stack
+              key={`mini-${i}`} direction='row' spacing={1.5} sx={{
+                alignItems: 'center'
+              }}
+            >
               <Skeleton variant='circular' width={32} height={32} />
               <Box sx={{ flex: 1 }}>
                 <Skeleton variant='text' width='60%' height={14} />
@@ -46,8 +87,8 @@ export const DashboardSkeleton = () => (
         </Stack>
       </MainCard>
     </Grid>
-    {[5, 4, 3].map((md, i) => (
-      <Grid key={`skel-card-${i}`} size={{ xs: 12, md }}>
+    {[5, 4, 3].map((md) => (
+      <Grid key={`skel-card-${md}`} size={{ xs: 12, md }}>
         <Skeleton variant='rounded' height={240} sx={{ borderRadius: 2 }} />
       </Grid>
     ))}
@@ -62,11 +103,21 @@ export const DashboardError = ({ error, onRetry }: { error: any; onRetry: () => 
   <Fade in timeout={400}>
     <Box>
       <MainCard>
-        <Stack alignItems='center' spacing={3} sx={{ py: 6 }}>
+        <Stack
+          spacing={3}
+          sx={{
+            alignItems: 'center',
+            py: 6
+          }}
+        >
           <Avatar sx={{ width: 64, height: 64, bgcolor: 'error.lighter' }}>
             <WarningOutlined style={{ fontSize: 32, color: '#f5222d' }} />
           </Avatar>
-          <Stack alignItems='center' spacing={1}>
+          <Stack
+            spacing={1} sx={{
+              alignItems: 'center'
+            }}
+          >
             <Typography variant='h5'>Error al cargar el dashboard</Typography>
             <Typography variant='body1' color='textSecondary' align='center' sx={{ maxWidth: 400 }}>
               No se pudieron cargar los datos financieros. Comprueba tu conexión e inténtalo de nuevo.

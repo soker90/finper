@@ -11,15 +11,20 @@ define help
     build-models:              build the models
     install:                   install all dependencies.
     lint-api:                  lint the API
+    lint-bot:                  lint the bot
     lint-client:               lint the client
     lint-models:               lint the models.
+    seed-user:                 create initial user (USERNAME and PASSWORD required).
     test:                      run all tests.
     test-api:                  run all tests for the API.
     test-client:               run all tests for the client
     test-models:               run all tests for the models.
     start-api:                 launch api
+    start-bot:                 launch bot (Cloudflare Worker dev)
     start-client:              launch client
-    clean:                    clean all build artifacts.
+    deploy-bot:                deploy bot to Cloudflare Workers
+    type-check-bot:            typecheck the bot
+    clean:                     clean all build artifacts.
 
 endef
 export help
@@ -44,6 +49,9 @@ lint-models:
 	@pnpm --filter @soker90/finper-models lint
 
 ## API ##
+seed-user:
+	@INIT_USERNAME=$(USERNAME) INIT_PASSWORD=$(PASSWORD) pnpm --filter @soker90/finper-api seed-user
+
 start-api:
 	@pnpm --filter @soker90/finper-api start
 
@@ -64,6 +72,19 @@ build-image-api-daily:
 build-image-api-latest:
 	@docker build . -t soker90/finper-api:latest -f ./packages/api/Dockerfile
 	@docker push soker90/finper-api:latest
+
+## Bot ##
+start-bot:
+	@pnpm --filter @soker90/finper-bot dev
+
+deploy-bot:
+	@pnpm --filter @soker90/finper-bot deploy
+
+lint-bot:
+	@pnpm --filter @soker90/finper-bot lint
+
+type-check-bot:
+	@pnpm --filter @soker90/finper-bot type-check
 
 ## Frontend ##
 start-client:

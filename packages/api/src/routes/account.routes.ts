@@ -42,5 +42,11 @@ export class AccountRoutes {
       authMiddleware,
       this.accountController.account.bind(this.accountController)
     )
+
+    this.router.post(
+      '/transfer',
+      authMiddleware,
+      this.accountController.transfer.bind(this.accountController)
+    )
   }
 }

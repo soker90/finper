@@ -29,3 +29,32 @@ declare module '@emotion/react' {
     palette: Palette
   }
 }
+
+declare module '@mui/material/styles' {
+  interface PaletteColor {
+    darker: string
+    lighter: string
+  }
+
+  interface Color {
+    A800: string
+  }
+
+  // eslint-disable-next-line no-unused-vars
+  interface Palette {
+    grey: Color
+    primary: PaletteColor
+    error: PaletteColor
+    secondary: PaletteColor
+    warning: PaletteColor
+    info: PaletteColor
+    success: PaletteColor
+  }
+
+  // eslint-disable-next-line no-unused-vars
+  interface Theme {
+    customShadows: {
+      z1: string
+    }
+  }
+}

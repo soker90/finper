@@ -30,9 +30,20 @@ const CandidateRow = ({ candidate, onAssign, onDismiss }: Props) => {
   return (
     <Box>
       {/* Movimiento detectado */}
-      <Box display='flex' justifyContent='space-between' alignItems='center' mb={1}>
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          mb: 1
+        }}
+      >
         <Box>
-          <Typography variant='body2' fontWeight={600}>
+          <Typography
+            variant='body2' sx={{
+              fontWeight: 600
+            }}
+          >
             {format.euro(tx.amount)} · {format.date(tx.date)}
           </Typography>
           <Typography variant='caption' color='textSecondary'>
@@ -41,9 +52,12 @@ const CandidateRow = ({ candidate, onAssign, onDismiss }: Props) => {
         </Box>
         <DismissButton disabled={loading} onClick={handleDismiss} />
       </Box>
-
       {/* Suscripciones candidatas */}
-      <Stack direction='row' spacing={1} flexWrap='wrap'>
+      <Stack
+        direction='row' spacing={1} sx={{
+          flexWrap: 'wrap'
+        }}
+      >
         {candidate.subscriptionIds.map((sub) => (
           <SubscriptionChip
             key={sub._id}

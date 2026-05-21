@@ -88,15 +88,14 @@ describe('Debt', () => {
     test('when there are debts, it should return the debts', async () => {
       const name = `a${faker.person.firstName()}`
       const name2 = `b${faker.person.firstName()}`
-      const from = await insertDebt({ user, type: DEBT.FROM, from: name, paymentDate: 0 })
-      const to = await insertDebt({ user, type: DEBT.TO, from: name2, paymentDate: 0 })
-      const to2 = await insertDebt({ user, type: DEBT.TO, from: name, paymentDate: 0 })
+      const from = await insertDebt({ user, type: DEBT.FROM, from: name })
+      const to = await insertDebt({ user, type: DEBT.TO, from: name2 })
+      const to2 = await insertDebt({ user, type: DEBT.TO, from: name })
       const getResponseDebt = (debt: any) => ({
         _id: debt._id.toString(),
         from: debt.from,
         date: debt.date,
         amount: debt.amount,
-        ...(debt.paymentDate && { paymentDate: debt.paymentDate }),
         concept: debt.concept,
         type: debt.type,
         user: debt.user
@@ -138,7 +137,6 @@ describe('Debt', () => {
         from: debt.from,
         date: debt.date,
         amount: debt.amount,
-        paymentDate: debt.paymentDate,
         concept: debt.concept,
         type: debt.type,
         user: debt.user
@@ -235,6 +233,53 @@ describe('Debt', () => {
       const debt: IDebt = await insertDebt()
 
       await supertest(server.app).delete(path(debt._id.toString())).set('Authorization', `Bearer ${token}`).expect(404)
+    })
+  })
+
+  describe('POST /:id/pay', () => {
+    const path = (id: string) => `/api/debts/${id}/pay`
+    let token: string
+    const user = generateUsername()
+
+    beforeAll(async () => {
+      token = await requestLogin(server.app, { username: user })
+    })
+
+    test('when token is not provided, it should response an error with status code 401', async () => {
+      await supertest(server.app).post(path('any')).expect(401)
+    })
+
+    test('when id is not a valid ObjectId, it should respond 400', async () => {
+      await supertest(server.app).post(path('not-a-valid-id')).auth(token, { type: 'bearer' }).send({ amount: 10 }).expect(400)
+    })
+
+    test('when the debt does not exist, it should response 404', async () => {
+      await supertest(server.app).post(path('62a39498c4497e1fe3c2bf35')).auth(token, { type: 'bearer' }).send({ amount: 10 }).expect(404)
+    })
+
+    test('when no amount is provided, it should response 422', async () => {
+      const debt: IDebt = await insertDebt({ user })
+      await supertest(server.app).post(path(debt._id.toString())).auth(token, { type: 'bearer' }).send({}).expect(422)
+    })
+
+    test('when amount is less than debt, it should reduce the pending amount', async () => {
+      const debt: IDebt = await insertDebt({ user, amount: 100 })
+      const res = await supertest(server.app)
+        .post(path(debt._id.toString()))
+        .auth(token, { type: 'bearer' })
+        .send({ amount: 30 })
+        .expect(200)
+
+      expect(res.body.amount).toBe(70)
+    })
+
+    test('when amount equals or exceeds the debt, it should delete the debt and respond 204', async () => {
+      const debt: IDebt = await insertDebt({ user, amount: 50 })
+      await supertest(server.app)
+        .post(path(debt._id.toString()))
+        .auth(token, { type: 'bearer' })
+        .send({ amount: 50 })
+        .expect(204)
     })
   })
 })

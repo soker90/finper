@@ -7,7 +7,7 @@ import { BankIcon } from 'components/icons'
 import { useAccounts } from 'hooks'
 import { AmortizationRow } from 'types'
 
-import { LoanStatsPanel, LoanAmortizationTable, LoanFormModal, LoanPayModal, LoanAmortizeModal, LoanEventModal, LoanRemoveModal, LoanEditPaymentModal, LoanDeletePaymentModal } from '../components'
+import { LoanStatsPanel, LoanAmortizationTable, LoanSimulator, LoanFormModal, LoanPayModal, LoanAmortizeModal, LoanEventModal, LoanRemoveModal, LoanEditPaymentModal, LoanDeletePaymentModal } from '../components'
 import { useLoan } from '../hooks'
 
 type ModalState =
@@ -22,22 +22,31 @@ type ModalState =
 const LoanDetail = () => {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
+  const { loan, isLoading } = useLoan(id ?? '')
+  const { accounts } = useAccounts()
+  const linkedAccount = accounts.find(account => account._id === loan?.account)
+
+  const [activeModal, setActiveModal] = useState<ModalState | null>(null)
+  const closeModal = () => setActiveModal(null)
+  const handleRemoveClose = () => {
+    closeModal()
+    navigate('/prestamos')
+  }
 
   if (!id) {
     navigate('/prestamos', { replace: true })
     return null
   }
 
-  const { loan, isLoading } = useLoan(id)
-  const { accounts } = useAccounts()
-  const linkedAccount = accounts.find(a => a._id === loan?.account)
-
-  const [activeModal, setActiveModal] = useState<ModalState | null>(null)
-  const closeModal = () => setActiveModal(null)
-
   if (isLoading) {
     return (
-      <Box display='flex' justifyContent='center' mt={6}>
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'center',
+          mt: 6
+        }}
+      >
         <CircularProgress />
       </Box>
     )
@@ -45,8 +54,13 @@ const LoanDetail = () => {
 
   if (!loan) {
     return (
-      <Typography color='textSecondary' mt={4} textAlign='center'>
-        Préstamo no encontrado.
+      <Typography
+        color='textSecondary'
+        sx={{
+          mt: 4,
+          textAlign: 'center'
+        }}
+      >Préstamo no encontrado.
       </Typography>
     )
   }
@@ -54,8 +68,22 @@ const LoanDetail = () => {
   return (
     <Stack spacing={3}>
       {/* Header */}
-      <Box display='flex' alignItems='center' justifyContent='space-between' flexWrap='wrap' gap={1}>
-        <Box display='flex' alignItems='center' gap={1}>
+      <Box
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          flexWrap: 'wrap',
+          gap: 1
+        }}
+      >
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 1
+          }}
+        >
           <Button
             startIcon={<ArrowLeftOutlined />}
             onClick={() => navigate('/prestamos')}
@@ -66,7 +94,11 @@ const LoanDetail = () => {
           <Typography variant='h4'>{loan.name}</Typography>
           <BankIcon name={linkedAccount?.bank ?? ''} width={24} height={24} />
         </Box>
-        <Stack direction='row' spacing={1} flexWrap='wrap'>
+        <Stack
+          direction='row' spacing={1} sx={{
+            flexWrap: 'wrap'
+          }}
+        >
           <Button variant='outlined' onClick={() => setActiveModal({ type: 'amortize' })}>
             Amortización extra
           </Button>
@@ -81,10 +113,14 @@ const LoanDetail = () => {
           </Button>
         </Stack>
       </Box>
-
       {/* Stats */}
       <LoanStatsPanel stats={loan.stats} />
-
+      {/* Simulator */}
+      <LoanSimulator
+        loanId={id}
+        monthlyPayment={loan.stats.currentPayment}
+        pendingAmount={loan.pendingAmount}
+      />
       {/* Amortization table */}
       <LoanAmortizationTable
         rows={loan.amortizationTable}
@@ -92,7 +128,6 @@ const LoanDetail = () => {
         onEditPayment={(row) => setActiveModal({ type: 'editPayment', data: row })}
         onPayPayment={(row) => setActiveModal({ type: 'pay', data: row })}
       />
-
       {/* Modals */}
       {activeModal?.type === 'deletePayment' && (
         <LoanDeletePaymentModal
@@ -136,10 +171,7 @@ const LoanDetail = () => {
       {activeModal?.type === 'remove' && (
         <LoanRemoveModal
           loan={loan}
-          onClose={() => {
-            closeModal()
-            navigate('/prestamos')
-          }}
+          onClose={handleRemoveClose}
         />
       )}
     </Stack>

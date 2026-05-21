@@ -10,7 +10,7 @@ export const useSubscriptionCandidates = (): {
   assign: (candidateId: string, subscriptionId: string) => Promise<{ error?: string }>
   dismiss: (candidateId: string) => Promise<{ error?: string }>
 } => {
-  const { data, error, mutate } = useSWR<SubscriptionCandidate[]>(SUBSCRIPTION_CANDIDATES)
+  const { data, error, mutate, isLoading } = useSWR<SubscriptionCandidate[]>(SUBSCRIPTION_CANDIDATES)
 
   const removeFromCache = (candidateId: string) =>
     mutate(
@@ -36,7 +36,7 @@ export const useSubscriptionCandidates = (): {
 
   return {
     candidates: data ?? [],
-    isLoading: !data && !error,
+    isLoading,
     error,
     assign,
     dismiss

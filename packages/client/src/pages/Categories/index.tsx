@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useState } from 'react'
 import { useCategories } from 'hooks'
 import { CategoryItem } from './components'
 import { PlusOutlined } from '@ant-design/icons'
@@ -10,9 +10,7 @@ const Accounts = () => {
   const { categories, isLoading } = useCategories()
   const [newAccount, setNewAccount] = useState(false)
 
-  const rootCategories = useMemo(() => {
-    return categories?.filter(category => !category.parent)
-  }, [categories])
+  const rootCategories = categories?.filter(category => !category.parent)
 
   if (isLoading) {
     return <LoadingList />

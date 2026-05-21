@@ -9,13 +9,13 @@ export const useDebts = (): {
   error: any,
   debtsByPerson: { _id: string, total: number }[]
 } => {
-  const { data, error } = useSWR(DEBTS)
+  const { data, error, isLoading } = useSWR(DEBTS)
 
   return {
     from: data?.from || [],
     to: data?.to || [],
     debtsByPerson: data?.debtsByPerson || [],
-    isLoading: !data,
+    isLoading,
     error
   }
 }

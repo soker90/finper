@@ -17,6 +17,11 @@ import { ILoanPayment, LoanPaymentModel, LoanPaymentType, LOAN_PAYMENT } from '.
 import { ILoanEvent, LoanEventModel } from './models/loan-events'
 import { ISubscription, SubscriptionModel } from './models/subscriptions'
 import { ISubscriptionCandidate, SubscriptionCandidateModel } from './models/subscription-candidates'
+import { IProperty, PropertyModel } from './models/properties'
+import { ISupply, SupplyModel, SUPPLY_TYPE, SupplyType } from './models/supplies'
+import { ISupplyReading, SupplyReadingModel } from './models/supply-readings'
+import { IStock, StockModel, STOCK_TYPE, StockType } from './models/stocks'
+import { IGoal, GoalModel, GOAL_COLORS, GoalColor, GOAL_ICONS, GoalIcon } from './models/goals'
 
 export type { AccountDocument } from './models/accounts'
 export type { BudgetDocument } from './models/budgets'
@@ -31,6 +36,11 @@ export type { TransactionDocument } from './models/transactions'
 export type { UserDocument } from './models/users'
 export type { SubscriptionDocument } from './models/subscriptions'
 export type { SubscriptionCandidateDocument } from './models/subscription-candidates'
+export type { PropertyDocument } from './models/properties'
+export type { SupplyDocument } from './models/supplies'
+export type { SupplyReadingDocument } from './models/supply-readings'
+export type { StockDocument } from './models/stocks'
+export type { GoalDocument } from './models/goals'
 
 function connect (uri: string, options: Record<string, unknown>): void {
   if (isNil(mongoose)) {
@@ -60,6 +70,15 @@ export {
   LoanPaymentType,
   TRANSACTION,
   TransactionType,
+  SUPPLY_TYPE,
+  SupplyType,
+  STOCK_TYPE,
+  StockType,
+
+  GOAL_COLORS,
+  GoalColor,
+  GOAL_ICONS,
+  GoalIcon,
 
   IAccount,
   IBudget,
@@ -74,6 +93,12 @@ export {
   ISubscriptionCandidate,
   ITransaction,
   IUser,
+  IProperty,
+  ISupply,
+  ISupplyReading,
+  IStock,
+
+  IGoal,
 
   AccountModel,
   BudgetModel,
@@ -87,5 +112,10 @@ export {
   SubscriptionModel,
   SubscriptionCandidateModel,
   TransactionModel,
-  UserModel
+  UserModel,
+  PropertyModel,
+  SupplyModel,
+  SupplyReadingModel,
+  StockModel,
+  GoalModel
 }

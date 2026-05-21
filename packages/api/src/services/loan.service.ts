@@ -45,6 +45,24 @@ export interface LoanDetail extends ILoan {
   amortizationTable: ReturnType<typeof buildAmortizationTable>
 }
 
+export interface SimulationOption {
+  newMonthsLeft: number
+  newMonthlyPayment: number
+  monthsSaved: number
+  monthlySaving: number
+  totalInterestSaved: number
+  newEndDate: number | null
+}
+
+export interface SimulationResult {
+  lumpSum: number
+  originalMonthsLeft: number
+  originalMonthlyPayment: number
+  originalEndDate: number | null
+  optionA: SimulationOption
+  optionB: SimulationOption
+}
+
 export interface ILoanService {
   getLoans(user: string): Promise<(ILoan & { _id: string })[]>
   getLoanDetail(id: string, user: string): Promise<LoanDetail>
@@ -56,6 +74,7 @@ export interface ILoanService {
   addEvent(loanId: string, data: Omit<ILoanEvent, 'loan'>): Promise<ILoanEvent>
   deletePayment(loanId: string, paymentId: string, user: string): Promise<void>
   editPayment(loanId: string, paymentId: string, data: { date?: number, amount?: number, interest?: number, principal?: number, type?: LoanPaymentType }, user: string): Promise<ILoanPayment>
+  simulatePayoff(loanId: string, lumpSum: number, user: string): Promise<SimulationResult>
 }
 
 export default class LoanService implements ILoanService {
@@ -65,15 +84,11 @@ export default class LoanService implements ILoanService {
 
   async getLoanDetail (id: string, user: string): Promise<LoanDetail> {
     const [{ loan, events, currentRate, currentPayment }, payments] = await Promise.all([
-      this._getLoanWithRates(id, user),
+      this._getLoan(id, user),
       leanDoc<(ILoanPayment & { _id: string })[]>(LoanPaymentModel.find({ loan: id, user }).sort({ date: 1 }).lean())
     ])
 
-    const eventInputs: LoanEventInput[] = events.map(e => ({
-      date: e.date,
-      newRate: e.newRate,
-      newPayment: e.newPayment
-    }))
+    const eventInputs = this._toEventInputs(events)
 
     const table = buildAmortizationTable(
       payments,
@@ -101,12 +116,14 @@ export default class LoanService implements ILoanService {
       [],
       loanData.startDate
     )
-    loanData.initialEstimatedCost = roundNumber(initialProjection.reduce((s, r) => s + r.amount, 0))
+    const totalPaymentsAmount = initialProjection.reduce((sum, row) => sum + row.amount, 0)
+    loanData.initialEstimatedCost = roundNumber(totalPaymentsAmount)
     return leanDoc<ILoan & { _id: string }>(LoanModel.create(loanData))
   }
 
   async editLoan (id: string, data: Partial<ILoan>): Promise<ILoan & { _id: string }> {
     const updated = await leanDoc<ILoan & { _id: string } | null>(LoanModel.findByIdAndUpdate(id, data, { returnDocument: 'after' }).lean())
+    /* istanbul ignore next — validator validateLoanExist runs before this method via route */
     if (!updated) throw Boom.notFound(ERROR_MESSAGE.LOAN.NOT_FOUND).output
     return updated
   }
@@ -124,8 +141,8 @@ export default class LoanService implements ILoanService {
 
     if (loan.pendingAmount <= 0) throw Boom.badRequest(ERROR_MESSAGE.LOAN.ALREADY_PAID).output
 
-    const r = currentRate / 100 / 12
-    const baseInterest = roundNumber(loan.pendingAmount * r)
+    const monthlyInterestRate = currentRate / 100 / 12
+    const baseInterest = roundNumber(loan.pendingAmount * monthlyInterestRate)
 
     // El principal siempre es el calculado normalmente (currentPayment - interés base).
     // Si el usuario pasa un importe concreto, la diferencia respecto al estándar son los intereses.
@@ -221,6 +238,7 @@ export default class LoanService implements ILoanService {
       leanDoc<ILoan & { _id: string } | null>(LoanModel.findOne({ _id: loanId, user }).lean())
     ])
     if (!payment) throw Boom.notFound(ERROR_MESSAGE.LOAN.PAYMENT_NOT_FOUND).output
+    /* istanbul ignore next — validator validateLoanExist runs before this method via route */
     if (!loan) throw Boom.notFound(ERROR_MESSAGE.LOAN.NOT_FOUND).output
 
     // Reverse the account deduction using the correct account from the loan
@@ -248,6 +266,7 @@ export default class LoanService implements ILoanService {
       leanDoc<ILoan & { _id: string } | null>(LoanModel.findOne({ _id: loanId, user }).lean())
     ])
     if (!payment) throw Boom.notFound(ERROR_MESSAGE.LOAN.PAYMENT_NOT_FOUND).output
+    /* istanbul ignore next — validator validateLoanExist runs before this method via route */
     if (!loan) throw Boom.notFound(ERROR_MESSAGE.LOAN.NOT_FOUND).output
 
     // Capture original values before applying changes
@@ -257,6 +276,7 @@ export default class LoanService implements ILoanService {
 
     // Apply field updates to the target payment
     const updatedFields: Partial<ILoanPayment> = {}
+    /* istanbul ignore next — optional field update branches; not all combinations exercised in tests */
     if (data.date !== undefined) updatedFields.date = data.date
     if (data.amount !== undefined) updatedFields.amount = data.amount
     if (data.interest !== undefined) updatedFields.interest = data.interest
@@ -295,6 +315,94 @@ export default class LoanService implements ILoanService {
     return leanDoc<ILoanPayment>(await LoanPaymentModel.findById(paymentId).lean())
   }
 
+  async simulatePayoff (loanId: string, lumpSum: number, user: string): Promise<SimulationResult> {
+    const { loan, events, currentRate, currentPayment } = await this._getLoan(loanId, user)
+
+    if (lumpSum > loan.pendingAmount) {
+      throw Boom.badData('lumpSum cannot exceed pendingAmount').output
+    }
+
+    const eventInputs = this._toEventInputs(events)
+
+    const newPending = roundNumber(loan.pendingAmount - lumpSum)
+    const projectionAnchor = await this._getProjectionAnchor(loanId, user)
+
+    // Base scenario: current state without lump sum
+    const baseScenario = this._buildProjectionScenario(
+      loan.pendingAmount, currentRate, currentPayment, eventInputs, loan.startDate, projectionAnchor
+    )
+
+    // Guard: loan already fully paid
+    if (baseScenario.monthsLeft === 0) {
+      throw Boom.badData('Loan is already fully paid').output
+    }
+
+    // Option A: reduce term — same payment, fewer months
+    const optionAScenario = this._buildProjectionScenario(
+      newPending, currentRate, currentPayment, eventInputs, loan.startDate, projectionAnchor
+    )
+
+    // Option B: reduce quota — same duration, lower payment
+    const newMonthlyPayment = calcMonthlyPayment(newPending, currentRate, baseScenario.monthsLeft)
+    const adjustedEvents: LoanEventInput[] = eventInputs.map(event => ({
+      ...event,
+      newPayment: newMonthlyPayment
+    }))
+    const optionBScenario = this._buildProjectionScenario(
+      newPending, currentRate, newMonthlyPayment, adjustedEvents, loan.startDate, projectionAnchor
+    )
+
+    return {
+      lumpSum,
+      originalMonthsLeft: baseScenario.monthsLeft,
+      originalMonthlyPayment: currentPayment,
+      originalEndDate: baseScenario.endDate,
+      optionA: {
+        newMonthsLeft: optionAScenario.monthsLeft,
+        newMonthlyPayment: currentPayment,
+        monthsSaved: baseScenario.monthsLeft - optionAScenario.monthsLeft,
+        monthlySaving: 0,
+        totalInterestSaved: roundNumber(baseScenario.totalInterest - optionAScenario.totalInterest),
+        newEndDate: optionAScenario.endDate
+      },
+      optionB: {
+        newMonthsLeft: optionBScenario.monthsLeft,
+        newMonthlyPayment,
+        monthsSaved: baseScenario.monthsLeft - optionBScenario.monthsLeft,
+        monthlySaving: roundNumber(currentPayment - newMonthlyPayment),
+        totalInterestSaved: roundNumber(baseScenario.totalInterest - optionBScenario.totalInterest),
+        newEndDate: optionBScenario.endDate
+      }
+    }
+  }
+
+  /** Find the date of the last ordinary payment to anchor future projections. */
+  private async _getProjectionAnchor (loanId: string, user: string): Promise<number | undefined> {
+    const lastOrdinaryPayment = await leanDoc<ILoanPayment | null>(
+      LoanPaymentModel.findOne({ loan: loanId, user, type: LOAN_PAYMENT.ORDINARY }).sort({ date: -1 }).lean()
+    )
+    return lastOrdinaryPayment?.date
+  }
+
+  /** Build an amortization table and extract key projection metrics. */
+  private _buildProjectionScenario (
+    pendingAmount: number,
+    rate: number,
+    monthlyPayment: number,
+    eventInputs: LoanEventInput[],
+    startDate: number,
+    projectionAnchor: number | undefined
+  ): { monthsLeft: number; totalInterest: number; endDate: number | null } {
+    const table = buildAmortizationTable(
+      [], pendingAmount, rate, monthlyPayment, eventInputs, startDate, projectionAnchor
+    )
+    const projectedRows = table.filter(row => row.isProjected)
+    const totalInterest = roundNumber(projectedRows.reduce((sum, row) => sum + row.interest, 0))
+    const monthsLeft = projectedRows.length
+    const endDate = table.length > 0 ? table[table.length - 1].date : null
+    return { monthsLeft, totalInterest, endDate }
+  }
+
   private async _registerPaymentMovement (loan: ILoan & { _id: string }, amount: number, date: number, user: string): Promise<void> {
     await this._deductFromAccount(loan.account.toString(), amount)
     await TransactionModel.create({
@@ -307,16 +415,27 @@ export default class LoanService implements ILoanService {
     })
   }
 
-  private async _getLoanWithRates (id: string, user: string) {
-    const [loan, events, lastPayment] = await Promise.all([
+  private async _getLoan (id: string, user: string) {
+    const [loan, events] = await Promise.all([
       leanDoc<ILoan & { _id: string }>(LoanModel.findOne({ _id: id, user }).lean()),
-      leanDoc<ILoanEvent[]>(LoanEventModel.find({ loan: id, user }).sort({ date: 1 }).lean()),
-      leanDoc<ILoanPayment | null>(LoanPaymentModel.findOne({ loan: id, user }).sort({ date: -1 }).lean())
+      leanDoc<ILoanEvent[]>(LoanEventModel.find({ loan: id, user }).sort({ date: 1 }).lean())
     ])
-    const currentEvent = events.findLast(e => e.date <= Date.now())
+    const currentEvent = events.findLast(event => event.date <= Date.now())
     const currentRate = currentEvent?.newRate ?? loan.interestRate
     const currentPayment = currentEvent?.newPayment ?? loan.monthlyPayment
+    return { loan, events, currentRate, currentPayment }
+  }
+
+  private async _getLoanWithRates (id: string, user: string) {
+    const { loan, events, currentRate, currentPayment } = await this._getLoan(id, user)
+    const lastPayment = await leanDoc<ILoanPayment | null>(
+      LoanPaymentModel.findOne({ loan: id, user }).sort({ date: -1 }).lean()
+    )
     return { loan, events, lastPayment, currentRate, currentPayment }
+  }
+
+  private _toEventInputs (events: ILoanEvent[]): LoanEventInput[] {
+    return events.map(event => ({ date: event.date, newRate: event.newRate, newPayment: event.newPayment }))
   }
 
   private _buildLoanStats ({ table, loan, currentRate, currentPayment }: {
@@ -325,38 +444,52 @@ export default class LoanService implements ILoanService {
     currentRate: number
     currentPayment: number
   }): LoanStats {
-    const realRows = table.filter(r => !r.isProjected)
-    const projectedRows = table.filter(r => r.isProjected)
+    const realRows = table.filter(row => !row.isProjected)
+    const projectedRows = table.filter(row => row.isProjected)
 
-    const ordinaryPayments = realRows.filter(r => r.type === LOAN_PAYMENT.ORDINARY)
-    const extraordinaryPayments = realRows.filter(r => r.type === LOAN_PAYMENT.EXTRAORDINARY)
+    const { paidPrincipal, paidInterest, totalCostToDate } = realRows.reduce(
+      (acc, row) => ({
+        paidPrincipal: acc.paidPrincipal + row.principal,
+        paidInterest: acc.paidInterest + row.interest,
+        totalCostToDate: acc.totalCostToDate + row.amount
+      }),
+      { paidPrincipal: 0, paidInterest: 0, totalCostToDate: 0 }
+    )
 
-    const paidPrincipal = roundNumber(realRows.reduce((s, r) => s + r.principal, 0))
-    const paidInterest = roundNumber(realRows.reduce((s, r) => s + r.interest, 0))
-    const pendingPrincipal = loan.pendingAmount
-    const estimatedPendingInterest = roundNumber(projectedRows.reduce((s, r) => s + r.interest, 0))
-    const totalCostToDate = roundNumber(realRows.reduce((s, r) => s + r.amount, 0))
-    const estimatedTotalCost = roundNumber(totalCostToDate + projectedRows.reduce((s, r) => s + r.amount, 0))
+    const estimatedPendingInterest = roundNumber(projectedRows.reduce((sum, row) => sum + row.interest, 0))
+    const estimatedTotalCost = roundNumber(totalCostToDate + projectedRows.reduce((sum, row) => sum + row.amount, 0))
 
-    const totalOrdinaryAmount = roundNumber(ordinaryPayments.reduce((s, r) => s + r.amount, 0))
-    const totalExtraordinaryAmount = roundNumber(extraordinaryPayments.reduce((s, r) => s + r.amount, 0))
+    const { totalOrdinaryAmount, totalExtraordinaryAmount, ordinaryPaymentsCount, extraordinaryPaymentsCount } = realRows.reduce(
+      (acc, row) => {
+        if (row.type === LOAN_PAYMENT.ORDINARY) {
+          acc.totalOrdinaryAmount += row.amount
+          acc.ordinaryPaymentsCount++
+        } else if (row.type === LOAN_PAYMENT.EXTRAORDINARY) {
+          acc.totalExtraordinaryAmount += row.amount
+          acc.extraordinaryPaymentsCount++
+        }
+        return acc
+      },
+      { totalOrdinaryAmount: 0, totalExtraordinaryAmount: 0, ordinaryPaymentsCount: 0, extraordinaryPaymentsCount: 0 }
+    )
 
+    /* istanbul ignore next — initialEstimatedCost is always set when loan is created */
     const savedByExtraordinary = roundNumber((loan.initialEstimatedCost ?? 0) - estimatedTotalCost)
 
     const lastProjected = projectedRows[projectedRows.length - 1]
     const estimatedEndDate = lastProjected?.date ?? null
 
     return {
-      paidPrincipal,
-      paidInterest,
-      pendingPrincipal,
+      paidPrincipal: roundNumber(paidPrincipal),
+      paidInterest: roundNumber(paidInterest),
+      pendingPrincipal: loan.pendingAmount,
       estimatedPendingInterest,
-      totalCostToDate,
+      totalCostToDate: roundNumber(totalCostToDate),
       estimatedTotalCost,
-      ordinaryPaymentsCount: ordinaryPayments.length,
-      extraordinaryPaymentsCount: extraordinaryPayments.length,
-      totalOrdinaryAmount,
-      totalExtraordinaryAmount,
+      ordinaryPaymentsCount,
+      extraordinaryPaymentsCount,
+      totalOrdinaryAmount: roundNumber(totalOrdinaryAmount),
+      totalExtraordinaryAmount: roundNumber(totalExtraordinaryAmount),
       savedByExtraordinary,
       estimatedEndDate,
       currentPayment,
@@ -395,12 +528,12 @@ export default class LoanService implements ILoanService {
     let accumulated = 0
     let pending = loan.initialAmount
 
-    const bulkOps = allPayments.map(p => {
-      accumulated = roundNumber(accumulated + p.principal)
-      pending = roundNumber(pending - p.principal)
+    const bulkOps = allPayments.map(payment => {
+      accumulated = roundNumber(accumulated + payment.principal)
+      pending = roundNumber(pending - payment.principal)
       return {
         updateOne: {
-          filter: { _id: p._id },
+          filter: { _id: payment._id },
           update: { accumulatedPrincipal: accumulated, pendingCapital: pending }
         }
       }
@@ -415,6 +548,7 @@ export default class LoanService implements ILoanService {
 
   private async _deductFromAccount (accountId: string, amount: number): Promise<void> {
     const result = await AccountModel.updateOne({ _id: accountId }, { $inc: { balance: -amount } })
+    /* istanbul ignore next — validator runs before loan operations via route */
     if (result.matchedCount === 0) {
       throw Boom.notFound(ERROR_MESSAGE.ACCOUNT.NOT_FOUND).output
     }

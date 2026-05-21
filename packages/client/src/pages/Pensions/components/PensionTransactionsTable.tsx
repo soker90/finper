@@ -1,33 +1,37 @@
-import { TableMaterial } from '@soker90/react-mui-table'
 import { EditOutlined } from '@ant-design/icons'
-
-import { MainCard } from 'components'
+import ScrollableTable, { Column, Action } from 'components/ScrollableTable'
 import { format } from 'utils'
 import { PensionTransaction } from 'types'
 
-const PensionTransactionsTable = ({ transactions, onEdit }: {
-  transactions: PensionTransaction[],
+const COLUMNS: Column<PensionTransaction>[] = [
+  { id: 'date', label: 'Fecha', render: (t) => format.date(t.date) },
+  { id: 'companyAmount', label: 'Empresa (€)', render: (t) => format.euro(t.companyAmount), align: 'right' },
+  { id: 'companyUnits', label: 'Empresa (uds)', field: 'companyUnits', align: 'right' },
+  { id: 'employeeAmount', label: 'Empleado (€)', render: (t) => format.euro(t.employeeAmount), align: 'right' },
+  { id: 'employeeUnits', label: 'Empleado (uds)', field: 'employeeUnits', align: 'right' },
+  { id: 'value', label: 'Valor ud.', render: (t) => format.euro(t.value), align: 'right' }
+]
+
+interface Props {
+  transactions: PensionTransaction[]
   onEdit: (transaction: PensionTransaction) => void
-}) => (
-  <MainCard sx={{ mt: 2 }} content={false}>
-    <TableMaterial
-      columns={[
-        { title: 'Fecha', render: ({ date }) => format.date(date) },
-        { title: 'Empresa (€)', render: ({ companyAmount }) => format.euro(companyAmount) },
-        { title: 'Empresa (uds)', field: 'companyUnits' },
-        { title: 'Empleado (€)', render: ({ employeeAmount }) => format.euro(employeeAmount) },
-        { title: 'Empleado (uds)', field: 'employeeUnits' },
-        { title: 'Valor ud.', render: ({ value }) => format.euro(value) }
-      ]}
-      data={transactions}
+}
+
+const PensionTransactionsTable = ({ transactions, onEdit }: Props) => {
+  const actions: Action<PensionTransaction>[] = [
+    { icon: EditOutlined, tooltip: 'Editar', onClick: onEdit }
+  ]
+
+  return (
+    <ScrollableTable
       title='Movimientos'
-      actions={[{
-        icon: EditOutlined,
-        tooltip: 'Editar',
-        onClick: onEdit
-      }]}
+      cardSx={{ mt: 2 }}
+      columns={COLUMNS}
+      data={transactions}
+      actions={actions}
+      keyExtractor={(t, i) => t._id ?? String(i)}
     />
-  </MainCard>
-)
+  )
+}
 
 export default PensionTransactionsTable

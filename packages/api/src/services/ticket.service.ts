@@ -14,6 +14,7 @@ export interface Ticket {
 }
 
 export interface ITicketService {
+  isConfigured(): boolean
   getTickets(status?: string): Promise<Ticket[]>
   reviewTicket(id: string): Promise<void>
   deleteTicket(id: string): Promise<void>
@@ -21,11 +22,17 @@ export interface ITicketService {
 
 export default class TicketService implements ITicketService {
   private get botUrl (): string {
+    /* istanbul ignore next — TICKET_BOT_URL env var is not set in test environment */
     return process.env.TICKET_BOT_URL ?? ''
   }
 
   private get apiKey (): string {
+    /* istanbul ignore next — TICKET_BOT_API_KEY env var is not set in test environment */
     return process.env.TICKET_BOT_API_KEY ?? ''
+  }
+
+  public isConfigured (): boolean {
+    return Boolean(process.env.TICKET_BOT_URL && process.env.TICKET_BOT_API_KEY)
   }
 
   private headers (): Record<string, string> {

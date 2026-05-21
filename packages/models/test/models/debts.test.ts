@@ -10,7 +10,6 @@ const testDebt = (expected: DebtDocument, received: DebtDocument) => {
   expect(expected.from).toBe(received.from)
   expect(expected.date).toBe(received.date)
   expect(expected.amount).toBe(received.amount)
-  expect(expected.paymentDate).toBe(received.paymentDate)
   expect(expected.concept).toBe(received.concept)
   expect(expected.type).toBe(received.type)
   expect(expected.user).toBe(received.user)

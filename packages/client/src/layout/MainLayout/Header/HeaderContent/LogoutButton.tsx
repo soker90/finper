@@ -31,12 +31,18 @@ const Profile = () => {
         aria-haspopup='true'
         onClick={handleClose}
       >
-        <Stack direction='row' spacing={2} alignItems='center' sx={{ p: 0.5 }}>
+        <Stack
+          direction='row'
+          spacing={2}
+          sx={{
+            alignItems: 'center',
+            p: 0.5
+          }}
+        >
           <Typography variant='subtitle1'>Salir</Typography>
           <LogoutOutlined />
         </Stack>
       </ButtonBase>
-
     </Box>
   )
 }

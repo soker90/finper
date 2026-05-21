@@ -13,7 +13,7 @@ interface HealthScoreSectionProps {
 }
 
 const HealthScoreSection = ({ stats }: HealthScoreSectionProps) => {
-  const { healthScore, pension } = stats
+  const { healthScore } = stats
 
   return (
     <>
@@ -41,7 +41,7 @@ const HealthScoreSection = ({ stats }: HealthScoreSectionProps) => {
       <Grow in timeout={1450}>
         <Grid size={{ xs: 12, md: 7 }}>
           <MainCard title='Consejos' sx={{ ...hoverCardSx, height: '100%' }}>
-            <HealthAdvice healthScore={healthScore} hasPension={pension !== null} />
+            <HealthAdvice insights={stats.insights} />
           </MainCard>
         </Grid>
       </Grow>

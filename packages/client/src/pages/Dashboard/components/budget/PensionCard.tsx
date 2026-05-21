@@ -19,8 +19,7 @@ const PensionCard = ({ pension, pensionReturnPct }: PensionCardProps) => {
   const theme = useTheme()
 
   const sparkline = (pension?.transactions ?? [])
-    .slice()
-    .sort((a, b) => a.date - b.date)
+    .toSorted((a, b) => a.date - b.date)
     .slice(-12)
     .map(t => ({
       date: new Date(t.date).toLocaleDateString('es-ES', { month: 'short', year: '2-digit' }),
@@ -36,21 +35,39 @@ const PensionCard = ({ pension, pensionReturnPct }: PensionCardProps) => {
       {pension
         ? (
           <Stack spacing={1.5}>
-            <Stack direction='row' justifyContent='space-between'>
+            <Stack
+              direction='row' sx={{
+                justifyContent: 'space-between'
+              }}
+            >
               <Typography variant='body1' color='textSecondary'>Valor total</Typography>
               <Typography variant='subtitle1'>{format.euro(pension.total)}</Typography>
             </Stack>
             <Divider />
-            <Stack direction='row' justifyContent='space-between'>
+            <Stack
+              direction='row' sx={{
+                justifyContent: 'space-between'
+              }}
+            >
               <Typography variant='body1' color='textSecondary'>Aporte empleado</Typography>
               <Typography variant='body1'>{format.euro(pension.employeeAmount)}</Typography>
             </Stack>
-            <Stack direction='row' justifyContent='space-between'>
+            <Stack
+              direction='row' sx={{
+                justifyContent: 'space-between'
+              }}
+            >
               <Typography variant='body1' color='textSecondary'>Aporte empresa</Typography>
               <Typography variant='body1'>{format.euro(pension.companyAmount)}</Typography>
             </Stack>
             <Divider />
-            <Stack direction='row' justifyContent='space-between' alignItems='center'>
+            <Stack
+              direction='row'
+              sx={{
+                justifyContent: 'space-between',
+                alignItems: 'center'
+              }}
+            >
               <Typography variant='body1' color='textSecondary'>Rentabilidad</Typography>
               <Chip
                 size='small'

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { Outlet } from 'react-router'
 import { useTheme } from '@mui/material/styles'
 import { Box, Toolbar, useMediaQuery } from '@mui/material'
@@ -15,14 +15,13 @@ const MainLayout = () => {
   const theme = useTheme()
   const matchDownLG = useMediaQuery(theme.breakpoints.down('xl'))
 
-  const [open, setOpen] = useState(false)
-  const handleDrawerToggle = () => {
-    setOpen(state => !state)
-  }
+  // User can explicitly toggle the drawer; resets to responsive default on breakpoint change.
+  const [userOverride, setUserOverride] = useState<boolean | null>(null)
+  const open = userOverride ?? !matchDownLG
 
-  useEffect(() => {
-    setOpen(!matchDownLG)
-  }, [matchDownLG])
+  const handleDrawerToggle = () => {
+    setUserOverride(prev => !(prev ?? !matchDownLG))
+  }
 
   return (
     <AuthGuard>

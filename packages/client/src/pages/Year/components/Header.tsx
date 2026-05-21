@@ -27,7 +27,11 @@ const Header = ({ year }: Props) => {
           >
             <LeftOutlined />
           </IconButton>
-          <Typography typography='h3'>{year} </Typography>
+          <Typography sx={{
+            typography: 'h3'
+          }}
+          >{year}
+          </Typography>
           <IconButton
             color='primary' aria-label='derecha' size='large' component={Link}
             to={getUrlYear(+year + 1)} disabled={!year} data-testid='right-arrow'

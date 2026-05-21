@@ -14,10 +14,16 @@ const CandidatesBanner = ({ candidates, onAssign, onDismiss }: Props) => {
 
   return (
     <MainCard data-testid='candidates-banner' contentSX={{ p: 2.25 }} sx={{ mb: 2 }}>
-      <Typography variant='body1' color='textSecondary' fontWeight={600} mb={1.5}>
+      <Typography
+        variant='body1'
+        color='textSecondary'
+        sx={{
+          fontWeight: 600,
+          mb: 1.5
+        }}
+      >
         Posibles pagos de suscripción detectados
       </Typography>
-
       <Stack spacing={1.5} divider={<Divider flexItem />}>
         {candidates.map((candidate) => (
           <CandidateRow

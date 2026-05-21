@@ -14,7 +14,6 @@ export const validateDebtEditParams = async ({
     from: Joi.string().required(),
     date: Joi.number(),
     amount: Joi.number().required(),
-    paymentDate: Joi.number(),
     concept: Joi.string(),
     type: Joi.string().valid(DEBT.TO, DEBT.FROM).required()
   })

@@ -39,6 +39,7 @@ const SubscriptionForm = ({ subscription, onClose, onSubmit }: Props) => {
 
   useEffect(() => {
     reset(defaultValues)
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- reset(defaultValues) on external prop change; defaultValues is rebuilt each render by design
   }, [reset, subscription, accounts, categories])
 
   const handleFormSubmit = handleSubmit(async (data) => {
@@ -77,6 +78,7 @@ const SubscriptionForm = ({ subscription, onClose, onSubmit }: Props) => {
         size={3}
         error={Boolean(errors.amount)}
         errorText='El importe debe ser mayor que 0'
+        inputProps={{ step: '0.01', min: '0.01' }}
         {...register('amount', { required: true, valueAsNumber: true, min: 0.01 })}
       />
 

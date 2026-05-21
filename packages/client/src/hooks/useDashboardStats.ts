@@ -1,7 +1,7 @@
 import useSWR from 'swr'
 import { DASHBOARD_STATS } from 'constants/api-paths'
 
-export interface MonthlyData {
+interface MonthlyData {
   month: number   // 1-indexed
   year: number
   income: number
@@ -20,6 +20,12 @@ export interface HealthScore {
   budgetAdherence: number
   cashRunway: number
   pensionReturn: number
+}
+
+export interface Insight {
+  type: 'warning' | 'info' | 'success' | 'critical'
+  title: string
+  message: string
 }
 
 export interface PensionTransaction {
@@ -45,7 +51,7 @@ export interface DashboardStats {
   netWorth: number
   totalDebts: number
   savingsRate: number
-  topExpenseCategories: Array<{ name: string; amount: number }>
+  topExpenseCategories: Array<{ name: string; amount: number; parentName?: string }>
   topStores: Array<{ name: string; amount: number }>
   monthlyTrend: {
     income: { current: number; previous: number }
@@ -64,6 +70,7 @@ export interface DashboardStats {
   pensionReturnPct: number
   budgetAdherencePct: number
   healthScore: HealthScore
+  insights: Insight[]
 }
 
 export const useDashboardStats = (): {

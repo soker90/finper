@@ -5,7 +5,7 @@ import extractUser from '../helpers/extract-user'
 import { RequestUser } from '../types'
 import { IDebtService } from '../services/debt.service'
 import { DebtDocument } from '@soker90/finper-models'
-import { validateDebtCreateParams, validateDebtEditParams, validateDebtExist } from '../validators/debt'
+import { validateDebtCreateParams, validateDebtEditParams, validateDebtExist, validateDebtPayParams } from '../validators/debt'
 
 type IDebtController = {
   loggerHandler: any,
@@ -81,6 +81,23 @@ export class DebtController {
       .then(this.debtService.deleteDebt.bind(this.debtService))
       .then(() => {
         res.status(204).send()
+      })
+      .catch((error) => {
+        next(error)
+      })
+  }
+
+  public async pay (req: Request, res: Response, next: NextFunction): Promise<void> {
+    Promise.resolve(req as RequestUser)
+      .tap(({ params }) => this.logger.logInfo(`/pay - debt: ${params?.id}`))
+      .then(validateDebtPayParams)
+      .then(this.debtService.payDebt.bind(this.debtService))
+      .then((response) => {
+        if (response === null) {
+          res.status(204).send()
+        } else {
+          res.send(response)
+        }
       })
       .catch((error) => {
         next(error)

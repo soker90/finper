@@ -1,4 +1,4 @@
-export interface BudgetItem {
+interface BudgetItem {
   amount: number,
   real: number,
   month: number,

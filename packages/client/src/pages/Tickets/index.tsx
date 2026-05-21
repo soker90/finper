@@ -21,21 +21,33 @@ type ModalState =
   | { type: 'delete'; data: Ticket }
 
 const Tickets = () => {
-  const { tickets, isLoading, error } = useTickets()
+  const { tickets, ticketsEnabled, isLoading, error } = useTickets()
   const [activeModal, setActiveModal] = useState<ModalState | null>(null)
   const closeModal = () => setActiveModal(null)
 
-  if (isLoading) return <Typography>Cargando tickets...</Typography>
+  if (isLoading) return <Typography>Cargando tickets…</Typography>
+
+  if (!ticketsEnabled) {
+    return (
+      <Alert severity='warning'>
+        El módulo de tickets no está configurado en este servidor.
+      </Alert>
+    )
+  }
+
   if (error) return <Alert severity='error'>Error al cargar tickets: {error.message}</Alert>
 
   return (
     <>
-      <Typography variant='h4' mb={2}>Tickets pendientes</Typography>
-
+      <Typography
+        variant='h4' sx={{
+          mb: 2
+        }}
+      >Tickets pendientes
+      </Typography>
       {tickets.length === 0 && (
         <Alert severity='info'>No hay tickets pendientes de revisión.</Alert>
       )}
-
       <Grid container spacing={2}>
         {tickets.map((ticket) => (
           <Grid key={ticket.id} size={{ xs: 12, sm: 6, md: 4 }}>
@@ -51,8 +63,18 @@ const Tickets = () => {
               )}
               <CardContent>
                 <Stack spacing={1}>
-                  <Stack direction='row' justifyContent='space-between' alignItems='center'>
-                    <Typography variant='body2' color='text.secondary'>
+                  <Stack
+                    direction='row'
+                    sx={{
+                      justifyContent: 'space-between',
+                      alignItems: 'center'
+                    }}
+                  >
+                    <Typography
+                      variant='body2' sx={{
+                        color: 'text.secondary'
+                      }}
+                    >
                       {format.date(ticket.created_at) ?? '—'}
                     </Typography>
                     <Chip
@@ -64,32 +86,74 @@ const Tickets = () => {
 
                   <Typography variant='h6'>{ticket.store ?? 'Comercio desconocido'}</Typography>
 
-                  <Stack direction='row' justifyContent='space-between'>
-                    <Typography variant='body2' color='text.secondary'>Fecha ticket:</Typography>
+                  <Stack
+                    direction='row' sx={{
+                      justifyContent: 'space-between'
+                    }}
+                  >
+                    <Typography
+                      variant='body2' sx={{
+                        color: 'text.secondary'
+                      }}
+                    >Fecha ticket:
+                    </Typography>
                     <Typography variant='body2'>{ticket.date ? format.date(ticket.date) : '—'}</Typography>
                   </Stack>
 
-                  <Stack direction='row' justifyContent='space-between'>
-                    <Typography variant='body2' color='text.secondary'>Total:</Typography>
-                    <Typography variant='body2' fontWeight='bold'>
+                  <Stack
+                    direction='row' sx={{
+                      justifyContent: 'space-between'
+                    }}
+                  >
+                    <Typography
+                      variant='body2' sx={{
+                        color: 'text.secondary'
+                      }}
+                    >Total:
+                    </Typography>
+                    <Typography
+                      variant='body2' sx={{
+                        fontWeight: 'bold'
+                      }}
+                    >
                       {ticket.amount != null ? format.euro(ticket.amount) : '—'}
                     </Typography>
                   </Stack>
 
                   {ticket.payment_method && (
-                    <Stack direction='row' justifyContent='space-between'>
-                      <Typography variant='body2' color='text.secondary'>Pago:</Typography>
+                    <Stack
+                      direction='row' sx={{
+                        justifyContent: 'space-between'
+                      }}
+                    >
+                      <Typography
+                        variant='body2' sx={{
+                          color: 'text.secondary'
+                        }}
+                      >Pago:
+                      </Typography>
                       <Typography variant='body2'>{ticket.payment_method}</Typography>
                     </Stack>
                   )}
 
                   {!ticket.image_url && ticket.raw_text && (
-                    <Typography variant='body2' color='text.secondary' sx={{ fontStyle: 'italic', wordBreak: 'break-word' }}>
+                    <Typography
+                      variant='body2'
+                      sx={{
+                        color: 'text.secondary',
+                        fontStyle: 'italic',
+                        wordBreak: 'break-word'
+                      }}
+                    >
                       "{ticket.raw_text}"
                     </Typography>
                   )}
 
-                  <Stack direction='row' spacing={1} pt={1}>
+                  <Stack
+                    direction='row' spacing={1} sx={{
+                      pt: 1
+                    }}
+                  >
                     <Button
                       variant='contained'
                       fullWidth
@@ -113,14 +177,12 @@ const Tickets = () => {
           </Grid>
         ))}
       </Grid>
-
       {activeModal?.type === 'review' && (
         <ReviewModal
           ticket={activeModal.data}
           onClose={closeModal}
         />
       )}
-
       {activeModal?.type === 'delete' && (
         <DeleteModal
           ticket={activeModal.data}

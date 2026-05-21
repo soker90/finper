@@ -1,0 +1,14 @@
+.logoName {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.goalIcon {
+  flex-shrink: 0;
+}
+
+.fundButton {
+  white-space: nowrap;
+  flex-shrink: 0;
+}

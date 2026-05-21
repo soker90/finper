@@ -2,12 +2,14 @@ import globals from "globals";
 import neostandard from "neostandard";
 import importPlugin from "eslint-plugin-import";
 import reactPlugin from "eslint-plugin-react";
+import reactHooksPlugin from "eslint-plugin-react-hooks";
 import tsParser from "@typescript-eslint/parser";
 import tseslint from "@typescript-eslint/eslint-plugin";
 
 export default [
   importPlugin.flatConfigs.recommended,
   ...neostandard(),
+  reactHooksPlugin.configs.flat['recommended-latest'],
   {
     files: ["**/*.{ts,tsx}"],
     languageOptions: {
@@ -32,6 +34,10 @@ export default [
     },
     rules: {
       "react/react-in-jsx-scope": "off",
+      // react-hooks/incompatible-library stays as warn: false positives from
+      // react-hook-form watch() and @tanstack/react-virtual useVirtualizer.
+      // All other React Compiler diagnostic rules use the preset default (error).
+      "react-hooks/incompatible-library": "warn",
     },
     settings: {
       react: {

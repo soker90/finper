@@ -430,6 +430,25 @@ Pasar `amount` negativo suma dinero (usado al revertir pagos). `roundNumber` apl
 
 ---
 
+### 4.12 `simulatePayoff(loanId, lumpSum, user)`
+
+Simula el impacto de hacer un pago puntual de capital sin modificar el estado real del préstamo. Devuelve dos escenarios comparativos.
+
+**Pasos:**
+1. Obtener préstamo con tasas y eventos vigentes (`_getLoanWithRates`).
+2. Buscar último pago ordinario para anclar la proyección al calendario real de pagos.
+3. Proyectar tabla de amortización base (sin pago puntual) desde `pendingAmount` actual.
+4. **Opción A — Reducir tiempo**: proyectar tabla con `newPending = pendingAmount − lumpSum` y la misma cuota.
+5. **Opción B — Reducir cuota**: calcular nueva cuota con `calcMonthlyPayment(newPending, rate, originalMonthsLeft)` y proyectar tabla.
+6. Devolver `{ lumpSum, originalMonthsLeft, originalEndDate, optionA, optionB }`.
+
+**Consideraciones:**
+- Los eventos futuros se aplican en ambos escenarios para una comparación justa.
+- No modifica el préstamo ni crea pagos.
+- La proyección se ancla al último pago ordinario (no a `Date.now()`) para que la fecha fin coincida con el calendario real de pagos.
+
+---
+
 ## 5. Controlador (`loan.controller.ts`)
 
 Los handlers usan cadenas `Promise.then().tap()`. Los errores se propagan a `next(err)` y son capturados por el middleware `handleError`.
@@ -446,6 +465,7 @@ Los handlers usan cadenas `Promise.then().tap()`. Los errores se propagan a `nex
 | `addEvent` | `validateLoanExist`, `validateLoanEventParams` | `addEvent` | 201 |
 | `deletePayment` | `validateLoanExist` | `deletePayment` | 204 |
 | `editPayment` | `validateLoanExist`, `validateLoanEditPaymentParams` | `editPayment` | 200 |
+| `simulatePayoff` | `validateLoanExist`, `validateLoanSimulateParams` | `simulatePayoff` | 200 |
 
 ---
 
@@ -463,6 +483,7 @@ Base path: `/api/loans`. Todas las rutas requieren autenticación JWT (`authMidd
 | `POST` | `/:id/pay` | Registrar cuota ordinaria |
 | `POST` | `/:id/amortize` | Registrar amortización anticipada |
 | `POST` | `/:id/events` | Añadir evento de cambio de condiciones |
+| `POST` | `/:id/simulate-payoff` | Simular impacto de pago extra mensual |
 | `DELETE` | `/:id/payments/:paymentId` | Eliminar un pago |
 | `PUT` | `/:id/payments/:paymentId` | Editar un pago |
 
@@ -553,6 +574,16 @@ Rechaza con 422 si solo vienen `user`/`paymentId` sin ningún campo editable.
 
 ---
 
+### 7.8 `validateLoanSimulateParams`
+
+Para `POST /:id/simulate-payoff`:
+
+| Campo | Regla |
+|---|---|
+| `lumpSum` | number, positive, entero, **requerido** |
+
+---
+
 ## 8. Decisiones arquitectónicas
 
 ### 8.1 Sistema de amortización francesa
@@ -598,3 +629,19 @@ Los pagos (`payOrdinary`, `payExtraordinary`) con `addMovement: true` (comportam
 2. Una transacción de gasto vinculada a `loan.category`.
 
 Al eliminar o editar un pago, estas operaciones se revierten/actualizan automáticamente.
+
+### 8.7 Simulador de amortización
+
+El endpoint `POST /:id/simulate-payoff` permite al usuario visualizar el impacto de hacer un pago puntual de capital sin comprometer el estado real del préstamo. Devuelve dos escenarios comparativos.
+
+**Flujo:**
+1. Lee los datos actuales del préstamo (capital pendiente, tipo vigente, cuota vigente, eventos).
+2. Ancla la proyección al último pago ordinario para que la fecha fin coincida con el calendario real de pagos.
+3. Proyecta tabla base (sin pago puntual) y calcula `originalMonthsLeft` y `originalEndDate`.
+4. **Opción A — Reducir tiempo**: proyecta con `newPending = pendingAmount − lumpSum` y la misma cuota.
+5. **Opción B — Reducir cuota**: recalcula la cuota con `calcMonthlyPayment(newPending, rate, originalMonthsLeft)` y proyecta con esa cuota.
+
+**Consideraciones:**
+- Los eventos futuros (`ILoanEvent`) se aplican en ambos escenarios para que la comparación sea justa.
+- El cálculo es puramente prospectivo: no modifica el préstamo ni sus pagos.
+- La proyección se ancla al último pago ordinario (no a `Date.now()`) para alinear las fechas con el calendario real del préstamo.

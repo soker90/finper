@@ -10,8 +10,21 @@ type Props = {
 }
 
 const SubscriptionCardHeader = ({ subscription, onEdit, onDelete, onSearchPayments }: Props) => (
-  <Box display='flex' justifyContent='space-between' alignItems='center'>
-    <Stack direction='row' spacing={1} alignItems='center' minWidth={0}>
+  <Box
+    sx={{
+      display: 'flex',
+      justifyContent: 'space-between',
+      alignItems: 'center'
+    }}
+  >
+    <Stack
+      direction='row'
+      spacing={1}
+      sx={{
+        alignItems: 'center',
+        minWidth: 0
+      }}
+    >
       <Avatar
         src={subscription.logoUrl}
         alt={subscription.name}
