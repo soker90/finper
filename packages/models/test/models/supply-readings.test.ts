@@ -1,7 +1,8 @@
 import { SupplyReadingModel, SupplyReadingDocument, mongoose } from '../../src'
 import createSupplyReading from '../helpers/create-supply-reading'
 
-const testDatabase = require('../test-db')(mongoose)
+import createTestDatabase from '../test-db.js'
+const testDatabase = createTestDatabase(mongoose)
 
 const testSupplyReading = (expected: SupplyReadingDocument, received: SupplyReadingDocument) => {
   expect(expected.supplyId.toString()).toBe(received.supplyId.toString())

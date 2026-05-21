@@ -3,7 +3,8 @@ import {
 } from '../../src'
 import createBudget from '../helpers/create-budget'
 
-const testDatabase = require('../test-db')(mongoose)
+import createTestDatabase from '../test-db.js'
+const testDatabase = createTestDatabase(mongoose)
 
 const testBudget = (expected: BudgetDocument, received: BudgetDocument) => {
   expect(expected.year).toBe(received.year)

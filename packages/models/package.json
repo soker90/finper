@@ -6,7 +6,7 @@
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsc",
-    "test": "jest --maxWorkers=50% --coverage",
+    "test": "NODE_OPTIONS=--experimental-vm-modules jest --maxWorkers=50% --coverage",
     "lint": "eslint . --ext .ts",
     "lint:fix": "eslint . --fix --ext .ts"
   },
@@ -32,7 +32,7 @@
   },
   "homepage": "https://github.com/soker90/finpers#readme",
   "devDependencies": {
-    "@faker-js/faker": "~9.9.0",
+    "@faker-js/faker": "~10.4.0",
     "@shelf/jest-mongodb": "^6.0.2",
     "@tsconfig/node22": "^22.0.5",
     "@types/bcrypt": "^6.0.0",

@@ -5,7 +5,8 @@ import {
 import createAccount from '../helpers/create-account'
 import { faker } from '@faker-js/faker'
 
-const testDatabase = require('../test-db')(mongoose)
+import createTestDatabase from '../test-db.js'
+const testDatabase = createTestDatabase(mongoose)
 
 describe('Account', () => {
   beforeAll(() => testDatabase.connect())

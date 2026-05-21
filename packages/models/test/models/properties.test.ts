@@ -1,7 +1,8 @@
 import { PropertyModel, PropertyDocument, mongoose } from '../../src'
 import createProperty from '../helpers/create-property'
 
-const testDatabase = require('../test-db')(mongoose)
+import createTestDatabase from '../test-db.js'
+const testDatabase = createTestDatabase(mongoose)
 
 const testProperty = (expected: PropertyDocument, received: PropertyDocument) => {
   expect(expected.name).toBe(received.name)

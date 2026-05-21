@@ -4,7 +4,8 @@ import {
 } from '../../src'
 import createTransaction from '../helpers/create-transaction'
 
-const testDatabase = require('../test-db')(mongoose)
+import createTestDatabase from '../test-db.js'
+const testDatabase = createTestDatabase(mongoose)
 
 const testTransactions = (expected: TransactionDocument, received: TransactionDocument) => {
   expect(expected.date).toBe(received.date)
