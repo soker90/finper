@@ -2,7 +2,8 @@
 module.exports = {
   preset: '@shelf/jest-mongodb',
   transform: {
-    '^.+\\.ts?$': ['ts-jest', { diagnostics: false }]
+    '^.+\\.ts?$': ['ts-jest', { diagnostics: false }],
+    '^.+\\.js$': ['ts-jest', { diagnostics: false }]
   },
   transformIgnorePatterns: [
     '/node_modules/(?!(@faker-js/faker)/)'
