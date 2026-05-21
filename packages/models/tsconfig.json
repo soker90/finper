@@ -4,7 +4,7 @@
     "rootDir": "./src",
     "outDir": "./dist",
     "lib": ["es2023"],
-    "module": "commonjs",
+    "module": "nodenext",
     "target": "es2021",
     "strict": true,
     "allowJs": true,
@@ -15,7 +15,7 @@
     "sourceMap": true,
     "strictNullChecks": false,
     "declaration": true,
-    "moduleResolution": "node"
+    "moduleResolution": "nodenext"
     },
   "include": [
     "src/**/*"

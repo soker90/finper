@@ -2,8 +2,6 @@
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "rootDir": ".",
-    "module": "node16",
-    "moduleResolution": "node16",
     "types": ["jest", "node"]
   },
   "include": [
