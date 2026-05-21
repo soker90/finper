@@ -15,7 +15,8 @@
     "sourceMap": true,
     "strictNullChecks": false,
     "declaration": true,
-    "moduleResolution": "node"
+    "moduleResolution": "node",
+    "ignoreDeprecations": "6.0"
     },
   "include": [
     "src/**/*"
