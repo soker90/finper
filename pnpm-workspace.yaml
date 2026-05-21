@@ -1,5 +1,6 @@
 packages:
   - packages/api
+  - packages/bot
   - packages/client
   - packages/models
 
