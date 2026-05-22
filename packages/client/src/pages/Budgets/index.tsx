@@ -1,8 +1,11 @@
 import { useParams } from 'react-router'
 import { Grid } from '@mui/material'
-import { useBudgets, useBudgetDataCard } from './hooks'
+import { useBudgets } from './hooks/useBudgets'
+import { useBudgetDataCard } from './hooks/useBudgetDataCard'
 
-import { BudgetCard, BudgetTable, BudgetRuleDashboard } from './components'
+import BudgetCard from './components/BudgetCard'
+import BudgetTable from './components/BudgetTable'
+import BudgetRuleDashboard from './components/BudgetRuleDashboard'
 import Header from './components/Header'
 
 const Budgets = () => {
