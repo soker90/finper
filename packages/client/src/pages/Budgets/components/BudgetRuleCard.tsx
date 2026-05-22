@@ -15,6 +15,62 @@ export interface BudgetRuleCardProps {
   isSavings?: boolean
 }
 
+interface GetRuleColorParams {
+  isSavings: boolean
+  percentageReal: number
+  target: number
+  theme: any
+}
+
+const getRuleColor = ({
+  isSavings,
+  percentageReal,
+  target,
+  theme
+}: GetRuleColorParams): string => {
+  if (isSavings) {
+    if (percentageReal >= 20) return theme.palette.success.main
+    if (percentageReal >= 10) return theme.palette.warning.main
+    return theme.palette.error.main
+  }
+  if (target === 50) {
+    if (percentageReal <= 50) return theme.palette.success.main
+    if (percentageReal <= 55) return theme.palette.warning.main
+    return theme.palette.error.main
+  }
+  // target === 30 (Wants)
+  if (percentageReal <= 30) return theme.palette.success.main
+  return theme.palette.error.main
+}
+
+interface GetStatusIconParams {
+  isSavings: boolean
+  percentageReal: number
+  target: number
+  theme: any
+}
+
+const getStatusIcon = ({
+  isSavings,
+  percentageReal,
+  target,
+  theme
+}: GetStatusIconParams): React.ReactNode => {
+  if (isSavings) {
+    if (percentageReal >= target) {
+      return <CheckCircleOutlined style={{ color: theme.palette.success.main, fontSize: '1.25rem' }} />
+    }
+    return <WarningOutlined style={{ color: theme.palette.error.main, fontSize: '1.25rem' }} />
+  }
+  if (percentageReal <= target) {
+    return <CheckCircleOutlined style={{ color: theme.palette.success.main, fontSize: '1.25rem' }} />
+  }
+  if (percentageReal <= target + 5) {
+    return <WarningOutlined style={{ color: theme.palette.warning.main, fontSize: '1.25rem' }} />
+  }
+  return <WarningOutlined style={{ color: theme.palette.error.main, fontSize: '1.25rem' }} />
+}
+
 const BudgetRuleCard = ({
   title,
   subtitle,
@@ -28,41 +84,19 @@ const BudgetRuleCard = ({
   const theme = useTheme()
   const progressMultiplier = 100 / target
 
-  // Color logic according to target limits
-  const getRuleColor = () => {
-    if (isSavings) {
-      if (percentageReal >= 20) return theme.palette.success.main
-      if (percentageReal >= 10) return theme.palette.warning.main
-      return theme.palette.error.main
-    }
-    if (target === 50) {
-      if (percentageReal <= 50) return theme.palette.success.main
-      if (percentageReal <= 55) return theme.palette.warning.main
-      return theme.palette.error.main
-    }
-    // target === 30 (Wants)
-    if (percentageReal <= 30) return theme.palette.success.main
-    return theme.palette.error.main
-  }
+  const ruleColor = getRuleColor({
+    isSavings,
+    percentageReal,
+    target,
+    theme
+  })
 
-  const ruleColor = getRuleColor()
-
-  // Status icon logic
-  const getStatusIcon = () => {
-    if (isSavings) {
-      if (percentageReal >= target) {
-        return <CheckCircleOutlined style={{ color: theme.palette.success.main, fontSize: '1.25rem' }} />
-      }
-      return <WarningOutlined style={{ color: theme.palette.error.main, fontSize: '1.25rem' }} />
-    }
-    if (percentageReal <= target) {
-      return <CheckCircleOutlined style={{ color: theme.palette.success.main, fontSize: '1.25rem' }} />
-    }
-    if (percentageReal <= target + 5) {
-      return <WarningOutlined style={{ color: theme.palette.warning.main, fontSize: '1.25rem' }} />
-    }
-    return <WarningOutlined style={{ color: theme.palette.error.main, fontSize: '1.25rem' }} />
-  }
+  const statusIcon = getStatusIcon({
+    isSavings,
+    percentageReal,
+    target,
+    theme
+  })
 
   return (
     <Grid size={{ xs: 12, md: 4 }}>
@@ -77,7 +111,7 @@ const BudgetRuleCard = ({
                 {subtitle}
               </Typography>
             </Stack>
-            {getStatusIcon()}
+            {statusIcon}
           </Stack>
 
           <Box>
