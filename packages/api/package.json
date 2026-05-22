@@ -11,8 +11,8 @@
     "serve": "node dist/server.js",
     "build-ts": "tsc",
     "test": "NODE_ENV=test jest --maxWorkers=50% --silent",
-    "lint": "eslint . --ext .ts",
-    "lint:fix": "eslint . --fix --ext .ts",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
     "seed-user": "ts-node src/scripts/seed-user.ts"
   },
   "repository": {
@@ -81,7 +81,7 @@
     "@types/uuid": "11.0.0",
     "@typescript-eslint/eslint-plugin": "8.59.3",
     "@typescript-eslint/parser": "8.59.3",
-    "eslint": "9.39.2",
+    "eslint": "10.3.0",
     "eslint-import-resolver-typescript": "4.4.4",
     "eslint-plugin-import": "2.32.0",
     "eslint-plugin-jest": "29.15.2",
