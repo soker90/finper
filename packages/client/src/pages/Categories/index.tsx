@@ -4,7 +4,7 @@ import { CategoryItem } from './components'
 import { PlusOutlined } from '@ant-design/icons'
 import { ListContainer } from './components/ListContainer'
 import { HeaderButtons, LoadingList } from 'components'
-import { TRANSACTION } from 'types/transaction'
+import { TRANSACTION } from 'types'
 
 const Accounts = () => {
   const { categories, isLoading } = useCategories()

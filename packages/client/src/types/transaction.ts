@@ -1,10 +1,4 @@
-export const TRANSACTION = {
-  Expense: 'expense',
-  Income: 'income',
-  NotComputable: 'not_computable',
-} as const
-
-export type TransactionType = typeof TRANSACTION[keyof typeof TRANSACTION]
+import type { TransactionType } from '@soker90/finper-types'
 
 export interface Transaction {
   _id?: string,

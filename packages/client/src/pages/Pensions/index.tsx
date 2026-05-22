@@ -8,7 +8,7 @@ import { PensionTransactionsTable, PensionStatCard } from './components'
 import { STATS } from './constants'
 import { usePensions } from './hooks'
 import TransactionModal from './components/TransactionModal'
-import { PensionTransaction } from 'types/pension'
+import { PensionTransaction } from 'types'
 
 const Pension = () => {
   const { pension } = usePensions()

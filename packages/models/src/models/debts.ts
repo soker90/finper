@@ -1,11 +1,8 @@
 import { Schema, model, HydratedDocument } from 'mongoose'
+import { DEBT, type DebtType } from '@soker90/finper-types'
 
-export const DEBT = {
-  FROM: 'from',
-  TO: 'to',
-} as const
-
-export type DebtType = typeof DEBT[keyof typeof DEBT]
+export { DEBT }
+export type { DebtType }
 
 export interface IDebt {
   from: string

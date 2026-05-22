@@ -1,4 +1,5 @@
-import { BudgetModel, TransactionModel, TRANSACTION } from '@soker90/finper-models'
+import { TRANSACTION } from '@soker90/finper-types'
+import { BudgetModel, TransactionModel } from '@soker90/finper-models'
 
 const TIMEZONE = 'Europe/Madrid'
 

@@ -1,13 +1,8 @@
 import { Schema, model, HydratedDocument, Types } from 'mongoose'
+import { SUPPLY_TYPE, type SupplyType } from '@soker90/finper-types'
 
-export const SUPPLY_TYPE = {
-  ELECTRICITY: 'electricity',
-  WATER: 'water',
-  GAS: 'gas',
-  OTHER: 'other'
-} as const
-
-export type SupplyType = typeof SUPPLY_TYPE[keyof typeof SUPPLY_TYPE]
+export { SUPPLY_TYPE }
+export type { SupplyType }
 
 export interface ISupply {
   name?: string

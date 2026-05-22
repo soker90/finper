@@ -1,4 +1,4 @@
-import { Budget } from 'types/budget'
+import { Budget } from 'types'
 
 export const isSameDate = (year?: string, month?: string): boolean => {
   const now = new Date()

@@ -1,6 +1,7 @@
 import Joi from 'joi'
 import Boom from '@hapi/boom'
-import { IStock, STOCK_TYPE } from '@soker90/finper-models'
+import { STOCK_TYPE } from '@soker90/finper-types'
+import { IStock } from '@soker90/finper-models'
 
 export const validateStockCreateParams = async (body: Omit<IStock, 'user'>) => {
   const schema = Joi.object({

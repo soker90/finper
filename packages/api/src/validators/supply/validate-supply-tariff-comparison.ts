@@ -1,5 +1,6 @@
 import Boom from '@hapi/boom'
-import { SupplyModel, SUPPLY_TYPE } from '@soker90/finper-models'
+import { SUPPLY_TYPE } from '@soker90/finper-types'
+import { SupplyModel } from '@soker90/finper-models'
 import { ERROR_MESSAGE } from '../../i18n'
 
 export const validateSupplyForTariffComparison = async ({ id, user }: { id: string, user: string }) => {

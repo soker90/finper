@@ -1,4 +1,5 @@
-import { ILoanPayment, LoanPaymentType, LOAN_PAYMENT, Types } from '@soker90/finper-models'
+import { LOAN_PAYMENT, type LoanPaymentType } from '@soker90/finper-types'
+import { ILoanPayment, Types } from '@soker90/finper-models'
 import { roundNumber } from '../../utils/roundNumber'
 
 /**

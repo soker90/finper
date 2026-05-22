@@ -5,7 +5,7 @@ import { Category } from 'types'
 import { ItemContent } from 'components'
 
 import CategorytEdit from '../CategorytEdit'
-import { TRANSACTION } from 'types/transaction'
+import { TRANSACTION } from 'types'
 import styles from './styles.module.css'
 
 const CATEGORY_TYPE = {

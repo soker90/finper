@@ -1,0 +1,26 @@
+{
+  "name": "@soker90/finper-types",
+  "version": "1.0.0",
+  "description": "Shared TypeScript types for finper",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "lint": "eslint . --ext .ts",
+    "lint:fix": "eslint . --fix --ext .ts"
+  },
+  "files": [
+    "/dist"
+  ],
+  "license": "GPL-3.0-or-later",
+  "devDependencies": {
+    "@tsconfig/node22": "22.0.5",
+    "@typescript-eslint/eslint-plugin": "8.59.3",
+    "@typescript-eslint/parser": "8.59.3",
+    "eslint": "9.39.2",
+    "globals": "17.6.0",
+    "neostandard": "0.13.0",
+    "typescript": "5.9.3",
+    "typescript-eslint": "8.59.3"
+  }
+}

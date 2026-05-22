@@ -1,6 +1,6 @@
 import Joi from 'joi'
 import Boom from '@hapi/boom'
-import { GOAL_COLORS, GOAL_ICONS } from '@soker90/finper-models'
+import { GOAL_COLORS, GOAL_ICONS } from '@soker90/finper-types'
 import { validateGoalExist } from './validate-goal-exist'
 
 export const validateGoalEditParams = async ({

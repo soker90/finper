@@ -1,4 +1,5 @@
-import { TransactionModel, TRANSACTION } from '@soker90/finper-models'
+import { TRANSACTION } from '@soker90/finper-types'
+import { TransactionModel } from '@soker90/finper-models'
 import { TagSummary, TagHistoric, TagDetail, TagYearSummary } from '../types/stats.types'
 import { roundNumber } from '../utils/roundNumber'
 

@@ -1,4 +1,4 @@
-import { TRANSACTION } from 'types/transaction'
+import { TRANSACTION } from 'types'
 
 const TYPES_TRANSACTIONS = {
   [TRANSACTION.Income]: 'Ingreso',

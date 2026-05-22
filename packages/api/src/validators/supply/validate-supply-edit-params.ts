@@ -3,7 +3,7 @@ import Boom from '@hapi/boom'
 import { RequestUser } from '../../types'
 import { validateSupplyExist } from './validate-supply-exist'
 import { validatePropertyExist } from '../property'
-import { SUPPLY_TYPE } from '@soker90/finper-models'
+import { SUPPLY_TYPE } from '@soker90/finper-types'
 
 export const validateSupplyEditParams = async (data: RequestUser) => {
   /* istanbul ignore else — params.id is always present when editing via route (URL param) */

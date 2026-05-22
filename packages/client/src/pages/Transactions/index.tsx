@@ -5,7 +5,7 @@ import { TransactionItem } from './components'
 import { ListContainer } from './components/ListContainer'
 import { HeaderButtons } from 'components'
 import { TransactionsPage } from './components/TransactionsPage'
-import { TRANSACTION } from 'types/transaction'
+import { TRANSACTION } from 'types'
 import { useFilters } from './hooks'
 import TransacionsFilter from './components/TransacionsFilter'
 

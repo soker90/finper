@@ -1,11 +1,8 @@
 import { Schema, model, HydratedDocument, Types } from 'mongoose'
+import { LOAN_PAYMENT, type LoanPaymentType } from '@soker90/finper-types'
 
-export const LOAN_PAYMENT = {
-  ORDINARY: 'ordinary',
-  EXTRAORDINARY: 'extraordinary',
-} as const
-
-export type LoanPaymentType = typeof LOAN_PAYMENT[keyof typeof LOAN_PAYMENT]
+export { LOAN_PAYMENT }
+export type { LoanPaymentType }
 
 export interface ILoanPayment {
   loan: Types.ObjectId

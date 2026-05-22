@@ -1,4 +1,4 @@
-import { TRANSACTION } from 'types/transaction'
+import { TRANSACTION } from 'types'
 
 export const AMOUNT_COLORS = {
   [TRANSACTION.Income]: 'success.main',

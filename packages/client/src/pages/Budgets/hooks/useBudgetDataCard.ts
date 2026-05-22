@@ -1,4 +1,4 @@
-import { Budget } from 'types/budget'
+import { Budget } from 'types'
 
 interface TotalReturn {
   total: number,

@@ -2,7 +2,7 @@ import { TableBody, TableCell, TableRow, useTheme } from '@mui/material'
 import TableHeaderMonths from './TableHeaderMonths'
 import { ScrollableTable } from 'components'
 import { format } from 'utils'
-import { Budget } from 'types/budget'
+import { Budget } from 'types'
 import { Theme } from '@emotion/react'
 
 interface Props {

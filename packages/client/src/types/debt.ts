@@ -1,9 +1,4 @@
-export const DEBT = {
-  FROM: 'from',
-  TO: 'to',
-} as const
-
-type DebtType = typeof DEBT[keyof typeof DEBT]
+import type { DebtType } from '@soker90/finper-types'
 
 export interface Debt {
   _id?: string;
@@ -12,5 +7,4 @@ export interface Debt {
   amount: number,
   concept: string,
   type: DebtType,
-  // user: string,
 }
