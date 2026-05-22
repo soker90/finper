@@ -26,14 +26,14 @@ export const transferAccountMoney = (params: { sourceId: string, destinationId: 
   return axios.post(`${ACCOUNTS}/transfer`, params).then(() => ({})).catch((error: any) => ({ error: extractError(error) }))
 }
 
-export const editCategory = (id: string, params: { name: string, type: string }): Promise<{
+export const editCategory = (id: string, params: { name: string, type: string, parent?: string, budgetRuleClass?: string }): Promise<{
   data?: Category,
   error?: string | undefined
 }> => {
   return axios.patch(`${CATEGORIES}/${id}`, params).then((data: any) => ({ data: data as Category })).catch((error: any) => ({ error: extractError(error) }))
 }
 
-export const addCategory = (params: { name?: string, type: string, balance?: number }): Promise<{
+export const addCategory = (params: { name?: string, type: string, parent?: string, budgetRuleClass?: string, balance?: number }): Promise<{
   data?: Category,
   error?: string | undefined
 }> => {

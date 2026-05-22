@@ -2,12 +2,12 @@ import { useParams } from 'react-router'
 import { Grid } from '@mui/material'
 import { useBudgets, useBudgetDataCard } from './hooks'
 
-import { BudgetCard, BudgetTable } from './components'
+import { BudgetCard, BudgetTable, BudgetRuleDashboard } from './components'
 import Header from './components/Header'
 
 const Budgets = () => {
   const { year, month } = useParams()
-  const { expenses, incomes, totalsIncomes, totalsExpenses } = useBudgets({ year, month })
+  const { expenses, incomes, totalsIncomes, totalsExpenses, rule503020 } = useBudgets({ year, month })
   const { expensesTotal, incomesTotal, balancePercentage } = useBudgetDataCard({ totalsIncomes, totalsExpenses })
 
   return (
@@ -39,6 +39,7 @@ const Budgets = () => {
 
         {year &&
           <>
+            <BudgetRuleDashboard data={rule503020} />
             <BudgetTable budgets={expenses} title='Gastos' year={year} month={month as string} />
             <BudgetTable budgets={incomes} title='Ingresos' year={year} month={month as string} />
           </>}

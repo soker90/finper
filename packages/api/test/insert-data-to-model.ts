@@ -65,7 +65,8 @@ export const insertCategory = async (params: Record<string, any> = {}): Promise<
     name: params.name ?? faker.commerce.department(),
     type: params.type ?? (Math.random() > 0.5 ? TRANSACTION.Expense : TRANSACTION.Income),
     ...(parent && { parent }),
-    user
+    user,
+    ...(params.budgetRuleClass && { budgetRuleClass: params.budgetRuleClass })
   })
 
   return category.populate('parent') as unknown as ICategory & { _id: string }
