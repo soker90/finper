@@ -5,6 +5,7 @@ interface CategoriesWithBudgets {
   _id: mongoose.ObjectId,
   name: string,
   type: string,
+  budgetRuleClass: string,
   budgets: {
     month: number,
     amount: number,
@@ -45,6 +46,14 @@ export default class BudgetService implements IBudgetService {
       },
       {
         $lookup: {
+          from: 'categories',
+          localField: 'parent',
+          foreignField: '_id',
+          as: 'parentDoc'
+        }
+      },
+      {
+        $lookup: {
           from: 'budgets',
           let: { categoryId: '$_id' },
           pipeline: [
@@ -69,6 +78,25 @@ export default class BudgetService implements IBudgetService {
           name: 1,
           type: 1,
           _id: 1,
+          budgetRuleClass: {
+            $let: {
+              vars: {
+                parentRule: { $arrayElemAt: ['$parentDoc.budgetRuleClass', 0] }
+              },
+              in: {
+                $cond: {
+                  if: {
+                    $and: [
+                      { $ne: ['$budgetRuleClass', 'none'] },
+                      { $ne: ['$budgetRuleClass', null] }
+                    ]
+                  },
+                  then: '$budgetRuleClass',
+                  else: { $ifNull: ['$$parentRule', 'none'] }
+                }
+              }
+            }
+          },
           budgets: {
             $map: {
               input: '$budgetsList',
@@ -141,6 +169,63 @@ export default class BudgetService implements IBudgetService {
     return categoriesByType
   }
 
+  private calculateRule503020 ({ expenses, incomes }: { expenses: any[], incomes: any[] }) {
+    const activeExpenses = expenses.filter(category => category.id !== 'totals')
+    const activeIncomes = incomes.filter(category => category.id !== 'totals')
+
+    const sumCategoryBudgets = (categories: any[], key: 'amount' | 'real'): number => {
+      let total = 0
+      categories.forEach(category => {
+        category.budgets.forEach((budget: any) => {
+          total += (budget[key] ?? 0)
+        })
+      })
+      return Math.round(total * 100) / 100
+    }
+
+    const incomeBudgeted = sumCategoryBudgets(activeIncomes, 'amount')
+    const incomeReal = sumCategoryBudgets(activeIncomes, 'real')
+
+    const needsBudgeted = sumCategoryBudgets(activeExpenses.filter(c => c.budgetRuleClass === 'needs'), 'amount')
+    const needsReal = sumCategoryBudgets(activeExpenses.filter(c => c.budgetRuleClass === 'needs'), 'real')
+
+    const wantsBudgeted = sumCategoryBudgets(activeExpenses.filter(c => c.budgetRuleClass === 'wants'), 'amount')
+    const wantsReal = sumCategoryBudgets(activeExpenses.filter(c => c.budgetRuleClass === 'wants'), 'real')
+
+    const savingsBudgeted = Math.round((incomeBudgeted - (needsBudgeted + wantsBudgeted)) * 100) / 100
+    const savingsReal = Math.round((incomeReal - (needsReal + wantsReal)) * 100) / 100
+
+    const getPercentage = (value: number, total: number): number => {
+      if (total <= 0) return 0
+      return Math.round((value / total) * 10000) / 100
+    }
+
+    return {
+      needs: {
+        budgeted: needsBudgeted,
+        real: needsReal,
+        percentageBudgeted: getPercentage(needsBudgeted, incomeBudgeted),
+        percentageReal: getPercentage(needsReal, incomeReal)
+      },
+      wants: {
+        budgeted: wantsBudgeted,
+        real: wantsReal,
+        percentageBudgeted: getPercentage(wantsBudgeted, incomeBudgeted),
+        percentageReal: getPercentage(wantsReal, incomeReal)
+      },
+      savings: {
+        budgeted: savingsBudgeted,
+        real: savingsReal,
+        percentageBudgeted: getPercentage(savingsBudgeted, incomeBudgeted),
+        percentageReal: getPercentage(savingsReal, incomeReal)
+      },
+      totals: {
+        incomeBudgeted,
+        incomeReal
+      }
+    }
+  }
+
   public async getBudgets ({
     user,
     year,
@@ -163,9 +248,12 @@ export default class BudgetService implements IBudgetService {
       month
     })
 
+    const rule503020 = this.calculateRule503020({ expenses, incomes })
+
     return {
       expenses,
-      incomes
+      incomes,
+      rule503020
     }
   }
 

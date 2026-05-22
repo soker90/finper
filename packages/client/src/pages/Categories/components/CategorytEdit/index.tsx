@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import {
   Button,
@@ -22,28 +22,47 @@ const CategoryEdit = ({
   isNew
 }: { rootCategories: Category[], category: Category, hideForm: () => void, isNew?: boolean }) => {
   const [error, setError] = useState<string | undefined>(undefined)
-  const { register, handleSubmit, formState: { errors } } = useForm({
-    defaultValues: {
-      name: category.name,
-      type: category.type,
-      parent: category.parent?._id
-    }
+  const defaultValues = {
+    name: category.name,
+    type: category.type,
+    parent: typeof category.parent === 'object' ? category.parent?._id : category.parent,
+    budgetRuleClass: category.budgetRuleClass ?? 'none'
+  }
+  const { register, handleSubmit, formState: { errors }, watch, reset } = useForm({
+    defaultValues
   })
+
+  useEffect(() => {
+    reset(defaultValues)
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- reset(defaultValues) on external prop change; defaultValues is rebuilt each render by design
+  }, [category, reset])
+
+  const categoryType = watch('type')
+  const categoryParent = watch('parent')
+  const showBudgetRule = categoryType === 'expense' && !!categoryParent
+  const fieldSize = showBudgetRule ? 3 : 4
+
   const onSubmit = handleSubmit(async (params) => {
     const sendParams = {
       name: params.name,
       type: params.type,
-      ...(params.parent && { parent: params.parent })
+      ...(params.parent && { parent: params.parent }),
+      budgetRuleClass: (params.type === 'expense' && params.parent) ? params.budgetRuleClass : 'none'
     }
 
-    const { error } = category._id ? await editCategory(category._id, sendParams) : await addCategory(sendParams)
-    if (!error) {
+    const { error, data } = category._id ? await editCategory(category._id, sendParams) : await addCategory(sendParams)
+    if (!error && data) {
       // @ts-ignore
       mutate(CATEGORIES, async (categories: Category[]) => {
-        if (isNew) {
-          return [...categories, sendParams]
+        const mutatedCategory = {
+          ...category,
+          ...data,
+          parent: data.parent && typeof data.parent === 'object' ? data.parent : (data.parent ? { _id: data.parent } : undefined)
         }
-        return categories.map(c => c._id === category._id ? sendParams : c)
+        if (isNew) {
+          return [...categories, mutatedCategory]
+        }
+        return categories.map(c => c._id === category._id ? mutatedCategory : c)
       })
       hideForm()
     }
@@ -68,6 +87,7 @@ const CategoryEdit = ({
           id='name' label='Nombre' placeholder='Nombre de la categoría'
           error={!!errors.name} {...register('name', { required: true, minLength: 3 })}
           errorText='Introduce un nombre de categoría válido'
+          size={fieldSize}
         />
         <SelectForm
           id='type' label='Tipo'
@@ -76,6 +96,7 @@ const CategoryEdit = ({
           options={TYPES_TRANSACTIONS_ENTRIES}
           optionValue={0}
           optionLabel={1}
+          size={fieldSize}
         />
         <SelectForm
           id='parent' label='Categoría padre' placeholder='Ninguna'
@@ -85,7 +106,24 @@ const CategoryEdit = ({
           options={[{ _id: '', name: 'Ninguna' }, ...rootCategories]}
           optionValue='_id'
           optionLabel='name'
+          size={fieldSize}
         />
+        {showBudgetRule && (
+          <SelectForm
+            id='budgetRuleClass' label='Regla 50/30/20'
+            error={!!errors.budgetRuleClass} {...register('budgetRuleClass')}
+            errorText='Introduce una clasificación válida'
+            options={[
+              { value: 'none', label: 'Ninguno (No aplica)' },
+              { value: 'needs', label: 'Necesidad (50%)' },
+              { value: 'wants', label: 'Deseo (30%)' },
+              { value: 'savings', label: 'Ahorro / Inversión (20%)' }
+            ]}
+            optionValue='value'
+            optionLabel='label'
+            size={fieldSize}
+          />
+        )}
 
         {error && (
           <Grid size={12}>

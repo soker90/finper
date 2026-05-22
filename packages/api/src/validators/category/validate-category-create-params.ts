@@ -13,7 +13,8 @@ export const validateCategoryCreateParams = async ({ body, user }: { user: strin
   const schema = Joi.object({
     name: Joi.string().required(),
     type: Joi.string().valid(TRANSACTION.Income, TRANSACTION.Expense, TRANSACTION.NotComputable).required(),
-    parent: Joi.string()
+    parent: Joi.string(),
+    budgetRuleClass: Joi.string().valid('needs', 'wants', 'savings', 'none').default('none')
   })
 
   const { error, value } = schema.validate(body)

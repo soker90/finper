@@ -6,7 +6,7 @@ export const calcBudgetByMonths = ({
   category,
   transactionsSum,
   month
-}: any): { name: string, id: string, budgets: { amount: number, real: number, month?: number, year?: number }[], total?: number } => {
+}: any): { name: string, id: string, budgets: { amount: number, real: number, month?: number, year?: number }[], total?: number, budgetRuleClass?: string } => {
   /* istanbul ignore next — false branch (month specific request) not exercised in current budget tests */
   const budgets = isNaN(month) ? Array.from({ length: 12 }, () => ({ amount: 0, real: 0 } as any)) : [{ amount: 0, real: 0 }]
 
@@ -31,6 +31,7 @@ export const calcBudgetByMonths = ({
     name: category.name,
     id: category._id,
     budgets,
-    total: totalCategory
+    total: totalCategory,
+    budgetRuleClass: category.budgetRuleClass
   }
 }

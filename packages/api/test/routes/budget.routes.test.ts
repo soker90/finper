@@ -48,7 +48,13 @@ describe('Budget', () => {
     test('when there are no budgets, it should return an empty array of incomes and other of expenses', async () => {
       await supertest(server.app).get(pathWithParams(2000, 1)).auth(token, { type: 'bearer' }).expect(200, {
         incomes: [],
-        expenses: []
+        expenses: [],
+        rule503020: {
+          needs: { budgeted: 0, real: 0, percentageBudgeted: 0, percentageReal: 0 },
+          wants: { budgeted: 0, real: 0, percentageBudgeted: 0, percentageReal: 0 },
+          savings: { budgeted: 0, real: 0, percentageBudgeted: 0, percentageReal: 0 },
+          totals: { incomeBudgeted: 0, incomeReal: 0 }
+        }
       })
     })
 
@@ -133,6 +139,62 @@ describe('Budget', () => {
       expect(response.body.expenses[0].budgets).toHaveLength(12)
       expect(response.body.expenses[0].budgets[month].amount).toBe(budgetExpense.amount)
       expect(response.body.expenses[0].budgets[month].real).toBe(0)
+    })
+
+    test('when budgets and transactions exist with budgetRuleClass, it should calculate the 50/30/20 rule properly', async () => {
+      const year = 2026
+      const month = 4 // May
+      const date = new Date(year, month, 15).getTime()
+
+      // Create categories with appropriate budgetRuleClass values
+      const incomeCategory = await insertCategory({ user, type: TRANSACTION.Income })
+      const needsCategory = await insertCategory({ user, type: TRANSACTION.Expense, budgetRuleClass: 'needs' })
+      const wantsCategory = await insertCategory({ user, type: TRANSACTION.Expense, budgetRuleClass: 'wants' })
+      const savingsCategory = await insertCategory({ user, type: TRANSACTION.Expense, budgetRuleClass: 'savings' })
+
+      // Create budgets
+      await BudgetModel.create([
+        { user, year, month, category: incomeCategory._id, amount: 2000 },
+        { user, year, month, category: needsCategory._id, amount: 900 },
+        { user, year, month, category: wantsCategory._id, amount: 500 },
+        { user, year, month, category: savingsCategory._id, amount: 200 }
+      ])
+
+      // Create transactions
+      await insertTransaction({ user, category: incomeCategory._id.toString(), type: TRANSACTION.Income, amount: 2000, date })
+      await insertTransaction({ user, category: needsCategory._id.toString(), type: TRANSACTION.Expense, amount: 1000, date })
+      await insertTransaction({ user, category: wantsCategory._id.toString(), type: TRANSACTION.Expense, amount: 400, date })
+      await insertTransaction({ user, category: savingsCategory._id.toString(), type: TRANSACTION.Expense, amount: 300, date })
+
+      const response = await supertest(server.app)
+        .get(pathWithParams(year, month))
+        .auth(token, { type: 'bearer' })
+        .expect(200)
+
+      expect(response.body.rule503020).toEqual({
+        needs: {
+          budgeted: 900,
+          real: 1000,
+          percentageBudgeted: 45,
+          percentageReal: 50
+        },
+        wants: {
+          budgeted: 500,
+          real: 400,
+          percentageBudgeted: 25,
+          percentageReal: 20
+        },
+        savings: {
+          budgeted: 600,
+          real: 600,
+          percentageBudgeted: 30,
+          percentageReal: 30
+        },
+        totals: {
+          incomeBudgeted: 2000,
+          incomeReal: 2000
+        }
+      })
     })
   })
 
