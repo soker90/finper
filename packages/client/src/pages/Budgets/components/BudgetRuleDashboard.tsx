@@ -18,7 +18,9 @@ const BudgetRuleDashboard = ({ data }: BudgetRuleDashboardProps) => {
   const { needs, wants, savings } = data
 
   // Personalized financial recommendations based on real state
+  const hasAlerts = needs.percentageReal > 50 || wants.percentageReal > 30 || savings.percentageReal < 20
   const recommendations: string[] = []
+
   if (needs.percentageReal > 50) {
     recommendations.push(
       `Tus gastos en Necesidades (${format.number(needs.percentageReal)}%) superan el 50% recomendado. Considera revisar tus facturas fijas de suministros, seguros o renegociar contratos recurrentes.`
@@ -34,13 +36,13 @@ const BudgetRuleDashboard = ({ data }: BudgetRuleDashboardProps) => {
       `Tu tasa de Ahorro Real (${format.number(savings.percentageReal)}%) es menor al 20% objetivo. Intenta automatizar tu ahorro a principio de mes o reajustar los gastos del día a día.`
     )
   }
-  if (recommendations.length === 0) {
+  if (!hasAlerts) {
     recommendations.push(
       '¡Felicidades! Estás cumpliendo perfectamente con la regla 50/30/20. Tus finanzas están equilibradas y tu nivel de ahorro es saludable. ¡Sigue así!'
     )
   }
 
-  const isFelicidades = recommendations.length === 1 && recommendations[0].startsWith('¡Felicidades!')
+  const isFelicidades = !hasAlerts
 
   return (
     <>
@@ -108,8 +110,8 @@ const BudgetRuleDashboard = ({ data }: BudgetRuleDashboardProps) => {
               </Typography>
             </Stack>
             <Stack spacing={1} sx={{ pl: 3.5 }}>
-              {recommendations.map((recommendation, index) => (
-                <Typography key={index} variant='body2' color='textSecondary'>
+              {recommendations.map((recommendation) => (
+                <Typography key={recommendation} variant='body2' color='textSecondary'>
                   • {recommendation}
                 </Typography>
               ))}

@@ -192,8 +192,8 @@ export default class BudgetService implements IBudgetService {
     const wantsBudgeted = sumCategoryBudgets(activeExpenses.filter(c => c.budgetRuleClass === 'wants'), 'amount')
     const wantsReal = sumCategoryBudgets(activeExpenses.filter(c => c.budgetRuleClass === 'wants'), 'real')
 
-    const savingsBudgeted = Math.max(0, Math.round((incomeBudgeted - (needsBudgeted + wantsBudgeted)) * 100) / 100)
-    const savingsReal = Math.max(0, Math.round((incomeReal - (needsReal + wantsReal)) * 100) / 100)
+    const savingsBudgeted = Math.round((incomeBudgeted - (needsBudgeted + wantsBudgeted)) * 100) / 100
+    const savingsReal = Math.round((incomeReal - (needsReal + wantsReal)) * 100) / 100
 
     const getPercentage = (value: number, total: number): number => {
       if (total <= 0) return 0

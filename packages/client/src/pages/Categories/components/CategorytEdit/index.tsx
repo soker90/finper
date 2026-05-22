@@ -50,14 +50,14 @@ const CategoryEdit = ({
       budgetRuleClass: (params.type === 'expense' && params.parent) ? params.budgetRuleClass : 'none'
     }
 
-    const { error } = category._id ? await editCategory(category._id, sendParams) : await addCategory(sendParams)
-    if (!error) {
+    const { error, data } = category._id ? await editCategory(category._id, sendParams) : await addCategory(sendParams)
+    if (!error && data) {
       // @ts-ignore
       mutate(CATEGORIES, async (categories: Category[]) => {
         const mutatedCategory = {
           ...category,
-          ...sendParams,
-          parent: sendParams.parent ? { _id: sendParams.parent } : undefined
+          ...data,
+          parent: data.parent && typeof data.parent === 'object' ? data.parent : (data.parent ? { _id: data.parent } : undefined)
         }
         if (isNew) {
           return [...categories, mutatedCategory]

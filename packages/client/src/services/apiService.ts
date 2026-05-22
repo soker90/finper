@@ -30,14 +30,14 @@ export const editCategory = (id: string, params: { name: string, type: string, p
   data?: Category,
   error?: string | undefined
 }> => {
-  return axios.patch(`${CATEGORIES}/${id}`, params).then((data: any) => ({ data: data as Category })).catch((error: any) => ({ error: extractError(error) }))
+  return axios.patch(`${CATEGORIES}/${id}`, params).then((response: any) => ({ data: response.data as Category })).catch((error: any) => ({ error: extractError(error) }))
 }
 
 export const addCategory = (params: { name?: string, type: string, parent?: string, budgetRuleClass?: string, balance?: number }): Promise<{
   data?: Category,
   error?: string | undefined
 }> => {
-  return axios.post(CATEGORIES, params).then((data: any) => ({ data: data as Category })).catch((error: any) => ({ error: extractError(error) }))
+  return axios.post(CATEGORIES, params).then((response: any) => ({ data: response.data as Category })).catch((error: any) => ({ error: extractError(error) }))
 }
 
 export const copyBudgets = async (params: {
