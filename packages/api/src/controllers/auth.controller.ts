@@ -30,19 +30,19 @@ export class AuthController {
   }
 
   public async register (req: Request, res: Response): Promise<void> {
-    const { username } = req.body
+    const username = req.body?.username
     this.logger.logInfo(`/register - username: ${username?.toLowerCase()}`)
-    const user = await validateRegisterInputParams(req.body)
+    const user = validateRegisterInputParams(req.body)
     const created = await this.userService.createUser(user)
     this.logger.logInfo(`User ${created.username} has been succesfully created`)
     const token = this.authService.getSignedToken(created.username)
     res.send({ token })
   }
 
-  public login (req: Request, res: Response, next: NextFunction): void {
+  public async login (req: Request, res: Response, next: NextFunction): Promise<void> {
     const { authService } = this
     this.logger.logInfo(`/login - user: ${req.body?.username?.toLowerCase()}`)
-    validateLoginInputParams(req.body)
+    req.body = validateLoginInputParams(req.body)
     passport.authenticate('local', function (error: any, user: IUser) {
       if (error) return next(error)
       if (!user) return next(Boom.unauthorized().output)
