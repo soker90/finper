@@ -1,19 +1,18 @@
 import Joi from 'joi'
 import Boom from '@hapi/boom'
 import { ERROR_MESSAGE } from '../../i18n'
-import { RequestUser } from '../../types'
 import { validateReadingExist } from './validate-reading-exist'
 import { validateSupplyExist } from '../supply'
 
-export const validateReadingEditParams = async (data: RequestUser) => {
+export const validateReadingEditParams = async ({ params, body, user }: { params: Record<string, string>, body: Record<string, any>, user: string }) => {
   /* istanbul ignore else — params.id is always present when editing via route (URL param) */
-  if (data.params?.id) {
-    await validateReadingExist({ id: data.params.id, user: data.user as string })
+  if (params.id) {
+    await validateReadingExist({ id: params.id, user })
   }
 
   /* istanbul ignore else — supplyId is always present in the body for edit requests */
-  if (data.body?.supplyId) {
-    await validateSupplyExist({ id: data.body.supplyId as string, user: data.user as string })
+  if (body.supplyId) {
+    await validateSupplyExist({ id: body.supplyId, user })
   }
 
   const schema = Joi.object({
@@ -29,11 +28,11 @@ export const validateReadingEditParams = async (data: RequestUser) => {
     consumptionOffPeak: Joi.number().optional()
   })
 
-  const { error, value } = schema.validate(data.body, { stripUnknown: true })
+  const { error, value } = schema.validate(body, { stripUnknown: true })
 
   if (error) {
     throw Boom.badData(error.message).output
   }
 
-  return { id: data.params?.id, value }
+  return { id: params.id, value }
 }
