@@ -2,6 +2,7 @@ import { NextFunction, Request, Response } from 'express'
 
 import { IStatsService } from '../services/stats.service'
 import { validateStatsYearParam } from '../validators/stats'
+import { tap } from '../utils/promise'
 
 type IStatsController = {
   loggerHandler: any,
@@ -19,7 +20,7 @@ export class StatsController {
 
   public getAvailableTags (req: Request, res: Response, next: NextFunction): void {
     Promise.resolve(req.user as string)
-      .tap(() => this.logger.logInfo('/tags/available - list available tags'))
+      .then(tap(() => this.logger.logInfo('/tags/available - list available tags')))
       .then(this.statsService.getAvailableTags.bind(this.statsService))
       .then((response) => {
         res.send(response)
@@ -31,7 +32,7 @@ export class StatsController {
 
   public getAvailableYears (req: Request, res: Response, next: NextFunction): void {
     Promise.resolve(req.user as string)
-      .tap(() => this.logger.logInfo('/tags/years - list available years'))
+      .then(tap(() => this.logger.logInfo('/tags/years - list available years')))
       .then(this.statsService.getAvailableYears.bind(this.statsService))
       .then((response) => {
         res.send(response)
@@ -46,7 +47,7 @@ export class StatsController {
     const year = req.query.year ? Number(req.query.year) : new Date().getFullYear()
 
     Promise.resolve(user)
-      .tap(() => this.logger.logInfo('/tags - list tags summary'))
+      .then(tap(() => this.logger.logInfo('/tags - list tags summary')))
       .then((u) => this.statsService.getTagsSummary(u, year))
       .then((response) => {
         res.send(response)
@@ -61,7 +62,7 @@ export class StatsController {
     const tagName = req.params.tagName
 
     Promise.resolve(user)
-      .tap(() => this.logger.logInfo(`/tags/${tagName} - get tag historic`))
+      .then(tap(() => this.logger.logInfo(`/tags/${tagName} - get tag historic`)))
       .then((u) => this.statsService.getTagHistoric(u, tagName))
       .then((response) => {
         res.send(response)
@@ -77,8 +78,8 @@ export class StatsController {
     const year = Number(req.params.year)
 
     Promise.resolve(user)
-      .tap(() => validateStatsYearParam(year))
-      .tap(() => this.logger.logInfo(`/tags/${tagName}/${year} - get tag detail`))
+      .then(tap(() => validateStatsYearParam(year)))
+      .then(tap(() => this.logger.logInfo(`/tags/${tagName}/${year} - get tag detail`)))
       .then((u) => this.statsService.getTagDetail(u, tagName, year))
       .then((response) => {
         res.send(response)

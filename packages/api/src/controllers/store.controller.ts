@@ -3,6 +3,7 @@ import { NextFunction, Request, Response } from 'express'
 import { IStoreService } from '../services/stores.service'
 
 import '../auth/local-strategy-passport-handler'
+import { tap } from '../utils/promise'
 
 type IStoreController = {
   loggerHandler: any,
@@ -21,7 +22,7 @@ export class StoreController {
 
   public async stores (req: Request, res: Response, next: NextFunction): Promise<void> {
     Promise.resolve(req.user as string)
-      .tap(() => this.logger.logInfo(`/stores - list stores of ${req.user}`))
+      .then(tap(() => this.logger.logInfo(`/stores - list stores of ${req.user}`)))
       .then(this.storeService.getStores.bind(this.storeService))
       .then(response => {
         res.send(response)

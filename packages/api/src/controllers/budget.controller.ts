@@ -5,6 +5,7 @@ import { IBudgetService } from '../services/budget.service'
 import extractUser from '../helpers/extract-user'
 import { validateBudgetGet, validateBudgetEditParams, validateBudgetCopy } from '../validators/budget'
 import { RequestUser } from '../types'
+import { tap } from '../utils/promise'
 
 type IBudgetController = {
   loggerHandler: any,
@@ -23,7 +24,7 @@ export class BudgetController {
 
   public async budgets (req: Request, res: Response, next: NextFunction): Promise<void> {
     Promise.resolve(req.query)
-      .tap(() => this.logger.logInfo(`/budgets - list budgets of ${req.user} ${req.query?.month}/${req.query?.year}`))
+      .then(tap(() => this.logger.logInfo(`/budgets - list budgets of ${req.user} ${req.query?.month}/${req.query?.year}`)))
       .then(validateBudgetGet)
       .then(extractUser(req))
       .then(this.budgetService.getBudgets.bind(this.budgetService))
@@ -36,10 +37,10 @@ export class BudgetController {
 
   public async edit (req: Request, res: Response, next: NextFunction): Promise<void> {
     Promise.resolve(req as RequestUser)
-      .tap(({ params }) => this.logger.logInfo(`/edit - category: ${params.category}`))
+      .then(tap(({ params }) => this.logger.logInfo(`/edit - category: ${params.category}`)))
       .then(validateBudgetEditParams)
       .then(this.budgetService.editBudget.bind(this.budgetService))
-      .tap(({ category }) => this.logger.logInfo(`Budget for category ${category} has been succesfully edited`))
+      .then(tap(({ category }) => this.logger.logInfo(`Budget for category ${category} has been succesfully edited`)))
       .then((response) => {
         res.send(response)
       })
@@ -50,10 +51,10 @@ export class BudgetController {
 
   public async copy (req: Request, res: Response, next: NextFunction): Promise<void> {
     Promise.resolve(req as RequestUser)
-      .tap(() => this.logger.logInfo('/copy - budget'))
+      .then(tap(() => this.logger.logInfo('/copy - budget')))
       .then(validateBudgetCopy)
       .then(this.budgetService.copy.bind(this.budgetService))
-      .tap(() => this.logger.logInfo('Budget has been succesfully copied'))
+      .then(tap(() => this.logger.logInfo('Budget has been succesfully copied')))
       .then((response) => {
         if (!response) {
           res.status(204).send()

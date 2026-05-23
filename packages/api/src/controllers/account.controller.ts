@@ -6,6 +6,7 @@ import { validateAccountCreateParams, validateAccountEditParams, validateAccount
 import '../auth/local-strategy-passport-handler'
 import extractUser from '../helpers/extract-user'
 import { RequestUser } from '../types'
+import { tap } from '../utils/promise'
 
 type IAccountController = {
   loggerHandler: any,
@@ -24,11 +25,11 @@ export class AccountController {
 
   public async create (req: Request, res: Response, next: NextFunction): Promise<void> {
     Promise.resolve(req.body)
-      .tap(({ name }) => this.logger.logInfo(`/create - account: ${name?.toLowerCase()}`))
+      .then(tap(({ name }) => this.logger.logInfo(`/create - account: ${name?.toLowerCase()}`)))
       .then(validateAccountCreateParams)
       .then(extractUser(req))
       .then(this.accountService.addAccount.bind(this.accountService))
-      .tap(({ name }) => this.logger.logInfo(`Account ${name} has been succesfully created`))
+      .then(tap(({ name }) => this.logger.logInfo(`Account ${name} has been succesfully created`)))
       .then((response) => {
         res.send(response)
       })
@@ -39,7 +40,7 @@ export class AccountController {
 
   public async accounts (req: Request, res: Response, next: NextFunction): Promise<void> {
     Promise.resolve(req.user as string)
-      .tap(() => this.logger.logInfo(`/accounts - list accounts of ${req.user}`))
+      .then(tap(() => this.logger.logInfo(`/accounts - list accounts of ${req.user}`)))
       .then(this.accountService.getAccounts.bind(this.accountService))
       .then(response => {
         res.send(response)
@@ -50,10 +51,10 @@ export class AccountController {
 
   public async edit (req: Request, res: Response, next: NextFunction): Promise<void> {
     Promise.resolve(req as RequestUser)
-      .tap(({ body }) => this.logger.logInfo(`/edit - account: ${body.name?.toLowerCase()}`))
+      .then(tap(({ body }) => this.logger.logInfo(`/edit - account: ${body.name?.toLowerCase()}`)))
       .then(validateAccountEditParams)
       .then(this.accountService.editAccount.bind(this.accountService))
-      .tap(({ _id }: AccountDocument) => this.logger.logInfo(`Account ${_id} has been succesfully edited`))
+      .then(tap(({ _id }: AccountDocument) => this.logger.logInfo(`Account ${_id} has been succesfully edited`)))
       .then((response) => {
         res.send(response)
       })
@@ -64,9 +65,9 @@ export class AccountController {
 
   public async account (req: Request, res: Response, next: NextFunction): Promise<void> {
     Promise.resolve(req.params)
-      .tap(({ id }) => this.logger.logInfo(`/account - account: ${id}`))
+      .then(tap(({ id }) => this.logger.logInfo(`/account - account: ${id}`)))
       .then(extractUser(req))
-      .tap(({ user, id }) => validateAccountExist(id, user))
+      .then(tap(({ user, id }) => validateAccountExist(id, user)))
       .then(this.accountService.getAccount.bind(this.accountService))
       .then(response => {
         res.send(response)
@@ -77,12 +78,12 @@ export class AccountController {
 
   public async transfer (req: Request, res: Response, next: NextFunction): Promise<void> {
     Promise.resolve(req.body)
-      .tap(() => this.logger.logInfo('/transfer - account transfer'))
+      .then(tap(() => this.logger.logInfo('/transfer - account transfer')))
       .then(validateAccountTransferParams)
       .then(extractUser(req))
       .then(validateAccountTransferExist)
       .then(this.accountService.transfer.bind(this.accountService))
-      .tap(() => this.logger.logInfo('Account transfer has been successfully processed'))
+      .then(tap(() => this.logger.logInfo('Account transfer has been successfully processed')))
       .then(() => {
         res.status(200).send({ message: 'Transfer successful' })
       })

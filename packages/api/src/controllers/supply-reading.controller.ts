@@ -11,6 +11,7 @@ import { validateSupplyExist } from '../validators/supply'
 import { ISupplyReadingService } from '../services/supply-reading.service'
 import extractUser from '../helpers/extract-user'
 import { RequestUser } from '../types'
+import { tap } from '../utils/promise'
 
 type ISupplyReadingController = {
   loggerHandler: any,
@@ -28,9 +29,9 @@ export class SupplyReadingController {
 
   public async getReadings (req: Request, res: Response, next: NextFunction): Promise<void> {
     Promise.resolve({ supplyId: req.params.supplyId })
-      .tap(() => this.logger.logInfo(`/supply/${req.params.supplyId} - list readings`))
+      .then(tap(() => this.logger.logInfo(`/supply/${req.params.supplyId} - list readings`)))
       .then(extractUser(req))
-      .tap(({ supplyId, user }) => validateSupplyExist({ id: supplyId as string, user: user as string }))
+      .then(tap(({ supplyId, user }) => validateSupplyExist({ id: supplyId as string, user: user as string })))
       .then(this.supplyReadingService.getSupplyReadings.bind(this.supplyReadingService))
       .then((response) => {
         res.send(response)
@@ -42,11 +43,11 @@ export class SupplyReadingController {
 
   public async create (req: Request, res: Response, next: NextFunction): Promise<void> {
     Promise.resolve(req.body)
-      .tap(() => this.logger.logInfo('/create - supply-reading'))
+      .then(tap(() => this.logger.logInfo('/create - supply-reading')))
       .then(extractUser(req))
       .then(validateReadingCreateParams)
       .then(this.supplyReadingService.addReading.bind(this.supplyReadingService))
-      .tap(({ _id }: SupplyReadingDocument) => this.logger.logInfo(`Supply Reading ${_id} has been succesfully created`))
+      .then(tap(({ _id }: SupplyReadingDocument) => this.logger.logInfo(`Supply Reading ${_id} has been succesfully created`)))
       .then((response) => {
         res.send(response)
       })
@@ -57,10 +58,10 @@ export class SupplyReadingController {
 
   public async edit (req: Request, res: Response, next: NextFunction): Promise<void> {
     Promise.resolve(req as unknown as RequestUser)
-      .tap(() => this.logger.logInfo(`/edit - supply-reading: ${req.params.id}`))
+      .then(tap(() => this.logger.logInfo(`/edit - supply-reading: ${req.params.id}`)))
       .then(validateReadingEditParams)
       .then(this.supplyReadingService.editReading.bind(this.supplyReadingService))
-      .tap(({ _id }: SupplyReadingDocument) => this.logger.logInfo(`Supply Reading ${_id} has been succesfully edited`))
+      .then(tap(({ _id }: SupplyReadingDocument) => this.logger.logInfo(`Supply Reading ${_id} has been succesfully edited`)))
       .then((response) => {
         res.send(response)
       })
@@ -71,9 +72,9 @@ export class SupplyReadingController {
 
   public async delete (req: Request, res: Response, next: NextFunction): Promise<void> {
     Promise.resolve(req.params as { id: string })
-      .tap(({ id }) => this.logger.logInfo(`/delete - supply-reading: ${id}`))
+      .then(tap(({ id }) => this.logger.logInfo(`/delete - supply-reading: ${id}`)))
       .then(extractUser(req))
-      .tap(validateReadingExist)
+      .then(tap(validateReadingExist))
       .then(this.supplyReadingService.deleteReading.bind(this.supplyReadingService))
       .then(() => {
         res.sendStatus(204)

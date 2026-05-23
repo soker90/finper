@@ -4,6 +4,7 @@ import '../auth/local-strategy-passport-handler'
 import { IStockService } from '../services/stock.service'
 import extractUser from '../helpers/extract-user'
 import { validateStockCreateParams } from '../validators/stock'
+import { tap } from '../utils/promise'
 
 type IStockController = {
   loggerHandler: any,
@@ -22,7 +23,7 @@ export class StockController {
 
   public async summary (req: Request, res: Response, next: NextFunction): Promise<void> {
     Promise.resolve(req.user as string)
-      .tap((user: string) => this.logger.logInfo(`/stocks/summary - summary of ${user}`))
+      .then(tap((user: string) => this.logger.logInfo(`/stocks/summary - summary of ${user}`)))
       .then(this.stockService.getStocksSummary.bind(this.stockService))
       .then(response => { res.send(response) })
       .catch(error => { next(error) })
@@ -30,7 +31,7 @@ export class StockController {
 
   public async stocks (req: Request, res: Response, next: NextFunction): Promise<void> {
     Promise.resolve(req.user as string)
-      .tap((user: string) => this.logger.logInfo(`/stocks - list positions of ${user}`))
+      .then(tap((user: string) => this.logger.logInfo(`/stocks - list positions of ${user}`)))
       .then(this.stockService.getStocks.bind(this.stockService))
       .then(response => {
         res.send(response)
@@ -42,11 +43,11 @@ export class StockController {
 
   public async create (req: Request, res: Response, next: NextFunction): Promise<void> {
     Promise.resolve(req.body)
-      .tap(() => this.logger.logInfo('/create - stock'))
+      .then(tap(() => this.logger.logInfo('/create - stock')))
       .then(validateStockCreateParams)
       .then(extractUser(req))
       .then(this.stockService.addStock.bind(this.stockService))
-      .tap(({ ticker }) => this.logger.logInfo(`Stock ${ticker} has been successfully created`))
+      .then(tap(({ ticker }) => this.logger.logInfo(`Stock ${ticker} has been successfully created`)))
       .then(response => {
         res.send(response)
       })
@@ -57,9 +58,9 @@ export class StockController {
 
   public async remove (req: Request, res: Response, next: NextFunction): Promise<void> {
     Promise.resolve(req.params.id)
-      .tap(() => this.logger.logInfo('/delete - stock'))
+      .then(tap(() => this.logger.logInfo('/delete - stock')))
       .then(id => this.stockService.deleteStock(id, req.user as string))
-      .tap(() => this.logger.logInfo('Stock has been successfully deleted'))
+      .then(tap(() => this.logger.logInfo('Stock has been successfully deleted')))
       .then(() => {
         res.sendStatus(204)
       })

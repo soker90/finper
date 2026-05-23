@@ -28,8 +28,6 @@ import { StockRoutes } from './routes/stock.routes'
 import { GoalRoutes } from './routes/goal.routes'
 import { StatsRoutes } from './routes/stats.routes'
 
-global.Promise = require('bluebird')
-
 class Server {
   public app: express.Application
 
