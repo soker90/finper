@@ -244,6 +244,9 @@ importers:
       '@mui/x-date-pickers':
         specifier: 9.1.0
         version: 9.1.0(@emotion/react@11.14.0(@types/react@19.2.14)(react@19.2.6))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@19.2.14)(react@19.2.6))(@types/react@19.2.14)(react@19.2.6))(@mui/material@9.0.1(@emotion/react@11.14.0(@types/react@19.2.14)(react@19.2.6))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@19.2.14)(react@19.2.6))(@types/react@19.2.14)(react@19.2.6))(@types/react@19.2.14)(react-dom@19.2.6(react@19.2.6))(react@19.2.6))(@mui/system@9.0.1(@emotion/react@11.14.0(@types/react@19.2.14)(react@19.2.6))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@19.2.14)(react@19.2.6))(@types/react@19.2.14)(react@19.2.6))(@types/react@19.2.14)(react@19.2.6))(@types/react@19.2.14)(dayjs@1.11.20)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
+      '@soker90/finper-types':
+        specifier: workspace:*
+        version: link:../types
       '@tanstack/react-virtual':
         specifier: 3.13.24
         version: 3.13.24(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
@@ -293,9 +296,6 @@ importers:
       '@faker-js/faker':
         specifier: 10.4.0
         version: 10.4.0
-      '@soker90/finper-types':
-        specifier: workspace:*
-        version: link:../types
       '@testing-library/dom':
         specifier: 10.4.1
         version: 10.4.1
