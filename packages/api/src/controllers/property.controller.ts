@@ -1,16 +1,11 @@
-import { NextFunction, Request, Response } from 'express'
+import { Request, Response } from 'express'
 
-import '../auth/local-strategy-passport-handler'
-import { PropertyDocument } from '@soker90/finper-models'
 import {
   validatePropertyCreateParams,
   validatePropertyEditParams,
   validatePropertyExist
 } from '../validators/property'
 import { IPropertyService } from '../services/property.service'
-import extractUser from '../helpers/extract-user'
-import { RequestUser } from '../types'
-import { tap } from '../utils/promise'
 
 type IPropertyController = {
   loggerHandler: any,
@@ -26,46 +21,34 @@ export class PropertyController {
     this.propertyService = propertyService
   }
 
-  public async create (req: Request, res: Response, next: NextFunction): Promise<void> {
-    Promise.resolve(req.body)
-      .then(tap(({ name }) => this.logger.logInfo(`/create - property: ${name}`)))
-      .then(extractUser(req))
-      .then(validatePropertyCreateParams)
-      .then(this.propertyService.addProperty.bind(this.propertyService))
-      .then(tap(({ name }: PropertyDocument) => this.logger.logInfo(`Property ${name} has been succesfully created`)))
-      .then((response) => {
-        res.send(response)
-      })
-      .catch((error) => {
-        next(error)
-      })
+  public async create (req: Request, res: Response): Promise<void> {
+    const { name } = req.body
+    this.logger.logInfo(`/create - property: ${name}`)
+
+    const params = await validatePropertyCreateParams({ ...req.body, user: req.user })
+    const response = await this.propertyService.addProperty(params)
+    this.logger.logInfo(`Property ${response.name} has been succesfully created`)
+
+    res.send(response)
   }
 
-  public async edit (req: Request, res: Response, next: NextFunction): Promise<void> {
-    Promise.resolve(req as unknown as RequestUser)
-      .then(tap(({ body }) => this.logger.logInfo(`/edit - property: ${body.name}`)))
-      .then(validatePropertyEditParams)
-      .then(this.propertyService.editProperty.bind(this.propertyService))
-      .then(tap(({ _id }: PropertyDocument) => this.logger.logInfo(`Property ${_id} has been succesfully edited`)))
-      .then((response) => {
-        res.send(response)
-      })
-      .catch((error) => {
-        next(error)
-      })
+  public async edit (req: Request, res: Response): Promise<void> {
+    this.logger.logInfo(`/edit - property: ${req.body.name}`)
+
+    const { id, value } = await validatePropertyEditParams({ params: req.params, body: req.body, user: req.user })
+    const response = await this.propertyService.editProperty({ id, value })
+    this.logger.logInfo(`Property ${response._id} has been succesfully edited`)
+
+    res.send(response)
   }
 
-  public async delete (req: Request, res: Response, next: NextFunction): Promise<void> {
-    Promise.resolve(req.params as { id: string })
-      .then(tap(({ id }) => this.logger.logInfo(`/delete - property: ${id}`)))
-      .then(extractUser(req))
-      .then(tap(validatePropertyExist))
-      .then(this.propertyService.deleteProperty.bind(this.propertyService))
-      .then(() => {
-        res.sendStatus(204)
-      })
-      .catch((error) => {
-        next(error)
-      })
+  public async delete (req: Request, res: Response): Promise<void> {
+    const { id } = req.params
+    this.logger.logInfo(`/delete - property: ${id}`)
+
+    await validatePropertyExist({ id, user: req.user })
+    await this.propertyService.deleteProperty({ id })
+
+    res.sendStatus(204)
   }
 }
