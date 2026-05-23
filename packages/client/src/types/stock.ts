@@ -1,4 +1,4 @@
-export type StockOperationType = 'buy' | 'sell' | 'dividend'
+import type { StockType } from '@soker90/finper-types'
 
 export interface StockPurchase {
   _id?: string
@@ -6,7 +6,7 @@ export interface StockPurchase {
   name: string
   shares: number
   price: number
-  type: StockOperationType
+  type: StockType
   date: number
   platform: string
 }

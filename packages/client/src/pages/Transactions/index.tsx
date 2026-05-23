@@ -5,7 +5,6 @@ import { TransactionItem } from './components'
 import { ListContainer } from './components/ListContainer'
 import { HeaderButtons } from 'components'
 import { TransactionsPage } from './components/TransactionsPage'
-import { TRANSACTION } from 'types/transaction'
 import { useFilters } from './hooks'
 import TransacionsFilter from './components/TransacionsFilter'
 
@@ -46,7 +45,7 @@ const Transactions = () => {
               category: '',
               note: '',
               store: '',
-              type: TRANSACTION.Expense
+              type: 'expense'
             } as any} forceExpand cancelCreate={cancelCreate} query=''
           />}
         {pages}

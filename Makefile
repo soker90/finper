@@ -8,17 +8,20 @@ define help
     build-client:              build the client
     build-image-api-daily:     build the API image dev
     build-image-api-latest:    build the API image latest
-    build-models:              build the models
+    build-models:              build the models (requires build-types first)
+    build-types:               build the shared types
     install:                   install all dependencies.
     lint-api:                  lint the API
     lint-bot:                  lint the bot
     lint-client:               lint the client
     lint-models:               lint the models.
+    lint-types:                lint the shared types.
     seed-user:                 create initial user (USERNAME and PASSWORD required).
     test:                      run all tests.
     test-api:                  run all tests for the API.
     test-client:               run all tests for the client
     test-models:               run all tests for the models.
+    test-types:                run all tests for the shared types.
     start-api:                 launch api
     start-bot:                 launch bot (Cloudflare Worker dev)
     start-client:              launch client
@@ -38,8 +41,18 @@ install:
 test:
 	@pnpm -r --parallel test
 
+## Types ##
+build-types:
+	@pnpm --filter @soker90/finper-types build
+
+test-types:
+	@pnpm --filter @soker90/finper-types test
+
+lint-types:
+	@pnpm --filter @soker90/finper-types lint
+
 ## Models ##
-build-models:
+build-models: build-types
 	@pnpm --filter @soker90/finper-models build
 
 test-models:

@@ -1,4 +1,5 @@
 import { Schema, model, HydratedDocument } from 'mongoose'
+import type { GoalColor, GoalIcon } from '@soker90/finper-types'
 
 export const GOAL_COLORS = [
   '#4CAF50',
@@ -10,10 +11,8 @@ export const GOAL_COLORS = [
   '#795548',
   '#607D8B',
   '#E91E63',
-  '#FFC107'
+  '#FFC107',
 ] as const
-
-export type GoalColor = typeof GOAL_COLORS[number]
 
 export const GOAL_ICONS = [
   'DollarOutlined',
@@ -25,10 +24,8 @@ export const GOAL_ICONS = [
   'GiftOutlined',
   'BankOutlined',
   'TrophyOutlined',
-  'StarOutlined'
+  'StarOutlined',
 ] as const
-
-export type GoalIcon = typeof GOAL_ICONS[number]
 
 export interface IGoal {
   name: string

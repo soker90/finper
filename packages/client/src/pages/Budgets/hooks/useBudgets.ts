@@ -1,7 +1,7 @@
 import useSWR from 'swr'
 import { BUDGETS } from 'constants/api-paths'
 import { objectToParams } from 'utils/objectToParams'
-import { Budget } from 'types/budget'
+import { Budget } from 'types'
 
 export interface RuleClassInfo {
   budgeted: number

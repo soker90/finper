@@ -1,4 +1,5 @@
-import { SUPPLY_TYPE_UNITS, SupplyType } from '../../utils/supply'
+import type { SupplyType } from '@soker90/finper-types'
+import { SUPPLY_TYPE_UNITS } from '../../utils/supply'
 
 export const DECIMAL_PATTERN = /^[0-9]+([.,][0-9]+)?$/
 

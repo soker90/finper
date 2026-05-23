@@ -1,17 +1,17 @@
 import { FC, useState } from 'react'
 import { Chip, Collapse, Divider, Paper, Typography, useTheme } from '@mui/material'
 
-import { Category } from 'types'
+import type { TransactionType } from '@soker90/finper-types'
+import type { Category } from 'types'
 import { ItemContent } from 'components'
 
 import CategorytEdit from '../CategorytEdit'
-import { TRANSACTION } from 'types/transaction'
 import styles from './styles.module.css'
 
-const CATEGORY_TYPE = {
-  [TRANSACTION.Income]: 'Ingreso',
-  [TRANSACTION.Expense]: 'Gasto',
-  [TRANSACTION.NotComputable]: 'No computable'
+const CATEGORY_TYPE: Record<TransactionType, string> = {
+  income: 'Ingreso',
+  expense: 'Gasto',
+  not_computable: 'No computable'
 }
 
 interface CategoryItemProps {

@@ -1,4 +1,5 @@
-import { SupplyInput, SupplyType } from 'types'
+import type { SupplyType } from '@soker90/finper-types'
+import type { SupplyInput } from 'types'
 
 export const SUPPLY_TYPE_OPTIONS: { value: SupplyType; label: string }[] = [
   { value: 'electricity', label: 'Electricidad' },

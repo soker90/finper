@@ -4,7 +4,6 @@ import { CategoryItem } from './components'
 import { PlusOutlined } from '@ant-design/icons'
 import { ListContainer } from './components/ListContainer'
 import { HeaderButtons, LoadingList } from 'components'
-import { TRANSACTION } from 'types/transaction'
 
 const Accounts = () => {
   const { categories, isLoading } = useCategories()
@@ -31,7 +30,7 @@ const Accounts = () => {
       <ListContainer>
         {newAccount &&
           <CategoryItem
-            category={{ name: '', type: TRANSACTION.Expense }} forceExpand
+            category={{ name: '', type: 'expense' }} forceExpand
             cancelCreate={cancelCreate} rootCategories={rootCategories}
           />}
         {categories.map((category) => <CategoryItem

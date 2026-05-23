@@ -2,7 +2,7 @@ import { Grid } from '@mui/material'
 import { DeleteOutlined, EditOutlined, EuroOutlined } from '@ant-design/icons'
 import ScrollableTable, { Column, Action } from 'components/ScrollableTable'
 import { format } from 'utils'
-import { Debt } from 'types/debt'
+import { Debt } from 'types'
 
 interface Props {
   debts: Debt[]

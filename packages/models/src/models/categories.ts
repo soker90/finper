@@ -1,7 +1,6 @@
 import { model, Schema, Types, HydratedDocument } from 'mongoose'
-import { TransactionType, TRANSACTION } from './transactions'
-
-export type BudgetRuleClassType = 'needs' | 'wants' | 'savings' | 'none'
+import type { TransactionType, BudgetRuleClassType } from '@soker90/finper-types'
+import { TRANSACTION } from './transactions'
 
 export interface ICategory {
   name: string

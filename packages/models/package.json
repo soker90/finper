@@ -55,6 +55,7 @@
     "typescript-eslint": "8.59.3"
   },
   "dependencies": {
+    "@soker90/finper-types": "workspace:*",
     "bcrypt": "6.0.0",
     "bluebird": "3.7.2",
     "lodash.isnil": "4.0.0",

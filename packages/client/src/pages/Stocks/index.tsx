@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Grid } from '@mui/material'
 import { PlusOutlined, GiftOutlined, FallOutlined } from '@ant-design/icons'
-import { StockOperationType } from 'types'
+import type { StockType } from '@soker90/finper-types'
 
 import { HeaderButtons, LoadingList } from 'components'
 import { useStocks } from './hooks'
@@ -9,7 +9,7 @@ import { StockStatCard, StocksTable, AddStockModal } from './components'
 
 const Stocks = () => {
   const { positions, addStock, deleteStock, isLoading } = useStocks()
-  const [showModal, setShowModal] = useState<StockOperationType | false>(false)
+  const [showModal, setShowModal] = useState<StockType | false>(false)
 
   const summary = (() => {
     const totalCost = positions.reduce((acc, p) => acc + p.totalCost, 0)

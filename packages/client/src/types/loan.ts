@@ -1,9 +1,4 @@
-export const LOAN_PAYMENT = {
-  ORDINARY: 'ordinary',
-  EXTRAORDINARY: 'extraordinary',
-} as const
-
-export type LoanPaymentType = typeof LOAN_PAYMENT[keyof typeof LOAN_PAYMENT]
+import type { LoanPaymentType } from '@soker90/finper-types'
 
 export interface Loan {
   _id: string

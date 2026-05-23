@@ -6,7 +6,7 @@ import { SWRConfig } from 'swr'
 import { server } from '../../../../mock/server'
 import { render } from '../../../../test/testUtils'
 import LinkTransactionsModal from '.'
-import { Subscription, TRANSACTION } from 'types'
+import { Subscription } from 'types'
 
 const NOW = Date.now()
 
@@ -25,7 +25,7 @@ const mockTransactions = [
     _id: 'tx-1',
     date: NOW - 30 * 86400000,
     amount: 4.99,
-    type: TRANSACTION.Expense,
+    type: 'expense',
     category: { _id: 'cat-1', name: 'Ocio' },
     account: { _id: 'acc-1', name: 'Mi cuenta', bank: 'BBVA' }
   },
@@ -33,7 +33,7 @@ const mockTransactions = [
     _id: 'tx-2',
     date: NOW - 60 * 86400000,
     amount: 4.99,
-    type: TRANSACTION.Expense,
+    type: 'expense',
     category: { _id: 'cat-1', name: 'Ocio' },
     account: { _id: 'acc-1', name: 'Mi cuenta', bank: 'BBVA' }
   }

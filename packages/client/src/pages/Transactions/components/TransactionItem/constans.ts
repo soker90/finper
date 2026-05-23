@@ -1,13 +1,13 @@
-import { TRANSACTION } from 'types/transaction'
+import type { TransactionType } from '@soker90/finper-types'
 
-export const AMOUNT_COLORS = {
-  [TRANSACTION.Income]: 'success.main',
-  [TRANSACTION.Expense]: 'error.main',
-  [TRANSACTION.NotComputable]: 'secondary.main'
+export const AMOUNT_COLORS: Record<TransactionType, string> = {
+  income: 'success.main',
+  expense: 'error.main',
+  not_computable: 'secondary.main'
 }
 
-export const TRANSACTION_SYMBOL = {
-  [TRANSACTION.Expense]: '-',
-  [TRANSACTION.Income]: '+',
-  [TRANSACTION.NotComputable]: ''
+export const TRANSACTION_SYMBOL: Record<TransactionType, string> = {
+  expense: '-',
+  income: '+',
+  not_computable: ''
 }

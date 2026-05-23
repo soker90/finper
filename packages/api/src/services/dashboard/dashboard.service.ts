@@ -1,4 +1,5 @@
-import { AccountModel, DebtModel, LoanModel, PensionModel, TransactionModel, TRANSACTION, type IPension } from '@soker90/finper-models'
+import { TRANSACTION } from '@soker90/finper-models'
+import { AccountModel, DebtModel, LoanModel, PensionModel, TransactionModel, type IPension } from '@soker90/finper-models'
 import { roundNumber } from '../../utils/roundNumber'
 import { generateInsights } from '../utils/insights'
 import { computeHealthScore, computeBudgetAdherence, computeHistoricalSavingsRate } from './health-score'

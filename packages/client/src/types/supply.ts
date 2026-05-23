@@ -1,4 +1,4 @@
-export type SupplyType = 'electricity' | 'water' | 'gas' | 'other'
+import type { SupplyType } from '@soker90/finper-types'
 
 export interface Property {
   _id: string

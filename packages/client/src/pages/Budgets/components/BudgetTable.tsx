@@ -4,7 +4,7 @@ import { EditOutlined } from '@ant-design/icons'
 import ScrollableTable, { Column, Action } from 'components/ScrollableTable'
 import { format } from 'utils/index'
 import ModalEdit from './ModalEdit'
-import { Budget } from 'types/budget'
+import { Budget } from 'types'
 import { sortByAmountAndName } from '../utils'
 
 const COLUMNS: Column<Budget>[] = [

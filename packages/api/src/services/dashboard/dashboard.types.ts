@@ -1,8 +1,6 @@
 import type { IPension } from '@soker90/finper-models'
 import type { Insight, MonthlyData } from '../utils/insights'
 
-export type { MonthlyData }
-
 export interface DailyExpense {
   day: number
   amount: number

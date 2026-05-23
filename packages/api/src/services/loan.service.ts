@@ -1,3 +1,5 @@
+import type { LoanPaymentType } from '@soker90/finper-types'
+import { LOAN_PAYMENT, TRANSACTION } from '@soker90/finper-models'
 import {
   ILoan,
   ILoanPayment,
@@ -5,11 +7,8 @@ import {
   LoanModel,
   LoanPaymentModel,
   LoanEventModel,
-  LoanPaymentType,
-  LOAN_PAYMENT,
   AccountModel,
-  TransactionModel,
-  TRANSACTION
+  TransactionModel
 } from '@soker90/finper-models'
 import Boom from '@hapi/boom'
 import { roundNumber } from '../utils/roundNumber'

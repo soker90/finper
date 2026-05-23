@@ -13,11 +13,14 @@ COPY --chown=node:node pnpm-workspace.yaml pnpm-lock.yaml package.json .npmrc ./
 
 COPY --chown=node:node packages/api/package.json ./packages/api/
 COPY --chown=node:node packages/models/package.json ./packages/models/
+COPY --chown=node:node packages/types/package.json ./packages/types/
 
 RUN pnpm install --frozen-lockfile --filter @soker90/finper-api...
 
 COPY --chown=node:node packages/api ./packages/api
 COPY --chown=node:node packages/models ./packages/models
+COPY --chown=node:node packages/types ./packages/types
+RUN pnpm --filter @soker90/finper-types build
 RUN pnpm --filter @soker90/finper-models build
 RUN pnpm --filter @soker90/finper-api build
 RUN pnpm deploy --filter @soker90/finper-api --prod --legacy /home/node/deploy
