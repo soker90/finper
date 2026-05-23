@@ -1,6 +1,6 @@
-import type { TransactionType } from '@soker90/finper-types'
+import type { TransactionType, BudgetRuleClassType } from '@soker90/finper-types'
 
-export type BudgetRuleClassType = 'needs' | 'wants' | 'savings' | 'none'
+export type { BudgetRuleClassType }
 
 export interface Category {
   _id?: string;

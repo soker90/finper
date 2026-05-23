@@ -11,7 +11,10 @@ export { SUPPLY_TYPE } from './enums/supply'
 export type { SupplyType } from './enums/supply'
 
 export { STOCK_TYPE } from './enums/stock'
-export type { StockType, StockOperationType } from './enums/stock'
+export type { StockType } from './enums/stock'
 
 export { GOAL_COLORS, GOAL_ICONS } from './enums/goal'
 export type { GoalColor, GoalIcon } from './enums/goal'
+
+export { BUDGET_RULE_CLASS } from './enums/budget-rule'
+export type { BudgetRuleClassType } from './enums/budget-rule'

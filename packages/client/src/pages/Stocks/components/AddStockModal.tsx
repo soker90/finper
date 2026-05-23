@@ -1,9 +1,9 @@
 import { useForm } from 'react-hook-form'
 import { ModalGrid, DateForm, InputForm, SelectForm } from 'components'
-import { StockOperationType, StockPurchase } from 'types'
+import { StockType, StockPurchase } from 'types'
 
 interface Props {
-  defaultType?: StockOperationType
+  defaultType?: StockType
   onClose: () => void
   onAdd: (stock: Omit<StockPurchase, '_id'>) => Promise<{ error?: string }>
 }

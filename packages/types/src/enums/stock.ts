@@ -5,5 +5,3 @@ export const STOCK_TYPE = {
 } as const
 
 export type StockType = typeof STOCK_TYPE[keyof typeof STOCK_TYPE]
-
-export type StockOperationType = StockType
