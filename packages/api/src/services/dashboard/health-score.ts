@@ -1,5 +1,6 @@
 import { roundNumber } from '../../utils/roundNumber'
-import type { HealthScore, MonthlyData } from './dashboard.types'
+import type { MonthlyData } from '../utils/insights'
+import type { HealthScore } from './dashboard.types'
 
 /**
  * Computes the savings score using a progressive scale:
