@@ -3,6 +3,7 @@ import { NextFunction, Request, Response } from 'express'
 import '../auth/local-strategy-passport-handler'
 import extractUser from '../helpers/extract-user'
 import { RequestUser } from '../types'
+import { tap } from '../utils/promise'
 import { IDebtService } from '../services/debt.service'
 import { DebtDocument } from '@soker90/finper-models'
 import { validateDebtCreateParams, validateDebtEditParams, validateDebtExist, validateDebtPayParams } from '../validators/debt'
@@ -24,11 +25,11 @@ export class DebtController {
 
   public async create (req: Request, res: Response, next: NextFunction): Promise<void> {
     Promise.resolve(req.body)
-      .tap(({ from }) => this.logger.logInfo(`/create - debt: ${from}`))
+      .then(tap(({ from }) => this.logger.logInfo(`/create - debt: ${from}`)))
       .then(extractUser(req))
       .then(validateDebtCreateParams)
       .then(this.debtService.addDebt.bind(this.debtService))
-      .tap(() => this.logger.logInfo('Debt has been succesfully created'))
+      .then(tap(() => this.logger.logInfo('Debt has been succesfully created')))
       .then((response) => {
         res.send(response)
       })
@@ -39,7 +40,7 @@ export class DebtController {
 
   public async debts (req: Request, res: Response, next: NextFunction): Promise<void> {
     Promise.resolve(req.user as string)
-      .tap((user: string) => this.logger.logInfo(`/debts - list debts of ${user}`))
+      .then(tap((user: string) => this.logger.logInfo(`/debts - list debts of ${user}`)))
       .then(this.debtService.getDebts.bind(this.debtService))
       .then(response => {
         res.send(response)
@@ -50,7 +51,7 @@ export class DebtController {
 
   public async debtsFrom (req: Request, res: Response, next: NextFunction): Promise<void> {
     Promise.resolve(req.params)
-      .tap(() => this.logger.logInfo(`/debts - list debts from ${req.params?.from}`))
+      .then(tap(() => this.logger.logInfo(`/debts - list debts from ${req.params?.from}`)))
       .then(extractUser(req))
       .then(this.debtService.getDebtsFrom.bind(this.debtService))
       .then(response => {
@@ -62,10 +63,10 @@ export class DebtController {
 
   public async edit (req: Request, res: Response, next: NextFunction): Promise<void> {
     Promise.resolve(req as RequestUser)
-      .tap(({ params }) => this.logger.logInfo(`/edit - debt: ${params?.id}`))
+      .then(tap(({ params }) => this.logger.logInfo(`/edit - debt: ${params?.id}`)))
       .then(validateDebtEditParams)
       .then(this.debtService.editDebt.bind(this.debtService))
-      .tap(({ _id }: DebtDocument) => this.logger.logInfo(`Debt ${_id} has been succesfully edited`))
+      .then(tap(({ _id }: DebtDocument) => this.logger.logInfo(`Debt ${_id} has been succesfully edited`)))
       .then((response) => {
         res.send(response)
       })
@@ -76,8 +77,8 @@ export class DebtController {
 
   public async delete (req: Request, res: Response, next: NextFunction): Promise<void> {
     Promise.resolve(req.params.id)
-      .tap((id) => this.logger.logInfo(`/delete - category: ${id}`))
-      .tap(validateDebtExist.bind(null, { id: req.params.id, user: req.user as string }))
+      .then(tap((id) => this.logger.logInfo(`/delete - category: ${id}`)))
+      .then(tap(validateDebtExist.bind(null, { id: req.params.id, user: req.user as string })))
       .then(this.debtService.deleteDebt.bind(this.debtService))
       .then(() => {
         res.status(204).send()
@@ -89,7 +90,7 @@ export class DebtController {
 
   public async pay (req: Request, res: Response, next: NextFunction): Promise<void> {
     Promise.resolve(req as RequestUser)
-      .tap(({ params }) => this.logger.logInfo(`/pay - debt: ${params?.id}`))
+      .then(tap(({ params }) => this.logger.logInfo(`/pay - debt: ${params?.id}`)))
       .then(validateDebtPayParams)
       .then(this.debtService.payDebt.bind(this.debtService))
       .then((response) => {

@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response } from 'express'
 import { ITicketService } from '../services/ticket.service'
 import { ERROR_MESSAGE } from '../i18n/ErrorMessages'
+import { tap } from '../utils/promise'
 
 type ITicketController = {
   loggerHandler: any
@@ -25,7 +26,7 @@ export class TicketController {
     const status = (req.query.status as string) || 'pending'
 
     Promise.resolve(status)
-      .tap(() => this.logger.logInfo(`/tickets - list tickets status=${status}`))
+      .then(tap(() => this.logger.logInfo(`/tickets - list tickets status=${status}`)))
       .then(s => this.ticketService.getTickets(s))
       .then(tickets => {
         res.send({ tickets, total: tickets.length })
@@ -42,7 +43,7 @@ export class TicketController {
     const { id } = req.params
 
     Promise.resolve(id)
-      .tap(() => this.logger.logInfo(`/tickets/${id} - mark as reviewed`))
+      .then(tap(() => this.logger.logInfo(`/tickets/${id} - mark as reviewed`)))
       .then(i => this.ticketService.reviewTicket(i))
       .then(() => {
         res.status(200).send({ success: true, id })
@@ -59,7 +60,7 @@ export class TicketController {
     const { id } = req.params
 
     Promise.resolve(id)
-      .tap(() => this.logger.logInfo(`/tickets/${id} - delete`))
+      .then(tap(() => this.logger.logInfo(`/tickets/${id} - delete`)))
       .then(i => this.ticketService.deleteTicket(i))
       .then(() => {
         res.status(204).send()

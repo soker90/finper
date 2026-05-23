@@ -9,6 +9,7 @@ import validateLoginInputParams from '../validators/validate-login-input-params'
 import validateRegisterInputParams from '../validators/validate-register-input-params'
 
 import '../auth/local-strategy-passport-handler'
+import { tap } from '../utils/promise'
 
 type IAccountController = {
   loggerHandler: any,
@@ -31,10 +32,10 @@ export class AuthController {
 
   public async register (req: Request, res: Response, next: NextFunction): Promise<void> {
     Promise.resolve(req.body)
-      .tap(({ username }) => this.logger.logInfo(`/register - username: ${username && username.toLowerCase()}`))
+      .then(tap(({ username }) => this.logger.logInfo(`/register - username: ${username && username.toLowerCase()}`)))
       .then(validateRegisterInputParams)
       .then(this.userService.createUser.bind(this.userService))
-      .tap(({ username }) => this.logger.logInfo(`User ${username} has been succesfully created`))
+      .then(tap(({ username }) => this.logger.logInfo(`User ${username} has been succesfully created`)))
       .then(({ username }) => {
         const token = this.authService.getSignedToken(username)
         res.send({ token })
@@ -47,7 +48,7 @@ export class AuthController {
   public login (req: Request, res: Response, next: NextFunction) {
     const { authService } = this
     Promise.resolve(req.body)
-      .tap(({ username }) => this.logger.logInfo(`/login - user: ${username && username.toLowerCase()}`))
+      .then(tap(({ username }) => this.logger.logInfo(`/login - user: ${username && username.toLowerCase()}`)))
       .then(validateLoginInputParams)
       .then(() => {
         passport.authenticate('local', function (error: any, user: IUser) {

@@ -2,6 +2,7 @@ import { NextFunction, Request, Response } from 'express'
 
 import '../auth/local-strategy-passport-handler'
 import { IDashboardService } from '../services/dashboard'
+import { tap } from '../utils/promise'
 
 type IDashboardController = {
   loggerHandler: any
@@ -19,7 +20,7 @@ export class DashboardController {
 
   public async stats (req: Request, res: Response, next: NextFunction): Promise<void> {
     Promise.resolve({ user: req.user as string })
-      .tap(() => this.logger.logInfo(`/stats - dashboard stats for ${req.user}`))
+      .then(tap(() => this.logger.logInfo(`/stats - dashboard stats for ${req.user}`)))
       .then(this.dashboardService.getStats.bind(this.dashboardService))
       .then(response => {
         res.send(response)

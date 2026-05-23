@@ -10,6 +10,7 @@ import {
 import { IPropertyService } from '../services/property.service'
 import extractUser from '../helpers/extract-user'
 import { RequestUser } from '../types'
+import { tap } from '../utils/promise'
 
 type IPropertyController = {
   loggerHandler: any,
@@ -27,11 +28,11 @@ export class PropertyController {
 
   public async create (req: Request, res: Response, next: NextFunction): Promise<void> {
     Promise.resolve(req.body)
-      .tap(({ name }) => this.logger.logInfo(`/create - property: ${name}`))
+      .then(tap(({ name }) => this.logger.logInfo(`/create - property: ${name}`)))
       .then(extractUser(req))
       .then(validatePropertyCreateParams)
       .then(this.propertyService.addProperty.bind(this.propertyService))
-      .tap(({ name }: PropertyDocument) => this.logger.logInfo(`Property ${name} has been succesfully created`))
+      .then(tap(({ name }: PropertyDocument) => this.logger.logInfo(`Property ${name} has been succesfully created`)))
       .then((response) => {
         res.send(response)
       })
@@ -42,10 +43,10 @@ export class PropertyController {
 
   public async edit (req: Request, res: Response, next: NextFunction): Promise<void> {
     Promise.resolve(req as unknown as RequestUser)
-      .tap(({ body }) => this.logger.logInfo(`/edit - property: ${body.name}`))
+      .then(tap(({ body }) => this.logger.logInfo(`/edit - property: ${body.name}`)))
       .then(validatePropertyEditParams)
       .then(this.propertyService.editProperty.bind(this.propertyService))
-      .tap(({ _id }: PropertyDocument) => this.logger.logInfo(`Property ${_id} has been succesfully edited`))
+      .then(tap(({ _id }: PropertyDocument) => this.logger.logInfo(`Property ${_id} has been succesfully edited`)))
       .then((response) => {
         res.send(response)
       })
@@ -56,9 +57,9 @@ export class PropertyController {
 
   public async delete (req: Request, res: Response, next: NextFunction): Promise<void> {
     Promise.resolve(req.params as { id: string })
-      .tap(({ id }) => this.logger.logInfo(`/delete - property: ${id}`))
+      .then(tap(({ id }) => this.logger.logInfo(`/delete - property: ${id}`)))
       .then(extractUser(req))
-      .tap(validatePropertyExist)
+      .then(tap(validatePropertyExist))
       .then(this.propertyService.deleteProperty.bind(this.propertyService))
       .then(() => {
         res.sendStatus(204)
