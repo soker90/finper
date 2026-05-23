@@ -1,6 +1,7 @@
 import type { LoanPaymentType } from '@soker90/finper-types'
-import { LOAN_PAYMENT, TRANSACTION } from '@soker90/finper-models'
 import {
+  LOAN_PAYMENT,
+  TRANSACTION,
   ILoan,
   ILoanPayment,
   ILoanEvent,
