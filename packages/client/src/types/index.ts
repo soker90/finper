@@ -11,7 +11,7 @@ export { SUPPLY_TYPE } from '@soker90/finper-types'
 export type { SupplyType } from '@soker90/finper-types'
 
 export { STOCK_TYPE } from '@soker90/finper-types'
-export type { StockType, StockOperationType } from '@soker90/finper-types'
+export type { StockType } from '@soker90/finper-types'
 
 export { GOAL_COLORS, GOAL_ICONS } from '@soker90/finper-types'
 export type { GoalColor, GoalIcon } from '@soker90/finper-types'

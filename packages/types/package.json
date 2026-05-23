@@ -6,8 +6,8 @@
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsc",
-    "lint": "eslint . --ext .ts",
-    "lint:fix": "eslint . --fix --ext .ts"
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix"
   },
   "files": [
     "/dist"

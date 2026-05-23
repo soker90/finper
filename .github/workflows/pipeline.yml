@@ -15,8 +15,8 @@ concurrency:
   cancel-in-progress: ${{ github.ref != 'refs/heads/master' }}
 
 jobs:
-  ## Models ##
-  lint-models:
+  ## Types ##
+  build-types:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
@@ -28,11 +28,17 @@ jobs:
           cache: 'pnpm'
           node-version-file: '.nvmrc'
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-      - name: Lint
-        run: make lint-models
+        run: pnpm install --frozen-lockfile --filter @soker90/finper-types
+      - name: Build
+        run: make build-types
+      - uses: actions/upload-artifact@v7
+        with:
+          name: types
+          path: packages/types/dist
 
-  build-models:
+  ## Models ##
+  lint-models:
+    needs: [ build-types ]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
@@ -43,6 +49,31 @@ jobs:
         with:
           cache: 'pnpm'
           node-version-file: '.nvmrc'
+      - uses: actions/download-artifact@v8
+        with:
+          name: types
+          path: packages/types/dist
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Lint
+        run: make lint-models
+
+  build-models:
+    needs: [ build-types ]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - uses: pnpm/action-setup@v5
+      - uses: actions/setup-node@v6
+        with:
+          cache: 'pnpm'
+          node-version-file: '.nvmrc'
+      - uses: actions/download-artifact@v8
+        with:
+          name: types
+          path: packages/types/dist
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
       - name: Build
@@ -83,6 +114,7 @@ jobs:
 
   ## API ##
   lint-api:
+    needs: [ build-types ]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
@@ -93,6 +125,10 @@ jobs:
         with:
           cache: 'pnpm'
           node-version-file: '.nvmrc'
+      - uses: actions/download-artifact@v8
+        with:
+          name: types
+          path: packages/types/dist
       - name: Install dependencies
         run: pnpm install --frozen-lockfile --filter @soker90/finper-api...
       - name: Lint
@@ -154,6 +190,7 @@ jobs:
 
   ## Frontend ##
   lint-client:
+    needs: [ build-types ]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
@@ -164,12 +201,17 @@ jobs:
         with:
           cache: 'pnpm'
           node-version-file: '.nvmrc'
+      - uses: actions/download-artifact@v8
+        with:
+          name: types
+          path: packages/types/dist
       - name: Install dependencies
         run: pnpm install --frozen-lockfile --filter @soker90/finper-client...
       - name: Lint
         run: make lint-client
 
   build-client:
+    needs: [ build-types ]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
@@ -180,6 +222,10 @@ jobs:
         with:
           cache: 'pnpm'
           node-version-file: '.nvmrc'
+      - uses: actions/download-artifact@v8
+        with:
+          name: types
+          path: packages/types/dist
       - name: Install dependencies
         run: pnpm install --frozen-lockfile --filter @soker90/finper-client...
       - name: Build
