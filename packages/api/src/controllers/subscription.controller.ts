@@ -1,8 +1,6 @@
-import { NextFunction, Request, Response } from 'express'
-import { RequestUser } from '../types'
+import { Request, Response } from 'express'
 
 import '../auth/local-strategy-passport-handler'
-import extractUser from '../helpers/extract-user'
 import { ISubscriptionService } from '../services/subscription.service'
 import { ISubscriptionCandidateService } from '../services/subscription-candidate.service'
 import {
@@ -12,7 +10,6 @@ import {
   validateSubscriptionLinkParams
 } from '../validators/subscription'
 import { validateCandidateExist } from '../validators/subscription-candidate'
-import { tap } from '../utils/promise'
 
 type ISubscriptionController = {
   loggerHandler: any,
@@ -31,112 +28,111 @@ export class SubscriptionController {
     this.subscriptionCandidateService = subscriptionCandidateService
   }
 
-  public async create (req: Request, res: Response, next: NextFunction): Promise<void> {
-    Promise.resolve(req.body)
-      .then(tap(() => this.logger.logInfo('/create - new subscription')))
-      .then(extractUser(req))
-      .then(validateSubscriptionCreateParams)
-      .then(this.subscriptionService.addSubscription.bind(this.subscriptionService))
-      .then(tap((created) => { /* istanbul ignore next */ if (created) this.logger.logInfo(`Subscription ${created.id} has been successfully created`) }))
-      .then((response) => { res.send(response) })
-      .catch((error) => { next(error) })
+  public async create (req: Request, res: Response): Promise<void> {
+    this.logger.logInfo('/create - new subscription')
+
+    const params = await validateSubscriptionCreateParams({ ...req.body, user: req.user })
+    const response = await this.subscriptionService.addSubscription(params)
+
+    /* istanbul ignore next */
+    if (response) this.logger.logInfo(`Subscription ${response.id} has been successfully created`)
+    res.send(response)
   }
 
-  public async list (req: Request, res: Response, next: NextFunction): Promise<void> {
-    Promise.resolve(req.user as string)
-      .then(tap((user) => this.logger.logInfo(`/subscriptions - list for ${user}`)))
-      .then(this.subscriptionService.getSubscriptions.bind(this.subscriptionService))
-      .then((response) => { res.send(response) })
-      .catch((error) => { next(error) })
+  public async list (req: Request, res: Response): Promise<void> {
+    this.logger.logInfo(`/subscriptions - list for ${req.user}`)
+
+    const response = await this.subscriptionService.getSubscriptions(req.user)
+    res.send(response)
   }
 
-  public async edit (req: Request, res: Response, next: NextFunction): Promise<void> {
-    Promise.resolve(req as RequestUser)
-      .then(tap(({ params }) => this.logger.logInfo(`/edit - subscription: ${params.id}`)))
-      .then(validateSubscriptionEditParams)
-      .then(({ id, value }) => this.subscriptionService.editSubscription(id, value))
-      .then(tap((updated) => { /* istanbul ignore next */ if (updated) this.logger.logInfo(`Subscription ${updated.id} has been successfully edited`) }))
-      .then((response) => { res.send(response) })
-      .catch((error) => { next(error) })
+  public async edit (req: Request, res: Response): Promise<void> {
+    this.logger.logInfo(`/edit - subscription: ${req.params.id}`)
+
+    const { id, value } = await validateSubscriptionEditParams({ params: req.params, body: req.body, user: req.user })
+    const response = await this.subscriptionService.editSubscription(id, value)
+
+    /* istanbul ignore next */
+    if (response) this.logger.logInfo(`Subscription ${response.id} has been successfully edited`)
+    res.send(response)
   }
 
-  public async delete (req: Request, res: Response, next: NextFunction): Promise<void> {
-    Promise.resolve({ id: req.params.id })
-      .then(tap(({ id }) => this.logger.logInfo(`/delete - subscription: ${id}`)))
-      .then(extractUser(req))
-      .then(tap(({ id, user }) => validateSubscriptionExist(id, user as string)))
-      .then(({ id }) => this.subscriptionService.deleteSubscription(id))
-      .then(() => { res.status(204).send() })
-      .catch((error) => { next(error) })
+  public async delete (req: Request, res: Response): Promise<void> {
+    const { id } = req.params
+    this.logger.logInfo(`/delete - subscription: ${id}`)
+
+    await validateSubscriptionExist(id, req.user)
+    await this.subscriptionService.deleteSubscription(id)
+
+    res.status(204).send()
   }
 
-  public async getMatchingTransactions (req: Request, res: Response, next: NextFunction): Promise<void> {
-    Promise.resolve({ id: req.params.id })
-      .then(tap(({ id }) => this.logger.logInfo(`/matching-transactions - subscription: ${id}`)))
-      .then(extractUser(req))
-      .then(({ id, user }) => this.subscriptionService.getMatchingTransactions(id, user as string))
-      .then((response) => { res.send(response) })
-      .catch((error) => { next(error) })
+  public async getMatchingTransactions (req: Request, res: Response): Promise<void> {
+    const { id } = req.params
+    this.logger.logInfo(`/matching-transactions - subscription: ${id}`)
+
+    const response = await this.subscriptionService.getMatchingTransactions(id, req.user)
+    res.send(response)
   }
 
-  public async linkTransactions (req: Request, res: Response, next: NextFunction): Promise<void> {
-    Promise.resolve({ id: req.params.id, transactionIds: req.body.transactionIds })
-      .then(tap(({ id }) => this.logger.logInfo(`/link-transactions - subscription: ${id}`)))
-      .then(extractUser(req))
-      .then(tap(({ id, user }) => validateSubscriptionExist(id, user as string)))
-      .then(validateSubscriptionLinkParams)
-      .then(({ id, transactionIds }) => this.subscriptionService.linkTransactions(id, transactionIds))
-      .then(() => { res.status(204).send() })
-      .catch((error) => { next(error) })
+  public async linkTransactions (req: Request, res: Response): Promise<void> {
+    const { id } = req.params
+    this.logger.logInfo(`/link-transactions - subscription: ${id}`)
+
+    await validateSubscriptionExist(id, req.user)
+    const { transactionIds } = validateSubscriptionLinkParams({ id, transactionIds: req.body.transactionIds, user: req.user })
+    await this.subscriptionService.linkTransactions(id, transactionIds)
+
+    res.status(204).send()
   }
 
-  public async unlinkTransaction (req: Request, res: Response, next: NextFunction): Promise<void> {
-    Promise.resolve({ id: req.params.id, transactionId: req.params.transactionId })
-      .then(tap(({ id, transactionId }) => this.logger.logInfo(`/unlink-transaction - subscription: ${id}, transaction: ${transactionId}`)))
-      .then(extractUser(req))
-      .then(tap(({ id, user }) => validateSubscriptionExist(id, user)))
-      .then(({ id, transactionId }) => this.subscriptionService.unlinkTransaction(id, transactionId))
-      .then(() => { res.status(204).send() })
-      .catch((error) => { next(error) })
+  public async unlinkTransaction (req: Request, res: Response): Promise<void> {
+    const { id, transactionId } = req.params
+    this.logger.logInfo(`/unlink-transaction - subscription: ${id}, transaction: ${transactionId}`)
+
+    await validateSubscriptionExist(id, req.user)
+    await this.subscriptionService.unlinkTransaction(id, transactionId)
+
+    res.status(204).send()
   }
 
   // --- Candidates ---
 
-  public async getTransactions (req: Request, res: Response, next: NextFunction): Promise<void> {
-    Promise.resolve({ id: req.params.id })
-      .then(tap(({ id }) => this.logger.logInfo(`/transactions - subscription: ${id}`)))
-      .then(extractUser(req))
-      .then(tap(({ id, user }) => validateSubscriptionExist(id, user)))
-      .then(({ id, user }) => this.subscriptionService.getTransactionsBySubscription(id, user))
-      .then((response) => { res.send(response) })
-      .catch((error) => { next(error) })
+  public async getTransactions (req: Request, res: Response): Promise<void> {
+    const { id } = req.params
+    this.logger.logInfo(`/transactions - subscription: ${id}`)
+
+    await validateSubscriptionExist(id, req.user)
+    const response = await this.subscriptionService.getTransactionsBySubscription(id, req.user)
+
+    res.send(response)
   }
 
-  public async listCandidates (req: Request, res: Response, next: NextFunction): Promise<void> {
-    Promise.resolve(req.user as string)
-      .then(tap((user) => this.logger.logInfo(`/subscription-candidates - list for ${user}`)))
-      .then(this.subscriptionCandidateService.getCandidates.bind(this.subscriptionCandidateService))
-      .then((response) => { res.send(response) })
-      .catch((error) => { next(error) })
+  public async listCandidates (req: Request, res: Response): Promise<void> {
+    this.logger.logInfo(`/subscription-candidates - list for ${req.user}`)
+
+    const response = await this.subscriptionCandidateService.getCandidates(req.user)
+    res.send(response)
   }
 
-  public async assignCandidate (req: Request, res: Response, next: NextFunction): Promise<void> {
-    Promise.resolve({ id: req.params.id, subscriptionId: req.body.subscriptionId })
-      .then(tap(({ id, subscriptionId }) => this.logger.logInfo(`/assign - candidate: ${id} → subscription: ${subscriptionId}`)))
-      .then(extractUser(req))
-      .then(tap(({ id, user }) => validateCandidateExist(id, user)))
-      .then(({ id, subscriptionId }) => this.subscriptionCandidateService.assignSubscription(id, subscriptionId))
-      .then(() => { res.status(204).send() })
-      .catch((error) => { next(error) })
+  public async assignCandidate (req: Request, res: Response): Promise<void> {
+    const { id } = req.params
+    const { subscriptionId } = req.body
+    this.logger.logInfo(`/assign - candidate: ${id} → subscription: ${subscriptionId}`)
+
+    await validateCandidateExist(id, req.user)
+    await this.subscriptionCandidateService.assignSubscription(id, subscriptionId)
+
+    res.status(204).send()
   }
 
-  public async dismissCandidate (req: Request, res: Response, next: NextFunction): Promise<void> {
-    Promise.resolve({ id: req.params.id })
-      .then(tap(({ id }) => this.logger.logInfo(`/dismiss - candidate: ${id}`)))
-      .then(extractUser(req))
-      .then(tap(({ id, user }) => validateCandidateExist(id, user)))
-      .then(({ id }) => this.subscriptionCandidateService.dismissCandidate(id))
-      .then(() => { res.status(204).send() })
-      .catch((error) => { next(error) })
+  public async dismissCandidate (req: Request, res: Response): Promise<void> {
+    const { id } = req.params
+    this.logger.logInfo(`/dismiss - candidate: ${id}`)
+
+    await validateCandidateExist(id, req.user)
+    await this.subscriptionCandidateService.dismissCandidate(id)
+
+    res.status(204).send()
   }
 }
