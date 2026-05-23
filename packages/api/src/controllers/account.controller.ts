@@ -3,7 +3,6 @@ import { Request, Response } from 'express'
 import { IAccountService } from '../services/account.service'
 import { validateAccountCreateParams, validateAccountEditParams, validateAccountExist, validateAccountTransferParams, validateAccountTransferExist } from '../validators/account'
 import '../auth/local-strategy-passport-handler'
-import { RequestUser } from '../types'
 
 type IAccountController = {
   loggerHandler: any,
@@ -25,7 +24,7 @@ export class AccountController {
     this.logger.logInfo(`/create - account: ${name?.toLowerCase()}`)
 
     const params = validateAccountCreateParams(req.body)
-    const response = await this.accountService.addAccount({ ...params, user: req.user as string })
+    const response = await this.accountService.addAccount({ ...params, user: req.user })
 
     this.logger.logInfo(`Account ${response.name} has been succesfully created`)
     res.send(response)
@@ -34,14 +33,14 @@ export class AccountController {
   public async accounts (req: Request, res: Response): Promise<void> {
     this.logger.logInfo(`/accounts - list accounts of ${req.user}`)
 
-    const response = await this.accountService.getAccounts(req.user as string)
+    const response = await this.accountService.getAccounts(req.user)
     res.send(response)
   }
 
   public async edit (req: Request, res: Response): Promise<void> {
     this.logger.logInfo(`/edit - account: ${req.body.name?.toLowerCase()}`)
 
-    const params = await validateAccountEditParams(req as RequestUser)
+    const params = await validateAccountEditParams(req)
     const response = await this.accountService.editAccount(params)
 
     this.logger.logInfo(`Account ${response._id} has been succesfully edited`)
@@ -50,7 +49,7 @@ export class AccountController {
 
   public async account (req: Request, res: Response): Promise<void> {
     const { id } = req.params
-    const user = req.user as string
+    const { user } = req
     this.logger.logInfo(`/account - account: ${id}`)
 
     await validateAccountExist(id, user)
@@ -63,7 +62,7 @@ export class AccountController {
     this.logger.logInfo('/transfer - account transfer')
 
     const params = validateAccountTransferParams(req.body)
-    await validateAccountTransferExist({ ...params, user: req.user as string })
+    await validateAccountTransferExist({ ...params, user: req.user })
     await this.accountService.transfer(params)
 
     this.logger.logInfo('Account transfer has been successfully processed')
