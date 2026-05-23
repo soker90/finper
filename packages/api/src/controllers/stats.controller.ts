@@ -1,8 +1,7 @@
-import { NextFunction, Request, Response } from 'express'
+import { Request, Response } from 'express'
 
 import { IStatsService } from '../services/stats.service'
 import { validateStatsYearParam } from '../validators/stats'
-import { tap } from '../utils/promise'
 
 type IStatsController = {
   loggerHandler: any,
@@ -18,74 +17,48 @@ export class StatsController {
     this.statsService = statsService
   }
 
-  public getAvailableTags (req: Request, res: Response, next: NextFunction): void {
-    Promise.resolve(req.user as string)
-      .then(tap(() => this.logger.logInfo('/tags/available - list available tags')))
-      .then(this.statsService.getAvailableTags.bind(this.statsService))
-      .then((response) => {
-        res.send(response)
-      })
-      .catch((error) => {
-        next(error)
-      })
+  public async getAvailableTags (req: Request, res: Response): Promise<void> {
+    this.logger.logInfo('/tags/available - list available tags')
+
+    const response = await this.statsService.getAvailableTags(req.user)
+
+    res.send(response)
   }
 
-  public getAvailableYears (req: Request, res: Response, next: NextFunction): void {
-    Promise.resolve(req.user as string)
-      .then(tap(() => this.logger.logInfo('/tags/years - list available years')))
-      .then(this.statsService.getAvailableYears.bind(this.statsService))
-      .then((response) => {
-        res.send(response)
-      })
-      .catch((error) => {
-        next(error)
-      })
+  public async getAvailableYears (req: Request, res: Response): Promise<void> {
+    this.logger.logInfo('/tags/years - list available years')
+
+    const response = await this.statsService.getAvailableYears(req.user)
+
+    res.send(response)
   }
 
-  public getTagsSummary (req: Request, res: Response, next: NextFunction): void {
-    const user = req.user as string
+  public async getTagsSummary (req: Request, res: Response): Promise<void> {
     const year = req.query.year ? Number(req.query.year) : new Date().getFullYear()
+    this.logger.logInfo('/tags - list tags summary')
 
-    Promise.resolve(user)
-      .then(tap(() => this.logger.logInfo('/tags - list tags summary')))
-      .then((u) => this.statsService.getTagsSummary(u, year))
-      .then((response) => {
-        res.send(response)
-      })
-      .catch((error) => {
-        next(error)
-      })
+    const response = await this.statsService.getTagsSummary(req.user, year)
+
+    res.send(response)
   }
 
-  public getTagHistoric (req: Request, res: Response, next: NextFunction): void {
-    const user = req.user as string
-    const tagName = req.params.tagName
+  public async getTagHistoric (req: Request, res: Response): Promise<void> {
+    const { tagName } = req.params
+    this.logger.logInfo(`/tags/${tagName} - get tag historic`)
 
-    Promise.resolve(user)
-      .then(tap(() => this.logger.logInfo(`/tags/${tagName} - get tag historic`)))
-      .then((u) => this.statsService.getTagHistoric(u, tagName))
-      .then((response) => {
-        res.send(response)
-      })
-      .catch((error) => {
-        next(error)
-      })
+    const response = await this.statsService.getTagHistoric(req.user, tagName)
+
+    res.send(response)
   }
 
-  public getTagDetail (req: Request, res: Response, next: NextFunction): void {
-    const user = req.user as string
-    const tagName = req.params.tagName
-    const year = Number(req.params.year)
+  public async getTagDetail (req: Request, res: Response): Promise<void> {
+    const { tagName, year: yearParam } = req.params
+    const year = Number(yearParam)
+    validateStatsYearParam(year)
+    this.logger.logInfo(`/tags/${tagName}/${year} - get tag detail`)
 
-    Promise.resolve(user)
-      .then(tap(() => validateStatsYearParam(year)))
-      .then(tap(() => this.logger.logInfo(`/tags/${tagName}/${year} - get tag detail`)))
-      .then((u) => this.statsService.getTagDetail(u, tagName, year))
-      .then((response) => {
-        res.send(response)
-      })
-      .catch((error) => {
-        next(error)
-      })
+    const response = await this.statsService.getTagDetail(req.user, tagName, year)
+
+    res.send(response)
   }
 }
