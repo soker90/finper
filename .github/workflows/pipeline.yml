@@ -148,6 +148,10 @@ jobs:
           node-version-file: '.nvmrc'
       - uses: actions/download-artifact@v8
         with:
+          name: types
+          path: packages/types/dist
+      - uses: actions/download-artifact@v8
+        with:
           name: models
           path: packages/models/dist
       - name: Install dependencies
@@ -175,6 +179,10 @@ jobs:
         with:
           path: ~/.cache/mongodb-binaries
           key: mongodb-binaries-${{ runner.os }}
+      - uses: actions/download-artifact@v8
+        with:
+          name: types
+          path: packages/types/dist
       - uses: actions/download-artifact@v8
         with:
           name: models
