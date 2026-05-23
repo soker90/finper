@@ -5,7 +5,7 @@ import { SWRConfig } from 'swr'
 import { server } from '../../../../mock/server'
 import { render } from '../../../../test/testUtils'
 import SubscriptionCard from '.'
-import { Subscription, TRANSACTION } from 'types'
+import { Subscription } from 'types'
 
 const NOW = Date.now()
 const FIVE_DAYS = 5 * 24 * 60 * 60 * 1000
@@ -89,7 +89,7 @@ describe('SubscriptionCard', () => {
       _id: `tx-${i}`,
       date: NOW - i * 24 * 60 * 60 * 1000,
       amount: 9.99,
-      type: TRANSACTION.Expense,
+      type: 'expense',
       category: { _id: 'cat-1', name: 'Ocio' },
       account: { _id: 'acc-1', name: 'Mi cuenta', bank: 'BBVA' }
     }))
@@ -134,7 +134,7 @@ describe('SubscriptionCard', () => {
         _id: 'tx-unlink',
         date: NOW - 86400000,
         amount: 9.99,
-        type: TRANSACTION.Expense,
+        type: 'expense',
         category: { _id: 'cat-1', name: 'Ocio' },
         account: { _id: 'acc-1', name: 'Mi cuenta', bank: 'BBVA' }
       }

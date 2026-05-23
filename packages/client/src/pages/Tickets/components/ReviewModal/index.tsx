@@ -7,7 +7,7 @@ import { ModalGrid, DateForm, InputForm, SelectForm, SelectGroupForm } from 'com
 import AutocompleteForm from 'components/forms/AutocompleteForm'
 import { addTransaction } from 'services/apiService'
 import { TRANSACTIONS } from 'constants/api-paths'
-import { Ticket, TransactionType, TRANSACTION } from 'types'
+import { Ticket, TransactionType } from 'types'
 import { useAccounts, useGroupedCategories, useTickets, useStores } from 'hooks'
 import { TYPES_TRANSACTIONS_ENTRIES } from 'constants/transactions'
 
@@ -38,7 +38,7 @@ const ReviewModal = ({ ticket, onClose }: Props) => {
       amount: ticket.amount ?? 0,
       account: '',
       category: '',
-      type: TRANSACTION.Expense,
+      type: 'expense',
       store: ticket.store ?? ''
     }
   })
