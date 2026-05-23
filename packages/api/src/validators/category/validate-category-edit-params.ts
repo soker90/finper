@@ -9,11 +9,11 @@ export const validateCategoryEditParams = async ({
   params,
   body,
   user
-}: { params: Record<string, string>, body: Record<string, string>, user: string }): Promise<{ id: string, value: ICategory }> => {
-  await validateCategoryExist({ id: params.id, user })
+}: { params: Record<string, string>, body: Record<string, string>, user?: string }): Promise<{ id: string, value: ICategory }> => {
+  await validateCategoryExist({ id: params.id, user: user as string })
 
   if (body.parent) {
-    await validateCategoryExist({ id: body.parent, message: ERROR_MESSAGE.CATEGORY.PARENT_NOT_FOUND, user })
+    await validateCategoryExist({ id: body.parent, message: ERROR_MESSAGE.CATEGORY.PARENT_NOT_FOUND, user: user as string })
   }
 
   const schema = Joi.object({

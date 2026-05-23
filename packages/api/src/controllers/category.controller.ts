@@ -1,16 +1,12 @@
-import { NextFunction, Request, Response } from 'express'
+import { Request, Response } from 'express'
 
 import '../auth/local-strategy-passport-handler'
-import { CategoryDocument } from '@soker90/finper-models'
 import {
   validateCategoryCreateParams,
   validateCategoryEditParams,
   validateCategoryExist
 } from '../validators/category'
 import { ICategoryService } from '../services/category.service'
-import extractUser from '../helpers/extract-user'
-import { RequestUser } from '../types'
-import { tap } from '../utils/promise'
 
 type ICategoryController = {
   loggerHandler: any,
@@ -27,68 +23,49 @@ export class CategoryController {
     this.categoryService = categoryService
   }
 
-  public async create (req: Request, res: Response, next: NextFunction): Promise<void> {
-    Promise.resolve(req.body)
-      .then(tap(({ name }) => this.logger.logInfo(`/create - category: ${name?.toLowerCase()}`)))
-      .then(validateCategoryCreateParams.bind(null, { user: req.user as string, body: req.body }))
-      .then(extractUser(req))
-      .then(this.categoryService.addCategory.bind(this.categoryService))
-      .then(tap(({ name }) => this.logger.logInfo(`Category ${name} has been succesfully created`)))
-      .then((response) => {
-        res.send(response)
-      })
-      .catch((error) => {
-        next(error)
-      })
+  public async create (req: Request, res: Response): Promise<void> {
+    const { name } = req.body
+    this.logger.logInfo(`/create - category: ${name?.toLowerCase()}`)
+
+    const params = await validateCategoryCreateParams({ body: req.body, user: req.user })
+    const response = await this.categoryService.addCategory({ ...params, user: req.user })
+
+    this.logger.logInfo(`Category ${response.name} has been succesfully created`)
+    res.send(response)
   }
 
-  public async categories (req: Request, res: Response, next: NextFunction): Promise<void> {
-    Promise.resolve(req.user as string)
-      .then(tap((user: string) => this.logger.logInfo(`/categories - list categories of ${user}`)))
-      .then(this.categoryService.getCategories.bind(this.categoryService))
-      .then(response => {
-        res.send(response)
-      }).catch(error => {
-        next(error)
-      })
+  public async categories (req: Request, res: Response): Promise<void> {
+    this.logger.logInfo(`/categories - list categories of ${req.user}`)
+
+    const response = await this.categoryService.getCategories(req.user)
+    res.send(response)
   }
 
-  public async categoriesGrouped (req: Request, res: Response, next: NextFunction): Promise<void> {
-    Promise.resolve(req)
-      .then(tap(() => this.logger.logInfo('/categories - list categories')))
-      .then(this.categoryService.getGroupedCategories.bind(this.categoryService))
-      .then(response => {
-        res.send(response)
-      }).catch(error => {
-        next(error)
-      })
+  public async categoriesGrouped (_req: Request, res: Response): Promise<void> {
+    this.logger.logInfo('/categories - list categories')
+
+    const response = await this.categoryService.getGroupedCategories()
+    res.send(response)
   }
 
-  public async edit (req: Request, res: Response, next: NextFunction): Promise<void> {
-    Promise.resolve(req as RequestUser)
-      .then(tap(({ body }) => this.logger.logInfo(`/edit - category: ${body.name}`)))
-      .then(validateCategoryEditParams)
-      .then(this.categoryService.editCategory.bind(this.categoryService))
-      .then(tap(({ _id }: CategoryDocument) => this.logger.logInfo(`Category ${_id} has been succesfully edited`)))
-      .then((response) => {
-        res.send(response)
-      })
-      .catch((error) => {
-        next(error)
-      })
+  public async edit (req: Request, res: Response): Promise<void> {
+    this.logger.logInfo(`/edit - category: ${req.body.name}`)
+
+    const params = await validateCategoryEditParams(req)
+    const response = await this.categoryService.editCategory(params)
+
+    this.logger.logInfo(`Category ${response._id} has been succesfully edited`)
+    res.send(response)
   }
 
   // TODO validar que no es padre de ninguna categoria
-  public async delete (req: Request, res: Response, next: NextFunction): Promise<void> {
-    Promise.resolve(req.params as { id: string })
-      .then(tap(({ id }) => this.logger.logInfo(`/delete - category: ${id}`)))
-      .then(tap(validateCategoryExist.bind(null, { id: req.params.id, user: req.user as string })))
-      .then(this.categoryService.deleteCategory.bind(this.categoryService))
-      .then((response) => {
-        res.send(response)
-      })
-      .catch((error) => {
-        next(error)
-      })
+  public async delete (req: Request, res: Response): Promise<void> {
+    const { id } = req.params
+    this.logger.logInfo(`/delete - category: ${id}`)
+
+    await validateCategoryExist({ id, user: req.user })
+    const response = await this.categoryService.deleteCategory({ id })
+
+    res.send(response)
   }
 }
