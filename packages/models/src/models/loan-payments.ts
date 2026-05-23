@@ -6,8 +6,6 @@ export const LOAN_PAYMENT = {
   EXTRAORDINARY: 'extraordinary',
 } as const
 
-export type { LoanPaymentType }
-
 export interface ILoanPayment {
   loan: Types.ObjectId
   date: number

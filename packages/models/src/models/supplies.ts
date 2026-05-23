@@ -8,8 +8,6 @@ export const SUPPLY_TYPE = {
   OTHER: 'other',
 } as const
 
-export type { SupplyType }
-
 export interface ISupply {
   name?: string
   type: SupplyType

@@ -6,8 +6,6 @@ export const DEBT = {
   TO: 'to',
 } as const
 
-export type { DebtType }
-
 export interface IDebt {
   from: string
   date: number

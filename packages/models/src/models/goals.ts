@@ -27,8 +27,6 @@ export const GOAL_ICONS = [
   'StarOutlined',
 ] as const
 
-export type { GoalColor, GoalIcon }
-
 export interface IGoal {
   name: string
   targetAmount: number

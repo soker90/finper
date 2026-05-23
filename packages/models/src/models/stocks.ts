@@ -7,8 +7,6 @@ export const STOCK_TYPE = {
   Dividend: 'dividend',
 } as const
 
-export type { StockType }
-
 export interface IStock {
   ticker: string
   name: string

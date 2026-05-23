@@ -6,22 +6,22 @@ import mongooseConnect from './mongoose-connect'
 
 import { IAccount, AccountModel } from './models/accounts'
 import { IBudget, BudgetModel } from './models/budgets'
-import { ICategory, CategoryModel, BUDGET_RULE_CLASS, BudgetRuleClassType } from './models/categories'
-import { IDebt, DebtModel, DebtType, DEBT } from './models/debts'
+import { ICategory, CategoryModel, BUDGET_RULE_CLASS } from './models/categories'
+import { IDebt, DebtModel, DEBT } from './models/debts'
 import { IPension, PensionModel } from './models/pensions'
 import { IStore, StoreModel } from './models/stores'
-import { ITransaction, TransactionModel, TransactionType, TRANSACTION } from './models/transactions'
+import { ITransaction, TransactionModel, TRANSACTION } from './models/transactions'
 import { IUser, UserModel } from './models/users'
 import { ILoan, LoanModel } from './models/loans'
-import { ILoanPayment, LoanPaymentModel, LoanPaymentType, LOAN_PAYMENT } from './models/loan-payments'
+import { ILoanPayment, LoanPaymentModel, LOAN_PAYMENT } from './models/loan-payments'
 import { ILoanEvent, LoanEventModel } from './models/loan-events'
 import { ISubscription, SubscriptionModel } from './models/subscriptions'
 import { ISubscriptionCandidate, SubscriptionCandidateModel } from './models/subscription-candidates'
 import { IProperty, PropertyModel } from './models/properties'
-import { ISupply, SupplyModel, SUPPLY_TYPE, SupplyType } from './models/supplies'
+import { ISupply, SupplyModel, SUPPLY_TYPE } from './models/supplies'
 import { ISupplyReading, SupplyReadingModel } from './models/supply-readings'
-import { IStock, StockModel, STOCK_TYPE, StockType } from './models/stocks'
-import { IGoal, GoalModel, GOAL_COLORS, GoalColor, GOAL_ICONS, GoalIcon } from './models/goals'
+import { IStock, StockModel, STOCK_TYPE } from './models/stocks'
+import { IGoal, GoalModel, GOAL_COLORS, GOAL_ICONS } from './models/goals'
 
 export type { AccountDocument } from './models/accounts'
 export type { BudgetDocument } from './models/budgets'
@@ -65,23 +65,15 @@ export {
   Types,
 
   DEBT,
-  DebtType,
   LOAN_PAYMENT,
-  LoanPaymentType,
   TRANSACTION,
-  TransactionType,
   SUPPLY_TYPE,
-  SupplyType,
   STOCK_TYPE,
-  StockType,
 
   GOAL_COLORS,
-  GoalColor,
   GOAL_ICONS,
-  GoalIcon,
 
   BUDGET_RULE_CLASS,
-  BudgetRuleClassType,
 
   IAccount,
   IBudget,

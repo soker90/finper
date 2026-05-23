@@ -7,8 +7,6 @@ export const TRANSACTION = {
   NotComputable: 'not_computable',
 } as const
 
-export type { TransactionType }
-
 export type TransactionDocument = HydratedDocument<ITransaction>
 
 export interface ITransaction {

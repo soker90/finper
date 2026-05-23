@@ -1,8 +1,6 @@
 import { model, Schema, Types, HydratedDocument } from 'mongoose'
-import { TransactionType, TRANSACTION } from './transactions'
-import type { BudgetRuleClassType } from '@soker90/finper-types'
-
-export type { BudgetRuleClassType }
+import type { TransactionType, BudgetRuleClassType } from '@soker90/finper-types'
+import { TRANSACTION } from './transactions'
 
 export const BUDGET_RULE_CLASS = {
   Needs: 'needs',
