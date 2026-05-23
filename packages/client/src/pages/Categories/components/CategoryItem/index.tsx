@@ -1,14 +1,14 @@
 import { FC, useState } from 'react'
 import { Chip, Collapse, Divider, Paper, Typography, useTheme } from '@mui/material'
 
-import { Category } from 'types'
+import { Category, TransactionType } from 'types'
 import { ItemContent } from 'components'
 
 import CategorytEdit from '../CategorytEdit'
 import { TRANSACTION } from 'types'
 import styles from './styles.module.css'
 
-const CATEGORY_TYPE = {
+const CATEGORY_TYPE: Record<TransactionType, string> = {
   [TRANSACTION.Income]: 'Ingreso',
   [TRANSACTION.Expense]: 'Gasto',
   [TRANSACTION.NotComputable]: 'No computable'

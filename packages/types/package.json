@@ -2,7 +2,6 @@
   "name": "@soker90/finper-types",
   "version": "1.0.0",
   "description": "Shared TypeScript types for finper",
-  "type": "module",
   "types": "dist/index.d.ts",
   "exports": {
     ".": {
