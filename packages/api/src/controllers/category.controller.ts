@@ -41,17 +41,17 @@ export class CategoryController {
     res.send(response)
   }
 
-  public async categoriesGrouped (_req: Request, res: Response): Promise<void> {
+  public async categoriesGrouped (req: Request, res: Response): Promise<void> {
     this.logger.logInfo('/categories - list categories')
 
-    const response = await this.categoryService.getGroupedCategories()
+    const response = await this.categoryService.getGroupedCategories(req.user)
     res.send(response)
   }
 
   public async edit (req: Request, res: Response): Promise<void> {
     this.logger.logInfo(`/edit - category: ${req.body.name}`)
 
-    const params = await validateCategoryEditParams(req)
+    const params = await validateCategoryEditParams({ params: req.params, body: req.body, user: req.user })
     const response = await this.categoryService.editCategory(params)
 
     this.logger.logInfo(`Category ${response._id} has been succesfully edited`)

@@ -11,7 +11,7 @@ export interface ICategoryService {
 
   getCategories(user: string): Promise<CategoryDocument[]>
 
-  getGroupedCategories(): Promise<any[]>
+  getGroupedCategories(user: string): Promise<any[]>
 
 }
 
@@ -20,18 +20,23 @@ export default class CategoryService implements ICategoryService {
     return CategoryModel.find({ user }, '_id name type budgetRuleClass').populate('parent', '_id').sort('name')
   }
 
-  public async getGroupedCategories (): Promise<any[]> {
+  public async getGroupedCategories (user: string): Promise<any[]> {
     return CategoryModel.aggregate([
       {
         $match: {
-          parent: { $exists: false }
+          parent: { $exists: false },
+          user
         }
       },
       {
         $lookup: {
           from: 'categories',
-          localField: '_id',
-          foreignField: 'parent',
+          let: { parentId: '$_id' },
+          pipeline: [
+            { $match: { $expr: { $eq: ['$parent', '$$parentId'] }, user } },
+            { $project: { _id: 1, name: 1 } },
+            { $sort: { name: 1 } }
+          ],
           as: 'children'
         }
       },
@@ -39,13 +44,10 @@ export default class CategoryService implements ICategoryService {
         $project: {
           _id: 1,
           name: 1,
-          children: {
-            _id: 1,
-            name: 1
-          }
+          children: 1
         }
       },
-      { $sort: { name: 1, children: 1 } }
+      { $sort: { name: 1 } }
     ])
   }
 

@@ -1,7 +1,6 @@
 import Joi from 'joi'
 import Boom from '@hapi/boom'
-import { TRANSACTION } from '@soker90/finper-models'
-import { ICategory } from '@soker90/finper-models'
+import { TRANSACTION, ICategory } from '@soker90/finper-models'
 import { validateCategoryExist } from './validate-category-exist'
 import { ERROR_MESSAGE } from '../../i18n'
 
@@ -9,11 +8,11 @@ export const validateCategoryEditParams = async ({
   params,
   body,
   user
-}: { params: Record<string, string>, body: Record<string, string>, user?: string }): Promise<{ id: string, value: ICategory }> => {
-  await validateCategoryExist({ id: params.id, user: user as string })
+}: { params: Record<string, string>, body: Record<string, string>, user: string }): Promise<{ id: string, value: ICategory }> => {
+  await validateCategoryExist({ id: params.id, user })
 
   if (body.parent) {
-    await validateCategoryExist({ id: body.parent, message: ERROR_MESSAGE.CATEGORY.PARENT_NOT_FOUND, user: user as string })
+    await validateCategoryExist({ id: body.parent, message: ERROR_MESSAGE.CATEGORY.PARENT_NOT_FOUND, user })
   }
 
   const schema = Joi.object({
