@@ -1,8 +1,6 @@
-import { NextFunction, Request, Response } from 'express'
+import { Request, Response } from 'express'
 
-import '../auth/local-strategy-passport-handler'
 import { IDashboardService } from '../services/dashboard'
-import { tap } from '../utils/promise'
 
 type IDashboardController = {
   loggerHandler: any
@@ -18,15 +16,11 @@ export class DashboardController {
     this.dashboardService = dashboardService
   }
 
-  public async stats (req: Request, res: Response, next: NextFunction): Promise<void> {
-    Promise.resolve({ user: req.user as string })
-      .then(tap(() => this.logger.logInfo(`/stats - dashboard stats for ${req.user}`)))
-      .then(this.dashboardService.getStats.bind(this.dashboardService))
-      .then(response => {
-        res.send(response)
-      })
-      .catch((error) => {
-        next(error)
-      })
+  public async stats (req: Request, res: Response): Promise<void> {
+    this.logger.logInfo(`/stats - dashboard stats for ${req.user}`)
+
+    const response = await this.dashboardService.getStats({ user: req.user })
+
+    res.send(response)
   }
 }
