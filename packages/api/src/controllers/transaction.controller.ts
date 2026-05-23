@@ -1,9 +1,7 @@
-import { NextFunction, Request, Response } from 'express'
+import { Request, Response } from 'express'
 
 import '../auth/local-strategy-passport-handler'
 import { ITransactionService } from '../services/transaction.service'
-import extractUser from '../helpers/extract-user'
-import { TransactionDocument } from '@soker90/finper-models'
 import {
   validateTransactionCreateParams,
   validateTransactionGetParams,
@@ -11,8 +9,6 @@ import {
   validateTransactionExist
 } from '../validators/transaction'
 import { IStoreService } from '../services/stores.service'
-import { RequestUser } from '../types'
-import { tap } from '../utils/promise'
 
 type ITransactionController = {
   loggerHandler: any,
@@ -32,60 +28,44 @@ export class TransactionController {
     this.storeService = storeService
   }
 
-  public async create (req: Request, res: Response, next: NextFunction): Promise<void> {
-    Promise.resolve(req.body)
-      .then(tap(() => this.logger.logInfo('/create - new transaction')))
-      .then(extractUser(req))
-      .then(validateTransactionCreateParams)
-      .then(this.storeService.getAndReplaceStore)
-      .then(this.transactionService.addTransaction.bind(this.transactionService))
-      .then(tap(({ _id }: TransactionDocument) => this.logger.logInfo(`Transaction ${_id} has been succesfully created`)))
-      .then((response) => {
-        res.send(response)
-      })
-      .catch((error) => {
-        next(error)
-      })
+  public async create (req: Request, res: Response): Promise<void> {
+    this.logger.logInfo('/create - new transaction')
+
+    const params = await validateTransactionCreateParams({ ...req.body, user: req.user })
+    const withStore = await this.storeService.getAndReplaceStore(params)
+    const response = await this.transactionService.addTransaction(withStore)
+
+    this.logger.logInfo(`Transaction ${response._id} has been succesfully created`)
+    res.send(response)
   }
 
-  public async transactions (req: Request, res: Response, next: NextFunction): Promise<void> {
-    Promise.resolve(req.query)
-      .then(tap(() => this.logger.logInfo(`/transactions - list transactions of ${req.user}`)))
-      .then(validateTransactionGetParams)
-      .then(extractUser(req))
-      .then(this.transactionService.getTransactions.bind(this.transactionService))
-      .then(response => {
-        res.send(response)
-      }).catch(error => {
-        next(error)
-      })
+  public async transactions (req: Request, res: Response): Promise<void> {
+    this.logger.logInfo(`/transactions - list transactions of ${req.user}`)
+
+    const filters = await validateTransactionGetParams(req.query as Record<string, any>)
+    const response = await this.transactionService.getTransactions({ ...filters, user: req.user })
+
+    res.send(response)
   }
 
-  public async edit (req: Request, res: Response, next: NextFunction): Promise<void> {
-    Promise.resolve(req as RequestUser)
-      .then(tap(({ params }) => this.logger.logInfo(`/edit - transaction: ${params.id}`)))
-      .then(validateTransactionEditParams)
-      .then(this.storeService.replaceShopValue.bind(this.storeService))
-      .then(this.transactionService.editTransaction.bind(this.transactionService))
-      .then(tap(({ _id }: TransactionDocument) => this.logger.logInfo(`Transaction ${_id} has been succesfully edited`)))
-      .then((response) => {
-        res.send(response)
-      })
-      .catch((error) => {
-        next(error)
-      })
+  public async edit (req: Request, res: Response): Promise<void> {
+    this.logger.logInfo(`/edit - transaction: ${req.params.id}`)
+
+    const params = await validateTransactionEditParams({ params: req.params, body: req.body, user: req.user })
+    const withStore = await this.storeService.replaceShopValue(params)
+    const response = await this.transactionService.editTransaction(withStore)
+
+    this.logger.logInfo(`Transaction ${response._id} has been succesfully edited`)
+    res.send(response)
   }
 
-  public async delete (req: Request, res: Response, next: NextFunction): Promise<void> {
-    Promise.resolve(req.params?.id)
-      .then(tap((id) => this.logger.logInfo(`/delete - transaction: ${id}`)))
-      .then(tap((id) => validateTransactionExist(id, req.user as string)))
-      .then(this.transactionService.deleteTransaction.bind(this.transactionService))
-      .then(() => {
-        res.status(204).send()
-      })
-      .catch((error) => {
-        next(error)
-      })
+  public async delete (req: Request, res: Response): Promise<void> {
+    const { id } = req.params
+    this.logger.logInfo(`/delete - transaction: ${id}`)
+
+    await validateTransactionExist(id, req.user)
+    await this.transactionService.deleteTransaction(id)
+
+    res.status(204).send()
   }
 }
