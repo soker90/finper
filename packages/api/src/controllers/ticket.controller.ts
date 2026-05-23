@@ -1,7 +1,6 @@
-import { NextFunction, Request, Response } from 'express'
+import { Request, Response } from 'express'
 import { ITicketService } from '../services/ticket.service'
 import { ERROR_MESSAGE } from '../i18n/ErrorMessages'
-import { tap } from '../utils/promise'
 
 type ITicketController = {
   loggerHandler: any
@@ -17,54 +16,45 @@ export class TicketController {
     this.ticketService = ticketService
   }
 
-  public async list (req: Request, res: Response, next: NextFunction): Promise<void> {
+  public async list (req: Request, res: Response): Promise<void> {
     if (!this.ticketService.isConfigured()) {
       res.status(503).json({ message: ERROR_MESSAGE.TICKET.MODULE_NOT_CONFIGURED })
       return
     }
 
     const status = (req.query.status as string) || 'pending'
+    this.logger.logInfo(`/tickets - list tickets status=${status}`)
 
-    Promise.resolve(status)
-      .then(tap(() => this.logger.logInfo(`/tickets - list tickets status=${status}`)))
-      .then(s => this.ticketService.getTickets(s))
-      .then(tickets => {
-        res.send({ tickets, total: tickets.length })
-      })
-      .catch(next)
+    const tickets = await this.ticketService.getTickets(status)
+
+    res.send({ tickets, total: tickets.length })
   }
 
-  public async review (req: Request, res: Response, next: NextFunction): Promise<void> {
+  public async review (req: Request, res: Response): Promise<void> {
     if (!this.ticketService.isConfigured()) {
       res.status(503).json({ message: ERROR_MESSAGE.TICKET.MODULE_NOT_CONFIGURED })
       return
     }
 
     const { id } = req.params
+    this.logger.logInfo(`/tickets/${id} - mark as reviewed`)
 
-    Promise.resolve(id)
-      .then(tap(() => this.logger.logInfo(`/tickets/${id} - mark as reviewed`)))
-      .then(i => this.ticketService.reviewTicket(i))
-      .then(() => {
-        res.status(200).send({ success: true, id })
-      })
-      .catch(next)
+    await this.ticketService.reviewTicket(id)
+
+    res.status(200).send({ success: true, id })
   }
 
-  public async destroy (req: Request, res: Response, next: NextFunction): Promise<void> {
+  public async destroy (req: Request, res: Response): Promise<void> {
     if (!this.ticketService.isConfigured()) {
       res.status(503).json({ message: ERROR_MESSAGE.TICKET.MODULE_NOT_CONFIGURED })
       return
     }
 
     const { id } = req.params
+    this.logger.logInfo(`/tickets/${id} - delete`)
 
-    Promise.resolve(id)
-      .then(tap(() => this.logger.logInfo(`/tickets/${id} - delete`)))
-      .then(i => this.ticketService.deleteTicket(i))
-      .then(() => {
-        res.status(204).send()
-      })
-      .catch(next)
+    await this.ticketService.deleteTicket(id)
+
+    res.status(204).send()
   }
 }

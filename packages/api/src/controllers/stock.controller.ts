@@ -1,10 +1,7 @@
-import { NextFunction, Request, Response } from 'express'
+import { Request, Response } from 'express'
 
-import '../auth/local-strategy-passport-handler'
 import { IStockService } from '../services/stock.service'
-import extractUser from '../helpers/extract-user'
 import { validateStockCreateParams } from '../validators/stock'
-import { tap } from '../utils/promise'
 
 type IStockController = {
   loggerHandler: any,
@@ -21,51 +18,38 @@ export class StockController {
     this.stockService = stockService
   }
 
-  public async summary (req: Request, res: Response, next: NextFunction): Promise<void> {
-    Promise.resolve(req.user as string)
-      .then(tap((user: string) => this.logger.logInfo(`/stocks/summary - summary of ${user}`)))
-      .then(this.stockService.getStocksSummary.bind(this.stockService))
-      .then(response => { res.send(response) })
-      .catch(error => { next(error) })
+  public async summary (req: Request, res: Response): Promise<void> {
+    this.logger.logInfo(`/stocks/summary - summary of ${req.user}`)
+
+    const response = await this.stockService.getStocksSummary(req.user)
+
+    res.send(response)
   }
 
-  public async stocks (req: Request, res: Response, next: NextFunction): Promise<void> {
-    Promise.resolve(req.user as string)
-      .then(tap((user: string) => this.logger.logInfo(`/stocks - list positions of ${user}`)))
-      .then(this.stockService.getStocks.bind(this.stockService))
-      .then(response => {
-        res.send(response)
-      })
-      .catch(error => {
-        next(error)
-      })
+  public async stocks (req: Request, res: Response): Promise<void> {
+    this.logger.logInfo(`/stocks - list positions of ${req.user}`)
+
+    const response = await this.stockService.getStocks(req.user)
+
+    res.send(response)
   }
 
-  public async create (req: Request, res: Response, next: NextFunction): Promise<void> {
-    Promise.resolve(req.body)
-      .then(tap(() => this.logger.logInfo('/create - stock')))
-      .then(validateStockCreateParams)
-      .then(extractUser(req))
-      .then(this.stockService.addStock.bind(this.stockService))
-      .then(tap(({ ticker }) => this.logger.logInfo(`Stock ${ticker} has been successfully created`)))
-      .then(response => {
-        res.send(response)
-      })
-      .catch(error => {
-        next(error)
-      })
+  public async create (req: Request, res: Response): Promise<void> {
+    this.logger.logInfo('/create - stock')
+
+    const params = await validateStockCreateParams(req.body)
+    const response = await this.stockService.addStock({ ...params, user: req.user })
+    this.logger.logInfo(`Stock ${response.ticker} has been successfully created`)
+
+    res.send(response)
   }
 
-  public async remove (req: Request, res: Response, next: NextFunction): Promise<void> {
-    Promise.resolve(req.params.id)
-      .then(tap(() => this.logger.logInfo('/delete - stock')))
-      .then(id => this.stockService.deleteStock(id, req.user as string))
-      .then(tap(() => this.logger.logInfo('Stock has been successfully deleted')))
-      .then(() => {
-        res.sendStatus(204)
-      })
-      .catch(error => {
-        next(error)
-      })
+  public async remove (req: Request, res: Response): Promise<void> {
+    this.logger.logInfo('/delete - stock')
+
+    await this.stockService.deleteStock(req.params.id, req.user)
+    this.logger.logInfo('Stock has been successfully deleted')
+
+    res.sendStatus(204)
   }
 }
