@@ -8,20 +8,24 @@ import Login from './index'
 import { LOGIN_USERNAMES } from '../../mock/handlers/auth/login'
 
 const user = userEvent.setup()
-let handleSubmit: any
+
+const { handleSubmit } = vi.hoisted(() => ({
+  handleSubmit: vi.fn()
+}))
+
+vi.mock('react-hook-form', () => ({
+  useForm: vi.fn(() => ({
+    register: vi.fn(),
+    handleSubmit,
+    formState: {
+      errors: {}
+    }
+  }))
+}))
 
 describe('Login', async () => {
   beforeEach(() => {
-    handleSubmit = vi.fn()
-    vi.mock('react-hook-form', () => ({
-      useForm: vi.fn(() => ({
-        register: vi.fn(),
-        handleSubmit,
-        formState: {
-          errors: {}
-        }
-      }))
-    }))
+    handleSubmit.mockReset()
   })
 
   it('button login works', async () => {

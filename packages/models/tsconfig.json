@@ -13,7 +13,6 @@
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "sourceMap": true,
-    "strictNullChecks": false,
     "declaration": true,
     "moduleResolution": "node"
     },
