@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "prebuild": "pnpm --filter @soker90/finper-types build",
     "build": "tsc && vite build",
     "preview": "vite preview",
     "lint": "eslint ./src --ext .ts,.tsx",
