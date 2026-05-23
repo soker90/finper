@@ -1,12 +1,8 @@
-import { NextFunction, Request, Response } from 'express'
+import { Request, Response } from 'express'
 
 import { IAccountService } from '../services/account.service'
-import { AccountDocument } from '@soker90/finper-models'
 import { validateAccountCreateParams, validateAccountEditParams, validateAccountExist, validateAccountTransferParams, validateAccountTransferExist } from '../validators/account'
 import '../auth/local-strategy-passport-handler'
-import extractUser from '../helpers/extract-user'
-import { RequestUser } from '../types'
-import { tap } from '../utils/promise'
 
 type IAccountController = {
   loggerHandler: any,
@@ -23,72 +19,53 @@ export class AccountController {
     this.accountService = accountService
   }
 
-  public async create (req: Request, res: Response, next: NextFunction): Promise<void> {
-    Promise.resolve(req.body)
-      .then(tap(({ name }) => this.logger.logInfo(`/create - account: ${name?.toLowerCase()}`)))
-      .then(validateAccountCreateParams)
-      .then(extractUser(req))
-      .then(this.accountService.addAccount.bind(this.accountService))
-      .then(tap(({ name }) => this.logger.logInfo(`Account ${name} has been succesfully created`)))
-      .then((response) => {
-        res.send(response)
-      })
-      .catch((error) => {
-        next(error)
-      })
+  public async create (req: Request, res: Response): Promise<void> {
+    const { name } = req.body
+    this.logger.logInfo(`/create - account: ${name?.toLowerCase()}`)
+
+    const params = validateAccountCreateParams(req.body)
+    const response = await this.accountService.addAccount({ ...params, user: req.user })
+
+    this.logger.logInfo(`Account ${response.name} has been succesfully created`)
+    res.send(response)
   }
 
-  public async accounts (req: Request, res: Response, next: NextFunction): Promise<void> {
-    Promise.resolve(req.user as string)
-      .then(tap(() => this.logger.logInfo(`/accounts - list accounts of ${req.user}`)))
-      .then(this.accountService.getAccounts.bind(this.accountService))
-      .then(response => {
-        res.send(response)
-      }).catch(error => {
-        next(error)
-      })
+  public async accounts (req: Request, res: Response): Promise<void> {
+    this.logger.logInfo(`/accounts - list accounts of ${req.user}`)
+
+    const response = await this.accountService.getAccounts(req.user)
+    res.send(response)
   }
 
-  public async edit (req: Request, res: Response, next: NextFunction): Promise<void> {
-    Promise.resolve(req as RequestUser)
-      .then(tap(({ body }) => this.logger.logInfo(`/edit - account: ${body.name?.toLowerCase()}`)))
-      .then(validateAccountEditParams)
-      .then(this.accountService.editAccount.bind(this.accountService))
-      .then(tap(({ _id }: AccountDocument) => this.logger.logInfo(`Account ${_id} has been succesfully edited`)))
-      .then((response) => {
-        res.send(response)
-      })
-      .catch((error) => {
-        next(error)
-      })
+  public async edit (req: Request, res: Response): Promise<void> {
+    this.logger.logInfo(`/edit - account: ${req.body.name?.toLowerCase()}`)
+
+    const params = await validateAccountEditParams(req)
+    const response = await this.accountService.editAccount(params)
+
+    this.logger.logInfo(`Account ${response._id} has been succesfully edited`)
+    res.send(response)
   }
 
-  public async account (req: Request, res: Response, next: NextFunction): Promise<void> {
-    Promise.resolve(req.params)
-      .then(tap(({ id }) => this.logger.logInfo(`/account - account: ${id}`)))
-      .then(extractUser(req))
-      .then(tap(({ user, id }) => validateAccountExist(id, user)))
-      .then(this.accountService.getAccount.bind(this.accountService))
-      .then(response => {
-        res.send(response)
-      }).catch((error) => {
-        next(error)
-      })
+  public async account (req: Request, res: Response): Promise<void> {
+    const { id } = req.params
+    const { user } = req
+    this.logger.logInfo(`/account - account: ${id}`)
+
+    await validateAccountExist(id, user)
+    const response = await this.accountService.getAccount({ id })
+
+    res.send(response)
   }
 
-  public async transfer (req: Request, res: Response, next: NextFunction): Promise<void> {
-    Promise.resolve(req.body)
-      .then(tap(() => this.logger.logInfo('/transfer - account transfer')))
-      .then(validateAccountTransferParams)
-      .then(extractUser(req))
-      .then(validateAccountTransferExist)
-      .then(this.accountService.transfer.bind(this.accountService))
-      .then(tap(() => this.logger.logInfo('Account transfer has been successfully processed')))
-      .then(() => {
-        res.status(200).send({ message: 'Transfer successful' })
-      })
-      .catch((error) => {
-        next(error)
-      })
+  public async transfer (req: Request, res: Response): Promise<void> {
+    this.logger.logInfo('/transfer - account transfer')
+
+    const params = validateAccountTransferParams(req.body)
+    await validateAccountTransferExist({ ...params, user: req.user })
+    await this.accountService.transfer(params)
+
+    this.logger.logInfo('Account transfer has been successfully processed')
+    res.status(200).send({ message: 'Transfer successful' })
   }
 }

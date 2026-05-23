@@ -7,8 +7,8 @@ export const validateAccountEditParams = async ({
   params,
   body,
   user
-}: { params: Record<string, string>, body: Record<string, string>, user: string }): Promise<{ id: string, value: IAccount }> => {
-  await validateAccountExist(params.id, user)
+}: { params: Record<string, string>, body: Record<string, string>, user?: string }): Promise<{ id: string, value: IAccount }> => {
+  await validateAccountExist(params.id, user as string)
 
   const schema = Joi.alternatives().try(
     Joi.object({
