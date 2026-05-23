@@ -31,8 +31,12 @@ export default class CategoryService implements ICategoryService {
       {
         $lookup: {
           from: 'categories',
-          localField: '_id',
-          foreignField: 'parent',
+          let: { parentId: '$_id' },
+          pipeline: [
+            { $match: { $expr: { $eq: ['$parent', '$$parentId'] }, user } },
+            { $project: { _id: 1, name: 1 } },
+            { $sort: { name: 1 } }
+          ],
           as: 'children'
         }
       },
@@ -40,13 +44,10 @@ export default class CategoryService implements ICategoryService {
         $project: {
           _id: 1,
           name: 1,
-          children: {
-            _id: 1,
-            name: 1
-          }
+          children: 1
         }
       },
-      { $sort: { name: 1, children: 1 } }
+      { $sort: { name: 1 } }
     ])
   }
 
