@@ -4,6 +4,7 @@ import loggerHandler from '../utils/logger'
 import { AuthController } from '../controllers/auth.controller'
 import { userService, authService } from '../services'
 import authMiddleware from '../middlewares/auth.middleware'
+import { asyncHandler } from '../middlewares/async-handler'
 
 export class AuthRoutes {
   router: Router
@@ -22,18 +23,18 @@ export class AuthRoutes {
   routes () {
     this.router.post(
       '/login',
-      this.accountController.login.bind(this.accountController)
+      asyncHandler(this.accountController.login.bind(this.accountController))
     )
 
     this.router.post(
       '/register',
-      this.accountController.register.bind(this.accountController)
+      asyncHandler(this.accountController.register.bind(this.accountController))
     )
 
     this.router.get(
       '/me',
       authMiddleware,
-      this.accountController.me.bind(this.accountController)
+      asyncHandler(this.accountController.me.bind(this.accountController))
     )
   }
 }
