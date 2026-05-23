@@ -14,9 +14,11 @@ ENV TZ=Europe/Madrid
 COPY --chown=node:node pnpm-workspace.yaml pnpm-lock.yaml package.json ./
 COPY --chown=node:node .npmrc* ./
 COPY --chown=node:node packages/client/package.json ./packages/client/
+COPY --chown=node:node packages/types/package.json ./packages/types/
 
 RUN pnpm install --frozen-lockfile --filter @soker90/finper-client...
 COPY --chown=node:node packages/client ./packages/client
+COPY --chown=node:node packages/types ./packages/types
 
 RUN pnpm --filter @soker90/finper-client build
 
