@@ -1,7 +1,5 @@
-import { NextFunction, Request, Response } from 'express'
+import { Request, Response } from 'express'
 
-import '../auth/local-strategy-passport-handler'
-import { SupplyDocument } from '@soker90/finper-models'
 import {
   validateSupplyCreateParams,
   validateSupplyEditParams,
@@ -9,10 +7,7 @@ import {
   validateSupplyForTariffComparison
 } from '../validators/supply'
 import { ISupplyService } from '../services/supply.service'
-import extractUser from '../helpers/extract-user'
 import { ITariffsService } from '../services/tariffs.service'
-import { RequestUser } from '../types'
-import { tap } from '../utils/promise'
 
 type ISupplyController = {
   loggerHandler: any,
@@ -31,72 +26,52 @@ export class SupplyController {
     this.tariffsService = tariffsService
   }
 
-  public async group (req: Request, res: Response, next: NextFunction): Promise<void> {
-    Promise.resolve(req.user as string)
-      .then(tap((user) => this.logger.logInfo(`/ - list grouped supplies for ${user}`)))
-      .then(this.supplyService.getSuppliesGroupedByProperty.bind(this.supplyService))
-      .then((response) => {
-        res.send(response)
-      })
-      .catch((error) => {
-        next(error)
-      })
+  public async group (req: Request, res: Response): Promise<void> {
+    this.logger.logInfo(`/ - list grouped supplies for ${req.user}`)
+
+    const response = await this.supplyService.getSuppliesGroupedByProperty(req.user)
+
+    res.send(response)
   }
 
-  public async create (req: Request, res: Response, next: NextFunction): Promise<void> {
-    Promise.resolve(req.body)
-      .then(tap(({ name }) => this.logger.logInfo(`/create - supply: ${name}`)))
-      .then(extractUser(req))
-      .then(validateSupplyCreateParams)
-      .then(this.supplyService.addSupply.bind(this.supplyService))
-      .then(tap(({ name }: SupplyDocument) => this.logger.logInfo(`Supply ${name} has been succesfully created`)))
-      .then((response) => {
-        res.send(response)
-      })
-      .catch((error) => {
-        next(error)
-      })
+  public async create (req: Request, res: Response): Promise<void> {
+    const { name } = req.body
+    this.logger.logInfo(`/create - supply: ${name}`)
+
+    const params = await validateSupplyCreateParams({ ...req.body, user: req.user })
+    const response = await this.supplyService.addSupply(params)
+    this.logger.logInfo(`Supply ${response.name} has been succesfully created`)
+
+    res.send(response)
   }
 
-  public async edit (req: Request, res: Response, next: NextFunction): Promise<void> {
-    Promise.resolve(req as unknown as RequestUser)
-      .then(tap(({ body }) => this.logger.logInfo(`/edit - supply: ${body.name}`)))
-      .then(validateSupplyEditParams)
-      .then(this.supplyService.editSupply.bind(this.supplyService))
-      .then(tap(({ _id }: SupplyDocument) => this.logger.logInfo(`Supply ${_id} has been succesfully edited`)))
-      .then((response) => {
-        res.send(response)
-      })
-      .catch((error) => {
-        next(error)
-      })
+  public async edit (req: Request, res: Response): Promise<void> {
+    this.logger.logInfo(`/edit - supply: ${req.body.name}`)
+
+    const { id, value } = await validateSupplyEditParams(req as any)
+    const response = await this.supplyService.editSupply({ id, value })
+    this.logger.logInfo(`Supply ${response._id} has been succesfully edited`)
+
+    res.send(response)
   }
 
-  public async delete (req: Request, res: Response, next: NextFunction): Promise<void> {
-    Promise.resolve(req.params as { id: string })
-      .then(tap(({ id }) => this.logger.logInfo(`/delete - supply: ${id}`)))
-      .then(extractUser(req))
-      .then(tap(validateSupplyExist))
-      .then(this.supplyService.deleteSupply.bind(this.supplyService))
-      .then(() => {
-        res.sendStatus(204)
-      })
-      .catch((error) => {
-        next(error)
-      })
-  }
-
-  public async compareTariffs (req: Request, res: Response, next: NextFunction): Promise<void> {
+  public async delete (req: Request, res: Response): Promise<void> {
     const { id } = req.params
-    Promise.resolve(req.user as string)
-      .then(tap((user) => this.logger.logInfo(`/supplies/${id}/tariffs-comparison - compare tariffs for ${user}`)))
-      .then(tap((user) => validateSupplyForTariffComparison({ id, user })))
-      .then((user) => this.tariffsService.compareTariffs(id, user))
-      .then((response) => {
-        res.send(response)
-      })
-      .catch((error) => {
-        next(error)
-      })
+    this.logger.logInfo(`/delete - supply: ${id}`)
+
+    await validateSupplyExist({ id, user: req.user })
+    await this.supplyService.deleteSupply({ id })
+
+    res.sendStatus(204)
+  }
+
+  public async compareTariffs (req: Request, res: Response): Promise<void> {
+    const { id } = req.params
+    this.logger.logInfo(`/supplies/${id}/tariffs-comparison - compare tariffs for ${req.user}`)
+
+    await validateSupplyForTariffComparison({ id, user: req.user })
+    const response = await this.tariffsService.compareTariffs(id, req.user)
+
+    res.send(response)
   }
 }
