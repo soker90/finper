@@ -1,6 +1,6 @@
 import Joi from 'joi'
 import Boom from '@hapi/boom'
-import { TRANSACTION } from '@soker90/finper-types'
+import { TRANSACTION } from '@soker90/finper-models'
 import { validateCategoryExist } from './validate-category-exist'
 import { ERROR_MESSAGE } from '../../i18n'
 

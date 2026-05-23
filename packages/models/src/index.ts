@@ -6,7 +6,7 @@ import mongooseConnect from './mongoose-connect'
 
 import { IAccount, AccountModel } from './models/accounts'
 import { IBudget, BudgetModel } from './models/budgets'
-import { ICategory, CategoryModel } from './models/categories'
+import { ICategory, CategoryModel, BUDGET_RULE_CLASS, BudgetRuleClassType } from './models/categories'
 import { IDebt, DebtModel, DebtType, DEBT } from './models/debts'
 import { IPension, PensionModel } from './models/pensions'
 import { IStore, StoreModel } from './models/stores'
@@ -79,6 +79,9 @@ export {
   GoalColor,
   GOAL_ICONS,
   GoalIcon,
+
+  BUDGET_RULE_CLASS,
+  BudgetRuleClassType,
 
   IAccount,
   IBudget,

@@ -1,7 +1,12 @@
 import { model, Schema, HydratedDocument } from 'mongoose'
-import { STOCK_TYPE, type StockType } from '@soker90/finper-types'
+import type { StockType } from '@soker90/finper-types'
 
-export { STOCK_TYPE }
+export const STOCK_TYPE = {
+  Buy: 'buy',
+  Sell: 'sell',
+  Dividend: 'dividend',
+} as const
+
 export type { StockType }
 
 export interface IStock {

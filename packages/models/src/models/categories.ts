@@ -4,6 +4,13 @@ import type { BudgetRuleClassType } from '@soker90/finper-types'
 
 export type { BudgetRuleClassType }
 
+export const BUDGET_RULE_CLASS = {
+  Needs: 'needs',
+  Wants: 'wants',
+  Savings: 'savings',
+  None: 'none',
+} as const
+
 export interface ICategory {
   name: string
   type: TransactionType

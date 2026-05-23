@@ -1,7 +1,13 @@
 import { Schema, model, HydratedDocument, Types } from 'mongoose'
-import { SUPPLY_TYPE, type SupplyType } from '@soker90/finper-types'
+import type { SupplyType } from '@soker90/finper-types'
 
-export { SUPPLY_TYPE }
+export const SUPPLY_TYPE = {
+  ELECTRICITY: 'electricity',
+  WATER: 'water',
+  GAS: 'gas',
+  OTHER: 'other',
+} as const
+
 export type { SupplyType }
 
 export interface ISupply {

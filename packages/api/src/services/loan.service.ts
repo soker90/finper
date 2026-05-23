@@ -1,4 +1,4 @@
-import { LOAN_PAYMENT, LoanPaymentType, TRANSACTION } from '@soker90/finper-types'
+import { LOAN_PAYMENT, LoanPaymentType, TRANSACTION } from '@soker90/finper-models'
 import {
   ILoan,
   ILoanPayment,

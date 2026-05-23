@@ -1,19 +1,19 @@
-export { TRANSACTION } from '@soker90/finper-types'
+export { TRANSACTION } from 'constants/enums'
 export type { TransactionType } from '@soker90/finper-types'
 
-export { DEBT } from '@soker90/finper-types'
+export { DEBT } from 'constants/enums'
 export type { DebtType } from '@soker90/finper-types'
 
-export { LOAN_PAYMENT } from '@soker90/finper-types'
+export { LOAN_PAYMENT } from 'constants/enums'
 export type { LoanPaymentType } from '@soker90/finper-types'
 
-export { SUPPLY_TYPE } from '@soker90/finper-types'
+export { SUPPLY_TYPE } from 'constants/enums'
 export type { SupplyType } from '@soker90/finper-types'
 
-export { STOCK_TYPE } from '@soker90/finper-types'
+export { STOCK_TYPE } from 'constants/enums'
 export type { StockType } from '@soker90/finper-types'
 
-export { GOAL_COLORS, GOAL_ICONS } from '@soker90/finper-types'
+export { GOAL_COLORS, GOAL_ICONS } from 'constants/enums'
 export type { GoalColor, GoalIcon } from '@soker90/finper-types'
 
 export * from './account'

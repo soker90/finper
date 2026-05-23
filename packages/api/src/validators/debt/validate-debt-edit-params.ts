@@ -1,6 +1,6 @@
 import Joi from 'joi'
 import Boom from '@hapi/boom'
-import { DEBT } from '@soker90/finper-types'
+import { DEBT } from '@soker90/finper-models'
 import { IDebt } from '@soker90/finper-models'
 import { validateDebtExist } from './validate-debt-exist'
 

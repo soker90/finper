@@ -1,4 +1,4 @@
-import { STOCK_TYPE } from '@soker90/finper-types'
+import { STOCK_TYPE } from '@soker90/finper-models'
 import { type IStock, StockModel } from '@soker90/finper-models'
 import { IStockPriceProvider, YahooPriceProvider } from './stock-price.provider'
 import { roundNumber } from '../utils/roundNumber'
