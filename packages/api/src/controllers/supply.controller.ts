@@ -48,7 +48,7 @@ export class SupplyController {
   public async edit (req: Request, res: Response): Promise<void> {
     this.logger.logInfo(`/edit - supply: ${req.body.name}`)
 
-    const { id, value } = await validateSupplyEditParams(req as any)
+    const { id, value } = await validateSupplyEditParams({ params: req.params, body: req.body, user: req.user })
     const response = await this.supplyService.editSupply({ id, value })
     this.logger.logInfo(`Supply ${response._id} has been succesfully edited`)
 

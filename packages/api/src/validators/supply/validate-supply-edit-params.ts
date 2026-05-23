@@ -1,19 +1,18 @@
 import Joi from 'joi'
 import Boom from '@hapi/boom'
-import { RequestUser } from '../../types'
 import { validateSupplyExist } from './validate-supply-exist'
 import { validatePropertyExist } from '../property'
 import { SUPPLY_TYPE } from '@soker90/finper-models'
 
-export const validateSupplyEditParams = async (data: RequestUser) => {
+export const validateSupplyEditParams = async ({ params, body, user }: { params: Record<string, string>, body: Record<string, any>, user: string }) => {
   /* istanbul ignore else — params.id is always present when editing via route (URL param) */
-  if (data.params?.id) {
-    await validateSupplyExist({ id: data.params.id, user: data.user as string })
+  if (params.id) {
+    await validateSupplyExist({ id: params.id, user })
   }
 
   /* istanbul ignore else — propertyId is always present in the body for supply edit requests */
-  if (data.body?.propertyId) {
-    await validatePropertyExist({ id: data.body.propertyId as string, user: data.user as string })
+  if (body.propertyId) {
+    await validatePropertyExist({ id: body.propertyId, user })
   }
 
   const schema = Joi.object({
@@ -33,12 +32,12 @@ export const validateSupplyEditParams = async (data: RequestUser) => {
     currentPriceEnergyOffPeak: Joi.number().optional()
   })
 
-  const { error, value } = schema.validate(data.body, { stripUnknown: true })
+  const { error, value } = schema.validate(body, { stripUnknown: true })
 
   /* istanbul ignore next — Joi error branch not exercised for supply edit in current tests */
   if (error) {
     throw Boom.badData(error.message).output
   }
 
-  return { id: data.params?.id, value }
+  return { id: params.id, value }
 }
