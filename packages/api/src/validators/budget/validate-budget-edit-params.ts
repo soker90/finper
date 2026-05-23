@@ -29,7 +29,6 @@ export const validateBudgetEditParams = async ({
     amount: Joi.number().required()
   })
 
-  console.log(body)
   const { error: errorAmount, value: amount } = schemaBody.validate(body)
 
   if (errorAmount) {
