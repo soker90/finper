@@ -1,6 +1,5 @@
-import { Supply, SupplyType } from 'types'
-
-export type { SupplyType }
+import type { SupplyType } from '@soker90/finper-types'
+import type { Supply } from 'types'
 
 export const SUPPLY_TYPE_LABELS: Record<SupplyType, string> = {
   electricity: 'Electricidad',

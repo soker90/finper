@@ -1,6 +1,7 @@
 import { useForm } from 'react-hook-form'
 import { ModalGrid, DateForm, InputForm, SelectForm } from 'components'
-import { StockType, StockPurchase } from 'types'
+import type { StockType } from '@soker90/finper-types'
+import type { StockPurchase } from 'types'
 
 interface Props {
   defaultType?: StockType

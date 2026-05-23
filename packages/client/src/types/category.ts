@@ -1,7 +1,5 @@
 import type { TransactionType, BudgetRuleClassType } from '@soker90/finper-types'
 
-export type { BudgetRuleClassType }
-
 export interface Category {
   _id?: string;
   name: string,

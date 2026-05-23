@@ -1,10 +1,3 @@
-export type { TransactionType } from '@soker90/finper-types'
-export type { DebtType } from '@soker90/finper-types'
-export type { LoanPaymentType } from '@soker90/finper-types'
-export type { SupplyType } from '@soker90/finper-types'
-export type { StockType } from '@soker90/finper-types'
-export type { GoalColor, GoalIcon } from '@soker90/finper-types'
-
 export * from './account'
 export * from './budget'
 export * from './category'

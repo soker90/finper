@@ -1,7 +1,5 @@
 import type { StockType } from '@soker90/finper-types'
 
-export type { StockType }
-
 export interface StockPurchase {
   _id?: string
   ticker: string

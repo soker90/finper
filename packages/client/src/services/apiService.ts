@@ -1,6 +1,7 @@
 import axios from 'axios'
 import { ACCOUNTS, BUDGETS, CATEGORIES, DEBTS, LOANS, LOAN_DETAIL, LOAN_SIMULATE, PENSIONS, TICKETS, TRANSACTIONS, SUBSCRIPTIONS, SUBSCRIPTION_CANDIDATES, SUPPLIES, SUPPLIES_PROPERTIES, SUPPLIES_READINGS, STOCKS, GOALS } from 'constants/api-paths'
-import { Category, Transaction, TransactionType, Account, Pension, PensionTransaction, Debt, Loan, SubscriptionInput, SupplyReadingInput, StockPurchase, Goal, SimulationResult } from 'types'
+import type { TransactionType } from '@soker90/finper-types'
+import type { Category, Transaction, Account, Pension, PensionTransaction, Debt, Loan, SubscriptionInput, SupplyReadingInput, StockPurchase, Goal, SimulationResult } from 'types'
 
 const extractError = (error: any) => error.response?.data?.message || error.message
 

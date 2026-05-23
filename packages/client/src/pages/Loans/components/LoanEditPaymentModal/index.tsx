@@ -2,7 +2,8 @@ import { useForm } from 'react-hook-form'
 
 import { DateForm, InputForm, ModalGrid, SelectForm } from 'components'
 import { editLoanPayment } from 'services/apiService'
-import { AmortizationRow, LoanPaymentType } from 'types'
+import type { LoanPaymentType } from '@soker90/finper-types'
+import type { AmortizationRow } from 'types'
 
 import { useApiError, useLoanMutate } from '../../hooks'
 import { dateToInput, inputToTimestamp } from '../../utils/date'

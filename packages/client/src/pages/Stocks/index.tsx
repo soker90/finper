@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Grid } from '@mui/material'
 import { PlusOutlined, GiftOutlined, FallOutlined } from '@ant-design/icons'
-import { StockType } from 'types'
+import type { StockType } from '@soker90/finper-types'
 
 import { HeaderButtons, LoadingList } from 'components'
 import { useStocks } from './hooks'

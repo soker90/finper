@@ -7,7 +7,8 @@ import { ModalGrid, DateForm, InputForm, SelectForm, SelectGroupForm } from 'com
 import AutocompleteForm from 'components/forms/AutocompleteForm'
 import { addTransaction } from 'services/apiService'
 import { TRANSACTIONS } from 'constants/api-paths'
-import { Ticket, TransactionType } from 'types'
+import type { TransactionType } from '@soker90/finper-types'
+import type { Ticket } from 'types'
 import { useAccounts, useGroupedCategories, useTickets, useStores } from 'hooks'
 import { TYPES_TRANSACTIONS_ENTRIES } from 'constants/transactions'
 

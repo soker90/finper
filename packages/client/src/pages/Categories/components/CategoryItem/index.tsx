@@ -1,7 +1,8 @@
 import { FC, useState } from 'react'
 import { Chip, Collapse, Divider, Paper, Typography, useTheme } from '@mui/material'
 
-import { Category, TransactionType } from 'types'
+import type { TransactionType } from '@soker90/finper-types'
+import type { Category } from 'types'
 import { ItemContent } from 'components'
 
 import CategorytEdit from '../CategorytEdit'

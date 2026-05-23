@@ -1,4 +1,4 @@
-import type { TransactionType } from 'types'
+import type { TransactionType } from '@soker90/finper-types'
 
 const TYPES_TRANSACTIONS: Record<TransactionType, string> = {
   income: 'Ingreso',
