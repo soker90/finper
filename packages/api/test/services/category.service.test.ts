@@ -55,7 +55,7 @@ describe('CategoryService', () => {
   // ── getGroupedCategories ──────────────────────────────────────────────────
   describe('getGroupedCategories', () => {
     test('returns empty array when there are no root categories', async () => {
-      const result = await service.getGroupedCategories()
+      const result = await service.getGroupedCategories(generateUsername())
       expect(result).toEqual([])
     })
 
@@ -65,7 +65,7 @@ describe('CategoryService', () => {
       const child = await insertCategory({ user })
       const rootId = (child as any).parent._id.toString()
 
-      const result = await service.getGroupedCategories()
+      const result = await service.getGroupedCategories(user)
       const found = result.find((r: any) => r._id.toString() === rootId)
       expect(found).toBeDefined()
       expect(Array.isArray(found.children)).toBe(true)
