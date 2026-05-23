@@ -1,9 +1,9 @@
 /**
- * Equivalente funcional al .tap() de Bluebird.
- * Ejecuta un side-effect sobre el valor resuelto y devuelve el valor intacto.
- * El side-effect puede ser síncrono o async; si es async se espera antes de continuar.
+ * Functional equivalent to Bluebird's .tap().
+ * Executes a side-effect on the resolved value and returns the value intact.
+ * The side-effect can be synchronous or async; if async, it is awaited before continuing.
  *
- * Uso: promise.then(tap(value => doSomething(value)))
+ * Usage: promise.then(tap(value => doSomething(value)))
  */
 export const tap =
   <T>(fn: (value: T) => unknown | Promise<unknown>) =>
