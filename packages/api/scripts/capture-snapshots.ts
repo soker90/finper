@@ -1,7 +1,7 @@
 import fs from 'fs'
 import path from 'path'
 
-const API_URL = 'http://localhost:3008'
+const API_URL = process.env.SNAPSHOT_TARGET_URL || 'http://localhost:3008'
 const OUTPUT_DIR = path.resolve(__dirname, '../test/snapshots/pre-migration')
 
 // Setup Output Dir
@@ -69,6 +69,18 @@ const endpointsToCapture = [
 
 async function run() {
   console.log('Capturing snapshots from ' + API_URL)
+  
+  // 0. Health check
+  try {
+    const health = await fetch(`${API_URL}/api/monit/health`)
+    if (!health.ok) {
+      console.error(`❌ ERROR: Health check failed (${health.status}). Is the API running on ${API_URL}?`)
+      process.exit(1)
+    }
+  } catch (err) {
+    console.error(`❌ ERROR: Could not connect to API on ${API_URL}. Please ensure it is running.`)
+    process.exit(1)
+  }
   
   // 1. Login
   let token = ''
