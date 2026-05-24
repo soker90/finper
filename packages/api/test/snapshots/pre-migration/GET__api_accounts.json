@@ -1,13 +1,28 @@
 {
   "method": "GET",
   "path": "/api/accounts",
-  "status": 401,
+  "status": 200,
   "headers": {
     "content-type": "application/json; charset=utf-8"
   },
-  "body": {
-    "statusCode": 401,
-    "error": "Unauthorized",
-    "message": "Unauthorized"
-  }
+  "body": [
+    {
+      "_id": "6a12d5eada2af90e7be66761",
+      "name": "Test Checking",
+      "bank": "TestBank",
+      "balance": 1000
+    },
+    {
+      "_id": "6a12d5eada2af90e7be66763",
+      "name": "Test Savings",
+      "bank": "TestBank",
+      "balance": 5000
+    },
+    {
+      "_id": "6a12d5eada2af90e7be66765",
+      "name": "Test Credit Card",
+      "bank": "TestBank",
+      "balance": -200
+    }
+  ]
 }

@@ -1,13 +1,60 @@
 {
   "method": "GET",
   "path": "/api/stocks",
-  "status": 401,
+  "status": 200,
   "headers": {
     "content-type": "application/json; charset=utf-8"
   },
-  "body": {
-    "statusCode": 401,
-    "error": "Unauthorized",
-    "message": "Unauthorized"
-  }
+  "body": [
+    {
+      "ticker": "TEST",
+      "name": "Test Stock",
+      "shares": 10,
+      "dividendShares": 0,
+      "avgCost": 15.5,
+      "totalCost": 155,
+      "currentPrice": 46.3389,
+      "currentValue": 463.39,
+      "gainLoss": 308.39,
+      "gainLossPct": 198.96,
+      "purchases": [
+        {
+          "_id": "6a12d5eada2af90e7be667a5",
+          "ticker": "TEST",
+          "name": "Test Stock",
+          "shares": 10,
+          "price": 15.5,
+          "type": "buy",
+          "date": 1736899200000,
+          "user": "testuser",
+          "platform": "TestBroker"
+        }
+      ]
+    },
+    {
+      "ticker": "TEST2",
+      "name": "Test Stock 2",
+      "shares": 5,
+      "dividendShares": 0,
+      "avgCost": 32.75,
+      "totalCost": 163.75,
+      "currentPrice": null,
+      "currentValue": null,
+      "gainLoss": null,
+      "gainLossPct": null,
+      "purchases": [
+        {
+          "_id": "6a12d5eada2af90e7be667a6",
+          "ticker": "TEST2",
+          "name": "Test Stock 2",
+          "shares": 5,
+          "price": 32.75,
+          "type": "buy",
+          "date": 1739577600000,
+          "user": "testuser",
+          "platform": "TestBroker"
+        }
+      ]
+    }
+  ]
 }

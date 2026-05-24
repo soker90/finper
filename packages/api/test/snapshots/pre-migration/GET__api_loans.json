@@ -1,13 +1,23 @@
 {
   "method": "GET",
   "path": "/api/loans",
-  "status": 401,
+  "status": 200,
   "headers": {
     "content-type": "application/json; charset=utf-8"
   },
-  "body": {
-    "statusCode": 401,
-    "error": "Unauthorized",
-    "message": "Unauthorized"
-  }
+  "body": [
+    {
+      "_id": "6a12d5eada2af90e7be66795",
+      "name": "Test Mortgage",
+      "initialAmount": 100000,
+      "pendingAmount": 95000,
+      "interestRate": 3.5,
+      "startDate": 1735689600000,
+      "monthlyPayment": 450,
+      "initialEstimatedCost": 120000,
+      "account": "6a12d5eada2af90e7be66761",
+      "category": "6a12d5eada2af90e7be66769",
+      "user": "testuser"
+    }
+  ]
 }

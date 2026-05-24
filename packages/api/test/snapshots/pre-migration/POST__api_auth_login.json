@@ -1,13 +1,11 @@
 {
-  "method": "GET",
-  "path": "/api/debts",
+  "method": "POST",
+  "path": "/api/auth/login",
   "status": 200,
   "headers": {
     "content-type": "application/json; charset=utf-8"
   },
   "body": {
-    "from": [],
-    "to": [],
-    "debtsByPerson": []
+    "token": "<REDACTED>"
   }
 }

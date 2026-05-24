@@ -1,13 +1,208 @@
 {
   "method": "GET",
   "path": "/api/transactions",
-  "status": 401,
+  "status": 200,
   "headers": {
     "content-type": "application/json; charset=utf-8"
   },
-  "body": {
-    "statusCode": 401,
-    "error": "Unauthorized",
-    "message": "Unauthorized"
-  }
+  "body": [
+    {
+      "_id": "6a12d5eada2af90e7be66780",
+      "date": 1741597200000,
+      "category": {
+        "_id": "6a12d5eada2af90e7be66769",
+        "name": "Transport"
+      },
+      "amount": -15,
+      "type": "expense",
+      "account": {
+        "_id": "6a12d5eada2af90e7be66761",
+        "name": "Test Checking",
+        "bank": "TestBank"
+      },
+      "tags": [],
+      "user": "testuser"
+    },
+    {
+      "_id": "6a12d5eada2af90e7be6677f",
+      "date": 1741176000000,
+      "category": {
+        "_id": "6a12d5eada2af90e7be6676d",
+        "name": "Investments"
+      },
+      "amount": -200,
+      "type": "expense",
+      "account": {
+        "_id": "6a12d5eada2af90e7be66761",
+        "name": "Test Checking",
+        "bank": "TestBank"
+      },
+      "tags": [],
+      "user": "testuser"
+    },
+    {
+      "_id": "6a12d5eada2af90e7be6677e",
+      "date": 1740826800000,
+      "category": {
+        "_id": "6a12d5eada2af90e7be66767",
+        "name": "Food"
+      },
+      "amount": -12.34,
+      "type": "expense",
+      "account": {
+        "_id": "6a12d5eada2af90e7be66761",
+        "name": "Test Checking",
+        "bank": "TestBank"
+      },
+      "tags": [
+        "imprescindible"
+      ],
+      "user": "testuser"
+    },
+    {
+      "_id": "6a12d5eada2af90e7be6677d",
+      "date": 1740736800000,
+      "category": {
+        "_id": "6a12d5eada2af90e7be6676b",
+        "name": "Salary"
+      },
+      "amount": 1000,
+      "type": "income",
+      "account": {
+        "_id": "6a12d5eada2af90e7be66761",
+        "name": "Test Checking",
+        "bank": "TestBank"
+      },
+      "tags": [
+        "trabajo"
+      ],
+      "user": "testuser"
+    },
+    {
+      "_id": "6a12d5eada2af90e7be6677c",
+      "date": 1739214000000,
+      "category": {
+        "_id": "6a12d5eada2af90e7be6676f",
+        "name": "Restaurants"
+      },
+      "amount": -99.99,
+      "type": "expense",
+      "account": {
+        "_id": "6a12d5eada2af90e7be66765",
+        "name": "Test Credit Card",
+        "bank": "TestBank"
+      },
+      "store": {
+        "_id": "6a12d5eada2af90e7be66775",
+        "name": "Test Restaurante Ñandú"
+      },
+      "tags": [
+        "ocio"
+      ],
+      "user": "testuser"
+    },
+    {
+      "_id": "6a12d5eada2af90e7be6677b",
+      "date": 1738396800000,
+      "category": {
+        "_id": "6a12d5eada2af90e7be66769",
+        "name": "Transport"
+      },
+      "amount": -10,
+      "type": "expense",
+      "account": {
+        "_id": "6a12d5eada2af90e7be66761",
+        "name": "Test Checking",
+        "bank": "TestBank"
+      },
+      "tags": [],
+      "user": "testuser"
+    },
+    {
+      "_id": "6a12d5eada2af90e7be6677a",
+      "date": 1737381600000,
+      "category": {
+        "_id": "6a12d5eada2af90e7be66767",
+        "name": "Food"
+      },
+      "amount": -250,
+      "type": "expense",
+      "account": {
+        "_id": "6a12d5eada2af90e7be66761",
+        "name": "Test Checking",
+        "bank": "TestBank"
+      },
+      "store": {
+        "_id": "6a12d5eada2af90e7be66773",
+        "name": "Test Store B"
+      },
+      "tags": [],
+      "user": "testuser"
+    },
+    {
+      "_id": "6a12d5eada2af90e7be66779",
+      "date": 1736931600000,
+      "category": {
+        "_id": "6a12d5eada2af90e7be66769",
+        "name": "Transport"
+      },
+      "amount": -100,
+      "type": "expense",
+      "account": {
+        "_id": "6a12d5eada2af90e7be66761",
+        "name": "Test Checking",
+        "bank": "TestBank"
+      },
+      "store": {
+        "_id": "6a12d5eada2af90e7be66771",
+        "name": "Test Store A"
+      },
+      "tags": [
+        "imprescindible"
+      ],
+      "user": "testuser"
+    },
+    {
+      "_id": "6a12d5eada2af90e7be66778",
+      "date": 1733400000000,
+      "category": {
+        "_id": "6a12d5eada2af90e7be6676f",
+        "name": "Restaurants"
+      },
+      "amount": -25.5,
+      "type": "expense",
+      "account": {
+        "_id": "6a12d5eada2af90e7be66761",
+        "name": "Test Checking",
+        "bank": "TestBank"
+      },
+      "store": {
+        "_id": "6a12d5eada2af90e7be66775",
+        "name": "Test Restaurante Ñandú"
+      },
+      "tags": [
+        "ocio"
+      ],
+      "user": "testuser"
+    },
+    {
+      "_id": "6a12d5eada2af90e7be66777",
+      "date": 1731232800000,
+      "category": {
+        "_id": "6a12d5eada2af90e7be6676b",
+        "name": "Salary"
+      },
+      "amount": 1000,
+      "type": "income",
+      "account": {
+        "_id": "6a12d5eada2af90e7be66761",
+        "name": "Test Checking",
+        "bank": "TestBank"
+      },
+      "tags": [
+        "trabajo"
+      ],
+      "user": "testuser"
+    }
+  ]
 }

@@ -1,13 +1,19 @@
 {
   "method": "GET",
   "path": "/api/goals",
-  "status": 401,
+  "status": 200,
   "headers": {
     "content-type": "application/json; charset=utf-8"
   },
-  "body": {
-    "statusCode": 401,
-    "error": "Unauthorized",
-    "message": "Unauthorized"
-  }
+  "body": [
+    {
+      "_id": "6a12d5eada2af90e7be667ad",
+      "name": "Test Goal",
+      "targetAmount": 5000,
+      "currentAmount": 1500,
+      "color": "#4CAF50",
+      "icon": "DollarOutlined",
+      "user": "testuser"
+    }
+  ]
 }
