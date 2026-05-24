@@ -23,6 +23,9 @@ importers:
       '@hapi/boom':
         specifier: 10.0.1
         version: 10.0.1
+      '@soker90/finper-db':
+        specifier: workspace:*
+        version: link:../db
       '@soker90/finper-models':
         specifier: workspace:*
         version: link:../models
@@ -11541,7 +11544,7 @@ snapshots:
       eslint: 9.39.2
       eslint-import-context: 0.1.9(unrs-resolver@1.11.1)
       is-glob: 4.0.3
-      minimatch: 9.0.9
+      minimatch: 10.2.4
       semver: 7.7.4
       stable-hash-x: 0.2.0
       unrs-resolver: 1.11.1

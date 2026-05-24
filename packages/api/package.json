@@ -38,6 +38,7 @@
   ],
   "dependencies": {
     "@hapi/boom": "10.0.1",
+    "@soker90/finper-db": "workspace:*",
     "@soker90/finper-models": "workspace:*",
     "@soker90/finper-types": "workspace:*",
     "bcrypt": "6.0.0",

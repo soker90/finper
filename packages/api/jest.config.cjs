@@ -9,6 +9,9 @@ module.exports = {
     '/node_modules/(?!(\\.pnpm|@faker-js/faker)/)',
     '/node_modules/\\.pnpm/(?!(@faker-js\\+faker)@)'
   ],
+  moduleNameMapper: {
+    '^@soker90/finper-db$': '<rootDir>/../db/src/index.ts'
+  },
   collectCoverage: true,
   collectCoverageFrom: [
     'src/**/*.{ts,js}',
