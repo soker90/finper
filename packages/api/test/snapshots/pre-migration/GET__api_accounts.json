@@ -1,0 +1,13 @@
+{
+  "method": "GET",
+  "path": "/api/accounts",
+  "status": 401,
+  "headers": {
+    "content-type": "application/json; charset=utf-8"
+  },
+  "body": {
+    "statusCode": 401,
+    "error": "Unauthorized",
+    "message": "Unauthorized"
+  }
+}

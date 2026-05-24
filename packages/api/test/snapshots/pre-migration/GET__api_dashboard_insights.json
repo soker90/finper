@@ -1,0 +1,9 @@
+{
+  "method": "GET",
+  "path": "/api/dashboard/insights",
+  "status": 404,
+  "headers": {
+    "content-type": "text/html; charset=utf-8"
+  },
+  "body": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<title>Error</title>\n</head>\n<body>\n<pre>Cannot GET /api/dashboard/insights</pre>\n</body>\n</html>\n"
+}
