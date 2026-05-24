@@ -1,11 +1,12 @@
-import { Types, AccountModel } from '@soker90/finper-models'
+import { isValidId } from '../../utils'
+import { AccountModel } from '@soker90/finper-models'
 import Boom from '@hapi/boom'
 import { ERROR_MESSAGE } from '../../i18n'
 
 export const validateAccountTransferExist = async (params: { user: string, sourceId: string, destinationId: string, amount: number }) => {
   const { user, sourceId, destinationId, amount } = params
 
-  if (!Types.ObjectId.isValid(sourceId) || !Types.ObjectId.isValid(destinationId)) {
+  if (!isValidId(sourceId) || !isValidId(destinationId)) {
     throw Boom.badRequest(ERROR_MESSAGE.COMMON.INVALID_ID).output
   }
 

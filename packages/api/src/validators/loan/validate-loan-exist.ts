@@ -1,8 +1,9 @@
-import { Types, LoanModel } from '@soker90/finper-models'
+import { isValidId } from '../../utils'
+import { LoanModel } from '@soker90/finper-models'
 import Boom from '@hapi/boom'
 
 export const validateLoanExist = async ({ id, user, message }: { id: string, user: string, message?: string }) => {
-  if (!Types.ObjectId.isValid(id)) {
+  if (!isValidId(id)) {
     throw Boom.badRequest('Invalid loan id').output
   }
   const exist = await LoanModel.exists({ _id: id, user })
