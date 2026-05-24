@@ -1,0 +1,23 @@
+{
+  "name": "@soker90/finper-db",
+  "version": "1.0.0",
+  "description": "Database definitions and ORM for finper",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "echo \"Error: no test specified\" && exit 0",
+    "lint": "eslint . --ext .ts",
+    "generate": "drizzle-kit generate"
+  },
+  "dependencies": {
+    "better-sqlite3": "11.8.1",
+    "bson": "6.10.3",
+    "drizzle-orm": "0.39.3"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "7.6.12",
+    "drizzle-kit": "0.30.5",
+    "typescript": "5.9.3"
+  }
+}

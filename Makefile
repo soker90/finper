@@ -10,16 +10,20 @@ define help
     build-image-api-latest:    build the API image latest
     build-models:              build the models (requires build-types first)
     build-types:               build the shared types
+    build-db:                  build the database package (requires build-models first)
     install:                   install all dependencies.
     lint-api:                  lint the API
     lint-bot:                  lint the bot
     lint-client:               lint the client
+    lint-db:                   lint the database package
     lint-models:               lint the models.
     lint-types:                lint the shared types.
     seed-user:                 create initial user (USERNAME and PASSWORD required).
     test:                      run all tests.
     test-api:                  run all tests for the API.
+    test-bot:                  run tests for the bot.
     test-client:               run all tests for the client
+    test-db:                   run all tests for the database package.
     test-models:               run all tests for the models.
     test-types:                run all tests for the shared types.
     start-api:                 launch api
@@ -61,6 +65,16 @@ test-models:
 lint-models:
 	@pnpm --filter @soker90/finper-models lint
 
+## DB ##
+build-db: build-models
+	@pnpm --filter @soker90/finper-db build
+
+test-db:
+	@pnpm --filter @soker90/finper-db test
+
+lint-db:
+	@pnpm --filter @soker90/finper-db lint
+
 ## API ##
 seed-user:
 	@INIT_USERNAME=$(USERNAME) INIT_PASSWORD=$(PASSWORD) pnpm --filter @soker90/finper-api seed-user
@@ -71,7 +85,7 @@ start-api:
 test-api:
 	@pnpm --filter @soker90/finper-api test
 
-build-api:
+build-api: build-db
 	@pnpm --filter @soker90/finper-api build
 
 lint-api:
