@@ -1,5 +1,5 @@
 import { TRANSACTION } from '@soker90/finper-models'
-import { AccountModel, DebtModel, LoanModel, PensionModel, TransactionModel, type IPension } from '@soker90/finper-models'
+import { AccountModel, LoanModel, PensionModel, TransactionModel, type IPension } from '@soker90/finper-models'
 import { roundNumber } from '../../utils/roundNumber'
 import { generateInsights } from '../utils/insights'
 import { computeHealthScore, computeBudgetAdherence, computeHistoricalSavingsRate } from './health-score'
@@ -11,6 +11,7 @@ import {
   aggregateCurrentBudgets
 } from './aggregations'
 import type { DashboardStatsResult, IDashboardService, PensionSummary, DailyExpense } from './dashboard.types'
+import { debtsService } from '../../modules/debts/debts.service'
 
 /** Builds the cumulative daily expense array from a day→amount map. */
 const buildCumulativeDailyExpenses = (
@@ -73,32 +74,7 @@ export default class DashboardService implements IDashboardService {
       ]),
 
       // 2. Sum of outstanding debts
-      DebtModel.aggregate([
-        { $match: { user } },
-        {
-          $group: {
-            _id: null,
-            totalOwed: {
-              $sum: {
-                $cond: {
-                  if: { $eq: ['$type', 'to'] },
-                  then: '$amount',
-                  else: 0
-                }
-              }
-            },
-            totalReceivable: {
-              $sum: {
-                $cond: {
-                  if: { $eq: ['$type', 'from'] },
-                  then: '$amount',
-                  else: 0
-                }
-              }
-            }
-          }
-        }
-      ]),
+      debtsService.getDebts(user),
 
       // 3. Sum of pending capital on active loans
       LoanModel.aggregate([
@@ -346,8 +322,13 @@ export default class DashboardService implements IDashboardService {
 
     // Scalar extraction
     const totalBalance = roundNumber(accountsResult[0]?.total ?? 0)
-    const totalDebts = roundNumber(debtsResult[0]?.totalOwed ?? 0)
-    const totalReceivable = roundNumber(debtsResult[0]?.totalReceivable ?? 0)
+
+    // Calculate total debts using the new debtsService result
+    const totalOwed = (debtsResult as any).to.reduce((sum: number, d: any) => sum + d.amount, 0)
+    const totalReceiv = (debtsResult as any).from.reduce((sum: number, d: any) => sum + d.amount, 0)
+    const totalDebts = roundNumber(totalOwed)
+    const totalReceivable = roundNumber(totalReceiv)
+
     const totalLoansPending = roundNumber(loansResult[0]?.total ?? 0)
     const netWorth = roundNumber(totalBalance - totalDebts - totalLoansPending + totalReceivable)
 

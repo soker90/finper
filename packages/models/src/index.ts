@@ -7,7 +7,7 @@ import mongooseConnect from './mongoose-connect'
 import { IAccount, AccountModel } from './models/accounts'
 import { IBudget, BudgetModel } from './models/budgets'
 import { ICategory, CategoryModel } from './models/categories'
-import { IDebt, DebtModel, DEBT } from './models/debts'
+
 import { IPension, PensionModel } from './models/pensions'
 import { IStore, StoreModel } from './models/stores'
 import { ITransaction, TransactionModel, TRANSACTION } from './models/transactions'
@@ -21,12 +21,12 @@ import { IProperty, PropertyModel } from './models/properties'
 import { ISupply, SupplyModel, SUPPLY_TYPE } from './models/supplies'
 import { ISupplyReading, SupplyReadingModel } from './models/supply-readings'
 import { IStock, StockModel, STOCK_TYPE } from './models/stocks'
-import { IGoal, GoalModel, GOAL_COLORS, GOAL_ICONS } from './models/goals'
+
 
 export type { AccountDocument } from './models/accounts'
 export type { BudgetDocument } from './models/budgets'
 export type { CategoryDocument } from './models/categories'
-export type { DebtDocument } from './models/debts'
+
 export type { LoanDocument } from './models/loans'
 export type { LoanPaymentDocument } from './models/loan-payments'
 export type { LoanEventDocument } from './models/loan-events'
@@ -40,7 +40,7 @@ export type { PropertyDocument } from './models/properties'
 export type { SupplyDocument } from './models/supplies'
 export type { SupplyReadingDocument } from './models/supply-readings'
 export type { StockDocument } from './models/stocks'
-export type { GoalDocument } from './models/goals'
+
 
 function connect (uri: string, options: Record<string, unknown>): void {
   if (isNil(mongoose)) {
@@ -64,19 +64,16 @@ export {
   mongoose,
   Types,
 
-  DEBT,
+
   LOAN_PAYMENT,
   TRANSACTION,
   SUPPLY_TYPE,
   STOCK_TYPE,
 
-  GOAL_COLORS,
-  GOAL_ICONS,
 
   IAccount,
   IBudget,
   ICategory,
-  IDebt,
   ILoan,
   ILoanPayment,
   ILoanEvent,
@@ -91,12 +88,11 @@ export {
   ISupplyReading,
   IStock,
 
-  IGoal,
 
   AccountModel,
   BudgetModel,
   CategoryModel,
-  DebtModel,
+
   LoanModel,
   LoanPaymentModel,
   LoanEventModel,
@@ -109,6 +105,5 @@ export {
   PropertyModel,
   SupplyModel,
   SupplyReadingModel,
-  StockModel,
-  GoalModel
+  StockModel
 }

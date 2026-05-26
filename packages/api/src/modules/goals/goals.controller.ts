@@ -1,19 +1,18 @@
 import { Request, Response } from 'express'
-
-import { IGoalService } from '../services/goal.service'
-import { validateGoalCreateParams, validateGoalEditParams, validateGoalExist, validateGoalFundParams } from '../validators/goal'
-
-type IGoalController = {
-  loggerHandler: any,
-  goalService: IGoalService,
-}
+import { IGoalService } from './goals.service'
+import {
+  validateGoalCreateParams,
+  validateGoalEditParams,
+  validateGoalExist,
+  validateGoalFundParams
+} from './goals.schema'
+import { goalsSerializer } from './goals.serializer'
 
 export class GoalController {
   private logger
-
   private goalService
 
-  constructor ({ loggerHandler, goalService }: IGoalController) {
+  constructor ({ loggerHandler, goalService }: { loggerHandler: any, goalService: IGoalService }) {
     this.logger = loggerHandler
     this.goalService = goalService
   }
@@ -23,10 +22,10 @@ export class GoalController {
     this.logger.logInfo(`/create - goal: ${name}`)
 
     const params = await validateGoalCreateParams({ ...req.body, user: req.user })
-    const response = await this.goalService.addGoal(params)
+    const response = await this.goalService.addGoal(req.user, params)
     this.logger.logInfo(`Goal ${response.name} has been successfully created`)
 
-    res.send(response)
+    res.status(201).send(goalsSerializer.toJson(response))
   }
 
   public async goals (req: Request, res: Response): Promise<void> {
@@ -34,7 +33,7 @@ export class GoalController {
 
     const response = await this.goalService.getGoals(req.user)
 
-    res.send(response)
+    res.send(response.map((r: any) => goalsSerializer.toJson(r)))
   }
 
   public async goal (req: Request, res: Response): Promise<void> {
@@ -44,7 +43,9 @@ export class GoalController {
     await validateGoalExist({ id, user: req.user })
     const response = await this.goalService.getGoal({ id, user: req.user })
 
-    res.send(response)
+    if (response) {
+      res.send(goalsSerializer.toJson(response))
+    }
   }
 
   public async edit (req: Request, res: Response): Promise<void> {
@@ -52,9 +53,9 @@ export class GoalController {
 
     const { id, user, value } = await validateGoalEditParams({ params: req.params, body: req.body, user: req.user })
     const response = await this.goalService.editGoal({ id, user, value })
-    this.logger.logInfo(`Goal ${response._id} has been successfully edited`)
+    this.logger.logInfo(`Goal ${response.id} has been successfully edited`)
 
-    res.send(response)
+    res.send(goalsSerializer.toJson(response))
   }
 
   public async delete (req: Request, res: Response): Promise<void> {
@@ -73,7 +74,7 @@ export class GoalController {
     const { id, user, amount } = await validateGoalFundParams({ params: req.params, body: req.body, user: req.user })
     const response = await this.goalService.fundGoal({ id, user, amount })
 
-    res.send(response)
+    res.send(goalsSerializer.toJson(response))
   }
 
   public async withdraw (req: Request, res: Response): Promise<void> {
@@ -82,6 +83,6 @@ export class GoalController {
     const { id, user, amount } = await validateGoalFundParams({ params: req.params, body: req.body, user: req.user })
     const response = await this.goalService.withdrawGoal({ id, user, amount })
 
-    res.send(response)
+    res.send(goalsSerializer.toJson(response))
   }
 }

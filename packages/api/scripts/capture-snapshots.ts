@@ -12,7 +12,7 @@ if (!fs.existsSync(OUTPUT_DIR)) {
 // Credentials for test user
 const TEST_USER = {
   username: 'testuser',
-  password: 'Password123!'
+  password: 'testpass1234'
 }
 
 const endpointsToCapture = [
@@ -20,56 +20,56 @@ const endpointsToCapture = [
   { method: 'GET', path: '/api/monit/health' },
   { method: 'GET', path: '/api/accounts/000000000000000000000000', expectedStatus: 404 },
   { method: 'POST', path: '/api/accounts', body: { name: 'Invalid' }, expectedStatus: 400 },
-  
+
   // Accounts
   { method: 'GET', path: '/api/accounts' },
-  
+
   // Transactions
   { method: 'GET', path: '/api/transactions' },
   { method: 'GET', path: '/api/transactions/summary' },
-  
+
   // Categories
   { method: 'GET', path: '/api/categories' },
-  
+
   // Budgets
   { method: 'GET', path: '/api/budgets' },
   { method: 'GET', path: '/api/budgets/year/2026' },
-  
+
   // Subscriptions
   { method: 'GET', path: '/api/subscriptions' },
-  
+
   // Loans
   { method: 'GET', path: '/api/loans' },
-  
+
   // Debts
   { method: 'GET', path: '/api/debts' },
-  
+
   // Goals
   { method: 'GET', path: '/api/goals' },
-  
+
   // Stocks
   { method: 'GET', path: '/api/stocks' },
-  
+
   // Pensions
   { method: 'GET', path: '/api/pensions' },
-  
+
   // Properties
   { method: 'GET', path: '/api/properties' },
-  
+
   // Supplies
   { method: 'GET', path: '/api/supplies' },
-  
+
   // Stores
   { method: 'GET', path: '/api/stores' },
-  
+
   // Dashboard
   { method: 'GET', path: '/api/dashboard' },
   { method: 'GET', path: '/api/dashboard/insights' }
 ]
 
-async function run() {
+async function run () {
   console.log('Capturing snapshots from ' + API_URL)
-  
+
   // 0. Health check
   try {
     const health = await fetch(`${API_URL}/api/monit/health`)
@@ -77,11 +77,11 @@ async function run() {
       console.error(`❌ ERROR: Health check failed (${health.status}). Is the API running on ${API_URL}?`)
       process.exit(1)
     }
-  } catch (err) {
+  } catch {
     console.error(`❌ ERROR: Could not connect to API on ${API_URL}. Please ensure it is running.`)
     process.exit(1)
   }
-  
+
   // 1. Login
   let token = ''
   try {
@@ -95,7 +95,7 @@ async function run() {
     } else {
       const loginData = await loginRes.json()
       token = loginData.token
-      
+
       const filename = path.join(OUTPUT_DIR, 'POST__api_auth_login.json')
       fs.writeFileSync(filename, JSON.stringify({
         method: 'POST',
@@ -105,7 +105,7 @@ async function run() {
         body: { token: '<REDACTED>' }
       }, null, 2))
     }
-  } catch (err) {
+  } catch {
     console.error('Error connecting to API. Ensure it is running on ' + API_URL)
     process.exit(1)
   }
@@ -116,13 +116,13 @@ async function run() {
     try {
       const headers: Record<string, string> = { 'Content-Type': 'application/json' }
       if (token) headers['Authorization'] = `Bearer ${token}`
-        
+
       const res = await fetch(`${API_URL}${ep.path}`, {
         method: ep.method,
         headers,
         body: ep.body ? JSON.stringify(ep.body) : undefined
       })
-      
+
       // Parse Body
       let bodyData = null
       const contentType = res.headers.get('content-type') || ''
@@ -131,9 +131,9 @@ async function run() {
       } else {
         bodyData = await res.text()
       }
-      
+
       const filename = path.join(OUTPUT_DIR, `${ep.method}__${ep.path.replace(/\//g, '_').replace(/^_/, '')}.json`)
-      
+
       const snapshot = {
         method: ep.method,
         path: ep.path,
@@ -143,19 +143,18 @@ async function run() {
         },
         body: bodyData
       }
-      
+
       fs.writeFileSync(filename, JSON.stringify(snapshot, null, 2))
-      
+
       // If we expect 200 but got 401, test user might not have data or token is invalid
       if (res.status >= 400 && !ep.expectedStatus) {
         console.warn(`⚠️ WARNING: ${ep.method} ${ep.path} returned ${res.status}`)
       }
-      
     } catch (err: any) {
       console.error(`❌ ERROR: Failed to capture ${ep.method} ${ep.path}: ${err.message}`)
     }
   }
-  
+
   console.log('\n✅ Capture complete! Snapshots saved to', OUTPUT_DIR)
 }
 

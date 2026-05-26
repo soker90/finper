@@ -6,6 +6,9 @@ import compression from 'compression'
 
 import db from './config/db'
 import config from './config'
+import { db as sqliteDb } from './db'
+import { migrate } from 'drizzle-orm/better-sqlite3/migrator'
+import path from 'node:path'
 
 import { MonitRoutes } from './routes/monit.routes'
 import handleError from './middlewares/handle-error'
@@ -14,7 +17,7 @@ import { AccountRoutes } from './routes/account.routes'
 import { BudgetRoutes } from './routes/budget.routes'
 import { CategoryRoutes } from './routes/category.routes'
 import { DashboardRoutes } from './routes/dashboard.routes'
-import { DebtRoutes } from './routes/debt.routes'
+import { debtsRouter } from './modules/debts/debts.routes'
 import { PensionRoutes } from './routes/pension.routes'
 import { TransactionRoutes } from './routes/transaction.routes'
 import { StoreRoutes } from './routes/store.routes'
@@ -25,7 +28,7 @@ import { PropertyRoutes } from './routes/property.routes'
 import { SupplyRoutes } from './routes/supply.routes'
 import { SupplyReadingRoutes } from './routes/supply-reading.routes'
 import { StockRoutes } from './routes/stock.routes'
-import { GoalRoutes } from './routes/goal.routes'
+import { goalsRouter } from './modules/goals/goals.routes'
 import { StatsRoutes } from './routes/stats.routes'
 
 class Server {
@@ -37,6 +40,7 @@ class Server {
     this.routes()
     this.postMiddlewareConfig()
     this.mongo()
+    this.sqlite()
   }
 
   public routes (): void {
@@ -45,7 +49,7 @@ class Server {
     this.app.use('/api/accounts', new AccountRoutes().router)
     this.app.use('/api/budgets', new BudgetRoutes().router)
     this.app.use('/api/dashboard', new DashboardRoutes().router)
-    this.app.use('/api/debts', new DebtRoutes().router)
+    this.app.use('/api/debts', debtsRouter)
     this.app.use('/api/categories', new CategoryRoutes().router)
     this.app.use('/api/pensions', new PensionRoutes().router)
     this.app.use('/api/transactions', new TransactionRoutes().router)
@@ -57,7 +61,7 @@ class Server {
     this.app.use('/api/supplies/readings', new SupplyReadingRoutes().router)
     this.app.use('/api/supplies', new SupplyRoutes().router)
     this.app.use('/api/stocks', new StockRoutes().router)
-    this.app.use('/api/goals', new GoalRoutes().router)
+    this.app.use('/api/goals', goalsRouter)
     this.app.use('/api/stats', new StatsRoutes().router)
   }
 
@@ -75,6 +79,13 @@ class Server {
 
   private mongo () {
     db.connect(config.mongo)
+  }
+
+  private sqlite () {
+    migrate(sqliteDb as any, {
+      migrationsFolder: path.resolve(__dirname, '../../db/drizzle')
+    })
+    console.log('[finper-api] Drizzle SQLite migrations applied')
   }
 
   /* istanbul ignore next — start() is only called outside of test env */

@@ -2,8 +2,6 @@ import supertest from 'supertest'
 import {
   AccountModel,
   CategoryModel,
-  DebtModel,
-  DEBT,
   mongoose,
   PensionModel,
   TransactionModel,
@@ -12,33 +10,60 @@ import {
 
 import { server } from '../../src/server'
 
+import {
+  insertAccount,
+  insertPension,
+  insertTransaction
+} from '../insert-data-to-model'
 import { requestLogin } from '../request-login'
-import { insertAccount, insertDebt, insertPension, insertTransaction } from '../insert-data-to-model'
 import { generateUsername } from '../generate-values'
+import { debtsRepository } from '../../src/modules/debts/debts.repository'
+import { db as sqliteDb } from '../../src/db'
+import { generateId } from '@soker90/finper-db'
 
 import createTestDatabase from '../test-db'
 const testDatabase = createTestDatabase(mongoose)
 
 describe('Dashboard', () => {
-  beforeAll(() => testDatabase.connect())
+  beforeAll(async () => {
+    await testDatabase.connect()
+  })
 
-  afterAll(() => testDatabase.close())
+  afterAll(async () => {
+    await testDatabase.close()
+  })
 
   describe('GET /stats', () => {
     const path = '/api/dashboard/stats'
     let token: string
-    const user: string = generateUsername()
+    const username = generateUsername()
+    const userId = generateId()
 
     beforeAll(async () => {
-      token = await requestLogin(server.app, { username: user })
+      token = await requestLogin(server.app, { username })
+      const { schema } = await import('@soker90/finper-db')
+      sqliteDb.insert(schema.users).values({
+        id: userId,
+        username,
+        password: 'pwd-hash',
+        createdAt: new Date(),
+      }).run()
     })
 
     afterEach(async () => {
       await TransactionModel.deleteMany({})
       await AccountModel.deleteMany({})
-      await DebtModel.deleteMany({})
       await PensionModel.deleteMany({})
       await CategoryModel.deleteMany({})
+      // clear sqlite debts table
+      const { schema } = await import('@soker90/finper-db')
+      const { debts } = schema
+      sqliteDb.delete(debts).run()
+    })
+
+    afterAll(async () => {
+      const { schema } = await import('@soker90/finper-db')
+      sqliteDb.delete(schema.users).run()
     })
 
     test('when token is not provided, it should response an error with status code 401', async () => {
@@ -83,9 +108,9 @@ describe('Dashboard', () => {
       const year = now.getFullYear()
       const month = now.getMonth()
 
-      await insertTransaction({ user, date: new Date(year, month, 5).getTime(), amount: 100, type: TRANSACTION.Expense })
-      await insertTransaction({ user, date: new Date(year, month, 10).getTime(), amount: 50, type: TRANSACTION.Expense })
-      await insertTransaction({ user, date: new Date(year, month, 3).getTime(), amount: 2000, type: TRANSACTION.Income })
+      await insertTransaction({ user: username, date: new Date(year, month, 5).getTime(), amount: 100, type: TRANSACTION.Expense })
+      await insertTransaction({ user: username, date: new Date(year, month, 10).getTime(), amount: 50, type: TRANSACTION.Expense })
+      await insertTransaction({ user: username, date: new Date(year, month, 3).getTime(), amount: 2000, type: TRANSACTION.Income })
 
       const response = await supertest(server.app)
         .get(path)
@@ -104,12 +129,12 @@ describe('Dashboard', () => {
       const prevYear = month === 0 ? year - 1 : year
 
       // Current month
-      await insertTransaction({ user, date: new Date(year, month, 5).getTime(), amount: 100, type: TRANSACTION.Expense })
-      await insertTransaction({ user, date: new Date(year, month, 3).getTime(), amount: 2000, type: TRANSACTION.Income })
+      await insertTransaction({ user: username, date: new Date(year, month, 5).getTime(), amount: 100, type: TRANSACTION.Expense })
+      await insertTransaction({ user: username, date: new Date(year, month, 3).getTime(), amount: 2000, type: TRANSACTION.Income })
 
       // Previous month
-      await insertTransaction({ user, date: new Date(prevYear, prevMonth, 15).getTime(), amount: 300, type: TRANSACTION.Expense })
-      await insertTransaction({ user, date: new Date(prevYear, prevMonth, 10).getTime(), amount: 1500, type: TRANSACTION.Income })
+      await insertTransaction({ user: username, date: new Date(prevYear, prevMonth, 15).getTime(), amount: 300, type: TRANSACTION.Expense })
+      await insertTransaction({ user: username, date: new Date(prevYear, prevMonth, 10).getTime(), amount: 1500, type: TRANSACTION.Income })
 
       const response = await supertest(server.app)
         .get(path)
@@ -127,8 +152,8 @@ describe('Dashboard', () => {
       const year = now.getFullYear()
       const month = now.getMonth()
 
-      await insertTransaction({ user, date: new Date(year, month, 5).getTime(), amount: 100, type: TRANSACTION.Expense })
-      await insertTransaction({ user, date: new Date(year, month, 3).getTime(), amount: 2000, type: TRANSACTION.Income })
+      await insertTransaction({ user: username, date: new Date(year, month, 5).getTime(), amount: 100, type: TRANSACTION.Expense })
+      await insertTransaction({ user: username, date: new Date(year, month, 3).getTime(), amount: 2000, type: TRANSACTION.Income })
 
       const response = await supertest(server.app)
         .get(path)
@@ -150,8 +175,8 @@ describe('Dashboard', () => {
       const year = now.getFullYear()
       const month = now.getMonth()
 
-      await insertTransaction({ user, date: new Date(year, month, 5).getTime(), amount: 300, type: TRANSACTION.Expense })
-      await insertTransaction({ user, date: new Date(year, month, 6).getTime(), amount: 100, type: TRANSACTION.Expense })
+      await insertTransaction({ user: username, date: new Date(year, month, 5).getTime(), amount: 300, type: TRANSACTION.Expense })
+      await insertTransaction({ user: username, date: new Date(year, month, 6).getTime(), amount: 100, type: TRANSACTION.Expense })
 
       const response = await supertest(server.app)
         .get(path)
@@ -178,8 +203,8 @@ describe('Dashboard', () => {
       const year = now.getFullYear()
       const month = now.getMonth()
 
-      await insertTransaction({ user, date: new Date(year, month, 1).getTime(), amount: 50, type: TRANSACTION.Expense })
-      await insertTransaction({ user, date: new Date(year, month, 3).getTime(), amount: 30, type: TRANSACTION.Expense })
+      await insertTransaction({ user: username, date: new Date(year, month, 1).getTime(), amount: 50, type: TRANSACTION.Expense })
+      await insertTransaction({ user: username, date: new Date(year, month, 3).getTime(), amount: 30, type: TRANSACTION.Expense })
 
       const response = await supertest(server.app)
         .get(path)
@@ -198,9 +223,9 @@ describe('Dashboard', () => {
     })
 
     test('should compute totalBalance from active accounts only', async () => {
-      await insertAccount({ user, balance: 1000, isActive: true })
-      await insertAccount({ user, balance: 500, isActive: true })
-      await insertAccount({ user, balance: 9999, isActive: false })
+      await insertAccount({ user: username, balance: 1000, isActive: true })
+      await insertAccount({ user: username, balance: 500, isActive: true })
+      await insertAccount({ user: username, balance: 9999, isActive: false })
 
       const response = await supertest(server.app)
         .get(path)
@@ -211,9 +236,9 @@ describe('Dashboard', () => {
     })
 
     test('should compute totalDebts from all pending debts', async () => {
-      await insertDebt({ user, amount: 200, type: DEBT.TO })
-      await insertDebt({ user, amount: 300, type: DEBT.TO })
-      await insertDebt({ user, amount: 9999, type: DEBT.TO })
+      await debtsRepository.create(username, { from: 'A', amount: 200, type: 'to', date: new Date() })
+      await debtsRepository.create(username, { from: 'B', amount: 300, type: 'to', date: new Date() })
+      await debtsRepository.create(username, { from: 'C', amount: 9999, type: 'to', date: new Date() })
 
       const response = await supertest(server.app)
         .get(path)
@@ -224,8 +249,8 @@ describe('Dashboard', () => {
     })
 
     test('should compute netWorth as totalBalance minus totalDebts', async () => {
-      await insertAccount({ user, balance: 1000, isActive: true })
-      await insertDebt({ user, amount: 200, type: DEBT.TO })
+      await insertAccount({ user: username, balance: 1000, isActive: true })
+      await debtsRepository.create(username, { from: 'A', amount: 200, type: 'to', date: new Date() })
 
       const response = await supertest(server.app)
         .get(path)
@@ -240,8 +265,8 @@ describe('Dashboard', () => {
       const year = now.getFullYear()
       const month = now.getMonth()
 
-      await insertTransaction({ user, date: new Date(year, month, 5).getTime(), amount: 500, type: TRANSACTION.NotComputable })
-      await insertTransaction({ user, date: new Date(year, month, 6).getTime(), amount: 100, type: TRANSACTION.Expense })
+      await insertTransaction({ user: username, date: new Date(year, month, 5).getTime(), amount: 500, type: TRANSACTION.NotComputable })
+      await insertTransaction({ user: username, date: new Date(year, month, 6).getTime(), amount: 100, type: TRANSACTION.Expense })
 
       const response = await supertest(server.app)
         .get(path)
@@ -260,7 +285,7 @@ describe('Dashboard', () => {
       // Another user's transaction
       await insertTransaction({ date: new Date(year, month, 5).getTime(), amount: 9999, type: TRANSACTION.Expense })
       // Our user's transaction
-      await insertTransaction({ user, date: new Date(year, month, 5).getTime(), amount: 100, type: TRANSACTION.Expense })
+      await insertTransaction({ user: username, date: new Date(year, month, 5).getTime(), amount: 100, type: TRANSACTION.Expense })
 
       const response = await supertest(server.app)
         .get(path)
@@ -275,8 +300,8 @@ describe('Dashboard', () => {
       const year = now.getFullYear()
       const month = now.getMonth()
 
-      await insertTransaction({ user, date: new Date(year, month, 5).getTime(), amount: 50, type: TRANSACTION.Expense })
-      await insertTransaction({ user, date: new Date(year, month, 10).getTime(), amount: -40, type: TRANSACTION.Expense })
+      await insertTransaction({ user: username, date: new Date(year, month, 5).getTime(), amount: 50, type: TRANSACTION.Expense })
+      await insertTransaction({ user: username, date: new Date(year, month, 10).getTime(), amount: -40, type: TRANSACTION.Expense })
 
       const response = await supertest(server.app)
         .get(path)
@@ -291,8 +316,8 @@ describe('Dashboard', () => {
       const year = now.getFullYear()
       const month = now.getMonth()
 
-      await insertTransaction({ user, date: new Date(year, month, 3).getTime(), amount: 1000, type: TRANSACTION.Income })
-      await insertTransaction({ user, date: new Date(year, month, 5).getTime(), amount: 200, type: TRANSACTION.Expense })
+      await insertTransaction({ user: username, date: new Date(year, month, 3).getTime(), amount: 1000, type: TRANSACTION.Income })
+      await insertTransaction({ user: username, date: new Date(year, month, 5).getTime(), amount: 200, type: TRANSACTION.Expense })
 
       const response = await supertest(server.app)
         .get(path)
@@ -308,7 +333,7 @@ describe('Dashboard', () => {
       // value=1.5, units = employeeUnits+companyUnits = 500+500 = 1000
       // total = 1.5 * 1000 = 1500 → return = (1500-1000)/1000 * 100 = 50%
       await insertPension({
-        user,
+        user: username,
         employeeAmount: 600,
         companyAmount: 400,
         employeeUnits: 500,
@@ -336,9 +361,9 @@ describe('Dashboard', () => {
       const year = now.getFullYear()
       const month = now.getMonth()
 
-      await insertAccount({ user, balance: 10000, isActive: true })
-      await insertTransaction({ user, date: new Date(year, month, 3).getTime(), amount: 3000, type: TRANSACTION.Income })
-      await insertTransaction({ user, date: new Date(year, month, 5).getTime(), amount: 1000, type: TRANSACTION.Expense })
+      await insertAccount({ user: username, balance: 10000, isActive: true })
+      await insertTransaction({ user: username, date: new Date(year, month, 3).getTime(), amount: 3000, type: TRANSACTION.Income })
+      await insertTransaction({ user: username, date: new Date(year, month, 5).getTime(), amount: 1000, type: TRANSACTION.Expense })
 
       const response = await supertest(server.app)
         .get(path)
@@ -380,14 +405,14 @@ describe('Dashboard', () => {
       const prevYear2 = month - 2 < 0 ? year - 1 : year
       const prevYear1 = month - 1 < 0 ? year - 1 : year
 
-      await insertTransaction({ user, date: new Date(prevYear3, prevMonth3, 5).getTime(), amount: 1000, type: TRANSACTION.Income })
-      await insertTransaction({ user, date: new Date(prevYear3, prevMonth3, 6).getTime(), amount: 100, type: TRANSACTION.Expense })
-      await insertTransaction({ user, date: new Date(prevYear2, prevMonth2, 5).getTime(), amount: 1000, type: TRANSACTION.Income })
-      await insertTransaction({ user, date: new Date(prevYear2, prevMonth2, 6).getTime(), amount: 100, type: TRANSACTION.Expense })
-      await insertTransaction({ user, date: new Date(prevYear1, prevMonth1, 5).getTime(), amount: 1000, type: TRANSACTION.Income })
-      await insertTransaction({ user, date: new Date(prevYear1, prevMonth1, 6).getTime(), amount: 100, type: TRANSACTION.Expense })
-      await insertTransaction({ user, date: new Date(year, month, 5).getTime(), amount: 1000, type: TRANSACTION.Income })
-      await insertTransaction({ user, date: new Date(year, month, 6).getTime(), amount: 100, type: TRANSACTION.Expense })
+      await insertTransaction({ user: username, date: new Date(prevYear3, prevMonth3, 5).getTime(), amount: 1000, type: TRANSACTION.Income })
+      await insertTransaction({ user: username, date: new Date(prevYear3, prevMonth3, 6).getTime(), amount: 100, type: TRANSACTION.Expense })
+      await insertTransaction({ user: username, date: new Date(prevYear2, prevMonth2, 5).getTime(), amount: 1000, type: TRANSACTION.Income })
+      await insertTransaction({ user: username, date: new Date(prevYear2, prevMonth2, 6).getTime(), amount: 100, type: TRANSACTION.Expense })
+      await insertTransaction({ user: username, date: new Date(prevYear1, prevMonth1, 5).getTime(), amount: 1000, type: TRANSACTION.Income })
+      await insertTransaction({ user: username, date: new Date(prevYear1, prevMonth1, 6).getTime(), amount: 100, type: TRANSACTION.Expense })
+      await insertTransaction({ user: username, date: new Date(year, month, 5).getTime(), amount: 1000, type: TRANSACTION.Income })
+      await insertTransaction({ user: username, date: new Date(year, month, 6).getTime(), amount: 100, type: TRANSACTION.Expense })
 
       const response = await supertest(server.app)
         .get(path)
@@ -414,29 +439,29 @@ describe('Dashboard', () => {
       const year = now.getFullYear()
       const month = now.getMonth()
 
-      const account = await insertAccount({ user, balance: 6000, isActive: true })
+      const account = await insertAccount({ user: username, balance: 6000, isActive: true })
 
       // 3 months ago: 4 transactions of 100€ + 1 outlier of 900€ (> 3x mean=220 → outlier)
       // Without outlier: filtered total = 400€
       const threeMonthsAgo = month - 3 < 0 ? month - 3 + 12 : month - 3
       const threeMonthsAgoYear = month - 3 < 0 ? year - 1 : year
       for (let i = 1; i <= 4; i++) {
-        await insertTransaction({ user, account: account._id, date: new Date(threeMonthsAgoYear, threeMonthsAgo, i).getTime(), amount: 100, type: TRANSACTION.Expense })
+        await insertTransaction({ user: username, account: account._id, date: new Date(threeMonthsAgoYear, threeMonthsAgo, i).getTime(), amount: 100, type: TRANSACTION.Expense })
       }
-      await insertTransaction({ user, account: account._id, date: new Date(threeMonthsAgoYear, threeMonthsAgo, 5).getTime(), amount: 900, type: TRANSACTION.Expense })
+      await insertTransaction({ user: username, account: account._id, date: new Date(threeMonthsAgoYear, threeMonthsAgo, 5).getTime(), amount: 900, type: TRANSACTION.Expense })
 
       // 2 months ago: 4 transactions of 100€ (no outlier) → filtered total = 400€
       const twoMonthsAgo = month - 2 < 0 ? month - 2 + 12 : month - 2
       const twoMonthsAgoYear = month - 2 < 0 ? year - 1 : year
       for (let i = 1; i <= 4; i++) {
-        await insertTransaction({ user, account: account._id, date: new Date(twoMonthsAgoYear, twoMonthsAgo, i).getTime(), amount: 100, type: TRANSACTION.Expense })
+        await insertTransaction({ user: username, account: account._id, date: new Date(twoMonthsAgoYear, twoMonthsAgo, i).getTime(), amount: 100, type: TRANSACTION.Expense })
       }
 
       // 1 month ago: 4 transactions of 100€ (no outlier) → filtered total = 400€
       const oneMonthAgo = month - 1 < 0 ? month - 1 + 12 : month - 1
       const oneMonthAgoYear = month - 1 < 0 ? year - 1 : year
       for (let i = 1; i <= 4; i++) {
-        await insertTransaction({ user, account: account._id, date: new Date(oneMonthAgoYear, oneMonthAgo, i).getTime(), amount: 100, type: TRANSACTION.Expense })
+        await insertTransaction({ user: username, account: account._id, date: new Date(oneMonthAgoYear, oneMonthAgo, i).getTime(), amount: 100, type: TRANSACTION.Expense })
       }
 
       const response = await supertest(server.app)
@@ -454,29 +479,29 @@ describe('Dashboard', () => {
       const year = now.getFullYear()
       const month = now.getMonth()
 
-      const account = await insertAccount({ user, balance: 3000, isActive: true })
+      const account = await insertAccount({ user: username, balance: 3000, isActive: true })
 
       // 1 transaction of 400€ in a month with total 1000€ → 40% of total → outlier
       // Remainder: 600€ → filtered = 600€
       const threeMonthsAgo = month - 3 < 0 ? month - 3 + 12 : month - 3
       const threeMonthsAgoYear = month - 3 < 0 ? year - 1 : year
-      await insertTransaction({ user, account: account._id, date: new Date(threeMonthsAgoYear, threeMonthsAgo, 1).getTime(), amount: 400, type: TRANSACTION.Expense })
+      await insertTransaction({ user: username, account: account._id, date: new Date(threeMonthsAgoYear, threeMonthsAgo, 1).getTime(), amount: 400, type: TRANSACTION.Expense })
       for (let i = 2; i <= 7; i++) {
-        await insertTransaction({ user, account: account._id, date: new Date(threeMonthsAgoYear, threeMonthsAgo, i).getTime(), amount: 100, type: TRANSACTION.Expense })
+        await insertTransaction({ user: username, account: account._id, date: new Date(threeMonthsAgoYear, threeMonthsAgo, i).getTime(), amount: 100, type: TRANSACTION.Expense })
       }
 
       // 2 months ago: 6 x 100€ = 600€ (no outlier)
       const twoMonthsAgo = month - 2 < 0 ? month - 2 + 12 : month - 2
       const twoMonthsAgoYear = month - 2 < 0 ? year - 1 : year
       for (let i = 1; i <= 6; i++) {
-        await insertTransaction({ user, account: account._id, date: new Date(twoMonthsAgoYear, twoMonthsAgo, i).getTime(), amount: 100, type: TRANSACTION.Expense })
+        await insertTransaction({ user: username, account: account._id, date: new Date(twoMonthsAgoYear, twoMonthsAgo, i).getTime(), amount: 100, type: TRANSACTION.Expense })
       }
 
       // 1 month ago: 6 x 100€ = 600€ (no outlier)
       const oneMonthAgo = month - 1 < 0 ? month - 1 + 12 : month - 1
       const oneMonthAgoYear = month - 1 < 0 ? year - 1 : year
       for (let i = 1; i <= 6; i++) {
-        await insertTransaction({ user, account: account._id, date: new Date(oneMonthAgoYear, oneMonthAgo, i).getTime(), amount: 100, type: TRANSACTION.Expense })
+        await insertTransaction({ user: username, account: account._id, date: new Date(oneMonthAgoYear, oneMonthAgo, i).getTime(), amount: 100, type: TRANSACTION.Expense })
       }
 
       const response = await supertest(server.app)
@@ -494,7 +519,7 @@ describe('Dashboard', () => {
       const year = now.getFullYear()
       const month = now.getMonth()
 
-      const account = await insertAccount({ user, balance: 1500, isActive: true })
+      const account = await insertAccount({ user: username, balance: 1500, isActive: true })
 
       // 3 uniform completed months of 500€ (no outlier) → avgFiltered=500 → cashRunway=3
       for (let m = 1; m <= 3; m++) {
@@ -502,7 +527,7 @@ describe('Dashboard', () => {
         const targetYear = month - m < 0 ? year - 1 : year
         // 5 transactions of 100€: mean=100, total=500 → none is >3x100 nor >30% of 500
         for (let d = 1; d <= 5; d++) {
-          await insertTransaction({ user, account: account._id, date: new Date(targetYear, targetMonth, d).getTime(), amount: 100, type: TRANSACTION.Expense })
+          await insertTransaction({ user: username, account: account._id, date: new Date(targetYear, targetMonth, d).getTime(), amount: 100, type: TRANSACTION.Expense })
         }
       }
 
@@ -519,28 +544,28 @@ describe('Dashboard', () => {
       const year = now.getFullYear()
       const month = now.getMonth()
 
-      const account = await insertAccount({ user, balance: 3000, isActive: true })
+      const account = await insertAccount({ user: username, balance: 3000, isActive: true })
 
       // 3 months ago: 3 transactions of 333€ each → each is ~33% of total (above 30%)
       // but count < 5, so no filtering should happen → total = 999€
       const threeMonthsAgo = month - 3 < 0 ? month - 3 + 12 : month - 3
       const threeMonthsAgoYear = month - 3 < 0 ? year - 1 : year
       for (let i = 1; i <= 3; i++) {
-        await insertTransaction({ user, account: account._id, date: new Date(threeMonthsAgoYear, threeMonthsAgo, i).getTime(), amount: 333, type: TRANSACTION.Expense })
+        await insertTransaction({ user: username, account: account._id, date: new Date(threeMonthsAgoYear, threeMonthsAgo, i).getTime(), amount: 333, type: TRANSACTION.Expense })
       }
 
       // 2 months ago: 3 transactions of 100€ → total = 300€
       const twoMonthsAgo = month - 2 < 0 ? month - 2 + 12 : month - 2
       const twoMonthsAgoYear = month - 2 < 0 ? year - 1 : year
       for (let i = 1; i <= 3; i++) {
-        await insertTransaction({ user, account: account._id, date: new Date(twoMonthsAgoYear, twoMonthsAgo, i).getTime(), amount: 100, type: TRANSACTION.Expense })
+        await insertTransaction({ user: username, account: account._id, date: new Date(twoMonthsAgoYear, twoMonthsAgo, i).getTime(), amount: 100, type: TRANSACTION.Expense })
       }
 
       // 1 month ago: 3 transactions of 100€ → total = 300€
       const oneMonthAgo = month - 1 < 0 ? month - 1 + 12 : month - 1
       const oneMonthAgoYear = month - 1 < 0 ? year - 1 : year
       for (let i = 1; i <= 3; i++) {
-        await insertTransaction({ user, account: account._id, date: new Date(oneMonthAgoYear, oneMonthAgo, i).getTime(), amount: 100, type: TRANSACTION.Expense })
+        await insertTransaction({ user: username, account: account._id, date: new Date(oneMonthAgoYear, oneMonthAgo, i).getTime(), amount: 100, type: TRANSACTION.Expense })
       }
 
       const response = await supertest(server.app)

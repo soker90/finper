@@ -2,17 +2,16 @@ import { faker } from '@faker-js/faker'
 import {
   AccountModel,
   BudgetModel,
-  CategoryModel, DebtModel, DEBT,
+  CategoryModel,
   IAccount, ICategory,
-  IDebt, ILoan, ILoanPayment, IPension, IStore, ISubscription, ISubscriptionCandidate,
+  ILoan, ILoanPayment, IPension, IStore, ISubscription, ISubscriptionCandidate,
   IUser, LoanModel, LoanPaymentModel, LOAN_PAYMENT, PensionModel, StoreModel,
   SubscriptionCandidateModel, SubscriptionModel, TransactionModel,
   TRANSACTION,
   UserModel,
   PropertyModel, SupplyModel, SupplyReadingModel,
   IProperty, ISupply, ISupplyReading, SUPPLY_TYPE,
-  StockModel, IStock, STOCK_TYPE,
-  GoalModel, IGoal, GOAL_COLORS, GOAL_ICONS
+  StockModel, IStock, STOCK_TYPE
 } from '@soker90/finper-models'
 
 import {
@@ -79,7 +78,7 @@ export const insertStore = async (params: Record<string, string> = {}): Promise<
   })
 }
 
-export const insertTransaction = async (params: Record<string, string | number | string[]> = {}): Promise<any> => {
+export const insertTransaction = async (params: Record<string, any> = {}): Promise<any> => {
   const user = (params.user ?? faker.internet.username().slice(MIN_LENGTH_USERNAME, MAX_USERNAME_LENGTH).toLowerCase()) as string
   return TransactionModel.create({
     date: params.date ?? faker.date.past().getTime(),
@@ -91,17 +90,6 @@ export const insertTransaction = async (params: Record<string, string | number |
     store: params.store ?? (await insertStore({ user })),
     tags: params.tags ?? [],
     user
-  })
-}
-
-export const insertDebt = async (params: Record<string, string | number> = {}): Promise<IDebt> => {
-  return DebtModel.create({
-    from: params.from ?? faker.person.firstName(),
-    date: params.date ?? faker.number.int(),
-    amount: params.amount ?? faker.number.int(),
-    concept: params.concept ?? faker.lorem.words(4),
-    type: params.type ?? (Math.random() > 0.5 ? DEBT.TO : DEBT.FROM),
-    user: params.user ?? faker.internet.username().slice(MIN_LENGTH_USERNAME, MAX_USERNAME_LENGTH).toLowerCase()
   })
 }
 
@@ -118,7 +106,7 @@ export const insertBudget = async (params: Record<string, any> = {}): Promise<an
   return params.category ? budget.populate('category') : budget
 }
 
-export const insertPension = async (params: Record<string, string | number> = {}): Promise<IPension> => {
+export const insertPension = async (params: Record<string, any> = {}): Promise<IPension> => {
   return PensionModel.create({
     date: params.date ?? faker.number.int(),
     value: params.value ?? faker.number.int(),
@@ -268,14 +256,3 @@ export const insertStock = async (params: Record<string, any> = {}): Promise<ISt
   }) as unknown as IStock & { _id: string }
 }
 
-export const insertGoal = async (params: Record<string, any> = {}): Promise<IGoal & { _id: string }> => {
-  return GoalModel.create({
-    name: params.name ?? faker.lorem.words(2),
-    targetAmount: params.targetAmount ?? faker.number.float({ min: 100, max: 10000, multipleOf: 0.01 }),
-    currentAmount: params.currentAmount ?? 0,
-    deadline: params.deadline ?? null,
-    color: params.color ?? faker.helpers.arrayElement(GOAL_COLORS),
-    icon: params.icon ?? faker.helpers.arrayElement(GOAL_ICONS),
-    user: params.user ?? faker.internet.username().slice(MIN_LENGTH_USERNAME, MAX_USERNAME_LENGTH).toLowerCase()
-  }) as unknown as IGoal & { _id: string }
-}

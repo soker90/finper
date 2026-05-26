@@ -4,7 +4,7 @@ import AuthService from './auth.service'
 import BudgetService from './budget.service'
 import CategoryService from './category.service'
 import DashboardService from './dashboard'
-import DebtService from './debt.service'
+
 import LoanService from './loan.service'
 import PensionService from './pension.service'
 import StoreService from './stores.service'
@@ -19,14 +19,12 @@ import SupplyService from './supply.service'
 import SupplyReadingService from './supply-reading.service'
 import TariffsService from './tariffs.service'
 import StockService from './stock.service'
-import GoalService from './goal.service'
 
 export const accountService = new AccountService()
 export const authService = new AuthService(config.jwt)
 export const budgetService = new BudgetService()
 export const categoryService = new CategoryService()
 export const dashboardService = new DashboardService()
-export const debtService = new DebtService()
 export const loanService = new LoanService()
 export const pensionService = new PensionService()
 export const storeService = new StoreService()
@@ -41,4 +39,3 @@ export const supplyService = new SupplyService()
 export const supplyReadingService = new SupplyReadingService()
 export const tariffsService = new TariffsService()
 export const stockService = new StockService()
-export const goalService = new GoalService()

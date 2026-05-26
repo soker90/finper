@@ -13,4 +13,4 @@ export const createDb = (path: string) => {
 };
 
 // In production/API the database file path will be provided via env.
-export type Db = ReturnType<typeof createDb>;
+export type DB = ReturnType<typeof createDb>;

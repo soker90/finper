@@ -1,10 +1,9 @@
 import { Router } from 'express'
-import loggerHandler from '../utils/logger'
-import { GoalController } from '../controllers/goal.controller'
-import { goalService } from '../services'
-import authMiddleware from '../middlewares/auth.middleware'
-
-export class GoalRoutes {
+import loggerHandler from '../../utils/logger'
+import { GoalController } from './goals.controller'
+import { goalService } from './goals.service'
+import authMiddleware from '../../middlewares/auth.middleware'
+export class GoalsRoutes {
   router: Router
   private goalController = new GoalController({ goalService, loggerHandler: loggerHandler('GoalController') })
 
@@ -23,3 +22,5 @@ export class GoalRoutes {
     this.router.post('/:id/withdraw', authMiddleware, this.goalController.withdraw.bind(this.goalController))
   }
 }
+
+export const goalsRouter = new GoalsRoutes().router

@@ -12,6 +12,7 @@ module.exports = {
   moduleNameMapper: {
     '^@soker90/finper-db$': '<rootDir>/../db/src/index.ts'
   },
+  testPathIgnorePatterns: ['/node_modules/', '/dist/'],
   collectCoverage: true,
   collectCoverageFrom: [
     'src/**/*.{ts,js}',
