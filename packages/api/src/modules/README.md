@@ -50,3 +50,18 @@ packages/api/src/modules/<modulo>/
 - **Repository**: Tests de integración contra base de datos de test (`createTestDb()`), utilizando fixtures o datos reales pero aislados (SQLite `:memory:` es perfecto para esto).
 - **Service**: Tests unitarios que mockean el Repository para probar la lógica.
 - **Controller/Routes**: Tests de integración end-to-end de API usando `supertest` contra Express, que pueden atacar la DB en memoria.
+
+## Autenticación
+
+Todas las rutas usan `authMiddleware` (importado de `../../middlewares/auth.middleware`),
+NO `passport.authenticate('jwt')` directo.
+
+`authMiddleware` pasa por Passport y luego normaliza `req.user` a un `string`
+(el username). Es el patrón estable del proyecto. Los controladores pueden hacer:
+
+```ts
+const user = req.user as string
+```
+
+NO usar `passport.authenticate('jwt')` directo porque inyecta el documento
+Mongoose completo en `req.user`, lo que rompe operaciones con SQLite/Drizzle.

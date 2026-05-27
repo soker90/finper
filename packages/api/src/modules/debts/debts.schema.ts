@@ -1,6 +1,7 @@
 import Joi from 'joi'
 import Boom from '@hapi/boom'
 import { debtsRepository } from './debts.repository'
+import { ERROR_MESSAGE } from '../../i18n'
 
 // Constants to match the old schema
 const DEBT = {
@@ -33,7 +34,7 @@ export const validateDebtEditParams = async ({
   user
 }: { params: Record<string, string>, body: Record<string, any>, user: string }) => {
   const existing = await debtsRepository.findById(params.id, user)
-  if (!existing) throw Boom.badRequest('The requested debt doesn\'t exist').output
+  if (!existing) throw Boom.notFound(ERROR_MESSAGE.DEBT.NOT_FOUND).output
 
   const schema = Joi.object({
     from: Joi.string().required(),
@@ -56,7 +57,7 @@ export const validateDebtPayParams = async ({
   user
 }: { params: Record<string, string>, body: Record<string, any>, user: string }) => {
   const existing = await debtsRepository.findById(params.id, user)
-  if (!existing) throw Boom.badRequest('The requested debt doesn\'t exist').output
+  if (!existing) throw Boom.notFound(ERROR_MESSAGE.DEBT.NOT_FOUND).output
 
   const schema = Joi.object({
     amount: Joi.number().positive().required()

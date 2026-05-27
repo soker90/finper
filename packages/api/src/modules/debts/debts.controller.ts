@@ -15,7 +15,7 @@ const logger = loggerHandler('DebtController')
 
 export const debtsController = {
   async create (req: Request, res: Response) {
-    const user = (req.user as any).username
+    const user = req.user as string
     logger.logInfo(`/create - debt: ${req.body.from}`)
 
     const params = await validateDebtCreateParams({ ...req.body, user })
@@ -26,7 +26,7 @@ export const debtsController = {
   },
 
   async getAll (req: Request, res: Response) {
-    const user = (req.user as any).username
+    const user = req.user as string
     logger.logInfo(`/debts - list debts of ${user}`)
 
     const result = await debtsService.getDebts(user)
@@ -38,7 +38,7 @@ export const debtsController = {
   },
 
   async getFrom (req: Request, res: Response) {
-    const user = (req.user as any).username
+    const user = req.user as string
     const from = req.params.from
     logger.logInfo(`/debts - list debts from ${from}`)
 
@@ -47,7 +47,7 @@ export const debtsController = {
   },
 
   async edit (req: Request, res: Response) {
-    const user = (req.user as any).username
+    const user = req.user as string
     const id = req.params.id
     if (!isValidId(id)) throw Boom.badRequest(ERROR_MESSAGE.DEBT.NOT_FOUND).output
 
@@ -61,7 +61,7 @@ export const debtsController = {
   },
 
   async delete (req: Request, res: Response) {
-    const user = (req.user as any).username
+    const user = req.user as string
     const id = req.params.id
     if (!isValidId(id)) throw Boom.badRequest(ERROR_MESSAGE.DEBT.NOT_FOUND).output
 
@@ -72,7 +72,7 @@ export const debtsController = {
   },
 
   async pay (req: Request, res: Response) {
-    const user = (req.user as any).username
+    const user = req.user as string
     const id = req.params.id
     if (!isValidId(id)) throw Boom.badRequest(ERROR_MESSAGE.DEBT.NOT_FOUND).output
 
