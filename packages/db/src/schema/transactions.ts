@@ -8,7 +8,7 @@ import { subscriptions } from './subscriptions';
 export const tags = sqliteTable('tags', {
   id: text('id').primaryKey(),
   name: text('name').notNull(),
-  user: text('user').notNull().references(() => users.username),
+  user: text('user').notNull(),
 });
 
 export const transactions = sqliteTable('transactions', {
@@ -21,7 +21,7 @@ export const transactions = sqliteTable('transactions', {
   note: text('note'),
   storeId: text('store_id').references(() => stores.id),
   subscriptionId: text('subscription_id').references(() => subscriptions.id),
-  user: text('user').notNull().references(() => users.username),
+  user: text('user').notNull(),
 }, (table) => ({
   userTypeDateIdx: index('transactions_user_type_date_idx').on(table.user, table.type, table.date),
   userIdx: index('transactions_user_idx').on(table.user),
@@ -30,7 +30,7 @@ export const transactions = sqliteTable('transactions', {
 export const transactionTags = sqliteTable('transaction_tags', {
   transactionId: text('transaction_id').notNull().references(() => transactions.id),
   tagId: text('tag_id').notNull().references(() => tags.id),
-  user: text('user').notNull().references(() => users.username),
+  user: text('user').notNull(),
 }, (table) => ({
   pk: primaryKey({ columns: [table.transactionId, table.tagId] })
 }));

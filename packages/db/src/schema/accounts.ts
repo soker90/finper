@@ -1,5 +1,4 @@
 import { sqliteTable, text, real, integer } from 'drizzle-orm/sqlite-core';
-import { users } from './users';
 
 export const accounts = sqliteTable('accounts', {
   id: text('id').primaryKey(),
@@ -8,5 +7,5 @@ export const accounts = sqliteTable('accounts', {
   number: text('number'),
   balance: real('balance').notNull().default(0),
   isActive: integer('is_active', { mode: 'boolean' }).default(true),
-  user: text('user').notNull().references(() => users.username),
+  user: text('user').notNull(),
 });

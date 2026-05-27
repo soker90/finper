@@ -1,5 +1,4 @@
 import { sqliteTable, text, integer, real } from 'drizzle-orm/sqlite-core';
-import { users } from './users';
 
 export const goals = sqliteTable('goals', {
   id: text('id').primaryKey(),
@@ -9,5 +8,5 @@ export const goals = sqliteTable('goals', {
   deadline: integer('deadline', { mode: 'timestamp_ms' }),
   color: text('color').notNull(),
   icon: text('icon').notNull(),
-  user: text('user').notNull().references(() => users.username),
+  user: text('user').notNull(),
 });
