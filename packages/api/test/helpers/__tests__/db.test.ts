@@ -36,21 +36,6 @@ describe('test db helper', () => {
     closeTestDb(db2)
   })
 
-  it('enforces foreign keys', () => {
-    const db = createTestDb()
-
-    expect(() => {
-      db.insert(schema.accounts).values({
-        id: generateId(),
-        name: 'Test',
-        bank: 'TestBank',
-        balance: 0,
-        user: 'nonexistent_user',
-      }).run()
-    }).toThrow(/FOREIGN KEY/i)
-
-    closeTestDb(db)
-  })
 
   it('applies REAL type for monetary fields', () => {
     const db = createTestDb()

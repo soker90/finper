@@ -63,6 +63,9 @@ describe('Dashboard', () => {
 
     afterAll(async () => {
       const { schema } = await import('@soker90/finper-db')
+      sqliteDb.delete(schema.debts).run()
+      sqliteDb.delete(schema.stocks).run()
+      sqliteDb.delete(schema.goals).run()
       sqliteDb.delete(schema.users).run()
     })
 

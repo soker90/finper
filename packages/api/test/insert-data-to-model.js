@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.insertStock = exports.insertSupplyReading = exports.insertSupply = exports.insertProperty = exports.insertSubscriptionCandidate = exports.insertSubscription = exports.insertLoanPayment = exports.insertLoan = exports.insertPension = exports.insertBudget = exports.insertTransaction = exports.insertStore = exports.insertCategory = exports.insertAccount = void 0;
+exports.insertSupplyReading = exports.insertSupply = exports.insertProperty = exports.insertSubscriptionCandidate = exports.insertSubscription = exports.insertLoanPayment = exports.insertLoan = exports.insertPension = exports.insertBudget = exports.insertTransaction = exports.insertStore = exports.insertCategory = exports.insertAccount = void 0;
 exports.insertCredentials = insertCredentials;
 const faker_1 = require("@faker-js/faker");
 const finper_models_1 = require("@soker90/finper-models");
@@ -212,17 +212,3 @@ const insertSupplyReading = async (params = {}) => {
     });
 };
 exports.insertSupplyReading = insertSupplyReading;
-const insertStock = async (params = {}) => {
-    const user = (params.user ?? (0, generate_values_1.generateUsername)());
-    return finper_models_1.StockModel.create({
-        ticker: params.ticker ?? faker_1.faker.string.alpha({ length: 4, casing: 'upper' }),
-        name: params.name ?? faker_1.faker.company.name(),
-        shares: params.shares ?? faker_1.faker.number.float({ min: 1, max: 100, multipleOf: 0.01 }),
-        price: params.price ?? faker_1.faker.number.float({ min: 1, max: 500, multipleOf: 0.01 }),
-        type: params.type ?? finper_models_1.STOCK_TYPE.Buy,
-        date: params.date ?? faker_1.faker.date.past().getTime(),
-        platform: params.platform ?? 'DEGIRO',
-        user
-    });
-};
-exports.insertStock = insertStock;
