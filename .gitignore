@@ -114,3 +114,6 @@ package-lock.json
 
 # Scratch directory for temporary artifacts
 scratch/
+
+# Local development database (any location)
+**/finper-dev.db
