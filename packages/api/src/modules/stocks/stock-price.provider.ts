@@ -1,5 +1,5 @@
 import YahooFinance from 'yahoo-finance2'
-import config from '../config'
+import config from '../../config'
 
 interface PriceCache {
   price: number

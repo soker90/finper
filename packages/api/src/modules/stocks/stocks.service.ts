@@ -1,7 +1,12 @@
-import { STOCK_TYPE } from '@soker90/finper-models'
-import { type IStock, StockModel } from '@soker90/finper-models'
+import { stocksRepository } from './stocks.repository'
 import { IStockPriceProvider, YahooPriceProvider } from './stock-price.provider'
-import { roundNumber } from '../utils/roundNumber'
+import { roundNumber } from '../../utils/roundNumber'
+import { STOCK_TYPE } from './stocks.schema'
+import { schema } from '@soker90/finper-db'
+
+const { stocks } = schema
+type StockRecord = typeof stocks.$inferSelect
+type StockInsert = Omit<typeof stocks.$inferInsert, 'id'>
 
 export interface StockPosition {
   ticker: string
@@ -14,7 +19,7 @@ export interface StockPosition {
   currentValue: number | null
   gainLoss: number | null
   gainLossPct: number | null
-  purchases: IStock[]
+  purchases: StockRecord[]
 }
 
 export interface StocksSummary {
@@ -25,24 +30,27 @@ export interface StocksSummary {
 export interface IStockService {
   getStocks(user: string): Promise<StockPosition[]>
   getStocksSummary(user: string): Promise<StocksSummary>
-  addStock(stock: IStock): Promise<IStock>
-  deleteStock(id: string, user: string): Promise<void>
+  addStock(stock: StockInsert): StockRecord
+  deleteStock(id: string, user: string): void
 }
 
 interface TickerAccumulator {
   totalShares: number
   dividendShares: number
   totalCost: number
-  purchases: IStock[]
+  purchases: StockRecord[]
 }
 
-export default class StockService implements IStockService {
-  constructor (private readonly priceProvider: IStockPriceProvider = new YahooPriceProvider()) {}
+export class StockService implements IStockService {
+  constructor (
+    private readonly priceProvider: IStockPriceProvider = new YahooPriceProvider(),
+    private readonly repository = stocksRepository
+  ) {}
 
   // ── Public ───────────────────────────────────────────────────────────────────
 
   public async getStocks (user: string): Promise<StockPosition[]> {
-    const operations = await StockModel.find({ user }).sort({ date: 1 })
+    const operations = this.repository.findAllByUser(user)
     const grouped = this.groupByTicker(operations)
 
     const positions = await Promise.all(
@@ -52,12 +60,12 @@ export default class StockService implements IStockService {
     return positions.filter((pos): pos is StockPosition => pos !== null)
   }
 
-  public async addStock (stock: IStock): Promise<IStock> {
-    return StockModel.create(stock)
+  public addStock (stock: StockInsert): StockRecord {
+    return this.repository.create(stock)
   }
 
-  public async deleteStock (id: string, user: string): Promise<void> {
-    await StockModel.findOneAndDelete({ _id: id, user })
+  public deleteStock (id: string, user: string): void {
+    this.repository.delete(id, user)
   }
 
   public async getStocksSummary (user: string): Promise<StocksSummary> {
@@ -72,16 +80,16 @@ export default class StockService implements IStockService {
 
   // ── Private ──────────────────────────────────────────────────────────────────
 
-  private groupByTicker (operations: IStock[]): Map<string, IStock[]> {
+  private groupByTicker (operations: StockRecord[]): Map<string, StockRecord[]> {
     return operations.reduce((map, op) => {
       const tickerOps = map.get(op.ticker) ?? []
       tickerOps.push(op)
       map.set(op.ticker, tickerOps)
       return map
-    }, new Map<string, IStock[]>())
+    }, new Map<string, StockRecord[]>())
   }
 
-  private accumulateOperations (ops: IStock[]): TickerAccumulator {
+  private accumulateOperations (ops: StockRecord[]): TickerAccumulator {
     return ops.reduce<TickerAccumulator>(
       (acc, op) => {
         if (op.type === STOCK_TYPE.Buy || op.type === STOCK_TYPE.Dividend) {
@@ -109,7 +117,7 @@ export default class StockService implements IStockService {
     return Math.round((Math.abs(n) + Number.EPSILON) * 1000000) / 1000000
   }
 
-  private async buildPosition (ticker: string, ops: IStock[]): Promise<StockPosition | null> {
+  private async buildPosition (ticker: string, ops: StockRecord[]): Promise<StockPosition | null> {
     const { totalShares, dividendShares, totalCost, purchases } = this.accumulateOperations(ops)
 
     if (totalShares <= 0) return null
@@ -137,3 +145,5 @@ export default class StockService implements IStockService {
     }
   }
 }
+
+export const stockService = new StockService()

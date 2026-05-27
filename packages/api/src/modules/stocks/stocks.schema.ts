@@ -1,6 +1,23 @@
 import Joi from 'joi'
 import Boom from '@hapi/boom'
-import { STOCK_TYPE, IStock } from '@soker90/finper-models'
+import type { StockType } from '@soker90/finper-types'
+
+export const STOCK_TYPE = {
+  Buy: 'buy',
+  Sell: 'sell',
+  Dividend: 'dividend'
+} as const
+
+export interface IStock {
+  ticker: string
+  name: string
+  shares: number
+  price: number
+  type: StockType
+  date: number
+  user: string
+  platform: string
+}
 
 export const validateStockCreateParams = async (body: Omit<IStock, 'user'>) => {
   const schema = Joi.object({

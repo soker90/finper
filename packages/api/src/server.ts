@@ -27,7 +27,7 @@ import { SubscriptionRoutes } from './routes/subscription.routes'
 import { PropertyRoutes } from './routes/property.routes'
 import { SupplyRoutes } from './routes/supply.routes'
 import { SupplyReadingRoutes } from './routes/supply-reading.routes'
-import { StockRoutes } from './routes/stock.routes'
+import { stocksRouter } from './modules/stocks/stocks.routes'
 import { goalsRouter } from './modules/goals/goals.routes'
 import { StatsRoutes } from './routes/stats.routes'
 
@@ -60,7 +60,7 @@ class Server {
     this.app.use('/api/supplies/properties', new PropertyRoutes().router)
     this.app.use('/api/supplies/readings', new SupplyReadingRoutes().router)
     this.app.use('/api/supplies', new SupplyRoutes().router)
-    this.app.use('/api/stocks', new StockRoutes().router)
+    this.app.use('/api/stocks', stocksRouter)
     this.app.use('/api/goals', goalsRouter)
     this.app.use('/api/stats', new StatsRoutes().router)
   }
