@@ -23,12 +23,7 @@ describe('Goal Routes (SQLite integration)', () => {
     testMongoDb = createTestDatabase(mongoose)
     await testMongoDb.connect()
 
-    sqliteDb.insert(users).values({
-      id: userId,
-      username,
-      password: 'pwd-hash',
-      createdAt: new Date()
-    }).run()
+
 
     token = await requestLogin(server.app, { username })
   })
@@ -147,7 +142,7 @@ describe('Goal Routes (SQLite integration)', () => {
 
       const otherUser = generateUsername()
       const otherUserId = generateId()
-      sqliteDb.insert(users).values({ id: otherUserId, username: otherUser, password: 'pwd', createdAt: new Date() }).run()
+
       const otherToken = await requestLogin(server.app, { username: otherUser })
 
       await supertest(server.app).get(`${path}/${id}`).set('Authorization', `Bearer ${otherToken}`).expect(404)

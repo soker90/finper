@@ -29,12 +29,7 @@ describe('Stocks Controller', () => {
   beforeAll(async () => {
     await testDatabase.connect()
 
-    sqliteDb.insert(schema.users).values({
-      id: generateId(),
-      username,
-      password: 'hashed-password',
-      createdAt: new Date()
-    }).run()
+
 
     token = await requestLogin(server.app, { username })
   })
@@ -94,7 +89,7 @@ describe('Stocks Controller', () => {
 
     it('stocks of other users should not be included', async () => {
       const otherUser = generateUsername()
-      sqliteDb.insert(schema.users).values({ id: generateId(), username: otherUser, password: 'pwd', createdAt: new Date() }).run()
+
       sqliteDb.insert(stocks).values({ id: generateId(), user: otherUser, ticker: 'ITX.MC', name: 'Inditex', shares: 10, price: 50, type: STOCK_TYPE.Buy, date: new Date(1), platform: 'X' }).run()
       stocksRepository.create({ user: username, ticker: 'TEF.MC', name: 'Telefónica', shares: 100, price: 4.0, type: STOCK_TYPE.Buy, date: new Date(1), platform: 'X' })
 
@@ -184,7 +179,7 @@ describe('Stocks Controller', () => {
 
     it('stocks of other users should not be included in the summary', async () => {
       const otherUser = generateUsername()
-      sqliteDb.insert(schema.users).values({ id: generateId(), username: otherUser, password: 'pwd', createdAt: new Date() }).run()
+
       sqliteDb.insert(stocks).values({ id: generateId(), user: otherUser, ticker: 'ITX.MC', name: 'Inditex', shares: 10, price: 50, type: STOCK_TYPE.Buy, date: new Date(1), platform: 'X' }).run()
 
       const response = await supertest(server.app)

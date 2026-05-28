@@ -19,12 +19,7 @@ describe('debtsController', () => {
 
   beforeAll(async () => {
     await dbInstance.connect()
-    sqliteDb.insert(users).values({
-      id: userId,
-      username,
-      password: 'pwd-hash',
-      createdAt: new Date(),
-    }).run()
+
     token = await requestLogin(server.app, { username })
   })
 
@@ -123,7 +118,7 @@ describe('debtsController', () => {
 
       const otherUser = generateUsername()
       const otherUserId = generateId()
-      sqliteDb.insert(users).values({ id: otherUserId, username: otherUser, password: 'pwd', createdAt: new Date() }).run()
+
       const otherToken = await requestLogin(server.app, { username: otherUser })
 
       await supertest(server.app).put(`/api/debts/${id}`).set('Authorization', `Bearer ${otherToken}`).send({ from: 'Bob', amount: 200, type: 'from' }).expect(404)
@@ -165,7 +160,7 @@ describe('debtsController', () => {
 
       const otherUser = generateUsername()
       const otherUserId = generateId()
-      sqliteDb.insert(users).values({ id: otherUserId, username: otherUser, password: 'pwd', createdAt: new Date() }).run()
+
       const otherToken = await requestLogin(server.app, { username: otherUser })
 
       await supertest(server.app).delete(`/api/debts/${id}`).set('Authorization', `Bearer ${otherToken}`).expect(404)
