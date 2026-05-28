@@ -1,5 +1,5 @@
 import { TRANSACTION } from '@soker90/finper-models'
-import { AccountModel, LoanModel, PensionModel, TransactionModel, type IPension } from '@soker90/finper-models'
+import { AccountModel, LoanModel, TransactionModel } from '@soker90/finper-models'
 import { roundNumber } from '../../utils/roundNumber'
 import { generateInsights } from '../utils/insights'
 import { computeHealthScore, computeBudgetAdherence, computeHistoricalSavingsRate } from './health-score'
@@ -12,6 +12,9 @@ import {
 } from './aggregations'
 import type { DashboardStatsResult, IDashboardService, PensionSummary, DailyExpense } from './dashboard.types'
 import { debtsService } from '../../modules/debts/debts.service'
+import { createPensionsRepository } from '../../modules/pensions/pensions.repository'
+import { PensionsService } from '../../modules/pensions/pensions.service'
+import { db } from '../../db'
 
 /** Builds the cumulative daily expense array from a day→amount map. */
 const buildCumulativeDailyExpenses = (
@@ -29,6 +32,7 @@ const buildCumulativeDailyExpenses = (
 
 export default class DashboardService implements IDashboardService {
   public async getStats ({ user }: { user: string }): Promise<DashboardStatsResult> {
+    const pensionsService = new PensionsService(createPensionsRepository(db))
     const now = new Date()
     const currentYear = now.getFullYear()
     const currentMonth = now.getMonth()        // 0-indexed
@@ -59,8 +63,7 @@ export default class DashboardService implements IDashboardService {
       previousVelocityAgg,
       topCategoriesAgg,
       topStoresAgg,
-      pensionStatsAgg,
-      pensionTransactions,
+      pensionData,
       currentMonthBudgetAgg,
       currentMonthByCategoryAgg,
       last3MonthsByCategoryAgg,
@@ -273,22 +276,8 @@ export default class DashboardService implements IDashboardService {
         }
       ]),
 
-      // 11. Pension: accumulated totals
-      PensionModel.aggregate([
-        { $match: { user } },
-        {
-          $group: {
-            _id: '$user',
-            employeeAmount: { $sum: '$employeeAmount' },
-            companyAmount: { $sum: '$companyAmount' },
-            totalUnits: { $sum: { $sum: ['$employeeUnits', '$companyUnits'] } },
-            lastValue: { $last: '$value' }
-          }
-        }
-      ]).sort({ date: -1 }),
-
-      // 12. Pension: individual records (for sparkline)
-      PensionModel.find({ user }).sort({ date: -1 }),
+      // 11. Pension data (totals and transactions)
+      pensionsService.getPensions(user),
 
       // 13. Total real expenses for the current month (for budget adherence)
       TransactionModel.aggregate([
@@ -395,25 +384,19 @@ export default class DashboardService implements IDashboardService {
     let pension: PensionSummary | null = null
     let pensionReturnPct = 0
 
-    if (pensionStatsAgg.length > 0) {
-      const ps = pensionStatsAgg[0] as {
-        employeeAmount: number
-        companyAmount: number
-        totalUnits: number
-        lastValue: number
-      }
-      const pensionTotal = roundNumber((ps.lastValue ?? 0) * (ps.totalUnits ?? 0))
-      const pensionContributed = (ps.employeeAmount ?? 0) + (ps.companyAmount ?? 0)
+    if (pensionData && pensionData.transactions.length > 0) {
+      const pensionTotal = pensionData.total
+      const pensionContributed = pensionData.amount
 
       pensionReturnPct = pensionContributed > 0
         ? Math.round(((pensionTotal - pensionContributed) / pensionContributed) * 10000) / 100
         : 0
 
       pension = {
-        employeeAmount: roundNumber(ps.employeeAmount ?? 0),
-        companyAmount: roundNumber(ps.companyAmount ?? 0),
-        total: pensionTotal,
-        transactions: pensionTransactions as IPension[]
+        employeeAmount: roundNumber(pensionData.employeeAmount),
+        companyAmount: roundNumber(pensionData.companyAmount),
+        total: roundNumber(pensionTotal),
+        transactions: pensionData.transactions as any[]
       }
     }
 

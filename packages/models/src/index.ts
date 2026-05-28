@@ -8,7 +8,6 @@ import { IAccount, AccountModel } from './models/accounts'
 import { IBudget, BudgetModel } from './models/budgets'
 import { ICategory, CategoryModel } from './models/categories'
 
-import { IPension, PensionModel } from './models/pensions'
 import { IStore, StoreModel } from './models/stores'
 import { ITransaction, TransactionModel, TRANSACTION } from './models/transactions'
 
@@ -29,7 +28,6 @@ export type { CategoryDocument } from './models/categories'
 export type { LoanDocument } from './models/loans'
 export type { LoanPaymentDocument } from './models/loan-payments'
 export type { LoanEventDocument } from './models/loan-events'
-export type { PensionDocument } from './models/pensions'
 export type { StoreDocument } from './models/stores'
 export type { TransactionDocument } from './models/transactions'
 
@@ -74,7 +72,6 @@ export {
   ILoan,
   ILoanPayment,
   ILoanEvent,
-  IPension,
   IStore,
   ISubscription,
   ISubscriptionCandidate,
@@ -92,7 +89,6 @@ export {
   LoanModel,
   LoanPaymentModel,
   LoanEventModel,
-  PensionModel,
   StoreModel,
   SubscriptionModel,
   SubscriptionCandidateModel,

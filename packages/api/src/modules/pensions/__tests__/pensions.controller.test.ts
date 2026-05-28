@@ -1,22 +1,40 @@
 import supertest from 'supertest'
 import { faker } from '@faker-js/faker'
-import {
-  PensionModel,
-  IPension,
-  mongoose
-} from '@soker90/finper-models'
+import mongoose from 'mongoose'
 
-import { server } from '../../src/server'
-import { ERROR_MESSAGE } from '../../src/i18n'
+import { server } from '../../../server'
+import { ERROR_MESSAGE } from '../../../i18n'
 
-import { requestLogin } from '../request-login'
-import { insertPension } from '../insert-data-to-model'
-import { generateUsername } from '../generate-values'
+import { requestLogin } from '../../../../test/request-login'
+import { generateUsername } from '../../../../test/generate-values'
 
-import createTestDatabase from '../test-db'
+import createTestDatabase from '../../../../test/test-db'
+import { db as sqliteDb } from '../../../db'
+import { schema, generateId } from '@soker90/finper-db'
+import { eq } from 'drizzle-orm'
+
 const testDatabase = createTestDatabase(mongoose)
 
-describe('Pension', () => {
+const insertPension = (data: any = {}) => {
+  const id = generateId()
+  const dateNum = data.date ? data.date : Date.now()
+  const record = {
+    id,
+    date: new Date(dateNum),
+    employeeAmount: faker.number.float({ min: 1, max: 100, multipleOf: 2 }),
+    employeeUnits: faker.number.float({ min: 1, max: 100, multipleOf: 5 }),
+    companyAmount: faker.number.float({ min: 1, max: 100, multipleOf: 2 }),
+    companyUnits: faker.number.float({ min: 1, max: 100, multipleOf: 5 }),
+    value: faker.number.float({ multipleOf: 2 }),
+    user: generateUsername(),
+    ...data,
+    date: new Date(dateNum) // ensure date is Date object
+  }
+  sqliteDb.insert(schema.pensions).values(record).run()
+  return { ...record, date: record.date.getTime(), _id: id }
+}
+
+describe('Pension Controller', () => {
   beforeAll(() => testDatabase.connect())
 
   afterAll(() => testDatabase.close())
@@ -80,7 +98,9 @@ describe('Pension', () => {
       token = await requestLogin(server.app, { username: user })
     })
 
-    afterEach(() => PensionModel.deleteMany({}))
+    afterEach(() => {
+      sqliteDb.delete(schema.pensions).where(eq(schema.pensions.user, user)).run()
+    })
 
     test('when token is not provided, it should response an error with status code 401', async () => {
       await supertest(server.app).get(path).expect(401)
@@ -98,16 +118,18 @@ describe('Pension', () => {
     })
 
     test('when there are pensions, it should return the pensions', async () => {
-      const pension = await insertPension({ user })
+      const pension = insertPension({ user })
       const response = await supertest(server.app).get(path).auth(token, { type: 'bearer' }).expect(200)
-      const responsePension: IPension = response.body.transactions[0]
-      expect(responsePension._id).toBe(pension._id.toString())
+      
+      const responsePension = response.body.transactions[0]
+      expect(responsePension._id).toBe(pension._id)
       expect(responsePension.date).toBe(pension.date)
       expect(responsePension.employeeUnits).toBe(pension.employeeUnits)
       expect(responsePension.employeeAmount).toBe(pension.employeeAmount)
       expect(responsePension.companyAmount).toBe(pension.companyAmount)
       expect(responsePension.companyUnits).toBe(pension.companyUnits)
       expect(responsePension.value).toBe(pension.value)
+      
       expect(response.body.amount).toBe(pension.employeeAmount + pension.companyAmount)
       expect(response.body.units).toBe(pension.employeeUnits + pension.companyUnits)
       expect(response.body.employeeAmount).toBe(pension.employeeAmount)
@@ -123,6 +145,10 @@ describe('Pension', () => {
 
     beforeAll(async () => {
       token = await requestLogin(server.app, { username: user })
+    })
+
+    afterEach(() => {
+      sqliteDb.delete(schema.pensions).where(eq(schema.pensions.user, user)).run()
     })
 
     test('when token is not provided, it should response an error with status code 401', async () => {
@@ -142,17 +168,21 @@ describe('Pension', () => {
     })
 
     test('when user is distinct, it should response an error with status code 404', async () => {
-      const pension: IPension = await insertPension()
-      await supertest(server.app).patch(path(pension._id.toString())).auth(token, { type: 'bearer' }).expect(404)
+      const otherUser = generateUsername()
+      sqliteDb.insert(schema.users).values({ id: generateId(), username: otherUser, password: 'pwd', createdAt: new Date(), updatedAt: new Date() }).run()
+      const pension = insertPension({ user: otherUser })
+      await supertest(server.app).put(path(pension._id)).auth(token, { type: 'bearer' }).expect(404)
+      sqliteDb.delete(schema.pensions).where(eq(schema.pensions.user, otherUser)).run()
+      sqliteDb.delete(schema.users).where(eq(schema.users.username, otherUser)).run()
     })
 
     test('when no params provided, it should response an error with status code 422', async () => {
-      const pension: IPension = await insertPension({ user })
-      await supertest(server.app).put(path(pension._id.toString())).auth(token, { type: 'bearer' }).send({}).expect(422)
+      const pension = insertPension({ user })
+      await supertest(server.app).put(path(pension._id)).auth(token, { type: 'bearer' }).send({}).expect(422)
     })
 
     test.each(['date', 'employeeAmount', 'employeeUnits', 'companyAmount', 'companyUnits', 'value'])('when no %s param provided, it should response an error with status code 422', async (param: string) => {
-      const pension: IPension = await insertPension({ user })
+      const pension = insertPension({ user })
       const params: Record<string, number> = {
         date: faker.date.recent().getTime(),
         employeeAmount: faker.number.float({ min: 1, max: 100, multipleOf: 2 }),
@@ -164,14 +194,14 @@ describe('Pension', () => {
 
       delete params[param]
       await supertest(server.app)
-        .put(path(pension._id.toString()))
+        .put(path(pension._id))
         .set('Authorization', `Bearer ${token}`)
         .send(params)
         .expect(422)
     })
 
     test('when fields are successfully edited', async () => {
-      const pension: IPension = await insertPension({ user })
+      const pension = insertPension({ user })
 
       const params = {
         date: faker.date.recent().getTime(),
@@ -182,11 +212,11 @@ describe('Pension', () => {
         value: faker.number.float({ multipleOf: 2 })
       }
       await supertest(server.app)
-        .put(path(pension._id.toString()))
+        .put(path(pension._id))
         .set('Authorization', `Bearer ${token}`)
         .send(params)
         .expect(200, {
-          _id: pension._id.toString(),
+          _id: pension._id,
           ...params,
           user
         })

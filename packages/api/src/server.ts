@@ -18,7 +18,7 @@ import { BudgetRoutes } from './routes/budget.routes'
 import { CategoryRoutes } from './routes/category.routes'
 import { DashboardRoutes } from './routes/dashboard.routes'
 import { debtsRouter } from './modules/debts/debts.routes'
-import { PensionRoutes } from './routes/pension.routes'
+import { PensionsRoutes } from './modules/pensions/pensions.routes'
 import { TransactionRoutes } from './routes/transaction.routes'
 import { StoreRoutes } from './routes/store.routes'
 import { TicketRoutes } from './routes/ticket.routes'
@@ -51,7 +51,7 @@ class Server {
     this.app.use('/api/dashboard', new DashboardRoutes().router)
     this.app.use('/api/debts', debtsRouter)
     this.app.use('/api/categories', new CategoryRoutes().router)
-    this.app.use('/api/pensions', new PensionRoutes().router)
+    this.app.use('/api/pensions', new PensionsRoutes().router)
     this.app.use('/api/transactions', new TransactionRoutes().router)
     this.app.use('/api/stores', new StoreRoutes().router)
     this.app.use('/api/tickets', new TicketRoutes().router)

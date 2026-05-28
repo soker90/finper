@@ -1,4 +1,3 @@
-import type { IPension } from '@soker90/finper-models'
 import type { Insight, MonthlyData } from '../utils/insights'
 
 export interface DailyExpense {
@@ -19,7 +18,7 @@ export interface PensionSummary {
   employeeAmount: number
   companyAmount: number
   total: number
-  transactions: IPension[]
+  transactions: any[]
 }
 
 export interface DashboardStatsResult {
