@@ -42,12 +42,7 @@ describe('Dashboard', () => {
     beforeAll(async () => {
       token = await requestLogin(server.app, { username })
       const { schema } = await import('@soker90/finper-db')
-      sqliteDb.insert(schema.users).values({
-        id: userId,
-        username,
-        password: 'pwd-hash',
-        createdAt: new Date(),
-      }).run()
+
     })
 
     afterEach(async () => {

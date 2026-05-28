@@ -8,10 +8,14 @@ import {
   IUser, LoanModel, LoanPaymentModel, LOAN_PAYMENT, PensionModel, StoreModel,
   SubscriptionCandidateModel, SubscriptionModel, TransactionModel,
   TRANSACTION,
-  UserModel,
   PropertyModel, SupplyModel, SupplyReadingModel,
   IProperty, ISupply, ISupplyReading, SUPPLY_TYPE
 } from '@soker90/finper-models'
+
+import { db as sqliteDb } from '../src/db'
+import hashPassword from '../src/helpers/hash-password'
+import { schema, generateId } from '@soker90/finper-db'
+const { users } = schema
 
 import {
   MAX_USERNAME_LENGTH, MIN_LENGTH_USERNAME,
@@ -21,22 +25,19 @@ import { generateUsername } from './generate-values'
 import { buildAmortizationTable } from '../src/services/utils/calcLoanProjection'
 import { roundNumber } from '../src/utils/roundNumber'
 
-export async function insertCredentials (params: Record<string, string | boolean> = {}): Promise<IUser> {
-  const parsedParams: Record<string, string | boolean> = {}
+export const insertCredentials = (params: Record<string, string | boolean> = {}): Promise<{ username: string }> => {
+  const username = ((params.username as string) ?? faker.internet.username())
+    .slice(0, MAX_USERNAME_LENGTH).toLowerCase()
+  const password = (params.password as string) ?? faker.internet.password({ length: MIN_PASSWORD_LENGTH })
 
-  if (params.password) {
-    parsedParams.password = params.password
-  }
+  sqliteDb.insert(users).values({
+    id: generateId(),
+    username,
+    password: hashPassword(password),
+    createdAt: new Date(),
+  }).run()
 
-  if (params.username) {
-    parsedParams.username = (params.username as string).slice(0, MAX_USERNAME_LENGTH).toLowerCase()
-  }
-
-  return await UserModel.create({
-    password: faker.internet.password({ length: MIN_PASSWORD_LENGTH }),
-    username: faker.internet.username().slice(0, MAX_USERNAME_LENGTH).toLowerCase(),
-    ...parsedParams
-  })
+  return Promise.resolve({ username })
 }
 
 export const insertAccount = async (params: { name?: string, bank?: string, balance?: number, isActive?: boolean, user?: string } = {}): Promise<IAccount & { _id: string }> => {

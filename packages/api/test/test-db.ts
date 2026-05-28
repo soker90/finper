@@ -1,4 +1,6 @@
 import type { Mongoose } from 'mongoose'
+import { db as sqliteDb } from '../src/db'
+import { schema } from '@soker90/finper-db'
 
 export default (mongoose: Mongoose) => {
   async function connect () {
