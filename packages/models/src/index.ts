@@ -11,7 +11,7 @@ import { ICategory, CategoryModel } from './models/categories'
 import { IPension, PensionModel } from './models/pensions'
 import { IStore, StoreModel } from './models/stores'
 import { ITransaction, TransactionModel, TRANSACTION } from './models/transactions'
-import { IUser, UserModel } from './models/users'
+
 import { ILoan, LoanModel } from './models/loans'
 import { ILoanPayment, LoanPaymentModel, LOAN_PAYMENT } from './models/loan-payments'
 import { ILoanEvent, LoanEventModel } from './models/loan-events'
@@ -32,7 +32,7 @@ export type { LoanEventDocument } from './models/loan-events'
 export type { PensionDocument } from './models/pensions'
 export type { StoreDocument } from './models/stores'
 export type { TransactionDocument } from './models/transactions'
-export type { UserDocument } from './models/users'
+
 export type { SubscriptionDocument } from './models/subscriptions'
 export type { SubscriptionCandidateDocument } from './models/subscription-candidates'
 export type { PropertyDocument } from './models/properties'
@@ -79,7 +79,7 @@ export {
   ISubscription,
   ISubscriptionCandidate,
   ITransaction,
-  IUser,
+
   IProperty,
   ISupply,
   ISupplyReading,
@@ -97,7 +97,7 @@ export {
   SubscriptionModel,
   SubscriptionCandidateModel,
   TransactionModel,
-  UserModel,
+
   PropertyModel,
   SupplyModel,
   SupplyReadingModel
