@@ -18,7 +18,8 @@ export const subscriptions = sqliteTable('subscriptions', {
 
 export const subscriptionCandidates = sqliteTable('subscription_candidates', {
   id: text('id').primaryKey(),
-  name: text('name').notNull(),
+  transactionId: text('transaction_id').notNull(),
+  subscriptionIds: text('subscription_ids', { mode: 'json' }).$type<string[]>().notNull(),
   user: text('user').notNull().references(() => users.username),
   createdAt: integer('created_at', { mode: 'timestamp_ms' }).notNull(),
 });

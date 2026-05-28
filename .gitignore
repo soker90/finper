@@ -117,3 +117,7 @@ scratch/
 
 # Local development database (any location)
 **/finper-dev.db
+
+# Drizzle interactive prompt automation (agent artifact)
+packages/db/gen.exp
+*.exp

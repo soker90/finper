@@ -3,7 +3,6 @@ import {
   AccountModel,
   CategoryModel,
   mongoose,
-  PensionModel,
   TransactionModel,
   TRANSACTION
 } from '@soker90/finper-models'
@@ -48,12 +47,12 @@ describe('Dashboard', () => {
     afterEach(async () => {
       await TransactionModel.deleteMany({})
       await AccountModel.deleteMany({})
-      await PensionModel.deleteMany({})
       await CategoryModel.deleteMany({})
       // clear sqlite debts table
       const { schema } = await import('@soker90/finper-db')
-      const { debts } = schema
+      const { debts, pensions } = schema
       sqliteDb.delete(debts).run()
+      sqliteDb.delete(pensions).run()
     })
 
     afterAll(async () => {

@@ -4,8 +4,8 @@ import {
   BudgetModel,
   CategoryModel,
   IAccount, ICategory,
-  ILoan, ILoanPayment, IPension, IStore, ISubscription, ISubscriptionCandidate,
-  IUser, LoanModel, LoanPaymentModel, LOAN_PAYMENT, PensionModel, StoreModel,
+  ILoan, ILoanPayment, IStore, ISubscription, ISubscriptionCandidate,
+  IUser, LoanModel, LoanPaymentModel, LOAN_PAYMENT, StoreModel,
   SubscriptionCandidateModel, SubscriptionModel, TransactionModel,
   TRANSACTION,
   PropertyModel, SupplyModel, SupplyReadingModel,
@@ -106,16 +106,20 @@ export const insertBudget = async (params: Record<string, any> = {}): Promise<an
   return params.category ? budget.populate('category') : budget
 }
 
-export const insertPension = async (params: Record<string, any> = {}): Promise<IPension> => {
-  return PensionModel.create({
-    date: params.date ?? faker.number.int(),
+export const insertPension = async (params: Record<string, any> = {}): Promise<any> => {
+  const id = generateId()
+  const data = {
+    id,
+    date: new Date(params.date ?? faker.date.past()),
     value: params.value ?? faker.number.int(),
     companyAmount: params.companyAmount ?? faker.number.int(),
     companyUnits: params.companyUnits ?? faker.number.int(),
     employeeUnits: params.employeeUnits ?? faker.number.int(),
     employeeAmount: params.employeeAmount ?? faker.number.int(),
     user: params.user ?? faker.internet.username().slice(MIN_LENGTH_USERNAME, MAX_USERNAME_LENGTH).toLowerCase()
-  })
+  }
+  sqliteDb.insert(schema.pensions).values(data).run()
+  return data
 }
 
 export const insertLoan = async (params: Record<string, any> = {}): Promise<ILoan & { _id: string }> => {
