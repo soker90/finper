@@ -1,7 +1,7 @@
 import passport from 'passport'
 import Boom from '@hapi/boom'
 import { NextFunction, Request, Response } from 'express'
-import { IUser } from '@soker90/finper-models'
+import type { AuthenticatedUser } from '../modules/users/users.service'
 
 import signToken from '../helpers/sign-token'
 import '../auth/jwt-strategy-passport-handler'
@@ -28,7 +28,7 @@ const refreshToken = (res: Response, username: string) => {
  * @param {function} next
  */
 const checkAuthorization = (req: Request, res: Response, next: NextFunction) => {
-  passport.authenticate('jwt', (err: any, user: IUser) => {
+  passport.authenticate('jwt', (err: any, user: AuthenticatedUser | false) => {
     /* istanbul ignore next — DB errors in Passport JWT verify are not reproducible in tests */
     if (err) {
       return next(err)

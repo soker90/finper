@@ -12,7 +12,7 @@ import path from 'node:path'
 
 import { MonitRoutes } from './routes/monit.routes'
 import handleError from './middlewares/handle-error'
-import { AuthRoutes } from './routes/auth.routes'
+import { usersRouter } from './modules/users/users.routes'
 import { AccountRoutes } from './routes/account.routes'
 import { BudgetRoutes } from './routes/budget.routes'
 import { CategoryRoutes } from './routes/category.routes'
@@ -45,7 +45,7 @@ class Server {
 
   public routes (): void {
     this.app.use('/api/monit', new MonitRoutes().router)
-    this.app.use('/api/auth', new AuthRoutes().router)
+    this.app.use('/api/auth', usersRouter)
     this.app.use('/api/accounts', new AccountRoutes().router)
     this.app.use('/api/budgets', new BudgetRoutes().router)
     this.app.use('/api/dashboard', new DashboardRoutes().router)
