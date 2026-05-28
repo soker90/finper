@@ -8,6 +8,7 @@ const { stocks } = schema
 import { server } from '../../../server'
 import { requestLogin } from '../../../../test/request-login'
 import { generateUsername } from '../../../../test/generate-values'
+import { insertCredentials } from '../../../../test/insert-data-to-model'
 import createTestDatabase from '../../../../test/test-db'
 import { stocksRepository } from '../stocks.repository'
 import { STOCK_TYPE } from '../stocks.schema'
@@ -89,6 +90,7 @@ describe('Stocks Controller', () => {
 
     it('stocks of other users should not be included', async () => {
       const otherUser = generateUsername()
+      await insertCredentials({ username: otherUser })
 
       sqliteDb.insert(stocks).values({ id: generateId(), user: otherUser, ticker: 'ITX.MC', name: 'Inditex', shares: 10, price: 50, type: STOCK_TYPE.Buy, date: new Date(1), platform: 'X' }).run()
       stocksRepository.create({ user: username, ticker: 'TEF.MC', name: 'Telefónica', shares: 100, price: 4.0, type: STOCK_TYPE.Buy, date: new Date(1), platform: 'X' })
@@ -179,6 +181,7 @@ describe('Stocks Controller', () => {
 
     it('stocks of other users should not be included in the summary', async () => {
       const otherUser = generateUsername()
+      await insertCredentials({ username: otherUser })
 
       sqliteDb.insert(stocks).values({ id: generateId(), user: otherUser, ticker: 'ITX.MC', name: 'Inditex', shares: 10, price: 50, type: STOCK_TYPE.Buy, date: new Date(1), platform: 'X' }).run()
 
