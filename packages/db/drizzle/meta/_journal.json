@@ -15,6 +15,13 @@
       "when": 1779901519735,
       "tag": "0001_talented_mach_iv",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1779988645931,
+      "tag": "0002_left_mauler",
+      "breakpoints": true
     }
   ]
 }

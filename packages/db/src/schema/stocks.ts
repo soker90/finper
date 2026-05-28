@@ -1,4 +1,5 @@
-import { sqliteTable, text, integer, real } from 'drizzle-orm/sqlite-core';
+import {  sqliteTable, text, integer, real  } from 'drizzle-orm/sqlite-core';
+import { users } from './users';
 
 export const stocks = sqliteTable('stocks', {
   id: text('id').primaryKey(),
@@ -9,5 +10,5 @@ export const stocks = sqliteTable('stocks', {
   price: real('price').notNull(),
   type: text('type').notNull(), // 'buy' | 'sell' | 'dividend'
   date: integer('date', { mode: 'timestamp_ms' }).notNull(),
-  user: text('user').notNull(),
+  user: text('user').notNull().references(() => users.username),
 });

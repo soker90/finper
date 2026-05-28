@@ -14,7 +14,7 @@ export const loans = sqliteTable('loans', {
   initialEstimatedCost: real('initial_estimated_cost').notNull(),
   accountId: text('account_id').notNull().references(() => accounts.id),
   categoryId: text('category_id').notNull().references(() => categories.id),
-  user: text('user').notNull(),
+  user: text('user').notNull().references(() => users.username),
 }, (table) => ({
   userIdx: index('loans_user_idx').on(table.user),
 }));

@@ -8,7 +8,7 @@ export const loanEvents = sqliteTable('loan_events', {
   date: integer('date', { mode: 'timestamp_ms' }).notNull(),
   newRate: real('new_rate').notNull(),
   newPayment: real('new_payment').notNull(),
-  user: text('user').notNull(),
+  user: text('user').notNull().references(() => users.username),
 }, (table) => ({
   loanUserIdx: index('loan_events_loan_user_idx').on(table.loanId, table.user),
   userIdx: index('loan_events_user_idx').on(table.user),
@@ -24,7 +24,7 @@ export const loanPayments = sqliteTable('loan_payments', {
   accumulatedPrincipal: real('accumulated_principal').notNull(),
   pendingCapital: real('pending_capital').notNull(),
   type: text('type').notNull().default('ordinary'), // 'ordinary' | 'extraordinary'
-  user: text('user').notNull(),
+  user: text('user').notNull().references(() => users.username),
 }, (table) => ({
   loanUserDateIdx: index('loan_payments_loan_user_date_idx').on(table.loanId, table.user, table.date),
   userIdx: index('loan_payments_user_idx').on(table.user),
