@@ -74,7 +74,10 @@ describe('Budget', () => {
 
       expect(months.length).toBe(budgetResponse.budgets.length)
     }
-    // TODO: flaky test — falla intermitentemente al ejecutar la suite completa por interferencia entre tests (#651)
+    // TODO: flaky test — falla intermitentemente al ejecutar la suite completa
+    // por interferencia entre tests Mongo (#651). Se mantiene skipped a propósito.
+    // Reescribir con el patrón de aislamiento SQLite por worker cuando se migre
+    // el módulo budget (Sesión M del plan de migración). Ver issue #769.
     test.skip('when there are budgets and month is provided, it should return the budgets', async () => {
       const year = faker.date.past().getFullYear()
       const month = faker.date.past().getMonth()
