@@ -312,7 +312,7 @@ export default class DashboardService implements IDashboardService {
       ]).sort({ date: -1 }),
 
       // 12. Pension: individual records (for sparkline)
-      PensionModel.find({ user }).sort({ date: -1 }),
+      PensionModel.find({ user }).sort({ date: -1 }).lean<IPension[]>(),
 
       // 13. Total real expenses for the current month (for budget adherence)
       TransactionModel.aggregate([
@@ -432,7 +432,7 @@ export default class DashboardService implements IDashboardService {
         employeeAmount: roundNumber(ps.employeeAmount ?? 0),
         companyAmount: roundNumber(ps.companyAmount ?? 0),
         total: pensionTotal,
-        transactions: pensionTransactions as IPension[]
+        transactions: pensionTransactions
       }
     }
 
