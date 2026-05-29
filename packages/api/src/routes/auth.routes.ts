@@ -2,7 +2,7 @@ import { Router } from 'express'
 
 import loggerHandler from '../utils/logger'
 import { AuthController } from '../controllers/auth.controller'
-import { userService, authService } from '../services'
+import { userService } from '../services'
 import authMiddleware from '../middlewares/auth.middleware'
 
 export class AuthRoutes {
@@ -10,7 +10,6 @@ export class AuthRoutes {
 
   private accountController: AuthController = new AuthController({
     userService,
-    authService,
     loggerHandler: loggerHandler('AuthController')
   })
 
