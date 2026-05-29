@@ -1,4 +1,4 @@
-import type { TransactionType, BudgetRuleClassType } from '@soker90/finper-types'
+import type { TransactionType, BudgetRuleClassType, CategoryColor, CategoryIcon } from '@soker90/finper-types'
 
 export interface Category {
   _id?: string;
@@ -7,6 +7,8 @@ export interface Category {
   root?: boolean,
   parent?: { _id?: string, name?: string },
   budgetRuleClass?: BudgetRuleClassType,
+  color?: CategoryColor,
+  icon?: CategoryIcon,
 }
 
 export interface CategoryGrouped {

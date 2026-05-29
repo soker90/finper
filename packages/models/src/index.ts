@@ -6,7 +6,7 @@ import mongooseConnect from './mongoose-connect'
 
 import { IAccount, AccountModel } from './models/accounts'
 import { IBudget, BudgetModel } from './models/budgets'
-import { ICategory, CategoryModel } from './models/categories'
+import { ICategory, CategoryModel, CATEGORY_COLORS, CATEGORY_ICONS } from './models/categories'
 import { IDebt, DebtModel, DEBT } from './models/debts'
 import { IPension, PensionModel } from './models/pensions'
 import { IStore, StoreModel } from './models/stores'
@@ -72,6 +72,9 @@ export {
 
   GOAL_COLORS,
   GOAL_ICONS,
+
+  CATEGORY_COLORS,
+  CATEGORY_ICONS,
 
   IAccount,
   IBudget,

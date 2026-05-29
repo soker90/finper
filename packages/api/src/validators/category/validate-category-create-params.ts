@@ -1,6 +1,6 @@
 import Joi from 'joi'
 import Boom from '@hapi/boom'
-import { TRANSACTION } from '@soker90/finper-models'
+import { TRANSACTION, CATEGORY_COLORS, CATEGORY_ICONS } from '@soker90/finper-models'
 import { validateCategoryExist } from './validate-category-exist'
 import { ERROR_MESSAGE } from '../../i18n'
 
@@ -14,7 +14,9 @@ export const validateCategoryCreateParams = async ({ body, user }: { user: strin
     name: Joi.string().required(),
     type: Joi.string().valid(TRANSACTION.Income, TRANSACTION.Expense, TRANSACTION.NotComputable).required(),
     parent: Joi.string(),
-    budgetRuleClass: Joi.string().valid('needs', 'wants', 'savings', 'none').default('none')
+    budgetRuleClass: Joi.string().valid('needs', 'wants', 'savings', 'none').default('none'),
+    color: Joi.string().valid(...CATEGORY_COLORS),
+    icon: Joi.string().valid(...CATEGORY_ICONS)
   })
 
   const { error, value } = schema.validate(body)
