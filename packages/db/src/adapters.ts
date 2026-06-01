@@ -16,4 +16,6 @@ export const spanishCompare = (a: string, b: string): number => collator.compare
  *    o devolver.
  * Sustituye al patrón manual `Math.round(x * 100) / 100` que la API usaba con Mongoose.
  */
-export const roundMoney = (value: number): number => Math.round(value * 100) / 100;
+// Maneja problemas de precisión IEEE 754 (alineado con roundNumber de la API)
+export const roundMoney = (value: number): number =>
+  Math.sign(value) * Math.round((Math.abs(value) + Number.EPSILON) * 100) / 100;
