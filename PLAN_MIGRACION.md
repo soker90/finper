@@ -1,4 +1,4 @@
-# Migración MongoDB → SQLite + Drizzle en Finper (Plan Definitivo v9)
+# Migración MongoDB → SQLite + Drizzle en Finper (Plan Definitivo v10)
 
 ## 📌 Contexto del proyecto
 Repositorio: `soker90/finper` — monorepo pnpm con `api`, `models` y `client`.
@@ -80,17 +80,18 @@ Estrategia:
    Como en ese momento NINGÚN módulo del core está en Mongoose, no hay
    populate cruzado roto.
 
-Orden de construcción del core:
+Orden de construcción del core (sin activar, sin eliminar Mongoose):
 1. accounts ✅ (construido, no activado — 6f3e175)
-2. transactions (+tags)
-3. loans (+loan_payments +loan_events)
-4. subscriptions (+subscription_candidates)
-5. stats (lector, penúltimo)
-6. TRANSICIÓN ATÓMICA DEL CORE
+2. categories (resolver issue #792 color/icon NOT NULL ANTES de construir)
+3. stores
+4. transactions (+tags)  [FK a accounts, categories, stores, subscriptions]
+5. subscriptions (+subscription_candidates)
+6. loans (+loan_payments +loan_events)
+7. stats (lector, penúltimo)
+8. TRANSICIÓN ATÓMICA DEL CORE
 
 ## Después del core
 - budgets
-- categories (tiene issue #792: color/icon NOT NULL a resolver antes)
 - properties + supplies + supply_readings (monolito)
 - dashboard (lector puro, al final — ya parcheado parcialmente)
 
@@ -106,6 +107,13 @@ Antes de eliminar un modelo Mongoose, hacer grep en TODO packages/api/src
 El tipo 7 es el insalvable: un modelo referenciado por populate desde
 modelos Mongoose vivos NO se puede eliminar hasta migrar los dependientes.
 Por eso el core se migra como bloque.
+
+## Lección: el orden de construcción lo dictan las FK estrictas
+
+Drizzle fuerza FK reales (Mongoose permitía IDs huérfanos). Al construir un
+módulo del core, sus tests insertan datos que deben satisfacer las FK. Por
+tanto, un módulo no se puede construir antes que aquellos a los que
+referencia por FK. Mapear las FK del schema Drizzle ANTES de fijar el orden.
 
 ### Fase 4 — Script de Migración de Datos y Validación
 Script de migración de datos Mongo → SQLite (all-or-nothing).
