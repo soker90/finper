@@ -2,8 +2,8 @@ import Boom from '@hapi/boom'
 import { ERROR_MESSAGE } from '../../i18n'
 import hashPassword from '../../helpers/hash-password'
 import bcrypt from 'bcrypt'
-import jwt, { SignOptions } from 'jsonwebtoken'
 import config from '../../config'
+import signToken from '../../helpers/sign-token'
 import { createUsersRepository, usersRepository } from './users.repository'
 
 export type AuthenticatedUser = { username: string }
@@ -27,7 +27,7 @@ export const createUsersService = (repo: ReturnType<typeof createUsersRepository
     return bcrypt.compareSync(passwordPlain, passwordHash)
   },
   signToken: (username: string) => {
-    return jwt.sign({ username }, config.jwt.secret, { expiresIn: String(config.jwt.timeout) } as SignOptions)
+    return signToken({ username })
   }
 })
 
