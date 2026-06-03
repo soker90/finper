@@ -9,7 +9,7 @@ import { subscriptions } from './subscriptions';
 
 export const transactions = sqliteTable('transactions', {
   id: text('id').primaryKey(),
-  date: integer('date', { mode: 'timestamp_ms' }).notNull(),
+  date: integer('date').notNull(),
   categoryId: text('category_id').notNull().references(() => categories.id),
   amount: real('amount').notNull(),
   type: text('type').notNull(), // 'expense' | 'income' | 'not_computable'
