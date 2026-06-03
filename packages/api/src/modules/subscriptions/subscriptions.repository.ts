@@ -1,8 +1,9 @@
-import { eq, and, asc, desc, isNull, inArray } from 'drizzle-orm'
+import { eq, and, asc, desc, isNull, inArray, gte, lte } from 'drizzle-orm'
 import { type DB, schema, generateId } from '@soker90/finper-db'
-const { subscriptions, transactions, categories, accounts, stores } = schema
+const { subscriptions, transactions, categories, accounts, stores, subscriptionCandidates } = schema
 
 type Subscription = typeof subscriptions.$inferSelect
+type CandidateRow = typeof subscriptionCandidates.$inferSelect
 
 export interface SubscriptionTransactionRow {
   id: string
@@ -134,5 +135,55 @@ export const createSubscriptionsRepository = (db: DB) => ({
 
   unlinkTransaction: (transactionId: string): void => {
     db.update(transactions).set({ subscriptionId: null }).where(eq(transactions.id, transactionId)).run()
+  },
+
+  // --- Parte C: candidates ---
+  findMatchingSubscriptions: (user: string, accountId: string, categoryId: string, from: number, to: number): Subscription[] =>
+    db.select().from(subscriptions)
+      .where(and(
+        eq(subscriptions.user, user),
+        eq(subscriptions.accountId, accountId),
+        eq(subscriptions.categoryId, categoryId),
+        gte(subscriptions.nextPaymentDate, from),
+        lte(subscriptions.nextPaymentDate, to)
+      ))
+      .all(),
+
+  createCandidate: (data: { transactionId: string, subscriptionIds: string[], user: string }): void => {
+    db.insert(subscriptionCandidates).values({
+      id: generateId(),
+      transactionId: data.transactionId,
+      subscriptionIds: data.subscriptionIds,
+      user: data.user,
+      createdAt: Date.now()
+    }).run()
+  },
+
+  findCandidatesByUser: (user: string): CandidateRow[] =>
+    db.select().from(subscriptionCandidates)
+      .where(eq(subscriptionCandidates.user, user))
+      .orderBy(desc(subscriptionCandidates.createdAt))
+      .all(),
+
+  findCandidateById: (id: string): CandidateRow | undefined =>
+    db.select().from(subscriptionCandidates).where(eq(subscriptionCandidates.id, id)).get(),
+
+  deleteCandidate: (id: string): void => {
+    db.delete(subscriptionCandidates).where(eq(subscriptionCandidates.id, id)).run()
+  },
+
+  findTransactionById: (id: string): SubscriptionTransactionRow | undefined =>
+    transactionsSelect(db).where(eq(transactions.id, id)).get() as SubscriptionTransactionRow | undefined,
+
+  findSubscriptionsByIds: (ids: string[]): Array<{ id: string, name: string, logoUrl: string | null, amount: number, cycle: number, nextPaymentDate: number | null }> => {
+    if (ids.length === 0) return []
+    return db.select({
+      id: subscriptions.id,
+      name: subscriptions.name,
+      logoUrl: subscriptions.logoUrl,
+      amount: subscriptions.amount,
+      cycle: subscriptions.cycle,
+      nextPaymentDate: subscriptions.nextPaymentDate
+    }).from(subscriptions).where(inArray(subscriptions.id, ids)).all()
   }
 })

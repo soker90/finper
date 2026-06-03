@@ -1,19 +1,23 @@
 import { Request, Response } from 'express'
 import { SubscriptionsService } from './subscriptions.service'
+import { SubscriptionCandidateService } from './subscription-candidate.service'
 import {
   validateSubscriptionCreateParams,
   validateSubscriptionEditParams,
   validateSubscriptionExist,
-  validateSubscriptionLinkParams
+  validateSubscriptionLinkParams,
+  validateCandidateExist
 } from './subscriptions.schema'
 
 export class SubscriptionsController {
   private logger
   private subscriptionsService: SubscriptionsService
+  private subscriptionCandidateService: SubscriptionCandidateService
 
-  constructor ({ loggerHandler, subscriptionsService }: { loggerHandler: any, subscriptionsService: SubscriptionsService }) {
+  constructor ({ loggerHandler, subscriptionsService, subscriptionCandidateService }: { loggerHandler: any, subscriptionsService: SubscriptionsService, subscriptionCandidateService: SubscriptionCandidateService }) {
     this.logger = loggerHandler
     this.subscriptionsService = subscriptionsService
+    this.subscriptionCandidateService = subscriptionCandidateService
   }
 
   public async create (req: Request, res: Response): Promise<void> {
@@ -74,6 +78,30 @@ export class SubscriptionsController {
     this.logger.logInfo(`/unlink-transaction - subscription: ${id}, transaction: ${transactionId}`)
     validateSubscriptionExist(id, req.user as string)
     this.subscriptionsService.unlinkTransaction(id, transactionId)
+    res.status(204).send()
+  }
+
+  // --- Parte C: candidates ---
+  public async listCandidates (req: Request, res: Response): Promise<void> {
+    this.logger.logInfo(`/subscription-candidates - list for ${req.user}`)
+    const response = this.subscriptionCandidateService.getCandidates(req.user as string)
+    res.send(response)
+  }
+
+  public async assignCandidate (req: Request, res: Response): Promise<void> {
+    const { id } = req.params
+    const { subscriptionId } = req.body
+    this.logger.logInfo(`/assign - candidate: ${id} -> subscription: ${subscriptionId}`)
+    validateCandidateExist(id, req.user as string)
+    this.subscriptionCandidateService.assignSubscription(id, subscriptionId)
+    res.status(204).send()
+  }
+
+  public async dismissCandidate (req: Request, res: Response): Promise<void> {
+    const { id } = req.params
+    this.logger.logInfo(`/dismiss - candidate: ${id}`)
+    validateCandidateExist(id, req.user as string)
+    this.subscriptionCandidateService.dismissCandidate(id)
     res.status(204).send()
   }
 }

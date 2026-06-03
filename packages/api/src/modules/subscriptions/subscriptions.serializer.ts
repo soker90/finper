@@ -33,7 +33,6 @@ export const serializeSubscriptionPopulated = (row: SubscriptionRow) =>
     user: row.user
   }, row)
 
-// Parte B: subscriptionId se OMITE cuando es null (matching lo exige undefined).
 export const serializeSubscriptionTransaction = (row: SubscriptionTransactionRow) => {
   const result: Record<string, any> = {
     _id: row.id,
@@ -49,3 +48,26 @@ export const serializeSubscriptionTransaction = (row: SubscriptionTransactionRow
   if (row.subscriptionId !== null) result.subscriptionId = row.subscriptionId
   return result
 }
+
+// Parte C: candidate con transactionId y subscriptionIds poblados.
+type CandidateRow = typeof schema.subscriptionCandidates.$inferSelect
+type PopulatedSub = { id: string, name: string, logoUrl: string | null, amount: number, cycle: number, nextPaymentDate: number | null }
+
+export const serializeCandidate = (
+  candidate: CandidateRow,
+  transaction: SubscriptionTransactionRow | undefined,
+  subs: PopulatedSub[]
+) => ({
+  _id: candidate.id,
+  transactionId: transaction ? serializeSubscriptionTransaction(transaction) : null,
+  subscriptionIds: subs.map(s => ({
+    _id: s.id,
+    name: s.name,
+    logoUrl: s.logoUrl,
+    amount: s.amount,
+    cycle: s.cycle,
+    nextPaymentDate: s.nextPaymentDate
+  })),
+  user: candidate.user,
+  createdAt: candidate.createdAt
+})

@@ -5,7 +5,7 @@ import { db as sqliteDb } from '../../db'
 import { schema } from '@soker90/finper-db'
 import { ERROR_MESSAGE } from '../../i18n'
 
-const { subscriptions, categories, accounts } = schema
+const { subscriptions, categories, accounts, subscriptionCandidates } = schema
 
 const assertCategoryExists = (id: string, user: string) => {
   const exists = sqliteDb.select({ id: categories.id }).from(categories)
@@ -67,4 +67,11 @@ export const validateSubscriptionLinkParams = ({ id, transactionIds, user }: Rec
     throw Boom.badData(ERROR_MESSAGE.SUBSCRIPTION.TRANSACTION_IDS_REQUIRED).output
   }
   return { id, transactionIds, user }
+}
+
+// Parte C: candidate existe (404). 1:1 con el viejo (solo existencia).
+export const validateCandidateExist = (id: string, user: string) => {
+  const exists = sqliteDb.select({ id: subscriptionCandidates.id }).from(subscriptionCandidates)
+    .where(and(eq(subscriptionCandidates.id, id), eq(subscriptionCandidates.user, user))).get()
+  if (!exists) throw Boom.notFound(ERROR_MESSAGE.SUBSCRIPTION_CANDIDATE.NOT_FOUND).output
 }
