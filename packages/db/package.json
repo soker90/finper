@@ -13,11 +13,11 @@
   "dependencies": {
     "better-sqlite3": "12.10.0",
     "bson": "6.10.3",
-    "drizzle-orm": "0.39.3"
+    "drizzle-orm": "0.45.2"
   },
   "devDependencies": {
     "@types/better-sqlite3": "7.6.12",
-    "drizzle-kit": "0.30.5",
+    "drizzle-kit": "0.31.9",
     "typescript": "5.9.3"
   }
 }
