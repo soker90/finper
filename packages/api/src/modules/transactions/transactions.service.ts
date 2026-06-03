@@ -1,7 +1,7 @@
 import Boom from '@hapi/boom'
 import { sql, eq } from 'drizzle-orm'
 import { db as sqliteDb } from '../../db'
-import { schema, generateId, type DB } from '@soker90/finper-db'
+import { schema, generateId } from '@soker90/finper-db'
 import { getTransactionAmount } from '../../services/utils'
 import { sanitizeTags } from '../../utils'
 import { ERROR_MESSAGE } from '../../i18n'
@@ -9,9 +9,7 @@ import { serializeTransaction, serializeTransactionPopulated } from './transacti
 
 const { transactions, accounts } = schema
 
-// Tipo del parámetro tx del callback de sqliteDb.transaction, derivado de la
-// firma real (evita TS7006 'implicitly any' por inferencia contextual).
-type SqliteTx = Parameters<Parameters<DB['transaction']>[0]>[0]
+
 
 // getTransactionAmount (helper compartido) tipa su parámetro como ITransaction
 // (Mongoose: con category/account). Solo lee type y amount; la fila Drizzle los
@@ -38,7 +36,7 @@ export class TransactionsService {
     const sanitizedTags = sanitizeTags(params.tags)
     const amount = amountOf(params)
 
-    const created = sqliteDb.transaction((tx: SqliteTx) => {
+    const created = sqliteDb.transaction((tx) => {
       const row = tx.insert(transactions).values({
         id: generateId(),
         date: params.date,
@@ -74,7 +72,7 @@ export class TransactionsService {
     const oldAmount = amountOf(oldTransaction)
     const sanitizedTags = sanitizeTags(value.tags)
 
-    const updated = sqliteDb.transaction((tx: SqliteTx) => {
+    const updated = sqliteDb.transaction((tx) => {
       const row = tx.update(transactions)
         .set({
           date: value.date,
@@ -111,7 +109,7 @@ export class TransactionsService {
 
     const amount = amountOf(transaction)
 
-    sqliteDb.transaction((tx: SqliteTx) => {
+    sqliteDb.transaction((tx) => {
       tx.delete(transactions).where(eq(transactions.id, id)).run()
       if (amount !== 0) {
         tx.update(accounts)
