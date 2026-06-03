@@ -14,8 +14,16 @@ const subscriptionsController = new SubscriptionsController({
   subscriptionsService,
   loggerHandler: loggerHandler('SubscriptionController')
 })
+const c = subscriptionsController
 
-subscriptionsRoutes.post('/', authMiddleware, subscriptionsController.create.bind(subscriptionsController))
-subscriptionsRoutes.get('/', authMiddleware, subscriptionsController.list.bind(subscriptionsController))
-subscriptionsRoutes.put('/:id', authMiddleware, subscriptionsController.edit.bind(subscriptionsController))
-subscriptionsRoutes.delete('/:id', authMiddleware, subscriptionsController.delete.bind(subscriptionsController))
+subscriptionsRoutes.post('/', authMiddleware, c.create.bind(c))
+subscriptionsRoutes.get('/', authMiddleware, c.list.bind(c))
+
+// Parte B: específicas /:id/... antes que las genéricas /:id
+subscriptionsRoutes.get('/:id/transactions', authMiddleware, c.getTransactions.bind(c))
+subscriptionsRoutes.get('/:id/matching-transactions', authMiddleware, c.getMatchingTransactions.bind(c))
+subscriptionsRoutes.post('/:id/link-transactions', authMiddleware, c.linkTransactions.bind(c))
+subscriptionsRoutes.delete('/:id/unlink-transactions/:transactionId', authMiddleware, c.unlinkTransaction.bind(c))
+
+subscriptionsRoutes.put('/:id', authMiddleware, c.edit.bind(c))
+subscriptionsRoutes.delete('/:id', authMiddleware, c.delete.bind(c))

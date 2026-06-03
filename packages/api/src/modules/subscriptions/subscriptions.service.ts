@@ -1,4 +1,4 @@
-import { serializeSubscription, serializeSubscriptionPopulated } from './subscriptions.serializer'
+import { serializeSubscription, serializeSubscriptionPopulated, serializeSubscriptionTransaction } from './subscriptions.serializer'
 
 type ISubscriptionsRepository = ReturnType<typeof import('./subscriptions.repository').createSubscriptionsRepository>
 
@@ -62,5 +62,28 @@ export class SubscriptionsService {
 
     this.repository.updateNextPaymentDate(subscriptionId, nextPaymentDate)
     return nextPaymentDate
+  }
+
+  // --- Parte B ---
+  public getTransactionsBySubscription (id: string, user: string) {
+    return this.repository.findTransactionsBySubscription(id, user).map(serializeSubscriptionTransaction)
+  }
+
+  public getMatchingTransactions (id: string, user: string) {
+    const subscription = this.repository.findByIdPopulated(id, user)
+    if (!subscription) return []
+    return this.repository
+      .findMatchingTransactions(subscription.categoryId, subscription.accountId, user)
+      .map(serializeSubscriptionTransaction)
+  }
+
+  public linkTransactions (id: string, transactionIds: string[]): void {
+    this.repository.linkTransactions(id, transactionIds)
+    this.recalculateNextPaymentDate(id)
+  }
+
+  public unlinkTransaction (id: string, transactionId: string): void {
+    this.repository.unlinkTransaction(transactionId)
+    this.recalculateNextPaymentDate(id)
   }
 }

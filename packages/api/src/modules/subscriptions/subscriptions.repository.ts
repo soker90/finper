@@ -1,8 +1,25 @@
-import { eq, and, asc, desc } from 'drizzle-orm'
+import { eq, and, asc, desc, isNull, inArray } from 'drizzle-orm'
 import { type DB, schema, generateId } from '@soker90/finper-db'
-const { subscriptions, transactions, categories, accounts } = schema
+const { subscriptions, transactions, categories, accounts, stores } = schema
 
 type Subscription = typeof subscriptions.$inferSelect
+
+export interface SubscriptionTransactionRow {
+  id: string
+  date: number
+  amount: number
+  type: string
+  note: string | null
+  tags: string[]
+  subscriptionId: string | null
+  categoryId: string
+  categoryName: string | null
+  accountId: string
+  accountName: string | null
+  accountBank: string | null
+  storeId: string | null
+  storeName: string | null
+}
 
 export interface SubscriptionRow extends Subscription {
   categoryName: string | null
@@ -28,6 +45,27 @@ const selectWithJoins = (db: DB) => db.select({
   .from(subscriptions)
   .leftJoin(categories, eq(subscriptions.categoryId, categories.id))
   .leftJoin(accounts, eq(subscriptions.accountId, accounts.id))
+
+const transactionsSelect = (db: DB) => db.select({
+  id: transactions.id,
+  date: transactions.date,
+  amount: transactions.amount,
+  type: transactions.type,
+  note: transactions.note,
+  tags: transactions.tags,
+  subscriptionId: transactions.subscriptionId,
+  categoryId: transactions.categoryId,
+  categoryName: categories.name,
+  accountId: transactions.accountId,
+  accountName: accounts.name,
+  accountBank: accounts.bank,
+  storeId: transactions.storeId,
+  storeName: stores.name
+})
+  .from(transactions)
+  .leftJoin(categories, eq(transactions.categoryId, categories.id))
+  .leftJoin(accounts, eq(transactions.accountId, accounts.id))
+  .leftJoin(stores, eq(transactions.storeId, stores.id))
 
 export const createSubscriptionsRepository = (db: DB) => ({
   findByUser: (user: string): SubscriptionRow[] =>
@@ -58,7 +96,6 @@ export const createSubscriptionsRepository = (db: DB) => ({
     db.delete(subscriptions).where(and(eq(subscriptions.id, id), eq(subscriptions.user, user))).run()
   },
 
-  // Acceso directo a transactions (circularidad; no toca el módulo transactions)
   findLatestTransactionDate: (subscriptionId: string): number | null => {
     const row = db.select({ date: transactions.date })
       .from(transactions)
@@ -70,5 +107,32 @@ export const createSubscriptionsRepository = (db: DB) => ({
 
   unlinkAllTransactions: (subscriptionId: string): void => {
     db.update(transactions).set({ subscriptionId: null }).where(eq(transactions.subscriptionId, subscriptionId)).run()
+  },
+
+  // --- Parte B ---
+  findTransactionsBySubscription: (subscriptionId: string, user: string): SubscriptionTransactionRow[] =>
+    transactionsSelect(db)
+      .where(and(eq(transactions.subscriptionId, subscriptionId), eq(transactions.user, user)))
+      .orderBy(desc(transactions.date))
+      .all() as SubscriptionTransactionRow[],
+
+  findMatchingTransactions: (categoryId: string, accountId: string, user: string): SubscriptionTransactionRow[] =>
+    transactionsSelect(db)
+      .where(and(
+        eq(transactions.user, user),
+        eq(transactions.categoryId, categoryId),
+        eq(transactions.accountId, accountId),
+        isNull(transactions.subscriptionId)
+      ))
+      .orderBy(desc(transactions.date))
+      .limit(50)
+      .all() as SubscriptionTransactionRow[],
+
+  linkTransactions: (subscriptionId: string, transactionIds: string[]): void => {
+    db.update(transactions).set({ subscriptionId }).where(inArray(transactions.id, transactionIds)).run()
+  },
+
+  unlinkTransaction: (transactionId: string): void => {
+    db.update(transactions).set({ subscriptionId: null }).where(eq(transactions.id, transactionId)).run()
   }
 })

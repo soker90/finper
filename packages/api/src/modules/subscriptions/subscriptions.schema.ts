@@ -60,3 +60,11 @@ export const validateSubscriptionEditParams = ({ params, body, user }: { params:
   if (body.accountId) assertAccountExists(body.accountId, user)
   return { id: params.id, value }
 }
+
+// Parte B: link-transactions requiere un array no vacío de ids (422 si no).
+export const validateSubscriptionLinkParams = ({ id, transactionIds, user }: Record<string, any>) => {
+  if (!Array.isArray(transactionIds) || transactionIds.length === 0) {
+    throw Boom.badData(ERROR_MESSAGE.SUBSCRIPTION.TRANSACTION_IDS_REQUIRED).output
+  }
+  return { id, transactionIds, user }
+}

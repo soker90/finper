@@ -3,7 +3,8 @@ import { SubscriptionsService } from './subscriptions.service'
 import {
   validateSubscriptionCreateParams,
   validateSubscriptionEditParams,
-  validateSubscriptionExist
+  validateSubscriptionExist,
+  validateSubscriptionLinkParams
 } from './subscriptions.schema'
 
 export class SubscriptionsController {
@@ -40,6 +41,39 @@ export class SubscriptionsController {
     this.logger.logInfo(`/delete - subscription: ${id}`)
     validateSubscriptionExist(id, req.user as string)
     this.subscriptionsService.deleteSubscription(id, req.user as string)
+    res.status(204).send()
+  }
+
+  // --- Parte B ---
+  public async getTransactions (req: Request, res: Response): Promise<void> {
+    const { id } = req.params
+    this.logger.logInfo(`/transactions - subscription: ${id}`)
+    validateSubscriptionExist(id, req.user as string)
+    const response = this.subscriptionsService.getTransactionsBySubscription(id, req.user as string)
+    res.send(response)
+  }
+
+  public async getMatchingTransactions (req: Request, res: Response): Promise<void> {
+    const { id } = req.params
+    this.logger.logInfo(`/matching-transactions - subscription: ${id}`)
+    const response = this.subscriptionsService.getMatchingTransactions(id, req.user as string)
+    res.send(response)
+  }
+
+  public async linkTransactions (req: Request, res: Response): Promise<void> {
+    const { id } = req.params
+    this.logger.logInfo(`/link-transactions - subscription: ${id}`)
+    validateSubscriptionExist(id, req.user as string)
+    const { transactionIds } = validateSubscriptionLinkParams({ id, transactionIds: req.body.transactionIds, user: req.user })
+    this.subscriptionsService.linkTransactions(id, transactionIds)
+    res.status(204).send()
+  }
+
+  public async unlinkTransaction (req: Request, res: Response): Promise<void> {
+    const { id, transactionId } = req.params
+    this.logger.logInfo(`/unlink-transaction - subscription: ${id}, transaction: ${transactionId}`)
+    validateSubscriptionExist(id, req.user as string)
+    this.subscriptionsService.unlinkTransaction(id, transactionId)
     res.status(204).send()
   }
 }
