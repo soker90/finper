@@ -9,7 +9,7 @@ export const subscriptions = sqliteTable('subscriptions', {
   amount: real('amount').notNull(),
   currency: text('currency'),
   cycle: integer('cycle').notNull(),
-  nextPaymentDate: integer('next_payment_date', { mode: 'timestamp_ms' }),
+  nextPaymentDate: integer('next_payment_date'),
   categoryId: text('category_id').notNull().references(() => categories.id),
   accountId: text('account_id').notNull().references(() => accounts.id),
   logoUrl: text('logo_url'),
