@@ -3,7 +3,10 @@ import { LoansService } from './loans.service'
 import {
   validateLoanCreateParams,
   validateLoanEditParams,
-  validateLoanExist
+  validateLoanExist,
+  validateLoanOrdinaryPaymentParams,
+  validateLoanPaymentParams,
+  validateLoanEditPaymentParams
 } from './loans.schema'
 
 export class LoansController {
@@ -45,5 +48,39 @@ export class LoansController {
     await validateLoanExist({ id, user: req.user as string })
     this.loansService.deleteLoan(id)
     res.status(204).send()
+  }
+
+  // --- Parte B: pagos ---
+
+  public async payOrdinary (req: Request, res: Response): Promise<void> {
+    const { id } = req.params
+    this.logger.logInfo(`/loans/${id}/pay - ordinary payment`)
+    await validateLoanExist({ id, user: req.user as string })
+    const params = await validateLoanOrdinaryPaymentParams(req.body)
+    res.status(201).send(this.loansService.payOrdinary(id, req.user as string, params))
+  }
+
+  public async payExtraordinary (req: Request, res: Response): Promise<void> {
+    const { id } = req.params
+    this.logger.logInfo(`/loans/${id}/amortize - extraordinary`)
+    await validateLoanExist({ id, user: req.user as string })
+    const { amount, mode, date, addMovement } = await validateLoanPaymentParams(req.body)
+    res.status(201).send(this.loansService.payExtraordinary(id, amount, mode, req.user as string, addMovement, date))
+  }
+
+  public async deletePayment (req: Request, res: Response): Promise<void> {
+    const { id, paymentId } = req.params
+    this.logger.logInfo(`/loans/${id}/payments/${paymentId} - delete payment`)
+    await validateLoanExist({ id, user: req.user as string })
+    this.loansService.deletePayment(id, paymentId, req.user as string)
+    res.status(204).send()
+  }
+
+  public async editPayment (req: Request, res: Response): Promise<void> {
+    const { id, paymentId } = req.params
+    this.logger.logInfo(`/loans/${id}/payments/${paymentId} - edit payment`)
+    await validateLoanExist({ id, user: req.user as string })
+    const data = await validateLoanEditPaymentParams({ ...req.body, user: req.user })
+    res.send(this.loansService.editPayment(id, paymentId, data, req.user as string))
   }
 }

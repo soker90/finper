@@ -55,3 +55,44 @@ export const validateLoanEditParams = async ({
 
   return { id: params.id, value }
 }
+
+// --- Parte B: validadores de pago ---
+
+export const validateLoanOrdinaryPaymentParams = async (data: Record<string, any>) => {
+  const schemaJoi = Joi.object({
+    date: Joi.number().optional(),
+    amount: Joi.number().positive().optional(),
+    addMovement: Joi.boolean().optional()
+  })
+  const { error, value } = schemaJoi.validate(data)
+  if (error) throw Boom.badData(error.message).output
+  return value
+}
+
+export const validateLoanPaymentParams = async (data: Record<string, any>) => {
+  const schemaJoi = Joi.object({
+    amount: Joi.number().positive().required(),
+    mode: Joi.string().valid('reduceQuota', 'reduceTerm').required(),
+    date: Joi.number().optional(),
+    addMovement: Joi.boolean().optional()
+  })
+  const { error, value } = schemaJoi.validate(data)
+  if (error) throw Boom.badData(error.message).output
+  return value
+}
+
+export const validateLoanEditPaymentParams = async (data: Record<string, any>) => {
+  const schemaJoi = Joi.object({
+    date: Joi.number(),
+    amount: Joi.number().positive(),
+    interest: Joi.number().min(0),
+    principal: Joi.number().min(0),
+    type: Joi.string().valid('ordinary', 'extraordinary'),
+    user: Joi.string().required(),
+    loan: Joi.string(),
+    paymentId: Joi.string()
+  }).or('date', 'amount', 'interest', 'principal', 'type')
+  const { error, value } = schemaJoi.validate(data)
+  if (error) throw Boom.badData(error.message).output
+  return value
+}

@@ -14,3 +14,17 @@ export const serializeLoan = (row: LoanRow) => ({
   category: row.categoryId,
   user: row.user
 })
+
+// Pago serializado (1:1 con leanDoc del viejo: _id, loan como id plano).
+export const serializePayment = (row: import('./loans.repository').LoanPaymentRow) => ({
+  _id: row.id,
+  loan: row.loanId,
+  date: row.date,
+  amount: row.amount,
+  interest: row.interest,
+  principal: row.principal,
+  accumulatedPrincipal: row.accumulatedPrincipal,
+  pendingCapital: row.pendingCapital,
+  type: row.type,
+  user: row.user
+})

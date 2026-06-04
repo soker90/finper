@@ -17,3 +17,9 @@ loansRoutes.post('/', authMiddleware, c.create.bind(c))
 loansRoutes.get('/:id', authMiddleware, c.detail.bind(c))
 loansRoutes.put('/:id', authMiddleware, c.edit.bind(c))
 loansRoutes.delete('/:id', authMiddleware, c.remove.bind(c))
+
+// Parte B: pagos
+loansRoutes.post('/:id/pay', authMiddleware, c.payOrdinary.bind(c))
+loansRoutes.post('/:id/amortize', authMiddleware, c.payExtraordinary.bind(c))
+loansRoutes.delete('/:id/payments/:paymentId', authMiddleware, c.deletePayment.bind(c))
+loansRoutes.put('/:id/payments/:paymentId', authMiddleware, c.editPayment.bind(c))
