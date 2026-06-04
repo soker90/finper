@@ -3,7 +3,7 @@ import { schema, generateId, roundMoney } from '@soker90/finper-db'
 import { eq, and, ne, sum } from 'drizzle-orm'
 import { db } from '../../db'
 
-const { goals } = schema
+const { goals, accounts } = schema
 
 type NewGoalInput = Omit<typeof goals.$inferInsert, 'id' | 'user'>
 type UpdateGoalInput = Partial<NewGoalInput>
@@ -51,6 +51,17 @@ export const createGoalsRepository = (database: DB) => ({
       .select({ total: sum(goals.currentAmount) })
       .from(goals)
       .where(conditions)
+      .get()
+
+    return roundMoney(Number(row?.total ?? 0))
+  },
+
+  // Suma del balance de cuentas activas (sustituye AccountModel.aggregate del viejo cruce Mongo).
+  getActiveAccountsBalance: (username: string): number => {
+    const row = database
+      .select({ total: sum(accounts.balance) })
+      .from(accounts)
+      .where(and(eq(accounts.user, username), eq(accounts.isActive, true)))
       .get()
 
     return roundMoney(Number(row?.total ?? 0))

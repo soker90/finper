@@ -1,4 +1,3 @@
-import { AccountModel } from '@soker90/finper-models'
 import Boom from '@hapi/boom'
 import { roundMoney } from '@soker90/finper-db'
 import { ERROR_MESSAGE } from '../../i18n'
@@ -16,25 +15,17 @@ export interface IGoalService {
 }
 
 /**
- * TRANSITORIO: cruza Mongo (accounts) con SQLite (goals).
- * No es atómico, pero la app es de un solo usuario y la ventana
- * de race condition es ínfima. Cuando se migre `accounts` a SQLite
- * en una futura sesión, esta función pasará a ser una sola query
- * SQL con JOIN, y este comentario debe eliminarse.
+ * Valida que la asignación total a objetivos no supere el balance de cuentas activas.
+ * Todo SQLite (accounts y goals en la misma base).
  */
-const validateTotalAllocation = async (
+const validateTotalAllocation = (
   repo: GoalsRepository,
   username: string,
   newAllocation: number,
   excludeGoalId?: string
-): Promise<void> => {
-  const [accountBalance, otherGoalsTotal] = await Promise.all([
-    AccountModel.aggregate([
-      { $match: { user: username, isActive: true } },
-      { $group: { _id: null, total: { $sum: '$balance' } } }
-    ]).then(r => r[0]?.total ?? 0),
-    Promise.resolve(repo.getTotalAllocatedByUser(username, excludeGoalId))
-  ])
+): void => {
+  const accountBalance = repo.getActiveAccountsBalance(username)
+  const otherGoalsTotal = repo.getTotalAllocatedByUser(username, excludeGoalId)
 
   const totalAfter = roundMoney(otherGoalsTotal + newAllocation)
   if (totalAfter > roundMoney(accountBalance)) {
@@ -48,7 +39,7 @@ export class GoalService implements IGoalService {
   public async addGoal (username: string, goal: Record<string, any>): Promise<any> {
     const currentAmount = goal.currentAmount ?? 0
     if (currentAmount > 0) {
-      await validateTotalAllocation(this.repo, username, currentAmount)
+      validateTotalAllocation(this.repo, username, currentAmount)
     }
     const data = {
       name: goal.name,
@@ -95,7 +86,7 @@ export class GoalService implements IGoalService {
     if (!goal) throw Boom.notFound(ERROR_MESSAGE.GOAL.NOT_FOUND).output
 
     const newAmount = roundMoney(goal.currentAmount + amount)
-    await validateTotalAllocation(this.repo, user, newAmount, id)
+    validateTotalAllocation(this.repo, user, newAmount, id)
 
     const updated = this.repo.update(id, user, { currentAmount: newAmount })
     /* istanbul ignore next — validator validateGoalExist runs before this method via route */

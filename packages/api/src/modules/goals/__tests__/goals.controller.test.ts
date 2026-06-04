@@ -7,10 +7,10 @@ import { requestLogin } from '../../../../test/request-login'
 import { generateUsername } from '../../../../test/generate-values'
 
 import mongoose from 'mongoose'
-import { AccountModel } from '@soker90/finper-models'
+
 import createTestDatabase from '../../../../test/test-db'
 
-const { users, goals } = schema
+const { users, goals, accounts } = schema
 
 describe('Goal Routes (SQLite integration)', () => {
   const path = '/api/goals'
@@ -23,8 +23,6 @@ describe('Goal Routes (SQLite integration)', () => {
     testMongoDb = createTestDatabase(mongoose)
     await testMongoDb.connect()
 
-
-
     token = await requestLogin(server.app, { username })
   })
 
@@ -36,7 +34,7 @@ describe('Goal Routes (SQLite integration)', () => {
 
   afterEach(async () => {
     sqliteDb.delete(goals).where(eq(goals.user, username)).run()
-    await AccountModel.deleteMany({ user: username })
+    sqliteDb.delete(accounts).where(eq(accounts.user, username)).run()
   })
 
   const validPayload = {
@@ -47,6 +45,9 @@ describe('Goal Routes (SQLite integration)', () => {
     color: '#4CAF50',
     icon: 'CarOutlined'
   }
+
+  const addBalance = (balance: number) =>
+    sqliteDb.insert(accounts).values({ id: generateId(), name: 'Bank', bank: 'MyBank', balance, isActive: true, user: username }).run()
 
   describe('POST /api/goals', () => {
     it('returns 401 when token is missing', async () => {
@@ -65,13 +66,7 @@ describe('Goal Routes (SQLite integration)', () => {
 
     it('creates a goal and returns 201 when it fits in balance', async () => {
       // Add balance in Mongo
-      await AccountModel.create({
-        user: username,
-        name: 'Bank',
-        balance: 10000,
-        bank: 'MyBank',
-        isActive: true
-      })
+      addBalance(10000)
 
       const payloadWithBalance = { ...validPayload, currentAmount: 1000 }
       const response = await supertest(server.app)
@@ -86,13 +81,7 @@ describe('Goal Routes (SQLite integration)', () => {
     })
 
     it('returns 400 when initial allocation exceeds available balance', async () => {
-      await AccountModel.create({
-        user: username,
-        name: 'Bank',
-        balance: 500,
-        bank: 'MyBank',
-        isActive: true
-      })
+      addBalance(500)
 
       const payloadWithBalance = { ...validPayload, currentAmount: 1000 }
       const response = await supertest(server.app)
@@ -209,13 +198,7 @@ describe('Goal Routes (SQLite integration)', () => {
     })
 
     it('funds a goal if there is enough account balance', async () => {
-      await AccountModel.create({
-        user: username,
-        name: 'Bank',
-        balance: 2000,
-        bank: 'MyBank',
-        isActive: true
-      })
+      addBalance(2000)
 
       const created = await supertest(server.app)
         .post(path)
@@ -234,13 +217,7 @@ describe('Goal Routes (SQLite integration)', () => {
     })
 
     it('returns 400 if fund exceeds account balance', async () => {
-      await AccountModel.create({
-        user: username,
-        name: 'Bank',
-        balance: 200,
-        bank: 'MyBank',
-        isActive: true
-      })
+      addBalance(200)
 
       const created = await supertest(server.app)
         .post(path)
@@ -268,13 +245,7 @@ describe('Goal Routes (SQLite integration)', () => {
     })
 
     it('withdraws from a goal if sufficient funds in goal', async () => {
-      await AccountModel.create({
-        user: username,
-        name: 'Bank',
-        balance: 1000,
-        bank: 'MyBank',
-        isActive: true
-      })
+      addBalance(1000)
 
       const payloadWithBalance = { ...validPayload, currentAmount: 500 }
       const created = await supertest(server.app)
@@ -294,13 +265,7 @@ describe('Goal Routes (SQLite integration)', () => {
     })
 
     it('returns 400 if withdraw amount exceeds goal balance', async () => {
-      await AccountModel.create({
-        user: username,
-        name: 'Bank',
-        balance: 1000,
-        bank: 'MyBank',
-        isActive: true
-      })
+      addBalance(1000)
 
       const payloadWithBalance = { ...validPayload, currentAmount: 100 }
       const created = await supertest(server.app)
