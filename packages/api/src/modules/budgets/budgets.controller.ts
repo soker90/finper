@@ -1,6 +1,6 @@
 import { Request, Response } from 'express'
 import { BudgetsService } from './budgets.service'
-import { validateBudgetEditParams, validateBudgetCopy } from './budgets.schema'
+import { validateBudgetGet, validateBudgetEditParams, validateBudgetCopy } from './budgets.schema'
 
 export class BudgetsController {
   private logger
@@ -9,6 +9,12 @@ export class BudgetsController {
   constructor ({ loggerHandler, budgetsService }: { loggerHandler: any, budgetsService: BudgetsService }) {
     this.logger = loggerHandler
     this.budgetsService = budgetsService
+  }
+
+  public async budgets (req: Request, res: Response): Promise<void> {
+    this.logger.logInfo(`/budgets - get ${req.query.year}`)
+    const filters = await validateBudgetGet(req.query as Record<string, any>)
+    res.send(this.budgetsService.getBudgets({ ...filters, user: req.user as string }))
   }
 
   public async edit (req: Request, res: Response): Promise<void> {

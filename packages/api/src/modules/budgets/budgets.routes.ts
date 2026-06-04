@@ -12,6 +12,6 @@ const repository = createBudgetsRepository(db)
 const budgetsService = new BudgetsService(repository)
 const c = new BudgetsController({ budgetsService, loggerHandler: loggerHandler('BudgetController') })
 
-// Parte A: edit + copy (GET / budgets se añade en la Parte B)
+budgetsRoutes.get('/', authMiddleware, c.budgets.bind(c))
 budgetsRoutes.patch('/:category/:year/:month', authMiddleware, c.edit.bind(c))
 budgetsRoutes.post('/', authMiddleware, c.copy.bind(c))
