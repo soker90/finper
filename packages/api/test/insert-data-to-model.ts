@@ -22,7 +22,7 @@ import {
   MIN_PASSWORD_LENGTH
 } from '../src/config/inputs'
 import { generateUsername } from './generate-values'
-import { buildAmortizationTable } from '../src/services/utils/calcLoanProjection'
+import { buildAmortizationTable } from '../src/modules/loans/utils/calcLoanProjection'
 import { roundNumber } from '../src/utils/roundNumber'
 
 export const insertCredentials = (params: Record<string, string | boolean> = {}): Promise<{ username: string }> => {

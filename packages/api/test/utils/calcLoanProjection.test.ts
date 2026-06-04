@@ -1,4 +1,4 @@
-import { buildAmortizationTable, calcMonthlyPayment } from '../../src/services/utils/calcLoanProjection'
+import { buildAmortizationTable, calcMonthlyPayment } from '../../src/modules/loans/utils/calcLoanProjection'
 import { LOAN_PAYMENT } from '@soker90/finper-models'
 
 describe('buildAmortizationTable', () => {
