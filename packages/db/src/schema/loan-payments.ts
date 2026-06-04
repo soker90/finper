@@ -5,7 +5,7 @@ import { loans } from './loans';
 export const loanEvents = sqliteTable('loan_events', {
   id: text('id').primaryKey(),
   loanId: text('loan_id').notNull(),
-  date: integer('date', { mode: 'timestamp_ms' }).notNull(),
+  date: integer('date').notNull(),
   newRate: real('new_rate').notNull(),
   newPayment: real('new_payment').notNull(),
   user: text('user').notNull().references(() => users.username),
@@ -17,7 +17,7 @@ export const loanEvents = sqliteTable('loan_events', {
 export const loanPayments = sqliteTable('loan_payments', {
   id: text('id').primaryKey(),
   loanId: text('loan_id').notNull().references(() => loans.id),
-  date: integer('date', { mode: 'timestamp_ms' }).notNull(),
+  date: integer('date').notNull(),
   amount: real('amount').notNull(),
   interest: real('interest').default(0),
   principal: real('principal').notNull(),

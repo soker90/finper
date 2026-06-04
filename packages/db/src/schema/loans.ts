@@ -9,7 +9,7 @@ export const loans = sqliteTable('loans', {
   initialAmount: real('initial_amount').notNull(),
   pendingAmount: real('pending_amount').notNull(),
   interestRate: real('interest_rate').notNull(),
-  startDate: integer('start_date', { mode: 'timestamp_ms' }).notNull(),
+  startDate: integer('start_date').notNull(),
   monthlyPayment: real('monthly_payment').notNull(),
   initialEstimatedCost: real('initial_estimated_cost').notNull(),
   accountId: text('account_id').notNull().references(() => accounts.id),
