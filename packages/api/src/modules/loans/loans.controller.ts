@@ -6,7 +6,9 @@ import {
   validateLoanExist,
   validateLoanOrdinaryPaymentParams,
   validateLoanPaymentParams,
-  validateLoanEditPaymentParams
+  validateLoanEditPaymentParams,
+  validateLoanEventParams,
+  validateLoanSimulateParams
 } from './loans.schema'
 
 export class LoansController {
@@ -82,5 +84,23 @@ export class LoansController {
     await validateLoanExist({ id, user: req.user as string })
     const data = await validateLoanEditPaymentParams({ ...req.body, user: req.user })
     res.send(this.loansService.editPayment(id, paymentId, data, req.user as string))
+  }
+
+  // --- Parte C: eventos / simulación ---
+
+  public async addEvent (req: Request, res: Response): Promise<void> {
+    const { id } = req.params
+    this.logger.logInfo(`/loans/${id}/events - add event`)
+    await validateLoanExist({ id, user: req.user as string })
+    const data = await validateLoanEventParams({ ...req.body, user: req.user })
+    res.status(201).send(this.loansService.addEvent(id, data))
+  }
+
+  public async simulatePayoff (req: Request, res: Response): Promise<void> {
+    const { id } = req.params
+    this.logger.logInfo(`/loans/${id}/simulate-payoff`)
+    await validateLoanExist({ id, user: req.user as string })
+    const { lumpSum } = await validateLoanSimulateParams(req.body)
+    res.send(this.loansService.simulatePayoff(id, lumpSum, req.user as string))
   }
 }

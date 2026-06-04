@@ -126,5 +126,19 @@ export const createLoansRepository = (db: DB) => ({
     if (movement && (fields.amount !== undefined || fields.date !== undefined)) {
       db.update(transactions).set(fields).where(eq(transactions.id, movement.id)).run()
     }
-  }
+  },
+
+  // --- Parte C: eventos / simulación ---
+
+  createEvent: (data: { loanId: string, date: number, newRate: number, newPayment: number, user: string }): LoanEventRow => {
+    const id = generateId()
+    return db.insert(loanEvents).values({ ...data, id }).returning().get()
+  },
+
+  // Ancla de proyección: date del último pago ordinario.
+  findLastOrdinaryPayment: (loanId: string, user: string): LoanPaymentRow | undefined =>
+    db.select().from(loanPayments)
+      .where(and(eq(loanPayments.loanId, loanId), eq(loanPayments.user, user), eq(loanPayments.type, 'ordinary')))
+      .orderBy(desc(loanPayments.date))
+      .get()
 })

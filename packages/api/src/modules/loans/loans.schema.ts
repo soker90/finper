@@ -96,3 +96,27 @@ export const validateLoanEditPaymentParams = async (data: Record<string, any>) =
   if (error) throw Boom.badData(error.message).output
   return value
 }
+
+// --- Parte C: validadores de evento / simulación ---
+
+export const validateLoanEventParams = async (data: Record<string, any>) => {
+  const schemaJoi = Joi.object({
+    date: Joi.number().required(),
+    newRate: Joi.number().min(0).required(),
+    newPayment: Joi.number().positive().required(),
+    user: Joi.string().required(),
+    loan: Joi.string()
+  })
+  const { error, value } = schemaJoi.validate(data)
+  if (error) throw Boom.badData(error.message).output
+  return value
+}
+
+export const validateLoanSimulateParams = async (data: Record<string, any>) => {
+  const schemaJoi = Joi.object({
+    lumpSum: Joi.number().positive().integer().required()
+  })
+  const { error, value } = schemaJoi.validate(data)
+  if (error) throw Boom.badData(error.message).output
+  return value
+}

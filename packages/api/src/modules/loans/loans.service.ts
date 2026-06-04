@@ -3,8 +3,8 @@ import { LOAN_PAYMENT } from '@soker90/finper-models'
 import type { LoanPaymentType } from '@soker90/finper-types'
 import { roundNumber } from '../../utils'
 import { ERROR_MESSAGE } from '../../i18n'
-import { serializeLoan, serializePayment } from './loans.serializer'
-import { LoanStats } from './loans.types'
+import { serializeLoan, serializePayment, serializeEvent } from './loans.serializer'
+import { LoanStats, SimulationResult } from './loans.types'
 import {
   buildAmortizationTable,
   calcRemainingMonths,
@@ -218,6 +218,72 @@ export class LoansService {
     return serializePayment(this.repository.findPaymentById(paymentId, loanId, user) as LoanPaymentRow)
   }
 
+  // --- Parte C: eventos / simulación ---
+
+  addEvent (loanId: string, data: { date: number, newRate: number, newPayment: number, user: string }) {
+    const event = this.repository.createEvent({
+      loanId, date: data.date, newRate: data.newRate, newPayment: data.newPayment, user: data.user
+    })
+    // Actualiza tasa y cuota "actuales" del préstamo.
+    this.repository.updateLoanFields(loanId, { interestRate: data.newRate, monthlyPayment: data.newPayment })
+    return serializeEvent(event)
+  }
+
+  simulatePayoff (loanId: string, lumpSum: number, user: string): SimulationResult {
+    const { loan, events, currentRate, currentPayment } = this._getLoan(loanId, user)
+
+    if (lumpSum > loan.pendingAmount) {
+      throw Boom.badData('lumpSum cannot exceed pendingAmount').output
+    }
+
+    const eventInputs = this._toEventInputs(events)
+    const newPending = roundNumber(loan.pendingAmount - lumpSum)
+    const projectionAnchor = this._getProjectionAnchor(loanId, user)
+
+    const baseScenario = this._buildProjectionScenario(
+      loan.pendingAmount, currentRate, currentPayment, eventInputs, loan.startDate, projectionAnchor
+    )
+
+    if (baseScenario.monthsLeft === 0) {
+      throw Boom.badData('Loan is already fully paid').output
+    }
+
+    // Opción A: reduceTerm — misma cuota, menos meses.
+    const optionAScenario = this._buildProjectionScenario(
+      newPending, currentRate, currentPayment, eventInputs, loan.startDate, projectionAnchor
+    )
+
+    // Opción B: reduceQuota — misma duración, cuota menor.
+    const newMonthlyPayment = calcMonthlyPayment(newPending, currentRate, baseScenario.monthsLeft)
+    const adjustedEvents: LoanEventInput[] = eventInputs.map(event => ({ ...event, newPayment: newMonthlyPayment }))
+    const optionBScenario = this._buildProjectionScenario(
+      newPending, currentRate, newMonthlyPayment, adjustedEvents, loan.startDate, projectionAnchor
+    )
+
+    return {
+      lumpSum,
+      originalMonthsLeft: baseScenario.monthsLeft,
+      originalMonthlyPayment: currentPayment,
+      originalEndDate: baseScenario.endDate,
+      optionA: {
+        newMonthsLeft: optionAScenario.monthsLeft,
+        newMonthlyPayment: currentPayment,
+        monthsSaved: baseScenario.monthsLeft - optionAScenario.monthsLeft,
+        monthlySaving: 0,
+        totalInterestSaved: roundNumber(baseScenario.totalInterest - optionAScenario.totalInterest),
+        newEndDate: optionAScenario.endDate
+      },
+      optionB: {
+        newMonthsLeft: optionBScenario.monthsLeft,
+        newMonthlyPayment,
+        monthsSaved: baseScenario.monthsLeft - optionBScenario.monthsLeft,
+        monthlySaving: roundNumber(currentPayment - newMonthlyPayment),
+        totalInterestSaved: roundNumber(baseScenario.totalInterest - optionBScenario.totalInterest),
+        newEndDate: optionBScenario.endDate
+      }
+    }
+  }
+
   // --- helpers ---
 
   private _getLoan (id: string, user: string) {
@@ -337,5 +403,27 @@ export class LoansService {
       currentPayment,
       currentRate
     }
+  }
+
+  // Ancla de proyección: date del último pago ordinario.
+  private _getProjectionAnchor (loanId: string, user: string): number | undefined {
+    return this.repository.findLastOrdinaryPayment(loanId, user)?.date
+  }
+
+  // Construye una tabla de amortización proyectada y extrae las métricas clave.
+  private _buildProjectionScenario (
+    pendingAmount: number,
+    rate: number,
+    monthlyPayment: number,
+    eventInputs: LoanEventInput[],
+    startDate: number,
+    projectionAnchor: number | undefined
+  ): { monthsLeft: number, totalInterest: number, endDate: number | null } {
+    const table = buildAmortizationTable([], pendingAmount, rate, monthlyPayment, eventInputs, startDate, projectionAnchor)
+    const projectedRows = table.filter(row => row.isProjected)
+    const totalInterest = roundNumber(projectedRows.reduce((sum, row) => sum + row.interest, 0))
+    const monthsLeft = projectedRows.length
+    const endDate = table.length > 0 ? table[table.length - 1].date : null
+    return { monthsLeft, totalInterest, endDate }
   }
 }

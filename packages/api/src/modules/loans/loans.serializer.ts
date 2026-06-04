@@ -28,3 +28,13 @@ export const serializePayment = (row: import('./loans.repository').LoanPaymentRo
   type: row.type,
   user: row.user
 })
+
+// Evento serializado (1:1 con leanDoc del viejo: _id, loan como id plano).
+export const serializeEvent = (row: import('./loans.repository').LoanEventRow) => ({
+  _id: row.id,
+  loan: row.loanId,
+  date: row.date,
+  newRate: row.newRate,
+  newPayment: row.newPayment,
+  user: row.user
+})

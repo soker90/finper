@@ -23,3 +23,7 @@ loansRoutes.post('/:id/pay', authMiddleware, c.payOrdinary.bind(c))
 loansRoutes.post('/:id/amortize', authMiddleware, c.payExtraordinary.bind(c))
 loansRoutes.delete('/:id/payments/:paymentId', authMiddleware, c.deletePayment.bind(c))
 loansRoutes.put('/:id/payments/:paymentId', authMiddleware, c.editPayment.bind(c))
+
+// Parte C: eventos / simulación
+loansRoutes.post('/:id/events', authMiddleware, c.addEvent.bind(c))
+loansRoutes.post('/:id/simulate-payoff', authMiddleware, c.simulatePayoff.bind(c))
