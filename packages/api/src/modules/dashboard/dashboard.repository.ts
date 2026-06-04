@@ -94,7 +94,7 @@ export const createDashboardRepository = (db: DB) => {
     },
 
     // 9. Top categorías de gasto con name y parentName, ordenadas desc.
-    topExpenseCategories: (user: string, from: number, to: number): Array<{ name: string, parentName: string | null, amount: number }> => {
+    topExpenseCategories: (user: string, from: number, to: number): Array<{ name: string, parentName?: string, amount: number }> => {
       const cats = categoryMap(user)
       const grouped = new Map<string, number>()
       for (const tx of txInRange(user, from, to, EXPENSE)) {
@@ -102,7 +102,7 @@ export const createDashboardRepository = (db: DB) => {
       }
       return [...grouped.entries()].map(([categoryId, amount]) => {
         const cat = cats.get(categoryId)
-        const parentName = cat?.parentId ? (cats.get(cat.parentId)?.name ?? null) : null
+        const parentName = cat?.parentId ? (cats.get(cat.parentId)?.name ?? undefined) : undefined
         return { name: cat?.name ?? 'Sin categoría', parentName, amount: roundNumber(amount) }
       }).sort((a, b) => b.amount - a.amount)
     },
