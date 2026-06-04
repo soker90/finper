@@ -19,11 +19,11 @@ import { categoriesRoutes } from './modules/categories/categories.routes'
 import { dashboardRoutes } from './modules/dashboard/dashboard.routes'
 import { debtsRouter } from './modules/debts/debts.routes'
 import { PensionsRoutes } from './modules/pensions/pensions.routes'
-import { TransactionRoutes } from './routes/transaction.routes'
+import { transactionsRoutes } from './modules/transactions/transactions.routes'
 import { storesRoutes } from './modules/stores/stores.routes'
 import { TicketRoutes } from './routes/ticket.routes'
 import { loansRoutes } from './modules/loans/loans.routes'
-import { SubscriptionRoutes } from './routes/subscription.routes'
+import { subscriptionsRoutes } from './modules/subscriptions/subscriptions.routes'
 import { PropertyRoutes } from './routes/property.routes'
 import { SupplyRoutes } from './routes/supply.routes'
 import { SupplyReadingRoutes } from './routes/supply-reading.routes'
@@ -52,11 +52,11 @@ class Server {
     this.app.use('/api/debts', debtsRouter)
     this.app.use('/api/categories', categoriesRoutes)
     this.app.use('/api/pensions', new PensionsRoutes().router)
-    this.app.use('/api/transactions', new TransactionRoutes().router)
+    this.app.use('/api/transactions', transactionsRoutes)
     this.app.use('/api/stores', storesRoutes)
     this.app.use('/api/tickets', new TicketRoutes().router)
     this.app.use('/api/loans', loansRoutes)
-    this.app.use('/api/subscriptions', new SubscriptionRoutes().router)
+    this.app.use('/api/subscriptions', subscriptionsRoutes)
     this.app.use('/api/supplies/properties', new PropertyRoutes().router)
     this.app.use('/api/supplies/readings', new SupplyReadingRoutes().router)
     this.app.use('/api/supplies', new SupplyRoutes().router)

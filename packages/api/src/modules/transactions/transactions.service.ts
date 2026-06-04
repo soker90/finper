@@ -9,8 +9,6 @@ import { serializeTransaction, serializeTransactionPopulated } from './transacti
 
 const { transactions, accounts } = schema
 
-
-
 // getTransactionAmount (helper compartido) tipa su parámetro como ITransaction
 // (Mongoose: con category/account). Solo lee type y amount; la fila Drizzle los
 // tiene, así que adaptamos el tipo con un cast acotado al parámetro esperado.

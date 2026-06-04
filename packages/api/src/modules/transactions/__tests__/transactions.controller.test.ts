@@ -209,8 +209,17 @@ describe('Transactions Controller', () => {
       const otherAccount = insertAccount(0, otherUsername)
       const id = generateId()
       sqliteDb.insert(transactions).values({
-        id, date: 1000, categoryId, amount: 10, type: TRANSACTION.Expense,
-        accountId: otherAccount, note: null, storeId: null, subscriptionId: null, tags: [], user: otherUsername
+        id,
+        date: 1000,
+        categoryId,
+        amount: 10,
+        type: TRANSACTION.Expense,
+        accountId: otherAccount,
+        note: null,
+        storeId: null,
+        subscriptionId: null,
+        tags: [],
+        user: otherUsername
       }).run()
       await supertest(server.app).delete(idPath(id)).set('Authorization', `Bearer ${token}`).expect(404)
     })
