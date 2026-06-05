@@ -57,7 +57,7 @@ describe('accountsRepository', () => {
   test('should update account and round balance', async () => {
     const account = await accountsRepository.create(username, { name: 'A1', bank: 'B1', balance: 50 })
     const updated = await accountsRepository.update(account.id, username, { balance: 50.555 })
-    
+
     expect(updated?.balance).toBe(50.56)
   })
 
@@ -73,14 +73,14 @@ describe('accountsRepository', () => {
 
   test('should adjust balance atomically with round', async () => {
     const account = await accountsRepository.create(username, { name: 'A1', bank: 'B1', balance: 100 })
-    
+
     const updated = await accountsRepository.adjustBalance(account.id, 50.126)
     expect(updated?.balance).toBe(150.13) // 100 + 50.126 = 150.126 -> rounded to 150.13
   })
 
   test('should adjust balance atomically without round', async () => {
     const account = await accountsRepository.create(username, { name: 'A1', bank: 'B1', balance: 100 })
-    
+
     const updated = await accountsRepository.adjustBalance(account.id, 50.126, { round: false })
     expect(updated?.balance).toBe(150.126)
   })

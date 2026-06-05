@@ -59,16 +59,7 @@ describe('accountsService', () => {
   })
 
   describe('editAccount', () => {
-    test('should throw 400 if invalid id', async () => {
-      await expect(accountsService.editAccount({ id: 'invalid', user: username, value: {} }))
-        .rejects.toMatchObject({ payload: { message: ERROR_MESSAGE.COMMON.INVALID_ID } })
-    })
-
-    test('should throw 404 if not found', async () => {
-      await expect(accountsService.editAccount({ id: generateId(), user: username, value: {} }))
-        .rejects.toMatchObject({ payload: { message: ERROR_MESSAGE.ACCOUNT.NOT_FOUND } })
-    })
-
+    // id/existencia se prueban en accounts.validators.test.ts (validateAccountEditParams)
     test('should edit account', async () => {
       const created = await accountsRepository.create(username, { name: 'A', bank: 'B' })
       const updated = await accountsService.editAccount({ id: created.id, user: username, value: { name: 'NewName' } })
@@ -96,7 +87,7 @@ describe('accountsService', () => {
     test('should throw 400 if insufficient balance', async () => {
       const source = await accountsRepository.create(username, { name: 'S', bank: 'B', balance: 50 })
       const dest = await accountsRepository.create(username, { name: 'D', bank: 'B', balance: 0 })
-      
+
       await expect(accountsService.transfer({ sourceId: source.id, destinationId: dest.id, amount: 100, user: username }))
         .rejects.toMatchObject({ payload: { message: 'Insufficient balance' } })
     })
@@ -104,7 +95,7 @@ describe('accountsService', () => {
     test('should transfer successfully', async () => {
       const source = await accountsRepository.create(username, { name: 'S', bank: 'B', balance: 100 })
       const dest = await accountsRepository.create(username, { name: 'D', bank: 'B', balance: 50 })
-      
+
       await accountsService.transfer({ sourceId: source.id, destinationId: dest.id, amount: 25, user: username })
 
       const sAfter = await accountsRepository.findById(source.id, username)

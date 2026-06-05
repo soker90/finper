@@ -8,13 +8,13 @@ import { schema } from '@soker90/finper-db'
 import { eq, and, sql } from 'drizzle-orm'
 
 export class AccountsService {
-  constructor(private readonly repo: IAccountsRepository = accountsRepository) {}
+  constructor (private readonly repo: IAccountsRepository = accountsRepository) {}
 
-  public async getAccounts(user: string): Promise<any[]> {
+  public async getAccounts (user: string): Promise<any[]> {
     return this.repo.findByUser(user)
   }
 
-  public async getAccount({ id, user }: { id: string, user: string }): Promise<any> {
+  public async getAccount ({ id, user }: { id: string, user: string }): Promise<any> {
     if (!isValidId(id)) {
       throw Boom.badRequest(ERROR_MESSAGE.COMMON.INVALID_ID).output
     }
@@ -25,22 +25,16 @@ export class AccountsService {
     return account
   }
 
-  public async addAccount(user: string, data: Record<string, any>): Promise<any> {
+  public async addAccount (user: string, data: Record<string, any>): Promise<any> {
     return this.repo.create(user, data)
   }
 
-  public async editAccount({ id, user, value }: { id: string, user: string, value: Record<string, any> }): Promise<any> {
-    if (!isValidId(id)) {
-      throw Boom.badRequest(ERROR_MESSAGE.COMMON.INVALID_ID).output
-    }
-    const exist = await this.repo.findById(id, user)
-    if (!exist) {
-      throw Boom.notFound(ERROR_MESSAGE.ACCOUNT.NOT_FOUND).output
-    }
+  // Existencia validada en el validador (validateAccountEditParams); aquí se asume.
+  public async editAccount ({ id, user, value }: { id: string, user: string, value: Record<string, any> }): Promise<any> {
     return this.repo.update(id, user, value)
   }
 
-  public async transfer({ sourceId, destinationId, amount, user }: { sourceId: string, destinationId: string, amount: number, user: string }): Promise<void> {
+  public async transfer ({ sourceId, destinationId, amount, user }: { sourceId: string, destinationId: string, amount: number, user: string }): Promise<void> {
     if (!isValidId(sourceId) || !isValidId(destinationId)) {
       throw Boom.badRequest(ERROR_MESSAGE.COMMON.INVALID_ID).output
     }
@@ -64,17 +58,17 @@ export class AccountsService {
 
       const balanceExpressionSource = sql`ROUND(${accounts.balance} + ${-amount}, 2)`
       tx.update(accounts).set({ balance: balanceExpressionSource }).where(eq(accounts.id, sourceId)).run()
-      
+
       const balanceExpressionDest = sql`ROUND(${accounts.balance} + ${amount}, 2)`
       tx.update(accounts).set({ balance: balanceExpressionDest }).where(eq(accounts.id, destinationId)).run()
     })
   }
 
-  public async getTotalBalanceByUser(user: string): Promise<number> {
+  public async getTotalBalanceByUser (user: string): Promise<number> {
     return this.repo.getTotalBalanceByUser(user)
   }
 
-  public async adjustBalance(accountId: string, amount: number, opts?: { round?: boolean }): Promise<any> {
+  public async adjustBalance (accountId: string, amount: number, opts?: { round?: boolean }): Promise<any> {
     return this.repo.adjustBalance(accountId, amount, opts)
   }
 }
