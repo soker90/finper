@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "07b974f6-4540-4fe4-9685-48a09a1fa84c",
+  "id": "315b8516-8559-44f4-a439-60776f5ba687",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "accounts": {
@@ -26,13 +26,6 @@
           "type": "text",
           "primaryKey": false,
           "notNull": true,
-          "autoincrement": false
-        },
-        "number": {
-          "name": "number",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false,
           "autoincrement": false
         },
         "balance": {
@@ -188,20 +181,6 @@
         },
         "type": {
           "name": "type",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "color": {
-          "name": "color",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "icon": {
-          "name": "icon",
           "type": "text",
           "primaryKey": false,
           "notNull": true,
@@ -670,19 +649,6 @@
         }
       },
       "foreignKeys": {
-        "loan_events_loan_id_loans_id_fk": {
-          "name": "loan_events_loan_id_loans_id_fk",
-          "tableFrom": "loan_events",
-          "tableTo": "loans",
-          "columnsFrom": [
-            "loan_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        },
         "loan_events_user_users_username_fk": {
           "name": "loan_events_user_users_username_fk",
           "tableFrom": "loan_events",
@@ -1322,8 +1288,15 @@
           "notNull": true,
           "autoincrement": false
         },
-        "name": {
-          "name": "name",
+        "transaction_id": {
+          "name": "transaction_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "subscription_ids": {
+          "name": "subscription_ids",
           "type": "text",
           "primaryKey": false,
           "notNull": true,
@@ -1484,130 +1457,6 @@
       "uniqueConstraints": {},
       "checkConstraints": {}
     },
-    "tags": {
-      "name": "tags",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "text",
-          "primaryKey": true,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "name": {
-          "name": "name",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "user": {
-          "name": "user",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "tags_user_users_username_fk": {
-          "name": "tags_user_users_username_fk",
-          "tableFrom": "tags",
-          "tableTo": "users",
-          "columnsFrom": [
-            "user"
-          ],
-          "columnsTo": [
-            "username"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "checkConstraints": {}
-    },
-    "transaction_tags": {
-      "name": "transaction_tags",
-      "columns": {
-        "transaction_id": {
-          "name": "transaction_id",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "tag_id": {
-          "name": "tag_id",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "user": {
-          "name": "user",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "transaction_tags_transaction_id_transactions_id_fk": {
-          "name": "transaction_tags_transaction_id_transactions_id_fk",
-          "tableFrom": "transaction_tags",
-          "tableTo": "transactions",
-          "columnsFrom": [
-            "transaction_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        },
-        "transaction_tags_tag_id_tags_id_fk": {
-          "name": "transaction_tags_tag_id_tags_id_fk",
-          "tableFrom": "transaction_tags",
-          "tableTo": "tags",
-          "columnsFrom": [
-            "tag_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        },
-        "transaction_tags_user_users_username_fk": {
-          "name": "transaction_tags_user_users_username_fk",
-          "tableFrom": "transaction_tags",
-          "tableTo": "users",
-          "columnsFrom": [
-            "user"
-          ],
-          "columnsTo": [
-            "username"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {
-        "transaction_tags_transaction_id_tag_id_pk": {
-          "columns": [
-            "transaction_id",
-            "tag_id"
-          ],
-          "name": "transaction_tags_transaction_id_tag_id_pk"
-        }
-      },
-      "uniqueConstraints": {},
-      "checkConstraints": {}
-    },
     "transactions": {
       "name": "transactions",
       "columns": {
@@ -1673,6 +1522,14 @@
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false
+        },
+        "tags": {
+          "name": "tags",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'[]'"
         },
         "user": {
           "name": "user",

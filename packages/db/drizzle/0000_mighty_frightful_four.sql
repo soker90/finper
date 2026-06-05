@@ -2,7 +2,6 @@ CREATE TABLE `accounts` (
 	`id` text PRIMARY KEY NOT NULL,
 	`name` text NOT NULL,
 	`bank` text NOT NULL,
-	`number` text,
 	`balance` real DEFAULT 0 NOT NULL,
 	`is_active` integer DEFAULT true,
 	`user` text NOT NULL,
@@ -25,8 +24,6 @@ CREATE TABLE `categories` (
 	`id` text PRIMARY KEY NOT NULL,
 	`name` text NOT NULL,
 	`type` text NOT NULL,
-	`color` text NOT NULL,
-	`icon` text NOT NULL,
 	`parent_id` text,
 	`budget_rule_class` text DEFAULT 'none' NOT NULL,
 	`user` text NOT NULL,
@@ -91,7 +88,6 @@ CREATE TABLE `loan_events` (
 	`new_rate` real NOT NULL,
 	`new_payment` real NOT NULL,
 	`user` text NOT NULL,
-	FOREIGN KEY (`loan_id`) REFERENCES `loans`(`id`) ON UPDATE no action ON DELETE no action,
 	FOREIGN KEY (`user`) REFERENCES `users`(`username`) ON UPDATE no action ON DELETE no action
 );
 --> statement-breakpoint
@@ -187,7 +183,8 @@ CREATE TABLE `stores` (
 --> statement-breakpoint
 CREATE TABLE `subscription_candidates` (
 	`id` text PRIMARY KEY NOT NULL,
-	`name` text NOT NULL,
+	`transaction_id` text NOT NULL,
+	`subscription_ids` text NOT NULL,
 	`user` text NOT NULL,
 	`created_at` integer NOT NULL,
 	FOREIGN KEY (`user`) REFERENCES `users`(`username`) ON UPDATE no action ON DELETE no action
@@ -209,23 +206,6 @@ CREATE TABLE `subscriptions` (
 	FOREIGN KEY (`user`) REFERENCES `users`(`username`) ON UPDATE no action ON DELETE no action
 );
 --> statement-breakpoint
-CREATE TABLE `tags` (
-	`id` text PRIMARY KEY NOT NULL,
-	`name` text NOT NULL,
-	`user` text NOT NULL,
-	FOREIGN KEY (`user`) REFERENCES `users`(`username`) ON UPDATE no action ON DELETE no action
-);
---> statement-breakpoint
-CREATE TABLE `transaction_tags` (
-	`transaction_id` text NOT NULL,
-	`tag_id` text NOT NULL,
-	`user` text NOT NULL,
-	PRIMARY KEY(`transaction_id`, `tag_id`),
-	FOREIGN KEY (`transaction_id`) REFERENCES `transactions`(`id`) ON UPDATE no action ON DELETE no action,
-	FOREIGN KEY (`tag_id`) REFERENCES `tags`(`id`) ON UPDATE no action ON DELETE no action,
-	FOREIGN KEY (`user`) REFERENCES `users`(`username`) ON UPDATE no action ON DELETE no action
-);
---> statement-breakpoint
 CREATE TABLE `transactions` (
 	`id` text PRIMARY KEY NOT NULL,
 	`date` integer NOT NULL,
@@ -236,6 +216,7 @@ CREATE TABLE `transactions` (
 	`note` text,
 	`store_id` text,
 	`subscription_id` text,
+	`tags` text DEFAULT '[]' NOT NULL,
 	`user` text NOT NULL,
 	FOREIGN KEY (`category_id`) REFERENCES `categories`(`id`) ON UPDATE no action ON DELETE no action,
 	FOREIGN KEY (`account_id`) REFERENCES `accounts`(`id`) ON UPDATE no action ON DELETE no action,

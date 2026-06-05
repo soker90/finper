@@ -5,43 +5,8 @@
     {
       "idx": 0,
       "version": "6",
-      "when": 1779615889646,
-      "tag": "0000_melodic_plazm",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "6",
-      "when": 1779901519735,
-      "tag": "0001_talented_mach_iv",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "6",
-      "when": 1779988645931,
-      "tag": "0002_left_mauler",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "6",
-      "when": 1779995125322,
-      "tag": "0003_handy_cannonball",
-      "breakpoints": true
-    },
-    {
-      "idx": 4,
-      "version": "6",
-      "when": 1780334115482,
-      "tag": "0004_many_masked_marvel",
-      "breakpoints": true
-    },
-    {
-      "idx": 5,
-      "version": "6",
-      "when": 1780383006701,
-      "tag": "0005_cheerful_talos",
+      "when": 1780641598605,
+      "tag": "0000_mighty_frightful_four",
       "breakpoints": true
     }
   ]
