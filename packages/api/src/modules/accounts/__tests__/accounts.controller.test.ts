@@ -193,20 +193,70 @@ describe('Accounts Controller', () => {
   })
 
   describe('POST /transfer', () => {
-    test('when successful transfer, it should return 200', async () => {
+    test('when token is not provided, it should response an error with status code 401', async () => {
+      await supertest(server.app).post(`${path}/transfer`).expect(401)
+    })
+
+    test('when sourceId is not a valid id, it should respond 400', async () => {
+      await supertest(server.app).post(`${path}/transfer`).auth(token, { type: 'bearer' })
+        .send({ sourceId: 'invalid', destinationId: generateId(), amount: 10 })
+        .expect(400)
+    })
+
+    test('when source account does not exist, it should respond 404', async () => {
+      await supertest(server.app).post(`${path}/transfer`).auth(token, { type: 'bearer' })
+        .send({ sourceId: generateId(), destinationId: generateId(), amount: 10 })
+        .expect(404)
+    })
+
+    test('when destination account does not exist, it should respond 404', async () => {
+      const source = await accountsRepository.create(username, { name: 'S', bank: 'B', balance: 100 })
+      await supertest(server.app).post(`${path}/transfer`).auth(token, { type: 'bearer' })
+        .send({ sourceId: source.id, destinationId: generateId(), amount: 10 })
+        .expect(404)
+    })
+
+    test('when source equals destination, it should respond 422', async () => {
+      const source = await accountsRepository.create(username, { name: 'S', bank: 'B', balance: 100 })
+      await supertest(server.app).post(`${path}/transfer`).auth(token, { type: 'bearer' })
+        .send({ sourceId: source.id, destinationId: source.id, amount: 10 })
+        .expect(422)
+    })
+
+    test('when amount is not positive, it should respond 422', async () => {
+      const source = await accountsRepository.create(username, { name: 'S', bank: 'B', balance: 100 })
+      const dest = await accountsRepository.create(username, { name: 'D', bank: 'B', balance: 50 })
+      await supertest(server.app).post(`${path}/transfer`).auth(token, { type: 'bearer' })
+        .send({ sourceId: source.id, destinationId: dest.id, amount: -5 })
+        .expect(422)
+    })
+
+    test('when source has insufficient balance, it should respond an error', async () => {
+      const source = await accountsRepository.create(username, { name: 'S', bank: 'B', balance: 10 })
+      const dest = await accountsRepository.create(username, { name: 'D', bank: 'B', balance: 50 })
+      await supertest(server.app).post(`${path}/transfer`).auth(token, { type: 'bearer' })
+        .send({ sourceId: source.id, destinationId: dest.id, amount: 100 })
+        .expect((res) => {
+          expect(res.status).toBe(400)
+          expect(res.body.message).toBe('Insufficient balance')
+        })
+    })
+
+    test('when successful transfer, it should return 200 and move the balances', async () => {
       const source = await accountsRepository.create(username, { name: 'S', bank: 'B', balance: 100 })
       const dest = await accountsRepository.create(username, { name: 'D', bank: 'B', balance: 50 })
 
       await supertest(server.app).post(`${path}/transfer`).auth(token, { type: 'bearer' })
-        .send({
-          sourceId: source.id,
-          destinationId: dest.id,
-          amount: 25
-        })
+        .send({ sourceId: source.id, destinationId: dest.id, amount: 25 })
         .expect((res) => {
           expect(res.status).toBe(200)
           expect(res.body).toEqual({ message: 'Transfer successful' })
         })
+
+      const sAfter = sqliteDb.select().from(accounts).where(eq(accounts.id, source.id)).get()
+      const dAfter = sqliteDb.select().from(accounts).where(eq(accounts.id, dest.id)).get()
+      expect(sAfter.balance).toBe(75)
+      expect(dAfter.balance).toBe(75)
     })
   })
 })
