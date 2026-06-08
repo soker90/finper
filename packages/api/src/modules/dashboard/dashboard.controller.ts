@@ -12,7 +12,7 @@ export class DashboardController {
 
   public stats (req: Request, res: Response): void {
     this.logger.logInfo(`/stats - dashboard stats for ${req.user}`)
-    const response = this.dashboardService.getStats({ user: req.user as string })
+    const response = this.dashboardService.getStats({ user: req.user })
     res.send(response)
   }
 }

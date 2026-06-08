@@ -13,7 +13,7 @@ const logger = loggerHandler('DebtController')
 
 export const debtsController = {
   async create (req: Request, res: Response) {
-    const user = req.user as string
+    const user = req.user
     logger.logInfo(`/create - debt: ${req.body.from}`)
 
     const params = validateDebtCreateParams({ body: req.body, user })
@@ -24,7 +24,7 @@ export const debtsController = {
   },
 
   async getAll (req: Request, res: Response) {
-    const user = req.user as string
+    const user = req.user
     logger.logInfo(`/debts - list debts of ${user}`)
 
     const result = debtsService.getDebts(user)
@@ -36,7 +36,7 @@ export const debtsController = {
   },
 
   async getFrom (req: Request, res: Response) {
-    const user = req.user as string
+    const user = req.user
     const from = req.params.from
     logger.logInfo(`/debts - list debts from ${from}`)
 
@@ -45,7 +45,7 @@ export const debtsController = {
   },
 
   async edit (req: Request, res: Response) {
-    const user = req.user as string
+    const user = req.user
     const id = req.params.id
     logger.logInfo(`/edit - debt: ${id}`)
 
@@ -57,7 +57,7 @@ export const debtsController = {
   },
 
   async delete (req: Request, res: Response) {
-    const user = req.user as string
+    const user = req.user
     const id = req.params.id
     logger.logInfo(`/delete - debt: ${id}`)
 
@@ -67,7 +67,7 @@ export const debtsController = {
   },
 
   async pay (req: Request, res: Response) {
-    const user = req.user as string
+    const user = req.user
     const id = req.params.id
     logger.logInfo(`/pay - debt: ${id}`)
 

@@ -13,24 +13,24 @@ export class StatsController {
 
   public getAvailableTags (req: Request, res: Response): void {
     this.logger.logInfo(`/stats/tags/available - ${req.user}`)
-    res.send(this.statsService.getAvailableTags(req.user as string))
+    res.send(this.statsService.getAvailableTags(req.user))
   }
 
   public getAvailableYears (req: Request, res: Response): void {
     this.logger.logInfo(`/stats/tags/years - ${req.user}`)
-    res.send(this.statsService.getAvailableYears(req.user as string))
+    res.send(this.statsService.getAvailableYears(req.user))
   }
 
   public getTagsSummary (req: Request, res: Response): void {
     const year = req.query.year ? Number(req.query.year) : new Date().getFullYear()
     this.logger.logInfo(`/stats/tags - ${req.user} (${year})`)
-    res.send(this.statsService.getTagsSummary(req.user as string, year))
+    res.send(this.statsService.getTagsSummary(req.user, year))
   }
 
   public getTagHistoric (req: Request, res: Response): void {
     const { tagName } = req.params
     this.logger.logInfo(`/stats/tags/${tagName} - ${req.user}`)
-    res.send(this.statsService.getTagHistoric(req.user as string, tagName))
+    res.send(this.statsService.getTagHistoric(req.user, tagName))
   }
 
   public getTagDetail (req: Request, res: Response): void {
@@ -38,6 +38,6 @@ export class StatsController {
     const year = Number(yearParam)
     validateStatsYearParam(year)
     this.logger.logInfo(`/stats/tags/${tagName}/${year} - ${req.user}`)
-    res.send(this.statsService.getTagDetail(req.user as string, tagName, year))
+    res.send(this.statsService.getTagDetail(req.user, tagName, year))
   }
 }

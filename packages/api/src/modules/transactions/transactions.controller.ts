@@ -34,7 +34,7 @@ export class TransactionsController {
     this.logger.logInfo(`/transactions - list transactions of ${req.user}`)
 
     const filters = validateTransactionGetParams(req.query as Record<string, any>)
-    const response = this.transactionsService.getTransactions({ ...filters, user: req.user as string })
+    const response = this.transactionsService.getTransactions({ ...filters, user: req.user })
 
     res.send(response)
   }
@@ -42,7 +42,7 @@ export class TransactionsController {
   public edit (req: Request, res: Response): void {
     this.logger.logInfo(`/edit - transaction: ${req.params.id}`)
 
-    const params = validateTransactionEditParams({ params: req.params, body: req.body, user: req.user as string })
+    const params = validateTransactionEditParams({ params: req.params, body: req.body, user: req.user })
     const withStore = this.storesService.replaceShopValue(params)
     const response = this.transactionsService.editTransaction(withStore)
 
@@ -54,8 +54,8 @@ export class TransactionsController {
     const { id } = req.params
     this.logger.logInfo(`/delete - transaction: ${id}`)
 
-    validateTransactionExist(id, req.user as string)
-    this.transactionsService.deleteTransaction(id, req.user as string)
+    validateTransactionExist(id, req.user)
+    this.transactionsService.deleteTransaction(id, req.user)
 
     res.status(204).send()
   }

@@ -16,7 +16,7 @@ export class PensionsController {
 
     const params = validatePensionCreateParams(req.body)
     const response = this.pensionsService.addPension({ ...params, user: req.user })
-    
+
     this.logger.logInfo(`Pension ${new Date(response.date).toISOString()} has been succesfully created`)
 
     res.send(response)
@@ -25,9 +25,9 @@ export class PensionsController {
   public edit (req: Request, res: Response): void {
     this.logger.logInfo('/pensions edit')
 
-    const { id, value } = validatePensionEditParams({ params: req.params, body: req.body, user: req.user as string })
-    const response = this.pensionsService.editPension(id, value, req.user as string)
-    
+    const { id, value } = validatePensionEditParams({ params: req.params, body: req.body, user: req.user })
+    const response = this.pensionsService.editPension(id, value, req.user)
+
     this.logger.logInfo(`Pension ${new Date(response.date).toISOString()} has been succesfully edited`)
 
     res.send(response)
@@ -36,7 +36,7 @@ export class PensionsController {
   public pensions (req: Request, res: Response): void {
     this.logger.logInfo(`/pensions - list pension transactions of ${req.user}`)
 
-    const response = this.pensionsService.getPensions(req.user as string)
+    const response = this.pensionsService.getPensions(req.user)
 
     res.send(response)
   }

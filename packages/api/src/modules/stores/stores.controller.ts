@@ -12,7 +12,7 @@ export class StoresController {
 
   public stores (req: Request, res: Response): void {
     this.logger.logInfo(`/stores - list stores of ${req.user}`)
-    const response = this.storesService.getStores(req.user as string)
+    const response = this.storesService.getStores(req.user)
     res.send(response)
   }
 }

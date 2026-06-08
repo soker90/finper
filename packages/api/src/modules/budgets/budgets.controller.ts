@@ -14,18 +14,18 @@ export class BudgetsController {
   public budgets (req: Request, res: Response): void {
     this.logger.logInfo(`/budgets - get ${req.query.year}`)
     const filters = validateBudgetGet(req.query as Record<string, any>)
-    res.send(this.budgetsService.getBudgets({ ...filters, user: req.user as string }))
+    res.send(this.budgetsService.getBudgets({ ...filters, user: req.user }))
   }
 
   public edit (req: Request, res: Response): void {
     this.logger.logInfo(`/budgets/edit - ${req.params.category}`)
-    const params = validateBudgetEditParams({ params: req.params, body: req.body, user: req.user as string })
+    const params = validateBudgetEditParams({ params: req.params, body: req.body, user: req.user })
     res.send(this.budgetsService.editBudget(params))
   }
 
   public copy (req: Request, res: Response): void {
     this.logger.logInfo('/budgets/copy')
-    const params = validateBudgetCopy({ body: req.body, user: req.user as string })
+    const params = validateBudgetCopy({ body: req.body, user: req.user })
     const result = this.budgetsService.copy(params)
     res.send({ success: result })
   }

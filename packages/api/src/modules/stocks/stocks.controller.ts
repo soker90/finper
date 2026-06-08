@@ -10,7 +10,7 @@ export class StockController {
   constructor (private readonly stockService: IStockService) {}
 
   public async summary (req: Request, res: Response): Promise<void> {
-    const username = req.user as string
+    const username = req.user
     this.logger.logInfo(`/stocks/summary - summary of ${username}`)
 
     const response = await this.stockService.getStocksSummary(username)
@@ -19,7 +19,7 @@ export class StockController {
   }
 
   public async stocks (req: Request, res: Response) {
-    const username = req.user as string
+    const username = req.user
     this.logger.logInfo(`/stocks - list positions of ${username}`)
 
     const response = await this.stockService.getStocks(username)
@@ -28,7 +28,7 @@ export class StockController {
   }
 
   public create (req: Request, res: Response): void {
-    const username = req.user as string
+    const username = req.user
     this.logger.logInfo('/create - stock')
 
     const params = validateStockCreateParams(req.body)
@@ -39,7 +39,7 @@ export class StockController {
   }
 
   public remove (req: Request, res: Response): void {
-    const username = req.user as string
+    const username = req.user
     this.logger.logInfo('/delete - stock')
 
     this.stockService.deleteStock(req.params.id, username)

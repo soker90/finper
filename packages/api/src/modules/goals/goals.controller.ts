@@ -40,8 +40,8 @@ export class GoalController {
     const { id } = req.params
     this.logger.logInfo(`/goal - get goal: ${id}`)
 
-    validateGoalExist({ id, user: req.user as string })
-    const response = this.goalService.getGoal({ id, user: req.user as string })
+    validateGoalExist({ id, user: req.user })
+    const response = this.goalService.getGoal({ id, user: req.user })
 
     if (response) {
       res.send(goalsSerializer.toJson(response))
@@ -51,7 +51,7 @@ export class GoalController {
   public edit (req: Request, res: Response): void {
     this.logger.logInfo(`/edit - goal: ${req.params.id}`)
 
-    const { id, user, value } = validateGoalEditParams({ params: req.params, body: req.body, user: req.user as string })
+    const { id, user, value } = validateGoalEditParams({ params: req.params, body: req.body, user: req.user })
     const response = this.goalService.editGoal({ id, user, value })
     this.logger.logInfo(`Goal ${response.id} has been successfully edited`)
 
@@ -62,8 +62,8 @@ export class GoalController {
     const { id } = req.params
     this.logger.logInfo(`/delete - goal: ${id}`)
 
-    validateGoalExist({ id, user: req.user as string })
-    this.goalService.deleteGoal({ id, user: req.user as string })
+    validateGoalExist({ id, user: req.user })
+    this.goalService.deleteGoal({ id, user: req.user })
 
     res.status(204).send()
   }
@@ -71,7 +71,7 @@ export class GoalController {
   public fund (req: Request, res: Response): void {
     this.logger.logInfo(`/fund - goal: ${req.params.id}`)
 
-    const { id, user, amount } = validateGoalFundParams({ params: req.params, body: req.body, user: req.user as string })
+    const { id, user, amount } = validateGoalFundParams({ params: req.params, body: req.body, user: req.user })
     const response = this.goalService.fundGoal({ id, user, amount })
 
     res.send(goalsSerializer.toJson(response))
@@ -80,7 +80,7 @@ export class GoalController {
   public withdraw (req: Request, res: Response): void {
     this.logger.logInfo(`/withdraw - goal: ${req.params.id}`)
 
-    const { id, user, amount } = validateGoalFundParams({ params: req.params, body: req.body, user: req.user as string })
+    const { id, user, amount } = validateGoalFundParams({ params: req.params, body: req.body, user: req.user })
     const response = this.goalService.withdrawGoal({ id, user, amount })
 
     res.send(goalsSerializer.toJson(response))
