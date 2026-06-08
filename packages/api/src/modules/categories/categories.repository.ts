@@ -1,5 +1,6 @@
 import { eq, and, asc } from 'drizzle-orm'
 import { type DB, schema, generateId } from '@soker90/finper-db'
+import { db } from '../../db'
 const { categories } = schema
 
 type NewCategory = typeof categories.$inferInsert
@@ -51,3 +52,7 @@ export const createCategoriesRepository = (db: DB) => ({
       .get()
   }
 })
+
+// Singleton para los validators (funciones standalone que no reciben el repo
+// inyectado). Envuelve el mismo singleton `db` que usan las rutas.
+export const categoriesRepository = createCategoriesRepository(db)

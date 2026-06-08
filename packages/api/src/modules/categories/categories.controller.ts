@@ -1,5 +1,10 @@
 import { Request, Response } from 'express'
 import { CategoriesService } from './categories.service'
+import {
+  validateCategoryCreateParams,
+  validateCategoryEditParams,
+  validateCategoryExist
+} from './categories.validators'
 
 export class CategoriesController {
   private logger
@@ -14,7 +19,8 @@ export class CategoriesController {
     const { name } = req.body
     this.logger.logInfo(`/create - category: ${name?.toLowerCase()}`)
 
-    const response = this.categoriesService.addCategory({ body: req.body, user: req.user as string })
+    const value = validateCategoryCreateParams({ body: req.body, user: req.user })
+    const response = this.categoriesService.addCategory({ value, user: req.user })
 
     this.logger.logInfo(`Category ${response.name} has been succesfully created`)
     res.send(response)
@@ -23,21 +29,22 @@ export class CategoriesController {
   public async categories (req: Request, res: Response): Promise<void> {
     this.logger.logInfo(`/categories - list categories of ${req.user}`)
 
-    const response = this.categoriesService.getCategories(req.user as string)
+    const response = this.categoriesService.getCategories(req.user)
     res.send(response)
   }
 
   public async categoriesGrouped (req: Request, res: Response): Promise<void> {
     this.logger.logInfo('/categories/grouped - list grouped categories')
 
-    const response = this.categoriesService.getGroupedCategories(req.user as string)
+    const response = this.categoriesService.getGroupedCategories(req.user)
     res.send(response)
   }
 
   public async edit (req: Request, res: Response): Promise<void> {
     this.logger.logInfo(`/edit - category: ${req.body.name}`)
 
-    const response = this.categoriesService.editCategory({ id: req.params.id, body: req.body, user: req.user as string })
+    const { id, value } = validateCategoryEditParams({ params: req.params, body: req.body, user: req.user })
+    const response = this.categoriesService.editCategory({ id, value, user: req.user })
 
     this.logger.logInfo(`Category ${response._id} has been succesfully edited`)
     res.send(response)
@@ -47,7 +54,8 @@ export class CategoriesController {
     const { id } = req.params
     this.logger.logInfo(`/delete - category: ${id}`)
 
-    this.categoriesService.deleteCategory({ id, user: req.user as string })
+    validateCategoryExist({ id, user: req.user })
+    this.categoriesService.deleteCategory({ id, user: req.user })
     res.send()
   }
 }

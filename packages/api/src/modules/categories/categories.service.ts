@@ -1,12 +1,13 @@
 import Boom from '@hapi/boom'
-import { isValidId } from '../../utils'
 import { spanishCompare } from '@soker90/finper-db'
 import { ERROR_MESSAGE } from '../../i18n'
 import { serializeCategory } from './categories.serializer'
-import { validateCategoryCreateParams, validateCategoryEditParams } from './categories.schema'
 
 type ICategoriesRepository = ReturnType<typeof import('./categories.repository').createCategoriesRepository>
 
+// El service asume que la existencia/parent/params han sido validados en los
+// validators (igual que el viejo). Solo conserva los `if (!x) 404` de seguridad
+// y la mejora `hasChildren` (409) del borrado (opción C, no estaba en el viejo).
 export class CategoriesService {
   constructor (private repository: ICategoriesRepository) {}
 
@@ -28,64 +29,28 @@ export class CategoriesService {
     return grouped.sort((a, b) => spanishCompare(a.name, b.name))
   }
 
-  // 1:1 con el viejo: parent (404) ANTES del Joi (422).
-  public addCategory ({ body, user }: { body: Record<string, any>, user: string }) {
-    if (body.parent) {
-      const parentCat = this.repository.findById(body.parent, user)
-      if (!parentCat) {
-        throw Boom.notFound(ERROR_MESSAGE.CATEGORY.PARENT_NOT_FOUND).output
-      }
-    }
-
-    const value = validateCategoryCreateParams(body)
+  public addCategory ({ value, user }: { value: Record<string, any>, user: string }) {
     const { parent, ...rest } = value
     const created = this.repository.create({ ...rest, parentId: parent ?? null, user } as any)
     return serializeCategory(created)
   }
 
-  // 1:1 con el viejo: isValidId (400) -> existe (404) -> parent (404) -> Joi (422).
-  public editCategory ({ id, body, user }: { id: string, body: Record<string, any>, user: string }) {
-    if (!isValidId(id)) {
-      throw Boom.badRequest(ERROR_MESSAGE.COMMON.INVALID_ID).output
-    }
-
-    const existing = this.repository.findById(id, user)
-    if (!existing) {
-      throw Boom.notFound(ERROR_MESSAGE.CATEGORY.NOT_FOUND).output
-    }
-
-    if (body.parent) {
-      const parentCat = this.repository.findById(body.parent, user)
-      if (!parentCat) {
-        throw Boom.notFound(ERROR_MESSAGE.CATEGORY.PARENT_NOT_FOUND).output
-      }
-    }
-
-    const value = validateCategoryEditParams(body)
+  public editCategory ({ id, value, user }: { id: string, value: Record<string, any>, user: string }) {
     const { parent, ...rest } = value
     const updated = this.repository.update(id, user, { ...rest, parentId: parent ?? null } as any)
     if (!updated) {
       throw Boom.notFound(ERROR_MESSAGE.CATEGORY.NOT_FOUND).output
     }
-
     return serializeCategory(updated)
   }
 
-  // opción C: implementa el TODO del controller viejo.
   public deleteCategory ({ id, user }: { id: string, user: string }): void {
-    if (!isValidId(id)) {
-      throw Boom.badRequest(ERROR_MESSAGE.COMMON.INVALID_ID).output
-    }
-
-    const existing = this.repository.findById(id, user)
-    if (!existing) {
-      throw Boom.notFound(ERROR_MESSAGE.CATEGORY.NOT_FOUND).output
-    }
-
     if (this.repository.hasChildren(id)) {
       throw Boom.conflict(ERROR_MESSAGE.CATEGORY.HAS_CHILDREN).output
     }
-
-    this.repository.delete(id, user)
+    const deleted = this.repository.delete(id, user)
+    if (!deleted) {
+      throw Boom.notFound(ERROR_MESSAGE.CATEGORY.NOT_FOUND).output
+    }
   }
 }
