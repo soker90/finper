@@ -30,7 +30,7 @@ export class TransactionsService {
     private hooks: TransactionHooks = {}
   ) {}
 
-  public async addTransaction (params: any): Promise<any> {
+  public addTransaction (params: any): any {
     const sanitizedTags = sanitizeTags(params.tags)
     const amount = amountOf(params)
 
@@ -62,7 +62,7 @@ export class TransactionsService {
     return serializeTransaction(created)
   }
 
-  public async editTransaction ({ id, value }: { id: string, value: any }): Promise<any> {
+  public editTransaction ({ id, value }: { id: string, value: any }): any {
     const oldTransaction = this.repository.findById(id, value.user)
     /* istanbul ignore next — validateTransactionExist runs before via route */
     if (!oldTransaction) throw Boom.notFound(ERROR_MESSAGE.TRANSACTION.NOT_FOUND).output
@@ -100,7 +100,7 @@ export class TransactionsService {
     return serializeTransaction(updated)
   }
 
-  public async deleteTransaction (id: string, user: string): Promise<void> {
+  public deleteTransaction (id: string, user: string): void {
     const transaction = this.repository.findById(id, user)
     /* istanbul ignore next — validateTransactionExist runs before via route */
     if (!transaction) throw Boom.notFound(ERROR_MESSAGE.TRANSACTION.NOT_FOUND).output

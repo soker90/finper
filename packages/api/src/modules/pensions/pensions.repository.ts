@@ -27,9 +27,19 @@ export const createPensionsRepository = (db: DB) => ({
   },
 
   update: (id: string, username: string, data: Partial<Omit<NewPension, 'id' | 'user' | 'date'> & { date?: number }>): Pension | undefined => {
-    const payload: any = { ...data }
+    const payload: any = {}
+    for (const [k, v] of Object.entries(data || {})) {
+      if (v !== undefined) payload[k] = v
+    }
     if (payload.date) payload.date = new Date(payload.date)
     
+    if (Object.keys(payload).length === 0) {
+      return db.select()
+        .from(pensions)
+        .where(and(eq(pensions.id, id), eq(pensions.user, username)))
+        .get()
+    }
+
     return db.update(pensions)
       .set(payload)
       .where(and(eq(pensions.id, id), eq(pensions.user, username)))

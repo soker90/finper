@@ -11,7 +11,7 @@ import { generateUsername } from '../../../../test/generate-values'
 import { insertCredentials } from '../../../../test/insert-data-to-model'
 import createTestDatabase from '../../../../test/test-db'
 import { stocksRepository } from '../stocks.repository'
-import { STOCK_TYPE } from '../stocks.schema'
+import { STOCK_TYPE } from '../stocks.validators'
 
 // Mock the price provider so tests don't depend on real network calls
 jest.mock('../stock-price.provider', () => ({

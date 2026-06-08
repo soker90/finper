@@ -44,21 +44,21 @@ describe('Stores Service', () => {
 
   describe('getAndReplaceStore', () => {
     it('should create a new store and replace the name with its id', async () => {
-      const tx = await service.getAndReplaceStore({ store: 'Mercadona', user })
+      const tx = service.getAndReplaceStore({ store: 'Mercadona', user })
       const stores = repository.findByUser(user)
       expect(stores).toHaveLength(1)
       expect(tx.store).toBe(stores[0].id)
     })
 
     it('should reuse an existing store with the same name (no duplicate)', async () => {
-      await service.getAndReplaceStore({ store: 'Mercadona', user })
-      await service.getAndReplaceStore({ store: 'Mercadona', user })
+      service.getAndReplaceStore({ store: 'Mercadona', user })
+      service.getAndReplaceStore({ store: 'Mercadona', user })
       expect(repository.findByUser(user)).toHaveLength(1)
     })
 
     it('should reuse the store ignoring case and accents (sensitivity base)', async () => {
-      await service.getAndReplaceStore({ store: 'Mercadona', user })
-      await service.getAndReplaceStore({ store: 'MERCADÓNA', user })
+      service.getAndReplaceStore({ store: 'Mercadona', user })
+      service.getAndReplaceStore({ store: 'MERCADÓNA', user })
       const stores = repository.findByUser(user)
       expect(stores).toHaveLength(1)
       // mantiene el name original
@@ -66,15 +66,15 @@ describe('Stores Service', () => {
     })
 
     it('should leave the transaction untouched when it has no store', async () => {
-      const tx = await service.getAndReplaceStore({ user })
+      const tx = service.getAndReplaceStore({ user })
       expect(tx.store).toBeUndefined()
       expect(repository.findByUser(user)).toHaveLength(0)
     })
   })
 
   describe('replaceShopValue', () => {
-    it('should apply getAndReplaceStore to value', async () => {
-      const result = await service.replaceShopValue({ value: { store: 'Mercadona', user } })
+    it('should apply getAndReplaceStore to value', () => {
+      const result = service.replaceShopValue({ value: { store: 'Mercadona', user } })
       const stores = repository.findByUser(user)
       expect(result.value.store).toBe(stores[0].id)
     })

@@ -1,5 +1,5 @@
 import Boom from '@hapi/boom'
-import { isValidId } from '../../utils'
+
 import { ERROR_MESSAGE } from '../../i18n'
 import { serializePension } from './pensions.serializer'
 
@@ -49,20 +49,9 @@ export class PensionsService {
     return serializePension(newPension)
   }
 
-  public editPension ({ id, value, user }: { id: string, value: any, user: string }): any {
-    if (!isValidId(id)) {
-      throw Boom.badRequest(ERROR_MESSAGE.COMMON.INVALID_ID).output
-    }
-
-    const existing = this.repository.findById(id, user)
-    if (!existing) {
-      throw Boom.notFound(ERROR_MESSAGE.PENSION.NOT_FOUND).output
-    }
-
+  public editPension (id: string, value: any, user: string): any {
     const updated = this.repository.update(id, user, value)
-    if (!updated) {
-      throw Boom.notFound(ERROR_MESSAGE.PENSION.NOT_FOUND).output
-    }
+    if (!updated) throw Boom.notFound(ERROR_MESSAGE.PENSION.NOT_FOUND).output
 
     return serializePension(updated)
   }

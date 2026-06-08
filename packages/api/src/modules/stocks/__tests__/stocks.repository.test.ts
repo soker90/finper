@@ -1,6 +1,6 @@
 import { createTestDb, closeTestDb } from '../../../../test/helpers/db'
 import { createStocksRepository } from '../stocks.repository'
-import { STOCK_TYPE } from '../stocks.schema'
+import { STOCK_TYPE } from '../stocks.validators'
 import { schema, generateId } from '@soker90/finper-db'
 
 let testDb: any

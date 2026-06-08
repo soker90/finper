@@ -5,11 +5,9 @@ import loggerHandler from '../../utils/logger'
 import {
   validateDebtCreateParams,
   validateDebtEditParams,
-  validateDebtPayParams
-} from './debts.schema'
-import { isValidId } from '../../utils'
-import Boom from '@hapi/boom'
-import { ERROR_MESSAGE } from '../../i18n'
+  validateDebtPayParams,
+  validateDebtExist
+} from './debts.validators'
 
 const logger = loggerHandler('DebtController')
 
@@ -18,8 +16,8 @@ export const debtsController = {
     const user = req.user as string
     logger.logInfo(`/create - debt: ${req.body.from}`)
 
-    const params = await validateDebtCreateParams({ ...req.body, user })
-    const result = await debtsService.addDebt(user, params)
+    const params = validateDebtCreateParams({ body: req.body, user })
+    const result = debtsService.addDebt(user, params as any)
     logger.logInfo('Debt has been succesfully created')
 
     res.status(201).json(debtsSerializer.toJson(result as any))
@@ -29,7 +27,7 @@ export const debtsController = {
     const user = req.user as string
     logger.logInfo(`/debts - list debts of ${user}`)
 
-    const result = await debtsService.getDebts(user)
+    const result = debtsService.getDebts(user)
     res.json({
       from: result.from.map(debtsSerializer.toJson),
       to: result.to.map(debtsSerializer.toJson),
@@ -42,19 +40,17 @@ export const debtsController = {
     const from = req.params.from
     logger.logInfo(`/debts - list debts from ${from}`)
 
-    const result = await debtsService.getDebtsFrom(user, from)
+    const result = debtsService.getDebtsFrom(user, from)
     res.json(result.map(debtsSerializer.toJson))
   },
 
   async edit (req: Request, res: Response) {
     const user = req.user as string
     const id = req.params.id
-    if (!isValidId(id)) throw Boom.badRequest(ERROR_MESSAGE.DEBT.NOT_FOUND).output
-
     logger.logInfo(`/edit - debt: ${id}`)
 
-    const value = await validateDebtEditParams({ params: req.params, body: req.body, user })
-    const result = await debtsService.editDebt(id, user, value)
+    const value = validateDebtEditParams({ params: req.params, body: req.body, user })
+    const result = debtsService.editDebt(value.id, user, value.value)
     logger.logInfo(`Debt ${id} has been succesfully edited`)
 
     res.json(debtsSerializer.toJson(result))
@@ -63,23 +59,20 @@ export const debtsController = {
   async delete (req: Request, res: Response) {
     const user = req.user as string
     const id = req.params.id
-    if (!isValidId(id)) throw Boom.badRequest(ERROR_MESSAGE.DEBT.NOT_FOUND).output
-
     logger.logInfo(`/delete - debt: ${id}`)
 
-    await debtsService.deleteDebt(id, user)
+    validateDebtExist({ id, user })
+    debtsService.deleteDebt(id, user)
     res.status(204).send()
   },
 
   async pay (req: Request, res: Response) {
     const user = req.user as string
     const id = req.params.id
-    if (!isValidId(id)) throw Boom.badRequest(ERROR_MESSAGE.DEBT.NOT_FOUND).output
-
     logger.logInfo(`/pay - debt: ${id}`)
 
-    const { amount } = await validateDebtPayParams({ params: req.params, body: req.body, user })
-    const result = await debtsService.payDebt(id, user, amount)
+    const value = validateDebtPayParams({ params: req.params, body: req.body, user })
+    const result = debtsService.payDebt(value.id, user, value.amount)
 
     res.json(result ? debtsSerializer.toJson(result) : null)
   }

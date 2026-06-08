@@ -1,6 +1,6 @@
 import { Request, Response } from 'express'
 import { PensionsService } from './pensions.service'
-import { validatePensionCreateParams, validatePensionEditParams } from './pensions.schema'
+import { validatePensionCreateParams, validatePensionEditParams } from './pensions.validators'
 
 export class PensionsController {
   private logger
@@ -11,7 +11,7 @@ export class PensionsController {
     this.pensionsService = pensionsService
   }
 
-  public async create (req: Request, res: Response): Promise<void> {
+  public create (req: Request, res: Response): void {
     this.logger.logInfo('/create - pension')
 
     const params = validatePensionCreateParams(req.body)
@@ -22,18 +22,18 @@ export class PensionsController {
     res.send(response)
   }
 
-  public async edit (req: Request, res: Response): Promise<void> {
+  public edit (req: Request, res: Response): void {
     this.logger.logInfo('/pensions edit')
 
-    const value = validatePensionEditParams(req.body)
-    const response = this.pensionsService.editPension({ id: req.params.id, value, user: req.user as string })
+    const { id, value } = validatePensionEditParams({ params: req.params, body: req.body, user: req.user as string })
+    const response = this.pensionsService.editPension(id, value, req.user as string)
     
     this.logger.logInfo(`Pension ${new Date(response.date).toISOString()} has been succesfully edited`)
 
     res.send(response)
   }
 
-  public async pensions (req: Request, res: Response): Promise<void> {
+  public pensions (req: Request, res: Response): void {
     this.logger.logInfo(`/pensions - list pension transactions of ${req.user}`)
 
     const response = this.pensionsService.getPensions(req.user as string)

@@ -10,9 +10,9 @@ export class DashboardController {
     this.dashboardService = dashboardService
   }
 
-  public async stats (req: Request, res: Response): Promise<void> {
+  public stats (req: Request, res: Response): void {
     this.logger.logInfo(`/stats - dashboard stats for ${req.user}`)
-    const response = await this.dashboardService.getStats({ user: req.user as string })
+    const response = this.dashboardService.getStats({ user: req.user as string })
     res.send(response)
   }
 }

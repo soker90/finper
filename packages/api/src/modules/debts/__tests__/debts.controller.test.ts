@@ -185,8 +185,16 @@ describe('debtsController', () => {
     it('returns 422 when amount is missing', async () => {
       const created = await supertest(server.app).post('/api/debts').set('Authorization', `Bearer ${token}`).send({ from: 'Alice', amount: 100, type: 'to' })
       const id = created.body._id
-
       await supertest(server.app).post(`/api/debts/${id}/pay`).set('Authorization', `Bearer ${token}`).send({}).expect(422)
+    })
+
+    it('should add a payment and return 200', async () => {
+      const created = await supertest(server.app).post('/api/debts').set('Authorization', `Bearer ${token}`).send({ from: 'Alice', amount: 100, type: 'to' })
+      const id = created.body._id
+
+      const res = await supertest(server.app).post(`/api/debts/${id}/pay`).set('Authorization', `Bearer ${token}`).send({ amount: 50 }).expect(200)
+
+      expect(res.body.amount).toBe(50)
     })
   })
 })

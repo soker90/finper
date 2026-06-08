@@ -5,13 +5,13 @@ import type { GoalsRepository } from './goals.repository'
 import { goalsRepository } from './goals.repository'
 
 export interface IGoalService {
-  addGoal(username: string, goal: Record<string, any>): Promise<any>
-  editGoal({ id, user, value }: { id: string, user: string, value: Record<string, any> }): Promise<any>
-  getGoals(user: string): Promise<any[]>
-  getGoal({ id, user }: { id: string, user: string }): Promise<any>
-  deleteGoal({ id, user }: { id: string, user: string }): Promise<void>
-  fundGoal({ id, user, amount }: { id: string, user: string, amount: number }): Promise<any>
-  withdrawGoal({ id, user, amount }: { id: string, user: string, amount: number }): Promise<any>
+  addGoal(username: string, goal: Record<string, any>): any
+  editGoal({ id, user, value }: { id: string, user: string, value: Record<string, any> }): any
+  getGoals(user: string): any[]
+  getGoal({ id, user }: { id: string, user: string }): any
+  deleteGoal({ id, user }: { id: string, user: string }): void
+  fundGoal({ id, user, amount }: { id: string, user: string, amount: number }): any
+  withdrawGoal({ id, user, amount }: { id: string, user: string, amount: number }): any
 }
 
 /**
@@ -36,7 +36,7 @@ const validateTotalAllocation = (
 export class GoalService implements IGoalService {
   constructor (private repo: GoalsRepository = goalsRepository) {}
 
-  public async addGoal (username: string, goal: Record<string, any>): Promise<any> {
+  public addGoal (username: string, goal: Record<string, any>): any {
     const currentAmount = goal.currentAmount ?? 0
     if (currentAmount > 0) {
       validateTotalAllocation(this.repo, username, currentAmount)
@@ -52,7 +52,7 @@ export class GoalService implements IGoalService {
     return this.repo.create(username, data)
   }
 
-  public async editGoal ({ id, user, value }: { id: string, user: string, value: Record<string, any> }): Promise<any> {
+  public editGoal ({ id, user, value }: { id: string, user: string, value: Record<string, any> }): any {
     const data: Record<string, any> = {}
     if (value.name !== undefined) data.name = value.name
     if (value.targetAmount !== undefined) data.targetAmount = roundMoney(value.targetAmount)
@@ -66,21 +66,21 @@ export class GoalService implements IGoalService {
     return updated
   }
 
-  public async getGoals (user: string): Promise<any[]> {
+  public getGoals (user: string): any[] {
     return this.repo.findAllByUser(user)
   }
 
-  public async getGoal ({ id, user }: { id: string, user: string }): Promise<any> {
+  public getGoal ({ id, user }: { id: string, user: string }): any {
     return this.repo.findById(id, user)
   }
 
-  public async deleteGoal ({ id, user }: { id: string, user: string }): Promise<void> {
+  public deleteGoal ({ id, user }: { id: string, user: string }): void {
     const deleted = this.repo.delete(id, user)
     /* istanbul ignore next — validator validateGoalExist runs before this method via route */
     if (!deleted) throw Boom.notFound(ERROR_MESSAGE.GOAL.NOT_FOUND).output
   }
 
-  public async fundGoal ({ id, user, amount }: { id: string, user: string, amount: number }): Promise<any> {
+  public fundGoal ({ id, user, amount }: { id: string, user: string, amount: number }): any {
     const goal = this.repo.findById(id, user)
     /* istanbul ignore next — validator validateGoalExist runs before this method via route */
     if (!goal) throw Boom.notFound(ERROR_MESSAGE.GOAL.NOT_FOUND).output
@@ -94,7 +94,7 @@ export class GoalService implements IGoalService {
     return updated
   }
 
-  public async withdrawGoal ({ id, user, amount }: { id: string, user: string, amount: number }): Promise<any> {
+  public withdrawGoal ({ id, user, amount }: { id: string, user: string, amount: number }): any {
     const goal = this.repo.findById(id, user)
     /* istanbul ignore next — validator validateGoalExist runs before this method via route */
     if (!goal) throw Boom.notFound(ERROR_MESSAGE.GOAL.NOT_FOUND).output

@@ -2,7 +2,7 @@ import { NextFunction, Request, Response } from 'express'
 import Boom from '@hapi/boom'
 import passport from 'passport'
 import loggerHandler from '../../utils/logger'
-import { validateLoginInput, validateRegisterInput } from './users.schema'
+import { validateLoginInput, validateRegisterInput } from './users.validators'
 import { usersService } from './users.service'
 
 import '../../auth/local-strategy-passport-handler'
@@ -11,17 +11,17 @@ export const createUsersController = (service: typeof usersService) => {
   const logger = loggerHandler('AuthController')
 
   return {
-    register: async (req: Request, res: Response) => {
+    register: (req: Request, res: Response) => {
       const username = req.body?.username
       logger.logInfo(`/register - username: ${username?.toLowerCase()}`)
       const user = validateRegisterInput(req.body)
-      const created = await service.createUser(user)
+      const created = service.createUser(user)
       logger.logInfo(`User ${created.username} has been succesfully created`)
       const token = service.signToken(created.username)
       res.send({ token })
     },
 
-    login: async (req: Request, res: Response, next: NextFunction) => {
+    login: (req: Request, res: Response, next: NextFunction) => {
       logger.logInfo(`/login - user: ${req.body?.username?.toLowerCase()}`)
       req.body = validateLoginInput(req.body)
       passport.authenticate('local', function (error: any, user: any) {

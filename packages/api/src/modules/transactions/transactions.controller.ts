@@ -6,7 +6,7 @@ import {
   validateTransactionEditParams,
   validateTransactionGetParams,
   validateTransactionExist
-} from './transactions.schema'
+} from './transactions.validators'
 
 export class TransactionsController {
   private logger
@@ -19,18 +19,18 @@ export class TransactionsController {
     this.storesService = storesService
   }
 
-  public async create (req: Request, res: Response): Promise<void> {
+  public create (req: Request, res: Response): void {
     this.logger.logInfo('/create - new transaction')
 
     const params = validateTransactionCreateParams({ ...req.body, user: req.user })
-    const withStore = await this.storesService.getAndReplaceStore(params)
-    const response = await this.transactionsService.addTransaction(withStore)
+    const withStore = this.storesService.getAndReplaceStore(params)
+    const response = this.transactionsService.addTransaction(withStore)
 
     this.logger.logInfo(`Transaction ${response._id} has been succesfully created`)
     res.send(response)
   }
 
-  public async transactions (req: Request, res: Response): Promise<void> {
+  public transactions (req: Request, res: Response): void {
     this.logger.logInfo(`/transactions - list transactions of ${req.user}`)
 
     const filters = validateTransactionGetParams(req.query as Record<string, any>)
@@ -39,23 +39,23 @@ export class TransactionsController {
     res.send(response)
   }
 
-  public async edit (req: Request, res: Response): Promise<void> {
+  public edit (req: Request, res: Response): void {
     this.logger.logInfo(`/edit - transaction: ${req.params.id}`)
 
     const params = validateTransactionEditParams({ params: req.params, body: req.body, user: req.user as string })
-    const withStore = await this.storesService.replaceShopValue(params)
-    const response = await this.transactionsService.editTransaction(withStore)
+    const withStore = this.storesService.replaceShopValue(params)
+    const response = this.transactionsService.editTransaction(withStore)
 
     this.logger.logInfo(`Transaction ${response._id} has been succesfully edited`)
     res.send(response)
   }
 
-  public async delete (req: Request, res: Response): Promise<void> {
+  public delete (req: Request, res: Response): void {
     const { id } = req.params
     this.logger.logInfo(`/delete - transaction: ${id}`)
 
     validateTransactionExist(id, req.user as string)
-    await this.transactionsService.deleteTransaction(id, req.user as string)
+    this.transactionsService.deleteTransaction(id, req.user as string)
 
     res.status(204).send()
   }

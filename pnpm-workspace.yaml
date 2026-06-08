@@ -16,5 +16,9 @@ ignoredBuiltDependencies:
 
 onlyBuiltDependencies:
   - bcrypt
+  - better-sqlite3
   - esbuild
   - mongodb-memory-server
+
+overrides:
+  '@types/express-serve-static-core': 5.1.0

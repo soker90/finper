@@ -1,6 +1,6 @@
 import { Request, Response } from 'express'
 import { IStockService } from './stocks.service'
-import { validateStockCreateParams } from './stocks.schema'
+import { validateStockCreateParams } from './stocks.validators'
 import { serializeStock, serializeStockPosition } from './stocks.serializer'
 import loggerHandler from '../../utils/logger'
 
@@ -27,18 +27,18 @@ export class StockController {
     res.send(response.map(serializeStockPosition))
   }
 
-  public async create (req: Request, res: Response): Promise<void> {
+  public create (req: Request, res: Response): void {
     const username = req.user as string
     this.logger.logInfo('/create - stock')
 
-    const params = await validateStockCreateParams(req.body)
+    const params = validateStockCreateParams(req.body)
     const response = this.stockService.addStock({ ...params, user: username, date: new Date(params.date) })
     this.logger.logInfo(`Stock ${response.ticker} has been successfully created`)
 
     res.send(serializeStock(response))
   }
 
-  public async remove (req: Request, res: Response): Promise<void> {
+  public remove (req: Request, res: Response): void {
     const username = req.user as string
     this.logger.logInfo('/delete - stock')
 

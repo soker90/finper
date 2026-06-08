@@ -9,7 +9,7 @@ import { createUsersRepository, usersRepository } from './users.repository'
 export type AuthenticatedUser = { username: string }
 
 export const createUsersService = (repo: ReturnType<typeof createUsersRepository>) => ({
-  createUser: async ({ username, password }: Record<string, string>) => {
+  createUser: ({ username, password }: Record<string, string>) => {
     const exists = repo.existsByUsername(username)
     if (exists) {
       throw Boom.conflict(ERROR_MESSAGE.USER.ALREADY_EXISTS).output

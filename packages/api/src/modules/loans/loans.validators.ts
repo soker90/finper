@@ -7,7 +7,7 @@ import { isValidId } from '../../utils'
 
 const { loans } = schema
 
-export const validateLoanExist = async ({ id, user, message }: { id: string, user: string, message?: string }) => {
+export const validateLoanExist = ({ id, user, message }: { id: string, user: string, message?: string }) => {
   if (!isValidId(id)) {
     throw Boom.badRequest('Invalid loan id').output
   }
@@ -18,7 +18,7 @@ export const validateLoanExist = async ({ id, user, message }: { id: string, use
   }
 }
 
-export const validateLoanCreateParams = async (data: Record<string, any>) => {
+export const validateLoanCreateParams = (data: Record<string, any>) => {
   const schemaJoi = Joi.object({
     name: Joi.string().required(),
     initialAmount: Joi.number().positive().required(),
@@ -37,12 +37,12 @@ export const validateLoanCreateParams = async (data: Record<string, any>) => {
   return value
 }
 
-export const validateLoanEditParams = async ({
+export const validateLoanEditParams = ({
   params,
   body,
   user
-}: { params: Record<string, string>, body: Record<string, any>, user: string }): Promise<{ id: string, value: Record<string, any> }> => {
-  await validateLoanExist({ id: params.id, user })
+}: { params: Record<string, string>, body: Record<string, any>, user: string }): { id: string, value: Record<string, any> } => {
+  validateLoanExist({ id: params.id, user })
 
   const schemaJoi = Joi.object({
     name: Joi.string(),
@@ -58,7 +58,7 @@ export const validateLoanEditParams = async ({
 
 // --- Parte B: validadores de pago ---
 
-export const validateLoanOrdinaryPaymentParams = async (data: Record<string, any>) => {
+export const validateLoanOrdinaryPaymentParams = (data: Record<string, any>) => {
   const schemaJoi = Joi.object({
     date: Joi.number().optional(),
     amount: Joi.number().positive().optional(),
@@ -69,7 +69,7 @@ export const validateLoanOrdinaryPaymentParams = async (data: Record<string, any
   return value
 }
 
-export const validateLoanPaymentParams = async (data: Record<string, any>) => {
+export const validateLoanPaymentParams = (data: Record<string, any>) => {
   const schemaJoi = Joi.object({
     amount: Joi.number().positive().required(),
     mode: Joi.string().valid('reduceQuota', 'reduceTerm').required(),
@@ -81,7 +81,7 @@ export const validateLoanPaymentParams = async (data: Record<string, any>) => {
   return value
 }
 
-export const validateLoanEditPaymentParams = async (data: Record<string, any>) => {
+export const validateLoanEditPaymentParams = (data: Record<string, any>) => {
   const schemaJoi = Joi.object({
     date: Joi.number(),
     amount: Joi.number().positive(),
@@ -99,7 +99,7 @@ export const validateLoanEditPaymentParams = async (data: Record<string, any>) =
 
 // --- Parte C: validadores de evento / simulación ---
 
-export const validateLoanEventParams = async (data: Record<string, any>) => {
+export const validateLoanEventParams = (data: Record<string, any>) => {
   const schemaJoi = Joi.object({
     date: Joi.number().required(),
     newRate: Joi.number().min(0).required(),
@@ -112,7 +112,7 @@ export const validateLoanEventParams = async (data: Record<string, any>) => {
   return value
 }
 
-export const validateLoanSimulateParams = async (data: Record<string, any>) => {
+export const validateLoanSimulateParams = (data: Record<string, any>) => {
   const schemaJoi = Joi.object({
     lumpSum: Joi.number().positive().integer().required()
   })

@@ -102,18 +102,14 @@ describe('Pensions Service', () => {
   describe('editPension', () => {
     it('should throw badRequest if id is invalid', () => {
       expect(() => {
-        service.editPension({ id: 'invalid', value: {}, user })
-      }).toThrow(expect.objectContaining({
-        payload: expect.objectContaining({ message: ERROR_MESSAGE.COMMON.INVALID_ID })
-      }))
+        service.editPension('invalid', {}, user)
+      }).toThrow(ERROR_MESSAGE.COMMON.INVALID_ID)
     })
 
     it('should throw notFound if pension does not exist', () => {
       expect(() => {
-        service.editPension({ id: '62a39498c4497e1fe3c2bf35', value: {}, user })
-      }).toThrow(expect.objectContaining({
-        payload: expect.objectContaining({ message: ERROR_MESSAGE.PENSION.NOT_FOUND })
-      }))
+        service.editPension('62a39498c4497e1fe3c2bf35', {}, user)
+      }).toThrow(ERROR_MESSAGE.PENSION.NOT_FOUND)
     })
 
     it('should throw notFound if pension exists but belongs to another user', () => {
@@ -129,10 +125,8 @@ describe('Pensions Service', () => {
       const pension = service.addPension(data)
 
       expect(() => {
-        service.editPension({ id: pension._id, value: { value: 20 }, user: 'other' })
-      }).toThrow(expect.objectContaining({
-        payload: expect.objectContaining({ message: ERROR_MESSAGE.PENSION.NOT_FOUND })
-      }))
+        service.editPension(pension._id, { value: 20 }, 'other')
+      }).toThrow(ERROR_MESSAGE.PENSION.NOT_FOUND)
     })
 
     it('should update the pension and return serialized data', () => {
@@ -147,11 +141,11 @@ describe('Pensions Service', () => {
       }
       const pension = service.addPension(data)
 
-      const updated = service.editPension({
-        id: pension._id,
-        user,
-        value: { value: 20, employeeAmount: 200 }
-      })
+      const updated = service.editPension(
+        pension._id,
+        { value: 20, employeeAmount: 200 },
+        user
+      )
 
       expect(updated._id).toBe(pension._id)
       expect(updated.value).toBe(20)

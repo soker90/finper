@@ -24,7 +24,7 @@ const buildCumulativeDailyExpenses = (dailyMap: Map<number, number>, daysInMonth
 export class DashboardService {
   constructor (private repository: IDashboardRepository) {}
 
-  async getStats ({ user }: { user: string }): Promise<DashboardStatsResult> {
+  getStats ({ user }: { user: string }): DashboardStatsResult {
     const pensionsService = new PensionsService(createPensionsRepository(db))
     const now = new Date()
     const currentYear = now.getFullYear()
@@ -41,10 +41,8 @@ export class DashboardService {
 
     const repo = this.repository
 
-    const [debtsResult, pensionData] = await Promise.all([
-      debtsService.getDebts(user),
-      pensionsService.getPensions(user)
-    ])
+    const debtsResult = debtsService.getDebts(user)
+    const pensionData = pensionsService.getPensions(user)
 
     // Agregaciones (SQLite, síncronas)
     const totalBalance = repo.sumActiveAccountsBalance(user)

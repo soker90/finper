@@ -10,7 +10,7 @@ export class StoresController {
     this.storesService = storesService
   }
 
-  public async stores (req: Request, res: Response): Promise<void> {
+  public stores (req: Request, res: Response): void {
     this.logger.logInfo(`/stores - list stores of ${req.user}`)
     const response = this.storesService.getStores(req.user as string)
     res.send(response)

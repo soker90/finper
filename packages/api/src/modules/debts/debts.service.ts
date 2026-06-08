@@ -9,18 +9,18 @@ type NewDebtInput = Omit<DebtInsert, 'id' | 'user'>
 type UpdateDebtInput = Partial<NewDebtInput>
 
 export const debtsService = {
-  async addDebt (username: string, debt: NewDebtInput) {
+  addDebt (username: string, debt: NewDebtInput) {
     return debtsRepository.create(username, debt)
   },
 
-  async editDebt (id: string, username: string, value: UpdateDebtInput) {
-    const updated = await debtsRepository.update(id, username, value)
+  editDebt (id: string, username: string, value: UpdateDebtInput) {
+    const updated = debtsRepository.update(id, username, value)
     if (!updated) throw Boom.notFound(ERROR_MESSAGE.DEBT.NOT_FOUND).output
     return updated
   },
 
-  async getDebts (username: string) {
-    const debts = await debtsRepository.findAllByUser(username)
+  getDebts (username: string) {
+    const debts = debtsRepository.findAllByUser(username)
 
     const from: DebtRow[] = []
     const to: DebtRow[] = []
@@ -50,22 +50,22 @@ export const debtsService = {
     }
   },
 
-  async getDebtsFrom (username: string, from: string) {
+  getDebtsFrom (username: string, from: string) {
     return debtsRepository.findAllFromUser(username, from)
   },
 
-  async deleteDebt (id: string, username: string) {
-    const deleted = await debtsRepository.delete(id, username)
+  deleteDebt (id: string, username: string) {
+    const deleted = debtsRepository.delete(id, username)
     if (!deleted) throw Boom.notFound(ERROR_MESSAGE.DEBT.NOT_FOUND).output
   },
 
-  async payDebt (id: string, username: string, amount: number) {
-    const debt = await debtsRepository.findById(id, username)
+  payDebt (id: string, username: string, amount: number) {
+    const debt = debtsRepository.findById(id, username)
     if (!debt) throw Boom.notFound(ERROR_MESSAGE.DEBT.NOT_FOUND).output
 
     const remaining = debt.amount - amount
     if (remaining <= 0) {
-      await debtsRepository.delete(id, username)
+      debtsRepository.delete(id, username)
       return null
     }
 

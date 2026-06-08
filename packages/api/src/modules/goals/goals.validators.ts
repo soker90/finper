@@ -14,7 +14,7 @@ import { ERROR_MESSAGE } from '../../i18n'
 import { isValidId } from '../../utils'
 import { goalsRepository } from './goals.repository'
 
-export const validateGoalCreateParams = async (data: Record<string, unknown>) => {
+export const validateGoalCreateParams = (data: Record<string, unknown>) => {
   const schema = Joi.object({
     name: Joi.string().required(),
     targetAmount: Joi.number().positive().required(),
@@ -35,7 +35,7 @@ export const validateGoalCreateParams = async (data: Record<string, unknown>) =>
   return value
 }
 
-export const validateGoalExist = async ({ id, user }: { id: string, user: string }) => {
+export const validateGoalExist = ({ id, user }: { id: string, user: string }) => {
   if (!isValidId(id)) {
     throw Boom.badRequest(ERROR_MESSAGE.COMMON.INVALID_ID).output
   }
@@ -45,12 +45,12 @@ export const validateGoalExist = async ({ id, user }: { id: string, user: string
   }
 }
 
-export const validateGoalEditParams = async ({
+export const validateGoalEditParams = ({
   params,
   body,
   user
-}: { params: Record<string, string>, body: Record<string, unknown>, user: string }): Promise<{ id: string, user: string, value: Record<string, unknown> }> => {
-  await validateGoalExist({ id: params.id, user })
+}: { params: Record<string, string>, body: Record<string, unknown>, user: string }): { id: string, user: string, value: Record<string, unknown> } => {
+  validateGoalExist({ id: params.id, user })
 
   const schema = Joi.object({
     name: Joi.string(),
@@ -69,12 +69,12 @@ export const validateGoalEditParams = async ({
   return { id: params.id, user, value }
 }
 
-export const validateGoalFundParams = async ({
+export const validateGoalFundParams = ({
   params,
   body,
   user
-}: { params: Record<string, string>, body: Record<string, unknown>, user: string }): Promise<{ id: string, user: string, amount: number }> => {
-  await validateGoalExist({ id: params.id, user })
+}: { params: Record<string, string>, body: Record<string, unknown>, user: string }): { id: string, user: string, amount: number } => {
+  validateGoalExist({ id: params.id, user })
 
   const schema = Joi.object({
     amount: Joi.number().positive().required()

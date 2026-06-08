@@ -19,7 +19,7 @@ export interface IStock {
   platform: string
 }
 
-export const validateStockCreateParams = async (body: Omit<IStock, 'user'>) => {
+export const validateStockCreateParams = (body: Omit<IStock, 'user'>) => {
   const schema = Joi.object({
     ticker: Joi.string().uppercase().required(),
     name: Joi.string().required(),

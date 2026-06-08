@@ -15,9 +15,9 @@ import {
   MIN_PASSWORD_LENGTH
 } from '../src/config/inputs'
 import { generateUsername } from './generate-values'
-import { DEBT } from '../src/modules/debts/debts.schema'
-import { STOCK_TYPE } from '../src/modules/stocks/stocks.schema'
-import { GOAL_COLORS, GOAL_ICONS } from '../src/modules/goals/goals.schema'
+import { DEBT } from '../src/modules/debts/debts.validators'
+import { STOCK_TYPE } from '../src/modules/stocks/stocks.validators'
+import { GOAL_COLORS, GOAL_ICONS } from '../src/modules/goals/goals.validators'
 import { buildAmortizationTable } from '../src/modules/loans/utils/calcLoanProjection'
 import { roundNumber } from '../src/utils/roundNumber'
 

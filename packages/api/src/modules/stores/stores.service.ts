@@ -14,7 +14,7 @@ export class StoresService {
   // es un string (nombre). Búsqueda insensible a mayúsculas y tildes
   // (spanishCompare, sensitivity 'base'). Si existe, se reutiliza manteniendo
   // su name original; si no, se crea. Reemplaza transaction.store por el id.
-  public async getAndReplaceStore (transaction: any): Promise<any> {
+  public getAndReplaceStore (transaction: any): any {
     if (transaction.store && typeof transaction.store === 'string') {
       const storeName = transaction.store
       const existing = this.repository.findByUser(transaction.user)
@@ -25,7 +25,7 @@ export class StoresService {
     return transaction
   }
 
-  public async replaceShopValue ({ value, ...rest }: { value: any }): Promise<any> {
-    return { ...rest, value: await this.getAndReplaceStore(value) }
+  public replaceShopValue ({ value, ...rest }: { value: any }): any {
+    return { ...rest, value: this.getAndReplaceStore(value) }
   }
 }

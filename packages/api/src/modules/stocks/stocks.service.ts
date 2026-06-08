@@ -1,7 +1,7 @@
 import { stocksRepository } from './stocks.repository'
 import { IStockPriceProvider, YahooPriceProvider } from './stock-price.provider'
 import { roundNumber } from '../../utils/roundNumber'
-import { STOCK_TYPE } from './stocks.schema'
+import { STOCK_TYPE } from './stocks.validators'
 import { schema } from '@soker90/finper-db'
 
 const { stocks } = schema
