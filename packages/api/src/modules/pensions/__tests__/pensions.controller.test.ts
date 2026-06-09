@@ -1,6 +1,5 @@
 import supertest from 'supertest'
 import { faker } from '@faker-js/faker'
-import mongoose from 'mongoose'
 
 import { server } from '../../../server'
 import { ERROR_MESSAGE } from '../../../i18n'

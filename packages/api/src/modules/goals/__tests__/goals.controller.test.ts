@@ -7,7 +7,6 @@ import { GOAL_COLORS, GOAL_ICONS } from '../goals.validators'
 import { requestLogin } from '../../../../test/request-login'
 import { generateUsername } from '../../../../test/generate-values'
 
-import mongoose from 'mongoose'
 
 
 const { users, goals, accounts } = schema
