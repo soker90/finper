@@ -1,5 +1,5 @@
 import Boom from '@hapi/boom'
-import { SUPPLY_TYPE } from '@soker90/finper-models'
+import { SUPPLY_TYPE } from '@soker90/finper-db'
 import { supplyRepository } from '../../repositories/supply.repository'
 import { ERROR_MESSAGE } from '../../i18n'
 

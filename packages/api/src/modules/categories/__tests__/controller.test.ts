@@ -8,7 +8,8 @@ import { schema, generateId } from '@soker90/finper-db'
 import { and, eq, isNull, isNotNull } from 'drizzle-orm'
 import { ERROR_MESSAGE } from '../../../i18n'
 import testDatabase from '../../../../test/test-db'
-import { mongoose, TRANSACTION } from '@soker90/finper-models'
+import { mongoose } from '@soker90/finper-models'
+import { TRANSACTION } from '@soker90/finper-db'
 import { categoriesRoutes } from '../categories.routes'
 
 const { categories, users } = schema

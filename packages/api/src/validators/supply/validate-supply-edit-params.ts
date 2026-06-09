@@ -2,7 +2,7 @@ import Joi from 'joi'
 import Boom from '@hapi/boom'
 import { validateSupplyExist } from './validate-supply-exist'
 import { validatePropertyExist } from '../property'
-import { SUPPLY_TYPE } from '@soker90/finper-models'
+import { SUPPLY_TYPE } from '@soker90/finper-db'
 
 export const validateSupplyEditParams = async ({ params, body, user }: { params: Record<string, string>, body: Record<string, any>, user: string }) => {
   /* istanbul ignore else — params.id is always present when editing via route (URL param) */

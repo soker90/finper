@@ -1,6 +1,6 @@
 import Joi from 'joi'
 import Boom from '@hapi/boom'
-import { TRANSACTION } from '@soker90/finper-models'
+import { TRANSACTION } from '@soker90/finper-db'
 import { isValidId } from '../../utils'
 import { ERROR_MESSAGE } from '../../i18n'
 import { categoriesRepository } from './categories.repository'

@@ -6,7 +6,8 @@ import { db as sqliteDb } from '../../../db'
 import { schema, generateId } from '@soker90/finper-db'
 import { eq } from 'drizzle-orm'
 import testDatabase from '../../../../test/test-db'
-import { mongoose, TRANSACTION } from '@soker90/finper-models'
+import { mongoose } from '@soker90/finper-models'
+import { TRANSACTION } from '@soker90/finper-db'
 import { transactionsRoutes } from '../transactions.routes'
 
 const { transactions, accounts, categories, subscriptions, subscriptionCandidates, users } = schema

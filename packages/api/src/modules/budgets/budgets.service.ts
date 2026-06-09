@@ -1,4 +1,4 @@
-import { TRANSACTION } from '@soker90/finper-models'
+import { TRANSACTION } from '@soker90/finper-db'
 import { serializeBudget } from './budgets.serializer'
 import { calcBudgetByMonths } from './utils/calcBudgetByMonths'
 

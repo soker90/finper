@@ -1,5 +1,5 @@
 import { buildAmortizationTable, calcMonthlyPayment } from '../../src/modules/loans/utils/calcLoanProjection'
-import { LOAN_PAYMENT } from '@soker90/finper-models'
+import { LOAN_PAYMENT } from '@soker90/finper-db'
 
 describe('buildAmortizationTable', () => {
   const START_DATE = new Date('2020-01-15').getTime()

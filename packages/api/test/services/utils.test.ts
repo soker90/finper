@@ -1,5 +1,6 @@
 import { faker } from '@faker-js/faker'
-import { ITransaction, TRANSACTION } from '@soker90/finper-models'
+import { ITransaction } from '@soker90/finper-models'
+import { TRANSACTION } from '@soker90/finper-db'
 import { getTransactionAmount } from '../../src/services/utils'
 
 describe('getTransactionsAmount', () => {

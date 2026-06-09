@@ -1,6 +1,6 @@
 import { eq, and, gte, lte, desc } from 'drizzle-orm'
 import { type DB, schema } from '@soker90/finper-db'
-import { TRANSACTION } from '@soker90/finper-models'
+import { TRANSACTION } from '@soker90/finper-db'
 
 const { transactions, categories, accounts, stores } = schema
 

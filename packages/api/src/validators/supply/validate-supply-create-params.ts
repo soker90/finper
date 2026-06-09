@@ -1,6 +1,6 @@
 import Joi from 'joi'
 import Boom from '@hapi/boom'
-import { SUPPLY_TYPE } from '@soker90/finper-models'
+import { SUPPLY_TYPE } from '@soker90/finper-db'
 import { validatePropertyExist } from '../property'
 
 export const validateSupplyCreateParams = async (data: Record<string, string>) => {

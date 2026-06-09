@@ -2,7 +2,7 @@ import { faker } from '@faker-js/faker'
 import {
   SUPPLY_TYPE,
   TRANSACTION, LOAN_PAYMENT
-} from '@soker90/finper-models'
+} from '@soker90/finper-db'
 import { propertyRepository } from '../src/repositories/property.repository'
 import { supplyRepository } from '../src/repositories/supply.repository'
 import { supplyReadingRepository } from '../src/repositories/supply-reading.repository'

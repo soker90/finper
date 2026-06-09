@@ -6,7 +6,7 @@ import { TransactionsService } from '../transactions.service'
 import { generateUsername } from '../../../../test/generate-values'
 import { getTransactionAmount } from '../../../services/utils'
 import { roundNumber } from '../../../utils'
-import { TRANSACTION } from '@soker90/finper-models'
+import { TRANSACTION } from '@soker90/finper-db'
 
 const { transactions, accounts, categories, stores, users } = schema
 

@@ -1,5 +1,5 @@
 import Boom from '@hapi/boom'
-import { LOAN_PAYMENT } from '@soker90/finper-models'
+import { LOAN_PAYMENT } from '@soker90/finper-db'
 import type { LoanPaymentType } from '@soker90/finper-types'
 import { roundNumber } from '../../utils'
 import { ERROR_MESSAGE } from '../../i18n'

@@ -1,4 +1,5 @@
-import { mongoose, SUPPLY_TYPE } from '@soker90/finper-models'
+import { mongoose } from '@soker90/finper-models'
+import { SUPPLY_TYPE } from '@soker90/finper-db'
 import { db as sqliteDb } from '../../src/db'
 import { schema } from '@soker90/finper-db'
 import { eq } from 'drizzle-orm'
