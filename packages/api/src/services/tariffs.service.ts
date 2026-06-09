@@ -1,4 +1,11 @@
-import { ISupplyReading } from '@soker90/finper-models'
+export interface ISupplyReading {
+  startDate: number
+  endDate: number
+  consumptionPeak: number | null
+  consumptionFlat: number | null
+  consumptionOffPeak: number | null
+  amount: number
+}
 import { supplyRepository } from '../repositories/supply.repository'
 import { supplyReadingRepository } from '../repositories/supply-reading.repository'
 import Boom from '@hapi/boom'

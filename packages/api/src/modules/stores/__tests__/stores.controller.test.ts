@@ -5,12 +5,9 @@ import { generateUsername } from '../../../../test/generate-values'
 import { db as sqliteDb } from '../../../db'
 import { schema, generateId } from '@soker90/finper-db'
 import { eq } from 'drizzle-orm'
-import testDatabase from '../../../../test/test-db'
-import { mongoose } from '@soker90/finper-models'
 import { storesRoutes } from '../stores.routes'
 
 const { stores, users } = schema
-const dbInstance = testDatabase(mongoose)
 
 describe('Stores Controller', () => {
   let token: string
@@ -24,7 +21,6 @@ describe('Stores Controller', () => {
   }
 
   beforeAll(async () => {
-    await dbInstance.connect()
     server.app.use('/test-api/stores', storesRoutes)
     server.app.use(require('../../../middlewares/handle-error').default)
     token = await requestLogin(server.app, { username })
@@ -32,7 +28,6 @@ describe('Stores Controller', () => {
 
   afterAll(async () => {
     sqliteDb.delete(users).where(eq(users.username, username)).run()
-    await dbInstance.close()
   })
 
   afterEach(() => {

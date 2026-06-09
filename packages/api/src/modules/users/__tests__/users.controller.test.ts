@@ -7,22 +7,17 @@ import { MAX_USERNAME_LENGTH, MIN_PASSWORD_LENGTH } from '../../../config/inputs
 import { requestLogin } from '../../../../test/request-login'
 import { generateUsername } from '../../../../test/generate-values'
 
-import { mongoose } from '@soker90/finper-models'
-import createTestDatabase from '../../../../test/test-db'
 import { db } from '../../../db'
 import { eq } from 'drizzle-orm'
 import { schema } from '@soker90/finper-db'
 
-const testDatabase = createTestDatabase(mongoose)
 
 function getUsername (): string {
   return faker.internet.username().slice(0, MAX_USERNAME_LENGTH)
 }
 
 describe('Auth / users controller', () => {
-  beforeAll(() => testDatabase.connect())
 
-  afterAll(() => testDatabase.close())
 
 
 

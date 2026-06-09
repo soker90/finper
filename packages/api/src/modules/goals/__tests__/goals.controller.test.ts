@@ -9,7 +9,6 @@ import { generateUsername } from '../../../../test/generate-values'
 
 import mongoose from 'mongoose'
 
-import createTestDatabase from '../../../../test/test-db'
 
 const { users, goals, accounts } = schema
 
@@ -18,11 +17,8 @@ describe('Goal Routes (SQLite integration)', () => {
   let token: string
   const username = generateUsername()
   const userId = generateId()
-  let testMongoDb: any
 
   beforeAll(async () => {
-    testMongoDb = createTestDatabase(mongoose)
-    await testMongoDb.connect()
 
     token = await requestLogin(server.app, { username })
   })
@@ -30,7 +26,6 @@ describe('Goal Routes (SQLite integration)', () => {
   afterAll(async () => {
     sqliteDb.delete(users).where(eq(users.id, userId)).run()
     sqliteDb.delete(goals).run()
-    await testMongoDb.close()
   })
 
   afterEach(async () => {

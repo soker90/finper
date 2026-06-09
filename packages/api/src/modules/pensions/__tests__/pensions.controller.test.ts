@@ -8,12 +8,10 @@ import { ERROR_MESSAGE } from '../../../i18n'
 import { requestLogin } from '../../../../test/request-login'
 import { generateUsername } from '../../../../test/generate-values'
 
-import createTestDatabase from '../../../../test/test-db'
 import { db as sqliteDb } from '../../../db'
 import { schema, generateId } from '@soker90/finper-db'
 import { eq } from 'drizzle-orm'
 
-const testDatabase = createTestDatabase(mongoose)
 
 const insertPension = (data: any = {}) => {
   const id = generateId()
@@ -35,9 +33,7 @@ const insertPension = (data: any = {}) => {
 }
 
 describe('Pension Controller', () => {
-  beforeAll(() => testDatabase.connect())
 
-  afterAll(() => testDatabase.close())
 
   describe('POST /', () => {
     const path = '/api/pensions'

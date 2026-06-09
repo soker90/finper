@@ -1,5 +1,4 @@
 import supertest from 'supertest'
-import { mongoose } from '@soker90/finper-models'
 import { db as sqliteDb } from '../../src/db'
 import { schema } from '@soker90/finper-db'
 import { eq } from 'drizzle-orm'
@@ -10,8 +9,6 @@ import { requestLogin } from '../request-login'
 import { insertSupplyReading, insertSupply } from '../insert-data-to-model'
 import { generateUsername } from '../generate-values'
 
-import createTestDatabase from '../test-db'
-const testDatabase = createTestDatabase(mongoose)
 
 const buildReadingPayload = (overrides: Record<string, unknown> = {}) => {
   const startDate = faker.date.past().getTime()
@@ -27,8 +24,6 @@ const buildReadingPayload = (overrides: Record<string, unknown> = {}) => {
 }
 
 describe('SupplyReading Routes', () => {
-  beforeAll(() => testDatabase.connect())
-  afterAll(() => testDatabase.close())
   afterEach(() => {
     sqliteDb.delete(schema.supplyReadings).run()
     sqliteDb.delete(schema.supplies).run()

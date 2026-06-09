@@ -6,12 +6,9 @@ import { db as sqliteDb } from '../../../db'
 import { schema, generateId } from '@soker90/finper-db'
 import { TRANSACTION } from '@soker90/finper-db'
 import { eq } from 'drizzle-orm'
-import testDatabase from '../../../../test/test-db'
-import { mongoose } from '@soker90/finper-models'
 import { statsRoutes } from '../stats.routes'
 
 const { transactions, categories, accounts, users } = schema
-const dbInstance = testDatabase(mongoose)
 
 describe('Stats Controller', () => {
   let token: string
@@ -38,7 +35,6 @@ describe('Stats Controller', () => {
   }
 
   beforeAll(async () => {
-    await dbInstance.connect()
     server.app.use('/test-api/stats', statsRoutes)
     server.app.use(require('../../../middlewares/handle-error').default)
     token = await requestLogin(server.app, { username })
@@ -53,7 +49,6 @@ describe('Stats Controller', () => {
     sqliteDb.delete(categories).where(eq(categories.user, username)).run()
     sqliteDb.delete(accounts).where(eq(accounts.user, username)).run()
     sqliteDb.delete(users).where(eq(users.username, username)).run()
-    await dbInstance.close()
   })
 
   afterEach(() => {

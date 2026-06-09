@@ -5,12 +5,9 @@ import { requestLogin } from '../../../../test/request-login'
 import { generateUsername } from '../../../../test/generate-values'
 import { db as sqliteDb } from '../../../db'
 import { debtsRepository } from '../debts.repository'
-import { mongoose } from '@soker90/finper-models'
 import { schema, generateId } from '@soker90/finper-db'
-import testDatabase from '../../../../test/test-db'
 
 const { users, debts } = schema
-const dbInstance = testDatabase(mongoose)
 
 describe('debtsController', () => {
   let token: string
@@ -18,14 +15,12 @@ describe('debtsController', () => {
   const userId = generateId()
 
   beforeAll(async () => {
-    await dbInstance.connect()
 
     token = await requestLogin(server.app, { username })
   })
 
   afterAll(async () => {
     sqliteDb.delete(users).where(eq(users.id, userId)).run()
-    await dbInstance.close()
   })
 
   afterEach(() => {

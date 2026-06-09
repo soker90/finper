@@ -1,6 +1,5 @@
 import supertest from 'supertest'
 import { eq } from 'drizzle-orm'
-import { mongoose } from '@soker90/finper-models'
 import { db as sqliteDb } from '../../../db'
 import { schema, generateId } from '@soker90/finper-db'
 const { stocks } = schema
@@ -9,7 +8,6 @@ import { server } from '../../../server'
 import { requestLogin } from '../../../../test/request-login'
 import { generateUsername } from '../../../../test/generate-values'
 import { insertCredentials } from '../../../../test/insert-data-to-model'
-import createTestDatabase from '../../../../test/test-db'
 import { stocksRepository } from '../stocks.repository'
 import { STOCK_TYPE } from '../stocks.validators'
 
@@ -21,14 +19,12 @@ jest.mock('../stock-price.provider', () => ({
   IStockPriceProvider: {}
 }))
 
-const testDatabase = createTestDatabase(mongoose)
 
 describe('Stocks Controller', () => {
   const username = generateUsername()
   let token: string
 
   beforeAll(async () => {
-    await testDatabase.connect()
 
 
 
@@ -37,7 +33,6 @@ describe('Stocks Controller', () => {
 
   afterAll(async () => {
     sqliteDb.delete(schema.users).where(eq(schema.users.username, username)).run()
-    await testDatabase.close()
   })
 
   afterEach(() => {

@@ -6,13 +6,10 @@ import { generateUsername } from '../../../../test/generate-values'
 import { db as sqliteDb } from '../../../db'
 import { schema, generateId } from '@soker90/finper-db'
 import { eq } from 'drizzle-orm'
-import testDatabase from '../../../../test/test-db'
-import { mongoose } from '@soker90/finper-models'
 import { TRANSACTION } from '@soker90/finper-db'
 import { transactionsRoutes } from '../transactions.routes'
 
 const { transactions, accounts, categories, stores, users } = schema
-const dbInstance = testDatabase(mongoose)
 
 describe('Transactions Controller', () => {
   let token: string
@@ -34,7 +31,6 @@ describe('Transactions Controller', () => {
     sqliteDb.select().from(accounts).where(eq(accounts.id, id)).get()!.balance
 
   beforeAll(async () => {
-    await dbInstance.connect()
     server.app.use('/test-api/transactions', transactionsRoutes)
     server.app.use(require('../../../middlewares/handle-error').default)
     token = await requestLogin(server.app, { username })
@@ -52,7 +48,6 @@ describe('Transactions Controller', () => {
     sqliteDb.delete(accounts).where(eq(accounts.user, otherUsername)).run()
     sqliteDb.delete(users).where(eq(users.username, otherUsername)).run()
     sqliteDb.delete(users).where(eq(users.username, username)).run()
-    await dbInstance.close()
   })
 
   beforeEach(() => {

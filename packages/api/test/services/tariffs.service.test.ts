@@ -1,4 +1,3 @@
-import { mongoose } from '@soker90/finper-models'
 import { SUPPLY_TYPE } from '@soker90/finper-db'
 import { db as sqliteDb } from '../../src/db'
 import { schema } from '@soker90/finper-db'
@@ -7,8 +6,6 @@ import TariffsService from '../../src/services/tariffs.service'
 import { insertSupply, insertSupplyReading, insertCredentials } from '../insert-data-to-model'
 import { generateUsername } from '../generate-values'
 
-import createTestDatabase from '../test-db'
-const testDatabase = createTestDatabase(mongoose)
 
 // Helpers compartidos
 const FULL_PRICE_SUPPLY = {
@@ -46,8 +43,6 @@ describe('TariffsService.simulateTariff — ramas de descuento', () => {
   let user: string
   let supplyId: string
 
-  beforeAll(() => testDatabase.connect())
-  afterAll(() => testDatabase.close())
   afterEach(() => {
     sqliteDb.delete(schema.supplyReadings).run()
     sqliteDb.delete(schema.supplies).run()

@@ -5,12 +5,9 @@ import { generateUsername } from '../../../../test/generate-values'
 import { db as sqliteDb } from '../../../db'
 import { schema, generateId } from '@soker90/finper-db'
 import { eq } from 'drizzle-orm'
-import testDatabase from '../../../../test/test-db'
-import { mongoose } from '@soker90/finper-models'
 import { loansRoutes } from '../loans.routes'
 
 const { loans, loanPayments, loanEvents, categories, accounts, users } = schema
-const dbInstance = testDatabase(mongoose)
 
 describe('Loans Controller (Part C - events / simulation)', () => {
   let token: string
@@ -38,7 +35,6 @@ describe('Loans Controller (Part C - events / simulation)', () => {
   }
 
   beforeAll(async () => {
-    await dbInstance.connect()
     server.app.use('/test-api/loans', loansRoutes)
     server.app.use(require('../../../middlewares/handle-error').default)
     token = await requestLogin(server.app, { username })
@@ -55,7 +51,6 @@ describe('Loans Controller (Part C - events / simulation)', () => {
     sqliteDb.delete(categories).where(eq(categories.user, username)).run()
     sqliteDb.delete(accounts).where(eq(accounts.user, username)).run()
     sqliteDb.delete(users).where(eq(users.username, username)).run()
-    await dbInstance.close()
   })
 
   afterEach(() => {

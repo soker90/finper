@@ -5,12 +5,9 @@ import { generateUsername } from '../../../../test/generate-values'
 import { db as sqliteDb } from '../../../db'
 import { schema, generateId } from '@soker90/finper-db'
 import { eq } from 'drizzle-orm'
-import testDatabase from '../../../../test/test-db'
-import { mongoose } from '@soker90/finper-models'
 import { budgetsRoutes } from '../budgets.routes'
 
 const { budgets, categories, users } = schema
-const dbInstance = testDatabase(mongoose)
 
 describe('Budgets Controller (Part A)', () => {
   let token: string
@@ -19,7 +16,6 @@ describe('Budgets Controller (Part A)', () => {
   let categoryId: string
 
   beforeAll(async () => {
-    await dbInstance.connect()
     server.app.use('/test-api/budgets', budgetsRoutes)
     server.app.use(require('../../../middlewares/handle-error').default)
     token = await requestLogin(server.app, { username })
@@ -31,7 +27,6 @@ describe('Budgets Controller (Part A)', () => {
     sqliteDb.delete(budgets).where(eq(budgets.user, username)).run()
     sqliteDb.delete(categories).where(eq(categories.user, username)).run()
     sqliteDb.delete(users).where(eq(users.username, username)).run()
-    await dbInstance.close()
   })
 
   afterEach(() => {

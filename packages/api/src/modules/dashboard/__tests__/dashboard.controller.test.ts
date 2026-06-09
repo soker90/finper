@@ -5,12 +5,9 @@ import { generateUsername } from '../../../../test/generate-values'
 import { db as sqliteDb } from '../../../db'
 import { schema, generateId } from '@soker90/finper-db'
 import { eq } from 'drizzle-orm'
-import testDatabase from '../../../../test/test-db'
-import { mongoose } from '@soker90/finper-models'
 import { dashboardRoutes } from '../dashboard.routes'
 
 const { accounts, users } = schema
-const dbInstance = testDatabase(mongoose)
 
 describe('Dashboard Controller (Part B - GET /stats)', () => {
   let token: string
@@ -18,7 +15,6 @@ describe('Dashboard Controller (Part B - GET /stats)', () => {
   const base = '/test-api/dashboard'
 
   beforeAll(async () => {
-    await dbInstance.connect()
     server.app.use('/test-api/dashboard', dashboardRoutes)
     server.app.use(require('../../../middlewares/handle-error').default)
     token = await requestLogin(server.app, { username })
@@ -28,7 +24,6 @@ describe('Dashboard Controller (Part B - GET /stats)', () => {
   afterAll(async () => {
     sqliteDb.delete(accounts).where(eq(accounts.user, username)).run()
     sqliteDb.delete(users).where(eq(users.username, username)).run()
-    await dbInstance.close()
   })
 
   describe('GET /stats', () => {

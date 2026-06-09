@@ -5,13 +5,10 @@ import { generateUsername } from '../../../../test/generate-values'
 import { db as sqliteDb } from '../../../db'
 import { schema, generateId } from '@soker90/finper-db'
 import { eq } from 'drizzle-orm'
-import testDatabase from '../../../../test/test-db'
-import { mongoose } from '@soker90/finper-models'
 import { TRANSACTION } from '@soker90/finper-db'
 import { transactionsRoutes } from '../transactions.routes'
 
 const { transactions, accounts, categories, subscriptions, subscriptionCandidates, users } = schema
-const dbInstance = testDatabase(mongoose)
 
 // Verifica el CABLEADO de hooks transactions -> subscriptions (T1b):
 //  - onTransactionCreated -> subscriptionCandidateService.detectCandidates
@@ -30,7 +27,6 @@ describe('Transactions hooks wiring (T1b)', () => {
   const txDate = Date.UTC(2025, 5, 15, 12, 0, 0)
 
   beforeAll(async () => {
-    await dbInstance.connect()
     server.app.use('/test-api/transactions', transactionsRoutes)
     server.app.use(require('../../../middlewares/handle-error').default)
     token = await requestLogin(server.app, { username })
@@ -53,7 +49,6 @@ describe('Transactions hooks wiring (T1b)', () => {
     sqliteDb.delete(categories).where(eq(categories.user, username)).run()
     sqliteDb.delete(accounts).where(eq(accounts.user, username)).run()
     sqliteDb.delete(users).where(eq(users.username, username)).run()
-    await dbInstance.close()
   })
 
   const insertSubscription = (catId: string, nextPaymentDate: number): string => {

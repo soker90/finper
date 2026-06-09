@@ -5,12 +5,9 @@ import { generateUsername } from '../../../../test/generate-values'
 import { db as sqliteDb } from '../../../db'
 import { schema, generateId } from '@soker90/finper-db'
 import { eq } from 'drizzle-orm'
-import testDatabase from '../../../../test/test-db'
-import { mongoose } from '@soker90/finper-models'
 import { subscriptionsRoutes } from '../subscriptions.routes'
 
 const { subscriptions, transactions, categories, accounts, users, subscriptionCandidates } = schema
-const dbInstance = testDatabase(mongoose)
 
 describe('Subscriptions Controller Part C (candidates)', () => {
   let token: string
@@ -42,7 +39,6 @@ describe('Subscriptions Controller Part C (candidates)', () => {
   }
 
   beforeAll(async () => {
-    await dbInstance.connect()
     server.app.use('/test-api/subscriptions', subscriptionsRoutes)
     server.app.use(require('../../../middlewares/handle-error').default)
     token = await requestLogin(server.app, { username })
@@ -59,7 +55,6 @@ describe('Subscriptions Controller Part C (candidates)', () => {
     sqliteDb.delete(categories).where(eq(categories.user, username)).run()
     sqliteDb.delete(accounts).where(eq(accounts.user, username)).run()
     sqliteDb.delete(users).where(eq(users.username, username)).run()
-    await dbInstance.close()
   })
 
   afterEach(() => {

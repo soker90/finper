@@ -4,7 +4,6 @@ import express from 'express'
 import cors from 'cors'
 import compression from 'compression'
 
-import db from './config/db'
 import config from './config'
 import { db as sqliteDb } from './db'
 import { migrate } from 'drizzle-orm/better-sqlite3/migrator'
@@ -39,7 +38,6 @@ class Server {
     this.preMiddlewareConfig()
     this.routes()
     this.postMiddlewareConfig()
-    this.mongo()
     this.sqlite()
   }
 
@@ -75,10 +73,6 @@ class Server {
 
   public postMiddlewareConfig (): void {
     this.app.use(handleError)
-  }
-
-  private mongo () {
-    db.connect(config.mongo)
   }
 
   private sqlite () {
