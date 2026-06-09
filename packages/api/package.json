@@ -10,7 +10,7 @@
     "build": "pnpm run build-ts",
     "serve": "node dist/server.js",
     "build-ts": "tsc",
-    "test": "NODE_ENV=test jest --maxWorkers=50% --silent",
+    "test": "NODE_ENV=test jest --runInBand --silent",
     "lint": "eslint . --ext .ts",
     "lint:fix": "eslint . --fix --ext .ts",
     "seed-user": "ts-node src/scripts/seed-user.ts"
