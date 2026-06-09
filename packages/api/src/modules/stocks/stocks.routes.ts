@@ -14,5 +14,5 @@ const stocksController = new StockController(stockService)
 
 stocksRouter.get('/summary', authMiddleware, asyncHandler(stocksController.summary.bind(stocksController)))
 stocksRouter.get('/', authMiddleware, asyncHandler(stocksController.stocks.bind(stocksController)))
-stocksRouter.post('/', authMiddleware, asyncHandler(stocksController.create.bind(stocksController)))
-stocksRouter.delete('/:id', authMiddleware, asyncHandler(stocksController.remove.bind(stocksController)))
+stocksRouter.post('/', authMiddleware, stocksController.create.bind(stocksController))
+stocksRouter.delete('/:id', authMiddleware, stocksController.remove.bind(stocksController))
