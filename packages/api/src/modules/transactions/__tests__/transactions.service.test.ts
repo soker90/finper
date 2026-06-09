@@ -1,12 +1,11 @@
 import { db as sqliteDb } from '../../../db'
-import { schema, generateId } from '@soker90/finper-db'
+import { schema, generateId, TRANSACTION } from '@soker90/finper-db'
 import { eq } from 'drizzle-orm'
 import { createTransactionsRepository } from '../transactions.repository'
 import { TransactionsService } from '../transactions.service'
 import { generateUsername } from '../../../../test/generate-values'
 import { getTransactionAmount } from '../../../services/utils'
 import { roundNumber } from '../../../utils'
-import { TRANSACTION } from '@soker90/finper-db'
 
 const { transactions, accounts, categories, stores, users } = schema
 

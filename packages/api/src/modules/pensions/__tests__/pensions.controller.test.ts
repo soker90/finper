@@ -11,13 +11,11 @@ import { db as sqliteDb } from '../../../db'
 import { schema, generateId } from '@soker90/finper-db'
 import { eq } from 'drizzle-orm'
 
-
 const insertPension = (data: any = {}) => {
   const id = generateId()
   const dateNum = data.date ? data.date : Date.now()
   const record = {
     id,
-    date: new Date(dateNum),
     employeeAmount: faker.number.float({ min: 1, max: 100, multipleOf: 2 }),
     employeeUnits: faker.number.float({ min: 1, max: 100, multipleOf: 5 }),
     companyAmount: faker.number.float({ min: 1, max: 100, multipleOf: 2 }),
@@ -32,8 +30,6 @@ const insertPension = (data: any = {}) => {
 }
 
 describe('Pension Controller', () => {
-
-
   describe('POST /', () => {
     const path = '/api/pensions'
     let token: string
@@ -115,7 +111,7 @@ describe('Pension Controller', () => {
     test('when there are pensions, it should return the pensions', async () => {
       const pension = insertPension({ user })
       const response = await supertest(server.app).get(path).auth(token, { type: 'bearer' }).expect(200)
-      
+
       const responsePension = response.body.transactions[0]
       expect(responsePension._id).toBe(pension._id)
       expect(responsePension.date).toBe(pension.date)
@@ -124,7 +120,7 @@ describe('Pension Controller', () => {
       expect(responsePension.companyAmount).toBe(pension.companyAmount)
       expect(responsePension.companyUnits).toBe(pension.companyUnits)
       expect(responsePension.value).toBe(pension.value)
-      
+
       expect(response.body.amount).toBe(pension.employeeAmount + pension.companyAmount)
       expect(response.body.units).toBe(pension.employeeUnits + pension.companyUnits)
       expect(response.body.employeeAmount).toBe(pension.employeeAmount)

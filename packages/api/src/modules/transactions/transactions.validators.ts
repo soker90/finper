@@ -1,9 +1,8 @@
 import Joi from 'joi'
 import Boom from '@hapi/boom'
 import { eq, and } from 'drizzle-orm'
-import { TRANSACTION } from '@soker90/finper-db'
+import { TRANSACTION, schema } from '@soker90/finper-db'
 import { db as sqliteDb } from '../../db'
-import { schema } from '@soker90/finper-db'
 import { isValidId } from '../../utils'
 import { ERROR_MESSAGE } from '../../i18n'
 

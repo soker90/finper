@@ -9,8 +9,6 @@ const LocalStrategy = passportLocal.Strategy
 passport.use(new LocalStrategy({ usernameField: 'username' }, function (user, password, done) {
   const lowercaseUser = user.toLowerCase()
 
-  const query = { username: lowercaseUser }
-
   try {
     const userDocument = usersRepository.findByUsername(lowercaseUser)
     if (!userDocument) {

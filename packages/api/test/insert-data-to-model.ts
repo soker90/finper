@@ -2,6 +2,7 @@ import { faker } from '@faker-js/faker'
 import {
   SUPPLY_TYPE,
   TRANSACTION, LOAN_PAYMENT
+  , schema, generateId
 } from '@soker90/finper-db'
 import { propertyRepository } from '../src/repositories/property.repository'
 import { supplyRepository } from '../src/repositories/supply.repository'
@@ -9,11 +10,10 @@ import { supplyReadingRepository } from '../src/repositories/supply-reading.repo
 
 import { db as sqliteDb } from '../src/db'
 import hashPassword from '../src/helpers/hash-password'
-import { schema, generateId } from '@soker90/finper-db'
 const { users } = schema
 
 import {
-  MAX_USERNAME_LENGTH, MIN_LENGTH_USERNAME,
+  MAX_USERNAME_LENGTH,
   MIN_PASSWORD_LENGTH
 } from '../src/config/inputs'
 import { generateUsername } from './generate-values'
@@ -302,7 +302,9 @@ export const insertProperty = (params: Record<string, any> = {}) => {
 export const insertSupply = (params: Record<string, any> = {}) => {
   const user = ensureUser(params.user)
   const propertyId = params.propertyId ?? insertProperty({ user }).id
-  const { propertyId: _pid, user: _u, ...rest } = params
+  const rest = { ...params }
+  delete rest.propertyId
+  delete rest.user
   return supplyRepository.create({
     name: faker.company.name(),
     type: SUPPLY_TYPE.ELECTRICITY,

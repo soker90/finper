@@ -19,15 +19,11 @@ jest.mock('../stock-price.provider', () => ({
   IStockPriceProvider: {}
 }))
 
-
 describe('Stocks Controller', () => {
   const username = generateUsername()
   let token: string
 
   beforeAll(async () => {
-
-
-
     token = await requestLogin(server.app, { username })
   })
 

@@ -32,7 +32,7 @@ export const createPensionsRepository = (db: DB) => ({
       if (v !== undefined) payload[k] = v
     }
     if (payload.date) payload.date = new Date(payload.date)
-    
+
     if (Object.keys(payload).length === 0) {
       return db.select()
         .from(pensions)

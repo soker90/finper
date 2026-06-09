@@ -4,10 +4,9 @@ import { server } from '../../../server'
 import { requestLogin } from '../../../../test/request-login'
 import { generateUsername } from '../../../../test/generate-values'
 import { db as sqliteDb } from '../../../db'
-import { schema, generateId } from '@soker90/finper-db'
+import { schema, generateId, TRANSACTION } from '@soker90/finper-db'
 import { and, eq, isNull, isNotNull } from 'drizzle-orm'
 import { ERROR_MESSAGE } from '../../../i18n'
-import { TRANSACTION } from '@soker90/finper-db'
 import { categoriesRoutes } from '../categories.routes'
 
 const { categories, users } = schema
@@ -34,7 +33,6 @@ describe('Categories Controller', () => {
   }
 
   beforeAll(async () => {
-
     // Montaje en ruta de test (módulo construido SIN activar en server.ts).
     server.app.use('/test-api/categories', categoriesRoutes)
     server.app.use(require('../../../middlewares/handle-error').default)

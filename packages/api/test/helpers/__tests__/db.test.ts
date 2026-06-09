@@ -36,7 +36,6 @@ describe('test db helper', () => {
     closeTestDb(db2)
   })
 
-
   it('applies REAL type for monetary fields', () => {
     const db = createTestDb()
     createTestUser(db)

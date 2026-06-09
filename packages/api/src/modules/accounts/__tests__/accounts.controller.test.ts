@@ -18,7 +18,6 @@ describe('Accounts Controller', () => {
   const path = '/test-api/accounts'
 
   beforeAll(async () => {
-
     server.app.use('/test-api/accounts', accountsRoutes)
     server.app.use(require('../../../middlewares/handle-error').default)
 

@@ -48,8 +48,17 @@ describe('Subscriptions Service', () => {
 
   const linkTx = (subscriptionId: string, date: number) => {
     db.insert(transactions).values({
-      id: generateId(), date, categoryId, amount: 10, type: 'expense',
-      accountId, note: null, storeId: null, subscriptionId, tags: [], user
+      id: generateId(),
+      date,
+      categoryId,
+      amount: 10,
+      type: 'expense',
+      accountId,
+      note: null,
+      storeId: null,
+      subscriptionId,
+      tags: [],
+      user
     }).run()
   }
 

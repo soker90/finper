@@ -1,14 +1,12 @@
 import supertest from 'supertest'
 import { db as sqliteDb } from '../../src/db'
 import { schema } from '@soker90/finper-db'
-import { eq } from 'drizzle-orm'
 import { faker } from '@faker-js/faker'
 
 import { server } from '../../src/server'
 import { requestLogin } from '../request-login'
 import { insertSupplyReading, insertSupply } from '../insert-data-to-model'
 import { generateUsername } from '../generate-values'
-
 
 const buildReadingPayload = (overrides: Record<string, unknown> = {}) => {
   const startDate = faker.date.past().getTime()

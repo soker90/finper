@@ -47,7 +47,7 @@ export const validateDebtCreateParams = ({ body, user }: { body: Record<string, 
   if (error) {
     throw Boom.badData(error.message).output
   }
-  
+
   delete value.user
   return value
 }
@@ -61,7 +61,7 @@ export const validateDebtEditParams = ({ params, body, user }: {
   if (error) {
     throw Boom.badData(error.message).output
   }
-  
+
   return { id: params.id, value }
 }
 

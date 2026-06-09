@@ -28,21 +28,20 @@ describe('users.service', () => {
     expect(user?.password).not.toBe('password123')
   })
 
-  it('createUser with existing username throws conflict', async () => {
-    await service.createUser({ username: 'testuser', password: 'password123' })
-    try {
-      await service.createUser({ username: 'testuser', password: 'password123' })
-      fail('Should have thrown')
-    } catch (err: any) {
-      expect(err.statusCode).toBe(409)
-      expect(err.payload.message).toBe('El usuario ya existe')
-    }
+  it('createUser with existing username throws conflict', () => {
+    service.createUser({ username: 'testuser', password: 'password123' })
+    expect(() => {
+      service.createUser({ username: 'testuser', password: 'password123' })
+    }).toThrow(expect.objectContaining({
+      statusCode: 409,
+      payload: expect.objectContaining({ message: 'El usuario ya existe' })
+    }))
   })
 
   it('validatePassword with correct and incorrect password', async () => {
     await service.createUser({ username: 'testuser', password: 'password123' })
     const user = repo.findByUsername('testuser')!
-    
+
     expect(service.validatePassword('password123', user.password)).toBe(true)
     expect(service.validatePassword('wrong', user.password)).toBe(false)
   })
@@ -50,7 +49,7 @@ describe('users.service', () => {
   it('signToken produces a decodable JWT with {username}', () => {
     const token = service.signToken('testuser')
     expect(typeof token).toBe('string')
-    
+
     const jwt = require('jsonwebtoken')
     const decoded = jwt.decode(token)
     expect(decoded.username).toBe('testuser')

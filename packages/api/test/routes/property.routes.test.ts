@@ -8,7 +8,6 @@ import { requestLogin } from '../request-login'
 import { insertProperty, insertSupply, insertSupplyReading } from '../insert-data-to-model'
 import { generateUsername } from '../generate-values'
 
-
 describe('Property Routes', () => {
   afterEach(() => {
     sqliteDb.delete(schema.supplyReadings).run()

@@ -58,8 +58,17 @@ describe('Subscriptions Part C (candidates)', () => {
   const insertTx = (subscriptionId: string | null, date = NOW) => {
     const id = generateId()
     db.insert(transactions).values({
-      id, date, categoryId, amount: 9.99, type: 'expense', accountId,
-      note: 'pay', storeId: null, subscriptionId, tags: [], user
+      id,
+      date,
+      categoryId,
+      amount: 9.99,
+      type: 'expense',
+      accountId,
+      note: 'pay',
+      storeId: null,
+      subscriptionId,
+      tags: [],
+      user
     }).run()
     return id
   }

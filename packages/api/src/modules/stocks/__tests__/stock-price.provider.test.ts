@@ -1,8 +1,6 @@
 import { YahooPriceProvider } from '../stock-price.provider'
 import config from '../../../config'
 
-import yahooFinance from 'yahoo-finance2'
-
 // ── Mock yahoo-finance2 ───────────────────────────────────────────────────────
 const mockQuote = jest.fn()
 jest.mock('yahoo-finance2', () => {

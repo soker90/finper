@@ -6,7 +6,6 @@ import { requestLogin } from '../request-login'
 import { ticketService } from '../../src/services'
 import { ERROR_MESSAGE } from '../../src/i18n/ErrorMessages'
 
-
 const mockFetch = (ok: boolean, body: object = {}) =>
   jest.spyOn(global, 'fetch').mockResolvedValueOnce({
     ok,

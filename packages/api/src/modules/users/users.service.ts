@@ -2,7 +2,6 @@ import Boom from '@hapi/boom'
 import { ERROR_MESSAGE } from '../../i18n'
 import hashPassword from '../../helpers/hash-password'
 import bcrypt from 'bcrypt'
-import config from '../../config'
 import signToken from '../../helpers/sign-token'
 import { createUsersRepository, usersRepository } from './users.repository'
 

@@ -1,9 +1,7 @@
-import Boom from '@hapi/boom'
 import { createTestDb, closeTestDb } from '../../../../test/helpers/db'
 import { createPensionsRepository } from '../pensions.repository'
 import { PensionsService } from '../pensions.service'
 import { generateUsername } from '../../../../test/generate-values'
-import { ERROR_MESSAGE } from '../../../i18n'
 import type { DB } from '@soker90/finper-db'
 import { schema } from '@soker90/finper-db'
 import { eq } from 'drizzle-orm'
@@ -31,7 +29,6 @@ describe('Pensions Service', () => {
     db.delete(schema.pensions).where(eq(schema.pensions.user, user)).run()
   })
 
-
   describe('addPension', () => {
     it('should create and return the serialized pension', () => {
       const date = Date.now()
@@ -57,7 +54,7 @@ describe('Pensions Service', () => {
   describe('getPensions', () => {
     it('should return zeros and empty array when no pensions exist', () => {
       const response = service.getPensions(user)
-      
+
       expect(response).toEqual({
         amount: 0,
         units: 0,
@@ -76,18 +73,18 @@ describe('Pensions Service', () => {
         companyUnits: 5,
         user
       }
-      
+
       // insert older
       service.addPension({ ...data, date: 1000, value: 10 })
       // insert newer
       service.addPension({ ...data, date: 2000, value: 15 })
 
       const response = service.getPensions(user)
-      
+
       expect(response.transactions).toHaveLength(2)
       expect(response.transactions[0].date).toBe(2000)
       expect(response.transactions[1].date).toBe(1000)
-      
+
       expect(response.employeeAmount).toBe(200) // 100 + 100
       expect(response.companyAmount).toBe(100) // 50 + 50
       expect(response.amount).toBe(300) // 200 + 100
@@ -98,6 +95,4 @@ describe('Pensions Service', () => {
       expect(response.total).toBe(450)
     })
   })
-
-
 })

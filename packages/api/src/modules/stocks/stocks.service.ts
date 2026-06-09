@@ -4,9 +4,8 @@ import { roundNumber } from '../../utils/roundNumber'
 import { STOCK_TYPE } from './stocks.validators'
 import { schema } from '@soker90/finper-db'
 
-const { stocks } = schema
-type StockRecord = typeof stocks.$inferSelect
-type StockInsert = Omit<typeof stocks.$inferInsert, 'id'>
+type StockRecord = typeof schema.stocks.$inferSelect
+type StockInsert = Omit<typeof schema.stocks.$inferInsert, 'id'>
 
 export interface StockPosition {
   ticker: string

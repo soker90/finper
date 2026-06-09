@@ -11,16 +11,11 @@ import { db } from '../../../db'
 import { eq } from 'drizzle-orm'
 import { schema } from '@soker90/finper-db'
 
-
 function getUsername (): string {
   return faker.internet.username().slice(0, MAX_USERNAME_LENGTH)
 }
 
 describe('Auth / users controller', () => {
-
-
-
-
   describe('POST /register', () => {
     const path = '/api/auth/register'
 

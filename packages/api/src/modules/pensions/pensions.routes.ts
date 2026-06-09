@@ -14,7 +14,7 @@ export class PensionsRoutes {
   constructor () {
     const repository = createPensionsRepository(db)
     const pensionsService = new PensionsService(repository)
-    
+
     this.pensionsController = new PensionsController({
       pensionsService,
       loggerHandler: loggerHandler('PensionController')

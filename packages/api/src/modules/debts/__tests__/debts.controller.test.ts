@@ -15,7 +15,6 @@ describe('debtsController', () => {
   const userId = generateId()
 
   beforeAll(async () => {
-
     token = await requestLogin(server.app, { username })
   })
 

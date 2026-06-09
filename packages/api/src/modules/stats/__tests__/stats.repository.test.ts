@@ -2,8 +2,7 @@ import { createTestDb, closeTestDb } from '../../../../test/helpers/db'
 import { createStatsRepository } from '../stats.repository'
 import { generateUsername } from '../../../../test/generate-values'
 import type { DB } from '@soker90/finper-db'
-import { schema, generateId } from '@soker90/finper-db'
-import { TRANSACTION } from '@soker90/finper-db'
+import { schema, generateId, TRANSACTION } from '@soker90/finper-db'
 import { eq } from 'drizzle-orm'
 
 const { transactions, categories, accounts, stores, users } = schema

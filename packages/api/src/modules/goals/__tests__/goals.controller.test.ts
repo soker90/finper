@@ -3,11 +3,8 @@ import { eq } from 'drizzle-orm'
 import { server } from '../../../server'
 import { db as sqliteDb } from '../../../db'
 import { schema, generateId } from '@soker90/finper-db'
-import { GOAL_COLORS, GOAL_ICONS } from '../goals.validators'
 import { requestLogin } from '../../../../test/request-login'
 import { generateUsername } from '../../../../test/generate-values'
-
-
 
 const { users, goals, accounts } = schema
 
@@ -18,7 +15,6 @@ describe('Goal Routes (SQLite integration)', () => {
   const userId = generateId()
 
   beforeAll(async () => {
-
     token = await requestLogin(server.app, { username })
   })
 

@@ -26,8 +26,17 @@ describe('Subscriptions Controller Part B', () => {
   const insertTx = (subscriptionId: string | null, date = 1000): string => {
     const id = generateId()
     sqliteDb.insert(transactions).values({
-      id, date, categoryId, amount: 9.99, type: 'expense', accountId,
-      note: null, storeId: null, subscriptionId, tags: [], user: username
+      id,
+      date,
+      categoryId,
+      amount: 9.99,
+      type: 'expense',
+      accountId,
+      note: null,
+      storeId: null,
+      subscriptionId,
+      tags: [],
+      user: username
     }).run()
     return id
   }

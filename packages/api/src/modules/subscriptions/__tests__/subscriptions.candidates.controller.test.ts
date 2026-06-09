@@ -26,8 +26,17 @@ describe('Subscriptions Controller Part C (candidates)', () => {
   const insertTx = (subscriptionId: string | null): string => {
     const id = generateId()
     sqliteDb.insert(transactions).values({
-      id, date: 1000, categoryId, amount: 9.99, type: 'expense', accountId,
-      note: null, storeId: null, subscriptionId, tags: [], user: username
+      id,
+      date: 1000,
+      categoryId,
+      amount: 9.99,
+      type: 'expense',
+      accountId,
+      note: null,
+      storeId: null,
+      subscriptionId,
+      tags: [],
+      user: username
     }).run()
     return id
   }

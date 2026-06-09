@@ -30,7 +30,7 @@ export default [
       'import/no-unresolved': [
         'error',
         {
-          ignore: ['^@soker90/finper-models', '^mongoose$', '^@typescript-eslint/', '^eslint-plugin-', '^neostandard$']
+          ignore: ['^@typescript-eslint/', '^eslint-plugin-', '^neostandard$']
         }
       ]
     },

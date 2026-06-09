@@ -3,9 +3,8 @@ import { server } from '../../../server'
 import { requestLogin } from '../../../../test/request-login'
 import { generateUsername } from '../../../../test/generate-values'
 import { db as sqliteDb } from '../../../db'
-import { schema, generateId } from '@soker90/finper-db'
+import { schema, generateId, TRANSACTION } from '@soker90/finper-db'
 import { eq } from 'drizzle-orm'
-import { TRANSACTION } from '@soker90/finper-db'
 import { transactionsRoutes } from '../transactions.routes'
 
 const { transactions, accounts, categories, subscriptions, subscriptionCandidates, users } = schema

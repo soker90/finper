@@ -26,7 +26,6 @@ describe('Pensions Repository', () => {
     db.delete(schema.pensions).where(eq(schema.pensions.user, user)).run()
   })
 
-
   describe('create', () => {
     it('should create a pension and return it with an id', () => {
       const date = Date.now()
@@ -68,7 +67,7 @@ describe('Pensions Repository', () => {
       repository.create({ ...data, date: 2000 })
 
       const pensions = repository.findByUser(user)
-      
+
       expect(pensions).toHaveLength(3)
       expect(pensions[0].date.getTime()).toBe(3000)
       expect(pensions[1].date.getTime()).toBe(2000)
@@ -132,7 +131,7 @@ describe('Pensions Repository', () => {
       const pension = repository.create(data)
 
       const updated = repository.update(pension.id, user, { value: 20, employeeAmount: 200 })
-      
+
       expect(updated).toBeDefined()
       expect(updated?.id).toBe(pension.id)
       expect(updated?.value).toBe(20)

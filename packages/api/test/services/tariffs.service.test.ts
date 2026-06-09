@@ -1,11 +1,7 @@
-import { SUPPLY_TYPE } from '@soker90/finper-db'
+import { SUPPLY_TYPE, schema } from '@soker90/finper-db'
 import { db as sqliteDb } from '../../src/db'
-import { schema } from '@soker90/finper-db'
-import { eq } from 'drizzle-orm'
 import TariffsService from '../../src/services/tariffs.service'
 import { insertSupply, insertSupplyReading, insertCredentials } from '../insert-data-to-model'
-import { generateUsername } from '../generate-values'
-
 
 // Helpers compartidos
 const FULL_PRICE_SUPPLY = {

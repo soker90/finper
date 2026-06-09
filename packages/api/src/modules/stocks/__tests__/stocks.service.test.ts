@@ -3,7 +3,6 @@ import { createStocksRepository } from '../stocks.repository'
 import { StockService } from '../stocks.service'
 import { STOCK_TYPE } from '../stocks.validators'
 import { schema, generateId } from '@soker90/finper-db'
-import { generateUsername } from '../../../../test/generate-values'
 
 describe('StocksService', () => {
   let testDb: any
