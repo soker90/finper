@@ -10,7 +10,7 @@
     "build": "pnpm run build-ts",
     "serve": "node dist/server.js",
     "build-ts": "tsc",
-    "test": "NODE_ENV=test jest --runInBand --silent",
+    "test": "NODE_ENV=test jest --maxWorkers=50% --silent",
     "lint": "eslint . --ext .ts",
     "lint:fix": "eslint . --fix --ext .ts",
     "seed-user": "ts-node src/scripts/seed-user.ts"
@@ -39,7 +39,6 @@
   "dependencies": {
     "@hapi/boom": "10.0.1",
     "@soker90/finper-db": "workspace:*",
-    "@soker90/finper-models": "workspace:*",
     "@soker90/finper-types": "workspace:*",
     "bcrypt": "6.0.0",
     "compression": "1.8.1",
@@ -63,7 +62,6 @@
     "@babel/core": "7.29.0",
     "@babel/preset-env": "7.29.3",
     "@faker-js/faker": "10.4.0",
-    "@shelf/jest-mongodb": "6.0.2",
     "@tsconfig/node22": "22.0.5",
     "@types/bcrypt": "6.0.0",
     "@types/compression": "1.8.1",

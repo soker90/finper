@@ -1,5 +1,5 @@
 import { faker } from '@faker-js/faker'
-import { ITransaction } from '@soker90/finper-models'
+import type { TransactionType } from '@soker90/finper-types'
 import { TRANSACTION } from '@soker90/finper-db'
 import { getTransactionAmount } from '../../src/services/utils'
 
@@ -8,7 +8,7 @@ describe('getTransactionsAmount', () => {
     const transaction = {
       amount: faker.number.int(),
       type: TRANSACTION.Income
-    } as ITransaction
+    } as { type: TransactionType, amount: number }
 
     const result = getTransactionAmount(transaction)
 
@@ -18,7 +18,7 @@ describe('getTransactionsAmount', () => {
     const transaction = {
       amount: faker.number.int(),
       type: TRANSACTION.Expense
-    } as ITransaction
+    } as { type: TransactionType, amount: number }
 
     const result = getTransactionAmount(transaction)
 
@@ -29,7 +29,7 @@ describe('getTransactionsAmount', () => {
     const transaction = {
       amount: faker.number.int(),
       type: TRANSACTION.NotComputable
-    } as ITransaction
+    } as { type: TransactionType, amount: number }
 
     const result = getTransactionAmount(transaction)
 

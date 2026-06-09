@@ -1,6 +1,5 @@
 /** @type {import('jest').Config} */
 module.exports = {
-  preset: '@shelf/jest-mongodb',
   setupFiles: ['<rootDir>/jest.setup.ts'],
   transform: {
     '^.+\\.ts?$': ['ts-jest', { diagnostics: false }],
