@@ -78,6 +78,23 @@ describe('Loans Controller (Part C - events / simulation)', () => {
       expect(loan.interestRate).toBe(4.5)
       expect(loan.monthlyPayment).toBe(520)
     })
+
+    test('with a past-dated event, getLoanDetail projection uses that rate', async () => {
+      const id = insertLoan()
+      const pastDate = Date.now() - 30 * 24 * 60 * 60 * 1000 // 30 days ago
+
+      await supertest(server.app).post(`${base}/${id}/events`).set('Authorization', `Bearer ${token}`)
+        .send({ date: pastDate, newRate: 5.5, newPayment: 220 }).expect(201)
+
+      const detailRes = await supertest(server.app).get(`${base}/${id}`).set('Authorization', `Bearer ${token}`).expect(200)
+
+      expect(detailRes.body.stats.currentRate).toBe(5.5)
+      expect(detailRes.body.stats.currentPayment).toBe(220)
+
+      const firstProjected = detailRes.body.amortizationTable.find((row: any) => row.isProjected)
+      // 10000 * 5.5 / 100 / 12 = 45.8333 -> 45.83
+      expect(firstProjected.interest).toBe(45.83)
+    })
   })
 
   describe('POST /:id/simulate-payoff', () => {

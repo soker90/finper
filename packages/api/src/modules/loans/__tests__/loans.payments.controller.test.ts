@@ -93,6 +93,15 @@ describe('Loans Controller (Part B - payments)', () => {
       expect(sqliteDb.select().from(transactions).where(eq(transactions.user, username)).all()).toHaveLength(0)
     })
 
+    test('dos pagos secuenciales deducen ambos correctamente del balance', async () => {
+      const id = insertLoan()
+      await supertest(server.app).post(`${base}/${id}/pay`).set('Authorization', `Bearer ${token}`).send({ addMovement: true }).expect(201)
+      await supertest(server.app).post(`${base}/${id}/pay`).set('Authorization', `Bearer ${token}`).send({ addMovement: true }).expect(201)
+      // Since initial balance is 1000, and each payment is ~500, after 2 payments it should be 0.
+      expect(balanceOf()).toBe(0)
+      expect(sqliteDb.select().from(transactions).where(eq(transactions.user, username)).all()).toHaveLength(2)
+    })
+
     test('already paid (pendingAmount 0) responds 400', async () => {
       const id = insertLoan({ pendingAmount: 0 })
       await supertest(server.app).post(`${base}/${id}/pay`).set('Authorization', `Bearer ${token}`).send({}).expect(400)
@@ -138,6 +147,31 @@ describe('Loans Controller (Part B - payments)', () => {
       const res = await supertest(server.app).put(`${base}/${id}/payments/${pay.body._id}`).set('Authorization', `Bearer ${token}`)
         .send({ amount: 600, principal: 500 }).expect(200)
       expect(res.body.amount).toBe(600)
+    })
+
+    test('editing type from ordinary to extraordinary should succeed and persist the new type', async () => {
+      const id = insertLoan()
+      const pay = await supertest(server.app).post(`${base}/${id}/pay`).set('Authorization', `Bearer ${token}`).send({}).expect(201)
+      const res = await supertest(server.app).put(`${base}/${id}/payments/${pay.body._id}`).set('Authorization', `Bearer ${token}`)
+        .send({ type: 'extraordinary' }).expect(200)
+      expect(res.body.type).toBe('extraordinary')
+      const dbPayment = sqliteDb.select().from(loanPayments).where(eq(loanPayments.id, pay.body._id)).get()
+      expect(dbPayment!.type).toBe('extraordinary')
+    })
+
+    test('editing date should update the payment date and the linked transaction date', async () => {
+      const id = insertLoan()
+      const pay = await supertest(server.app).post(`${base}/${id}/pay`).set('Authorization', `Bearer ${token}`).send({ addMovement: true }).expect(201)
+
+      const newDate = new Date('2025-02-15').getTime()
+      const res = await supertest(server.app).put(`${base}/${id}/payments/${pay.body._id}`).set('Authorization', `Bearer ${token}`)
+        .send({ date: newDate }).expect(200)
+
+      expect(res.body.date).toBe(newDate)
+
+      // Look up the transaction (it should have been updated to match the new date)
+      const tx = sqliteDb.select().from(transactions).where(eq(transactions.user, username)).get()
+      expect(tx!.date).toBe(newDate)
     })
   })
 })
