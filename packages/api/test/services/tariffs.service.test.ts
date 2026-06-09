@@ -1,6 +1,9 @@
-import { SupplyModel, SupplyReadingModel, mongoose, SUPPLY_TYPE } from '@soker90/finper-models'
+import { mongoose, SUPPLY_TYPE } from '@soker90/finper-models'
+import { db as sqliteDb } from '../../src/db'
+import { schema } from '@soker90/finper-db'
+import { eq } from 'drizzle-orm'
 import TariffsService from '../../src/services/tariffs.service'
-import { insertSupply, insertSupplyReading } from '../insert-data-to-model'
+import { insertSupply, insertSupplyReading, insertCredentials } from '../insert-data-to-model'
 import { generateUsername } from '../generate-values'
 
 import createTestDatabase from '../test-db'
@@ -44,12 +47,16 @@ describe('TariffsService.simulateTariff — ramas de descuento', () => {
 
   beforeAll(() => testDatabase.connect())
   afterAll(() => testDatabase.close())
-  afterEach(() => Promise.all([SupplyModel.deleteMany({}), SupplyReadingModel.deleteMany({})]))
+  afterEach(() => {
+    sqliteDb.delete(schema.supplyReadings).run()
+    sqliteDb.delete(schema.supplies).run()
+    sqliteDb.delete(schema.properties).run()
+  })
 
   beforeEach(async () => {
-    user = generateUsername()
+    user = (await insertCredentials()).username
     const supply = await insertSupply({ user, ...FULL_PRICE_SUPPLY })
-    supplyId = supply._id.toString()
+    supplyId = supply.id
     const endDate = Date.now()
     await insertSupplyReading({
       user,
