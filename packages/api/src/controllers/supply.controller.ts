@@ -49,7 +49,7 @@ export class SupplyController {
     this.logger.logInfo(`/edit - supply: ${req.body.name}`)
 
     const { id, value } = await validateSupplyEditParams({ params: req.params, body: req.body, user: req.user })
-    const response = await this.supplyService.editSupply({ id, value })
+    const response = await this.supplyService.editSupply({ id, value, user: req.user })
     this.logger.logInfo(`Supply ${response._id} has been succesfully edited`)
 
     res.send(response)
@@ -60,7 +60,7 @@ export class SupplyController {
     this.logger.logInfo(`/delete - supply: ${id}`)
 
     await validateSupplyExist({ id, user: req.user })
-    await this.supplyService.deleteSupply({ id })
+    await this.supplyService.deleteSupply({ id, user: req.user })
 
     res.sendStatus(204)
   }

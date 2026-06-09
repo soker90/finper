@@ -1,33 +1,36 @@
-import { SupplyReadingModel, ISupplyReading, SupplyReadingDocument } from '@soker90/finper-models'
 import Boom from '@hapi/boom'
 import { ERROR_MESSAGE } from '../i18n'
+import { supplyReadingRepository } from '../repositories/supply-reading.repository'
+import { serializeReading } from '../serializers/supply-reading.serializer'
+
+type SerializedReading = ReturnType<typeof serializeReading>
 
 export interface ISupplyReadingService {
-  addReading(reading: ISupplyReading): Promise<SupplyReadingDocument>
-  editReading({ id, value }: { id: string, value: ISupplyReading }): Promise<SupplyReadingDocument>
-  deleteReading({ id }: { id: string }): Promise<void>
-  getSupplyReadings({ supplyId, user }: { supplyId: string, user: string }): Promise<SupplyReadingDocument[]>
+  addReading(reading: any): Promise<SerializedReading>
+  editReading(args: { id: string, value: any, user: string }): Promise<SerializedReading>
+  deleteReading(args: { id: string, user: string }): Promise<void>
+  getSupplyReadings(args: { supplyId: string, user: string }): Promise<SerializedReading[]>
 }
 
 export default class SupplyReadingService implements ISupplyReadingService {
-  public async getSupplyReadings ({ supplyId, user }: { supplyId: string, user: string }): Promise<SupplyReadingDocument[]> {
-    return SupplyReadingModel.find({ supplyId, user }).sort({ startDate: -1, endDate: -1 })
+  public async getSupplyReadings ({ supplyId, user }: { supplyId: string, user: string }): Promise<SerializedReading[]> {
+    return supplyReadingRepository.findBySupplyAndUser(supplyId, user).map(serializeReading)
   }
 
-  public async addReading (reading: ISupplyReading): Promise<SupplyReadingDocument> {
-    return SupplyReadingModel.create(reading)
+  public async addReading (reading: any): Promise<SerializedReading> {
+    return serializeReading(supplyReadingRepository.create(reading))
   }
 
-  public async editReading ({ id, value }: { id: string, value: ISupplyReading }): Promise<SupplyReadingDocument> {
-    const updated = await SupplyReadingModel.findByIdAndUpdate<SupplyReadingDocument>(id, value, { returnDocument: 'after' })
-    /* istanbul ignore next — validator validateReadingExist runs before this method via route */
+  public async editReading ({ id, value, user }: { id: string, value: any, user: string }): Promise<SerializedReading> {
+    const updated = supplyReadingRepository.update(id, user, value)
+    /* istanbul ignore next */
     if (!updated) throw Boom.notFound(ERROR_MESSAGE.SUPPLY_READING.NOT_FOUND).output
-    return updated
+    return serializeReading(updated)
   }
 
-  public async deleteReading ({ id }: { id: string }): Promise<void> {
-    const deleted = await SupplyReadingModel.findByIdAndDelete(id)
-    /* istanbul ignore next — validator validateReadingExist runs before this method via route */
+  public async deleteReading ({ id, user }: { id: string, user: string }): Promise<void> {
+    const deleted = supplyReadingRepository.delete(id, user)
+    /* istanbul ignore next */
     if (!deleted) throw Boom.notFound(ERROR_MESSAGE.SUPPLY_READING.NOT_FOUND).output
   }
 }

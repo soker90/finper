@@ -1,4 +1,6 @@
-import { SupplyModel, SupplyReadingModel, SupplyReadingDocument, ISupplyReading } from '@soker90/finper-models'
+import { ISupplyReading } from '@soker90/finper-models'
+import { supplyRepository } from '../repositories/supply.repository'
+import { supplyReadingRepository } from '../repositories/supply-reading.repository'
 import Boom from '@hapi/boom'
 import { roundNumber } from '../utils/roundNumber'
 import { ERROR_MESSAGE } from '../i18n'
@@ -176,24 +178,26 @@ export default class TariffsService implements ITariffsService {
     throw Boom.badGateway(ERROR_MESSAGE.TARIFF.FETCH_ERROR).output
   }
 
-  private async fetchYearReadings (supplyId: string, user: string): Promise<SupplyReadingDocument[]> {
-    const lastReading = await SupplyReadingModel.findOne({ supplyId, user }).sort({ endDate: -1 })
+  private async fetchYearReadings (supplyId: string, user: string): Promise<ISupplyReading[]> {
+    const lastReading = supplyReadingRepository.findLastBySupply(supplyId, user)
     if (!lastReading) {
       throw Boom.badRequest(ERROR_MESSAGE.SUPPLY_READING.NO_READINGS_FOR_COMPARISON).output
     }
 
-    const readings = await SupplyReadingModel.find({
-      supplyId,
-      user,
-      endDate: { $lte: lastReading.endDate },
-      startDate: { $gte: lastReading.endDate - ONE_YEAR_MS }
-    }).sort({ endDate: -1 })
+    const to = lastReading.endDate
+    const from = new Date(lastReading.endDate.getTime() - ONE_YEAR_MS)
+    const rows = supplyReadingRepository.findInLastYear(supplyId, user, to, from)
 
-    if (readings.length === 0) {
+    if (rows.length === 0) {
       throw Boom.badRequest(ERROR_MESSAGE.SUPPLY_READING.NO_READINGS_IN_LAST_YEAR).output
     }
 
-    return readings
+    // El cálculo aguas abajo espera startDate/endDate como número (ms), como el doc Mongo viejo.
+    return rows.map(r => ({
+      ...r,
+      startDate: r.startDate.getTime(),
+      endDate: r.endDate.getTime()
+    })) as unknown as ISupplyReading[]
   }
 
   private calculateInvoiceCost (
@@ -224,7 +228,7 @@ export default class TariffsService implements ITariffsService {
 
   private simulateTariff (
     tariff: ITariffEntry,
-    readings: SupplyReadingDocument[],
+    readings: ISupplyReading[],
     contractedPowerPeak: number,
     contractedPowerOffPeak: number,
     currentTariffPrices: ITariffPrices,
@@ -285,7 +289,7 @@ export default class TariffsService implements ITariffsService {
   }
 
   public async compareTariffs (supplyId: string, user: string): Promise<TariffComparisonResult[]> {
-    const supply = await SupplyModel.findOne({ _id: supplyId, user })
+    const supply = supplyRepository.findById(supplyId, user)
     if (!supply) throw Boom.notFound(ERROR_MESSAGE.SUPPLY.NOT_FOUND).output
 
     const [readings, tariffData] = await Promise.all([

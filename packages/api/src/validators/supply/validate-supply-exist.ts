@@ -1,10 +1,9 @@
 import Boom from '@hapi/boom'
-import { SupplyModel } from '@soker90/finper-models'
+import { supplyRepository } from '../../repositories/supply.repository'
 import { ERROR_MESSAGE } from '../../i18n'
 
 export const validateSupplyExist = async ({ id, message, user }: { id: string, message?: string, user: string }) => {
-  const supply = await SupplyModel.findOne({ _id: id, user })
-
+  const supply = supplyRepository.findById(id, user)
   if (!supply) {
     throw Boom.notFound(message || ERROR_MESSAGE.SUPPLY.NOT_FOUND).output
   }

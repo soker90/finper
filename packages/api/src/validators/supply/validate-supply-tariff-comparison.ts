@@ -1,9 +1,10 @@
 import Boom from '@hapi/boom'
-import { SUPPLY_TYPE, SupplyModel } from '@soker90/finper-models'
+import { SUPPLY_TYPE } from '@soker90/finper-models'
+import { supplyRepository } from '../../repositories/supply.repository'
 import { ERROR_MESSAGE } from '../../i18n'
 
 export const validateSupplyForTariffComparison = async ({ id, user }: { id: string, user: string }) => {
-  const supply = await SupplyModel.findOne({ _id: id, user })
+  const supply = supplyRepository.findById(id, user)
 
   if (!supply) {
     throw Boom.notFound(ERROR_MESSAGE.SUPPLY.NOT_FOUND).output

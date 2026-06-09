@@ -1,36 +1,36 @@
-import { PropertyModel, SupplyModel, SupplyReadingModel, IProperty, PropertyDocument } from '@soker90/finper-models'
 import Boom from '@hapi/boom'
 import { ERROR_MESSAGE } from '../i18n'
+import { propertyRepository } from '../repositories/property.repository'
+import { supplyRepository } from '../repositories/supply.repository'
+import { supplyReadingRepository } from '../repositories/supply-reading.repository'
+import { serializeProperty } from '../serializers/property.serializer'
+
+type SerializedProperty = ReturnType<typeof serializeProperty>
 
 export interface IPropertyService {
-  addProperty(property: IProperty): Promise<PropertyDocument>
-  editProperty({ id, value }: { id: string, value: IProperty }): Promise<PropertyDocument>
-  deleteProperty({ id }: { id: string }): Promise<void>
+  addProperty(property: { name: string, user: string }): Promise<SerializedProperty>
+  editProperty(args: { id: string, value: any, user: string }): Promise<SerializedProperty>
+  deleteProperty(args: { id: string, user: string }): Promise<void>
 }
 
 export default class PropertyService implements IPropertyService {
-  public async addProperty (property: IProperty): Promise<PropertyDocument> {
-    return PropertyModel.create(property)
+  public async addProperty (property: { name: string, user: string }): Promise<SerializedProperty> {
+    return serializeProperty(propertyRepository.create(property))
   }
 
-  public async editProperty ({ id, value }: { id: string, value: IProperty }): Promise<PropertyDocument> {
-    const updated = await PropertyModel.findByIdAndUpdate<PropertyDocument>(id, value, { returnDocument: 'after' })
-    /* istanbul ignore next — validator validatePropertyExist runs before this method via route */
+  public async editProperty ({ id, value, user }: { id: string, value: any, user: string }): Promise<SerializedProperty> {
+    const updated = propertyRepository.update(id, user, value)
+    /* istanbul ignore next — validatePropertyExist corre antes vía ruta */
     if (!updated) throw Boom.notFound(ERROR_MESSAGE.PROPERTY.NOT_FOUND).output
-    return updated
+    return serializeProperty(updated)
   }
 
-  public async deleteProperty ({ id }: { id: string }): Promise<void> {
-    const supplies = await SupplyModel.find({ propertyId: id }).select('_id')
-    const supplyIds = supplies.map(({ _id }) => _id)
-
-    if (supplyIds.length > 0) {
-      await SupplyReadingModel.deleteMany({ supplyId: { $in: supplyIds } })
-      await SupplyModel.deleteMany({ propertyId: id })
-    }
-
-    const deleted = await PropertyModel.findByIdAndDelete(id)
-    /* istanbul ignore next — validator validatePropertyExist runs before this method via route */
+  public async deleteProperty ({ id, user }: { id: string, user: string }): Promise<void> {
+    const supplyIds = supplyRepository.findByPropertyId(id).map(s => s.id)
+    supplyReadingRepository.deleteBySupplyIds(supplyIds)
+    supplyRepository.deleteByPropertyId(id)
+    const deleted = propertyRepository.delete(id, user)
+    /* istanbul ignore next */
     if (!deleted) throw Boom.notFound(ERROR_MESSAGE.PROPERTY.NOT_FOUND).output
   }
 }

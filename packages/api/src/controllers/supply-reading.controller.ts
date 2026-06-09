@@ -46,7 +46,7 @@ export class SupplyReadingController {
     this.logger.logInfo(`/edit - supply-reading: ${req.params.id}`)
 
     const { id, value } = await validateReadingEditParams({ params: req.params, body: req.body, user: req.user })
-    const response = await this.supplyReadingService.editReading({ id, value })
+    const response = await this.supplyReadingService.editReading({ id, value, user: req.user })
     this.logger.logInfo(`Supply Reading ${response._id} has been succesfully edited`)
 
     res.send(response)
@@ -57,7 +57,7 @@ export class SupplyReadingController {
     this.logger.logInfo(`/delete - supply-reading: ${id}`)
 
     await validateReadingExist({ id, user: req.user })
-    await this.supplyReadingService.deleteReading({ id })
+    await this.supplyReadingService.deleteReading({ id, user: req.user })
 
     res.sendStatus(204)
   }

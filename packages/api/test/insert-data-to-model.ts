@@ -1,9 +1,11 @@
 import { faker } from '@faker-js/faker'
 import {
-  PropertyModel, SupplyModel, SupplyReadingModel,
-  IProperty, ISupply, ISupplyReading, SUPPLY_TYPE,
+  SUPPLY_TYPE,
   TRANSACTION, LOAN_PAYMENT
 } from '@soker90/finper-models'
+import { propertyRepository } from '../src/repositories/property.repository'
+import { supplyRepository } from '../src/repositories/supply.repository'
+import { supplyReadingRepository } from '../src/repositories/supply-reading.repository'
 
 import { db as sqliteDb } from '../src/db'
 import hashPassword from '../src/helpers/hash-password'
@@ -292,35 +294,30 @@ export const insertPension = async (params: Record<string, any> = {}): Promise<a
   return data
 }
 
-export const insertProperty = async (params: Record<string, any> = {}): Promise<IProperty & { _id: any }> => {
-  const user = (params.user ?? generateUsername()) as string
-
-  return PropertyModel.create({
-    name: params.name ?? faker.location.streetAddress(),
-    user
-  }) as unknown as IProperty & { _id: any }
+export const insertProperty = (params: Record<string, any> = {}) => {
+  const user = ensureUser(params.user)
+  return propertyRepository.create({ name: params.name ?? faker.location.streetAddress(), user })
 }
 
-export const insertSupply = async (params: Record<string, any> = {}): Promise<ISupply & { _id: any }> => {
-  const user = (params.user ?? generateUsername()) as string
-  const propertyId = params.propertyId ?? (await insertProperty({ user }))._id
-
-  return SupplyModel.create({
+export const insertSupply = (params: Record<string, any> = {}) => {
+  const user = ensureUser(params.user)
+  const propertyId = params.propertyId ?? insertProperty({ user }).id
+  const { propertyId: _pid, user: _u, ...rest } = params
+  return supplyRepository.create({
     name: faker.company.name(),
     type: SUPPLY_TYPE.ELECTRICITY,
-    ...params,
+    ...rest,
     propertyId,
     user
-  }) as unknown as ISupply & { _id: any }
+  } as any)
 }
 
-export const insertSupplyReading = async (params: Record<string, any> = {}): Promise<ISupplyReading & { _id: any }> => {
-  const user = (params.user ?? generateUsername()) as string
-  const supplyId = params.supplyId ?? (await insertSupply({ user }))._id
+export const insertSupplyReading = (params: Record<string, any> = {}) => {
+  const user = ensureUser(params.user)
+  const supplyId = params.supplyId ?? insertSupply({ user }).id
   const startDate = params.startDate ?? faker.date.past({ years: 1 }).getTime()
   const endDate = params.endDate ?? faker.date.between({ from: startDate, to: Date.now() }).getTime()
-
-  return SupplyReadingModel.create({
+  return supplyReadingRepository.create({
     supplyId,
     startDate,
     endDate,
@@ -330,5 +327,5 @@ export const insertSupplyReading = async (params: Record<string, any> = {}): Pro
     consumptionOffPeak: params.consumptionOffPeak ?? faker.number.int({ min: 10, max: 100 }),
     consumption: params.consumption ?? faker.number.int({ min: 10, max: 100 }),
     user
-  }) as unknown as ISupplyReading & { _id: any }
+  } as any)
 }

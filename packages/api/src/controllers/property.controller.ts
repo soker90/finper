@@ -36,7 +36,7 @@ export class PropertyController {
     this.logger.logInfo(`/edit - property: ${req.body.name}`)
 
     const { id, value } = await validatePropertyEditParams({ params: req.params, body: req.body, user: req.user })
-    const response = await this.propertyService.editProperty({ id, value })
+    const response = await this.propertyService.editProperty({ id, value, user: req.user })
     this.logger.logInfo(`Property ${response._id} has been succesfully edited`)
 
     res.send(response)
@@ -47,7 +47,7 @@ export class PropertyController {
     this.logger.logInfo(`/delete - property: ${id}`)
 
     await validatePropertyExist({ id, user: req.user })
-    await this.propertyService.deleteProperty({ id })
+    await this.propertyService.deleteProperty({ id, user: req.user })
 
     res.sendStatus(204)
   }
