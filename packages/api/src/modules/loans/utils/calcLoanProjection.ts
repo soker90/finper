@@ -1,7 +1,17 @@
 import type { LoanPaymentType } from '@soker90/finper-types'
 import { LOAN_PAYMENT } from '@soker90/finper-db'
-import { ILoanPayment, Types } from '@soker90/finper-models'
 import { roundNumber } from '../../../utils/roundNumber'
+
+interface LoanPaymentBase {
+  date: number
+  amount: number
+  interest: number
+  principal: number
+  accumulatedPrincipal: number
+  pendingCapital: number
+  type: LoanPaymentType
+  user?: string
+}
 
 /**
  * Safety cap: maximum number of projected periods (50 years).
@@ -18,7 +28,7 @@ const MAX_PERIODS = 600
  */
 const AMORTIZATION_THRESHOLD = 0.009
 
-interface ProjectedPayment extends Omit<ILoanPayment, 'loan' | 'user'> {
+interface ProjectedPayment extends Omit<LoanPaymentBase, 'user'> {
   type: LoanPaymentType
   period: number
 }
@@ -170,7 +180,7 @@ export interface AmortizationRow {
 }
 
 export const buildAmortizationTable = (
-  realPayments: (ILoanPayment & { _id?: string | Types.ObjectId })[],
+  realPayments: (LoanPaymentBase & { _id?: string })[],
   pendingAmount: number,
   interestRate: number,
   monthlyPayment: number,
