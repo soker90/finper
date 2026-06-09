@@ -302,9 +302,7 @@ export const insertProperty = (params: Record<string, any> = {}) => {
 export const insertSupply = (params: Record<string, any> = {}) => {
   const user = ensureUser(params.user)
   const propertyId = params.propertyId ?? insertProperty({ user }).id
-  const rest = { ...params }
-  delete rest.propertyId
-  delete rest.user
+  const rest = Object.fromEntries(Object.entries(params).filter(([k]) => k !== 'propertyId' && k !== 'user'))
   return supplyRepository.create({
     name: faker.company.name(),
     type: SUPPLY_TYPE.ELECTRICITY,

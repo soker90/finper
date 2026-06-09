@@ -121,3 +121,9 @@ scratch/
 # Drizzle interactive prompt automation (agent artifact)
 packages/db/gen.exp
 *.exp
+
+# build & coverage artifacts
+dist/
+coverage/
+**/dist/
+**/coverage/
