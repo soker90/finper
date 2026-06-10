@@ -1,4 +1,5 @@
 packages:
+  - scripts/*
   - packages/api
   - packages/bot
   - packages/client
