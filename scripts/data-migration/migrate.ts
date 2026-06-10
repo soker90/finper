@@ -26,6 +26,16 @@ async function main (): Promise<void> {
   // Activa foreign_keys al abrir la BBDD
   sqlite.pragma('foreign_keys = ON')
   
+  // WORKAROUND: drizzle-orm 0.45.2 migrator bug uses 'SERIAL PRIMARY KEY' for SQLite
+  // which causes 'id' to be null instead of autoincrement. We pre-create it correctly.
+  sqlite.exec(`
+    CREATE TABLE IF NOT EXISTS "__drizzle_migrations" (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      hash text NOT NULL,
+      created_at numeric
+    )
+  `)
+
   const db = drizzle(sqlite, { schema })
   migrate(db, { migrationsFolder: resolve(process.cwd(), '../../packages/db/drizzle') })
 
