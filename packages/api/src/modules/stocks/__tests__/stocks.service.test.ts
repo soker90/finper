@@ -42,8 +42,8 @@ describe('StocksService', () => {
       mockProvider = makeProvider(5)
       stocksService = new StockService(mockProvider, stocksRepository)
 
-      stocksRepository.create({ user: username, ticker: 'TEF.MC', name: 'Telefónica', shares: 10, price: 4, type: STOCK_TYPE.Buy, date: new Date(), platform: 'DEGIRO' })
-      stocksRepository.create({ user: 'other', ticker: 'ITX.MC', name: 'Inditex', shares: 5, price: 30, type: STOCK_TYPE.Buy, date: new Date(), platform: 'DEGIRO' })
+      stocksRepository.create({ user: username, ticker: 'TEF.MC', name: 'Telefónica', shares: 10, price: 4, type: STOCK_TYPE.Buy, date: Date.now(), platform: 'DEGIRO' })
+      stocksRepository.create({ user: 'other', ticker: 'ITX.MC', name: 'Inditex', shares: 5, price: 30, type: STOCK_TYPE.Buy, date: Date.now(), platform: 'DEGIRO' })
 
       const result = await stocksService.getStocks(username)
       expect(result).toHaveLength(1)
@@ -54,8 +54,8 @@ describe('StocksService', () => {
       mockProvider = makeProvider(4.5)
       stocksService = new StockService(mockProvider, stocksRepository)
 
-      stocksRepository.create({ user: username, ticker: 'TEF.MC', name: 'Telefónica', shares: 100, price: 4.0, type: STOCK_TYPE.Buy, date: new Date(1000), platform: 'DEGIRO' })
-      stocksRepository.create({ user: username, ticker: 'TEF.MC', name: 'Telefónica', shares: 50, price: 4.2, type: STOCK_TYPE.Buy, date: new Date(2000), platform: 'DEGIRO' })
+      stocksRepository.create({ user: username, ticker: 'TEF.MC', name: 'Telefónica', shares: 100, price: 4.0, type: STOCK_TYPE.Buy, date: 1000, platform: 'DEGIRO' })
+      stocksRepository.create({ user: username, ticker: 'TEF.MC', name: 'Telefónica', shares: 50, price: 4.2, type: STOCK_TYPE.Buy, date: 2000, platform: 'DEGIRO' })
 
       const result = await stocksService.getStocks(username)
       expect(result).toHaveLength(1)
@@ -72,8 +72,8 @@ describe('StocksService', () => {
       mockProvider = makeProvider(5)
       stocksService = new StockService(mockProvider, stocksRepository)
 
-      stocksRepository.create({ user: username, ticker: 'TEF.MC', name: 'Telefónica', shares: 100, price: 4.0, type: STOCK_TYPE.Buy, date: new Date(1000), platform: 'DEGIRO' })
-      stocksRepository.create({ user: username, ticker: 'TEF.MC', name: 'Telefónica', shares: 40, price: 5.0, type: STOCK_TYPE.Sell, date: new Date(2000), platform: 'DEGIRO' })
+      stocksRepository.create({ user: username, ticker: 'TEF.MC', name: 'Telefónica', shares: 100, price: 4.0, type: STOCK_TYPE.Buy, date: 1000, platform: 'DEGIRO' })
+      stocksRepository.create({ user: username, ticker: 'TEF.MC', name: 'Telefónica', shares: 40, price: 5.0, type: STOCK_TYPE.Sell, date: 2000, platform: 'DEGIRO' })
 
       const result = await stocksService.getStocks(username)
       expect(result).toHaveLength(1)
@@ -84,8 +84,8 @@ describe('StocksService', () => {
       mockProvider = makeProvider(5)
       stocksService = new StockService(mockProvider, stocksRepository)
 
-      stocksRepository.create({ user: username, ticker: 'TEF.MC', name: 'Telefónica', shares: 100, price: 4.0, type: STOCK_TYPE.Buy, date: new Date(1000), platform: 'DEGIRO' })
-      stocksRepository.create({ user: username, ticker: 'TEF.MC', name: 'Telefónica', shares: 100, price: 5.0, type: STOCK_TYPE.Sell, date: new Date(2000), platform: 'DEGIRO' })
+      stocksRepository.create({ user: username, ticker: 'TEF.MC', name: 'Telefónica', shares: 100, price: 4.0, type: STOCK_TYPE.Buy, date: 1000, platform: 'DEGIRO' })
+      stocksRepository.create({ user: username, ticker: 'TEF.MC', name: 'Telefónica', shares: 100, price: 5.0, type: STOCK_TYPE.Sell, date: 2000, platform: 'DEGIRO' })
 
       const result = await stocksService.getStocks(username)
       expect(result).toHaveLength(0)
@@ -95,8 +95,8 @@ describe('StocksService', () => {
       mockProvider = makeProvider(5)
       stocksService = new StockService(mockProvider, stocksRepository)
 
-      stocksRepository.create({ user: username, ticker: 'TEF.MC', name: 'Telefónica', shares: 100, price: 4.0, type: STOCK_TYPE.Buy, date: new Date(1000), platform: 'DEGIRO' })
-      stocksRepository.create({ user: username, ticker: 'TEF.MC', name: 'Telefónica', shares: 5, price: 0, type: STOCK_TYPE.Dividend, date: new Date(2000), platform: 'DEGIRO' })
+      stocksRepository.create({ user: username, ticker: 'TEF.MC', name: 'Telefónica', shares: 100, price: 4.0, type: STOCK_TYPE.Buy, date: 1000, platform: 'DEGIRO' })
+      stocksRepository.create({ user: username, ticker: 'TEF.MC', name: 'Telefónica', shares: 5, price: 0, type: STOCK_TYPE.Dividend, date: 2000, platform: 'DEGIRO' })
 
       const result = await stocksService.getStocks(username)
       expect(result[0].shares).toBe(105)
@@ -107,7 +107,7 @@ describe('StocksService', () => {
       mockProvider = makeProvider(null)
       stocksService = new StockService(mockProvider, stocksRepository)
 
-      stocksRepository.create({ user: username, ticker: 'TEF.MC', name: 'Telefónica', shares: 10, price: 4, type: STOCK_TYPE.Buy, date: new Date(), platform: 'DEGIRO' })
+      stocksRepository.create({ user: username, ticker: 'TEF.MC', name: 'Telefónica', shares: 10, price: 4, type: STOCK_TYPE.Buy, date: Date.now(), platform: 'DEGIRO' })
 
       const result = await stocksService.getStocks(username)
       expect(result[0].currentValue).toBeNull()
@@ -128,7 +128,7 @@ describe('StocksService', () => {
         shares: 200,
         price: 3.5,
         type: STOCK_TYPE.Buy,
-        date: new Date(),
+        date: Date.now(),
         platform: 'DEGIRO',
       }
 
@@ -147,7 +147,7 @@ describe('StocksService', () => {
       mockProvider = makeProvider(10)
       stocksService = new StockService(mockProvider, stocksRepository)
 
-      const stock = stocksRepository.create({ user: username, ticker: 'SAN.MC', name: 'Santander', shares: 200, price: 3.5, type: STOCK_TYPE.Buy, date: new Date(), platform: 'DEGIRO' })
+      const stock = stocksRepository.create({ user: username, ticker: 'SAN.MC', name: 'Santander', shares: 200, price: 3.5, type: STOCK_TYPE.Buy, date: Date.now(), platform: 'DEGIRO' })
 
       await stocksService.deleteStock(stock.id, username)
 
@@ -160,7 +160,7 @@ describe('StocksService', () => {
       stocksService = new StockService(mockProvider, stocksRepository)
 
       const otherUser = 'other'
-      const stock = stocksRepository.create({ user: otherUser, ticker: 'SAN.MC', name: 'Santander', shares: 200, price: 3.5, type: STOCK_TYPE.Buy, date: new Date(), platform: 'DEGIRO' })
+      const stock = stocksRepository.create({ user: otherUser, ticker: 'SAN.MC', name: 'Santander', shares: 200, price: 3.5, type: STOCK_TYPE.Buy, date: Date.now(), platform: 'DEGIRO' })
 
       await stocksService.deleteStock(stock.id, username)
 
@@ -182,8 +182,8 @@ describe('StocksService', () => {
       mockProvider = makeProvider(10)
       stocksService = new StockService(mockProvider, stocksRepository)
 
-      stocksRepository.create({ user: username, ticker: 'TEF.MC', name: 'Telefónica', shares: 100, price: 4, type: STOCK_TYPE.Buy, date: new Date(), platform: 'DEGIRO' })
-      stocksRepository.create({ user: username, ticker: 'ITX.MC', name: 'Inditex', shares: 2, price: 50, type: STOCK_TYPE.Buy, date: new Date(), platform: 'DEGIRO' })
+      stocksRepository.create({ user: username, ticker: 'TEF.MC', name: 'Telefónica', shares: 100, price: 4, type: STOCK_TYPE.Buy, date: Date.now(), platform: 'DEGIRO' })
+      stocksRepository.create({ user: username, ticker: 'ITX.MC', name: 'Inditex', shares: 2, price: 50, type: STOCK_TYPE.Buy, date: Date.now(), platform: 'DEGIRO' })
 
       const result = await stocksService.getStocksSummary(username)
       // totalCost = 100*4 + 2*50 = 500
@@ -200,8 +200,8 @@ describe('StocksService', () => {
       }
       stocksService = new StockService(mockProvider, stocksRepository)
 
-      stocksRepository.create({ user: username, ticker: 'TEF.MC', name: 'Telefónica', shares: 100, price: 4, type: STOCK_TYPE.Buy, date: new Date(), platform: 'DEGIRO' })
-      stocksRepository.create({ user: username, ticker: 'ITX.MC', name: 'Inditex', shares: 2, price: 50, type: STOCK_TYPE.Buy, date: new Date(), platform: 'DEGIRO' })
+      stocksRepository.create({ user: username, ticker: 'TEF.MC', name: 'Telefónica', shares: 100, price: 4, type: STOCK_TYPE.Buy, date: Date.now(), platform: 'DEGIRO' })
+      stocksRepository.create({ user: username, ticker: 'ITX.MC', name: 'Inditex', shares: 2, price: 50, type: STOCK_TYPE.Buy, date: Date.now(), platform: 'DEGIRO' })
 
       const result = await stocksService.getStocksSummary(username)
       expect(result.totalValue).toBeNull()

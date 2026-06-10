@@ -8,12 +8,6 @@ type Reading = typeof supplyReadings.$inferSelect
 
 // startDate/endDate viajan como número (ms) desde el validator Joi;
 // la columna es timestamp_ms → Drizzle espera Date al insertar.
-const coerceDates = (data: Record<string, any>): Record<string, any> => {
-  const d = { ...data }
-  if (typeof d.startDate === 'number') d.startDate = new Date(d.startDate)
-  if (typeof d.endDate === 'number') d.endDate = new Date(d.endDate)
-  return d
-}
 
 export const createSupplyReadingRepository = (db: DB) => ({
   findBySupplyAndUser: (supplyId: string, user: string): Reading[] =>
@@ -29,7 +23,7 @@ export const createSupplyReadingRepository = (db: DB) => ({
       .get(),
 
   // ventana del último año: endDate ≤ to  y  startDate ≥ from
-  findInLastYear: (supplyId: string, user: string, to: Date, from: Date): Reading[] =>
+  findInLastYear: (supplyId: string, user: string, to: number, from: number): Reading[] =>
     db.select().from(supplyReadings)
       .where(and(
         eq(supplyReadings.supplyId, supplyId),
@@ -44,10 +38,10 @@ export const createSupplyReadingRepository = (db: DB) => ({
     db.select().from(supplyReadings).where(and(eq(supplyReadings.id, id), eq(supplyReadings.user, user))).get(),
 
   create: (data: Omit<NewReading, 'id'>): Reading =>
-    db.insert(supplyReadings).values({ ...coerceDates(data), id: generateId() } as NewReading).returning().get(),
+    db.insert(supplyReadings).values({ ...data, id: generateId() } as NewReading).returning().get(),
 
   update: (id: string, user: string, data: Partial<Omit<NewReading, 'id' | 'user'>>): Reading | undefined =>
-    db.update(supplyReadings).set(coerceDates(data)).where(and(eq(supplyReadings.id, id), eq(supplyReadings.user, user))).returning().get(),
+    db.update(supplyReadings).set(data).where(and(eq(supplyReadings.id, id), eq(supplyReadings.user, user))).returning().get(),
 
   delete: (id: string, user: string): Reading | undefined =>
     db.delete(supplyReadings).where(and(eq(supplyReadings.id, id), eq(supplyReadings.user, user))).returning().get(),

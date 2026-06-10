@@ -9,6 +9,6 @@ export const stocks = sqliteTable('stocks', {
   shares: real('shares').notNull(),
   price: real('price').notNull(),
   type: text('type').notNull(), // 'buy' | 'sell' | 'dividend'
-  date: integer('date', { mode: 'timestamp_ms' }).notNull(),
+  date: integer('date').notNull(),
   user: text('user').notNull().references(() => users.username),
 });

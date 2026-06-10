@@ -37,8 +37,8 @@ describe('debtsRepository', () => {
         password: 'pwd-hash',
         createdAt: new Date()
       }).run()
-      repo.create(username, { from: 'Alice', amount: 100, type: 'to', date: new Date() })
-      repo.create('other', { from: 'Bob', amount: 50, type: 'to', date: new Date() })
+      repo.create(username, { from: 'Alice', amount: 100, type: 'to', date: Date.now() })
+      repo.create('other', { from: 'Bob', amount: 50, type: 'to', date: Date.now() })
 
       const result = repo.findAllByUser(username)
       expect(result).toHaveLength(1)
@@ -48,7 +48,7 @@ describe('debtsRepository', () => {
 
   describe('create', () => {
     it('creates a debt with generated id (24-char hex)', () => {
-      const debt = repo.create(username, { from: 'Charlie', amount: 200, type: 'from', date: new Date() })
+      const debt = repo.create(username, { from: 'Charlie', amount: 200, type: 'from', date: Date.now() })
       expect(debt.id).toMatch(/^[0-9a-f]{24}$/)
       expect(debt.from).toBe('Charlie')
     })
@@ -56,7 +56,7 @@ describe('debtsRepository', () => {
 
   describe('findById', () => {
     it('finds debt by id and user', () => {
-      const created = repo.create(username, { from: 'Dave', amount: 10, type: 'to', date: new Date() })
+      const created = repo.create(username, { from: 'Dave', amount: 10, type: 'to', date: Date.now() })
       const found = repo.findById(created.id, username)
       expect(found).toBeDefined()
       expect(found?.id).toBe(created.id)
@@ -69,7 +69,7 @@ describe('debtsRepository', () => {
         password: 'pwd',
         createdAt: new Date()
       }).run()
-      const created = repo.create('other', { from: 'Dave', amount: 10, type: 'to', date: new Date() })
+      const created = repo.create('other', { from: 'Dave', amount: 10, type: 'to', date: Date.now() })
       expect(repo.findById(created.id, username)).toBeNull()
     })
   })

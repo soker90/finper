@@ -10,7 +10,9 @@ export const goalsSerializer = {
       name: row.name,
       targetAmount: row.targetAmount,
       currentAmount: row.currentAmount,
-      ...(row.deadline && { deadline: row.deadline }),
+      // Se mantiene la serialización a ISO string para preservar el contrato histórico con el front
+      // (a diferencia de otras fechas que viajan como raw number ms).
+      ...(row.deadline && { deadline: new Date(row.deadline).toISOString() }),
       color: row.color,
       icon: row.icon,
       user: row.user

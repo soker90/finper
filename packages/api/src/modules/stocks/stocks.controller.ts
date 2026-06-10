@@ -32,7 +32,7 @@ export class StockController {
     this.logger.logInfo('/create - stock')
 
     const params = validateStockCreateParams(req.body)
-    const response = this.stockService.addStock({ ...params, user: username, date: new Date(params.date) })
+    const response = this.stockService.addStock({ ...params, user: username, date: params.date })
     this.logger.logInfo(`Stock ${response.ticker} has been successfully created`)
 
     res.send(serializeStock(response))

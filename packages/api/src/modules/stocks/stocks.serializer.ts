@@ -5,7 +5,7 @@ export const serializeStock = (stock: typeof schema.stocks.$inferSelect) => {
   const { id, date, ...rest } = stock
   return {
     ...rest,
-    date: date.getTime(),
+    date,
     _id: id
   }
 }

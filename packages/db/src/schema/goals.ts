@@ -6,7 +6,7 @@ export const goals = sqliteTable('goals', {
   name: text('name').notNull(),
   targetAmount: real('target_amount').notNull(),
   currentAmount: real('current_amount').notNull().default(0),
-  deadline: integer('deadline', { mode: 'timestamp_ms' }),
+  deadline: integer('deadline'),
   color: text('color').notNull(),
   icon: text('icon').notNull(),
   user: text('user').notNull().references(() => users.username),

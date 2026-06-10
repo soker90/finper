@@ -5,8 +5,8 @@ type Reading = typeof schema.supplyReadings.$inferSelect
 export const serializeReading = (r: Reading) => ({
   _id: r.id,
   supplyId: r.supplyId,
-  startDate: r.startDate.getTime(),
-  endDate: r.endDate.getTime(),
+  startDate: r.startDate,
+  endDate: r.endDate,
   amount: r.amount,
   consumption: r.consumption,
   consumptionPeak: r.consumptionPeak,

@@ -4,7 +4,7 @@ import { users } from './users';
 export const debts = sqliteTable('debts', {
   id: text('id').primaryKey(),
   from: text('from').notNull(),
-  date: integer('date', { mode: 'timestamp_ms' }),
+  date: integer('date'),
   amount: real('amount').notNull(),
   concept: text('concept'),
   type: text('type').notNull(), // 'from' | 'to'

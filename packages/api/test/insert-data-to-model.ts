@@ -238,7 +238,7 @@ export const insertDebt = async (params: Record<string, any> = {}): Promise<any>
   const data = {
     id: generateId(),
     from: params.from ?? faker.person.firstName(),
-    date: params.date ?? new Date(faker.date.past()),
+    date: params.date ?? faker.date.past().getTime(),
     amount: params.amount ?? faker.number.int({ min: 1, max: 5000 }),
     concept: params.concept ?? faker.lorem.words(4),
     type: params.type ?? (Math.random() > 0.5 ? DEBT.TO : DEBT.FROM),
@@ -257,7 +257,7 @@ export const insertStock = async (params: Record<string, any> = {}): Promise<any
     shares: params.shares ?? faker.number.float({ min: 1, max: 100, multipleOf: 0.01 }),
     price: params.price ?? faker.number.float({ min: 1, max: 500, multipleOf: 0.01 }),
     type: params.type ?? STOCK_TYPE.Buy,
-    date: params.date ?? new Date(faker.date.past()),
+    date: params.date ?? faker.date.past().getTime(),
     user: ensureUser(params.user)
   }
   sqliteDb.insert(schema.stocks).values(data).run()
@@ -282,7 +282,7 @@ export const insertGoal = async (params: Record<string, any> = {}): Promise<any>
 export const insertPension = async (params: Record<string, any> = {}): Promise<any> => {
   const data = {
     id: generateId(),
-    date: new Date(params.date ?? faker.date.past()),
+    date: params.date ?? faker.date.past().getTime(),
     value: params.value ?? faker.number.int(),
     companyAmount: params.companyAmount ?? faker.number.int(),
     companyUnits: params.companyUnits ?? faker.number.int(),

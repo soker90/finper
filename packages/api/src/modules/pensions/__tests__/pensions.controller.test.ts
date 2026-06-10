@@ -23,10 +23,10 @@ const insertPension = (data: any = {}) => {
     value: faker.number.float({ multipleOf: 2 }),
     user: generateUsername(),
     ...data,
-    date: new Date(dateNum) // ensure date is Date object
+    date: dateNum
   }
   sqliteDb.insert(schema.pensions).values(record).run()
-  return { ...record, date: record.date.getTime(), _id: id }
+  return { ...record, date: record.date, _id: id }
 }
 
 describe('Pension Controller', () => {

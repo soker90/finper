@@ -25,8 +25,8 @@ export const supplies = sqliteTable('supplies', {
 export const supplyReadings = sqliteTable('supply_readings', {
   id: text('id').primaryKey(),
   supplyId: text('supply_id').notNull().references(() => supplies.id),
-  startDate: integer('start_date', { mode: 'timestamp_ms' }).notNull(),
-  endDate: integer('end_date', { mode: 'timestamp_ms' }).notNull(),
+  startDate: integer('start_date').notNull(),
+  endDate: integer('end_date').notNull(),
   amount: real('amount').notNull(),
   consumption: real('consumption'),
   consumptionPeak: real('consumption_peak'),

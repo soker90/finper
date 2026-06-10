@@ -42,7 +42,7 @@ describe('Pensions Repository', () => {
       const pension = repository.create(data)
 
       expect(pension.id).toBeDefined()
-      expect(pension.date.getTime()).toBe(date)
+      expect(pension.date).toBe(date)
       expect(pension.user).toBe(user)
     })
   })
@@ -69,9 +69,9 @@ describe('Pensions Repository', () => {
       const pensions = repository.findByUser(user)
 
       expect(pensions).toHaveLength(3)
-      expect(pensions[0].date.getTime()).toBe(3000)
-      expect(pensions[1].date.getTime()).toBe(2000)
-      expect(pensions[2].date.getTime()).toBe(1000)
+      expect(pensions[0].date).toBe(3000)
+      expect(pensions[1].date).toBe(2000)
+      expect(pensions[2].date).toBe(1000)
     })
   })
 
@@ -136,7 +136,7 @@ describe('Pensions Repository', () => {
       expect(updated?.id).toBe(pension.id)
       expect(updated?.value).toBe(20)
       expect(updated?.employeeAmount).toBe(200)
-      expect(updated?.date?.getTime()).toBe(1000)
+      expect(updated?.date).toBe(1000)
     })
   })
 })

@@ -23,7 +23,7 @@ export const createPensionsRepository = (db: DB) => ({
 
   create: (data: Omit<NewPension, 'id' | 'date'> & { date: number }): Pension => {
     const id = generateId()
-    return db.insert(pensions).values({ ...data, date: new Date(data.date), id }).returning().get()
+    return db.insert(pensions).values({ ...data, date: data.date, id }).returning().get()
   },
 
   update: (id: string, username: string, data: Partial<Omit<NewPension, 'id' | 'user' | 'date'> & { date?: number }>): Pension | undefined => {
@@ -31,7 +31,6 @@ export const createPensionsRepository = (db: DB) => ({
     for (const [k, v] of Object.entries(data || {})) {
       if (v !== undefined) payload[k] = v
     }
-    if (payload.date) payload.date = new Date(payload.date)
 
     if (Object.keys(payload).length === 0) {
       return db.select()

@@ -35,7 +35,7 @@ describe('Stocks Repository', () => {
         shares: 100,
         price: 4.0,
         type: STOCK_TYPE.Buy,
-        date: new Date(1000),
+        date: 1000,
         platform: 'DEGIRO'
       })
 
@@ -46,7 +46,7 @@ describe('Stocks Repository', () => {
         shares: 10,
         price: 50.0,
         type: STOCK_TYPE.Buy,
-        date: new Date(500), // Should be first
+        date: 500, // Should be first
         platform: 'DEGIRO'
       })
 
@@ -66,7 +66,7 @@ describe('Stocks Repository', () => {
         shares: 100,
         price: 4.0,
         type: STOCK_TYPE.Buy,
-        date: new Date(1000),
+        date: 1000,
         platform: 'DEGIRO'
       })
 
@@ -84,7 +84,7 @@ describe('Stocks Repository', () => {
         shares: 100,
         price: 4.0,
         type: STOCK_TYPE.Buy,
-        date: new Date(1000),
+        date: 1000,
         platform: 'DEGIRO'
       })
 

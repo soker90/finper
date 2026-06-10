@@ -35,7 +35,7 @@ describe('goalsRepository', () => {
         name: 'Goal 1',
         targetAmount: 1000,
         currentAmount: 0,
-        deadline: new Date(),
+        deadline: Date.now(),
         color: '#4CAF50',
         icon: 'DollarOutlined'
       })
@@ -55,7 +55,7 @@ describe('goalsRepository', () => {
         name: 'Goal 1',
         targetAmount: 1000,
         currentAmount: 0,
-        deadline: new Date(),
+        deadline: Date.now(),
         color: '#4CAF50',
         icon: 'DollarOutlined'
       })

@@ -3,7 +3,7 @@ import { users } from './users';
 
 export const pensions = sqliteTable('pensions', {
   id: text('id').primaryKey(),
-  date: integer('date', { mode: 'timestamp_ms' }).notNull(),
+  date: integer('date').notNull(),
   employeeAmount: real('employee_amount').notNull(),
   employeeUnits: real('employee_units').notNull(),
   companyAmount: real('company_amount').notNull(),

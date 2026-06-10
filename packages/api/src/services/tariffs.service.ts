@@ -192,7 +192,7 @@ export default class TariffsService implements ITariffsService {
     }
 
     const to = lastReading.endDate
-    const from = new Date(lastReading.endDate.getTime() - ONE_YEAR_MS)
+    const from = lastReading.endDate - ONE_YEAR_MS
     const rows = supplyReadingRepository.findInLastYear(supplyId, user, to, from)
 
     if (rows.length === 0) {
@@ -202,8 +202,8 @@ export default class TariffsService implements ITariffsService {
     // El cálculo aguas abajo espera startDate/endDate como número (ms), como el doc Mongo viejo.
     return rows.map(r => ({
       ...r,
-      startDate: r.startDate.getTime(),
-      endDate: r.endDate.getTime()
+      startDate: r.startDate,
+      endDate: r.endDate
     })) as unknown as ISupplyReading[]
   }
 

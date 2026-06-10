@@ -5,7 +5,7 @@ type Pension = typeof schema.pensions.$inferSelect
 export const serializePension = (pension: Pension) => {
   return {
     _id: pension.id,
-    date: pension.date.getTime(),
+    date: pension.date,
     employeeAmount: pension.employeeAmount,
     employeeUnits: pension.employeeUnits,
     companyAmount: pension.companyAmount,

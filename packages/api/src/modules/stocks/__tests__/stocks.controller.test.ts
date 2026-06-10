@@ -52,8 +52,8 @@ describe('Stocks Controller', () => {
     })
 
     it('should return aggregated positions by ticker', async () => {
-      stocksRepository.create({ user: username, ticker: 'TEF.MC', name: 'Telefónica', shares: 100, price: 4.0, type: STOCK_TYPE.Buy, date: new Date(1), platform: 'X' })
-      stocksRepository.create({ user: username, ticker: 'TEF.MC', name: 'Telefónica', shares: 50, price: 4.2, type: STOCK_TYPE.Buy, date: new Date(2), platform: 'X' })
+      stocksRepository.create({ user: username, ticker: 'TEF.MC', name: 'Telefónica', shares: 100, price: 4.0, type: STOCK_TYPE.Buy, date: 1, platform: 'X' })
+      stocksRepository.create({ user: username, ticker: 'TEF.MC', name: 'Telefónica', shares: 50, price: 4.2, type: STOCK_TYPE.Buy, date: 2, platform: 'X' })
 
       const response = await supertest(server.app)
         .get(path)
@@ -83,8 +83,8 @@ describe('Stocks Controller', () => {
       const otherUser = generateUsername()
       await insertCredentials({ username: otherUser })
 
-      sqliteDb.insert(stocks).values({ id: generateId(), user: otherUser, ticker: 'ITX.MC', name: 'Inditex', shares: 10, price: 50, type: STOCK_TYPE.Buy, date: new Date(1), platform: 'X' }).run()
-      stocksRepository.create({ user: username, ticker: 'TEF.MC', name: 'Telefónica', shares: 100, price: 4.0, type: STOCK_TYPE.Buy, date: new Date(1), platform: 'X' })
+      sqliteDb.insert(stocks).values({ id: generateId(), user: otherUser, ticker: 'ITX.MC', name: 'Inditex', shares: 10, price: 50, type: STOCK_TYPE.Buy, date: 1, platform: 'X' }).run()
+      stocksRepository.create({ user: username, ticker: 'TEF.MC', name: 'Telefónica', shares: 100, price: 4.0, type: STOCK_TYPE.Buy, date: 1, platform: 'X' })
 
       const response = await supertest(server.app)
         .get(path)
@@ -157,7 +157,7 @@ describe('Stocks Controller', () => {
     })
 
     it('should return aggregated totalCost and totalValue', async () => {
-      stocksRepository.create({ user: username, ticker: 'TEF.MC', name: 'Telefónica', shares: 100, price: 4.0, type: STOCK_TYPE.Buy, date: new Date(1), platform: 'X' })
+      stocksRepository.create({ user: username, ticker: 'TEF.MC', name: 'Telefónica', shares: 100, price: 4.0, type: STOCK_TYPE.Buy, date: 1, platform: 'X' })
 
       const response = await supertest(server.app)
         .get(path)
@@ -174,7 +174,7 @@ describe('Stocks Controller', () => {
       const otherUser = generateUsername()
       await insertCredentials({ username: otherUser })
 
-      sqliteDb.insert(stocks).values({ id: generateId(), user: otherUser, ticker: 'ITX.MC', name: 'Inditex', shares: 10, price: 50, type: STOCK_TYPE.Buy, date: new Date(1), platform: 'X' }).run()
+      sqliteDb.insert(stocks).values({ id: generateId(), user: otherUser, ticker: 'ITX.MC', name: 'Inditex', shares: 10, price: 50, type: STOCK_TYPE.Buy, date: 1, platform: 'X' }).run()
 
       const response = await supertest(server.app)
         .get(path)
@@ -194,7 +194,7 @@ describe('Stocks Controller', () => {
     })
 
     it('should delete a stock purchase and return 204', async () => {
-      const stock = stocksRepository.create({ user: username, ticker: 'TEF.MC', name: 'Telefónica', shares: 100, price: 4.0, type: STOCK_TYPE.Buy, date: new Date(1), platform: 'X' })
+      const stock = stocksRepository.create({ user: username, ticker: 'TEF.MC', name: 'Telefónica', shares: 100, price: 4.0, type: STOCK_TYPE.Buy, date: 1, platform: 'X' })
 
       await supertest(server.app)
         .delete(`/api/stocks/${stock.id}`)

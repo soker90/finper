@@ -14,7 +14,7 @@ export const debtsSerializer = {
     }
 
     if (row.date != null) {
-      json.date = row.date instanceof Date ? row.date.getTime() : row.date
+      json.date = row.date
     }
     if (row.concept != null) {
       json.concept = row.concept

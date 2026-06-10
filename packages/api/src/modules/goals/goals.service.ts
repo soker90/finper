@@ -45,7 +45,7 @@ export class GoalService implements IGoalService {
       name: goal.name,
       targetAmount: roundMoney(goal.targetAmount),
       currentAmount: roundMoney(currentAmount),
-      deadline: goal.deadline ? new Date(goal.deadline) : null,
+      deadline: goal.deadline ? new Date(goal.deadline).getTime() : null,
       color: goal.color,
       icon: goal.icon
     }
@@ -56,7 +56,7 @@ export class GoalService implements IGoalService {
     const data: Record<string, any> = {}
     if (value.name !== undefined) data.name = value.name
     if (value.targetAmount !== undefined) data.targetAmount = roundMoney(value.targetAmount)
-    if (value.deadline !== undefined) data.deadline = value.deadline ? new Date(value.deadline) : null
+    if (value.deadline !== undefined) data.deadline = value.deadline ? new Date(value.deadline).getTime() : null
     if (value.color !== undefined) data.color = value.color
     if (value.icon !== undefined) data.icon = value.icon
 
