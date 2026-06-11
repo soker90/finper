@@ -12,6 +12,6 @@
  *   isValidId(42)                          // false (no es string)
  *   isValidId(undefined)                   // false
  */
-export const isValidId = (id: unknown): id is boolean => {
+export const isValidId = (id: unknown): id is string => {
   return typeof id === 'string' && /^[0-9a-f]{24}$/i.test(id)
 }

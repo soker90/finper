@@ -83,80 +83,84 @@ export class LoansService {
   // --- Parte B: pagos ---
 
   payOrdinary (id: string, user: string, params?: { date?: number, amount?: number, addMovement?: boolean }) {
-    const { loan, lastPayment, currentRate, currentPayment } = this._getLoanWithRates(id, user)
+    return this.repository.transaction(() => {
+      const { loan, lastPayment, currentRate, currentPayment } = this._getLoanWithRates(id, user)
 
-    if (loan.pendingAmount <= 0) throw Boom.badRequest(ERROR_MESSAGE.LOAN.ALREADY_PAID).output
+      if (loan.pendingAmount <= 0) throw Boom.badRequest(ERROR_MESSAGE.LOAN.ALREADY_PAID).output
 
-    const monthlyInterestRate = currentRate / 100 / 12
-    const baseInterest = roundNumber(loan.pendingAmount * monthlyInterestRate)
+      const monthlyInterestRate = currentRate / 100 / 12
+      const baseInterest = roundNumber(loan.pendingAmount * monthlyInterestRate)
 
-    const principalPart = roundNumber(Math.min(currentPayment - baseInterest, loan.pendingAmount))
-    const amount = params?.amount ?? roundNumber(baseInterest + principalPart)
-    const interestPart = roundNumber(amount - principalPart)
+      const principalPart = roundNumber(Math.min(currentPayment - baseInterest, loan.pendingAmount))
+      const amount = params?.amount ?? roundNumber(baseInterest + principalPart)
+      const interestPart = roundNumber(amount - principalPart)
 
-    const lastAcc = lastPayment?.accumulatedPrincipal ?? 0
-    const accumulatedPrincipal = roundNumber(lastAcc + principalPart)
-    const pendingCapital = roundNumber(loan.pendingAmount - principalPart)
-    const date = params?.date ?? Date.now()
+      const lastAcc = lastPayment?.accumulatedPrincipal ?? 0
+      const accumulatedPrincipal = roundNumber(lastAcc + principalPart)
+      const pendingCapital = roundNumber(loan.pendingAmount - principalPart)
+      const date = params?.date ?? Date.now()
 
-    const payment = this.repository.createPayment({
-      loanId: id,
-      date,
-      amount,
-      interest: interestPart,
-      principal: principalPart,
-      accumulatedPrincipal,
-      pendingCapital,
-      type: LOAN_PAYMENT.ORDINARY,
-      user
+      const payment = this.repository.createPayment({
+        loanId: id,
+        date,
+        amount,
+        interest: interestPart,
+        principal: principalPart,
+        accumulatedPrincipal,
+        pendingCapital,
+        type: LOAN_PAYMENT.ORDINARY,
+        user
+      })
+
+      this.repository.updateLoanFields(id, { pendingAmount: pendingCapital })
+
+      if (params?.addMovement ?? true) this._registerPaymentMovement(loan, amount, date, user)
+
+      return serializePayment(payment)
     })
-
-    this.repository.updateLoanFields(id, { pendingAmount: pendingCapital })
-
-    if (params?.addMovement ?? true) this._registerPaymentMovement(loan, amount, date, user)
-
-    return serializePayment(payment)
   }
 
   payExtraordinary (id: string, amount: number, mode: 'reduceQuota' | 'reduceTerm', user: string, addMovement = true, date?: number) {
-    const { loan, lastPayment, currentRate, currentPayment } = this._getLoanWithRates(id, user)
+    return this.repository.transaction(() => {
+      const { loan, lastPayment, currentRate, currentPayment } = this._getLoanWithRates(id, user)
 
-    const amortizationDate = date ?? Date.now()
+      const amortizationDate = date ?? Date.now()
 
-    // Si el importe supera el capital pendiente, el exceso son intereses (Bug A, 1:1).
-    const principal = roundNumber(Math.min(amount, loan.pendingAmount))
-    const interest = roundNumber(amount - principal)
-    const lastAcc = lastPayment?.accumulatedPrincipal ?? 0
-    const accumulatedPrincipal = roundNumber(lastAcc + principal)
-    const pendingCapital = roundNumber(loan.pendingAmount - principal)
+      // Si el importe supera el capital pendiente, el exceso son intereses (Bug A, 1:1).
+      const principal = roundNumber(Math.min(amount, loan.pendingAmount))
+      const interest = roundNumber(amount - principal)
+      const lastAcc = lastPayment?.accumulatedPrincipal ?? 0
+      const accumulatedPrincipal = roundNumber(lastAcc + principal)
+      const pendingCapital = roundNumber(loan.pendingAmount - principal)
 
-    const payment = this.repository.createPayment({
-      loanId: id,
-      date: amortizationDate,
-      amount: roundNumber(principal + interest),
-      interest,
-      principal,
-      accumulatedPrincipal,
-      pendingCapital,
-      type: LOAN_PAYMENT.EXTRAORDINARY,
-      user
-    })
+      const payment = this.repository.createPayment({
+        loanId: id,
+        date: amortizationDate,
+        amount: roundNumber(principal + interest),
+        interest,
+        principal,
+        accumulatedPrincipal,
+        pendingCapital,
+        type: LOAN_PAYMENT.EXTRAORDINARY,
+        user
+      })
 
-    let newPayment = currentPayment
-    if (mode === 'reduceQuota') {
-      const remaining = calcRemainingMonths(pendingCapital, currentRate, currentPayment)
-      // Si remaining es Infinity la cuota no cubre intereses → mantener cuota actual (Bug B, 1:1).
-      if (remaining !== Infinity) {
-        newPayment = roundNumber(calcMonthlyPayment(pendingCapital, currentRate, remaining))
+      let newPayment = currentPayment
+      if (mode === 'reduceQuota') {
+        const remaining = calcRemainingMonths(pendingCapital, currentRate, currentPayment)
+        // Si remaining es Infinity la cuota no cubre intereses → mantener cuota actual (Bug B, 1:1).
+        if (remaining !== Infinity) {
+          newPayment = roundNumber(calcMonthlyPayment(pendingCapital, currentRate, remaining))
+        }
       }
-    }
-    // 'reduceTerm': misma cuota, menos meses → sin cambio de cuota.
+      // 'reduceTerm': misma cuota, menos meses → sin cambio de cuota.
 
-    this.repository.updateLoanFields(id, { pendingAmount: pendingCapital, monthlyPayment: newPayment })
+      this.repository.updateLoanFields(id, { pendingAmount: pendingCapital, monthlyPayment: newPayment })
 
-    if (addMovement) this._registerPaymentMovement(loan, amount, payment.date, user)
+      if (addMovement) this._registerPaymentMovement(loan, amount, payment.date, user)
 
-    return serializePayment(payment)
+      return serializePayment(payment)
+    })
   }
 
   deletePayment (loanId: string, paymentId: string, user: string): void {
@@ -166,18 +170,20 @@ export class LoansService {
     /* istanbul ignore next — validateLoanExist runs before via route */
     if (!loan) throw Boom.notFound(ERROR_MESSAGE.LOAN.NOT_FOUND).output
 
-    // Revierte la deducción de la cuenta.
-    this._deductFromAccount(loan.accountId, -payment.amount)
+    this.repository.transaction(() => {
+      // Revierte la deducción de la cuenta.
+      this._deductFromAccount(loan.accountId, -payment.amount)
 
-    // Sólo los pagos ordinarios generan movimiento.
-    if (payment.type === LOAN_PAYMENT.ORDINARY) {
-      this.repository.deleteMovementByMatch(user, loan.accountId, payment.amount, payment.date)
-    }
+      // Sólo los pagos ordinarios generan movimiento.
+      if (payment.type === LOAN_PAYMENT.ORDINARY) {
+        this.repository.deleteMovementByMatch(user, loan.accountId, payment.amount, payment.date)
+      }
 
-    this.repository.deletePayment(paymentId)
+      this.repository.deletePayment(paymentId)
 
-    // Recalcula toda la cadena (Bug C).
-    this._recalcChain(loanId, user)
+      // Recalcula toda la cadena (Bug C).
+      this._recalcChain(loanId, user)
+    })
   }
 
   editPayment (loanId: string, paymentId: string, data: { date?: number, amount?: number, interest?: number, principal?: number, type?: LoanPaymentType }, user: string) {
@@ -198,35 +204,39 @@ export class LoansService {
     if (data.principal !== undefined) updatedFields.principal = data.principal
     if (data.type !== undefined) updatedFields.type = data.type
 
-    this.repository.updatePayment(paymentId, updatedFields)
-    this._recalcChain(loanId, user)
+    return this.repository.transaction(() => {
+      this.repository.updatePayment(paymentId, updatedFields)
+      this._recalcChain(loanId, user)
 
-    const amountDiff = roundNumber((data.amount ?? originalAmount) - originalAmount)
-    if (amountDiff !== 0) this._deductFromAccount(loan.accountId, amountDiff)
+      const amountDiff = roundNumber((data.amount ?? originalAmount) - originalAmount)
+      if (amountDiff !== 0) this._deductFromAccount(loan.accountId, amountDiff)
 
-    const effectiveType = data.type ?? originalType
-    if (effectiveType === LOAN_PAYMENT.ORDINARY || originalType === LOAN_PAYMENT.ORDINARY) {
-      this.repository.updateMovementByMatch(
-        { user, accountId: loan.accountId, amount: originalAmount, date: originalDate },
-        {
-          ...(data.amount !== undefined && { amount: data.amount }),
-          ...(data.date !== undefined && { date: data.date })
-        }
-      )
-    }
+      const effectiveType = data.type ?? originalType
+      if (effectiveType === LOAN_PAYMENT.ORDINARY || originalType === LOAN_PAYMENT.ORDINARY) {
+        this.repository.updateMovementByMatch(
+          { user, accountId: loan.accountId, amount: originalAmount, date: originalDate },
+          {
+            ...(data.amount !== undefined && { amount: data.amount }),
+            ...(data.date !== undefined && { date: data.date })
+          }
+        )
+      }
 
-    return serializePayment(this.repository.findPaymentById(paymentId, loanId, user) as LoanPaymentRow)
+      return serializePayment(this.repository.findPaymentById(paymentId, loanId, user) as LoanPaymentRow)
+    })
   }
 
   // --- Parte C: eventos / simulación ---
 
   addEvent (loanId: string, data: { date: number, newRate: number, newPayment: number, user: string }) {
-    const event = this.repository.createEvent({
-      loanId, date: data.date, newRate: data.newRate, newPayment: data.newPayment, user: data.user
+    return this.repository.transaction(() => {
+      const event = this.repository.createEvent({
+        loanId, date: data.date, newRate: data.newRate, newPayment: data.newPayment, user: data.user
+      })
+      // Actualiza tasa y cuota "actuales" del préstamo.
+      this.repository.updateLoanFields(loanId, { interestRate: data.newRate, monthlyPayment: data.newPayment })
+      return serializeEvent(event)
     })
-    // Actualiza tasa y cuota "actuales" del préstamo.
-    this.repository.updateLoanFields(loanId, { interestRate: data.newRate, monthlyPayment: data.newPayment })
-    return serializeEvent(event)
   }
 
   simulatePayoff (loanId: string, lumpSum: number, user: string): SimulationResult {

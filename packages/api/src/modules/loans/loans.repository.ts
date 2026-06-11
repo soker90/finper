@@ -37,11 +37,13 @@ export const createLoansRepository = (db: DB) => ({
   update: (id: string, data: Partial<Omit<LoanRow, 'id' | 'user'>>): LoanRow | undefined =>
     db.update(loans).set(data).where(eq(loans.id, id)).returning().get(),
 
-  // Borrado en cascada manual (loan + sus pagos + sus eventos).
+  // Borrado en cascada manual (loan + sus pagos + sus eventos), atómico.
   delete: (id: string): void => {
-    db.delete(loanPayments).where(eq(loanPayments.loanId, id)).run()
-    db.delete(loanEvents).where(eq(loanEvents.loanId, id)).run()
-    db.delete(loans).where(eq(loans.id, id)).run()
+    db.transaction(() => {
+      db.delete(loanPayments).where(eq(loanPayments.loanId, id)).run()
+      db.delete(loanEvents).where(eq(loanEvents.loanId, id)).run()
+      db.delete(loans).where(eq(loans.id, id)).run()
+    })
   },
 
   // --- Parte B: pagos ---
@@ -140,5 +142,11 @@ export const createLoansRepository = (db: DB) => ({
     db.select().from(loanPayments)
       .where(and(eq(loanPayments.loanId, loanId), eq(loanPayments.user, user), eq(loanPayments.type, 'ordinary')))
       .orderBy(desc(loanPayments.date))
-      .get()
+      .get(),
+
+  // Ejecuta `fn` dentro de una transacción SQLite atómica: si `fn` lanza, se
+  // revierte todo. better-sqlite3 usa una única conexión, por lo que cualquier
+  // escritura emitida por estos mismos métodos del repositorio durante `fn`
+  // queda incluida en el BEGIN/COMMIT.
+  transaction: <T>(fn: () => T): T => db.transaction(fn)
 })
