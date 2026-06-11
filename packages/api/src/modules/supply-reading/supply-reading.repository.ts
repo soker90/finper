@@ -1,6 +1,6 @@
 import { eq, and, lte, gte, desc, inArray } from 'drizzle-orm'
 import { type DB, schema, generateId } from '@soker90/finper-db'
-import { db } from '../db'
+import { db } from '../../db'
 const { supplyReadings } = schema
 
 type NewReading = typeof supplyReadings.$inferInsert

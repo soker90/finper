@@ -1,9 +1,13 @@
 import { Router } from 'express'
 
-import loggerHandler from '../utils/logger'
-import { SupplyController } from '../controllers/supply.controller'
-import { supplyService, tariffsService } from '../services'
-import authMiddleware from '../middlewares/auth.middleware'
+import loggerHandler from '../../utils/logger'
+import { SupplyController } from './supply.controller'
+import SupplyService from './supply.service'
+import TariffsService from './tariffs.service'
+import authMiddleware from '../../middlewares/auth.middleware'
+
+const supplyService = new SupplyService()
+const tariffsService = new TariffsService()
 
 export class SupplyRoutes {
   router: Router

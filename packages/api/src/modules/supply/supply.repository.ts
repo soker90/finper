@@ -1,6 +1,6 @@
 import { eq, and } from 'drizzle-orm'
 import { type DB, schema, generateId } from '@soker90/finper-db'
-import { db } from '../db'
+import { db } from '../../db'
 const { supplies } = schema
 
 type NewSupply = typeof supplies.$inferInsert

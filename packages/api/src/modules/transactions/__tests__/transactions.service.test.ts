@@ -4,8 +4,7 @@ import { eq } from 'drizzle-orm'
 import { createTransactionsRepository } from '../transactions.repository'
 import { TransactionsService } from '../transactions.service'
 import { generateUsername } from '../../../../test/generate-values'
-import { getTransactionAmount } from '../../../services/utils'
-import { roundNumber } from '../../../utils'
+import { getTransactionAmount, roundNumber } from '../../../utils'
 
 const { transactions, accounts, categories, stores, users } = schema
 

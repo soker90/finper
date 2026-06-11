@@ -4,9 +4,9 @@ import {
   validateReadingCreateParams,
   validateReadingEditParams,
   validateReadingExist
-} from '../validators/supply-reading'
-import { validateSupplyExist } from '../validators/supply'
-import { ISupplyReadingService } from '../services/supply-reading.service'
+} from './supply-reading.validators'
+import { validateSupplyExist } from '../supply/supply.validators'
+import { ISupplyReadingService } from './supply-reading.service'
 
 type ISupplyReadingController = {
   loggerHandler: any,

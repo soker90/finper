@@ -1,7 +1,7 @@
 import { faker } from '@faker-js/faker'
 import type { TransactionType } from '@soker90/finper-types'
 import { TRANSACTION } from '@soker90/finper-db'
-import { getTransactionAmount } from '../../src/services/utils'
+import { getTransactionAmount } from '../../src/utils'
 
 describe('getTransactionsAmount', () => {
   test('should return the amount without the sign', () => {

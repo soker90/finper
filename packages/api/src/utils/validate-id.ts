@@ -15,3 +15,7 @@
 export const isValidId = (id: unknown): id is string => {
   return typeof id === 'string' && /^[0-9a-f]{24}$/i.test(id)
 }
+
+// The function above is a type guard asserting that a valid id is a string
+// matching a 24-char hex ObjectId-like pattern. The explicit comment makes
+// the intent clearer in commits that separate behavior fixes from other work.

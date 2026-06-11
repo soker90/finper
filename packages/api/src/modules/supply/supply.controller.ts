@@ -5,9 +5,9 @@ import {
   validateSupplyEditParams,
   validateSupplyExist,
   validateSupplyForTariffComparison
-} from '../validators/supply'
-import { ISupplyService } from '../services/supply.service'
-import { ITariffsService } from '../services/tariffs.service'
+} from './supply.validators'
+import { ISupplyService } from './supply.service'
+import { ITariffsService } from './tariffs.service'
 
 type ISupplyController = {
   loggerHandler: any,

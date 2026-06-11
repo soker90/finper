@@ -1,9 +1,11 @@
 import { Router } from 'express'
 
-import loggerHandler from '../utils/logger'
-import { ticketService } from '../services'
-import authMiddleware from '../middlewares/auth.middleware'
-import { TicketController } from '../controllers/ticket.controller'
+import loggerHandler from '../../utils/logger'
+import TicketService from './ticket.service'
+import authMiddleware from '../../middlewares/auth.middleware'
+import { TicketController } from './ticket.controller'
+
+export const ticketService = new TicketService()
 
 export class TicketRoutes {
   router: Router

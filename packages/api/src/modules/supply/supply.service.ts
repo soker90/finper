@@ -1,10 +1,10 @@
 import Boom from '@hapi/boom'
-import { ERROR_MESSAGE } from '../i18n'
-import { supplyRepository } from '../repositories/supply.repository'
-import { propertyRepository } from '../repositories/property.repository'
-import { supplyReadingRepository } from '../repositories/supply-reading.repository'
-import { serializeSupply } from '../serializers/supply.serializer'
-import { serializeProperty } from '../serializers/property.serializer'
+import { ERROR_MESSAGE } from '../../i18n'
+import { supplyRepository } from './supply.repository'
+import { propertyRepository } from '../property/property.repository'
+import { supplyReadingRepository } from '../supply-reading/supply-reading.repository'
+import { serializeSupply } from './supply.serializer'
+import { serializeProperty } from '../property/property.serializer'
 
 type SerializedSupply = ReturnType<typeof serializeSupply>
 

@@ -1,9 +1,11 @@
 import { Router } from 'express'
 
-import loggerHandler from '../utils/logger'
-import { PropertyController } from '../controllers/property.controller'
-import { propertyService } from '../services'
-import authMiddleware from '../middlewares/auth.middleware'
+import loggerHandler from '../../utils/logger'
+import { PropertyController } from './property.controller'
+import PropertyService from './property.service'
+import authMiddleware from '../../middlewares/auth.middleware'
+
+const propertyService = new PropertyService()
 
 export class PropertyRoutes {
   router: Router

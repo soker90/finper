@@ -4,9 +4,9 @@ import {
   TRANSACTION, LOAN_PAYMENT
   , schema, generateId
 } from '@soker90/finper-db'
-import { propertyRepository } from '../src/repositories/property.repository'
-import { supplyRepository } from '../src/repositories/supply.repository'
-import { supplyReadingRepository } from '../src/repositories/supply-reading.repository'
+import { propertyRepository } from '../src/modules/property/property.repository'
+import { supplyRepository } from '../src/modules/supply/supply.repository'
+import { supplyReadingRepository } from '../src/modules/supply-reading/supply-reading.repository'
 
 import { db as sqliteDb } from '../src/db'
 import hashPassword from '../src/helpers/hash-password'

@@ -1,6 +1,6 @@
 import { SUPPLY_TYPE, schema } from '@soker90/finper-db'
 import { db as sqliteDb } from '../../src/db'
-import TariffsService from '../../src/services/tariffs.service'
+import TariffsService from '../../src/modules/supply/tariffs.service'
 import { insertSupply, insertSupplyReading, insertCredentials } from '../insert-data-to-model'
 
 // Helpers compartidos

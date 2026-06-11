@@ -1,7 +1,7 @@
 import { Router } from 'express'
 
-import { MonitController } from '../controllers/monit.controller'
-import loggerHandler from '../utils/logger'
+import { MonitController } from './monit.controller'
+import loggerHandler from '../../utils/logger'
 
 export class MonitRoutes {
   router: Router

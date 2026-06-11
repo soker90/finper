@@ -3,7 +3,7 @@ import { faker } from '@faker-js/faker'
 
 import { server } from '../../src/server'
 import { requestLogin } from '../request-login'
-import { ticketService } from '../../src/services'
+import { ticketService } from '../../src/modules/ticket/ticket.routes'
 import { ERROR_MESSAGE } from '../../src/i18n/ErrorMessages'
 
 const mockFetch = (ok: boolean, body: object = {}) =>

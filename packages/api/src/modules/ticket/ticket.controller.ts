@@ -1,6 +1,6 @@
 import { Request, Response } from 'express'
-import { ITicketService } from '../services/ticket.service'
-import { ERROR_MESSAGE } from '../i18n/ErrorMessages'
+import { ITicketService } from './ticket.service'
+import { ERROR_MESSAGE } from '../../i18n/ErrorMessages'
 
 type ITicketController = {
   loggerHandler: any

@@ -6,12 +6,12 @@ export interface ISupplyReading {
   consumptionOffPeak: number | null
   amount: number
 }
-import { supplyRepository } from '../repositories/supply.repository'
-import { supplyReadingRepository } from '../repositories/supply-reading.repository'
+import { supplyRepository } from './supply.repository'
+import { supplyReadingRepository } from '../supply-reading/supply-reading.repository'
 import Boom from '@hapi/boom'
-import { roundNumber } from '../utils/roundNumber'
-import { ERROR_MESSAGE } from '../i18n'
-import config from '../config'
+import { roundNumber } from '../../utils/roundNumber'
+import { ERROR_MESSAGE } from '../../i18n'
+import config from '../../config'
 
 const ONE_YEAR_MS = 365 * 24 * 60 * 60 * 1000
 

@@ -1,9 +1,9 @@
 import Boom from '@hapi/boom'
-import { ERROR_MESSAGE } from '../i18n'
-import { propertyRepository } from '../repositories/property.repository'
-import { supplyRepository } from '../repositories/supply.repository'
-import { supplyReadingRepository } from '../repositories/supply-reading.repository'
-import { serializeProperty } from '../serializers/property.serializer'
+import { ERROR_MESSAGE } from '../../i18n'
+import { propertyRepository } from './property.repository'
+import { supplyRepository } from '../supply/supply.repository'
+import { supplyReadingRepository } from '../supply-reading/supply-reading.repository'
+import { serializeProperty } from './property.serializer'
 
 type SerializedProperty = ReturnType<typeof serializeProperty>
 

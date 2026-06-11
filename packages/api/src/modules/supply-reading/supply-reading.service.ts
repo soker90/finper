@@ -1,7 +1,7 @@
 import Boom from '@hapi/boom'
-import { ERROR_MESSAGE } from '../i18n'
-import { supplyReadingRepository } from '../repositories/supply-reading.repository'
-import { serializeReading } from '../serializers/supply-reading.serializer'
+import { ERROR_MESSAGE } from '../../i18n'
+import { supplyReadingRepository } from './supply-reading.repository'
+import { serializeReading } from './supply-reading.serializer'
 
 type SerializedReading = ReturnType<typeof serializeReading>
 

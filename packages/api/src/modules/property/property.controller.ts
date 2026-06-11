@@ -4,8 +4,8 @@ import {
   validatePropertyCreateParams,
   validatePropertyEditParams,
   validatePropertyExist
-} from '../validators/property'
-import { IPropertyService } from '../services/property.service'
+} from './property.validators'
+import { IPropertyService } from './property.service'
 
 type IPropertyController = {
   loggerHandler: any,

@@ -1,9 +1,11 @@
 import { Router } from 'express'
 
-import loggerHandler from '../utils/logger'
-import { SupplyReadingController } from '../controllers/supply-reading.controller'
-import { supplyReadingService } from '../services'
-import authMiddleware from '../middlewares/auth.middleware'
+import loggerHandler from '../../utils/logger'
+import { SupplyReadingController } from './supply-reading.controller'
+import SupplyReadingService from './supply-reading.service'
+import authMiddleware from '../../middlewares/auth.middleware'
+
+const supplyReadingService = new SupplyReadingService()
 
 export class SupplyReadingRoutes {
   router: Router
