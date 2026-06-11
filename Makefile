@@ -8,15 +8,13 @@ define help
     build-client:              build the client
     build-image-api-daily:     build the API image dev
     build-image-api-latest:    build the API image latest
-    build-models:              build the models (requires build-types first)
     build-types:               build the shared types
-    build-db:                  build the database package (requires build-models first)
+    build-db:                  build the database package
     install:                   install all dependencies.
     lint-api:                  lint the API
     lint-bot:                  lint the bot
     lint-client:               lint the client
     lint-db:                   lint the database package
-    lint-models:               lint the models.
     lint-types:                lint the shared types.
     seed-user:                 create initial user (USERNAME and PASSWORD required).
     test:                      run all tests.
@@ -24,7 +22,6 @@ define help
     test-bot:                  run tests for the bot.
     test-client:               run all tests for the client
     test-db:                   run all tests for the database package.
-    test-models:               run all tests for the models.
     test-types:                run all tests for the shared types.
     start-api:                 launch api
     start-bot:                 launch bot (Cloudflare Worker dev)
@@ -55,18 +52,8 @@ test-types:
 lint-types:
 	@pnpm --filter @soker90/finper-types lint
 
-## Models ##
-build-models: build-types
-	@pnpm --filter @soker90/finper-models build
-
-test-models:
-	@pnpm --filter @soker90/finper-models test
-
-lint-models:
-	@pnpm --filter @soker90/finper-models lint
-
 ## DB ##
-build-db: build-models
+build-db:
 	@pnpm --filter @soker90/finper-db build
 
 test-db:
@@ -85,7 +72,7 @@ start-api:
 test-api:
 	@pnpm --filter @soker90/finper-api test
 
-build-api: build-db
+build-api: build-types build-db
 	@pnpm --filter @soker90/finper-api build
 
 lint-api:
