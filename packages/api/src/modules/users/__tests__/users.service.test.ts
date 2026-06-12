@@ -18,7 +18,8 @@ describe('users.service', () => {
     db.delete(schema.users).run()
   })
 
-  it('createUser happy path', async () => {
+  // Unit: the password is stored hashed, which is not observable through the HTTP client.
+  it('persists the password hashed, not in plain text', async () => {
     const created = await service.createUser({ username: 'testuser', password: 'password123' })
     expect(created.username).toBe('testuser')
     expect(created._id).toBeDefined()
@@ -26,32 +27,5 @@ describe('users.service', () => {
     const user = repo.findByUsername('testuser')
     expect(user).toBeDefined()
     expect(user?.password).not.toBe('password123')
-  })
-
-  it('createUser with existing username throws conflict', () => {
-    service.createUser({ username: 'testuser', password: 'password123' })
-    expect(() => {
-      service.createUser({ username: 'testuser', password: 'password123' })
-    }).toThrow(expect.objectContaining({
-      statusCode: 409,
-      payload: expect.objectContaining({ message: 'El usuario ya existe' })
-    }))
-  })
-
-  it('validatePassword with correct and incorrect password', async () => {
-    await service.createUser({ username: 'testuser', password: 'password123' })
-    const user = repo.findByUsername('testuser')!
-
-    expect(service.validatePassword('password123', user.password)).toBe(true)
-    expect(service.validatePassword('wrong', user.password)).toBe(false)
-  })
-
-  it('signToken produces a decodable JWT with {username}', () => {
-    const token = service.signToken('testuser')
-    expect(typeof token).toBe('string')
-
-    const jwt = require('jsonwebtoken')
-    const decoded = jwt.decode(token)
-    expect(decoded.username).toBe('testuser')
   })
 })
