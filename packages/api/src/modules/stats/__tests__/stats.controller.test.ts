@@ -69,6 +69,13 @@ describe('Stats Controller', () => {
       const res = await supertest(server.app).get(`${base}/tags/available`).auth(token, { type: 'bearer' }).expect(200)
       expect(res.body).toEqual(['casa', 'juan', 'viaje-japon'])
     })
+
+    test('ignores tags from income and not_computable transactions', async () => {
+      insertTx({ tags: ['salario'], type: TRANSACTION.Income })
+      insertTx({ tags: ['transf'], type: TRANSACTION.NotComputable })
+      const res = await supertest(server.app).get(`${base}/tags/available`).auth(token, { type: 'bearer' }).expect(200)
+      expect(res.body).toEqual([])
+    })
   })
 
   describe('GET /tags/years', () => {
@@ -82,6 +89,12 @@ describe('Stats Controller', () => {
       const res = await supertest(server.app).get(`${base}/tags/years`).auth(token, { type: 'bearer' }).expect(200)
       expect(res.body).toEqual([2025, 2023])
     })
+
+    test('excludes years from untagged transactions', async () => {
+      insertTx({ date: Date.UTC(2024, 5, 15), tags: [] })
+      const res = await supertest(server.app).get(`${base}/tags/years`).auth(token, { type: 'bearer' }).expect(200)
+      expect(res.body).toEqual([])
+    })
   })
 
   describe('GET /tags', () => {
@@ -89,12 +102,32 @@ describe('Stats Controller', () => {
       await supertest(server.app).get(`${base}/tags`).expect(401)
     })
 
-    test('returns summary filtered by year query', async () => {
+    test('returns summary filtered by year query with totals and byCategory', async () => {
       insertTx({ amount: 100, tags: ['viaje'], date: Date.UTC(2024, 5, 15) })
-      insertTx({ amount: 200, tags: ['viaje'], date: Date.UTC(2025, 5, 15) })
+      insertTx({ amount: 100, tags: ['juan'], date: Date.UTC(2025, 5, 15) })
+      insertTx({ amount: 200, tags: ['juan'], date: Date.UTC(2025, 5, 16) })
       const res = await supertest(server.app).get(`${base}/tags?year=2025`).auth(token, { type: 'bearer' }).expect(200)
       expect(res.body).toHaveLength(1)
-      expect(res.body[0].totalAmount).toBe(200)
+      expect(res.body[0].tag).toBe('juan')
+      expect(res.body[0].totalAmount).toBe(300)
+      expect(res.body[0].transactionCount).toBe(2)
+      expect(res.body[0].byCategory).toHaveLength(1)
+      expect(res.body[0].byCategory[0].categoryName).toBe('Comida')
+      expect(res.body[0].byCategory[0].amount).toBe(300)
+    })
+
+    test('excludes income and not_computable transactions', async () => {
+      insertTx({ tags: ['salario'], type: TRANSACTION.Income, date: Date.UTC(2025, 5, 15) })
+      insertTx({ tags: ['transf'], type: TRANSACTION.NotComputable, date: Date.UTC(2025, 5, 15) })
+      const res = await supertest(server.app).get(`${base}/tags?year=2025`).auth(token, { type: 'bearer' }).expect(200)
+      expect(res.body).toHaveLength(0)
+    })
+
+    test('sorts tags by totalAmount desc', async () => {
+      insertTx({ amount: 50, tags: ['small'], date: Date.UTC(2025, 1, 1) })
+      insertTx({ amount: 500, tags: ['big'], date: Date.UTC(2025, 1, 1) })
+      const res = await supertest(server.app).get(`${base}/tags?year=2025`).auth(token, { type: 'bearer' }).expect(200)
+      expect(res.body.map((s: any) => s.tag)).toEqual(['big', 'small'])
     })
   })
 
@@ -110,12 +143,17 @@ describe('Stats Controller', () => {
   })
 
   describe('GET /tags/:tagName/:year', () => {
-    test('returns detail for the year', async () => {
+    test('returns detail for the year with byCategory and populated transactions', async () => {
       insertTx({ amount: 150, tags: ['viaje-japon'], date: Date.UTC(2025, 5, 15) })
       const res = await supertest(server.app).get(`${base}/tags/viaje-japon/2025`).auth(token, { type: 'bearer' }).expect(200)
       expect(res.body.tag).toBe('viaje-japon')
+      expect(res.body.year).toBe(2025)
       expect(res.body.totalAmount).toBe(150)
+      expect(res.body.transactionCount).toBe(1)
+      expect(res.body.byCategory).toHaveLength(1)
+      expect(res.body.byCategory[0].categoryName).toBe('Comida')
       expect(res.body.transactions).toHaveLength(1)
+      expect(res.body.transactions[0].category).toEqual({ _id: categoryId, name: 'Comida' })
     })
 
     test('non-numeric year responds 422', async () => {
