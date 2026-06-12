@@ -127,6 +127,24 @@ describe('Pension Controller', () => {
       expect(response.body.companyAmount).toBe(pension.companyAmount)
       expect(response.body.total).toBe(pension.value * response.body.units)
     })
+
+    test('with several pensions, orders transactions by date desc and total uses the latest value', async () => {
+      const common = { user, employeeAmount: 100, employeeUnits: 10, companyAmount: 50, companyUnits: 5 }
+      insertPension({ ...common, date: 1000, value: 10 })
+      insertPension({ ...common, date: 2000, value: 15 })
+
+      const response = await supertest(server.app).get(path).auth(token, { type: 'bearer' }).expect(200)
+
+      expect(response.body.transactions).toHaveLength(2)
+      expect(response.body.transactions[0].date).toBe(2000)
+      expect(response.body.transactions[1].date).toBe(1000)
+      expect(response.body.employeeAmount).toBe(200)
+      expect(response.body.companyAmount).toBe(100)
+      expect(response.body.amount).toBe(300)
+      expect(response.body.units).toBe(30)
+      // total = value of latest (transactions[0]) * total units = 15 * 30
+      expect(response.body.total).toBe(450)
+    })
   })
 
   describe('PUT /:id', () => {
