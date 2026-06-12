@@ -163,6 +163,22 @@ describe('Transactions Controller', () => {
       expect(response.body[0].account._id).toBe(accountId)
       expect(response.body[0].account.bank).toBe('Bank')
     })
+
+    test('returns transactions ordered by date descending', async () => {
+      await supertest(server.app).post(path).set('Authorization', `Bearer ${token}`).send(validBody({ date: 100 }))
+      await supertest(server.app).post(path).set('Authorization', `Bearer ${token}`).send(validBody({ date: 300 }))
+      await supertest(server.app).post(path).set('Authorization', `Bearer ${token}`).send(validBody({ date: 200 }))
+      const response = await supertest(server.app).get(path).auth(token, { type: 'bearer' }).expect(200)
+      expect(response.body.map((t: any) => t.date)).toEqual([300, 200, 100])
+    })
+
+    test('filters by type when the type query param is provided', async () => {
+      await supertest(server.app).post(path).set('Authorization', `Bearer ${token}`).send(validBody({ type: TRANSACTION.Expense }))
+      await supertest(server.app).post(path).set('Authorization', `Bearer ${token}`).send(validBody({ type: TRANSACTION.Income }))
+      const response = await supertest(server.app).get(`${path}?type=${TRANSACTION.Income}`).auth(token, { type: 'bearer' }).expect(200)
+      expect(response.body).toHaveLength(1)
+      expect(response.body[0].type).toBe(TRANSACTION.Income)
+    })
   })
 
   describe('PUT /:id', () => {
