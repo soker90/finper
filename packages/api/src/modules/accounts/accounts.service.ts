@@ -63,14 +63,6 @@ export class AccountsService {
       tx.update(accounts).set({ balance: balanceExpressionDest }).where(eq(accounts.id, destinationId)).run()
     })
   }
-
-  public async getTotalBalanceByUser (user: string): Promise<number> {
-    return this.repo.getTotalBalanceByUser(user)
-  }
-
-  public async adjustBalance (accountId: string, amount: number, opts?: { round?: boolean }): Promise<any> {
-    return this.repo.adjustBalance(accountId, amount, opts)
-  }
 }
 
 export const accountsService = new AccountsService()

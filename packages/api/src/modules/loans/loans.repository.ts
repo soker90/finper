@@ -14,9 +14,6 @@ export const createLoansRepository = (db: DB) => ({
   findById: (id: string, user: string): LoanRow | undefined =>
     db.select().from(loans).where(and(eq(loans.id, id), eq(loans.user, user))).get(),
 
-  exists: (id: string, user: string): boolean =>
-    Boolean(db.select({ id: loans.id }).from(loans).where(and(eq(loans.id, id), eq(loans.user, user))).get()),
-
   findEventsByLoan: (loanId: string, user: string): LoanEventRow[] =>
     db.select().from(loanEvents)
       .where(and(eq(loanEvents.loanId, loanId), eq(loanEvents.user, user)))

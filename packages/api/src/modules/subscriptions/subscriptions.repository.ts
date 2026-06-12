@@ -78,9 +78,6 @@ export const createSubscriptionsRepository = (db: DB) => ({
   findByIdAny: (id: string): Subscription | undefined =>
     db.select().from(subscriptions).where(eq(subscriptions.id, id)).get(),
 
-  exists: (id: string, user: string): boolean =>
-    Boolean(db.select({ id: subscriptions.id }).from(subscriptions).where(and(eq(subscriptions.id, id), eq(subscriptions.user, user))).get()),
-
   create: (data: { name: string, amount: number, currency?: string | null, cycle: number, categoryId: string, accountId: string, logoUrl?: string | null, user: string }): Subscription => {
     const id = generateId()
     return db.insert(subscriptions).values({ ...data, id, nextPaymentDate: null }).returning().get()
