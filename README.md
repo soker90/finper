@@ -1,6 +1,6 @@
 # Finper
 
-Finper es una aplicación para gestionar finanzas personales: cuentas, movimientos, presupuestos, deudas, préstamos, pensión, suscripciones y suministros. El repositorio está organizado como un monorepo con `pnpm` y separa claramente frontend, API y capa de modelos.
+Finper es una aplicación para gestionar finanzas personales: cuentas, movimientos, presupuestos, deudas, préstamos, pensión, suscripciones y suministros. El repositorio está organizado como un monorepo con `pnpm` y separa claramente frontend, API y capa de base de datos.
 
 [![js-standard-style](https://img.shields.io/badge/code%20style-standard-brightgreen.svg)](http://standardjs.com)
 [![codecov](https://codecov.io/gh/soker90/finper/branch/master/graph/badge.svg?token=gWKDyCALuU)](https://codecov.io/gh/soker90/finper)
@@ -36,7 +36,8 @@ git clone https://github.com/soker90/finper.git
 cd finper
 cp .env.example .env
 pnpm install
-make build-models
+make build-types
+make build-db
 make start-api
 ```
 
@@ -69,17 +70,18 @@ Actualmente Finper cubre, entre otros, estos módulos:
 
 ## Arquitectura del proyecto
 
-El repositorio está dividido en tres paquetes principales dentro de `packages/`:
+El repositorio está dividido en estos paquetes principales dentro de `packages/`:
 
 - `packages/api`: API REST en Express y TypeScript
 - `packages/client`: frontend en React + Vite
-- `packages/models`: modelos y tipos compartidos basados en Mongoose
+- `packages/db`: esquema y capa de base de datos (SQLite con Drizzle ORM)
+- `packages/types`: tipos compartidos entre API y cliente
 
 Relación entre paquetes:
 
 - El **cliente** consume la **API**
-- La **API** utiliza `@soker90/finper-models` como dependencia de workspace
-- Los **models** encapsulan esquemas, tipos y utilidades de conexión con MongoDB
+- La **API** utiliza `@soker90/finper-db` y `@soker90/finper-types` como dependencias de workspace
+- El paquete **db** define el esquema Drizzle, el cliente SQLite y las migraciones
 
 ## Ecosistema Finper
 
@@ -122,7 +124,7 @@ En Finper esto se refleja en:
 - Node.js
 - Express
 - TypeScript
-- Mongoose
+- SQLite (better-sqlite3) + Drizzle ORM
 - Passport + JWT
 - Joi para validación
 
@@ -149,9 +151,10 @@ Para trabajar en local, lo recomendable es contar con:
 
 - **Node.js 24 o superior**
 - **pnpm 10**
-- **MongoDB** accesible en local o por red
 - **make**
-- **Docker** y **Docker Compose** si quieres levantar la API y MongoDB en contenedores
+- **Docker** y **Docker Compose** si quieres levantar la API en contenedores
+
+> No necesitas ninguna base de datos externa: la persistencia es SQLite (fichero local), y la API aplica las migraciones Drizzle automáticamente al arrancar.
 
 > El repositorio fuerza el uso de `pnpm` en la instalación.
 
@@ -190,11 +193,7 @@ Variables principales para desarrollo local:
 
 | Variable | Obligatoria | Descripción |
 | --- | --- | --- |
-| `DATABASE_NAME` | Sí | Nombre de la base de datos |
-| `DATABASE_HOST` | Sí | Host de MongoDB |
-| `MONGODB_USER` | No | Usuario de MongoDB |
-| `MONGODB_PASS` | No | Contraseña de MongoDB |
-| `MONGODB` | No | URI completa de MongoDB; si existe, tiene prioridad |
+| `DATABASE_FILE` | No | Ruta del fichero SQLite (por defecto `./finper-dev.db`) |
 | `JWT_SECRET` | Sí | Secreto para firmar tokens |
 | `SALT_ROUNDS` | Sí | Rondas de hash para contraseñas |
 | `GRAFANA_LOGGER_USER` | No | Usuario del logger externo |
@@ -204,16 +203,12 @@ Variables principales para desarrollo local:
 
 ### 2. Variables adicionales si usas Docker Compose
 
-Los `docker-compose` del repo también interpolan variables específicas para inicializar MongoDB y para compatibilidad con el archivo Compose actual:
+En Compose el fichero SQLite se persiste en un volumen (`DATABASE_FILE=/home/node/app/data/finper.db`), por lo que no hace falta configurar ninguna base de datos externa. Los archivos Compose también interpolan variables de logging:
 
 | Variable | Obligatoria en Compose | Descripción |
 | --- | --- | --- |
-| `DATABASE_ROOT_USERNAME` | Sí | Usuario root para el contenedor MongoDB |
-| `DATABASE_ROOT_PASSWORD` | Sí | Password root para el contenedor MongoDB |
 | `LOKI_USER` | No | Variable interpolada actualmente por Compose |
 | `LOKI_PASSWORD` | No | Variable interpolada actualmente por Compose |
-
-> Importante: la API lee `GRAFANA_LOGGER_USER` y `GRAFANA_LOGGER_PASSWORD`, mientras que los archivos Compose actuales interpolan también `LOKI_USER` y `LOKI_PASSWORD`. Si usas Docker Compose y esa integración de logging te importa, lo más seguro es definir ambos pares con el mismo valor.
 
 ### 3. Configuración del cliente
 
@@ -231,16 +226,16 @@ Si tu API corre en otra URL, ajusta ese valor antes de arrancar el frontend.
 
 ### Opción recomendada: desarrollo por paquetes
 
-1. Arranca MongoDB
-2. Instala dependencias
-3. Construye los modelos
-4. Arranca la API
-5. Arranca el cliente
+1. Instala dependencias
+2. Construye los tipos y el paquete de base de datos
+3. Arranca la API (aplica migraciones SQLite automáticamente)
+4. Arranca el cliente
 
 Comandos:
 
 ```bash
-make build-models
+make build-types
+make build-db
 make start-api
 ```
 
@@ -257,7 +252,7 @@ URLs locales conocidas desde el código actual:
 - Base path API: `http://localhost:3008/api`
 
 > `make start-api` ejecuta el script de arranque de `@soker90/finper-api`.
-> Si estás trabajando con cambios en `packages/models`, construir los modelos antes de arrancar la API evita inconsistencias.
+> Si estás trabajando con cambios en `packages/db` o `packages/types`, conviene reconstruirlos antes de arrancar la API para evitar inconsistencias.
 
 ## Creación de usuarios
 
@@ -317,25 +312,25 @@ curl -X POST http://localhost:3008/api/auth/login \
 | Comando | Descripción |
 | --- | --- |
 | `make install` | Instala dependencias del monorepo |
-| `make build-models` | Compila `packages/models` |
-| `make build-api` | Compila la API |
+| `make build-db` | Compila `packages/db` |
+| `make build-api` | Compila la API (encadena `build-types` y `build-db`) |
 | `make build-client` | Genera la build del frontend |
 | `make start-api` | Arranca la API |
 | `make start-client` | Arranca el frontend en modo desarrollo |
 | `make seed-user USERNAME=... PASSWORD=...` | Crea un usuario inicial/manual |
 | `make lint-api` | Ejecuta lint de la API |
 | `make lint-client` | Ejecuta lint del cliente |
-| `make lint-models` | Ejecuta lint de models |
+| `make lint-db` | Ejecuta lint del paquete de base de datos |
 | `make test-api` | Ejecuta tests de la API |
 | `make test-client` | Ejecuta tests del cliente |
-| `make test-models` | Ejecuta tests de models |
+| `make test-db` | Ejecuta tests del paquete de base de datos |
 | `make test` | Ejecuta tests de todos los paquetes |
 | `make` | Muestra la ayuda |
 
 ### Con `pnpm`
 
 ```bash
-pnpm --filter @soker90/finper-models build
+pnpm --filter @soker90/finper-db build
 pnpm --filter @soker90/finper-api start
 pnpm --filter @soker90/finper-client dev
 INIT_USERNAME=miusuario INIT_PASSWORD=mipassword pnpm --filter @soker90/finper-api seed-user
@@ -346,7 +341,6 @@ INIT_USERNAME=miusuario INIT_PASSWORD=mipassword pnpm --filter @soker90/finper-a
 El proyecto usa:
 
 - **Jest** en `packages/api`
-- **Jest** en `packages/models`
 - **Vitest** en `packages/client`
 
 Ejecutar toda la batería:
@@ -360,7 +354,7 @@ Ejecutar por paquete:
 ```bash
 make test-api
 make test-client
-make test-models
+make test-db
 ```
 
 Lint por paquete:
@@ -368,32 +362,29 @@ Lint por paquete:
 ```bash
 make lint-api
 make lint-client
-make lint-models
+make lint-db
 ```
 
 ## Docker
 
 El repositorio incluye dos ficheros Compose:
 
-- `docker-compose.yml`: entorno base con **MongoDB + API**
+- `docker-compose.yml`: entorno base con la **API** (construye la imagen localmente)
 - `docker-compose.prod.yml`: variante orientada a despliegue usando imagen publicada de la API
 
 ### Qué levanta el Compose actual
 
 Según la configuración actual, el Compose raíz levanta:
 
-- `database` en `mongo:4.4`
 - `api` en el puerto `3008`
 
-No levanta el cliente web.
+La persistencia SQLite se guarda en el volumen `finperdb` montado en `/home/node/app/data`. No levanta ningún contenedor de base de datos ni el cliente web.
 
 ### Variables necesarias para Compose
 
 El `docker-compose.yml` utiliza variables como:
 
-- `DATABASE_NAME`
-- `DATABASE_ROOT_USERNAME`
-- `DATABASE_ROOT_PASSWORD`
+- `DATABASE_FILE`
 - `JWT_SECRET`
 - `SALT_ROUNDS`
 - `LOKI_USER` / `LOKI_PASSWORD`
@@ -406,8 +397,6 @@ Arranque típico:
 docker compose up --build
 ```
 
-> Si trabajas con Docker Compose, revisa que tu `.env` incluya también las variables específicas de Compose para MongoDB root, ya que no coinciden exactamente con las usadas por la API en modo local.
-
 ## Estructura del repositorio
 
 ```text
@@ -418,7 +407,8 @@ finper/
 ├── packages/
 │   ├── api/
 │   ├── client/
-│   └── models/
+│   ├── db/
+│   └── types/
 ├── .env.example
 ├── docker-compose.yml
 ├── docker-compose.prod.yml

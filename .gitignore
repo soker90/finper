@@ -105,3 +105,25 @@ dist
 
 .idea/
 package-lock.json
+
+# SQLite auxiliary files (WAL mode)
+*.db-shm
+*.db-wal
+*.sqlite-shm
+*.sqlite-wal
+
+# Scratch directory for temporary artifacts
+scratch/
+
+# Local development database (any location)
+**/finper-dev.db
+
+# Drizzle interactive prompt automation (agent artifact)
+packages/db/gen.exp
+*.exp
+
+# build & coverage artifacts
+dist/
+coverage/
+**/dist/
+**/coverage/

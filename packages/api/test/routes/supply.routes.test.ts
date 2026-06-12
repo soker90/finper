@@ -1,14 +1,13 @@
 import supertest from 'supertest'
 import { faker } from '@faker-js/faker'
-import { SupplyModel, PropertyModel, SupplyReadingModel, mongoose, SUPPLY_TYPE } from '@soker90/finper-models'
+import { SUPPLY_TYPE, schema } from '@soker90/finper-db'
+import { db as sqliteDb } from '../../src/db'
+import { eq } from 'drizzle-orm'
 
 import { server } from '../../src/server'
 import { requestLogin } from '../request-login'
 import { insertSupply, insertProperty, insertSupplyReading } from '../insert-data-to-model'
 import { generateUsername } from '../generate-values'
-
-import createTestDatabase from '../test-db'
-const testDatabase = createTestDatabase(mongoose)
 
 const MOCK_TARIFFS_RESPONSE = {
   datosGenerales: { iva: 0.21, impuestoElectrico: 0.0511269632, alquilerContador: 0.026557 },
@@ -40,12 +39,10 @@ const FULL_PRICE_SUPPLY = {
 }
 
 describe('Supply Routes', () => {
-  beforeAll(() => testDatabase.connect())
-  afterAll(() => testDatabase.close())
-  afterEach(async () => {
-    await SupplyModel.deleteMany({})
-    await SupplyReadingModel.deleteMany({})
-    await PropertyModel.deleteMany({})
+  afterEach(() => {
+    sqliteDb.delete(schema.supplyReadings).run()
+    sqliteDb.delete(schema.supplies).run()
+    sqliteDb.delete(schema.properties).run()
   })
 
   describe('GET /api/supplies', () => {
@@ -63,12 +60,12 @@ describe('Supply Routes', () => {
 
     test('should return grouped supplies', async () => {
       const property = await insertProperty({ user })
-      await insertSupply({ user, propertyId: property._id.toString() })
+      await insertSupply({ user, propertyId: property.id })
 
       const { body } = await supertest(server.app).get(path).auth(token, { type: 'bearer' }).expect(200)
 
       expect(Array.isArray(body)).toBeTruthy()
-      expect(body[0]._id.toString()).toEqual(property._id.toString())
+      expect(body[0]._id).toEqual(property.id)
       expect(Array.isArray(body[0].supplies)).toBeTruthy()
       expect(body[0].supplies.length).toBe(1)
     })
@@ -86,14 +83,14 @@ describe('Supply Routes', () => {
     test('when success creating a supply', async () => {
       const property = await insertProperty({ user })
       await supertest(server.app).post(path).auth(token, { type: 'bearer' })
-        .send({ name: 'Electricidad', type: SUPPLY_TYPE.ELECTRICITY, propertyId: property._id.toString() })
+        .send({ name: 'Electricidad', type: SUPPLY_TYPE.ELECTRICITY, propertyId: property.id })
         .expect(200)
     })
 
     test('when token is not provided, it should respond 401', async () => {
       const property = await insertProperty({ user })
       await supertest(server.app).post(path)
-        .send({ name: 'Electricidad', type: SUPPLY_TYPE.ELECTRICITY, propertyId: property._id.toString() })
+        .send({ name: 'Electricidad', type: SUPPLY_TYPE.ELECTRICITY, propertyId: property.id })
         .expect(401)
     })
 
@@ -115,14 +112,14 @@ describe('Supply Routes', () => {
 
     test('when success editing a supply', async () => {
       const supply = await insertSupply({ user })
-      await supertest(server.app).put(path(supply._id.toString())).auth(token, { type: 'bearer' })
+      await supertest(server.app).put(path(supply.id)).auth(token, { type: 'bearer' })
         .send({ name: 'Nuevo nombre', type: SUPPLY_TYPE.ELECTRICITY, propertyId: supply.propertyId.toString() })
         .expect(200)
     })
 
     test('when token is not provided, it should respond 401', async () => {
       const supply = await insertSupply({ user })
-      await supertest(server.app).put(path(supply._id.toString()))
+      await supertest(server.app).put(path(supply.id))
         .send({ name: 'Nuevo nombre', type: SUPPLY_TYPE.ELECTRICITY, propertyId: supply.propertyId.toString() })
         .expect(401)
     })
@@ -130,13 +127,13 @@ describe('Supply Routes', () => {
     test('when supply does not exist in PUT, return 404', async () => {
       const property = await insertProperty({ user })
       await supertest(server.app).put(path('662cc99403a45c3453b3bbed')).auth(token, { type: 'bearer' })
-        .send({ name: 'Nuevo nombre', type: SUPPLY_TYPE.ELECTRICITY, propertyId: property._id.toString() })
+        .send({ name: 'Nuevo nombre', type: SUPPLY_TYPE.ELECTRICITY, propertyId: property.id })
         .expect(404)
     })
 
     test('when another user supply in PUT, return 404', async () => {
       const supply = await insertSupply()
-      await supertest(server.app).put(path(supply._id.toString())).auth(token, { type: 'bearer' })
+      await supertest(server.app).put(path(supply.id)).auth(token, { type: 'bearer' })
         .send({ name: 'Nuevo nombre', type: SUPPLY_TYPE.ELECTRICITY, propertyId: supply.propertyId.toString() })
         .expect(404)
     })
@@ -153,12 +150,12 @@ describe('Supply Routes', () => {
 
     test('when success deleting a supply', async () => {
       const supply = await insertSupply({ user })
-      await supertest(server.app).delete(path(supply._id.toString())).auth(token, { type: 'bearer' }).expect(204)
+      await supertest(server.app).delete(path(supply.id)).auth(token, { type: 'bearer' }).expect(204)
     })
 
     test('when token is not provided, it should respond 401', async () => {
       const supply = await insertSupply({ user })
-      await supertest(server.app).delete(path(supply._id.toString())).expect(401)
+      await supertest(server.app).delete(path(supply.id)).expect(401)
     })
 
     test('when supply does not exist in DELETE, return 404', async () => {
@@ -167,16 +164,16 @@ describe('Supply Routes', () => {
 
     test('when another user supply in DELETE, return 404', async () => {
       const supply = await insertSupply()
-      await supertest(server.app).delete(path(supply._id.toString())).auth(token, { type: 'bearer' }).expect(404)
+      await supertest(server.app).delete(path(supply.id)).auth(token, { type: 'bearer' }).expect(404)
     })
 
     test('when deleting supply, it should delete related readings', async () => {
       const supply = await insertSupply({ user })
-      await insertSupplyReading({ user, supplyId: supply._id.toString(), amount: 15.5 })
+      await insertSupplyReading({ user, supplyId: supply.id, amount: 15.5 })
 
-      await supertest(server.app).delete(path(supply._id.toString())).auth(token, { type: 'bearer' }).expect(204)
+      await supertest(server.app).delete(path(supply.id)).auth(token, { type: 'bearer' }).expect(204)
 
-      const readingsCount = await SupplyReadingModel.countDocuments({ supplyId: supply._id })
+      const readingsCount = sqliteDb.select().from(schema.supplyReadings).where(eq(schema.supplyReadings.supplyId, supply.id)).all().length
       expect(readingsCount).toBe(0)
     })
   })
@@ -200,7 +197,7 @@ describe('Supply Routes', () => {
 
     test('when token is not provided, it should respond 401', async () => {
       const supply = await insertSupply({ user })
-      await supertest(server.app).get(path(supply._id.toString())).expect(401)
+      await supertest(server.app).get(path(supply.id)).expect(401)
     })
 
     test('when supply does not exist, it should respond 404', async () => {
@@ -213,7 +210,7 @@ describe('Supply Routes', () => {
     test('when supply belongs to another user, it should respond 404', async () => {
       const supply = await insertSupply()
       await supertest(server.app)
-        .get(path(supply._id.toString()))
+        .get(path(supply.id))
         .auth(token, { type: 'bearer' })
         .expect(404)
     })
@@ -221,7 +218,7 @@ describe('Supply Routes', () => {
     test('when supply is not electricity type, it should respond 400', async () => {
       const supply = await insertSupply({ user, type: SUPPLY_TYPE.WATER })
       await supertest(server.app)
-        .get(path(supply._id.toString()))
+        .get(path(supply.id))
         .auth(token, { type: 'bearer' })
         .expect(400)
     })
@@ -229,7 +226,7 @@ describe('Supply Routes', () => {
     test('when supply has no contracted power configured, it should respond 400', async () => {
       const supply = await insertSupply({ user, type: SUPPLY_TYPE.ELECTRICITY })
       await supertest(server.app)
-        .get(path(supply._id.toString()))
+        .get(path(supply.id))
         .auth(token, { type: 'bearer' })
         .expect(400)
     })
@@ -242,7 +239,7 @@ describe('Supply Routes', () => {
         contractedPowerOffPeak: 3.45
       })
       await supertest(server.app)
-        .get(path(supply._id.toString()))
+        .get(path(supply.id))
         .auth(token, { type: 'bearer' })
         .expect(400)
     })
@@ -250,7 +247,7 @@ describe('Supply Routes', () => {
     test('when supply has no readings, it should respond 400', async () => {
       const supply = await insertSupply({ user, ...FULL_PRICE_SUPPLY })
       await supertest(server.app)
-        .get(path(supply._id.toString()))
+        .get(path(supply.id))
         .auth(token, { type: 'bearer' })
         .expect(400)
     })
@@ -260,10 +257,10 @@ describe('Supply Routes', () => {
       const startDate = endDate - 30 * 24 * 60 * 60 * 1000
 
       const supply = await insertSupply({ user, ...FULL_PRICE_SUPPLY })
-      await insertSupplyReading({ user, supplyId: supply._id.toString(), startDate, endDate })
+      await insertSupplyReading({ user, supplyId: supply.id, startDate, endDate })
 
       const { body } = await supertest(server.app)
-        .get(path(supply._id.toString()))
+        .get(path(supply.id))
         .auth(token, { type: 'bearer' })
         .expect(200)
 
@@ -290,13 +287,13 @@ describe('Supply Routes', () => {
       const supply = await insertSupply({ user, ...FULL_PRICE_SUPPLY })
       await insertSupplyReading({
         user,
-        supplyId: supply._id.toString(),
+        supplyId: supply.id,
         endDate: Date.now(),
         startDate: Date.now() - 366 * 24 * 60 * 60 * 1000 // >365 días antes
       })
 
       await supertest(server.app)
-        .get(path(supply._id.toString()))
+        .get(path(supply.id))
         .auth(token, { type: 'bearer' })
         .expect(400)
     })

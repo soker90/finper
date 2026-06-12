@@ -1,6 +1,0 @@
-dist
-.vscode
-coverage
-node_modules
-globalConfig.json
-.idea

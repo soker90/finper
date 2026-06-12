@@ -1,4 +1,6 @@
-import { TransactionDocument } from '@soker90/finper-models'
+import { schema } from '@soker90/finper-db'
+
+type TransactionRow = typeof schema.transactions.$inferSelect
 
 export interface TagCategoryBreakdown {
   categoryId: string
@@ -32,5 +34,5 @@ export interface TagDetail {
   totalAmount: number
   transactionCount: number
   byCategory: TagCategoryBreakdown[]
-  transactions: TransactionDocument[]
+  transactions: TransactionRow[]
 }

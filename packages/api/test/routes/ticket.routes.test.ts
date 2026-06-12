@@ -1,14 +1,10 @@
 import supertest from 'supertest'
-import { mongoose } from '@soker90/finper-models'
 import { faker } from '@faker-js/faker'
 
 import { server } from '../../src/server'
 import { requestLogin } from '../request-login'
-import { ticketService } from '../../src/services'
+import { ticketService } from '../../src/modules/ticket/ticket.routes'
 import { ERROR_MESSAGE } from '../../src/i18n/ErrorMessages'
-
-import createTestDatabase from '../test-db'
-const testDatabase = createTestDatabase(mongoose)
 
 const mockFetch = (ok: boolean, body: object = {}) =>
   jest.spyOn(global, 'fetch').mockResolvedValueOnce({
@@ -19,8 +15,6 @@ const mockFetch = (ok: boolean, body: object = {}) =>
   } as Response)
 
 describe('Ticket', () => {
-  beforeAll(() => testDatabase.connect())
-  afterAll(() => testDatabase.close())
   afterEach(() => jest.restoreAllMocks())
 
   describe('GET /', () => {

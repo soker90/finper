@@ -8,7 +8,8 @@ export const ERROR_MESSAGE = {
   },
   CATEGORY: {
     NOT_FOUND: 'La categoría no existe',
-    PARENT_NOT_FOUND: 'La categoría padre no existe'
+    PARENT_NOT_FOUND: 'La categoría padre no existe',
+    HAS_CHILDREN: 'No se puede eliminar una categoría que tiene subcategorías'
   },
   TRANSACTION: {
     NOT_FOUND: 'No existe el movimiento'
@@ -30,6 +31,9 @@ export const ERROR_MESSAGE = {
   },
   USER: {
     ALREADY_EXISTS: 'El usuario ya existe'
+  },
+  STOCK: {
+    NOT_FOUND: 'La acción no existe'
   },
   SUBSCRIPTION: {
     NOT_FOUND: 'La suscripción no existe',
