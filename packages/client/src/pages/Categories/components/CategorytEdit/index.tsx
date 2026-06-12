@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useForm } from 'react-hook-form'
+import { useForm, useWatch } from 'react-hook-form'
 import {
   Button,
   FormHelperText,
@@ -28,7 +28,7 @@ const CategoryEdit = ({
     parent: typeof category.parent === 'object' ? category.parent?._id : category.parent,
     budgetRuleClass: category.budgetRuleClass ?? 'none'
   }
-  const { register, handleSubmit, formState: { errors }, watch, reset } = useForm({
+  const { register, handleSubmit, formState: { errors }, control, reset } = useForm({
     defaultValues
   })
 
@@ -37,8 +37,8 @@ const CategoryEdit = ({
   // eslint-disable-next-line react-hooks/exhaustive-deps -- reset(defaultValues) on external prop change; defaultValues is rebuilt each render by design
   }, [category, reset])
 
-  const categoryType = watch('type')
-  const categoryParent = watch('parent')
+  const categoryType = useWatch({ control, name: 'type' })
+  const categoryParent = useWatch({ control, name: 'parent' })
   const showBudgetRule = categoryType === 'expense' && !!categoryParent
   const fieldSize = showBudgetRule ? 3 : 4
 
