@@ -79,6 +79,32 @@ describe('Stocks Controller', () => {
       expect(pos.purchases[0]).toHaveProperty('_id')
     })
 
+    it('subtracts shares after a sell operation', async () => {
+      stocksRepository.create({ user: username, ticker: 'TEF.MC', name: 'Telefónica', shares: 100, price: 4.0, type: STOCK_TYPE.Buy, date: 1, platform: 'X' })
+      stocksRepository.create({ user: username, ticker: 'TEF.MC', name: 'Telefónica', shares: 40, price: 5.0, type: STOCK_TYPE.Sell, date: 2, platform: 'X' })
+
+      const response = await supertest(server.app).get(path).set('Authorization', `Bearer ${token}`).expect(200)
+      expect(response.body).toHaveLength(1)
+      expect(response.body[0].shares).toBe(60)
+    })
+
+    it('counts dividend shares separately', async () => {
+      stocksRepository.create({ user: username, ticker: 'TEF.MC', name: 'Telefónica', shares: 100, price: 4.0, type: STOCK_TYPE.Buy, date: 1, platform: 'X' })
+      stocksRepository.create({ user: username, ticker: 'TEF.MC', name: 'Telefónica', shares: 5, price: 0, type: STOCK_TYPE.Dividend, date: 2, platform: 'X' })
+
+      const response = await supertest(server.app).get(path).set('Authorization', `Bearer ${token}`).expect(200)
+      expect(response.body[0].shares).toBe(105)
+      expect(response.body[0].dividendShares).toBe(5)
+    })
+
+    it('excludes a position when all shares have been sold', async () => {
+      stocksRepository.create({ user: username, ticker: 'TEF.MC', name: 'Telefónica', shares: 100, price: 4.0, type: STOCK_TYPE.Buy, date: 1, platform: 'X' })
+      stocksRepository.create({ user: username, ticker: 'TEF.MC', name: 'Telefónica', shares: 100, price: 5.0, type: STOCK_TYPE.Sell, date: 2, platform: 'X' })
+
+      const response = await supertest(server.app).get(path).set('Authorization', `Bearer ${token}`).expect(200)
+      expect(response.body).toHaveLength(0)
+    })
+
     it('stocks of other users should not be included', async () => {
       const otherUser = generateUsername()
       await insertCredentials({ username: otherUser })
@@ -203,6 +229,22 @@ describe('Stocks Controller', () => {
 
       const inDb = stocksRepository.findAllByUser(username)
       expect(inDb).toHaveLength(0)
+    })
+
+    it('does not delete a stock belonging to another user', async () => {
+      const otherUser = generateUsername()
+      await insertCredentials({ username: otherUser })
+      const stock = stocksRepository.create({ user: otherUser, ticker: 'SAN.MC', name: 'Santander', shares: 200, price: 3.5, type: STOCK_TYPE.Buy, date: 1, platform: 'X' })
+
+      await supertest(server.app)
+        .delete(`/api/stocks/${stock.id}`)
+        .set('Authorization', `Bearer ${token}`)
+        .expect(204)
+
+      expect(stocksRepository.findAllByUser(otherUser)).toHaveLength(1)
+
+      sqliteDb.delete(stocks).where(eq(stocks.user, otherUser)).run()
+      sqliteDb.delete(schema.users).where(eq(schema.users.username, otherUser)).run()
     })
   })
 })
