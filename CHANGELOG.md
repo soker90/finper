@@ -16,11 +16,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   The Docker production stage (`pnpm deploy --prod`) excludes `devDependencies`, causing the
   container to crash immediately with `MODULE_NOT_FOUND`. ([#819](https://github.com/soker90/finper/pull/819))
 
-- **client**: Restore transaction amount colors broken by the MUI v9 upgrade.
-  `Typography` color prop in MUI v9 only accepts first-level palette tokens (`success`, `error`,
-  `secondary`). The dot-notation previously used (`success.main`, `error.main`) is no longer
-  resolved and produced no color. ([#817](https://github.com/soker90/finper/pull/817))
-
 ### Changed
 
 - **docker**: Remove hardcoded `ENV DATABASE_FILE` from the API `Dockerfile` — the database path
@@ -48,3 +43,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 Full migration from MongoDB/Mongoose to **Drizzle ORM + SQLite**. See
 [#802](https://github.com/soker90/finper/pull/802) for the complete changeset.
+
+### Fixed
+
+- **client**: Restore transaction amount colors broken by the MUI v9 upgrade.
+  `Typography` color prop in MUI v9 only accepts first-level palette tokens (`success`, `error`,
+  `secondary`). The dot-notation previously used (`success.main`, `error.main`) is no longer
+  resolved and produced no color. ([#817](https://github.com/soker90/finper/pull/817))
