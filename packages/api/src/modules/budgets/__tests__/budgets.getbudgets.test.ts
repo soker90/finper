@@ -70,4 +70,35 @@ describe('Budgets Service (Part B - getBudgets)', () => {
     expect(savings.budgeted).toBe(500)
     expect(savings.real).toBe(600)
   })
+
+  it('accumulates the totals row across multiple categories of the same type', () => {
+    // Usuario aislado para no alterar las aserciones del fixture compartido.
+    const u = generateUsername()
+    db.insert(users).values({ id: generateId(), username: u, password: 'pwd', createdAt: new Date(), updatedAt: new Date() }).run()
+    const acc = generateId()
+    db.insert(accounts).values({ id: acc, name: 'C', bank: 'B', balance: 0, user: u }).run()
+
+    const parent = generateId()
+    db.insert(categories).values({ id: parent, name: 'Casa', type: 'expense', budgetRuleClass: 'needs', user: u }).run()
+    const luz = generateId()
+    db.insert(categories).values({ id: luz, name: 'Luz', type: 'expense', parentId: parent, budgetRuleClass: 'none', user: u }).run()
+    const agua = generateId()
+    db.insert(categories).values({ id: agua, name: 'Agua', type: 'expense', parentId: parent, budgetRuleClass: 'none', user: u }).run()
+
+    service.editBudget({ category: luz, year: 2025, month: 3, user: u, amount: 100 })
+    service.editBudget({ category: agua, year: 2025, month: 3, user: u, amount: 250 })
+
+    const march = Date.UTC(2025, 2, 15, 12, 0, 0)
+    db.insert(transactions).values({ id: generateId(), date: march, categoryId: luz, amount: 40, type: 'expense', accountId: acc, note: null, storeId: null, subscriptionId: null, tags: [], user: u }).run()
+    db.insert(transactions).values({ id: generateId(), date: march, categoryId: agua, amount: 60, type: 'expense', accountId: acc, note: null, storeId: null, subscriptionId: null, tags: [], user: u }).run()
+
+    const result = service.getBudgets({ user: u, year: 2025, month: NaN })
+    const totalsRow = result.expenses.find((c: any) => c.id === 'totals')
+    expect(totalsRow).toBeDefined()
+
+    const totalBudgeted = totalsRow.budgets.reduce((sum: number, b: any) => sum + b.amount, 0)
+    const totalReal = totalsRow.budgets.reduce((sum: number, b: any) => sum + b.real, 0)
+    expect(totalBudgeted).toBe(350) // 100 + 250 acumulados entre las dos categorías
+    expect(totalReal).toBe(100) // 40 + 60
+  })
 })

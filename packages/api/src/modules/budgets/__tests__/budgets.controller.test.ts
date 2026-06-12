@@ -49,6 +49,15 @@ describe('Budgets Controller (Part A)', () => {
       expect(res.body.amount).toBe(120)
       expect(sqliteDb.select().from(budgets).where(eq(budgets.user, username)).all()).toHaveLength(1)
     })
+
+    test('editing the same budget again updates the amount without duplicating it', async () => {
+      await supertest(server.app).patch(`${base}/${categoryId}/2025/3`).set('Authorization', `Bearer ${token}`)
+        .send({ amount: 120 }).expect(200)
+      const res = await supertest(server.app).patch(`${base}/${categoryId}/2025/3`).set('Authorization', `Bearer ${token}`)
+        .send({ amount: 200 }).expect(200)
+      expect(res.body.amount).toBe(200)
+      expect(sqliteDb.select().from(budgets).where(eq(budgets.user, username)).all()).toHaveLength(1)
+    })
   })
 
   describe('POST / (copy)', () => {
@@ -70,6 +79,18 @@ describe('Budgets Controller (Part A)', () => {
       expect(res.body.success).toBe(true)
       const dest = sqliteDb.select().from(budgets).where(eq(budgets.month, 5)).all()
       expect(dest.find(b => b.user === username)?.amount).toBe(80)
+    })
+
+    test('copy overwrites budgets already present in the destination month', async () => {
+      await supertest(server.app).patch(`${base}/${categoryId}/2025/4`).set('Authorization', `Bearer ${token}`)
+        .send({ amount: 100 }).expect(200)
+      await supertest(server.app).patch(`${base}/${categoryId}/2025/5`).set('Authorization', `Bearer ${token}`)
+        .send({ amount: 999 }).expect(200)
+      await supertest(server.app).post(base).set('Authorization', `Bearer ${token}`)
+        .send({ year: 2025, month: 5, yearOrigin: 2025, monthOrigin: 4 }).expect(200)
+      const dest = sqliteDb.select().from(budgets).where(eq(budgets.month, 5)).all().filter(b => b.user === username)
+      expect(dest).toHaveLength(1)
+      expect(dest[0].amount).toBe(100)
     })
   })
 })
