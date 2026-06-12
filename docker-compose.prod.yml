@@ -5,7 +5,11 @@ services:
     container_name: finper-api
     env_file: .env
     environment:
-      DATABASE_FILE: /home/node/app/data/finper.db
+      # Ruta del fichero SQLite DENTRO del contenedor.
+      # El volumen finperdb se monta en /home/node/app/data; el fichero queda
+      # en la raíz de ese volumen. Para cambiar el nombre, sobreescribe
+      # DATABASE_FILE en el .env (ej: DATABASE_FILE=/home/node/app/data/otro.db).
+      DATABASE_FILE: ${DATABASE_FILE:-/home/node/app/data/finper.db}
       JWT_SECRET: ${JWT_SECRET}
       SALT_ROUNDS: ${SALT_ROUNDS}
       LOKI_USER: ${LOKI_USER}

@@ -1,6 +1,6 @@
 FROM node:24-alpine as builder
 
-RUN corepack enable && corepack prepare pnpm@latest --activate
+RUN corepack enable && corepack prepare pnpm@10.29.3 --activate
 
 RUN mkdir -p /home/node/app && chown -R node:node /home/node/app
 
@@ -37,8 +37,6 @@ ENV NPM_CONFIG_LOGLEVEL=info
 ENV NODE_ENV=production
 ENV LOG=1
 ENV TZ=Europe/Madrid
-# Fichero SQLite persistente (montar /home/node/app/data como volumen)
-ENV DATABASE_FILE=/home/node/app/data/finper.db
 
 RUN apk add --no-cache dumb-init
 

@@ -103,13 +103,12 @@ Copy `.env.example` to `.env` at repo root:
 
 | Variable | Required | Notes |
 |---|---|---|
-| `DATABASE_NAME` | Yes | |
-| `DATABASE_HOST` | Yes | |
-| `JWT_SECRET` | Yes | |
-| `SALT_ROUNDS` | Yes | |
-| `MONGODB` | No | Overrides host+name if set |
-| `MONGODB_USER` / `MONGODB_PASS` | No | |
-| `TICKET_BOT_URL` / `TICKET_BOT_API_KEY` | No | Tickets module |
+| `DATABASE_FILE` | No | SQLite file path. Local default: `./finper-dev.db`. With Docker Compose, the compose sets `/home/node/app/data/finper.db` (volume root) unless overridden here. |
+| `JWT_SECRET` | Yes | JWT signing secret. |
+| `SALT_ROUNDS` | Yes | bcrypt rounds. |
+| `GRAFANA_LOGGER_USER` / `GRAFANA_LOGGER_PASSWORD` | No | External Loki logger. |
+| `LOKI_USER` / `LOKI_PASSWORD` | No | Alias used by the compose files (same credential). |
+| `TICKET_BOT_URL` / `TICKET_BOT_API_KEY` | No | Tickets module integration with `finper-bot`. |
 
 Client also needs `packages/client/.env`:
 ```dotenv
