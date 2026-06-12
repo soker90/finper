@@ -197,6 +197,19 @@ describe('Transactions Controller', () => {
         .send(validBody({ amount: 20, type: TRANSACTION.Income })).expect(200)
     })
 
+    test('editing with a store string resolves it to a store and links it (replaceShopValue)', async () => {
+      const id = await createOne()
+      await supertest(server.app).put(idPath(id)).set('Authorization', `Bearer ${token}`)
+        .send(validBody({ store: 'Mercadona' })).expect(200)
+
+      const storesInDb = sqliteDb.select().from(stores).where(eq(stores.user, username)).all()
+      expect(storesInDb).toHaveLength(1)
+      expect(storesInDb[0].name).toBe('Mercadona')
+
+      const tx = sqliteDb.select().from(transactions).where(eq(transactions.id, id)).get()!
+      expect(tx.storeId).toBe(storesInDb[0].id)
+    })
+
     test.each([
       { from: TRANSACTION.Income, to: TRANSACTION.Expense },
       { from: TRANSACTION.Expense, to: TRANSACTION.NotComputable },
