@@ -19,11 +19,6 @@ export class SubscriptionsService {
     return this.repository.findByUser(user).map(serializeSubscriptionPopulated)
   }
 
-  public getSubscription (id: string, user: string) {
-    const row = this.repository.findByIdPopulated(id, user)
-    return row ? serializeSubscriptionPopulated(row) : null
-  }
-
   public addSubscription (params: any) {
     const created = this.repository.create({
       name: params.name,

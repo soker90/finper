@@ -41,9 +41,9 @@ describe('Subscriptions Controller Part C (candidates)', () => {
     return id
   }
 
-  const insertCandidate = (transactionId: string, subscriptionIds: string[]): string => {
+  const insertCandidate = (transactionId: string, subscriptionIds: string[], createdAt = Date.now()): string => {
     const id = generateId()
-    sqliteDb.insert(subscriptionCandidates).values({ id, transactionId, subscriptionIds, user: username, createdAt: Date.now() }).run()
+    sqliteDb.insert(subscriptionCandidates).values({ id, transactionId, subscriptionIds, user: username, createdAt }).run()
     return id
   }
 
@@ -81,13 +81,25 @@ describe('Subscriptions Controller Part C (candidates)', () => {
       await supertest(server.app).get(`${base}/candidates`).auth(token, { type: 'bearer' }).expect(200, [])
     })
 
-    test('returns candidates of the user', async () => {
+    test('returns candidates of the user with deep population (transaction category/account + subscriptions)', async () => {
       const tx = insertTx(null)
       const sub = makeSub()
       insertCandidate(tx, [sub])
       const res = await supertest(server.app).get(`${base}/candidates`).auth(token, { type: 'bearer' }).expect(200)
       expect(res.body).toHaveLength(1)
-      expect(res.body[0].subscriptionIds[0]._id).toBe(sub)
+      expect(res.body[0].transactionId.category).toEqual({ _id: categoryId, name: 'Streaming' })
+      expect(res.body[0].transactionId.account).toEqual({ _id: accountId, name: 'Checking', bank: 'BankA' })
+      expect(res.body[0].subscriptionIds[0]).toMatchObject({ _id: sub, name: 'Netflix', amount: 9.99, cycle: 1 })
+    })
+
+    test('orders candidates by createdAt desc', async () => {
+      const tx = insertTx(null)
+      const sub = makeSub()
+      insertCandidate(tx, [sub], 100)
+      insertCandidate(tx, [sub], 300)
+      insertCandidate(tx, [sub], 200)
+      const res = await supertest(server.app).get(`${base}/candidates`).auth(token, { type: 'bearer' }).expect(200)
+      expect(res.body.map((c: any) => c.createdAt)).toEqual([300, 200, 100])
     })
   })
 

@@ -106,6 +106,15 @@ describe('Loans Controller (Part B - payments)', () => {
       const id = insertLoan({ pendingAmount: 0 })
       await supertest(server.app).post(`${base}/${id}/pay`).set('Authorization', `Bearer ${token}`).send({}).expect(400)
     })
+
+    test('custom amount distributes interest as amount - principal', async () => {
+      const id = insertLoan()
+      const res = await supertest(server.app).post(`${base}/${id}/pay`).set('Authorization', `Bearer ${token}`)
+        .send({ amount: 550 }).expect(201)
+      expect(res.body.amount).toBe(550)
+      expect(res.body.principal).toBe(400)
+      expect(res.body.interest).toBe(150)
+    })
   })
 
   describe('POST /:id/amortize', () => {
@@ -128,6 +137,31 @@ describe('Loans Controller (Part B - payments)', () => {
       expect(res.body.type).toBe('extraordinary')
       expect(balanceOf()).toBe(0)
     })
+
+    test('reduceQuota recalculates monthlyPayment to a lower value', async () => {
+      const id = insertLoan()
+      await supertest(server.app).post(`${base}/${id}/amortize`).set('Authorization', `Bearer ${token}`)
+        .send({ amount: 2000, mode: 'reduceQuota' }).expect(201)
+      const loan = sqliteDb.select().from(loans).where(eq(loans.id, id)).get()
+      expect(loan!.monthlyPayment).toBeLessThan(500)
+    })
+
+    test('amount greater than pendingAmount caps principal and routes the excess to interest', async () => {
+      const id = insertLoan({ pendingAmount: 500 })
+      const res = await supertest(server.app).post(`${base}/${id}/amortize`).set('Authorization', `Bearer ${token}`)
+        .send({ amount: 800, mode: 'reduceTerm' }).expect(201)
+      expect(res.body.principal).toBe(500)
+      expect(res.body.interest).toBe(300)
+      expect(sqliteDb.select().from(loans).where(eq(loans.id, id)).get()!.pendingAmount).toBe(0)
+    })
+
+    test('addMovement:false does not change balance nor create a movement', async () => {
+      const id = insertLoan()
+      await supertest(server.app).post(`${base}/${id}/amortize`).set('Authorization', `Bearer ${token}`)
+        .send({ amount: 1000, mode: 'reduceTerm', addMovement: false }).expect(201)
+      expect(balanceOf()).toBe(1000)
+      expect(sqliteDb.select().from(transactions).where(eq(transactions.user, username)).all()).toHaveLength(0)
+    })
   })
 
   describe('DELETE /:id/payments/:paymentId', () => {
@@ -137,6 +171,11 @@ describe('Loans Controller (Part B - payments)', () => {
       await supertest(server.app).delete(`${base}/${id}/payments/${pay.body._id}`).set('Authorization', `Bearer ${token}`).expect(204)
       expect(balanceOf()).toBe(1000)
       expect(sqliteDb.select().from(loanPayments).where(eq(loanPayments.user, username)).all()).toHaveLength(0)
+    })
+
+    test('deleting a non-existent payment responds 404', async () => {
+      const id = insertLoan()
+      await supertest(server.app).delete(`${base}/${id}/payments/62a39498c4497e1fe3c2bf35`).set('Authorization', `Bearer ${token}`).expect(404)
     })
   })
 

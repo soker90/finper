@@ -70,6 +70,41 @@ describe('Transactions hooks wiring (T1b)', () => {
     expect(candidates[0].subscriptionIds).toContain(subId)
   })
 
+  it('onTransactionCreated only matches subscriptions whose nextPaymentDate is within ±7 days', async () => {
+    const inWindowA = insertSubscription(categoryId, txDate)
+    const inWindowB = insertSubscription(categoryId, txDate + WEEK - 86400000)
+    insertSubscription(categoryId, txDate + WEEK + 86400000) // out of window
+    insertSubscription(categoryId, txDate + WEEK * 8) // far out of window
+
+    await supertest(server.app).post(path).set('Authorization', `Bearer ${token}`)
+      .send({ date: txDate, category: categoryId, amount: 10, type: TRANSACTION.Expense, account: accountId })
+      .expect(200)
+
+    const candidates = sqliteDb.select().from(subscriptionCandidates).where(eq(subscriptionCandidates.user, username)).all()
+    expect(candidates).toHaveLength(1)
+    expect(candidates[0].subscriptionIds).toHaveLength(2)
+    expect(candidates[0].subscriptionIds).toEqual(expect.arrayContaining([inWindowA, inWindowB]))
+  })
+
+  it('onTransactionCreated ignores subscriptions of other users', async () => {
+    const other = generateUsername()
+    sqliteDb.insert(users).values({ id: generateId(), username: other, password: 'pwd', createdAt: new Date(), updatedAt: new Date() }).run()
+    const oc = generateId(); sqliteDb.insert(categories).values({ id: oc, name: 'X', type: 'expense', user: other }).run()
+    const oa = generateId(); sqliteDb.insert(accounts).values({ id: oa, name: 'X', bank: 'X', balance: 0, user: other }).run()
+    sqliteDb.insert(subscriptions).values({ id: generateId(), name: 'S', amount: 1, cycle: 1, categoryId: oc, accountId: oa, user: other, nextPaymentDate: txDate }).run()
+
+    await supertest(server.app).post(path).set('Authorization', `Bearer ${token}`)
+      .send({ date: txDate, category: categoryId, amount: 10, type: TRANSACTION.Expense, account: accountId })
+      .expect(200)
+
+    expect(sqliteDb.select().from(subscriptionCandidates).where(eq(subscriptionCandidates.user, username)).all()).toHaveLength(0)
+
+    sqliteDb.delete(subscriptions).where(eq(subscriptions.user, other)).run()
+    sqliteDb.delete(accounts).where(eq(accounts.user, other)).run()
+    sqliteDb.delete(categories).where(eq(categories.user, other)).run()
+    sqliteDb.delete(users).where(eq(users.username, other)).run()
+  })
+
   it('onTransactionCreated does NOT create a candidate when nothing matches', async () => {
     insertSubscription(categoryId, txDate) // existe una subscription, pero en OTRA categoría que la transacción
 

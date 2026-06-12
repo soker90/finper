@@ -9,6 +9,14 @@ import { subscriptionsRoutes } from '../subscriptions.routes'
 
 const { subscriptions, transactions, categories, accounts, users } = schema
 
+const advanceDate = (timestamp: number, cycle: number): number => {
+  const date = new Date(timestamp)
+  const originalDay = date.getDate()
+  date.setMonth(date.getMonth() + cycle)
+  if (date.getDate() !== originalDay) date.setDate(0)
+  return date.getTime()
+}
+
 describe('Subscriptions Controller Part B', () => {
   let token: string
   const username = generateUsername()
@@ -78,13 +86,16 @@ describe('Subscriptions Controller Part B', () => {
       await supertest(server.app).get(`${base}/${id}/transactions`).auth(token, { type: 'bearer' }).expect(200, [])
     })
 
-    test('returns only transactions linked to the subscription', async () => {
+    test('returns only linked transactions, populated and ordered date desc', async () => {
       const id = makeSub()
-      const tx = insertTx(id)
+      insertTx(id, 100)
+      insertTx(id, 300)
       insertTx(null)
       const res = await supertest(server.app).get(`${base}/${id}/transactions`).auth(token, { type: 'bearer' }).expect(200)
-      expect(res.body).toHaveLength(1)
-      expect(res.body[0]._id).toBe(tx)
+      expect(res.body).toHaveLength(2)
+      expect(res.body.map((r: any) => r.date)).toEqual([300, 100])
+      expect(res.body[0].category).toEqual({ _id: categoryId, name: 'Streaming' })
+      expect(res.body[0].account).toEqual({ _id: accountId, name: 'Checking', bank: 'BankA' })
     })
   })
 
@@ -130,6 +141,16 @@ describe('Subscriptions Controller Part B', () => {
       const linked = sqliteDb.select().from(transactions).where(eq(transactions.subscriptionId, id)).all()
       expect(linked).toHaveLength(1)
     })
+
+    test('linking recalculates nextPaymentDate from the last linked transaction', async () => {
+      const id = makeSub()
+      const lastDate = new Date(2025, 0, 15).getTime()
+      const tx = insertTx(null, lastDate)
+      await supertest(server.app).post(`${base}/${id}/link-transactions`).set('Authorization', `Bearer ${token}`)
+        .send({ transactionIds: [tx] }).expect(204)
+      const sub = sqliteDb.select().from(subscriptions).where(eq(subscriptions.id, id)).get()!
+      expect(sub.nextPaymentDate).toBe(advanceDate(lastDate, 1))
+    })
   })
 
   describe('DELETE /:id/unlink-transactions/:transactionId', () => {
@@ -148,6 +169,15 @@ describe('Subscriptions Controller Part B', () => {
       await supertest(server.app).delete(`${base}/${id}/unlink-transactions/${tx}`).set('Authorization', `Bearer ${token}`).expect(204)
       const stillLinked = sqliteDb.select().from(transactions).where(eq(transactions.subscriptionId, id)).all()
       expect(stillLinked).toHaveLength(0)
+    })
+
+    test('unlinking the only linked transaction recalculates nextPaymentDate back to null', async () => {
+      const id = makeSub()
+      const tx = insertTx(id, new Date(2025, 0, 15).getTime())
+      sqliteDb.update(subscriptions).set({ nextPaymentDate: 9999 }).where(eq(subscriptions.id, id)).run()
+      await supertest(server.app).delete(`${base}/${id}/unlink-transactions/${tx}`).set('Authorization', `Bearer ${token}`).expect(204)
+      const sub = sqliteDb.select().from(subscriptions).where(eq(subscriptions.id, id)).get()!
+      expect(sub.nextPaymentDate).toBeNull()
     })
   })
 })

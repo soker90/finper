@@ -133,6 +133,18 @@ describe('Transactions Controller', () => {
         .send(validBody({ type: TRANSACTION.Expense, amount: 50 })).expect(200)
       expect(balanceOf(accountId)).toBeCloseTo(950, 2)
     })
+
+    test('creating an income increases the account balance', async () => {
+      await supertest(server.app).post(path).set('Authorization', `Bearer ${token}`)
+        .send(validBody({ type: TRANSACTION.Income, amount: 50 })).expect(200)
+      expect(balanceOf(accountId)).toBeCloseTo(1050, 2)
+    })
+
+    test('creating a not-computable transaction does not change the account balance', async () => {
+      await supertest(server.app).post(path).set('Authorization', `Bearer ${token}`)
+        .send(validBody({ type: TRANSACTION.NotComputable, amount: 50 })).expect(200)
+      expect(balanceOf(accountId)).toBeCloseTo(1000, 2)
+    })
   })
 
   describe('GET /', () => {
@@ -184,6 +196,25 @@ describe('Transactions Controller', () => {
       await supertest(server.app).put(idPath(id)).set('Authorization', `Bearer ${token}`)
         .send(validBody({ amount: 20, type: TRANSACTION.Income })).expect(200)
     })
+
+    test.each([
+      { from: TRANSACTION.Income, to: TRANSACTION.Expense },
+      { from: TRANSACTION.Expense, to: TRANSACTION.NotComputable },
+      { from: TRANSACTION.NotComputable, to: TRANSACTION.Income },
+      { from: TRANSACTION.Expense, to: TRANSACTION.Income },
+      { from: TRANSACTION.Income, to: TRANSACTION.NotComputable },
+      { from: TRANSACTION.NotComputable, to: TRANSACTION.Expense }
+    ])('editing type/amount $from -> $to adjusts the account balance by the delta', async ({ from, to }) => {
+      const amountOld = 40
+      const amountNew = 25
+      const created = await supertest(server.app).post(path).set('Authorization', `Bearer ${token}`)
+        .send(validBody({ type: from, amount: amountOld }))
+      await supertest(server.app).put(idPath(created.body._id)).set('Authorization', `Bearer ${token}`)
+        .send(validBody({ type: to, amount: amountNew })).expect(200)
+
+      const sign = (type: string) => type === TRANSACTION.Income ? 1 : type === TRANSACTION.Expense ? -1 : 0
+      expect(balanceOf(accountId)).toBeCloseTo(1000 + sign(to) * amountNew, 2)
+    })
   })
 
   describe('DELETE /:id', () => {
@@ -223,5 +254,13 @@ describe('Transactions Controller', () => {
       const id = await createOne()
       await supertest(server.app).delete(idPath(id)).set('Authorization', `Bearer ${token}`).expect(204)
     })
+
+    test.each([TRANSACTION.Income, TRANSACTION.Expense, TRANSACTION.NotComputable])(
+      'deleting a %s transaction reverts the account balance', async (type) => {
+        const created = await supertest(server.app).post(path).set('Authorization', `Bearer ${token}`)
+          .send(validBody({ type, amount: 40 }))
+        await supertest(server.app).delete(idPath(created.body._id)).set('Authorization', `Bearer ${token}`).expect(204)
+        expect(balanceOf(accountId)).toBeCloseTo(1000, 2)
+      })
   })
 })

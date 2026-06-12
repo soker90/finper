@@ -7,7 +7,15 @@ import { schema, generateId } from '@soker90/finper-db'
 import { eq } from 'drizzle-orm'
 import { subscriptionsRoutes } from '../subscriptions.routes'
 
-const { subscriptions, categories, accounts, users } = schema
+const { subscriptions, transactions, categories, accounts, users } = schema
+
+const advanceDate = (timestamp: number, cycle: number): number => {
+  const date = new Date(timestamp)
+  const originalDay = date.getDate()
+  date.setMonth(date.getMonth() + cycle)
+  if (date.getDate() !== originalDay) date.setDate(0)
+  return date.getTime()
+}
 
 describe('Subscriptions Controller', () => {
   let token: string
@@ -30,6 +38,7 @@ describe('Subscriptions Controller', () => {
   })
 
   afterAll(async () => {
+    sqliteDb.delete(transactions).where(eq(transactions.user, username)).run()
     sqliteDb.delete(subscriptions).where(eq(subscriptions.user, username)).run()
     sqliteDb.delete(categories).where(eq(categories.user, username)).run()
     sqliteDb.delete(accounts).where(eq(accounts.user, username)).run()
@@ -37,12 +46,21 @@ describe('Subscriptions Controller', () => {
   })
 
   afterEach(() => {
+    sqliteDb.delete(transactions).where(eq(transactions.user, username)).run()
     sqliteDb.delete(subscriptions).where(eq(subscriptions.user, username)).run()
   })
 
   const validBody = (overrides: Record<string, any> = {}) => ({
     name: 'Netflix', amount: 9.99, cycle: 1, categoryId, accountId, ...overrides
   })
+
+  const insertLinkedTx = (subscriptionId: string, date: number): string => {
+    const id = generateId()
+    sqliteDb.insert(transactions).values({
+      id, date, categoryId, amount: 9.99, type: 'expense', accountId, note: null, storeId: null, subscriptionId, tags: [], user: username
+    }).run()
+    return id
+  }
 
   describe('POST /', () => {
     test('without token responds 401', async () => {
@@ -123,6 +141,14 @@ describe('Subscriptions Controller', () => {
       const response = await supertest(server.app).put(idPath(id)).set('Authorization', `Bearer ${token}`).send({ name: 'HBO Max' }).expect(200)
       expect(response.body.name).toBe('HBO Max')
     })
+
+    test('changing the cycle recalculates nextPaymentDate from the last linked transaction', async () => {
+      const id = await createOne()
+      const lastDate = new Date(2025, 0, 15).getTime()
+      insertLinkedTx(id, lastDate)
+      const response = await supertest(server.app).put(idPath(id)).set('Authorization', `Bearer ${token}`).send({ cycle: 3 }).expect(200)
+      expect(response.body.nextPaymentDate).toBe(advanceDate(lastDate, 3))
+    })
   })
 
   describe('DELETE /:id', () => {
@@ -142,6 +168,14 @@ describe('Subscriptions Controller', () => {
     test('deleting an existing subscription responds 204', async () => {
       const id = await createOne()
       await supertest(server.app).delete(idPath(id)).set('Authorization', `Bearer ${token}`).expect(204)
+    })
+
+    test('deleting a subscription unlinks its transactions (subscriptionId set to null)', async () => {
+      const id = await createOne()
+      const txId = insertLinkedTx(id, 1000)
+      await supertest(server.app).delete(idPath(id)).set('Authorization', `Bearer ${token}`).expect(204)
+      const tx = sqliteDb.select().from(transactions).where(eq(transactions.id, txId)).get()!
+      expect(tx.subscriptionId).toBeNull()
     })
   })
 })
