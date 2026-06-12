@@ -198,16 +198,12 @@ Endpoints:
 
 | Variable | Obligatoria | Notas |
 |---|---|---|
-| `DATABASE_NAME` | Sí | |
-| `DATABASE_HOST` | Sí | |
+| `DATABASE_FILE` | No | Ruta al fichero SQLite. Local: `./finper-dev.db`. Docker Compose: el compose usa `/home/node/app/data/finper.db` (raíz del volumen) salvo que se sobreescriba en el `.env`. |
 | `JWT_SECRET` | Sí | Firma JWT. |
 | `SALT_ROUNDS` | Sí | bcrypt. |
-| `MONGODB` | No | URI completa; tiene prioridad sobre host+name. |
-| `MONGODB_USER` / `MONGODB_PASS` | No | |
+| `GRAFANA_LOGGER_USER` / `GRAFANA_LOGGER_PASSWORD` | No | Logger externo Loki. |
+| `LOKI_USER` / `LOKI_PASSWORD` | No | Alias usados por los compose (misma credencial que los anteriores). |
 | `TICKET_BOT_URL` / `TICKET_BOT_API_KEY` | No | Integración con `finper-bot`. |
-| `GRAFANA_LOGGER_USER` / `GRAFANA_LOGGER_PASSWORD` | No | Logger externo (no montado actualmente). |
-
-Específicas de Docker Compose (`docker-compose.yml`): `DATABASE_ROOT_USERNAME`, `DATABASE_ROOT_PASSWORD`, `LOKI_USER`, `LOKI_PASSWORD`.
 
 `packages/client/.env` (consumido por Vite):
 
