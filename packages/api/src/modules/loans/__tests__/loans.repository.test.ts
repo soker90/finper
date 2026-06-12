@@ -18,7 +18,7 @@ describe('Loans Repository (Part A)', () => {
     db = createTestDb()
     repository = createLoansRepository(db)
     user = generateUsername()
-    db.insert(users).values({ id: 'loan-repo-user', username: user, password: 'pwd', createdAt: new Date(), updatedAt: new Date() }).run()
+    db.insert(users).values({ id: 'loan-repo-user', username: user, password: 'pwd', createdAt: new Date() }).run()
     accountId = generateId()
     db.insert(accounts).values({ id: accountId, name: 'Checking', bank: 'BankA', balance: 0, user }).run()
     categoryId = generateId()

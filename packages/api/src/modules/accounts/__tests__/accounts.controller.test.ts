@@ -270,8 +270,8 @@ describe('Accounts Controller', () => {
           expect(res.body).toEqual({ message: 'Transfer successful' })
         })
 
-      const sAfter = sqliteDb.select().from(accounts).where(eq(accounts.id, source.id)).get()
-      const dAfter = sqliteDb.select().from(accounts).where(eq(accounts.id, dest.id)).get()
+      const sAfter = sqliteDb.select().from(accounts).where(eq(accounts.id, source.id)).get()!
+      const dAfter = sqliteDb.select().from(accounts).where(eq(accounts.id, dest.id)).get()!
       expect(sAfter.balance).toBe(75)
       expect(dAfter.balance).toBe(75)
     })

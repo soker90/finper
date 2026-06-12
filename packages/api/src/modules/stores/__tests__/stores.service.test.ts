@@ -17,7 +17,7 @@ describe('Stores Service', () => {
     repository = createStoresRepository(db)
     service = new StoresService(repository)
     user = generateUsername()
-    db.insert(schema.users).values({ id: 'store-svc-user', username: user, password: 'pwd', createdAt: new Date(), updatedAt: new Date() }).run()
+    db.insert(schema.users).values({ id: 'store-svc-user', username: user, password: 'pwd', createdAt: new Date() }).run()
   })
 
   afterAll(() => {

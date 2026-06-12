@@ -1,4 +1,5 @@
 import type { Insight, MonthlyData } from './utils/insights'
+import type { SerializedPension } from '../pensions/pensions.serializer'
 
 export interface DailyExpense {
   day: number
@@ -18,7 +19,7 @@ export interface PensionSummary {
   employeeAmount: number
   companyAmount: number
   total: number
-  transactions: any[]
+  transactions: SerializedPension[]
 }
 
 export interface DashboardStatsResult {

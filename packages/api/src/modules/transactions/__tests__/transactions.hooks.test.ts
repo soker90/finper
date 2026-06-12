@@ -88,7 +88,7 @@ describe('Transactions hooks wiring (T1b)', () => {
 
   it('onTransactionCreated ignores subscriptions of other users', async () => {
     const other = generateUsername()
-    sqliteDb.insert(users).values({ id: generateId(), username: other, password: 'pwd', createdAt: new Date(), updatedAt: new Date() }).run()
+    sqliteDb.insert(users).values({ id: generateId(), username: other, password: 'pwd', createdAt: new Date() }).run()
     const oc = generateId(); sqliteDb.insert(categories).values({ id: oc, name: 'X', type: 'expense', user: other }).run()
     const oa = generateId(); sqliteDb.insert(accounts).values({ id: oa, name: 'X', bank: 'X', balance: 0, user: other }).run()
     sqliteDb.insert(subscriptions).values({ id: generateId(), name: 'S', amount: 1, cycle: 1, categoryId: oc, accountId: oa, user: other, nextPaymentDate: txDate }).run()

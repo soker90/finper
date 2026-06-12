@@ -217,23 +217,19 @@ describe('Auth / users controller', () => {
       })
     })
 
-    describe('after registering, logging in with the same password', () => {
-      afterAll(() => {
-        db.delete(schema.users).run()
-      })
+    // Round-trip: si /register guardara la contraseña en claro, bcrypt.compare
+    // del login fallaría (401). Que el login devuelva 200 demuestra que se
+    // persistió hasheada — observable desde el cliente, sin tocar el repo.
+    test('after registering, logging in with the same password succeeds (password stored hashed)', async () => {
+      const username = generateUsername()
+      const password = faker.internet.password({ length: MIN_PASSWORD_LENGTH })
 
-      // Round-trip: si /register guardara la contraseña en claro, bcrypt.compare
-      // del login fallaría (401). Que el login devuelva 200 demuestra que se
-      // persistió hasheada — observable desde el cliente, sin tocar el repo.
-      test('it should succeed because the password was stored hashed', async () => {
-        const username = generateUsername()
-        const password = faker.internet.password({ length: MIN_PASSWORD_LENGTH })
+      await supertest(server.app).post('/api/auth/register').send({ username, password }).expect(200)
+      const response = await supertest(server.app).post(path).send({ username, password }).expect(200)
 
-        await supertest(server.app).post('/api/auth/register').send({ username, password }).expect(200)
-        const response = await supertest(server.app).post(path).send({ username, password }).expect(200)
+      expect(response.body.token).toBeDefined()
 
-        expect(response.body.token).toBeDefined()
-      })
+      db.delete(schema.users).where(eq(schema.users.username, username)).run()
     })
   })
 

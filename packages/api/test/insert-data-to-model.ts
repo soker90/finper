@@ -3,6 +3,7 @@ import {
   SUPPLY_TYPE,
   TRANSACTION, LOAN_PAYMENT
   , schema, generateId
+  , roundMoney
 } from '@soker90/finper-db'
 import { propertyRepository } from '../src/modules/property/property.repository'
 import { supplyRepository } from '../src/modules/supply/supply.repository'
@@ -21,7 +22,6 @@ import { DEBT } from '../src/modules/debts/debts.validators'
 import { STOCK_TYPE } from '../src/modules/stocks/stocks.validators'
 import { GOAL_COLORS, GOAL_ICONS } from '../src/modules/goals/goals.validators'
 import { buildAmortizationTable } from '../src/modules/loans/utils/calcLoanProjection'
-import { roundNumber } from '../src/utils/roundNumber'
 
 // En SQLite todas las tablas de datos referencian users.username (FK).
 // A diferencia del viejo (Mongo, sin FK), el usuario debe existir antes de
@@ -143,7 +143,7 @@ export const insertLoan = async (params: Record<string, any> = {}): Promise<any>
   const startDate = params.startDate ?? Date.now()
 
   const projection = buildAmortizationTable([], initialAmount, interestRate, monthlyPayment, [], startDate)
-  const estimatedCost = roundNumber(projection.reduce((s: number, r: any) => s + r.amount, 0))
+  const estimatedCost = roundMoney(projection.reduce((s: number, r: any) => s + r.amount, 0))
 
   const data = {
     id: generateId(),
@@ -167,7 +167,7 @@ export const insertLoanPayment = async (params: Record<string, any> = {}): Promi
   const loanId = params.loanId ?? (await insertLoan({ user })).id
   const principal = params.principal ?? 175
   const accumulatedPrincipal = params.accumulatedPrincipal ?? principal
-  const pendingCapital = params.pendingCapital ?? roundNumber(10000 - accumulatedPrincipal)
+  const pendingCapital = params.pendingCapital ?? roundMoney(10000 - accumulatedPrincipal)
   const data = {
     id: generateId(),
     loanId,

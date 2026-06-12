@@ -1,4 +1,4 @@
-import { roundNumber } from '../../utils'
+import { roundMoney } from '@soker90/finper-db'
 import { serializeStatsTransaction } from './stats.serializer'
 import { TagSummary, TagHistoric, TagDetail, TagCategoryBreakdown } from './stats.types'
 
@@ -57,9 +57,9 @@ export class StatsService {
     return [...byTag.entries()]
       .map(([tag, entry]) => ({
         tag,
-        totalAmount: roundNumber(entry.totalAmount),
+        totalAmount: roundMoney(entry.totalAmount),
         transactionCount: entry.transactionCount,
-        byCategory: [...entry.categories.values()].map(c => ({ ...c, amount: roundNumber(c.amount) }))
+        byCategory: [...entry.categories.values()].map(c => ({ ...c, amount: roundMoney(c.amount) }))
       }))
       .sort((a, b) => b.totalAmount - a.totalAmount)
   }
@@ -80,10 +80,10 @@ export class StatsService {
     }
 
     const years = [...byYear.entries()]
-      .map(([year, e]) => ({ year, totalAmount: roundNumber(e.totalAmount), transactionCount: e.transactionCount }))
+      .map(([year, e]) => ({ year, totalAmount: roundMoney(e.totalAmount), transactionCount: e.transactionCount }))
       .sort((a, b) => b.year - a.year)
 
-    const totalAmount = roundNumber(years.reduce((sum, y) => sum + y.totalAmount, 0))
+    const totalAmount = roundMoney(years.reduce((sum, y) => sum + y.totalAmount, 0))
     return { tag: tagName, totalAmount, years }
   }
 
@@ -104,10 +104,10 @@ export class StatsService {
     }
 
     const byCategory = [...byCat.values()]
-      .map(c => ({ ...c, amount: roundNumber(c.amount) }))
+      .map(c => ({ ...c, amount: roundMoney(c.amount) }))
       .sort((a, b) => b.amount - a.amount)
 
-    const totalAmount = roundNumber(byCategory.reduce((sum, c) => sum + c.amount, 0))
+    const totalAmount = roundMoney(byCategory.reduce((sum, c) => sum + c.amount, 0))
 
     return {
       tag: tagName,

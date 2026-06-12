@@ -1,7 +1,7 @@
 import Boom from '@hapi/boom'
 
 import { ERROR_MESSAGE } from '../../i18n'
-import { serializePension } from './pensions.serializer'
+import { serializePension, type SerializedPension } from './pensions.serializer'
 
 type IPensionRepository = ReturnType<typeof import('./pensions.repository').createPensionsRepository>
 
@@ -11,7 +11,7 @@ interface PensionsResponse {
   employeeAmount: number
   companyAmount: number
   total: number
-  transactions: any[]
+  transactions: SerializedPension[]
 }
 
 export class PensionsService {

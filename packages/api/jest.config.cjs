@@ -2,7 +2,7 @@
 module.exports = {
   setupFiles: ['<rootDir>/jest.setup.ts'],
   transform: {
-    '^.+\\.ts?$': ['ts-jest', { diagnostics: false }],
+    '^.+\\.ts?$': ['ts-jest', { diagnostics: true }],
     '^.+\\.js$': ['babel-jest', { presets: [['@babel/preset-env', { targets: { node: 'current' } }]] }]
   },
   transformIgnorePatterns: [

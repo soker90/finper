@@ -39,7 +39,7 @@ describe('Categories Controller', () => {
 
     token = await requestLogin(server.app, { username })
     // otherUsername necesita existir por la FK categories.user -> users.username
-    sqliteDb.insert(users).values({ id: 'cat-other-user', username: otherUsername, password: 'pwd', createdAt: new Date(), updatedAt: new Date() }).run()
+    sqliteDb.insert(users).values({ id: 'cat-other-user', username: otherUsername, password: 'pwd', createdAt: new Date() }).run()
   })
 
   afterAll(async () => {

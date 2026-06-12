@@ -14,7 +14,7 @@ describe('Stores Repository', () => {
     db = createTestDb()
     repository = createStoresRepository(db)
     user = generateUsername()
-    db.insert(schema.users).values({ id: 'store-repo-user', username: user, password: 'pwd', createdAt: new Date(), updatedAt: new Date() }).run()
+    db.insert(schema.users).values({ id: 'store-repo-user', username: user, password: 'pwd', createdAt: new Date() }).run()
   })
 
   afterAll(() => {
@@ -28,7 +28,7 @@ describe('Stores Repository', () => {
 
   it('should return only stores belonging to the given user', () => {
     const other = generateUsername()
-    db.insert(schema.users).values({ id: 'store-repo-other', username: other, password: 'pwd', createdAt: new Date(), updatedAt: new Date() }).run()
+    db.insert(schema.users).values({ id: 'store-repo-other', username: other, password: 'pwd', createdAt: new Date() }).run()
     repository.create({ name: 'Mine', user })
     repository.create({ name: 'Theirs', user: other })
 

@@ -17,7 +17,7 @@ describe('Categories Repository', () => {
     db = createTestDb()
     repository = createCategoriesRepository(db)
     user = generateUsername()
-    db.insert(schema.users).values({ id: 'cat-repo-user', username: user, password: 'pwd', createdAt: new Date(), updatedAt: new Date() }).run()
+    db.insert(schema.users).values({ id: 'cat-repo-user', username: user, password: 'pwd', createdAt: new Date() }).run()
   })
 
   afterAll(() => {

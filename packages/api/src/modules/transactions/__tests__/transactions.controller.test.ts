@@ -33,7 +33,7 @@ describe('Transactions Controller', () => {
     server.app.use('/test-api/transactions', transactionsRoutes)
     server.app.use(require('../../../middlewares/handle-error').default)
     token = await requestLogin(server.app, { username })
-    sqliteDb.insert(users).values({ id: 'tx-ctrl-other', username: otherUsername, password: 'pwd', createdAt: new Date(), updatedAt: new Date() }).run()
+    sqliteDb.insert(users).values({ id: 'tx-ctrl-other', username: otherUsername, password: 'pwd', createdAt: new Date() }).run()
 
     categoryId = generateId()
     sqliteDb.insert(categories).values({ id: categoryId, name: 'Food', type: 'expense', user: username }).run()

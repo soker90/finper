@@ -1,6 +1,5 @@
 import type { LoanPaymentType } from '@soker90/finper-types'
-import { LOAN_PAYMENT } from '@soker90/finper-db'
-import { roundNumber } from '../../../utils/roundNumber'
+import { LOAN_PAYMENT, roundMoney } from '@soker90/finper-db'
 
 interface LoanPaymentBase {
   date: number
@@ -60,8 +59,8 @@ const monthlyRate = (annualRate: number): number => annualRate / 100 / 12
  */
 export const calcMonthlyPayment = (principal: number, annualRate: number, months: number): number => {
   const monthlyInterestRate = monthlyRate(annualRate)
-  if (monthlyInterestRate === 0) return roundNumber(principal / months)
-  return roundNumber(principal * (monthlyInterestRate * Math.pow(1 + monthlyInterestRate, months)) / (Math.pow(1 + monthlyInterestRate, months) - 1))
+  if (monthlyInterestRate === 0) return roundMoney(principal / months)
+  return roundMoney(principal * (monthlyInterestRate * Math.pow(1 + monthlyInterestRate, months)) / (Math.pow(1 + monthlyInterestRate, months) - 1))
 }
 
 /**
@@ -111,7 +110,7 @@ const addOneMonth = (timestamp: number): number => {
  */
 const projectLoanPayments = (input: ProjectionInput): ProjectedPayment[] => {
   const { startPeriod, events } = input
-  let pending = roundNumber(input.pendingAmount)
+  let pending = roundMoney(input.pendingAmount)
   let rate = input.interestRate
   let payment = input.monthlyPayment
   // Anchor dates to the last ORDINARY payment — extraordinary payments don't shift the schedule
@@ -137,10 +136,10 @@ const projectLoanPayments = (input: ProjectionInput): ProjectedPayment[] => {
     }
 
     const monthlyInterestRate = monthlyRate(rate)
-    const interestPart = roundNumber(pending * monthlyInterestRate)
-    const principalPart = roundNumber(Math.min(payment - interestPart, pending))
-    const totalAmount = roundNumber(interestPart + principalPart)
-    pending = roundNumber(pending - principalPart)
+    const interestPart = roundMoney(pending * monthlyInterestRate)
+    const principalPart = roundMoney(Math.min(payment - interestPart, pending))
+    const totalAmount = roundMoney(interestPart + principalPart)
+    pending = roundMoney(pending - principalPart)
 
     projected.push({
       period,
@@ -231,7 +230,7 @@ export const buildAmortizationTable = (
   // Calculate accumulated principal for projected rows
   let accumulatedPrincipal = real[real.length - 1]?.accumulatedPrincipal ?? 0
   const projected: AmortizationRow[] = projectedRaw.map(projectedPayment => {
-    accumulatedPrincipal = roundNumber(accumulatedPrincipal + projectedPayment.principal)
+    accumulatedPrincipal = roundMoney(accumulatedPrincipal + projectedPayment.principal)
     return {
       period: projectedPayment.period,
       date: projectedPayment.date,

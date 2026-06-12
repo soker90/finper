@@ -60,7 +60,7 @@ describe('Stores Controller', () => {
 
   test('stores belonging to another user should not be included', async () => {
     const other = generateUsername()
-    sqliteDb.insert(users).values({ id: 'store-ctrl-other', username: other, password: 'pwd', createdAt: new Date(), updatedAt: new Date() }).run()
+    sqliteDb.insert(users).values({ id: 'store-ctrl-other', username: other, password: 'pwd', createdAt: new Date() }).run()
     insertStore('Theirs', other)
     insertStore('Mine')
 

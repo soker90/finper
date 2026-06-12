@@ -1,4 +1,4 @@
-import { roundNumber } from '../../utils/roundNumber'
+import { roundMoney } from '@soker90/finper-db'
 import { db } from '../../db'
 import { debtsService } from '../debts/debts.service'
 import { createPensionsRepository } from '../pensions/pensions.repository'
@@ -16,7 +16,7 @@ const buildCumulativeDailyExpenses = (dailyMap: Map<number, number>, daysInMonth
   let cumulative = 0
   for (let d = 1; d <= daysInMonth; d++) {
     cumulative += dailyMap.get(d) ?? 0
-    result.push({ day: d, amount: roundNumber(cumulative) })
+    result.push({ day: d, amount: roundMoney(cumulative) })
   }
   return result
 }
@@ -63,15 +63,15 @@ export class DashboardService {
     // Debts
     const totalOwed = debtsResult.to.reduce((sum: number, d: any) => sum + d.amount, 0)
     const totalReceiv = debtsResult.from.reduce((sum: number, d: any) => sum + d.amount, 0)
-    const totalDebts = roundNumber(totalOwed)
-    const totalReceivable = roundNumber(totalReceiv)
+    const totalDebts = roundMoney(totalOwed)
+    const totalReceivable = roundMoney(totalReceiv)
 
-    const netWorth = roundNumber(totalBalance - totalDebts - totalLoansPending + totalReceivable)
+    const netWorth = roundMoney(totalBalance - totalDebts - totalLoansPending + totalReceivable)
 
-    const monthlyIncome = roundNumber(currentMonthAgg.income)
-    const monthlyExpenses = roundNumber(currentMonthAgg.expenses)
-    const prevIncome = roundNumber(previousMonthAgg.income)
-    const prevExpenses = roundNumber(previousMonthAgg.expenses)
+    const monthlyIncome = roundMoney(currentMonthAgg.income)
+    const monthlyExpenses = roundMoney(currentMonthAgg.expenses)
+    const prevIncome = roundMoney(previousMonthAgg.income)
+    const prevExpenses = roundMoney(previousMonthAgg.expenses)
 
     const savingsRate = monthlyIncome > 0
       ? Math.round(((monthlyIncome - monthlyExpenses) / monthlyIncome) * 10000) / 100
@@ -97,8 +97,8 @@ export class DashboardService {
     }
 
     const dayOfMonth = now.getDate()
-    const dailyAvgExpense = dayOfMonth > 0 ? roundNumber(monthlyExpenses / dayOfMonth) : 0
-    const projectedMonthlyExpense = roundNumber(dailyAvgExpense * daysInCurrentMonth)
+    const dailyAvgExpense = dayOfMonth > 0 ? roundMoney(monthlyExpenses / dayOfMonth) : 0
+    const projectedMonthlyExpense = roundMoney(dailyAvgExpense * daysInCurrentMonth)
 
     const filteredAvgMonthlyExpense = computeFilteredAvgMonthlyExpense(last3MonthsTransactionsAgg, monthlyExpenses)
     const cashRunwayMonths = filteredAvgMonthlyExpense > 0
@@ -118,10 +118,10 @@ export class DashboardService {
         ? Math.round(((pensionTotal - pensionContributed) / pensionContributed) * 10000) / 100
         : 0
       pension = {
-        employeeAmount: roundNumber(pensionData.employeeAmount),
-        companyAmount: roundNumber(pensionData.companyAmount),
-        total: roundNumber(pensionTotal),
-        transactions: pensionData.transactions as any[]
+        employeeAmount: roundMoney(pensionData.employeeAmount),
+        companyAmount: roundMoney(pensionData.companyAmount),
+        total: roundMoney(pensionTotal),
+        transactions: pensionData.transactions
       }
     }
 

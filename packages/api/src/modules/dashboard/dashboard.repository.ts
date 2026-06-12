@@ -1,6 +1,6 @@
 import { eq, and, gte, lt } from 'drizzle-orm'
 import { type DB, schema } from '@soker90/finper-db'
-import { roundNumber } from '../../utils/roundNumber'
+import { roundMoney } from '@soker90/finper-db'
 
 const { accounts, loans, transactions, categories, stores, budgets } = schema
 
@@ -48,14 +48,14 @@ export const createDashboardRepository = (db: DB) => {
     sumActiveAccountsBalance: (user: string): number => {
       const rows = db.select({ balance: accounts.balance }).from(accounts)
         .where(and(eq(accounts.user, user), eq(accounts.isActive, true))).all()
-      return roundNumber(rows.reduce((s, r) => s + r.balance, 0))
+      return roundMoney(rows.reduce((s, r) => s + r.balance, 0))
     },
 
     // 3. Suma de capital pendiente de préstamos activos.
     sumPendingLoans: (user: string): number => {
       const rows = db.select({ pendingAmount: loans.pendingAmount }).from(loans)
         .where(eq(loans.user, user)).all()
-      return roundNumber(rows.filter(r => r.pendingAmount > 0).reduce((s, r) => s + r.pendingAmount, 0))
+      return roundMoney(rows.filter(r => r.pendingAmount > 0).reduce((s, r) => s + r.pendingAmount, 0))
     },
 
     // 4/5. Ingresos y gastos en un rango.
@@ -103,7 +103,7 @@ export const createDashboardRepository = (db: DB) => {
       return [...grouped.entries()].map(([categoryId, amount]) => {
         const cat = cats.get(categoryId)
         const parentName = cat?.parentId ? (cats.get(cat.parentId)?.name ?? undefined) : undefined
-        return { name: cat?.name ?? 'Sin categoría', parentName, amount: roundNumber(amount) }
+        return { name: cat?.name ?? 'Sin categoría', parentName, amount: roundMoney(amount) }
       }).sort((a, b) => b.amount - a.amount)
     },
 
@@ -117,13 +117,13 @@ export const createDashboardRepository = (db: DB) => {
         grouped.set(tx.storeId, (grouped.get(tx.storeId) ?? 0) + tx.amount)
       }
       return [...grouped.entries()].map(([storeId, amount]) => ({
-        name: storeNames.get(storeId) ?? 'Sin tienda', amount: roundNumber(amount)
+        name: storeNames.get(storeId) ?? 'Sin tienda', amount: roundMoney(amount)
       })).sort((a, b) => b.amount - a.amount)
     },
 
     // 13. Gasto real total del rango.
     realExpenses: (user: string, from: number, to: number): number =>
-      roundNumber(txInRange(user, from, to, EXPENSE).reduce((s, tx) => s + tx.amount, 0)),
+      roundMoney(txInRange(user, from, to, EXPENSE).reduce((s, tx) => s + tx.amount, 0)),
 
     // 14. Gasto del mes por categoría con name [{ categoryId, name, total, count }].
     currentMonthByCategory: (user: string, from: number, to: number): CategorySpendingRow[] => {
@@ -138,7 +138,7 @@ export const createDashboardRepository = (db: DB) => {
       for (const [categoryId, { total, count }] of grouped) {
         const cat = cats.get(categoryId)
         if (!cat) continue // $unwind descarta categorías inexistentes
-        result.push({ categoryId, name: cat.name, total: roundNumber(total), count })
+        result.push({ categoryId, name: cat.name, total: roundMoney(total), count })
       }
       return result
     },

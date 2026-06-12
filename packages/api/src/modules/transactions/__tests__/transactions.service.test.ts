@@ -14,7 +14,7 @@ describe('Transactions Service', () => {
   let categoryId: string
 
   beforeAll(() => {
-    sqliteDb.insert(users).values({ id: 'tx-svc-user', username, password: 'pwd', createdAt: new Date(), updatedAt: new Date() }).run()
+    sqliteDb.insert(users).values({ id: 'tx-svc-user', username, password: 'pwd', createdAt: new Date() }).run()
     categoryId = generateId()
     sqliteDb.insert(categories).values({ id: categoryId, name: 'Food', type: 'expense', user: username }).run()
   })

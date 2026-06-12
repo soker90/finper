@@ -1,8 +1,10 @@
+import Boom from '@hapi/boom'
 import { stocksRepository } from './stocks.repository'
 import { IStockPriceProvider, YahooPriceProvider } from './stock-price.provider'
-import { roundNumber } from '../../utils/roundNumber'
+import { roundMoney, schema } from '@soker90/finper-db'
 import { STOCK_TYPE } from './stocks.validators'
-import { schema } from '@soker90/finper-db'
+import { isValidId } from '../../utils'
+import { ERROR_MESSAGE } from '../../i18n'
 
 type StockRecord = typeof schema.stocks.$inferSelect
 type StockInsert = Omit<typeof schema.stocks.$inferInsert, 'id'>
@@ -64,16 +66,18 @@ export class StockService implements IStockService {
   }
 
   public deleteStock (id: string, user: string): void {
-    this.repository.delete(id, user)
+    if (!isValidId(id)) throw Boom.badRequest(ERROR_MESSAGE.COMMON.INVALID_ID).output
+    const changes = this.repository.delete(id, user)
+    if (changes === 0) throw Boom.notFound(ERROR_MESSAGE.STOCK.NOT_FOUND).output
   }
 
   public async getStocksSummary (user: string): Promise<StocksSummary> {
     const positions = await this.getStocks(user)
-    const totalCost = roundNumber(positions.reduce((acc, p) => acc + p.totalCost, 0))
+    const totalCost = roundMoney(positions.reduce((acc, p) => acc + p.totalCost, 0))
     const hasNullPrice = positions.some(p => p.currentValue === null)
     const totalValue = hasNullPrice
       ? null
-      : roundNumber(positions.reduce((acc, p) => acc + (p.currentValue ?? 0), 0))
+      : roundMoney(positions.reduce((acc, p) => acc + (p.currentValue ?? 0), 0))
     return { totalCost, totalValue }
   }
 
@@ -126,7 +130,7 @@ export class StockService implements IStockService {
     const currentValue = currentPrice !== null ? currentPrice * totalShares : null
     const gainLoss = currentValue !== null ? currentValue - totalCost : null
     const gainLossPct = gainLoss !== null && totalCost > 0
-      ? roundNumber((gainLoss / totalCost) * 100)
+      ? roundMoney((gainLoss / totalCost) * 100)
       : null
 
     return {
@@ -134,11 +138,11 @@ export class StockService implements IStockService {
       name: ops[ops.length - 1].name,
       shares: this.round4(totalShares),
       dividendShares: this.round4(dividendShares),
-      avgCost: roundNumber(avgCost),
-      totalCost: roundNumber(totalCost),
+      avgCost: roundMoney(avgCost),
+      totalCost: roundMoney(totalCost),
       currentPrice,
-      currentValue: currentValue !== null ? roundNumber(currentValue) : null,
-      gainLoss: gainLoss !== null ? roundNumber(gainLoss) : null,
+      currentValue: currentValue !== null ? roundMoney(currentValue) : null,
+      gainLoss: gainLoss !== null ? roundMoney(gainLoss) : null,
       gainLossPct,
       purchases
     }

@@ -1,4 +1,4 @@
-import { roundNumber } from '../../../utils/roundNumber'
+import { roundMoney } from '@soker90/finper-db'
 import type { MonthlyData } from './insights'
 import type { HealthScore } from '../dashboard.types'
 
@@ -51,7 +51,7 @@ export const computeHistoricalSavingsRate = ({
     return sum + monthRate
   }, 0)
 
-  return roundNumber(totalRate / recentMonths.length)
+  return roundMoney(totalRate / recentMonths.length)
 }
 
 /**

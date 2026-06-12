@@ -17,7 +17,7 @@ describe('Pensions Repository', () => {
     db = createTestDb()
     repository = createPensionsRepository(db)
     user = generateUsername()
-    db.insert(schema.users).values({ id: 'some-id', username: user, password: 'pwd', createdAt: new Date(), updatedAt: new Date() }).run()
+    db.insert(schema.users).values({ id: 'some-id', username: user, password: 'pwd', createdAt: new Date() }).run()
   })
 
   afterAll(() => {

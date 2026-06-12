@@ -14,3 +14,5 @@ export const serializePension = (pension: Pension) => {
     user: pension.user
   }
 }
+
+export type SerializedPension = ReturnType<typeof serializePension>

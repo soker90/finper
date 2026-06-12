@@ -25,7 +25,7 @@ describe('Dashboard Repository (Part A - aggregations)', () => {
     db = createTestDb()
     repo = createDashboardRepository(db)
     user = generateUsername()
-    db.insert(users).values({ id: 'dash-a-user', username: user, password: 'pwd', createdAt: new Date(), updatedAt: new Date() }).run()
+    db.insert(users).values({ id: 'dash-a-user', username: user, password: 'pwd', createdAt: new Date() }).run()
 
     accountId = generateId()
     db.insert(accounts).values({ id: accountId, name: 'Active', bank: 'B', balance: 1000, isActive: true, user }).run()

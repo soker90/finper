@@ -231,7 +231,21 @@ describe('Stocks Controller', () => {
       expect(inDb).toHaveLength(0)
     })
 
-    it('does not delete a stock belonging to another user', async () => {
+    it('when the id is not valid, it should respond 400', async () => {
+      await supertest(server.app)
+        .delete('/api/stocks/not-a-valid-id')
+        .set('Authorization', `Bearer ${token}`)
+        .expect(400)
+    })
+
+    it('when the stock does not exist, it should respond 404', async () => {
+      await supertest(server.app)
+        .delete('/api/stocks/62a39498c4497e1fe3c2bf35')
+        .set('Authorization', `Bearer ${token}`)
+        .expect(404)
+    })
+
+    it('does not delete a stock belonging to another user and responds 404', async () => {
       const otherUser = generateUsername()
       await insertCredentials({ username: otherUser })
       const stock = stocksRepository.create({ user: otherUser, ticker: 'SAN.MC', name: 'Santander', shares: 200, price: 3.5, type: STOCK_TYPE.Buy, date: 1, platform: 'X' })
@@ -239,7 +253,7 @@ describe('Stocks Controller', () => {
       await supertest(server.app)
         .delete(`/api/stocks/${stock.id}`)
         .set('Authorization', `Bearer ${token}`)
-        .expect(204)
+        .expect(404)
 
       expect(stocksRepository.findAllByUser(otherUser)).toHaveLength(1)
 

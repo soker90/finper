@@ -1,7 +1,6 @@
 import Boom from '@hapi/boom'
-import { LOAN_PAYMENT } from '@soker90/finper-db'
+import { LOAN_PAYMENT, roundMoney } from '@soker90/finper-db'
 import type { LoanPaymentType } from '@soker90/finper-types'
-import { roundNumber } from '../../utils'
 import { ERROR_MESSAGE } from '../../i18n'
 import { serializeLoan, serializePayment, serializeEvent } from './loans.serializer'
 import { LoanStats, SimulationResult } from './loans.types'
@@ -50,7 +49,7 @@ export class LoansService {
       [],
       data.startDate
     )
-    const initialEstimatedCost = roundNumber(initialProjection.reduce((sum, row) => sum + row.amount, 0))
+    const initialEstimatedCost = roundMoney(initialProjection.reduce((sum, row) => sum + row.amount, 0))
 
     const created = this.repository.create({
       name: data.name,
@@ -89,15 +88,15 @@ export class LoansService {
       if (loan.pendingAmount <= 0) throw Boom.badRequest(ERROR_MESSAGE.LOAN.ALREADY_PAID).output
 
       const monthlyInterestRate = currentRate / 100 / 12
-      const baseInterest = roundNumber(loan.pendingAmount * monthlyInterestRate)
+      const baseInterest = roundMoney(loan.pendingAmount * monthlyInterestRate)
 
-      const principalPart = roundNumber(Math.min(currentPayment - baseInterest, loan.pendingAmount))
-      const amount = params?.amount ?? roundNumber(baseInterest + principalPart)
-      const interestPart = roundNumber(amount - principalPart)
+      const principalPart = roundMoney(Math.min(currentPayment - baseInterest, loan.pendingAmount))
+      const amount = params?.amount ?? roundMoney(baseInterest + principalPart)
+      const interestPart = roundMoney(amount - principalPart)
 
       const lastAcc = lastPayment?.accumulatedPrincipal ?? 0
-      const accumulatedPrincipal = roundNumber(lastAcc + principalPart)
-      const pendingCapital = roundNumber(loan.pendingAmount - principalPart)
+      const accumulatedPrincipal = roundMoney(lastAcc + principalPart)
+      const pendingCapital = roundMoney(loan.pendingAmount - principalPart)
       const date = params?.date ?? Date.now()
 
       const payment = this.repository.createPayment({
@@ -127,16 +126,16 @@ export class LoansService {
       const amortizationDate = date ?? Date.now()
 
       // Si el importe supera el capital pendiente, el exceso son intereses (Bug A, 1:1).
-      const principal = roundNumber(Math.min(amount, loan.pendingAmount))
-      const interest = roundNumber(amount - principal)
+      const principal = roundMoney(Math.min(amount, loan.pendingAmount))
+      const interest = roundMoney(amount - principal)
       const lastAcc = lastPayment?.accumulatedPrincipal ?? 0
-      const accumulatedPrincipal = roundNumber(lastAcc + principal)
-      const pendingCapital = roundNumber(loan.pendingAmount - principal)
+      const accumulatedPrincipal = roundMoney(lastAcc + principal)
+      const pendingCapital = roundMoney(loan.pendingAmount - principal)
 
       const payment = this.repository.createPayment({
         loanId: id,
         date: amortizationDate,
-        amount: roundNumber(principal + interest),
+        amount: roundMoney(principal + interest),
         interest,
         principal,
         accumulatedPrincipal,
@@ -150,7 +149,7 @@ export class LoansService {
         const remaining = calcRemainingMonths(pendingCapital, currentRate, currentPayment)
         // Si remaining es Infinity la cuota no cubre intereses → mantener cuota actual (Bug B, 1:1).
         if (remaining !== Infinity) {
-          newPayment = roundNumber(calcMonthlyPayment(pendingCapital, currentRate, remaining))
+          newPayment = roundMoney(calcMonthlyPayment(pendingCapital, currentRate, remaining))
         }
       }
       // 'reduceTerm': misma cuota, menos meses → sin cambio de cuota.
@@ -208,7 +207,7 @@ export class LoansService {
       this.repository.updatePayment(paymentId, updatedFields)
       this._recalcChain(loanId, user)
 
-      const amountDiff = roundNumber((data.amount ?? originalAmount) - originalAmount)
+      const amountDiff = roundMoney((data.amount ?? originalAmount) - originalAmount)
       if (amountDiff !== 0) this._deductFromAccount(loan.accountId, amountDiff)
 
       const effectiveType = data.type ?? originalType
@@ -247,7 +246,7 @@ export class LoansService {
     }
 
     const eventInputs = this._toEventInputs(events)
-    const newPending = roundNumber(loan.pendingAmount - lumpSum)
+    const newPending = roundMoney(loan.pendingAmount - lumpSum)
     const projectionAnchor = this._getProjectionAnchor(loanId, user)
 
     const baseScenario = this._buildProjectionScenario(
@@ -280,15 +279,15 @@ export class LoansService {
         newMonthlyPayment: currentPayment,
         monthsSaved: baseScenario.monthsLeft - optionAScenario.monthsLeft,
         monthlySaving: 0,
-        totalInterestSaved: roundNumber(baseScenario.totalInterest - optionAScenario.totalInterest),
+        totalInterestSaved: roundMoney(baseScenario.totalInterest - optionAScenario.totalInterest),
         newEndDate: optionAScenario.endDate
       },
       optionB: {
         newMonthsLeft: optionBScenario.monthsLeft,
         newMonthlyPayment,
         monthsSaved: baseScenario.monthsLeft - optionBScenario.monthsLeft,
-        monthlySaving: roundNumber(currentPayment - newMonthlyPayment),
-        totalInterestSaved: roundNumber(baseScenario.totalInterest - optionBScenario.totalInterest),
+        monthlySaving: roundMoney(currentPayment - newMonthlyPayment),
+        totalInterestSaved: roundMoney(baseScenario.totalInterest - optionBScenario.totalInterest),
         newEndDate: optionBScenario.endDate
       }
     }
@@ -332,8 +331,8 @@ export class LoansService {
     let pending = loan.initialAmount
 
     for (const payment of allPayments) {
-      accumulated = roundNumber(accumulated + payment.principal)
-      pending = roundNumber(pending - payment.principal)
+      accumulated = roundMoney(accumulated + payment.principal)
+      pending = roundMoney(pending - payment.principal)
       this.repository.updatePayment(payment.id, { accumulatedPrincipal: accumulated, pendingCapital: pending })
     }
 
@@ -376,8 +375,8 @@ export class LoansService {
       { paidPrincipal: 0, paidInterest: 0, totalCostToDate: 0 }
     )
 
-    const estimatedPendingInterest = roundNumber(projectedRows.reduce((sum, row) => sum + row.interest, 0))
-    const estimatedTotalCost = roundNumber(totalCostToDate + projectedRows.reduce((sum, row) => sum + row.amount, 0))
+    const estimatedPendingInterest = roundMoney(projectedRows.reduce((sum, row) => sum + row.interest, 0))
+    const estimatedTotalCost = roundMoney(totalCostToDate + projectedRows.reduce((sum, row) => sum + row.amount, 0))
 
     const { totalOrdinaryAmount, totalExtraordinaryAmount, ordinaryPaymentsCount, extraordinaryPaymentsCount } = realRows.reduce(
       (acc, row) => {
@@ -393,21 +392,21 @@ export class LoansService {
       { totalOrdinaryAmount: 0, totalExtraordinaryAmount: 0, ordinaryPaymentsCount: 0, extraordinaryPaymentsCount: 0 }
     )
 
-    const savedByExtraordinary = roundNumber((loan.initialEstimatedCost ?? 0) - estimatedTotalCost)
+    const savedByExtraordinary = roundMoney((loan.initialEstimatedCost ?? 0) - estimatedTotalCost)
     const lastProjected = projectedRows[projectedRows.length - 1]
     const estimatedEndDate = lastProjected?.date ?? null
 
     return {
-      paidPrincipal: roundNumber(paidPrincipal),
-      paidInterest: roundNumber(paidInterest),
+      paidPrincipal: roundMoney(paidPrincipal),
+      paidInterest: roundMoney(paidInterest),
       pendingPrincipal: loan.pendingAmount,
       estimatedPendingInterest,
-      totalCostToDate: roundNumber(totalCostToDate),
+      totalCostToDate: roundMoney(totalCostToDate),
       estimatedTotalCost,
       ordinaryPaymentsCount,
       extraordinaryPaymentsCount,
-      totalOrdinaryAmount: roundNumber(totalOrdinaryAmount),
-      totalExtraordinaryAmount: roundNumber(totalExtraordinaryAmount),
+      totalOrdinaryAmount: roundMoney(totalOrdinaryAmount),
+      totalExtraordinaryAmount: roundMoney(totalExtraordinaryAmount),
       savedByExtraordinary,
       estimatedEndDate,
       currentPayment,
@@ -431,7 +430,7 @@ export class LoansService {
   ): { monthsLeft: number, totalInterest: number, endDate: number | null } {
     const table = buildAmortizationTable([], pendingAmount, rate, monthlyPayment, eventInputs, startDate, projectionAnchor)
     const projectedRows = table.filter(row => row.isProjected)
-    const totalInterest = roundNumber(projectedRows.reduce((sum, row) => sum + row.interest, 0))
+    const totalInterest = roundMoney(projectedRows.reduce((sum, row) => sum + row.interest, 0))
     const monthsLeft = projectedRows.length
     const endDate = table.length > 0 ? table[table.length - 1].date : null
     return { monthsLeft, totalInterest, endDate }

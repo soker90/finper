@@ -14,7 +14,7 @@ describe('Dashboard Service (Part B - getStats)', () => {
   let categoryId: string
 
   beforeAll(() => {
-    sqliteDb.insert(users).values({ id: generateId(), username: user, password: 'pwd', createdAt: new Date(), updatedAt: new Date() }).run()
+    sqliteDb.insert(users).values({ id: generateId(), username: user, password: 'pwd', createdAt: new Date() }).run()
     accountId = generateId()
     sqliteDb.insert(accounts).values({ id: accountId, name: 'Active', bank: 'B', balance: 1000, isActive: true, user }).run()
     categoryId = generateId()

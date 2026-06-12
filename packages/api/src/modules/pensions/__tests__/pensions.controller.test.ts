@@ -178,7 +178,7 @@ describe('Pension Controller', () => {
 
     test('when user is distinct, it should response an error with status code 404', async () => {
       const otherUser = generateUsername()
-      sqliteDb.insert(schema.users).values({ id: generateId(), username: otherUser, password: 'pwd', createdAt: new Date(), updatedAt: new Date() }).run()
+      sqliteDb.insert(schema.users).values({ id: generateId(), username: otherUser, password: 'pwd', createdAt: new Date() }).run()
       const pension = insertPension({ user: otherUser })
       await supertest(server.app).put(path(pension._id)).auth(token, { type: 'bearer' }).expect(404)
       sqliteDb.delete(schema.pensions).where(eq(schema.pensions.user, otherUser)).run()

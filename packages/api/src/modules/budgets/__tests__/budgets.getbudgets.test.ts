@@ -20,7 +20,7 @@ describe('Budgets Service (Part B - getBudgets)', () => {
     db = createTestDb()
     service = new BudgetsService(createBudgetsRepository(db))
     user = generateUsername()
-    db.insert(users).values({ id: 'budget-b-user', username: user, password: 'pwd', createdAt: new Date(), updatedAt: new Date() }).run()
+    db.insert(users).values({ id: 'budget-b-user', username: user, password: 'pwd', createdAt: new Date() }).run()
     accountId = generateId()
     db.insert(accounts).values({ id: accountId, name: 'Checking', bank: 'BankA', balance: 0, user }).run()
 
@@ -74,7 +74,7 @@ describe('Budgets Service (Part B - getBudgets)', () => {
   it('accumulates the totals row across multiple categories of the same type', () => {
     // Usuario aislado para no alterar las aserciones del fixture compartido.
     const u = generateUsername()
-    db.insert(users).values({ id: generateId(), username: u, password: 'pwd', createdAt: new Date(), updatedAt: new Date() }).run()
+    db.insert(users).values({ id: generateId(), username: u, password: 'pwd', createdAt: new Date() }).run()
     const acc = generateId()
     db.insert(accounts).values({ id: acc, name: 'C', bank: 'B', balance: 0, user: u }).run()
 

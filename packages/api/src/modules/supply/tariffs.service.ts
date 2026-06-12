@@ -9,7 +9,7 @@ export interface ISupplyReading {
 import { supplyRepository } from './supply.repository'
 import { supplyReadingRepository } from '../supply-reading/supply-reading.repository'
 import Boom from '@hapi/boom'
-import { roundNumber } from '../../utils/roundNumber'
+import { roundMoney } from '@soker90/finper-db'
 import { ERROR_MESSAGE } from '../../i18n'
 import config from '../../config'
 
@@ -245,7 +245,7 @@ export default class TariffsService implements ITariffsService {
     const newTariffPrices: ITariffPrices = { peakPower, offPeakPower, peakEnergy, flatEnergy, offPeakEnergy }
 
     const invoices: ISimulatedInvoice[] = readings.map(reading => {
-      const billedDays = Math.max(1, roundNumber((reading.endDate - reading.startDate) / (1000 * 60 * 60 * 24)))
+      const billedDays = Math.max(1, roundMoney((reading.endDate - reading.startDate) / (1000 * 60 * 60 * 24)))
       return {
         startDate: reading.startDate,
         endDate: reading.endDate,

@@ -1,7 +1,7 @@
 import { type DB, schema, generateId } from '@soker90/finper-db'
 import { eq, and } from 'drizzle-orm'
 import { db as sqliteDb } from '../../db'
-import { roundNumber } from '../../utils'
+import { roundMoney } from '@soker90/finper-db'
 
 const { accounts } = schema
 
@@ -31,7 +31,7 @@ export class AccountsRepository implements IAccountsRepository {
 
   public async create (user: string, data: Record<string, any>): Promise<any> {
     const id = generateId()
-    const balance = data.balance !== undefined ? roundNumber(data.balance) : 0
+    const balance = data.balance !== undefined ? roundMoney(data.balance) : 0
     const newAccount = {
       id,
       user,
@@ -51,7 +51,7 @@ export class AccountsRepository implements IAccountsRepository {
     const updateData: Record<string, any> = {}
     if (data.name !== undefined) updateData.name = data.name
     if (data.bank !== undefined) updateData.bank = data.bank
-    if (data.balance !== undefined) updateData.balance = roundNumber(data.balance)
+    if (data.balance !== undefined) updateData.balance = roundMoney(data.balance)
     if (data.isActive !== undefined) updateData.isActive = data.isActive
 
     if (Object.keys(updateData).length === 0) return this.findById(id, user)

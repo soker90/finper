@@ -18,7 +18,7 @@ describe('Subscriptions Repository', () => {
     db = createTestDb()
     repository = createSubscriptionsRepository(db)
     user = generateUsername()
-    db.insert(users).values({ id: 'sub-repo-user', username: user, password: 'pwd', createdAt: new Date(), updatedAt: new Date() }).run()
+    db.insert(users).values({ id: 'sub-repo-user', username: user, password: 'pwd', createdAt: new Date() }).run()
     categoryId = generateId()
     db.insert(categories).values({ id: categoryId, name: 'Streaming', type: 'expense', user }).run()
     accountId = generateId()
