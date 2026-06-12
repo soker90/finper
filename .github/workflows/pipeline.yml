@@ -36,8 +36,8 @@ jobs:
           name: types
           path: packages/types/dist
 
-  ## Models ##
-  lint-models:
+  ## DB ##
+  lint-db:
     needs: [ build-types ]
     runs-on: ubuntu-latest
     steps:
@@ -56,9 +56,9 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
       - name: Lint
-        run: make lint-models
+        run: make lint-db
 
-  build-models:
+  build-db:
     needs: [ build-types ]
     runs-on: ubuntu-latest
     steps:
@@ -77,20 +77,16 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
       - name: Build
-        run: make build-models
+        run: make build-db
       - uses: actions/upload-artifact@v7
         with:
-          name: models
-          path: packages/models/dist
+          name: db
+          path: packages/db/dist
 
-  test-models:
-    needs: [ lint-models, build-models ]
+  test-db:
+    needs: [ lint-db, build-db ]
     runs-on: ubuntu-latest
     steps:
-      - name: Install Openssl
-        run: |
-          wget http://archive.ubuntu.com/ubuntu/pool/main/o/openssl/libssl1.1_1.1.1f-1ubuntu2_amd64.deb
-          sudo dpkg -i libssl1.1_1.1.1f-1ubuntu2_amd64.deb
       - uses: actions/checkout@v6
         with:
           fetch-depth: 0
@@ -99,22 +95,18 @@ jobs:
         with:
           cache: 'pnpm'
           node-version-file: '.nvmrc'
-      - uses: actions/cache@v5
-        with:
-          path: ~/.cache/mongodb-binaries
-          key: mongodb-binaries-${{ runner.os }}
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
       - name: Test
-        run: make test-models
+        run: make test-db
       - name: Codecov
         uses: codecov/codecov-action@v6
         with:
-          flags: models
+          flags: db
 
   ## API ##
   lint-api:
-    needs: [ build-types ]
+    needs: [ build-types, build-db ]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
@@ -129,13 +121,17 @@ jobs:
         with:
           name: types
           path: packages/types/dist
+      - uses: actions/download-artifact@v8
+        with:
+          name: db
+          path: packages/db/dist
       - name: Install dependencies
         run: pnpm install --frozen-lockfile --filter @soker90/finper-api...
       - name: Lint
         run: make lint-api
 
   build-api:
-    needs: [ build-models ]
+    needs: [ build-db ]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
@@ -152,8 +148,8 @@ jobs:
           path: packages/types/dist
       - uses: actions/download-artifact@v8
         with:
-          name: models
-          path: packages/models/dist
+          name: db
+          path: packages/db/dist
       - name: Install dependencies
         run: pnpm install --frozen-lockfile --filter @soker90/finper-api...
       - name: Build
@@ -163,10 +159,6 @@ jobs:
     needs: [ lint-api, build-api ]
     runs-on: ubuntu-latest
     steps:
-      - name: Install Openssl
-        run: |
-          wget http://archive.ubuntu.com/ubuntu/pool/main/o/openssl/libssl1.1_1.1.1f-1ubuntu2_amd64.deb
-          sudo dpkg -i libssl1.1_1.1.1f-1ubuntu2_amd64.deb
       - uses: actions/checkout@v6
         with:
           fetch-depth: 0
@@ -175,18 +167,14 @@ jobs:
         with:
           cache: 'pnpm'
           node-version-file: '.nvmrc'
-      - uses: actions/cache@v5
-        with:
-          path: ~/.cache/mongodb-binaries
-          key: mongodb-binaries-${{ runner.os }}
       - uses: actions/download-artifact@v8
         with:
           name: types
           path: packages/types/dist
       - uses: actions/download-artifact@v8
         with:
-          name: models
-          path: packages/models/dist
+          name: db
+          path: packages/db/dist
       - name: Install dependencies
         run: pnpm install --frozen-lockfile --filter @soker90/finper-api...
       - name: Test
