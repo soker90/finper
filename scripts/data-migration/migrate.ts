@@ -1,15 +1,18 @@
 import { MongoClient, type Document } from 'mongodb'
 import Database from 'better-sqlite3'
 import { drizzle } from 'drizzle-orm/better-sqlite3'
-import { migrate } from 'drizzle-orm/better-sqlite3/migrator'
 import { schema } from '@soker90/finper-db'
+// El esquema completo (CREATE TABLE…) se embebe en tiempo de build vía el
+// text-loader de esbuild, de modo que el .mjs resultante es autocontenido.
+import SCHEMA_SQL from '../../packages/db/drizzle/0000_mighty_frightful_four.sql'
 import { existsSync, unlinkSync } from 'node:fs'
 import { resolve } from 'node:path'
 
 const MONGO_URI = process.env.MONGODB
 if (!MONGO_URI) { console.error('✗ Falta la variable MONGODB'); process.exit(1) }
 const DRY_RUN = process.argv.includes('--dry-run')
-const SQLITE_PATH = resolve(process.cwd(), 'finper-migrated.sqlite')
+// Destino configurable; por defecto `finper.db` (la app lee DATABASE_FILE).
+const SQLITE_PATH = resolve(process.cwd(), process.env.OUTPUT ?? 'finper.db')
 
 const oid = (v: unknown): string => String(v)
 
@@ -25,19 +28,12 @@ async function main (): Promise<void> {
   
   // Activa foreign_keys al abrir la BBDD
   sqlite.pragma('foreign_keys = ON')
-  
-  // WORKAROUND: drizzle-orm 0.45.2 migrator bug uses 'SERIAL PRIMARY KEY' for SQLite
-  // which causes 'id' to be null instead of autoincrement. We pre-create it correctly.
-  sqlite.exec(`
-    CREATE TABLE IF NOT EXISTS "__drizzle_migrations" (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      hash text NOT NULL,
-      created_at numeric
-    )
-  `)
+
+  // Crea todas las tablas a partir del esquema embebido (one-shot ETL, sin
+  // tracking de migraciones: solo necesitamos el DDL).
+  sqlite.exec(SCHEMA_SQL)
 
   const db = drizzle(sqlite, { schema })
-  migrate(db, { migrationsFolder: resolve(process.cwd(), '../../packages/db/drizzle') })
 
   console.log(`\nModo: ${DRY_RUN ? 'DRY-RUN (no escribe fichero, usa :memory:)' : `ESCRITURA → ${SQLITE_PATH}`}\n`)
 

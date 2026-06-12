@@ -3,8 +3,9 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dry-run": "tsx migrate.ts --dry-run",
-    "migrate": "tsx migrate.ts"
+    "build": "esbuild migrate.ts --bundle --platform=node --format=cjs --external:better-sqlite3 --external:mongodb --loader:.sql=text --outfile=finper-migrate.cjs",
+    "dry-run": "pnpm run build && node finper-migrate.cjs --dry-run",
+    "migrate": "pnpm run build && node finper-migrate.cjs"
   },
   "dependencies": {
     "mongodb": "6.12.0",
@@ -13,7 +14,7 @@
     "@soker90/finper-db": "workspace:*"
   },
   "devDependencies": {
-    "tsx": "4.19.2",
+    "esbuild": "0.25.0",
     "@types/better-sqlite3": "7.6.12"
   }
 }
