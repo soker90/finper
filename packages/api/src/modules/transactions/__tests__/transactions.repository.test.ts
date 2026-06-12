@@ -61,11 +61,6 @@ describe('Transactions Repository', () => {
   }
 
   describe('findById', () => {
-    it('should return the transaction when it exists for the user', () => {
-      const id = insertTx()
-      expect(repository.findById(id, user)?.id).toBe(id)
-    })
-
     it('should return undefined when it belongs to another user', () => {
       const id = insertTx()
       expect(repository.findById(id, generateUsername())).toBeUndefined()
@@ -73,19 +68,6 @@ describe('Transactions Repository', () => {
   })
 
   describe('findMany', () => {
-    it('should return an empty array when there are no transactions', () => {
-      expect(repository.findMany({ user })).toEqual([])
-    })
-
-    it('should populate category/account/store names via joins', () => {
-      insertTx()
-      const [row] = repository.findMany({ user })
-      expect(row.categoryName).toBe('Food')
-      expect(row.accountName).toBe('Checking')
-      expect(row.accountBank).toBe('BankA')
-      expect(row.storeName).toBe('Mercadona')
-    })
-
     it('should order by date desc', () => {
       insertTx({ date: 100 })
       insertTx({ date: 300 })

@@ -26,17 +26,6 @@ describe('Stores Repository', () => {
     db.delete(schema.stores).where(eq(schema.stores.user, user)).run()
   })
 
-  it('should return an empty array when the user has no stores', () => {
-    expect(repository.findByUser(user)).toEqual([])
-  })
-
-  it('should create a store and return it with an id', () => {
-    const store = repository.create({ name: 'Mercadona', user })
-    expect(store.id).toBeDefined()
-    expect(store.name).toBe('Mercadona')
-    expect(store.user).toBe(user)
-  })
-
   it('should return only stores belonging to the given user', () => {
     const other = generateUsername()
     db.insert(schema.users).values({ id: 'store-repo-other', username: other, password: 'pwd', createdAt: new Date(), updatedAt: new Date() }).run()

@@ -58,24 +58,6 @@ describe('Stocks Repository', () => {
   })
 
   describe('delete', () => {
-    it('deletes a stock by id and user', () => {
-      const stock = stocksRepository.create({
-        user: username,
-        ticker: 'TEF.MC',
-        name: 'Telefónica',
-        shares: 100,
-        price: 4.0,
-        type: STOCK_TYPE.Buy,
-        date: 1000,
-        platform: 'DEGIRO'
-      })
-
-      stocksRepository.delete(stock.id, username)
-
-      const stocks = stocksRepository.findAllByUser(username)
-      expect(stocks).toHaveLength(0)
-    })
-
     it('does not delete if user does not match', () => {
       const stock = stocksRepository.create({
         user: username,

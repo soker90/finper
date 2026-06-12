@@ -66,6 +66,17 @@ describe('Accounts Controller', () => {
         })
         .expect(200)
     })
+
+    test('when creating with a decimal balance, it should round it to 2 decimals', async () => {
+      await supertest(server.app)
+        .post(path)
+        .set('Authorization', `Bearer ${token}`)
+        .send({ name: 'Rounded', bank: 'B', balance: 100.126 })
+        .expect(200)
+        .expect((res) => {
+          expect(res.body.balance).toBe(100.13)
+        })
+    })
   })
 
   describe('GET /', () => {
@@ -148,6 +159,18 @@ describe('Accounts Controller', () => {
         .set('Authorization', `Bearer ${token}`)
         .send(params)
         .expect(200)
+    })
+
+    test('when editing balance with decimals, it should round it to 2 decimals', async () => {
+      const account = await accountsRepository.create(username, { name: 'A', bank: 'B', balance: 50 })
+      await supertest(server.app)
+        .patch(patchPath(account.id))
+        .set('Authorization', `Bearer ${token}`)
+        .send({ name: 'A', bank: 'B', balance: 50.555 })
+        .expect(200)
+        .expect((res) => {
+          expect(res.body.balance).toBe(50.56)
+        })
     })
   })
 

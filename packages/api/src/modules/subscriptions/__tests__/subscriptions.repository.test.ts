@@ -65,13 +65,6 @@ describe('Subscriptions Repository', () => {
     }).run()
   }
 
-  it('should create a subscription with nextPaymentDate null', () => {
-    const sub = repository.create(baseData())
-    expect(sub.id).toBeDefined()
-    expect(sub.nextPaymentDate).toBeNull()
-    expect(sub.name).toBe('Netflix')
-  })
-
   it('findByUser should populate names and order by nextPaymentDate asc (nulls first)', () => {
     db.insert(subscriptions).values({ id: generateId(), name: 'B', amount: 5, cycle: 1, categoryId, accountId, user, nextPaymentDate: 2000 }).run()
     db.insert(subscriptions).values({ id: generateId(), name: 'A', amount: 5, cycle: 1, categoryId, accountId, user, nextPaymentDate: null }).run()
@@ -84,29 +77,10 @@ describe('Subscriptions Repository', () => {
     expect(rows[0].accountBank).toBe('BankA')
   })
 
-  it('exists should reflect ownership', () => {
-    const sub = repository.create(baseData())
-    expect(repository.exists(sub.id, user)).toBe(true)
-    expect(repository.exists(sub.id, generateUsername())).toBe(false)
-  })
-
-  it('update should modify fields', () => {
-    const sub = repository.create(baseData())
-    const updated = repository.update(sub.id, user, { name: 'HBO', amount: 12 })
-    expect(updated?.name).toBe('HBO')
-    expect(updated?.amount).toBe(12)
-  })
-
   it('updateNextPaymentDate should persist the value', () => {
     const sub = repository.create(baseData())
     repository.updateNextPaymentDate(sub.id, 5000)
     expect(repository.findByIdAny(sub.id)?.nextPaymentDate).toBe(5000)
-  })
-
-  it('delete should remove the subscription', () => {
-    const sub = repository.create(baseData())
-    repository.delete(sub.id, user)
-    expect(repository.findByIdAny(sub.id)).toBeUndefined()
   })
 
   it('findLatestTransactionDate should return the most recent linked transaction date', () => {

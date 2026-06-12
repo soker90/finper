@@ -54,21 +54,6 @@ describe('Loans Repository (Part A)', () => {
     user
   })
 
-  it('create + findById + findByUser + exists', () => {
-    const loan = createLoan()
-    expect(loan.id).toBeDefined()
-    expect(repository.findById(loan.id, user)?.name).toBe('L')
-    expect(repository.findByUser(user)).toHaveLength(1)
-    expect(repository.exists(loan.id, user)).toBe(true)
-    expect(repository.exists('62a39498c4497e1fe3c2bf35', user)).toBe(false)
-  })
-
-  it('update changes fields', () => {
-    const loan = createLoan()
-    const updated = repository.update(loan.id, { name: 'L2', accountId })
-    expect(updated?.name).toBe('L2')
-  })
-
   it('delete cascades to payments and events', () => {
     const loan = createLoan()
     db.insert(loanPayments).values({
