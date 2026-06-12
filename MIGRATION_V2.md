@@ -54,16 +54,10 @@ mkdir finper-migracion && cd finper-migracion
 
 # Coloca aquí el finper-migrate.cjs descargado de la release, y luego:
 npm init -y
-npm install better-sqlite3@12.10.0 mongodb@6.12.0
+npm install better-sqlite3 mongodb
 ```
 
-## Paso 2 — Copia de seguridad de Mongo
-
-```bash
-mongodump --uri="mongodb://usuario:password@host:puerto/finper" --out ./backup-mongo
-```
-
-## Paso 3 — Dry-run (solo lectura, no escribe nada)
+## Paso 2 — Dry-run (solo lectura, no escribe nada)
 
 Valida el mapeo y los recuentos **en memoria**, sin generar ningún fichero:
 
@@ -177,7 +171,6 @@ funciona correctamente en producción.
 - **SQLite en modo WAL.** En ejecución, la API abre el fichero en modo WAL y
   genera ficheros hermanos `finper.db-wal` y `finper.db-shm`. Si haces copias o
   mueves la base de datos, manténlos juntos (o haz la copia con la app parada).
-- **`loanhistories` no se migra.** Es una colección legado sin uso en v2.
 - **Colecciones vacías.** Si en tu Mongo no hay registros de `goals`, `debts` o
   `subscription_candidates`, simplemente migrarán 0 filas; no es un error.
 - **Producción:** revisa que `JWT_SECRET` sea un valor fuerte y considera subir
