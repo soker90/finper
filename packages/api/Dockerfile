@@ -12,24 +12,22 @@ ENV TZ=Europe/Madrid
 COPY --chown=node:node pnpm-workspace.yaml pnpm-lock.yaml package.json .npmrc ./
 
 COPY --chown=node:node packages/api/package.json ./packages/api/
-COPY --chown=node:node packages/models/package.json ./packages/models/
+COPY --chown=node:node packages/db/package.json ./packages/db/
 COPY --chown=node:node packages/types/package.json ./packages/types/
 
 RUN pnpm install --frozen-lockfile --filter @soker90/finper-api...
 
 COPY --chown=node:node packages/api ./packages/api
-COPY --chown=node:node packages/models ./packages/models
+COPY --chown=node:node packages/db ./packages/db
 COPY --chown=node:node packages/types ./packages/types
 RUN pnpm --filter @soker90/finper-types build
-RUN pnpm --filter @soker90/finper-models build
+RUN pnpm --filter @soker90/finper-db build
 RUN pnpm --filter @soker90/finper-api build
 RUN pnpm deploy --filter @soker90/finper-api --prod --legacy /home/node/deploy
 
 # STAGE 2 - Producción
 FROM node:24-alpine
 
-ARG MONGODB_USER
-ARG MONGODB_PASS
 ARG JWT_SECRET
 ARG SALT_ROUNDS
 ARG LOKI_USER
@@ -39,15 +37,23 @@ ENV NPM_CONFIG_LOGLEVEL=info
 ENV NODE_ENV=production
 ENV LOG=1
 ENV TZ=Europe/Madrid
+# Fichero SQLite persistente (montar /home/node/app/data como volumen)
+ENV DATABASE_FILE=/home/node/app/data/finper.db
 
 RUN apk add --no-cache dumb-init
 
-RUN mkdir -p /home/node/app && chown -R node:node /home/node/app
+RUN mkdir -p /home/node/app/data && chown -R node:node /home/node/app
 
 WORKDIR /home/node/app
 USER node
 
 COPY --from=builder --chown=node:node /home/node/deploy ./
+
+# Migraciones Drizzle: el servidor las aplica al arrancar buscando en
+# path.resolve(__dirname /*dist*/, '../../db/drizzle') => /home/node/db/drizzle
+COPY --from=builder --chown=node:node /home/node/app/packages/db/drizzle /home/node/db/drizzle
+
+VOLUME ["/home/node/app/data"]
 
 # Healthcheck para monitoreo
 HEALTHCHECK --interval=30s --timeout=3s --start-period=40s --retries=3 \

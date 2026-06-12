@@ -1,172 +1,176 @@
 import { faker } from '@faker-js/faker'
 import {
-  AccountModel,
-  BudgetModel,
-  CategoryModel, DebtModel, DEBT,
-  IAccount, ICategory,
-  IDebt, ILoan, ILoanPayment, IPension, IStore, ISubscription, ISubscriptionCandidate,
-  IUser, LoanModel, LoanPaymentModel, LOAN_PAYMENT, PensionModel, StoreModel,
-  SubscriptionCandidateModel, SubscriptionModel, TransactionModel,
-  TRANSACTION,
-  UserModel,
-  PropertyModel, SupplyModel, SupplyReadingModel,
-  IProperty, ISupply, ISupplyReading, SUPPLY_TYPE,
-  StockModel, IStock, STOCK_TYPE,
-  GoalModel, IGoal, GOAL_COLORS, GOAL_ICONS
-} from '@soker90/finper-models'
+  SUPPLY_TYPE,
+  TRANSACTION, LOAN_PAYMENT
+  , schema, generateId
+} from '@soker90/finper-db'
+import { propertyRepository } from '../src/modules/property/property.repository'
+import { supplyRepository } from '../src/modules/supply/supply.repository'
+import { supplyReadingRepository } from '../src/modules/supply-reading/supply-reading.repository'
+
+import { db as sqliteDb } from '../src/db'
+import hashPassword from '../src/helpers/hash-password'
+const { users } = schema
 
 import {
-  MAX_USERNAME_LENGTH, MIN_LENGTH_USERNAME,
+  MAX_USERNAME_LENGTH,
   MIN_PASSWORD_LENGTH
 } from '../src/config/inputs'
 import { generateUsername } from './generate-values'
-import { buildAmortizationTable } from '../src/services/utils/calcLoanProjection'
+import { DEBT } from '../src/modules/debts/debts.validators'
+import { STOCK_TYPE } from '../src/modules/stocks/stocks.validators'
+import { GOAL_COLORS, GOAL_ICONS } from '../src/modules/goals/goals.validators'
+import { buildAmortizationTable } from '../src/modules/loans/utils/calcLoanProjection'
 import { roundNumber } from '../src/utils/roundNumber'
 
-export async function insertCredentials (params: Record<string, string | boolean> = {}): Promise<IUser> {
-  const parsedParams: Record<string, string | boolean> = {}
-
-  if (params.password) {
-    parsedParams.password = params.password
-  }
-
-  if (params.username) {
-    parsedParams.username = (params.username as string).slice(0, MAX_USERNAME_LENGTH).toLowerCase()
-  }
-
-  return await UserModel.create({
-    password: faker.internet.password({ length: MIN_PASSWORD_LENGTH }),
-    username: faker.internet.username().slice(0, MAX_USERNAME_LENGTH).toLowerCase(),
-    ...parsedParams
-  })
+// En SQLite todas las tablas de datos referencian users.username (FK).
+// A diferencia del viejo (Mongo, sin FK), el usuario debe existir antes de
+// insertar. ensureUser devuelve el user dado (se asume existente) o crea uno.
+const ensureUser = (user?: string): string => {
+  if (user) return user
+  const username = generateUsername()
+  sqliteDb.insert(users).values({
+    id: generateId(),
+    username,
+    password: hashPassword('password'),
+    createdAt: new Date()
+  }).run()
+  return username
 }
 
-export const insertAccount = async (params: { name?: string, bank?: string, balance?: number, isActive?: boolean, user?: string } = {}): Promise<IAccount & { _id: string }> => {
-  return AccountModel.create({
+export const insertCredentials = (params: Record<string, string | boolean> = {}): Promise<{ username: string }> => {
+  const username = ((params.username as string) ?? faker.internet.username())
+    .slice(0, MAX_USERNAME_LENGTH).toLowerCase()
+  const password = (params.password as string) ?? faker.internet.password({ length: MIN_PASSWORD_LENGTH })
+
+  sqliteDb.insert(users).values({
+    id: generateId(),
+    username,
+    password: hashPassword(password),
+    createdAt: new Date(),
+  }).run()
+
+  return Promise.resolve({ username })
+}
+
+export const insertAccount = async (params: Record<string, any> = {}): Promise<any> => {
+  const data = {
+    id: generateId(),
     name: params.name ?? faker.finance.accountName(),
     bank: params.bank ?? faker.lorem.word(),
-    balance: params.balance ?? faker.number.int(),
-    isActive: params.isActive ?? faker.datatype.boolean(),
-    user: params.user ?? faker.internet.username().slice(MIN_LENGTH_USERNAME, MAX_USERNAME_LENGTH).toLowerCase()
-  }) as unknown as IAccount & { _id: string }
+    balance: params.balance ?? faker.number.int({ min: 0, max: 100000 }),
+    isActive: params.isActive ?? true,
+    user: ensureUser(params.user)
+  }
+  sqliteDb.insert(schema.accounts).values(data).run()
+  return data
 }
 
-export const insertCategory = async (params: Record<string, any> = {}): Promise<ICategory & { _id: string }> => {
-  const user = params.user ?? generateUsername()
-  const parent = params.parent ?? params.root
-    ? false
-    : (await insertCategory({
-        user,
-        root: true,
-        type: params.type
-      }))._id
-
-  const category = await CategoryModel.create({
+export const insertCategory = async (params: Record<string, any> = {}): Promise<any> => {
+  const user = ensureUser(params.user)
+  let parentId: string | null = null
+  if (params.parentId) {
+    parentId = params.parentId
+  } else if (!params.root) {
+    parentId = (await insertCategory({ user, root: true, type: params.type })).id
+  }
+  const data = {
+    id: generateId(),
     name: params.name ?? faker.commerce.department(),
     type: params.type ?? (Math.random() > 0.5 ? TRANSACTION.Expense : TRANSACTION.Income),
-    ...(parent && { parent }),
-    user,
-    ...(params.budgetRuleClass && { budgetRuleClass: params.budgetRuleClass })
-  })
-
-  return category.populate('parent') as unknown as ICategory & { _id: string }
+    parentId,
+    budgetRuleClass: params.budgetRuleClass ?? null,
+    user
+  }
+  sqliteDb.insert(schema.categories).values(data).run()
+  return data
 }
 
-export const insertStore = async (params: Record<string, string> = {}): Promise<IStore> => {
-  return StoreModel.create({
+export const insertStore = async (params: Record<string, any> = {}): Promise<any> => {
+  const data = {
+    id: generateId(),
     name: params.name ?? faker.company.name(),
-    user: params.user ?? faker.internet.username().slice(MIN_LENGTH_USERNAME, MAX_USERNAME_LENGTH).toLowerCase()
-  })
+    user: ensureUser(params.user)
+  }
+  sqliteDb.insert(schema.stores).values(data).run()
+  return data
 }
 
-export const insertTransaction = async (params: Record<string, string | number | string[]> = {}): Promise<any> => {
-  const user = (params.user ?? faker.internet.username().slice(MIN_LENGTH_USERNAME, MAX_USERNAME_LENGTH).toLowerCase()) as string
-  return TransactionModel.create({
+export const insertTransaction = async (params: Record<string, any> = {}): Promise<any> => {
+  const user = ensureUser(params.user)
+  const categoryId = params.categoryId ?? (await insertCategory({ user })).id
+  const accountId = params.accountId ?? (await insertAccount({ user })).id
+  const storeId = params.storeId ?? (await insertStore({ user })).id
+  const data = {
+    id: generateId(),
     date: params.date ?? faker.date.past().getTime(),
-    category: params.category ?? (await insertCategory({ user })),
-    amount: params.amount ?? faker.number.int(),
+    categoryId,
+    amount: params.amount ?? faker.number.int({ min: 1, max: 1000 }),
     type: params.type ?? (Math.random() > 0.5 ? TRANSACTION.Expense : TRANSACTION.Income),
-    account: params.account ?? (await insertAccount({ user })),
+    accountId,
     note: params.note ?? faker.lorem.sentence(),
-    store: params.store ?? (await insertStore({ user })),
+    storeId,
+    subscriptionId: params.subscriptionId ?? null,
     tags: params.tags ?? [],
     user
-  })
-}
-
-export const insertDebt = async (params: Record<string, string | number> = {}): Promise<IDebt> => {
-  return DebtModel.create({
-    from: params.from ?? faker.person.firstName(),
-    date: params.date ?? faker.number.int(),
-    amount: params.amount ?? faker.number.int(),
-    concept: params.concept ?? faker.lorem.words(4),
-    type: params.type ?? (Math.random() > 0.5 ? DEBT.TO : DEBT.FROM),
-    user: params.user ?? faker.internet.username().slice(MIN_LENGTH_USERNAME, MAX_USERNAME_LENGTH).toLowerCase()
-  })
+  }
+  sqliteDb.insert(schema.transactions).values(data).run()
+  return data
 }
 
 export const insertBudget = async (params: Record<string, any> = {}): Promise<any> => {
-  const user = (params.user ?? generateUsername()) as string
-  const budget = await BudgetModel.create({
+  const user = ensureUser(params.user)
+  const categoryId = params.categoryId ?? (await insertCategory({ user, ...(params.type && { type: params.type }) })).id
+  const data = {
+    id: generateId(),
     year: params.year ?? faker.date.past().getFullYear(),
     month: params.month ?? faker.date.past().getMonth(),
-    category: params.category ?? (await insertCategory({ user, ...(params.type && { type: params.type }) }))._id,
-    amount: faker.number.int(),
+    amount: params.amount ?? faker.number.int({ min: 1, max: 5000 }),
+    categoryId,
     user
-  })
-
-  return params.category ? budget.populate('category') : budget
+  }
+  sqliteDb.insert(schema.budgets).values(data).run()
+  return data
 }
 
-export const insertPension = async (params: Record<string, string | number> = {}): Promise<IPension> => {
-  return PensionModel.create({
-    date: params.date ?? faker.number.int(),
-    value: params.value ?? faker.number.int(),
-    companyAmount: params.companyAmount ?? faker.number.int(),
-    companyUnits: params.companyUnits ?? faker.number.int(),
-    employeeUnits: params.employeeUnits ?? faker.number.int(),
-    employeeAmount: params.employeeAmount ?? faker.number.int(),
-    user: params.user ?? faker.internet.username().slice(MIN_LENGTH_USERNAME, MAX_USERNAME_LENGTH).toLowerCase()
-  })
-}
-
-export const insertLoan = async (params: Record<string, any> = {}): Promise<ILoan & { _id: string }> => {
-  const user = (params.user ?? generateUsername()) as string
-  const account = params.account ?? (await insertAccount({ user }))._id
-  const category = params.category ?? (await insertCategory({ user, type: TRANSACTION.Expense }))._id
+export const insertLoan = async (params: Record<string, any> = {}): Promise<any> => {
+  const user = ensureUser(params.user)
+  const accountId = params.accountId ?? (await insertAccount({ user })).id
+  const categoryId = params.categoryId ?? (await insertCategory({ user, type: TRANSACTION.Expense })).id
   const initialAmount = params.initialAmount ?? 10000
   const interestRate = params.interestRate ?? 3
   const monthlyPayment = params.monthlyPayment ?? 200
   const startDate = params.startDate ?? Date.now()
 
-  // Calculate initialEstimatedCost dynamically from the amortization table
-  const initialProjection = buildAmortizationTable([], initialAmount, interestRate, monthlyPayment, [], startDate)
-  const calculatedEstimatedCost = roundNumber(initialProjection.reduce((s, r) => s + r.amount, 0))
+  const projection = buildAmortizationTable([], initialAmount, interestRate, monthlyPayment, [], startDate)
+  const estimatedCost = roundNumber(projection.reduce((s: number, r: any) => s + r.amount, 0))
 
-  return LoanModel.create({
+  const data = {
+    id: generateId(),
     name: params.name ?? faker.lorem.words(2),
     initialAmount,
     pendingAmount: params.pendingAmount ?? initialAmount,
     interestRate,
     startDate,
     monthlyPayment,
-    initialEstimatedCost: params.initialEstimatedCost ?? calculatedEstimatedCost,
-    account,
-    category,
+    initialEstimatedCost: params.initialEstimatedCost ?? estimatedCost,
+    accountId,
+    categoryId,
     user
-  }) as unknown as ILoan & { _id: string }
+  }
+  sqliteDb.insert(schema.loans).values(data).run()
+  return data
 }
 
-export const insertLoanPayment = async (params: Record<string, any> = {}): Promise<ILoanPayment & { _id: string }> => {
-  const user = (params.user ?? generateUsername()) as string
-  const loan = params.loan ?? (await insertLoan({ user }))._id
+export const insertLoanPayment = async (params: Record<string, any> = {}): Promise<any> => {
+  const user = ensureUser(params.user)
+  const loanId = params.loanId ?? (await insertLoan({ user })).id
   const principal = params.principal ?? 175
   const accumulatedPrincipal = params.accumulatedPrincipal ?? principal
-  // pendingCapital = initialAmount(10000) - accumulatedPrincipal, consistent with the defaults
   const pendingCapital = params.pendingCapital ?? roundNumber(10000 - accumulatedPrincipal)
-
-  return LoanPaymentModel.create({
-    loan,
+  const data = {
+    id: generateId(),
+    loanId,
     date: params.date ?? Date.now(),
     amount: params.amount ?? 200,
     interest: params.interest ?? 25,
@@ -175,72 +179,145 @@ export const insertLoanPayment = async (params: Record<string, any> = {}): Promi
     pendingCapital,
     type: params.type ?? LOAN_PAYMENT.ORDINARY,
     user
-  }) as unknown as ILoanPayment & { _id: string }
+  }
+  sqliteDb.insert(schema.loanPayments).values(data).run()
+  return data
 }
 
-export const insertSubscription = async (params: Record<string, any> = {}): Promise<ISubscription & { _id: any }> => {
-  const user = (params.user ?? generateUsername()) as string
-  const account = params.accountId ? { _id: params.accountId } : await insertAccount({ user })
-  const category = params.categoryId ? { _id: params.categoryId } : await insertCategory({ user })
+export const insertLoanEvent = async (params: Record<string, any> = {}): Promise<any> => {
+  const user = ensureUser(params.user)
+  const loanId = params.loanId ?? (await insertLoan({ user })).id
+  const data = {
+    id: generateId(),
+    loanId,
+    date: params.date ?? Date.now(),
+    newRate: params.newRate ?? 2.5,
+    newPayment: params.newPayment ?? 180,
+    user
+  }
+  sqliteDb.insert(schema.loanEvents).values(data).run()
+  return data
+}
 
-  return SubscriptionModel.create({
+export const insertSubscription = async (params: Record<string, any> = {}): Promise<any> => {
+  const user = ensureUser(params.user)
+  const categoryId = params.categoryId ?? (await insertCategory({ user })).id
+  const accountId = params.accountId ?? (await insertAccount({ user })).id
+  const data = {
+    id: generateId(),
     name: params.name ?? faker.company.name(),
     amount: params.amount ?? faker.number.float({ min: 1, max: 50, multipleOf: 0.01 }),
+    currency: params.currency ?? null,
     cycle: params.cycle ?? 1,
-    categoryId: category._id,
-    accountId: account._id,
     nextPaymentDate: params.nextPaymentDate ?? null,
+    categoryId,
+    accountId,
+    logoUrl: params.logoUrl ?? null,
     user
-  }) as unknown as ISubscription & { _id: any }
+  }
+  sqliteDb.insert(schema.subscriptions).values(data).run()
+  return data
 }
 
-export const insertSubscriptionCandidate = async (params: Record<string, any> = {}): Promise<ISubscriptionCandidate & { _id: any }> => {
-  const user = (params.user ?? generateUsername()) as string
-  const transaction = params.transactionId
-    ? { _id: params.transactionId }
-    : await insertTransaction({ user })
-  const subscription = params.subscriptionId
-    ? { _id: params.subscriptionId }
-    : await insertSubscription({ user })
-
-  return SubscriptionCandidateModel.create({
-    transactionId: transaction._id,
-    subscriptionIds: [subscription._id],
+export const insertSubscriptionCandidate = async (params: Record<string, any> = {}): Promise<any> => {
+  const user = ensureUser(params.user)
+  const transactionId = params.transactionId ?? (await insertTransaction({ user })).id
+  const subscriptionId = params.subscriptionId ?? (await insertSubscription({ user })).id
+  const data = {
+    id: generateId(),
+    transactionId,
+    subscriptionIds: params.subscriptionIds ?? [subscriptionId],
+    createdAt: params.createdAt ?? Date.now(),
     user
-  }) as unknown as ISubscriptionCandidate & { _id: any }
+  }
+  sqliteDb.insert(schema.subscriptionCandidates).values(data).run()
+  return data
 }
 
-export const insertProperty = async (params: Record<string, any> = {}): Promise<IProperty & { _id: any }> => {
-  const user = (params.user ?? generateUsername()) as string
-
-  return PropertyModel.create({
-    name: params.name ?? faker.location.streetAddress(),
-    user
-  }) as unknown as IProperty & { _id: any }
+export const insertDebt = async (params: Record<string, any> = {}): Promise<any> => {
+  const data = {
+    id: generateId(),
+    from: params.from ?? faker.person.firstName(),
+    date: params.date ?? faker.date.past().getTime(),
+    amount: params.amount ?? faker.number.int({ min: 1, max: 5000 }),
+    concept: params.concept ?? faker.lorem.words(4),
+    type: params.type ?? (Math.random() > 0.5 ? DEBT.TO : DEBT.FROM),
+    user: ensureUser(params.user)
+  }
+  sqliteDb.insert(schema.debts).values(data).run()
+  return data
 }
 
-export const insertSupply = async (params: Record<string, any> = {}): Promise<ISupply & { _id: any }> => {
-  const user = (params.user ?? generateUsername()) as string
-  const propertyId = params.propertyId ?? (await insertProperty({ user }))._id
+export const insertStock = async (params: Record<string, any> = {}): Promise<any> => {
+  const data = {
+    id: generateId(),
+    platform: params.platform ?? 'DEGIRO',
+    ticker: params.ticker ?? faker.string.alpha({ length: 4, casing: 'upper' }),
+    name: params.name ?? faker.company.name(),
+    shares: params.shares ?? faker.number.float({ min: 1, max: 100, multipleOf: 0.01 }),
+    price: params.price ?? faker.number.float({ min: 1, max: 500, multipleOf: 0.01 }),
+    type: params.type ?? STOCK_TYPE.Buy,
+    date: params.date ?? faker.date.past().getTime(),
+    user: ensureUser(params.user)
+  }
+  sqliteDb.insert(schema.stocks).values(data).run()
+  return data
+}
 
-  return SupplyModel.create({
-    // defaults sobreescribibles por cualquier campo de params
+export const insertGoal = async (params: Record<string, any> = {}): Promise<any> => {
+  const data = {
+    id: generateId(),
+    name: params.name ?? faker.lorem.words(2),
+    targetAmount: params.targetAmount ?? faker.number.float({ min: 100, max: 10000, multipleOf: 0.01 }),
+    currentAmount: params.currentAmount ?? 0,
+    deadline: params.deadline ?? null,
+    color: params.color ?? faker.helpers.arrayElement(GOAL_COLORS),
+    icon: params.icon ?? faker.helpers.arrayElement(GOAL_ICONS),
+    user: ensureUser(params.user)
+  }
+  sqliteDb.insert(schema.goals).values(data).run()
+  return data
+}
+
+export const insertPension = async (params: Record<string, any> = {}): Promise<any> => {
+  const data = {
+    id: generateId(),
+    date: params.date ?? faker.date.past().getTime(),
+    value: params.value ?? faker.number.int(),
+    companyAmount: params.companyAmount ?? faker.number.int(),
+    companyUnits: params.companyUnits ?? faker.number.int(),
+    employeeUnits: params.employeeUnits ?? faker.number.int(),
+    employeeAmount: params.employeeAmount ?? faker.number.int(),
+    user: ensureUser(params.user)
+  }
+  sqliteDb.insert(schema.pensions).values(data).run()
+  return data
+}
+
+export const insertProperty = (params: Record<string, any> = {}) => {
+  const user = ensureUser(params.user)
+  return propertyRepository.create({ name: params.name ?? faker.location.streetAddress(), user })
+}
+
+export const insertSupply = (params: Record<string, any> = {}) => {
+  const user = ensureUser(params.user)
+  const propertyId = params.propertyId ?? insertProperty({ user }).id
+  const rest = Object.fromEntries(Object.entries(params).filter(([k]) => k !== 'propertyId' && k !== 'user'))
+  return supplyRepository.create({
     name: faker.company.name(),
     type: SUPPLY_TYPE.ELECTRICITY,
-    ...params,
-    // campos que siempre se resuelven arriba y no pueden sobreescribirse
+    ...rest,
     propertyId,
     user
-  }) as unknown as ISupply & { _id: any }
+  } as any)
 }
 
-export const insertSupplyReading = async (params: Record<string, any> = {}): Promise<ISupplyReading & { _id: any }> => {
-  const user = (params.user ?? generateUsername()) as string
-  const supplyId = params.supplyId ?? (await insertSupply({ user }))._id
+export const insertSupplyReading = (params: Record<string, any> = {}) => {
+  const user = ensureUser(params.user)
+  const supplyId = params.supplyId ?? insertSupply({ user }).id
   const startDate = params.startDate ?? faker.date.past({ years: 1 }).getTime()
   const endDate = params.endDate ?? faker.date.between({ from: startDate, to: Date.now() }).getTime()
-
-  return SupplyReadingModel.create({
+  return supplyReadingRepository.create({
     supplyId,
     startDate,
     endDate,
@@ -250,32 +327,5 @@ export const insertSupplyReading = async (params: Record<string, any> = {}): Pro
     consumptionOffPeak: params.consumptionOffPeak ?? faker.number.int({ min: 10, max: 100 }),
     consumption: params.consumption ?? faker.number.int({ min: 10, max: 100 }),
     user
-  }) as unknown as ISupplyReading & { _id: any }
-}
-
-export const insertStock = async (params: Record<string, any> = {}): Promise<IStock & { _id: string }> => {
-  const user = (params.user ?? generateUsername()) as string
-
-  return StockModel.create({
-    ticker: params.ticker ?? faker.string.alpha({ length: 4, casing: 'upper' }),
-    name: params.name ?? faker.company.name(),
-    shares: params.shares ?? faker.number.float({ min: 1, max: 100, multipleOf: 0.01 }),
-    price: params.price ?? faker.number.float({ min: 1, max: 500, multipleOf: 0.01 }),
-    type: params.type ?? STOCK_TYPE.Buy,
-    date: params.date ?? faker.date.past().getTime(),
-    platform: params.platform ?? 'DEGIRO',
-    user
-  }) as unknown as IStock & { _id: string }
-}
-
-export const insertGoal = async (params: Record<string, any> = {}): Promise<IGoal & { _id: string }> => {
-  return GoalModel.create({
-    name: params.name ?? faker.lorem.words(2),
-    targetAmount: params.targetAmount ?? faker.number.float({ min: 100, max: 10000, multipleOf: 0.01 }),
-    currentAmount: params.currentAmount ?? 0,
-    deadline: params.deadline ?? null,
-    color: params.color ?? faker.helpers.arrayElement(GOAL_COLORS),
-    icon: params.icon ?? faker.helpers.arrayElement(GOAL_ICONS),
-    user: params.user ?? faker.internet.username().slice(MIN_LENGTH_USERNAME, MAX_USERNAME_LENGTH).toLowerCase()
-  }) as unknown as IGoal & { _id: string }
+  } as any)
 }

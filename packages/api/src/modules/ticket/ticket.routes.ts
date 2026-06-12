@@ -1,0 +1,42 @@
+import { Router } from 'express'
+
+import loggerHandler from '../../utils/logger'
+import TicketService from './ticket.service'
+import authMiddleware from '../../middlewares/auth.middleware'
+import { TicketController } from './ticket.controller'
+
+export const ticketService = new TicketService()
+
+export class TicketRoutes {
+  router: Router
+
+  private ticketController: TicketController = new TicketController({
+    ticketService,
+    loggerHandler: loggerHandler('TicketController')
+  })
+
+  constructor () {
+    this.router = Router()
+    this.routes()
+  }
+
+  routes () {
+    this.router.get(
+      '/',
+      authMiddleware,
+      this.ticketController.list.bind(this.ticketController)
+    )
+
+    this.router.patch(
+      '/:id',
+      authMiddleware,
+      this.ticketController.review.bind(this.ticketController)
+    )
+
+    this.router.delete(
+      '/:id',
+      authMiddleware,
+      this.ticketController.destroy.bind(this.ticketController)
+    )
+  }
+}

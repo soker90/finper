@@ -1,14 +1,12 @@
 import supertest from 'supertest'
-import { SupplyReadingModel, SupplyModel, mongoose } from '@soker90/finper-models'
+import { db as sqliteDb } from '../../src/db'
+import { schema } from '@soker90/finper-db'
 import { faker } from '@faker-js/faker'
 
 import { server } from '../../src/server'
 import { requestLogin } from '../request-login'
 import { insertSupplyReading, insertSupply } from '../insert-data-to-model'
 import { generateUsername } from '../generate-values'
-
-import createTestDatabase from '../test-db'
-const testDatabase = createTestDatabase(mongoose)
 
 const buildReadingPayload = (overrides: Record<string, unknown> = {}) => {
   const startDate = faker.date.past().getTime()
@@ -24,11 +22,10 @@ const buildReadingPayload = (overrides: Record<string, unknown> = {}) => {
 }
 
 describe('SupplyReading Routes', () => {
-  beforeAll(() => testDatabase.connect())
-  afterAll(() => testDatabase.close())
-  afterEach(async () => {
-    await SupplyReadingModel.deleteMany({})
-    await SupplyModel.deleteMany({})
+  afterEach(() => {
+    sqliteDb.delete(schema.supplyReadings).run()
+    sqliteDb.delete(schema.supplies).run()
+    sqliteDb.delete(schema.properties).run()
   })
 
   describe('GET /api/supplies/readings/supply/:supplyId', () => {
@@ -46,9 +43,9 @@ describe('SupplyReading Routes', () => {
 
     test('successfully returns array of readings', async () => {
       const supply = await insertSupply({ user })
-      await insertSupplyReading({ user, supplyId: supply._id.toString() })
+      await insertSupplyReading({ user, supplyId: supply.id })
 
-      const { body } = await supertest(server.app).get(path(supply._id.toString())).auth(token, { type: 'bearer' }).expect(200)
+      const { body } = await supertest(server.app).get(path(supply.id)).auth(token, { type: 'bearer' }).expect(200)
       expect(Array.isArray(body)).toBeTruthy()
       expect(body.length).toBe(1)
     })
@@ -72,28 +69,28 @@ describe('SupplyReading Routes', () => {
     test('success creating reading', async () => {
       const supply = await insertSupply({ user })
       await supertest(server.app).post(path).auth(token, { type: 'bearer' })
-        .send(buildReadingPayload({ supplyId: supply._id.toString() }))
+        .send(buildReadingPayload({ supplyId: supply.id }))
         .expect(200)
     })
 
     test('when token is not provided, it should respond 401', async () => {
       const supply = await insertSupply({ user })
       await supertest(server.app).post(path)
-        .send(buildReadingPayload({ supplyId: supply._id.toString() }))
+        .send(buildReadingPayload({ supplyId: supply.id }))
         .expect(401)
     })
 
     test('missing amount returns 422', async () => {
       const supply = await insertSupply({ user })
       await supertest(server.app).post(path).auth(token, { type: 'bearer' })
-        .send(buildReadingPayload({ supplyId: supply._id.toString(), amount: undefined }))
+        .send(buildReadingPayload({ supplyId: supply.id, amount: undefined }))
         .expect(422)
     })
 
     test('invalid amount type returns 422', async () => {
       const supply = await insertSupply({ user })
       await supertest(server.app).post(path).auth(token, { type: 'bearer' })
-        .send(buildReadingPayload({ supplyId: supply._id.toString(), amount: faker.word.noun() }))
+        .send(buildReadingPayload({ supplyId: supply.id, amount: faker.word.noun() }))
         .expect(422)
     })
   })
@@ -109,14 +106,14 @@ describe('SupplyReading Routes', () => {
 
     test('success updating reading', async () => {
       const reading = await insertSupplyReading({ user })
-      await supertest(server.app).put(path(reading._id.toString())).auth(token, { type: 'bearer' })
+      await supertest(server.app).put(path(reading.id)).auth(token, { type: 'bearer' })
         .send(buildReadingPayload({ supplyId: reading.supplyId.toString() }))
         .expect(200)
     })
 
     test('when token is not provided, it should respond 401', async () => {
       const reading = await insertSupplyReading({ user })
-      await supertest(server.app).put(path(reading._id.toString()))
+      await supertest(server.app).put(path(reading.id))
         .send(buildReadingPayload({ supplyId: reading.supplyId.toString() }))
         .expect(401)
     })
@@ -124,20 +121,20 @@ describe('SupplyReading Routes', () => {
     test('when reading does not exist in PUT, return 404', async () => {
       const supply = await insertSupply({ user })
       await supertest(server.app).put(path(faker.database.mongodbObjectId())).auth(token, { type: 'bearer' })
-        .send(buildReadingPayload({ supplyId: supply._id.toString() }))
+        .send(buildReadingPayload({ supplyId: supply.id }))
         .expect(404)
     })
 
     test('when another user reading in PUT, return 404', async () => {
       const reading = await insertSupplyReading()
-      await supertest(server.app).put(path(reading._id.toString())).auth(token, { type: 'bearer' })
+      await supertest(server.app).put(path(reading.id)).auth(token, { type: 'bearer' })
         .send(buildReadingPayload({ supplyId: reading.supplyId.toString() }))
         .expect(404)
     })
 
     test('missing amount in PUT returns 422', async () => {
       const reading = await insertSupplyReading({ user })
-      await supertest(server.app).put(path(reading._id.toString())).auth(token, { type: 'bearer' })
+      await supertest(server.app).put(path(reading.id)).auth(token, { type: 'bearer' })
         .send(buildReadingPayload({ supplyId: reading.supplyId.toString(), amount: undefined }))
         .expect(422)
     })
@@ -154,12 +151,12 @@ describe('SupplyReading Routes', () => {
 
     test('success deleting reading', async () => {
       const reading = await insertSupplyReading({ user })
-      await supertest(server.app).delete(path(reading._id.toString())).auth(token, { type: 'bearer' }).expect(204)
+      await supertest(server.app).delete(path(reading.id)).auth(token, { type: 'bearer' }).expect(204)
     })
 
     test('when token is not provided, it should respond 401', async () => {
       const reading = await insertSupplyReading({ user })
-      await supertest(server.app).delete(path(reading._id.toString())).expect(401)
+      await supertest(server.app).delete(path(reading.id)).expect(401)
     })
 
     test('when reading does not exist in DELETE, return 404', async () => {
@@ -168,7 +165,7 @@ describe('SupplyReading Routes', () => {
 
     test('when another user reading in DELETE, return 404', async () => {
       const reading = await insertSupplyReading()
-      await supertest(server.app).delete(path(reading._id.toString())).auth(token, { type: 'bearer' }).expect(404)
+      await supertest(server.app).delete(path(reading.id)).auth(token, { type: 'bearer' }).expect(404)
     })
   })
 })

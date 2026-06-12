@@ -1,21 +1,18 @@
 import supertest from 'supertest'
-import { PropertyModel, SupplyModel, SupplyReadingModel, mongoose } from '@soker90/finper-models'
+import { db as sqliteDb } from '../../src/db'
+import { schema } from '@soker90/finper-db'
+import { eq } from 'drizzle-orm'
 
 import { server } from '../../src/server'
 import { requestLogin } from '../request-login'
 import { insertProperty, insertSupply, insertSupplyReading } from '../insert-data-to-model'
 import { generateUsername } from '../generate-values'
 
-import createTestDatabase from '../test-db'
-const testDatabase = createTestDatabase(mongoose)
-
 describe('Property Routes', () => {
-  beforeAll(() => testDatabase.connect())
-  afterAll(() => testDatabase.close())
-  afterEach(async () => {
-    await SupplyReadingModel.deleteMany({})
-    await SupplyModel.deleteMany({})
-    await PropertyModel.deleteMany({})
+  afterEach(() => {
+    sqliteDb.delete(schema.supplyReadings).run()
+    sqliteDb.delete(schema.supplies).run()
+    sqliteDb.delete(schema.properties).run()
   })
 
   describe('POST /api/supplies/properties', () => {
@@ -56,12 +53,12 @@ describe('Property Routes', () => {
 
     test('when another user property, it should return 404', async () => {
       const property = await insertProperty()
-      await supertest(server.app).put(path(property._id.toString())).auth(token, { type: 'bearer' }).send({ name: 'casa' }).expect(404)
+      await supertest(server.app).put(path(property.id)).auth(token, { type: 'bearer' }).send({ name: 'casa' }).expect(404)
     })
 
     test('when success editing a property', async () => {
       const property = await insertProperty({ user })
-      await supertest(server.app).put(path(property._id.toString())).auth(token, { type: 'bearer' })
+      await supertest(server.app).put(path(property.id)).auth(token, { type: 'bearer' })
         .send({ name: 'Mi chalet' })
         .expect(200)
     })
@@ -82,20 +79,18 @@ describe('Property Routes', () => {
 
     test('when success deleting a property', async () => {
       const property = await insertProperty({ user })
-      await supertest(server.app).delete(path(property._id.toString())).auth(token, { type: 'bearer' }).expect(204)
+      await supertest(server.app).delete(path(property.id)).auth(token, { type: 'bearer' }).expect(204)
     })
 
     test('when deleting property, it should delete related supplies and readings', async () => {
       const property = await insertProperty({ user })
-      const supply = await insertSupply({ user, propertyId: property._id.toString() })
-      await insertSupplyReading({ user, supplyId: supply._id.toString(), amount: 12.45 })
+      const supply = await insertSupply({ user, propertyId: property.id })
+      await insertSupplyReading({ user, supplyId: supply.id, amount: 12.45 })
 
-      await supertest(server.app).delete(path(property._id.toString())).auth(token, { type: 'bearer' }).expect(204)
+      await supertest(server.app).delete(path(property.id)).auth(token, { type: 'bearer' }).expect(204)
 
-      const [suppliesCount, readingsCount] = await Promise.all([
-        SupplyModel.countDocuments({ propertyId: property._id }),
-        SupplyReadingModel.countDocuments({ supplyId: supply._id })
-      ])
+      const suppliesCount = sqliteDb.select().from(schema.supplies).where(eq(schema.supplies.propertyId, property.id)).all().length
+      const readingsCount = sqliteDb.select().from(schema.supplyReadings).where(eq(schema.supplyReadings.supplyId, supply.id)).all().length
 
       expect(suppliesCount).toBe(0)
       expect(readingsCount).toBe(0)

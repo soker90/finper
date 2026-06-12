@@ -1,0 +1,19 @@
+{
+  "name": "finper-data-migration",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dry-run": "tsx migrate.ts --dry-run",
+    "migrate": "tsx migrate.ts"
+  },
+  "dependencies": {
+    "mongodb": "6.12.0",
+    "better-sqlite3": "12.10.0",
+    "drizzle-orm": "0.45.2",
+    "@soker90/finper-db": "workspace:*"
+  },
+  "devDependencies": {
+    "tsx": "4.19.2",
+    "@types/better-sqlite3": "7.6.12"
+  }
+}

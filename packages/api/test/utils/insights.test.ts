@@ -7,8 +7,8 @@ import {
   type CategoryHistoryRow,
   type BudgetRow,
   type MonthlyData
-} from '../../src/services/utils/insights'
-import { computeBudgetAdherence } from '../../src/services/dashboard/health-score'
+} from '../../src/modules/dashboard/utils/insights'
+import { computeBudgetAdherence } from '../../src/modules/dashboard/utils/health-score'
 
 // Helpers
 

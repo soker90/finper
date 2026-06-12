@@ -1,7 +1,8 @@
 import 'dotenv/config'
-import { UserModel, mongoose } from '@soker90/finper-models'
-import config from '../config'
-import db from '../config/db'
+import { db as sqliteDb } from '../db'
+import { migrate } from 'drizzle-orm/better-sqlite3/migrator'
+import path from 'node:path'
+import { usersService } from '../modules/users/users.service'
 import { MIN_LENGTH_USERNAME, MAX_USERNAME_LENGTH, MIN_PASSWORD_LENGTH } from '../config/inputs'
 
 const username = (process.env.INIT_USERNAME ?? '').toLowerCase().trim()
@@ -24,25 +25,22 @@ function validate (): void {
 async function seed (): Promise<void> {
   validate()
 
-  db.connect(config.mongo)
-
-  await new Promise<void>((resolve, reject) => {
-    mongoose.connection.once('connected', resolve)
-    mongoose.connection.once('error', reject)
+  migrate(sqliteDb as any, {
+    migrationsFolder: path.resolve(__dirname, '../../../db/drizzle')
   })
 
-  const existing = await UserModel.findOne({ username })
-
-  if (existing) {
-    console.log('ℹ️   El usuario ya existe. No se realizaron cambios.')
-    await mongoose.connection.close()
-    process.exit(0)
+  try {
+    await usersService.createUser({ username, password })
+    console.log('✅  Usuario creado correctamente.')
+  } catch (err: any) {
+    if (err.message && err.message.includes('UNIQUE constraint failed')) {
+      console.log('ℹ️   El usuario ya existe. No se realizaron cambios.')
+    } else {
+      console.error('❌  Error inesperado:', err)
+      process.exit(1)
+    }
   }
 
-  await UserModel.create({ username, password })
-  console.log('✅  Usuario creado correctamente.')
-
-  await mongoose.connection.close()
   process.exit(0)
 }
 
