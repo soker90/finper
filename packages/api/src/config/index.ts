@@ -1,5 +1,8 @@
 export default {
   port: 3008,
+  database: {
+    file: process.env.DATABASE_FILE || './finper-dev.db'
+  },
   jwt: {
     secret: process.env.JWT_SECRET || 'test',
     saltRounds: process.env.SALT_ROUNDS || '10',

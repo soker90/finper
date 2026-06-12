@@ -1,3 +1,4 @@
 import { createDb, type DB } from '@soker90/finper-db'
+import config from './config'
 
-export const db: DB = createDb(process.env.DATABASE_FILE ?? './finper-dev.db')
+export const db: DB = createDb(config.database.file)
