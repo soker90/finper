@@ -100,6 +100,7 @@ describe('Auth / users controller', () => {
       let response: supertest.Response
 
       beforeAll(async () => {
+        db.delete(schema.users).run()
         await insertCredentials()
 
         response = await supertest(server.app)
