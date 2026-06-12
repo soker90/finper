@@ -32,6 +32,9 @@ importers:
       bcrypt:
         specifier: 6.0.0
         version: 6.0.0
+      better-sqlite3:
+        specifier: 12.10.0
+        version: 12.10.0
       compression:
         specifier: 1.8.1
         version: 1.8.1
@@ -41,6 +44,9 @@ importers:
       dotenv:
         specifier: 17.4.2
         version: 17.4.2
+      drizzle-orm:
+        specifier: 0.45.2
+        version: 0.45.2(@cloudflare/workers-types@4.20260317.1)(@types/better-sqlite3@7.6.12)(better-sqlite3@12.10.0)(gel@2.2.0)
       express:
         specifier: 5.2.1
         version: 5.2.1
@@ -141,12 +147,6 @@ importers:
       babel-jest:
         specifier: 30.4.1
         version: 30.4.1(@babel/core@7.29.0)
-      better-sqlite3:
-        specifier: 12.10.0
-        version: 12.10.0
-      drizzle-orm:
-        specifier: 0.45.2
-        version: 0.45.2(@cloudflare/workers-types@4.20260317.1)(@types/better-sqlite3@7.6.12)(better-sqlite3@12.10.0)(gel@2.2.0)
       eslint:
         specifier: 9.39.2
         version: 9.39.2
