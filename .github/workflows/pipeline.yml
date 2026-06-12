@@ -100,7 +100,7 @@ jobs:
       - name: Test
         run: make test-db
       - name: Codecov
-        uses: codecov/codecov-action@v6
+        uses: codecov/codecov-action@v7
         with:
           flags: db
 
@@ -180,7 +180,7 @@ jobs:
       - name: Test
         run: make test-api
       - name: Codecov
-        uses: codecov/codecov-action@v6
+        uses: codecov/codecov-action@v7
         with:
           flags: api
 
@@ -244,6 +244,6 @@ jobs:
       - name: Test
         run: make test-client
       - name: Codecov
-        uses: codecov/codecov-action@v6
+        uses: codecov/codecov-action@v7
         with:
           flags: client
