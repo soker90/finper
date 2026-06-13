@@ -14,7 +14,7 @@
     "@soker90/finper-db": "workspace:*"
   },
   "devDependencies": {
-    "esbuild": "0.25.0",
+    "esbuild": "0.28.1",
     "@types/better-sqlite3": "7.6.12"
   }
 }
