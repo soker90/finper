@@ -30,8 +30,8 @@ routes/<X>.routes.ts        → authMiddleware + .bind() del controller
 middlewares/auth.middleware → Passport JWT → req.user = username (string), refresca header Token
 controllers/<X>.controller  → Promise chain bluebird
 services/<X>.service        → lógica + Boom.<x>(...).output en errores
-@soker90/finper-models      → consumido desde dist/
-MongoDB
+@soker90/finper-db          → consumido desde dist/
+SQLite
 ```
 
 ---
@@ -140,7 +140,7 @@ Helpers compartidos:
 - `test/insert-data-to-model.ts` — factories (`insertAccount`, `insertLoan`) con faker.
 - `test/request-login.ts` — credenciales + JWT vía `POST /auth/login`.
 
-`@shelf/jest-mongodb` requiere `libssl1.1` en Ubuntu 22+. `NODE_ENV=test` evita `server.start()` y `db.connect()` reales.
+En los tests se usa una base de datos SQLite en memoria. `NODE_ENV=test` evita `server.start()` y `db.connect()` reales.
 
 ```bash
 make test-api

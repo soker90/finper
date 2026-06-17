@@ -24,12 +24,13 @@
 
 ```
 packages/
-  models/   @soker90/finper-models  — Mongoose schemas, published to NPM
+  db/       @soker90/finper-db      — SQLite database schema and Drizzle ORM
+  types/    @soker90/finper-types   — Shared types
   api/      @soker90/finper-api     — Express REST API, port 3008
   client/   @soker90/finper-client  — React 19 + Vite SPA, port 5173
 ```
 
-`api` depends on `models` via `workspace:*`. The API imports from `models/dist/` (compiled output), **not** from source. Without a models build, the API server won't start and imports fail at runtime.
+`api` depends on `db` and `types` via `workspace:*`. Without building the packages, the API server won't start and imports fail at runtime.
 
 ---
 
@@ -39,26 +40,27 @@ packages/
 # Install
 pnpm install
 
-# Critical: build models BEFORE starting or building the API
-make build-models
+# Critical: build types and db BEFORE starting or building the API
+make build-types
+make build-db
 
-# Dev servers (run in separate terminals after build-models)
+# Dev servers (run in separate terminals after build steps)
 make start-api       # http://localhost:3008
 make start-client    # http://localhost:5173
 
 # Build all
-make build-models && make build-api && make build-client
+make build-types && make build-db && make build-api && make build-client
 
 # Tests (all packages in parallel)
 make test
 
 # Tests per package
-make test-models     # Jest + @shelf/jest-mongodb (in-memory MongoDB)
-make test-api        # Jest + @shelf/jest-mongodb
+make test-db         # Vitest (SQLite in-memory)
+make test-api        # Jest (SQLite)
 make test-client     # Vitest (runs with --coverage by default)
 
 # Lint per package
-make lint-models
+make lint-db
 make lint-api
 make lint-client
 ```
@@ -66,11 +68,11 @@ make lint-client
 ### Run a single test file
 
 ```bash
-# API / models (Jest)
+# API (Jest)
 pnpm --filter @soker90/finper-api exec jest src/controllers/account.test.ts
 pnpm --filter @soker90/finper-api exec jest --testNamePattern="should return 200"
 
-# Client (Vitest)
+# Client / DB (Vitest)
 pnpm --filter @soker90/finper-client exec vitest run src/pages/Accounts/Accounts.test.tsx
 pnpm --filter @soker90/finper-client exec vitest run -t "should render"
 pnpm --filter @soker90/finper-client exec vitest --watch   # watch mode, no coverage
@@ -81,16 +83,16 @@ pnpm --filter @soker90/finper-client exec vitest --watch   # watch mode, no cove
 ```bash
 pnpm --filter @soker90/finper-client exec tsc --noEmit
 pnpm --filter @soker90/finper-api exec tsc --noEmit
-pnpm --filter @soker90/finper-models exec tsc --noEmit
+pnpm --filter @soker90/finper-db exec tsc --noEmit
 ```
 
 ---
 
 ## Toolchain quirks
 
-- **Two test frameworks**: `api` and `models` use Jest (`jest.config.cjs`); `client` uses Vitest configured inside `vite.config.ts` — there is no separate `vitest.config.*`.
-- **In-memory MongoDB** (`@shelf/jest-mongodb`): downloads a MongoDB binary to `~/.cache/mongodb-binaries`. On Ubuntu 22+ requires `libssl1.1` installed manually (CI does this explicitly before tests).
-- **ESLint flat config** (`eslint.config.mjs`) in all three packages. No `.eslintrc`. Uses `neostandard` + `@typescript-eslint`.
+- **Two test frameworks**: `api` uses Jest (`jest.config.cjs`); `client` and `db` use Vitest.
+- **SQLite Database**: The database is a local SQLite file. Docker Compose relies on a mounted volume.
+- **ESLint flat config** (`eslint.config.mjs`) in all packages. No `.eslintrc`. Uses `neostandard` + `@typescript-eslint`.
 - **PWA**: `vite-plugin-pwa` with `registerType: 'autoUpdate'`. Service worker registers automatically; may interfere in integration test environments.
 - **Node 24** required (`.nvmrc` + `"engines": { "node": ">=24.x" }` in api).
 - **`packageManager` pinned**: root `package.json` declares `pnpm@10.29.3`; `preinstall` script blocks npm/yarn.
@@ -120,7 +122,7 @@ No fallback is hardcoded; without this variable all API calls fail in developmen
 
 ## Common agent mistakes
 
-- Running `make start-api` or building the API without first running `make build-models`.
+- Running `make start-api` or building the API without first running `make build-types` and `make build-db`.
 - Adding dependencies with `^` or `~` — always use exact versions.
 - Looking for a `vitest.config.*` in the client — it doesn't exist; Vitest config is in `vite.config.ts`.
 - Running `tsc` expecting a `typecheck` npm script — there isn't one; run `tsc --noEmit` directly.
@@ -144,7 +146,6 @@ Cada `AGENTS.md` de paquete contiene **solo reglas críticas + checklist + coman
 
 - [`packages/api/AGENTS.md`](./packages/api/AGENTS.md) → detalle en [`docs/api-patterns.md`](./docs/api-patterns.md).
 - [`packages/client/AGENTS.md`](./packages/client/AGENTS.md) → detalle en [`docs/client-patterns.md`](./docs/client-patterns.md).
-- [`packages/models/AGENTS.md`](./packages/models/AGENTS.md) → detalle en [`docs/models-patterns.md`](./docs/models-patterns.md).
 
 ### Documentación técnica de módulos
 

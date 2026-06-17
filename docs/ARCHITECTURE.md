@@ -11,7 +11,8 @@ Visión global de Finper para agentes IA y contribuyentes. Una sola pasada para 
 ```
 finper/
 ├── packages/
-│   ├── models/   @soker90/finper-models   — Mongoose schemas (publicable a npm)
+│   ├── db/       @soker90/finper-db       — SQLite schema and Drizzle ORM
+│   ├── types/    @soker90/finper-types    — Shared types
 │   ├── api/      @soker90/finper-api      — Express REST API en :3008
 │   └── client/   @soker90/finper-client   — React 19 + Vite SPA en :5173
 ├── docs/                                  — documentación técnica
@@ -23,15 +24,14 @@ finper/
 ### Dependencias entre paquetes
 
 ```
-client  ──HTTP──▶  api  ──require──▶  models (dist/)
+client  ──HTTP──▶  api  ──require──▶  db & types (dist/)
                                            │
                                            ▼
-                                       MongoDB
+                                       SQLite
 ```
 
-- `api` depende de `models` vía `workspace:*` y consume el **build compilado** (`packages/models/dist/`), no la fuente. Sin `make build-models`, la API no arranca.
-- `client` no depende de `models`: tiene tipos propios en `src/types/`. La frontera de tipado entre cliente y API es de facto el JSON HTTP.
-- `models` se publica de forma independiente a npm (`finper-bot` u otros consumidores externos pueden usarlo).
+- `api` depende de `db` y `types` vía `workspace:*` y consume el **build compilado**. Sin construir esos paquetes, la API no arranca.
+- `client` consume los tipos compartidos de `@soker90/finper-types`.
 
 ---
 
@@ -67,10 +67,10 @@ controllers/account.controller  — Promise chain con bluebird:
 services/account.service        — lógica de negocio
     │                             throw Boom.<x>(...).output en errores
     ▼
-@soker90/finper-models          — AccountModel.find(...)
+@soker90/finper-db              — db.select().from(accounts)
     │
     ▼
-MongoDB                         — colección `accounts`
+SQLite                          — tabla `accounts`
     │
     ▲
     │ (errores → next(error))
@@ -88,16 +88,16 @@ Detalle del Promise chain canónico: `packages/api/AGENTS.md` §2.
 | Orden | Comando | Por qué |
 |---|---|---|
 | 1 | `pnpm install` | Resuelve workspace + lockfile. |
-| 2 | `make build-models` | Genera `packages/models/dist/`. La API y los tests de la API lo importan desde `dist/`. |
-| 3 | `make start-api` | Arranca Express en `:3008`. Requiere `dist/` del paso 2. |
+| 2 | `make build-types` y `make build-db` | Genera los builds compilados de tipos y base de datos. La API los requiere. |
+| 3 | `make start-api` | Arranca Express en `:3008`. Requiere build previo. |
 | 4 | `make start-client` | Arranca Vite en `:5173`. Independiente de los pasos 2 y 3 a nivel de build. |
 
 Para pruebas:
 
 | Comando | Pre-requisito |
 |---|---|
-| `make test-models` | Ninguno (Jest + jest-mongodb). |
-| `make test-api` | `make build-models` previo. Jest + jest-mongodb + supertest. |
+| `make test-db` | Ninguno (Vitest). |
+| `make test-api` | `make build-types` y `make build-db` previos. Jest + SQLite en memoria + supertest. |
 | `make test-client` | Ninguno (Vitest + MSW; no necesita la API real). |
 
 Más detalle del toolchain (Jest vs Vitest, jest-mongodb, ESLint flat config, alias en cliente) en el `AGENTS.md` raíz.
@@ -141,12 +141,12 @@ Endpoints:
 
 ## 5. Persistencia
 
-- **MongoDB** como única base de datos.
-- Conexión gestionada por `@soker90/finper-models` (`packages/models/src/mongoose-connect.ts`).
-- La API la inicia desde `packages/api/src/config/db.ts:19` solo si `NODE_ENV !== 'test'`.
-- En tests (api y models) se usa **MongoDB en memoria** vía `@shelf/jest-mongodb` (`global.__MONGO_URI__`).
-- **Multitenancy**: cada documento (excepto `User`) lleva campo `user: string` con el username. Las queries siempre filtran por `user`.
-- Convenciones de modelo, índices y quirks en [`packages/models/AGENTS.md`](../packages/models/AGENTS.md).
+- **SQLite** como única base de datos, usando **Drizzle ORM**.
+- Conexión y esquema gestionados en `@soker90/finper-db`.
+- La API aplica migraciones automáticamente al arrancar.
+- En tests se usa una base de datos SQLite en memoria.
+- **Multitenancy**: cada registro (excepto `User`) lleva campo `userId: string` con el username. Las queries siempre filtran por `userId`.
+- Convenciones de base de datos en `packages/db/README.md`.
 
 ---
 
@@ -161,7 +161,7 @@ Endpoints:
 | Passport + JWT | Auth (estrategias `local` y `jwt`). |
 | Joi | Validación de params. Validadores en `validators/<dominio>/`. |
 | Boom | Errores HTTP. Lanzar **siempre** `Boom.<x>(...).output`. |
-| Mongoose | Vía `@soker90/finper-models`. |
+| Drizzle ORM | Vía `@soker90/finper-db`. |
 | ts-node + ts-jest | Ejecución y test sin build previo de la API. |
 
 ### Frontend
@@ -185,7 +185,7 @@ Endpoints:
 | pnpm 10 (workspaces) | Lockfile obligatorio, `^`/`~` prohibidos. |
 | Make | Punto de entrada para todos los comandos. |
 | ESLint flat config | `neostandard` + `@typescript-eslint`. Sin `.eslintrc`. |
-| `@shelf/jest-mongodb` | MongoDB en memoria para tests. Ubuntu 22+: requiere `libssl1.1`. |
+| `better-sqlite3` | Cliente SQLite síncrono. |
 | Husky + commitlint | Hooks de git. |
 | TypeScript | `strict: true` en api/client; `strictNullChecks: false` en models. |
 | Node 24 | `.nvmrc` y `engines.node ≥24.x`. |
@@ -227,8 +227,8 @@ Sin `VITE_API_HOST`, todas las llamadas del cliente fallan en desarrollo (no hay
 
 | Decisión | Razón / consecuencia |
 |---|---|
-| Monorepo con `models` separado y publicable | Permite reutilizar los schemas en servicios externos (`finper-bot`). Coste: la API consume `dist/` y requiere build previo. |
-| Cliente con tipos propios (sin importar `models`) | Evita acoplar el bundle del cliente al runtime de Mongoose. Coste: tipos duplicados que pueden divergir. |
+| Monorepo con `db` y `types` separados | Permite compartir de forma segura tipos y esquemas entre frontend y backend. Coste: requiere builds intermedios. |
+| Cliente consume `types` | Reutilización de interfaces sin acoplar al ORM o base de datos. |
 | DI manual en la API (sin contenedor) | Simplicidad. Services como singletons en `services/index.ts`. Coste: `new XxxService()` ad-hoc en algún controller (ver deuda en `packages/api/AGENTS.md`). |
 | Bluebird como `global.Promise` | Habilita `.tap()` para logs y validators de existencia. Coste: dependencia adicional, semántica algo distinta a Promises nativas. |
 | Errores Boom con `.output` (no la instancia) | Estandariza la forma del error en el handler central. Trampa típica si se olvida `.output`. |
