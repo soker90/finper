@@ -6,6 +6,6 @@ import { registrationEnabledMiddleware } from '../../middlewares/registration-en
 
 export const usersRouter = Router()
 
-usersRouter.post('/login', usersController.login)
-usersRouter.post('/register', registrationEnabledMiddleware, usersController.register)
-usersRouter.get('/me', authMiddleware, usersController.me)
+usersRouter.post('/login', usersController.login.bind(usersController))
+usersRouter.post('/register', registrationEnabledMiddleware, usersController.register.bind(usersController))
+usersRouter.get('/me', authMiddleware, usersController.me.bind(usersController))
