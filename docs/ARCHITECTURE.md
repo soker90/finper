@@ -2,7 +2,7 @@
 
 Visión global de Finper para agentes IA y contribuyentes. Una sola pasada para entender cómo encajan los paquetes, el flujo de petición y el toolchain.
 
-> Para detalles por paquete, ver [`packages/api/AGENTS.md`](../packages/api/AGENTS.md), [`packages/client/AGENTS.md`](../packages/client/AGENTS.md), [`packages/models/AGENTS.md`](../packages/models/AGENTS.md).
+> Para detalles por paquete, ver [`packages/api/AGENTS.md`](../packages/api/AGENTS.md), [`packages/client/AGENTS.md`](../packages/client/AGENTS.md).
 
 ---
 
@@ -17,7 +17,7 @@ finper/
 │   └── client/   @soker90/finper-client   — React 19 + Vite SPA en :5173
 ├── docs/                                  — documentación técnica
 ├── Makefile                               — entrada para todos los comandos
-├── docker-compose.yml                     — MongoDB + API
+├── docker-compose.yml                     — SQLite + API
 └── pnpm-workspace.yaml
 ```
 

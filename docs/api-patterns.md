@@ -9,7 +9,8 @@ Detalle operativo de `packages/api`. Cargar bajo demanda. Para reglas críticas 
 | Carpeta | Rol |
 |---|---|
 | `auth/` | Estrategias Passport (`local`, `jwt`). Se importan **por side effect** para registrarse. |
-| `config/` | `index.ts` (config central), `db.ts` (wrapper sobre `models.connect`), `inputs.ts` (límites de username/password). |
+| `config/` | `index.ts` (config central), `inputs.ts` (límites de username/password). |
+| `db.ts` | Wrapper sobre `createDb` de `@soker90/finper-db`. Vive en `src/db.ts` (fuera de `config/`). |
 | `controllers/` | 18 archivos. Patrón Promise chain con bluebird. |
 | `helpers/` | Funciones puras: `extract-user.ts`, `hash-password.ts`, `sign-token.ts`. |
 | `i18n/` | `ErrorMessages.ts` con `ERROR_MESSAGE` (solo es-ES). |
@@ -136,7 +137,7 @@ Invocación en el Promise chain:
 - `test/utils/*.test.ts` — funciones puras.
 
 Helpers compartidos:
-- `test/test-db.js` — `connect/close/cleanAll` sobre `global.__MONGO_URI__`.
+- `test/helpers/db.ts` — crea una base de datos SQLite en memoria (`createDb(':memory:')`) con todas las migraciones aplicadas.
 - `test/insert-data-to-model.ts` — factories (`insertAccount`, `insertLoan`) con faker.
 - `test/request-login.ts` — credenciales + JWT vía `POST /auth/login`.
 
