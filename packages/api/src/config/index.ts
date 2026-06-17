@@ -1,5 +1,13 @@
 export default {
   port: 3008,
+  cors: {
+    allowedOrigins: [
+      /^https?:\/\/localhost(:\d+)?$/,
+      /^https?:\/\/127\.0\.0\.1(:\d+)?$/,
+      /^https?:\/\/192\.168\.1\.\d{1,3}(:\d+)?$/
+    ]
+  },
+  allowRegistration: process.env.ALLOW_REGISTRATION === 'true',
   database: {
     file: process.env.DATABASE_FILE || './finper-dev.db'
   },

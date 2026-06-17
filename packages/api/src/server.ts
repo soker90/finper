@@ -3,6 +3,7 @@ import express from 'express'
 
 import cors from 'cors'
 import compression from 'compression'
+import helmet from 'helmet'
 
 import config from './config'
 import { db as sqliteDb } from './db'
@@ -65,10 +66,27 @@ class Server {
 
   public preMiddlewareConfig (): void {
     this.app.set('port', config.port)
+    this.app.use(helmet())
     this.app.use(express.json())
     this.app.use(express.urlencoded({ extended: false }))
     this.app.use(compression())
-    this.app.use(cors())
+
+    const extraOrigins = process.env.CORS_EXTRA_ORIGINS
+      ? process.env.CORS_EXTRA_ORIGINS.split(',').map((o) => o.trim())
+      : []
+
+    this.app.use(
+      cors({
+        origin: (origin, callback) => {
+          if (!origin) return callback(null, true)
+          if (extraOrigins.includes(origin)) return callback(null, true)
+          const isAllowed = config.cors.allowedOrigins.some((pattern: RegExp) => pattern.test(origin))
+          if (isAllowed) return callback(null, true)
+          callback(new Error('Not allowed by CORS'))
+        },
+        credentials: true
+      })
+    )
   }
 
   public postMiddlewareConfig (): void {
