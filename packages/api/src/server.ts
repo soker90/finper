@@ -39,7 +39,9 @@ class Server {
   constructor () {
     this.app = express()
     this.preMiddlewareConfig()
-    this.runMigrations()
+    if (process.env.NODE_ENV !== 'test') {
+      this.runMigrations()
+    }
     this.routes()
     this.postMiddlewareConfig()
   }
