@@ -9,6 +9,7 @@ import config from './config'
 import { db as sqliteDb } from './db'
 import { migrate } from 'drizzle-orm/better-sqlite3/migrator'
 import path from 'node:path'
+import registerLogger from './middlewares/logger'
 
 import { MonitRoutes } from './modules/monit/monit.routes'
 import handleError from './middlewares/handle-error'
@@ -37,9 +38,9 @@ class Server {
   constructor () {
     this.app = express()
     this.preMiddlewareConfig()
+    this.runMigrations()
     this.routes()
     this.postMiddlewareConfig()
-    this.sqlite()
   }
 
   public routes (): void {
@@ -66,6 +67,7 @@ class Server {
 
   public preMiddlewareConfig (): void {
     this.app.set('port', config.port)
+    registerLogger(this.app)
     this.app.use(helmet())
     this.app.use(express.json())
     this.app.use(express.urlencoded({ extended: false }))
@@ -93,11 +95,16 @@ class Server {
     this.app.use(handleError)
   }
 
-  private sqlite () {
-    migrate(sqliteDb as any, {
-      migrationsFolder: path.resolve(__dirname, '../../db/drizzle')
-    })
-    console.log('[finper-api] Drizzle SQLite migrations applied')
+  private runMigrations () {
+    try {
+      migrate(sqliteDb, {
+        migrationsFolder: path.resolve(__dirname, '../../db/drizzle')
+      })
+      console.log('[finper-api] Drizzle SQLite migrations applied')
+    } catch (error) {
+      console.error('[finper-api] Failed to apply migrations', error)
+      process.exit(1)
+    }
   }
 
   /* istanbul ignore next — start() is only called outside of test env */

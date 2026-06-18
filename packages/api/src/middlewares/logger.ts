@@ -1,7 +1,7 @@
 import LokiTransport from 'winston-loki'
 import morgan, { StreamOptions } from 'morgan'
 import TransportStream from 'winston-transport'
-import { NextFunction, Request, Response, Application } from 'express'
+import { Application } from 'express'
 import { createLogger, format, Logger, transports } from 'winston'
 
 import config from '../config'
@@ -38,24 +38,19 @@ export default (app: Application): void => {
     transports: transportList
   })
 
+  /* eslint-disable no-useless-call */
+  console.log = (args) => logger.info.call(logger, args)
+  console.info = (args) => logger.info.call(logger, args)
+  console.warn = (args) => logger.warn.call(logger, args)
+  console.error = (args) => logger.error.call(logger, args)
+  console.debug = (args) => logger.debug.call(logger, args)
+  /* eslint-enable */
+
   const morganOptions: StreamOptions = {
     write: function (message: string) {
       logger.info(message)
     }
   }
 
-  function initLogger (req: Request, res: Response, next: NextFunction) {
-    /* eslint-disable no-useless-call */
-    console.log = (args) => logger.info.call(logger, args)
-    console.info = (args) => logger.info.call(logger, args)
-    console.warn = (args) => logger.warn.call(logger, args)
-    console.error = (args) => logger.error.call(logger, args)
-    console.debug = (args) => logger.debug.call(logger, args)
-    /* eslint-enable */
-
-    next()
-  }
-
   app.use(morgan('tiny', { stream: morganOptions }))
-  app.use(initLogger)
 }
