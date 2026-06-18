@@ -9,6 +9,7 @@ import config from './config'
 import { db as sqliteDb } from './db'
 import { migrate } from 'drizzle-orm/better-sqlite3/migrator'
 import path from 'node:path'
+import util from 'node:util'
 import registerLogger from './middlewares/logger'
 
 import { MonitRoutes } from './modules/monit/monit.routes'
@@ -102,7 +103,7 @@ class Server {
       })
       console.log('[finper-api] Drizzle SQLite migrations applied')
     } catch (error) {
-      console.error('[finper-api] Failed to apply migrations', error)
+      process.stderr.write(`[finper-api] Failed to apply migrations: ${util.format(error)}\n`)
       process.exit(1)
     }
   }

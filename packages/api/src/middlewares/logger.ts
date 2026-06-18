@@ -1,3 +1,4 @@
+import util from 'node:util'
 import LokiTransport from 'winston-loki'
 import morgan, { StreamOptions } from 'morgan'
 import TransportStream from 'winston-transport'
@@ -38,13 +39,11 @@ export default (app: Application): void => {
     transports: transportList
   })
 
-  /* eslint-disable no-useless-call */
-  console.log = (args) => logger.info.call(logger, args)
-  console.info = (args) => logger.info.call(logger, args)
-  console.warn = (args) => logger.warn.call(logger, args)
-  console.error = (args) => logger.error.call(logger, args)
-  console.debug = (args) => logger.debug.call(logger, args)
-  /* eslint-enable */
+  console.log = (...args: unknown[]) => logger.info(util.format(...args))
+  console.info = (...args: unknown[]) => logger.info(util.format(...args))
+  console.warn = (...args: unknown[]) => logger.warn(util.format(...args))
+  console.error = (...args: unknown[]) => logger.error(util.format(...args))
+  console.debug = (...args: unknown[]) => logger.debug(util.format(...args))
 
   const morganOptions: StreamOptions = {
     write: function (message: string) {

@@ -88,7 +88,7 @@ describe('Auth / users controller', () => {
       })
 
       afterAll(() => {
-        db.delete(schema.users).run()
+        (db as any).$client?.pragma('foreign_keys = OFF'); db.delete(schema.users).run(); (db as any).$client?.pragma('foreign_keys = ON')
       })
 
       test('it should response an error of 409', () => {
@@ -100,7 +100,7 @@ describe('Auth / users controller', () => {
       let response: supertest.Response
 
       beforeAll(async () => {
-        db.delete(schema.users).run()
+        (db as any).$client?.pragma('foreign_keys = OFF'); db.delete(schema.users).run(); (db as any).$client?.pragma('foreign_keys = ON')
         await insertCredentials()
 
         response = await supertest(server.app)
@@ -112,7 +112,7 @@ describe('Auth / users controller', () => {
       })
 
       afterAll(() => {
-        db.delete(schema.users).run()
+        (db as any).$client?.pragma('foreign_keys = OFF'); db.delete(schema.users).run(); (db as any).$client?.pragma('foreign_keys = ON')
       })
 
       test('it should response an status code of 200', () => {
@@ -166,7 +166,7 @@ describe('Auth / users controller', () => {
       })
 
       afterAll(() => {
-        db.delete(schema.users).run()
+        (db as any).$client?.pragma('foreign_keys = OFF'); db.delete(schema.users).run(); (db as any).$client?.pragma('foreign_keys = ON')
       })
 
       test('it should response a status code of 401', () => {
@@ -186,7 +186,7 @@ describe('Auth / users controller', () => {
       })
 
       afterAll(() => {
-        db.delete(schema.users).run()
+        (db as any).$client?.pragma('foreign_keys = OFF'); db.delete(schema.users).run(); (db as any).$client?.pragma('foreign_keys = ON')
       })
 
       test('it should response an error code of 401', () => {
@@ -210,7 +210,7 @@ describe('Auth / users controller', () => {
       })
 
       afterAll(() => {
-        db.delete(schema.users).run()
+        (db as any).$client?.pragma('foreign_keys = OFF'); db.delete(schema.users).run(); (db as any).$client?.pragma('foreign_keys = ON')
       })
 
       test('it should response a status code of 200', () => {
@@ -262,7 +262,7 @@ describe('Auth / users controller', () => {
       })
 
       afterAll(() => {
-        db.delete(schema.users).run()
+        (db as any).$client?.pragma('foreign_keys = OFF'); db.delete(schema.users).run(); (db as any).$client?.pragma('foreign_keys = ON')
       })
 
       test('it should response a status code of 204', async () => {
