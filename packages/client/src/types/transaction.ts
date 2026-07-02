@@ -21,10 +21,10 @@ export interface Transaction {
   tags?: string[],
 }
 
-// Filtros aceptados por GET /transactions (ver TransactionFilters en
-// packages/api/src/modules/transactions/transactions.repository.ts). Los
-// valores son siempre el _id de la entidad seleccionada (o '' si no hay
-// filtro activo), nunca el objeto completo.
+// Filters accepted by GET /transactions (see TransactionFilters in
+// packages/api/src/modules/transactions/transactions.repository.ts). The
+// values are always the _id of the selected entity (or '' when there is no
+// active filter), never the full object.
 export interface TransactionFilters {
   account?: string,
   category?: string,

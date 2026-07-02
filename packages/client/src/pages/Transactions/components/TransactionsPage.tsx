@@ -1,9 +1,14 @@
-import { useTransactions } from '../hooks'
+import { useTransactions } from '../hooks/useTransactions'
 import TransactionItem from './TransactionItem'
 import { LoadingList } from 'components'
 import { TransactionFilters } from 'types'
 
-export const TransactionsPage = ({ index, filters }: { index: number, filters: TransactionFilters }) => {
+interface TransactionsPageProps {
+  index: number,
+  filters: TransactionFilters,
+}
+
+export const TransactionsPage = ({ index, filters }: TransactionsPageProps) => {
   const { transactions, isLoading, query } = useTransactions({ index, filters })
 
   if (isLoading) {
