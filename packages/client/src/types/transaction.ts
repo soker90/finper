@@ -20,3 +20,14 @@ export interface Transaction {
   },
   tags?: string[],
 }
+
+// Filters accepted by GET /transactions (see TransactionFilters in
+// packages/api/src/modules/transactions/transactions.repository.ts). The
+// values are always the _id of the selected entity (or '' when there is no
+// active filter), never the full object.
+export interface TransactionFilters {
+  account?: string,
+  category?: string,
+  type?: string,
+  store?: string,
+}

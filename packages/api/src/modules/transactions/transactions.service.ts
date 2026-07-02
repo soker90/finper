@@ -5,6 +5,7 @@ import { schema, generateId } from '@soker90/finper-db'
 import { getTransactionAmount, sanitizeTags } from '../../utils'
 import { ERROR_MESSAGE } from '../../i18n'
 import { serializeTransaction, serializeTransactionPopulated } from './transactions.serializer'
+import type { TransactionFilters } from './transactions.repository'
 
 const { transactions, accounts } = schema
 
@@ -119,9 +120,7 @@ export class TransactionsService {
     this.hooks.onTransactionDeleted?.(transaction.subscriptionId ?? null)
   }
 
-  public getTransactions (params: {
-    user: string, account?: string, category?: string, type?: string, page?: number, limit?: number
-  }): any[] {
+  public getTransactions (params: TransactionFilters): any[] {
     return this.repository.findMany(params).map(serializeTransactionPopulated)
   }
 }

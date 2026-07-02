@@ -9,6 +9,7 @@ export interface TransactionFilters {
   account?: string
   category?: string
   type?: string
+  store?: string
   page?: number
   limit?: number
 }
@@ -26,11 +27,12 @@ export const createTransactionsRepository = (db: DB) => ({
       .where(and(eq(transactions.id, id), eq(transactions.user, user)))
       .get(),
 
-  findMany: ({ user, account, category, type, page = 0, limit = 50 }: TransactionFilters): TransactionRow[] => {
+  findMany: ({ user, account, category, type, store, page = 0, limit = 50 }: TransactionFilters): TransactionRow[] => {
     const conditions: SQL[] = [eq(transactions.user, user)]
     if (account) conditions.push(eq(transactions.accountId, account))
     if (category) conditions.push(eq(transactions.categoryId, category))
     if (type) conditions.push(eq(transactions.type, type))
+    if (store) conditions.push(eq(transactions.storeId, store))
 
     return db.select({
       id: transactions.id,

@@ -1,31 +1,36 @@
 import { useReducer } from 'react'
+import { TransactionFilters } from 'types'
 
-interface FilterAction {
-  type: 'set' | 'reset';
-  key?: string;
-  value?: string
-}
+type FilterKey = keyof TransactionFilters
+
+type FilterAction =
+  | { type: 'set', key: FilterKey, value: string }
+  | { type: 'reset' }
 
 export interface FilterParams {
-  setFilter: (key: string, value: string) => void,
+  setFilter: (key: FilterKey, value: string) => void,
   resetFilter: () => void,
-  filters: any,
+  filters: TransactionFilters,
+}
+
+const emptyFilters: TransactionFilters = {
+  category: '',
+  type: '',
+  account: '',
+  store: ''
+}
+
+const filtersReducer = (state: TransactionFilters, action: FilterAction): TransactionFilters => {
+  if (action.type === 'set') {
+    return { ...state, [action.key]: action.value }
+  }
+  return emptyFilters
 }
 
 export const useFilters = (): FilterParams => {
-  const [filters, setFilters] = useReducer(
-    (state: any, { type, key, value }: FilterAction) => ({
-      set: { ...state, [key as string]: value },
-      reset: {
-        category: '',
-        type: '',
-        account: '',
-        store: ''
-      }
-    }[type]),
-    {})
+  const [filters, setFilters] = useReducer(filtersReducer, emptyFilters)
 
-  const setFilter = (key: string, value: string) => setFilters({ type: 'set', key, value })
+  const setFilter = (key: FilterKey, value: string) => setFilters({ type: 'set', key, value })
   const resetFilter = () => setFilters({ type: 'reset' })
 
   return { setFilter, resetFilter, filters }

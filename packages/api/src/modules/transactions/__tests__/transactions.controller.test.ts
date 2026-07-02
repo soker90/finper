@@ -179,6 +179,69 @@ describe('Transactions Controller', () => {
       expect(response.body).toHaveLength(1)
       expect(response.body[0].type).toBe(TRANSACTION.Income)
     })
+
+    test('filters by store when the store query param is provided', async () => {
+      await supertest(server.app).post(path).set('Authorization', `Bearer ${token}`).send(validBody({ store: 'Store A' }))
+      await supertest(server.app).post(path).set('Authorization', `Bearer ${token}`).send(validBody({ store: 'Store B' }))
+
+      const dbStores = sqliteDb.select().from(stores).where(eq(stores.user, username)).all()
+      const storeA = dbStores.find(s => s.name === 'Store A')
+      const storeB = dbStores.find(s => s.name === 'Store B')
+
+      expect(storeA).toBeDefined()
+      expect(storeB).toBeDefined()
+
+      const response = await supertest(server.app).get(`${path}?store=${storeA!.id}`).auth(token, { type: 'bearer' }).expect(200)
+      expect(response.body).toHaveLength(1)
+      expect(response.body[0].store._id).toBe(storeA!.id)
+    })
+
+    test('filters by account when the account query param is provided', async () => {
+      const otherAccount = insertAccount(500)
+      await supertest(server.app).post(path).set('Authorization', `Bearer ${token}`).send(validBody({ account: accountId }))
+      await supertest(server.app).post(path).set('Authorization', `Bearer ${token}`).send(validBody({ account: otherAccount }))
+
+      const response = await supertest(server.app).get(`${path}?account=${otherAccount}`).auth(token, { type: 'bearer' }).expect(200)
+      expect(response.body).toHaveLength(1)
+      expect(response.body[0].account._id).toBe(otherAccount)
+    })
+
+    test('filters by category when the category query param is provided', async () => {
+      const otherCategoryId = generateId()
+      sqliteDb.insert(categories).values({ id: otherCategoryId, name: 'Transport', type: 'expense', user: username }).run()
+
+      await supertest(server.app).post(path).set('Authorization', `Bearer ${token}`).send(validBody({ category: categoryId }))
+      await supertest(server.app).post(path).set('Authorization', `Bearer ${token}`).send(validBody({ category: otherCategoryId }))
+
+      const response = await supertest(server.app).get(`${path}?category=${otherCategoryId}`).auth(token, { type: 'bearer' }).expect(200)
+      expect(response.body).toHaveLength(1)
+      expect(response.body[0].category._id).toBe(otherCategoryId)
+
+      // No se borra otherCategoryId aquí: la transacción que la referencia (FK)
+      // se limpia en el afterEach de este describe, y la propia categoría se
+      // limpia en el afterAll (que borra transactions antes que categories).
+    })
+
+    test('combines store and type filters with AND semantics', async () => {
+      await supertest(server.app).post(path).set('Authorization', `Bearer ${token}`)
+        .send(validBody({ store: 'Combo Store', type: TRANSACTION.Expense }))
+      await supertest(server.app).post(path).set('Authorization', `Bearer ${token}`)
+        .send(validBody({ store: 'Combo Store', type: TRANSACTION.Income }))
+      await supertest(server.app).post(path).set('Authorization', `Bearer ${token}`)
+        .send(validBody({ store: 'Other Store', type: TRANSACTION.Expense }))
+
+      const dbStores = sqliteDb.select().from(stores).where(eq(stores.user, username)).all()
+      const comboStore = dbStores.find(s => s.name === 'Combo Store')
+      expect(comboStore).toBeDefined()
+
+      const response = await supertest(server.app)
+        .get(`${path}?store=${comboStore!.id}&type=${TRANSACTION.Expense}`)
+        .auth(token, { type: 'bearer' }).expect(200)
+
+      expect(response.body).toHaveLength(1)
+      expect(response.body[0].store._id).toBe(comboStore!.id)
+      expect(response.body[0].type).toBe(TRANSACTION.Expense)
+    })
   })
 
   describe('PUT /:id', () => {
