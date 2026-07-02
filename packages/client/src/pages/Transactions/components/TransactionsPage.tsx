@@ -1,8 +1,9 @@
 import { useTransactions } from '../hooks'
 import TransactionItem from './TransactionItem'
 import { LoadingList } from 'components'
+import { TransactionFilters } from 'types'
 
-export const TransactionsPage = ({ index, filters }: { index: number, filters: any }) => {
+export const TransactionsPage = ({ index, filters }: { index: number, filters: TransactionFilters }) => {
   const { transactions, isLoading, query } = useTransactions({ index, filters })
 
   if (isLoading) {

@@ -120,7 +120,7 @@ export class TransactionsService {
   }
 
   public getTransactions (params: {
-    user: string, account?: string, category?: string, type?: string, page?: number, limit?: number
+    user: string, account?: string, category?: string, type?: string, store?: string, page?: number, limit?: number
   }): any[] {
     return this.repository.findMany(params).map(serializeTransactionPopulated)
   }

@@ -1,11 +1,11 @@
 import useSWR from 'swr'
 import { TRANSACTIONS } from 'constants/api-paths'
-import { Transaction } from 'types'
+import { Transaction, TransactionFilters } from 'types'
 import { objectToParams } from 'utils/objectToParams'
 
 interface UseTransactions {
   index: number,
-  filters: any,
+  filters: TransactionFilters,
 }
 
 export const useTransactions = ({
