@@ -33,6 +33,7 @@ import { statsRoutes } from './modules/stats/stats.routes'
 
 class Server {
   public app: express.Application
+  public httpServer: import('node:http').Server | null = null
 
   constructor () {
     this.app = express()
@@ -102,7 +103,7 @@ class Server {
 
   /* istanbul ignore next — start() is only called outside of test env */
   public start (): void {
-    this.app.listen(this.app.get('port'), () => {
+    this.httpServer = this.app.listen(this.app.get('port'), () => {
       console.log(`API is running at http://localhost:${this.app.get('port')}`)
     })
   }
@@ -115,8 +116,7 @@ if (process.env.NODE_ENV !== 'test') {
   server.start()
 }
 
-const gracefulShutdown = () => {
-  console.log('\n[finper-api] Received shutdown signal, starting graceful shutdown...')
+const closeDatabase = () => {
   try {
     const sqliteClient = (sqliteDb as any).$client
     if (sqliteClient) {
@@ -129,6 +129,30 @@ const gracefulShutdown = () => {
     console.error('[finper-api] Error during database graceful shutdown checkpoint:', error)
   }
   process.exit(0)
+}
+
+const gracefulShutdown = () => {
+  console.log('\n[finper-api] Received shutdown signal, starting graceful shutdown...')
+
+  // Force exit after 10 seconds if graceful shutdown hangs (e.g. keep-alive connections)
+  setTimeout(() => {
+    console.error('[finper-api] Graceful shutdown timed out, forcing exit.')
+    process.exit(1)
+  }, 10000).unref()
+
+  if (server.httpServer) {
+    console.log('[finper-api] Closing HTTP server...')
+    server.httpServer.close((httpCloseError) => {
+      if (httpCloseError) {
+        console.error('[finper-api] Error closing HTTP server:', httpCloseError)
+      } else {
+        console.log('[finper-api] HTTP server closed.')
+      }
+      closeDatabase()
+    })
+  } else {
+    closeDatabase()
+  }
 }
 
 process.on('SIGTERM', gracefulShutdown)
