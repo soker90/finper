@@ -114,3 +114,22 @@ export const server = new Server()
 if (process.env.NODE_ENV !== 'test') {
   server.start()
 }
+
+const gracefulShutdown = () => {
+  console.log('\n[finper-api] Received shutdown signal, starting graceful shutdown...')
+  try {
+    const sqliteClient = (sqliteDb as any).$client
+    if (sqliteClient) {
+      console.log('[finper-api] Consolidating WAL journal to database file...')
+      sqliteClient.pragma('wal_checkpoint(TRUNCATE)')
+      sqliteClient.close()
+      console.log('[finper-api] SQLite database closed and WAL checkpoint completed successfully.')
+    }
+  } catch (error) {
+    console.error('[finper-api] Error during database graceful shutdown checkpoint:', error)
+  }
+  process.exit(0)
+}
+
+process.on('SIGTERM', gracefulShutdown)
+process.on('SIGINT', gracefulShutdown)
