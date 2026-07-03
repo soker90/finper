@@ -107,6 +107,42 @@ class Server {
       console.log(`API is running at http://localhost:${this.app.get('port')}`)
     })
   }
+
+  /* istanbul ignore next — only invoked on SIGTERM/SIGINT */
+  public shutdown (): void {
+    console.log('\n[finper-api] Received shutdown signal, starting graceful shutdown...')
+
+    setTimeout(() => {
+      console.error('[finper-api] Graceful shutdown timed out, forcing exit.')
+      process.exit(1)
+    }, 10_000).unref()
+
+    const closeDatabaseAndExit = () => {
+      try {
+        const sqliteClient = (sqliteDb as any).$client
+        if (sqliteClient) {
+          console.log('[finper-api] Consolidating WAL journal to database file...')
+          sqliteClient.pragma('wal_checkpoint(TRUNCATE)')
+          sqliteClient.close()
+          console.log('[finper-api] SQLite database closed successfully.')
+        }
+      } catch (error) {
+        console.error('[finper-api] Error during database checkpoint:', error)
+      }
+      process.exit(0)
+    }
+
+    if (this.httpServer) {
+      console.log('[finper-api] Closing HTTP server...')
+      this.httpServer.close((closeError) => {
+        if (closeError) console.error('[finper-api] Error closing HTTP server:', closeError)
+        else console.log('[finper-api] HTTP server closed.')
+        closeDatabaseAndExit()
+      })
+    } else {
+      closeDatabaseAndExit()
+    }
+  }
 }
 
 export const server = new Server()
@@ -116,44 +152,5 @@ if (process.env.NODE_ENV !== 'test') {
   server.start()
 }
 
-const closeDatabase = () => {
-  try {
-    const sqliteClient = (sqliteDb as any).$client
-    if (sqliteClient) {
-      console.log('[finper-api] Consolidating WAL journal to database file...')
-      sqliteClient.pragma('wal_checkpoint(TRUNCATE)')
-      sqliteClient.close()
-      console.log('[finper-api] SQLite database closed and WAL checkpoint completed successfully.')
-    }
-  } catch (error) {
-    console.error('[finper-api] Error during database graceful shutdown checkpoint:', error)
-  }
-  process.exit(0)
-}
-
-const gracefulShutdown = () => {
-  console.log('\n[finper-api] Received shutdown signal, starting graceful shutdown...')
-
-  // Force exit after 10 seconds if graceful shutdown hangs (e.g. keep-alive connections)
-  setTimeout(() => {
-    console.error('[finper-api] Graceful shutdown timed out, forcing exit.')
-    process.exit(1)
-  }, 10000).unref()
-
-  if (server.httpServer) {
-    console.log('[finper-api] Closing HTTP server...')
-    server.httpServer.close((httpCloseError) => {
-      if (httpCloseError) {
-        console.error('[finper-api] Error closing HTTP server:', httpCloseError)
-      } else {
-        console.log('[finper-api] HTTP server closed.')
-      }
-      closeDatabase()
-    })
-  } else {
-    closeDatabase()
-  }
-}
-
-process.on('SIGTERM', gracefulShutdown)
-process.on('SIGINT', gracefulShutdown)
+process.on('SIGTERM', server.shutdown.bind(server))
+process.on('SIGINT', server.shutdown.bind(server))
