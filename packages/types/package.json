@@ -25,6 +25,6 @@
     "globals": "17.6.0",
     "neostandard": "0.13.0",
     "typescript": "5.9.3",
-    "typescript-eslint": "8.59.3"
+    "typescript-eslint": "8.62.0"
   }
 }
