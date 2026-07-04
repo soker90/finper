@@ -66,6 +66,7 @@
     "@faker-js/faker": "10.4.0",
     "@tsconfig/node22": "22.0.5",
     "@types/bcrypt": "6.0.0",
+    "@types/better-sqlite3": "7.6.12",
     "@types/compression": "1.8.1",
     "@types/cors": "2.8.19",
     "@types/express": "5.0.6",

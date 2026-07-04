@@ -18,6 +18,9 @@ services:
     build:
       context: .
       dockerfile: ./packages/api/Dockerfile
+    # Da margen al graceful shutdown (checkpoint del WAL de SQLite, ver
+    # server.ts SHUTDOWN_TIMEOUT_MS) antes de que Docker mande SIGKILL.
+    stop_grace_period: 15s
     volumes:
       - finperdb:/home/node/app/data
     ports:
