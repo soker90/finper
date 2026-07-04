@@ -11,14 +11,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- **api**: Implement graceful shutdown to checkpoint SQLite WAL (Write-Ahead Log) journal.
-  The server now captures termination signals (`SIGTERM`, `SIGINT`) to drain active HTTP connections
-  and perform a database checkpoint/close before exiting, preventing journal corruption.
-  For fatal errors (`uncaughtException`, `unhandledRejection`), the HTTP drain is skipped to perform
-  an immediate database checkpoint. ([#831](https://github.com/soker90/finper/pull/831))
+- **api**: Improve application shutdown process to prevent database corruption. The server now
+  ensures all pending data is safely saved to the database before completely closing down. ([#831](https://github.com/soker90/finper/pull/831))
 
-- **docker**: Add `stop_grace_period: 15s` to `docker-compose.yml` and `docker-compose.prod.yml`
-  to allow the container sufficient time to perform the SQLite checkpoint. ([#831](https://github.com/soker90/finper/pull/831))
+- **docker**: Configure a 15-second shutdown grace period for containers to allow the database enough
+  time to finish saving all pending data safely. ([#831](https://github.com/soker90/finper/pull/831))
 
 ---
 
