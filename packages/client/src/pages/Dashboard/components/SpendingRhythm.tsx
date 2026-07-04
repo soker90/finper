@@ -115,8 +115,8 @@ const SpendingRhythm = ({ stats, chartHeight }: SpendingRhythmProps) => {
             />
             <KpiCard
               title='Colchón financiero'
-              value={`${stats.cashRunwayMonths} meses`}
-              subtitle='Al ritmo de gasto actual'
+              value={format.runwayTime(stats.cashRunwayMonths)}
+              subtitle='Según últimos 3 meses completos'
               icon={<ThunderboltOutlined />}
               color={stats.cashRunwayMonths >= 6 ? 'success' : stats.cashRunwayMonths >= 3 ? 'warning' : 'error'}
             />
