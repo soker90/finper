@@ -7,6 +7,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.0.3] - 2026-07-04
+
+### Fixed
+
+- **api**: Implement graceful shutdown to checkpoint SQLite WAL (Write-Ahead Log) journal.
+  The server now captures termination signals (`SIGTERM`, `SIGINT`) to drain active HTTP connections
+  and perform a database checkpoint/close before exiting, preventing journal corruption.
+  For fatal errors (`uncaughtException`, `unhandledRejection`), the HTTP drain is skipped to perform
+  an immediate database checkpoint. ([#831](https://github.com/soker90/finper/pull/831))
+
+- **docker**: Add `stop_grace_period: 15s` to `docker-compose.yml` and `docker-compose.prod.yml`
+  to allow the container sufficient time to perform the SQLite checkpoint. ([#831](https://github.com/soker90/finper/pull/831))
+
+---
+
+## [2.0.2] - 2026-07-02
+
+### Fixed
+
+- **client**: Fix store filter in transactions page. Initialize search filter state with empty default
+  filters instead of an empty object to avoid undefined parameters on initial render. ([#830](https://github.com/soker90/finper/pull/830))
+
+---
+
 ## [2.0.1] - 2026-06-12
 
 ### Fixed
