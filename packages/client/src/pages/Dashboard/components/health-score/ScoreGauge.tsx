@@ -28,7 +28,7 @@ const SCORE_ITEMS = [
   {
     label: 'Colchón',
     key: 'cashRunway',
-    tooltip: 'Meses de gastos cubiertos con el saldo disponible actual. Representa el 20% del score total.'
+    tooltip: 'Meses de gastos cubiertos con el saldo disponible, según la media de los últimos 3 meses completos. Representa el 20% del score total.'
   },
   {
     label: 'Pensión',
