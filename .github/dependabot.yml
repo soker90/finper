@@ -14,7 +14,7 @@ updates:
       - "dependencies"
 
   - package-ecosystem: "npm"
-    directory: "/packages/api"
+    directory: "/"
     schedule:
       interval: "weekly"
     cooldown:
@@ -22,41 +22,4 @@ updates:
       semver-minor-days: 7
       semver-major-days: 7
     labels:
-      - "api"
-      - "dependencies"
-
-  - package-ecosystem: "npm"
-    directory: "/packages/client"
-    schedule:
-      interval: "weekly"
-    cooldown:
-      semver-patch-days: 1
-      semver-minor-days: 7
-      semver-major-days: 7
-    labels:
-      - "ui"
-      - "dependencies"
-
-  - package-ecosystem: "npm"
-    directory: "/packages/models"
-    schedule:
-      interval: "weekly"
-    cooldown:
-      semver-patch-days: 1
-      semver-minor-days: 7
-      semver-major-days: 7
-    labels:
-      - "models"
-      - "dependencies"
-
-  - package-ecosystem: "npm"
-    directory: "/packages/bot"
-    schedule:
-      interval: "weekly"
-    cooldown:
-      semver-patch-days: 1
-      semver-minor-days: 7
-      semver-major-days: 7
-    labels:
-      - "bot"
       - "dependencies"
