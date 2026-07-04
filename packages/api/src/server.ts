@@ -38,6 +38,14 @@ interface WalCheckpointResult {
   checkpointed: number
 }
 
+interface ShutdownOptions {
+  reason: string
+  // Skips waiting for the HTTP server to drain in-flight requests. Must be
+  // used for uncaughtException/unhandledRejection, where the process state
+  // may be corrupted and should not keep serving traffic.
+  immediate?: boolean
+}
+
 const SHUTDOWN_TIMEOUT_MS = 8_000
 
 /**
@@ -162,7 +170,7 @@ class Server {
   }
 
   /* istanbul ignore next — only invoked on SIGTERM/SIGINT/uncaught errors */
-  public shutdown (reason: string): void {
+  public shutdown ({ reason, immediate = false }: ShutdownOptions): void {
     if (this.isShuttingDown) {
       console.log('[finper-api] Shutdown already in progress, ignoring duplicate trigger.')
       return
@@ -180,19 +188,26 @@ class Server {
       process.exit(checkpointAndCloseDatabase(sqliteDb.$client))
     }
 
-    if (this.httpServer) {
-      console.log('[finper-api] Closing HTTP server...')
-      // Drop idle keep-alive sockets immediately; in-flight requests are
-      // still allowed to finish before the close() callback below fires.
-      this.httpServer.closeIdleConnections()
-      this.httpServer.close((closeError) => {
-        if (closeError) console.error('[finper-api] Error closing HTTP server:', closeError)
-        else console.log('[finper-api] HTTP server closed.')
-        closeDatabaseAndExit()
-      })
-    } else {
+    // Node.js explicitly warns against resuming normal operation after
+    // 'uncaughtException'/'unhandledRejection': the process state may be
+    // corrupted. In that case we skip waiting for in-flight HTTP requests to
+    // finish (which would keep serving traffic on a potentially broken
+    // state) and go straight to the SQLite checkpoint before exiting.
+    if (immediate || !this.httpServer) {
+      if (immediate) console.log('[finper-api] Fatal error detected, skipping graceful HTTP close.')
       closeDatabaseAndExit()
+      return
     }
+
+    console.log('[finper-api] Closing HTTP server...')
+    // Drop idle keep-alive sockets immediately; in-flight requests are
+    // still allowed to finish before the close() callback below fires.
+    this.httpServer.closeIdleConnections()
+    this.httpServer.close((closeError) => {
+      if (closeError) console.error('[finper-api] Error closing HTTP server:', closeError)
+      else console.log('[finper-api] HTTP server closed.')
+      closeDatabaseAndExit()
+    })
   }
 }
 
@@ -202,16 +217,16 @@ export const server = new Server()
 if (process.env.NODE_ENV !== 'test') {
   server.start()
 
-  process.on('SIGTERM', () => server.shutdown('SIGTERM'))
-  process.on('SIGINT', () => server.shutdown('SIGINT'))
+  process.on('SIGTERM', () => server.shutdown({ reason: 'SIGTERM' }))
+  process.on('SIGINT', () => server.shutdown({ reason: 'SIGINT' }))
 
   process.on('uncaughtException', (error) => {
     console.error('[finper-api] Uncaught exception:', error)
-    server.shutdown('uncaughtException')
+    server.shutdown({ reason: 'uncaughtException', immediate: true })
   })
 
   process.on('unhandledRejection', (reason) => {
     console.error('[finper-api] Unhandled promise rejection:', reason)
-    server.shutdown('unhandledRejection')
+    server.shutdown({ reason: 'unhandledRejection', immediate: true })
   })
 }
