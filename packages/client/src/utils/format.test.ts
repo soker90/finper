@@ -1,5 +1,5 @@
 import { test, expect, describe } from 'vitest'
-import { dateShort, euro, monthToNumber } from 'utils/format'
+import { dateShort, euro, monthToNumber, runwayTime } from 'utils/format'
 
 test('date returned is valid', () => {
   const sDate = dateShort(new Date(2022, 0, 1).getTime())
@@ -9,6 +9,35 @@ test('date returned is valid', () => {
 test('returned a valid formatted number', () => {
   const sEuro = euro(12345.678)
   expect(sEuro).eq('12.345,68 €')
+})
+
+describe('runwayTime', () => {
+  test('handles 0 or negative values', () => {
+    expect(runwayTime(0)).eq('0 días')
+    expect(runwayTime(-1.5)).eq('0 días')
+  })
+
+  test('formats days only', () => {
+    expect(runwayTime(0.1)).eq('3 días')
+    expect(runwayTime(0.5)).eq('15 días')
+  })
+
+  test('formats months only', () => {
+    expect(runwayTime(3)).eq('3 meses')
+    expect(runwayTime(1)).eq('1 mes')
+  })
+
+  test('formats years only', () => {
+    expect(runwayTime(12)).eq('1 año')
+    expect(runwayTime(24)).eq('2 años')
+  })
+
+  test('formats combination of years, months, and days', () => {
+    expect(runwayTime(13.5)).eq('1 año, 1 mes y 15 días')
+    expect(runwayTime(3.5)).eq('3 meses y 15 días')
+    expect(runwayTime(12.1)).eq('1 año y 3 días')
+    expect(runwayTime(24.033)).eq('2 años y 1 día')
+  })
 })
 
 describe('monthToNumber', () => {

@@ -100,3 +100,29 @@ export const monthToNumber = (month?: number | string): string => {
 
   return capitalize(monthString)
 }
+
+const DAYS_PER_MONTH = 30
+const MONTHS_PER_YEAR = 12
+const DAYS_PER_YEAR = DAYS_PER_MONTH * MONTHS_PER_YEAR
+
+const runwayListFormatter = new Intl.ListFormat('es-ES', { type: 'conjunction' })
+
+const pluralize = (count: number, singular: string, plural: string): string =>
+  `${count} ${count === 1 ? singular : plural}`
+
+export const runwayTime = (monthsNum: number): string => {
+  if (monthsNum <= 0) return '0 días'
+
+  const totalDays = Math.round(monthsNum * DAYS_PER_MONTH)
+  const years = Math.floor(totalDays / DAYS_PER_YEAR)
+  const remainingDays = totalDays % DAYS_PER_YEAR
+  const months = Math.floor(remainingDays / DAYS_PER_MONTH)
+  const days = remainingDays % DAYS_PER_MONTH
+
+  const parts: string[] = []
+  if (years > 0) parts.push(pluralize(years, 'año', 'años'))
+  if (months > 0) parts.push(pluralize(months, 'mes', 'meses'))
+  if (days > 0) parts.push(pluralize(days, 'día', 'días'))
+
+  return parts.length === 0 ? '0 días' : runwayListFormatter.format(parts)
+}
