@@ -1,5 +1,5 @@
 import useSWR from 'swr'
-import { Yield, YieldInput } from 'types'
+import { Yield, YieldInput, YieldDetail } from 'types'
 import { YIELDS } from 'constants/api-paths'
 import { addYield, editYield, deleteYield } from 'services/apiService'
 
@@ -47,5 +47,20 @@ export const useYields = (): {
     createYield,
     updateYield,
     removeYield
+  }
+}
+
+export const useYield = (id?: string): {
+  yieldData: YieldDetail | null
+  isLoading: boolean
+  error: any
+  mutate: () => Promise<any>
+} => {
+  const { data, error, mutate, isLoading } = useSWR<YieldDetail>(id ? `${YIELDS}/${id}` : null)
+  return {
+    yieldData: data ?? null,
+    isLoading,
+    error,
+    mutate
   }
 }

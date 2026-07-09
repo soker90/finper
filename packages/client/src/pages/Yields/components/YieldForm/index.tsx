@@ -2,9 +2,9 @@ import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { Alert, Box } from '@mui/material'
 import ModalGrid from 'components/modals/ModalGrid'
-import InputForm from 'components/forms/InputForm'
 import SelectForm from 'components/forms/SelectForm'
 import { useAccounts } from 'hooks/useAccounts'
+import { useCategories } from 'hooks/useCategories'
 import { Yield, YieldInput } from 'types'
 
 const YIELD_TYPE_OPTIONS = [
@@ -20,12 +20,13 @@ type Props = {
 
 const YieldForm = ({ editingYield, onClose, onSubmit }: Props) => {
   const { accounts } = useAccounts()
+  const { categories } = useCategories()
 
   const defaultValues = editingYield
     ? {
-        name: editingYield.name,
         type: editingYield.type,
-        accountId: editingYield.account._id
+        accountId: editingYield.account._id,
+        categoryId: editingYield.categoryId
       }
     : {
         type: 'interest' as const
@@ -40,7 +41,7 @@ const YieldForm = ({ editingYield, onClose, onSubmit }: Props) => {
   useEffect(() => {
     reset(defaultValues)
   // eslint-disable-next-line react-hooks/exhaustive-deps -- reset(defaultValues) on external prop change; defaultValues is rebuilt each render by design
-  }, [reset, editingYield, accounts])
+  }, [reset, editingYield, accounts, categories])
 
   const handleFormSubmit = handleSubmit(async (data) => {
     setSubmitError(null)
@@ -60,20 +61,10 @@ const YieldForm = ({ editingYield, onClose, onSubmit }: Props) => {
       action={handleFormSubmit}
       actionDisabled={isSubmitting}
     >
-      <InputForm
-        id='name'
-        label='Nombre'
-        placeholder='Ej. Intereses Cuenta Naranja'
-        size={6}
-        error={Boolean(errors.name)}
-        errorText='El nombre es obligatorio'
-        {...register('name', { required: true })}
-      />
-
       <SelectForm
         id='type'
         label='Tipo'
-        size={3}
+        size={6}
         options={YIELD_TYPE_OPTIONS}
         optionValue='value'
         optionLabel='label'
@@ -85,7 +76,7 @@ const YieldForm = ({ editingYield, onClose, onSubmit }: Props) => {
       <SelectForm
         id='accountId'
         label='Cuenta'
-        size={3}
+        size={6}
         options={accounts}
         optionValue='_id'
         optionLabel='name'
@@ -93,6 +84,19 @@ const YieldForm = ({ editingYield, onClose, onSubmit }: Props) => {
         error={Boolean(errors.accountId)}
         errorText='La cuenta es obligatoria'
         {...register('accountId', { required: true })}
+      />
+
+      <SelectForm
+        id='categoryId'
+        label='Categoría principal'
+        size={12}
+        options={categories}
+        optionValue='_id'
+        optionLabel='name'
+        voidOption
+        error={Boolean(errors.categoryId)}
+        errorText='La categoría es obligatoria'
+        {...register('categoryId', { required: true })}
       />
 
       {submitError && (

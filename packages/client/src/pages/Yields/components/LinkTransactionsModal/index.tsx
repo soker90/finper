@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import {
   Typography, Box, Checkbox, List, ListItem,
-  ListItemText, ListItemIcon, CircularProgress, Alert
+  ListItemText, ListItemIcon, CircularProgress, Alert,
+  FormControl, InputLabel, Select, MenuItem
 } from '@mui/material'
 import { SearchOutlined } from '@ant-design/icons'
 import useSWR from 'swr'
@@ -10,6 +11,7 @@ import { format } from 'utils'
 import { Yield, YieldEntry } from 'types'
 import { YIELDS } from 'constants/api-paths'
 import { linkYieldTransactions } from 'services/apiService'
+import { useCategories } from 'hooks/useCategories'
 
 type Props = {
   item: Yield
@@ -18,12 +20,14 @@ type Props = {
 }
 
 const LinkTransactionsModal = ({ item, onClose, onLinked }: Props) => {
+  const { categories } = useCategories()
   const [selected, setSelected] = useState<Set<string>>(new Set())
   const [submitting, setSubmitting] = useState(false)
   const [linkError, setLinkError] = useState<string | null>(null)
+  const [categoryId, setCategoryId] = useState<string>(item.categoryId)
 
   const { data: transactions, isLoading } = useSWR<YieldEntry[]>(
-    `${YIELDS}/${item._id}/matching-transactions`
+    `${YIELDS}/${item._id}/matching-transactions?categoryId=${categoryId}`
   )
 
   const toggle = (id: string) =>
@@ -56,10 +60,29 @@ const LinkTransactionsModal = ({ item, onClose, onLinked }: Props) => {
       actionDisabled={submitting || selected.size === 0}
     >
       <Box sx={{ width: '100%', gridColumn: '1 / -1' }}>
-        <Typography variant='caption' color='textSecondary' sx={{ display: 'block', mb: 1 }}>
+        <Typography variant='caption' color='textSecondary' sx={{ display: 'block', mb: 2 }}>
           Marca tanto el abono como, si tu banco lo separa, el impuesto retenido o los recibos
           relacionados — todos se enlazan a este rendimiento.
         </Typography>
+
+        <FormControl fullWidth size='small' sx={{ mb: 2 }}>
+          <InputLabel id='category-filter-label'>Filtrar por categoría</InputLabel>
+          <Select
+            labelId='category-filter-label'
+            value={categoryId}
+            label='Filtrar por categoría'
+            onChange={(e) => {
+              setCategoryId(e.target.value as string)
+              setSelected(new Set())
+            }}
+          >
+            {categories.map((cat) => (
+              <MenuItem key={cat._id} value={cat._id}>
+                {cat.name}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
 
         {isLoading && (
           <Box sx={{ display: 'flex', justifyContent: 'center', py: 3 }}>
@@ -69,7 +92,7 @@ const LinkTransactionsModal = ({ item, onClose, onLinked }: Props) => {
 
         {!isLoading && (!transactions || transactions.length === 0) && (
           <Alert severity='info' icon={<SearchOutlined />}>
-            No hay movimientos sin enlazar en la cuenta {item.account.name}.
+            No hay movimientos sin enlazar en esta categoría para la cuenta {item.account.name}.
           </Alert>
         )}
 

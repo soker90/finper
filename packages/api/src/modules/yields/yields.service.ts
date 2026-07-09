@@ -19,12 +19,12 @@ export class YieldsService {
     return serializeYieldDetail(y, entries)
   }
 
-  public addYield (params: { name: string, type: string, accountId: string, user: string }) {
+  public addYield (params: { name: string, type: string, accountId: string, categoryId: string, user: string }) {
     const created = this.repository.create(params)
     return serializeYield(created)
   }
 
-  public editYield (id: string, value: any, user: string) {
+  public editYield ({ id, value, user }: { id: string, value: any, user: string }) {
     const updated = this.repository.update(id, user, value)
     return updated ? serializeYield(updated) : null
   }
@@ -34,13 +34,14 @@ export class YieldsService {
     this.repository.delete(id, user)
   }
 
-  public getMatchingTransactions (id: string, user: string) {
+  public getMatchingTransactions ({ id, categoryId, user }: { id: string, categoryId?: string, user: string }) {
     const y = this.repository.findByIdPopulated(id, user)
     if (!y) return []
-    return this.repository.findMatchingTransactions(y.accountId, user).map(serializeYieldTransaction)
+    const targetCategoryId = categoryId || y.categoryId
+    return this.repository.findMatchingTransactions({ accountId: y.accountId, categoryId: targetCategoryId, user }).map(serializeYieldTransaction)
   }
 
-  public linkTransactions (id: string, transactionIds: string[], user: string): void {
+  public linkTransactions ({ id, transactionIds, user }: { id: string, transactionIds: string[], user: string }): void {
     this.repository.linkTransactions(id, transactionIds, user)
   }
 

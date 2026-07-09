@@ -4,6 +4,8 @@ export interface Yield {
   _id: string
   name: string
   type: YieldType
+  accountId: string
+  categoryId: string
   account: {
     _id: string
     name: string
@@ -15,9 +17,10 @@ export interface Yield {
 }
 
 export interface YieldInput {
-  name: string
+  name?: string
   type: YieldType
   accountId: string
+  categoryId: string
 }
 
 export interface YieldEntry {
@@ -27,4 +30,20 @@ export interface YieldEntry {
   type: string
   category: { _id: string, name: string }
   note?: string
+}
+
+export interface YieldMonthRow {
+  month: string
+  grossIncome?: number
+  taxExpense?: number
+  net?: number
+  billsTotal?: number
+  cashbackAmount?: number
+  percentage?: number | null
+  entries: YieldEntry[]
+}
+
+export interface YieldDetail extends Yield {
+  entries: YieldEntry[]
+  monthlyRows: YieldMonthRow[]
 }

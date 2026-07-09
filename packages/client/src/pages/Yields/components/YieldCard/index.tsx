@@ -1,4 +1,6 @@
+import React from 'react'
 import { Stack, Typography } from '@mui/material'
+import { useNavigate } from 'react-router'
 import useSWR from 'swr'
 import { MainCard } from 'components'
 import { format } from 'utils'
@@ -17,11 +19,19 @@ type Props = {
 }
 
 const YieldCard = ({ item, onEdit, onDelete, onSearchTransactions, onUnlinkTransaction }: Props) => {
+  const navigate = useNavigate()
   const { data: detail } = useSWR<Yield & { entries: YieldEntry[] }>(`${YIELDS}/${item._id}`)
   const lastEntries = detail?.entries.slice(0, 3) ?? []
 
+  const handleCardClick = (e: React.MouseEvent) => {
+    if ((e.target as HTMLElement).closest('button') || (e.target as HTMLElement).closest('a')) {
+      return
+    }
+    navigate(`/rendimientos/${item._id}`)
+  }
+
   return (
-    <MainCard contentSX={{ p: 2.25 }} sx={hoverCardSx}>
+    <MainCard contentSX={{ p: 2.25 }} sx={{ ...hoverCardSx, cursor: 'pointer' }} onClick={handleCardClick}>
       <Stack spacing={1}>
         <YieldCardHeader
           item={item}

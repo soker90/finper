@@ -20,16 +20,16 @@ describe('Yields Controller', () => {
 
   const insertYield = (type: string = 'interest'): string => {
     const id = generateId()
-    sqliteDb.insert(yields).values({ id, name: 'Test yield', type, accountId, user: username }).run()
+    sqliteDb.insert(yields).values({ id, name: 'Test yield', type, accountId, categoryId, user: username }).run()
     return id
   }
 
-  const insertTransaction = (params: { type: string, amount: number, yieldId?: string | null, date?: number }): string => {
+  const insertTransaction = (params: { type: string, amount: number, yieldId?: string | null, date?: number, categoryId?: string }): string => {
     const id = generateId()
     sqliteDb.insert(transactions).values({
       id,
       date: params.date ?? Date.now(),
-      categoryId,
+      categoryId: params.categoryId ?? categoryId,
       amount: params.amount,
       type: params.type,
       accountId,
@@ -68,22 +68,22 @@ describe('Yields Controller', () => {
 
     test('when the type is not valid, it should respond 422', async () => {
       await supertest(server.app).post(path).auth(token, { type: 'bearer' })
-        .send({ name: 'X', type: 'invalid', accountId })
+        .send({ name: 'X', type: 'invalid', accountId, categoryId })
         .expect(422)
     })
 
     test('when the account does not exist, it should respond 404', async () => {
       await supertest(server.app).post(path).auth(token, { type: 'bearer' })
-        .send({ name: 'X', type: 'interest', accountId: generateId() })
+        .send({ name: 'X', type: 'interest', accountId: generateId(), categoryId })
         .expect(404)
     })
 
     test('when successful, it should create the yield', async () => {
       const res = await supertest(server.app).post(path).auth(token, { type: 'bearer' })
-        .send({ name: 'Intereses Cuenta Naranja', type: 'interest', accountId })
+        .send({ name: 'Intereses Cuenta Naranja', type: 'interest', accountId, categoryId })
         .expect(200)
 
-      expect(res.body).toMatchObject({ name: 'Intereses Cuenta Naranja', type: 'interest', accountId })
+      expect(res.body).toMatchObject({ name: 'Intereses Cuenta Naranja', type: 'interest', accountId, categoryId })
     })
   })
 
@@ -156,6 +156,56 @@ describe('Yields Controller', () => {
       const res = await supertest(server.app).get(`${path}/${yieldId}`).auth(token, { type: 'bearer' }).expect(200)
       expect(res.body.entries).toHaveLength(1)
     })
+
+    test('interest: should return monthlyRows with grossIncome, taxExpense, and net', async () => {
+      const yieldId = insertYield('interest')
+      const dateJuly = new Date('2026-07-09T18:25:02').getTime()
+      insertTransaction({ type: TRANSACTION.Income, amount: 100, yieldId, date: dateJuly })
+      insertTransaction({ type: TRANSACTION.Expense, amount: 19, yieldId, date: dateJuly })
+
+      const res = await supertest(server.app).get(`${path}/${yieldId}`).auth(token, { type: 'bearer' }).expect(200)
+      expect(res.body.monthlyRows).toHaveLength(1)
+      expect(res.body.monthlyRows[0]).toMatchObject({
+        month: '2026-07',
+        grossIncome: 100,
+        taxExpense: 19,
+        net: 81
+      })
+      expect(res.body.netAccumulated).toBe(81)
+    })
+
+    test('cashback: should return monthlyRows with billsTotal, cashbackAmount, and percentage', async () => {
+      const yieldId = insertYield('cashback')
+      const dateJuly = new Date('2026-07-09T18:25:02').getTime()
+      insertTransaction({ type: TRANSACTION.Income, amount: 3, yieldId, date: dateJuly })
+      insertTransaction({ type: TRANSACTION.Expense, amount: 60, yieldId, date: dateJuly })
+
+      const res = await supertest(server.app).get(`${path}/${yieldId}`).auth(token, { type: 'bearer' }).expect(200)
+      expect(res.body.monthlyRows).toHaveLength(1)
+      expect(res.body.monthlyRows[0]).toMatchObject({
+        month: '2026-07',
+        billsTotal: 60,
+        cashbackAmount: 3,
+        percentage: 5
+      })
+      expect(res.body.netAccumulated).toBe(3)
+    })
+
+    test('cashback: should return percentage: null when billsTotal = 0', async () => {
+      const yieldId = insertYield('cashback')
+      const dateJuly = new Date('2026-07-09T18:25:02').getTime()
+      insertTransaction({ type: TRANSACTION.Income, amount: 5, yieldId, date: dateJuly })
+
+      const res = await supertest(server.app).get(`${path}/${yieldId}`).auth(token, { type: 'bearer' }).expect(200)
+      expect(res.body.monthlyRows).toHaveLength(1)
+      expect(res.body.monthlyRows[0]).toMatchObject({
+        month: '2026-07',
+        billsTotal: 0,
+        cashbackAmount: 5,
+        percentage: null
+      })
+      expect(res.body.netAccumulated).toBe(5)
+    })
   })
 
   describe('PUT /:id', () => {
@@ -187,14 +237,35 @@ describe('Yields Controller', () => {
   })
 
   describe('GET /:id/matching-transactions', () => {
-    test('it should only return unlinked transactions of the same account', async () => {
+    test('it should only return unlinked transactions of the same account and default category', async () => {
       const yieldId = insertYield('interest')
       const unlinkedId = insertTransaction({ type: TRANSACTION.Income, amount: 5 })
-      insertTransaction({ type: TRANSACTION.Income, amount: 5, yieldId: insertYield('interest') })
+
+      const otherCatId = generateId()
+      sqliteDb.insert(categories).values({ id: otherCatId, name: 'Other', type: TRANSACTION.Income, user: username }).run()
+      insertTransaction({ type: TRANSACTION.Income, amount: 15, categoryId: otherCatId })
 
       const res = await supertest(server.app).get(`${path}/${yieldId}/matching-transactions`).auth(token, { type: 'bearer' }).expect(200)
       expect(res.body).toHaveLength(1)
       expect(res.body[0]._id).toBe(unlinkedId)
+    })
+
+    test('it should filter by query param categoryId if provided', async () => {
+      const yieldId = insertYield('interest')
+      const otherCatId = generateId()
+      sqliteDb.insert(categories).values({ id: otherCatId, name: 'Other', type: TRANSACTION.Income, user: username }).run()
+
+      insertTransaction({ type: TRANSACTION.Income, amount: 5 })
+      const txOtherCat = insertTransaction({ type: TRANSACTION.Income, amount: 15, categoryId: otherCatId })
+
+      const res = await supertest(server.app)
+        .get(`${path}/${yieldId}/matching-transactions`)
+        .query({ categoryId: otherCatId })
+        .auth(token, { type: 'bearer' })
+        .expect(200)
+
+      expect(res.body).toHaveLength(1)
+      expect(res.body[0]._id).toBe(txOtherCat)
     })
   })
 

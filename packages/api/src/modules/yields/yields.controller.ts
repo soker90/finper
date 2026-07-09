@@ -43,7 +43,7 @@ export class YieldsController {
   public edit (req: Request, res: Response): void {
     this.logger.logInfo(`/edit - yield: ${req.params.id}`)
     const { id, value } = validateYieldEditParams({ params: req.params, body: req.body, user: req.user })
-    const response = this.yieldsService.editYield(id, value, req.user)
+    const response = this.yieldsService.editYield({ id, value, user: req.user })
     res.send(response)
   }
 
@@ -57,9 +57,10 @@ export class YieldsController {
 
   public getMatchingTransactions (req: Request, res: Response): void {
     const { id } = req.params
+    const categoryId = req.query.categoryId as string | undefined
     this.logger.logInfo(`/matching-transactions - yield: ${id}`)
     validateYieldExist(id, req.user)
-    const response = this.yieldsService.getMatchingTransactions(id, req.user)
+    const response = this.yieldsService.getMatchingTransactions({ id, categoryId, user: req.user })
     res.send(response)
   }
 
@@ -68,7 +69,7 @@ export class YieldsController {
     this.logger.logInfo(`/link-transactions - yield: ${id}`)
     validateYieldExist(id, req.user)
     const transactionIds = validateYieldLinkParams({ transactionIds: req.body.transactionIds })
-    this.yieldsService.linkTransactions(id, transactionIds, req.user)
+    this.yieldsService.linkTransactions({ id, transactionIds, user: req.user })
     res.status(204).send()
   }
 

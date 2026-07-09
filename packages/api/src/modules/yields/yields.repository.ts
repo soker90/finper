@@ -29,6 +29,7 @@ const selectWithJoins = (db: DB) => db.select({
   name: yields.name,
   type: yields.type,
   accountId: yields.accountId,
+  categoryId: yields.categoryId,
   user: yields.user,
   accountName: accounts.name,
   accountBank: accounts.bank
@@ -60,7 +61,7 @@ export const createYieldsRepository = (db: DB) => ({
   findByIdPopulated: (id: string, user: string): YieldRow | undefined =>
     selectWithJoins(db).where(and(eq(yields.id, id), eq(yields.user, user))).get() as YieldRow | undefined,
 
-  create: (data: { name: string, type: string, accountId: string, user: string }): Yield => {
+  create: (data: { name: string, type: string, accountId: string, categoryId: string, user: string }): Yield => {
     const id = generateId()
     return db.insert(yields).values({ ...data, id }).returning().get()
   },
@@ -82,11 +83,12 @@ export const createYieldsRepository = (db: DB) => ({
       .orderBy(desc(transactions.date))
       .all() as YieldTransactionRow[],
 
-  findMatchingTransactions: (accountId: string, user: string): YieldTransactionRow[] =>
+  findMatchingTransactions: ({ accountId, categoryId, user }: { accountId: string, categoryId: string, user: string }): YieldTransactionRow[] =>
     transactionsSelect(db)
       .where(and(
         eq(transactions.user, user),
         eq(transactions.accountId, accountId),
+        eq(transactions.categoryId, categoryId),
         isNull(transactions.yieldId)
       ))
       .orderBy(desc(transactions.date))

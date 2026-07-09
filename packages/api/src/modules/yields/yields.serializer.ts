@@ -1,13 +1,14 @@
 import { roundMoney, TRANSACTION } from '@soker90/finper-db'
 import type { YieldRow, YieldTransactionRow } from './yields.repository'
 
-type Yield = { id: string, name: string, type: string, accountId: string, user: string }
+type Yield = { id: string, name: string, type: string, accountId: string, categoryId: string, user: string }
 
 export const serializeYield = (y: Yield) => ({
   _id: y.id,
   name: y.name,
   type: y.type,
-  accountId: y.accountId
+  accountId: y.accountId,
+  categoryId: y.categoryId
 })
 
 export const serializeYieldTransaction = (row: YieldTransactionRow) => {
@@ -22,36 +23,76 @@ export const serializeYieldTransaction = (row: YieldTransactionRow) => {
   return result
 }
 
-/**
- * Calcula el neto acumulado a partir de los movimientos enlazados. El
- * significado de un movimiento de gasto enlazado depende del tipo de
- * rendimiento:
- *   - 'interest': es el impuesto retenido sobre el abono → se resta.
- *   - 'cashback' (y cualquier otro tipo futuro): es solo contexto (p. ej.
- *     el recibo que generó el cashback) → no se resta.
- */
-export const calcNetAmount = (type: string, entries: YieldTransactionRow[]): number => {
-  const income = entries.filter((e) => e.type === TRANSACTION.Income).reduce((total, e) => total + e.amount, 0)
-  const expense = entries.filter((e) => e.type === TRANSACTION.Expense).reduce((total, e) => total + e.amount, 0)
+export const groupEntriesByMonth = (type: string, entries: YieldTransactionRow[]) => {
+  const groups: Record<string, YieldTransactionRow[]> = {}
+  for (const entry of entries) {
+    const dateObj = new Date(entry.date)
+    const year = dateObj.getFullYear()
+    const month = String(dateObj.getMonth() + 1).padStart(2, '0')
+    const key = `${year}-${month}`
+    if (!groups[key]) groups[key] = []
+    groups[key].push(entry)
+  }
 
-  return roundMoney(type === 'interest' ? income - expense : income)
+  const keys = Object.keys(groups).sort().reverse() // Newest first
+
+  return keys.map((month) => {
+    const monthEntries = groups[month]
+    const income = monthEntries.filter((e) => e.type === TRANSACTION.Income).reduce((sum, e) => sum + e.amount, 0)
+    const expense = monthEntries.filter((e) => e.type === TRANSACTION.Expense).reduce((sum, e) => sum + e.amount, 0)
+
+    if (type === 'interest') {
+      return {
+        month,
+        grossIncome: roundMoney(income),
+        taxExpense: roundMoney(expense),
+        net: roundMoney(income - expense),
+        entries: monthEntries.map(serializeYieldTransaction)
+      }
+    } else {
+      const percentage = expense > 0 ? roundMoney((income / expense) * 100) : null
+      return {
+        month,
+        billsTotal: roundMoney(expense),
+        cashbackAmount: roundMoney(income),
+        percentage,
+        entries: monthEntries.map(serializeYieldTransaction)
+      }
+    }
+  })
 }
 
 export const serializeYieldSummary = (y: YieldRow, entries: YieldTransactionRow[]) => {
   const paymentsCount = entries.filter((e) => e.type === TRANSACTION.Income).length
 
+  const monthlyRows = groupEntriesByMonth(y.type, entries)
+  const netAccumulated = monthlyRows.reduce((sum, row) => {
+    if (y.type === 'interest') {
+      return sum + (row.net ?? 0)
+    } else {
+      return sum + (row.cashbackAmount ?? 0)
+    }
+  }, 0)
+
   return {
     _id: y.id,
     name: y.name,
     type: y.type,
+    accountId: y.accountId,
+    categoryId: y.categoryId,
     account: { _id: y.accountId, name: y.accountName, bank: y.accountBank },
-    netAccumulated: calcNetAmount(y.type, entries),
+    netAccumulated: roundMoney(netAccumulated),
     entriesCount: entries.length,
     paymentsCount
   }
 }
 
-export const serializeYieldDetail = (y: YieldRow, entries: YieldTransactionRow[]) => ({
-  ...serializeYieldSummary(y, entries),
-  entries: entries.map(serializeYieldTransaction)
-})
+export const serializeYieldDetail = (y: YieldRow, entries: YieldTransactionRow[]) => {
+  const summary = serializeYieldSummary(y, entries)
+  const monthlyRows = groupEntriesByMonth(y.type, entries)
+  return {
+    ...summary,
+    entries: entries.map(serializeYieldTransaction),
+    monthlyRows
+  }
+}
