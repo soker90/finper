@@ -23,6 +23,7 @@ yieldsRoutes.get('/', authMiddleware, c.list.bind(c))
 yieldsRoutes.get('/:id/matching-transactions', authMiddleware, c.getMatchingTransactions.bind(c))
 yieldsRoutes.post('/:id/link-transactions', authMiddleware, c.linkTransactions.bind(c))
 yieldsRoutes.delete('/:id/unlink-transactions/:transactionId', authMiddleware, c.unlinkTransaction.bind(c))
+yieldsRoutes.put('/:id/settlements/:settlementId', authMiddleware, c.editSettlement.bind(c))
 
 // Genéricas /:id
 yieldsRoutes.get('/:id', authMiddleware, c.detail.bind(c))

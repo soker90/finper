@@ -1,14 +1,14 @@
 import { roundMoney, TRANSACTION } from '@soker90/finper-db'
 import type { YieldRow, YieldTransactionRow } from './yields.repository'
 
-type Yield = { id: string, name: string, type: string, accountId: string, categoryId: string, user: string }
+type Yield = { id: string, name: string, type: string, accountId: string, categoryIds: string[], user: string }
 
 export const serializeYield = (y: Yield) => ({
   _id: y.id,
   name: y.name,
   type: y.type,
   accountId: y.accountId,
-  categoryId: y.categoryId
+  categoryIds: y.categoryIds
 })
 
 export const serializeYieldTransaction = (row: YieldTransactionRow) => {
@@ -23,50 +23,92 @@ export const serializeYieldTransaction = (row: YieldTransactionRow) => {
   return result
 }
 
-export const groupEntriesByMonth = (type: string, entries: YieldTransactionRow[]) => {
-  const groups: Record<string, YieldTransactionRow[]> = {}
-  for (const entry of entries) {
-    const dateObj = new Date(entry.date)
-    const year = dateObj.getFullYear()
-    const month = String(dateObj.getMonth() + 1).padStart(2, '0')
-    const key = `${year}-${month}`
-    if (!groups[key]) groups[key] = []
-    groups[key].push(entry)
-  }
-
-  const keys = Object.keys(groups).sort().reverse() // Newest first
-
-  return keys.map((month) => {
-    const monthEntries = groups[month]
-    const income = monthEntries.filter((e) => e.type === TRANSACTION.Income).reduce((sum, e) => sum + e.amount, 0)
-    const expense = monthEntries.filter((e) => e.type === TRANSACTION.Expense).reduce((sum, e) => sum + e.amount, 0)
+export const groupEntriesBySettlement = ({ type, entries, settlements }: { type: string, entries: YieldTransactionRow[], settlements: any[] }) => {
+  return settlements.map((settlement) => {
+    const settlementEntries = entries.filter((e) => e.yieldSettlementId === settlement.id)
+    const income = settlementEntries.filter((e) => e.type === TRANSACTION.Income).reduce((sum, e) => sum + e.amount, 0)
+    const expense = settlementEntries.filter((e) => e.type === TRANSACTION.Expense).reduce((sum, e) => sum + e.amount, 0)
 
     if (type === 'interest') {
+      const net = income - expense
+      let calculatedTae: number | null = null
+      let calculatedBalance: number | null = null
+      let taeSource: 'provided' | 'calculated' | null = null
+      let balanceSource: 'provided' | 'calculated' | null = null
+
+      const taeVal = settlement.tae
+      const balanceVal = settlement.averageBalance
+
+      if (taeVal !== undefined && taeVal !== null) {
+        calculatedTae = taeVal
+        taeSource = 'provided'
+      }
+      if (balanceVal !== undefined && balanceVal !== null) {
+        calculatedBalance = balanceVal
+        balanceSource = 'provided'
+      }
+
+      if (calculatedTae !== null && calculatedBalance === null) {
+        if (calculatedTae !== 0) {
+          const monthlyRate = Math.pow(1 + calculatedTae / 100, 1 / 12) - 1
+          calculatedBalance = net / monthlyRate
+          balanceSource = 'calculated'
+        } else {
+          calculatedBalance = null
+          balanceSource = null
+        }
+      } else if (calculatedBalance !== null && calculatedTae === null) {
+        if (calculatedBalance !== 0) {
+          const monthlyRate = net / calculatedBalance
+          if (1 + monthlyRate > 0) {
+            calculatedTae = (Math.pow(1 + monthlyRate, 12) - 1) * 100
+            taeSource = 'calculated'
+          } else {
+            calculatedTae = null
+            taeSource = null
+          }
+        } else {
+          calculatedTae = null
+          taeSource = null
+        }
+      }
+
       return {
-        month,
+        id: settlement.id,
         grossIncome: roundMoney(income),
         taxExpense: roundMoney(expense),
-        net: roundMoney(income - expense),
-        entries: monthEntries.map(serializeYieldTransaction)
+        net: roundMoney(net),
+        tae: calculatedTae !== null ? roundMoney(calculatedTae) : null,
+        averageBalance: calculatedBalance !== null ? roundMoney(calculatedBalance) : null,
+        taeSource,
+        balanceSource,
+        entries: settlementEntries.map(serializeYieldTransaction)
       }
     } else {
-      const percentage = expense > 0 ? roundMoney((income / expense) * 100) : null
+      const billsTotal = expense
+      const cashbackAmount = income
+      const percentage = (billsTotal > 0 && cashbackAmount > 0)
+        ? roundMoney((cashbackAmount / billsTotal) * 100)
+        : null
+      const status = (billsTotal > 0 && cashbackAmount === 0) ? 'pending' : 'completed'
+
       return {
-        month,
-        billsTotal: roundMoney(expense),
-        cashbackAmount: roundMoney(income),
+        id: settlement.id,
+        billsTotal: roundMoney(billsTotal),
+        cashbackAmount: roundMoney(cashbackAmount),
         percentage,
-        entries: monthEntries.map(serializeYieldTransaction)
+        status,
+        entries: settlementEntries.map(serializeYieldTransaction)
       }
     }
   })
 }
 
-export const serializeYieldSummary = (y: YieldRow, entries: YieldTransactionRow[]) => {
+export const serializeYieldSummary = (y: YieldRow, entries: YieldTransactionRow[], settlements: any[]) => {
   const paymentsCount = entries.filter((e) => e.type === TRANSACTION.Income).length
 
-  const monthlyRows = groupEntriesByMonth(y.type, entries)
-  const netAccumulated = monthlyRows.reduce((sum, row) => {
+  const settlementRows = groupEntriesBySettlement({ type: y.type, entries, settlements })
+  const netAccumulated = settlementRows.reduce((sum, row) => {
     if (y.type === 'interest') {
       return sum + (row.net ?? 0)
     } else {
@@ -79,7 +121,7 @@ export const serializeYieldSummary = (y: YieldRow, entries: YieldTransactionRow[
     name: y.name,
     type: y.type,
     accountId: y.accountId,
-    categoryId: y.categoryId,
+    categoryIds: y.categoryIds,
     account: { _id: y.accountId, name: y.accountName, bank: y.accountBank },
     netAccumulated: roundMoney(netAccumulated),
     entriesCount: entries.length,
@@ -87,12 +129,12 @@ export const serializeYieldSummary = (y: YieldRow, entries: YieldTransactionRow[
   }
 }
 
-export const serializeYieldDetail = (y: YieldRow, entries: YieldTransactionRow[]) => {
-  const summary = serializeYieldSummary(y, entries)
-  const monthlyRows = groupEntriesByMonth(y.type, entries)
+export const serializeYieldDetail = (y: YieldRow, entries: YieldTransactionRow[], settlements: any[]) => {
+  const summary = serializeYieldSummary(y, entries, settlements)
+  const settlementRows = groupEntriesBySettlement({ type: y.type, entries, settlements })
   return {
     ...summary,
     entries: entries.map(serializeYieldTransaction),
-    monthlyRows
+    settlements: settlementRows
   }
 }

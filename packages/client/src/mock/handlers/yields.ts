@@ -6,13 +6,13 @@ const YIELD_NAMES = ['Intereses Cuenta Naranja', 'Cashback recibos luz', 'Intere
 
 const makeYield = (index: number = 0) => {
   const accountId = faker.database.mongodbObjectId()
-  const categoryId = faker.database.mongodbObjectId()
+  const categoryIds = [faker.database.mongodbObjectId()]
   return {
     _id: faker.database.mongodbObjectId(),
     name: YIELD_NAMES[index % YIELD_NAMES.length],
     type: YIELD_TYPES[index % YIELD_TYPES.length],
     accountId,
-    categoryId,
+    categoryIds,
     account: {
       _id: accountId,
       name: faker.finance.accountName(),
@@ -60,15 +60,20 @@ export const yieldsHandlers = [
           note: 'Abono intereses'
         }
       ],
-      monthlyRows: [
+      settlements: [
         {
-          month: '2026-07',
+          id: 'settlement1',
           grossIncome: 100,
           taxExpense: 0,
           net: 100,
+          tae: 2.5,
+          averageBalance: 48000,
+          taeSource: 'provided',
+          balanceSource: 'calculated',
           billsTotal: 0,
           cashbackAmount: 100,
           percentage: null,
+          status: 'completed',
           entries: [
             {
               _id: 'tx1',
@@ -90,6 +95,14 @@ export const yieldsHandlers = [
 
   http.post('/yields/:id/link-transactions', () => {
     return new HttpResponse(null, { status: 204 })
+  }),
+
+  http.put('/yields/:id/settlements/:settlementId', () => {
+    return HttpResponse.json({
+      id: 'settlement1',
+      tae: 3.0,
+      averageBalance: 40000
+    })
   }),
 
   http.delete('/yields/:id/unlink-transactions/:transactionId', () => {

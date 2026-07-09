@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "50a81418-fec1-4333-8e3f-17098529946c",
+  "id": "12b5e732-e7ba-47ea-bce4-142cd9ffb531",
   "prevId": "315b8516-8559-44f4-a439-60776f5ba687",
   "tables": {
     "accounts": {
@@ -1457,6 +1457,78 @@
       "uniqueConstraints": {},
       "checkConstraints": {}
     },
+    "yield_settlements": {
+      "name": "yield_settlements",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "yield_id": {
+          "name": "yield_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "user": {
+          "name": "user",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "tae": {
+          "name": "tae",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "average_balance": {
+          "name": "average_balance",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "yield_settlements_yield_id_yields_id_fk": {
+          "name": "yield_settlements_yield_id_yields_id_fk",
+          "tableFrom": "yield_settlements",
+          "tableTo": "yields",
+          "columnsFrom": [
+            "yield_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "yield_settlements_user_users_username_fk": {
+          "name": "yield_settlements_user_users_username_fk",
+          "tableFrom": "yield_settlements",
+          "tableTo": "users",
+          "columnsFrom": [
+            "user"
+          ],
+          "columnsTo": [
+            "username"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
     "yields": {
       "name": "yields",
       "columns": {
@@ -1487,6 +1559,14 @@
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
+        },
+        "category_ids": {
+          "name": "category_ids",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'[]'"
         },
         "user": {
           "name": "user",
@@ -1602,6 +1682,13 @@
           "notNull": false,
           "autoincrement": false
         },
+        "yield_settlement_id": {
+          "name": "yield_settlement_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
         "tags": {
           "name": "tags",
           "type": "text",
@@ -1695,6 +1782,19 @@
           "tableTo": "yields",
           "columnsFrom": [
             "yield_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "transactions_yield_settlement_id_yield_settlements_id_fk": {
+          "name": "transactions_yield_settlement_id_yield_settlements_id_fk",
+          "tableFrom": "transactions",
+          "tableTo": "yield_settlements",
+          "columnsFrom": [
+            "yield_settlement_id"
           ],
           "columnsTo": [
             "id"

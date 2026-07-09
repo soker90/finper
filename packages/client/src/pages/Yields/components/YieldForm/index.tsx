@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react'
-import { useForm } from 'react-hook-form'
-import { Alert, Box } from '@mui/material'
+import { useForm, Controller } from 'react-hook-form'
+import { Alert, Box, Autocomplete, TextField, InputLabel, FormHelperText, Stack, Grid } from '@mui/material'
 import ModalGrid from 'components/modals/ModalGrid'
 import SelectForm from 'components/forms/SelectForm'
+import InputForm from 'components/forms/InputForm'
 import { useAccounts } from 'hooks/useAccounts'
 import { useCategories } from 'hooks/useCategories'
 import { Yield, YieldInput } from 'types'
@@ -24,19 +25,41 @@ const YieldForm = ({ editingYield, onClose, onSubmit }: Props) => {
 
   const defaultValues = editingYield
     ? {
+        name: editingYield.name,
         type: editingYield.type,
-        accountId: editingYield.account._id,
-        categoryId: editingYield.categoryId
+        accountId: editingYield.accountId,
+        categoryIds: editingYield.categoryIds || []
       }
     : {
-        type: 'interest' as const
+        name: '',
+        type: 'interest' as const,
+        accountId: '',
+        categoryIds: []
       }
 
-  const { register, handleSubmit, formState: { errors, isSubmitting }, reset } = useForm<YieldInput>({
+  const { register, handleSubmit, formState: { errors, isSubmitting }, reset, watch, setValue, getValues, control } = useForm<YieldInput>({
     defaultValues
   })
 
   const [submitError, setSubmitError] = useState<string | null>(null)
+
+  const typeWatch = watch('type')
+  const accountIdWatch = watch('accountId')
+
+  // Auto-suggestion for Yield Name based on Account + Type
+  useEffect(() => {
+    if (!editingYield) {
+      const selectedAccount = accounts.find((a) => a._id === accountIdWatch)
+      if (selectedAccount && typeWatch) {
+        const typeLabel = typeWatch === 'interest' ? 'Intereses' : 'Cashback'
+        const suggestion = `${selectedAccount.name} - ${typeLabel}`
+        const currentName = getValues('name')
+        if (!currentName || currentName.includes(' - Intereses') || currentName.includes(' - Cashback')) {
+          setValue('name', suggestion)
+        }
+      }
+    }
+  }, [typeWatch, accountIdWatch, editingYield, accounts, setValue, getValues])
 
   useEffect(() => {
     reset(defaultValues)
@@ -61,10 +84,20 @@ const YieldForm = ({ editingYield, onClose, onSubmit }: Props) => {
       action={handleFormSubmit}
       actionDisabled={isSubmitting}
     >
+      <InputForm
+        id='name'
+        label='Nombre'
+        placeholder='Ej. Intereses Cuenta Naranja'
+        size={6}
+        error={Boolean(errors.name)}
+        errorText='El nombre es obligatorio'
+        {...register('name', { required: true })}
+      />
+
       <SelectForm
         id='type'
         label='Tipo'
-        size={6}
+        size={3}
         options={YIELD_TYPE_OPTIONS}
         optionValue='value'
         optionLabel='label'
@@ -76,7 +109,7 @@ const YieldForm = ({ editingYield, onClose, onSubmit }: Props) => {
       <SelectForm
         id='accountId'
         label='Cuenta'
-        size={6}
+        size={3}
         options={accounts}
         optionValue='_id'
         optionLabel='name'
@@ -86,21 +119,42 @@ const YieldForm = ({ editingYield, onClose, onSubmit }: Props) => {
         {...register('accountId', { required: true })}
       />
 
-      <SelectForm
-        id='categoryId'
-        label='Categoría principal'
-        size={12}
-        options={categories}
-        optionValue='_id'
-        optionLabel='name'
-        voidOption
-        error={Boolean(errors.categoryId)}
-        errorText='La categoría es obligatoria'
-        {...register('categoryId', { required: true })}
-      />
+      <Grid size={{ md: 12, xs: 12 }}>
+        <Stack spacing={1}>
+          <InputLabel htmlFor='categoryIds'>Categorías principales</InputLabel>
+          <Controller
+            name='categoryIds'
+            control={control}
+            rules={{ required: true, validate: (val) => val && val.length > 0 }}
+            render={({ field }) => (
+              <Autocomplete
+                multiple
+                id='categoryIds'
+                options={categories}
+                getOptionLabel={(option) => typeof option === 'string' ? option : option.name}
+                value={categories.filter((c) => c._id && field.value?.includes(c._id)) || []}
+                onChange={(_, newValue) => {
+                  const ids = newValue.flatMap((v) => typeof v === 'string' ? [v] : (v._id ? [v._id] : []))
+                  field.onChange(ids)
+                }}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    error={Boolean(errors.categoryIds)}
+                    placeholder={field.value?.length ? '' : 'Selecciona una o más categorías'}
+                  />
+                )}
+              />
+            )}
+          />
+          {errors.categoryIds && (
+            <FormHelperText error>Selecciona al menos una categoría</FormHelperText>
+          )}
+        </Stack>
+      </Grid>
 
       {submitError && (
-        <Box sx={{ gridColumn: '1 / -1' }}>
+        <Box sx={{ gridColumn: '1 / -1', width: '100%', mt: 1 }}>
           <Alert severity='error'>{submitError}</Alert>
         </Box>
       )}

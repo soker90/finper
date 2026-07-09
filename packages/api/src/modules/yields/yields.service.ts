@@ -8,7 +8,8 @@ export class YieldsService {
   public getYields (user: string) {
     return this.repository.findByUser(user).map((y) => {
       const entries = this.repository.findTransactionsByYield(y.id, user)
-      return serializeYieldSummary(y, entries)
+      const settlements = this.repository.findSettlementsByYieldId(y.id, user)
+      return serializeYieldSummary(y, entries, settlements)
     })
   }
 
@@ -16,10 +17,11 @@ export class YieldsService {
     const y = this.repository.findByIdPopulated(id, user)
     if (!y) return null
     const entries = this.repository.findTransactionsByYield(id, user)
-    return serializeYieldDetail(y, entries)
+    const settlements = this.repository.findSettlementsByYieldId(id, user)
+    return serializeYieldDetail(y, entries, settlements)
   }
 
-  public addYield (params: { name: string, type: string, accountId: string, categoryId: string, user: string }) {
+  public addYield (params: { name: string, type: string, accountId: string, categoryIds: string[], user: string }) {
     const created = this.repository.create(params)
     return serializeYield(created)
   }
@@ -31,21 +33,51 @@ export class YieldsService {
 
   public deleteYield (id: string, user: string): void {
     this.repository.unlinkAllTransactions(id)
+    this.repository.deleteSettlementsByYield(id)
     this.repository.delete(id, user)
   }
 
-  public getMatchingTransactions ({ id, categoryId, user }: { id: string, categoryId?: string, user: string }) {
+  public getMatchingTransactions ({ id, user }: { id: string, user: string }) {
     const y = this.repository.findByIdPopulated(id, user)
     if (!y) return []
-    const targetCategoryId = categoryId || y.categoryId
-    return this.repository.findMatchingTransactions({ accountId: y.accountId, categoryId: targetCategoryId, user }).map(serializeYieldTransaction)
+    return this.repository.findMatchingTransactions({
+      accountId: y.accountId,
+      categoryIds: y.categoryIds,
+      user
+    }).map(serializeYieldTransaction)
   }
 
-  public linkTransactions ({ id, transactionIds, user }: { id: string, transactionIds: string[], user: string }): void {
-    this.repository.linkTransactions(id, transactionIds, user)
+  public linkTransactions ({ id, transactionIds, settlementId, tae, averageBalance, user }: { id: string, transactionIds: string[], settlementId?: string | null, tae?: number | null, averageBalance?: number | null, user: string }): void {
+    let targetSettlementId = settlementId
+    if (!targetSettlementId) {
+      // Create a new settlement
+      const settlement = this.repository.createSettlement({
+        yieldId: id,
+        user,
+        tae: tae ?? null,
+        averageBalance: averageBalance ?? null
+      })
+      targetSettlementId = settlement.id
+    }
+    this.repository.linkTransactions(id, targetSettlementId, transactionIds, user)
   }
 
   public unlinkTransaction (transactionId: string, user: string): void {
+    const settlementId = this.repository.findTransactionSettlementId(transactionId, user)
     this.repository.unlinkTransaction(transactionId, user)
+    if (settlementId) {
+      const isEmpty = this.repository.isSettlementEmpty(settlementId)
+      if (isEmpty) {
+        this.repository.deleteSettlement(settlementId, user)
+      }
+    }
+  }
+
+  public editSettlement ({ settlementId, value, user }: { settlementId: string, value: { tae?: number | null, averageBalance?: number | null }, user: string }) {
+    const updated = this.repository.updateSettlement(settlementId, user, {
+      tae: value.tae !== undefined ? value.tae : undefined,
+      averageBalance: value.averageBalance !== undefined ? value.averageBalance : undefined
+    })
+    return updated || null
   }
 }

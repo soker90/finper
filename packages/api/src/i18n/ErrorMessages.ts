@@ -16,7 +16,8 @@ export const ERROR_MESSAGE = {
   },
   YIELD: {
     NOT_FOUND: 'El rendimiento no existe',
-    TRANSACTION_IDS_REQUIRED: 'Selecciona al menos un movimiento para enlazar'
+    TRANSACTION_IDS_REQUIRED: 'Selecciona al menos un movimiento para enlazar',
+    ALREADY_EXISTS: 'Ya existe un rendimiento de este tipo para esta cuenta'
   },
   DEBT: {
     NOT_FOUND: 'La deuda no existe'

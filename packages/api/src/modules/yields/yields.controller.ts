@@ -4,7 +4,8 @@ import {
   validateYieldCreateParams,
   validateYieldEditParams,
   validateYieldExist,
-  validateYieldLinkParams
+  validateYieldLinkParams,
+  validateSettlementEditParams
 } from './yields.validators'
 import Boom from '@hapi/boom'
 import { ERROR_MESSAGE } from '../../i18n'
@@ -57,10 +58,9 @@ export class YieldsController {
 
   public getMatchingTransactions (req: Request, res: Response): void {
     const { id } = req.params
-    const categoryId = req.query.categoryId as string | undefined
     this.logger.logInfo(`/matching-transactions - yield: ${id}`)
     validateYieldExist(id, req.user)
-    const response = this.yieldsService.getMatchingTransactions({ id, categoryId, user: req.user })
+    const response = this.yieldsService.getMatchingTransactions({ id, user: req.user })
     res.send(response)
   }
 
@@ -68,8 +68,15 @@ export class YieldsController {
     const { id } = req.params
     this.logger.logInfo(`/link-transactions - yield: ${id}`)
     validateYieldExist(id, req.user)
-    const transactionIds = validateYieldLinkParams({ transactionIds: req.body.transactionIds })
-    this.yieldsService.linkTransactions({ id, transactionIds, user: req.user })
+    const parsed = validateYieldLinkParams(req.body)
+    this.yieldsService.linkTransactions({
+      id,
+      transactionIds: parsed.transactionIds,
+      settlementId: parsed.settlementId,
+      tae: parsed.tae,
+      averageBalance: parsed.averageBalance,
+      user: req.user
+    })
     res.status(204).send()
   }
 
@@ -79,5 +86,14 @@ export class YieldsController {
     validateYieldExist(id, req.user)
     this.yieldsService.unlinkTransaction(transactionId, req.user)
     res.status(204).send()
+  }
+
+  public editSettlement (req: Request, res: Response): void {
+    const { id, settlementId } = req.params
+    this.logger.logInfo(`/edit-settlement - yield: ${id}, settlement: ${settlementId}`)
+    const { value } = validateSettlementEditParams({ params: req.params, body: req.body, user: req.user })
+    const response = this.yieldsService.editSettlement({ settlementId, value, user: req.user })
+    if (!response) throw Boom.notFound(ERROR_MESSAGE.YIELD.NOT_FOUND).output
+    res.send(response)
   }
 }

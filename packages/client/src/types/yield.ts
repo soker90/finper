@@ -5,7 +5,7 @@ export interface Yield {
   name: string
   type: YieldType
   accountId: string
-  categoryId: string
+  categoryIds: string[]
   account: {
     _id: string
     name: string
@@ -17,10 +17,10 @@ export interface Yield {
 }
 
 export interface YieldInput {
-  name?: string
+  name: string
   type: YieldType
   accountId: string
-  categoryId: string
+  categoryIds: string[]
 }
 
 export interface YieldEntry {
@@ -32,18 +32,23 @@ export interface YieldEntry {
   note?: string
 }
 
-export interface YieldMonthRow {
-  month: string
+export interface YieldSettlement {
+  id: string
   grossIncome?: number
   taxExpense?: number
   net?: number
+  tae?: number | null
+  averageBalance?: number | null
+  taeSource?: 'provided' | 'calculated' | null
+  balanceSource?: 'provided' | 'calculated' | null
   billsTotal?: number
   cashbackAmount?: number
   percentage?: number | null
+  status?: 'pending' | 'completed'
   entries: YieldEntry[]
 }
 
 export interface YieldDetail extends Yield {
   entries: YieldEntry[]
-  monthlyRows: YieldMonthRow[]
+  settlements: YieldSettlement[]
 }

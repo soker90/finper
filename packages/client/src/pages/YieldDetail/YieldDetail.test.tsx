@@ -5,11 +5,9 @@ import { render } from '../../test/testUtils'
 import YieldDetail from './index'
 import { YIELDS_LIST } from '../../mock/handlers/yields'
 
-vi.mock('recharts', async (importOriginal) => {
-  const original = await importOriginal<typeof import('recharts')>()
+vi.mock('./components/YieldSettlementChart', () => {
   return {
-    ...original,
-    ResponsiveContainer: ({ children }: any) => <div className='recharts-responsive-container'>{children}</div>
+    default: () => <div className='recharts-responsive-container'>Mocked Chart</div>
   }
 })
 
@@ -44,14 +42,14 @@ describe('YieldDetail', () => {
     // 2. Renders statistics cards
     expect(await findByText('Saldo actual cuenta')).toBeDefined()
     expect(await findByText('Neto acumulado')).toBeDefined()
-    expect(await findByText('Último mes')).toBeDefined()
+    expect(await findByText('Última liquidación')).toBeDefined()
     expect(await findByText('Movimientos enlazados')).toBeDefined()
 
     // 3. Renders chart container
+    expect(await findByText('Mocked Chart')).toBeDefined()
     expect(container.querySelector('.recharts-responsive-container')).not.toBeNull()
 
     // 4. Renders table with calendar month and movements
-    expect(await findByText('2026-07')).toBeDefined()
-    expect(await findByText('Detalle por Mes')).toBeDefined()
+    expect(await findByText('Detalle de Liquidaciones')).toBeDefined()
   })
 })

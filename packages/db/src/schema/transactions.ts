@@ -4,7 +4,7 @@ import { accounts } from './accounts';
 import { categories } from './categories';
 import { stores } from './stores';
 import { subscriptions } from './subscriptions';
-import { yields } from './yields';
+import { yields, yieldSettlements } from './yields';
 
 
 
@@ -24,6 +24,7 @@ export const transactions = sqliteTable('transactions', {
   // (tipo 'cashback') — el papel se deduce del `type` de la transacción y
   // del `type` del rendimiento, sin necesidad de columnas adicionales.
   yieldId: text('yield_id').references(() => yields.id),
+  yieldSettlementId: text('yield_settlement_id').references(() => yieldSettlements.id),
   tags: text('tags', { mode: 'json' }).$type<string[]>().notNull().default([]),
   user: text('user').notNull().references(() => users.username),
 }, (table) => ({

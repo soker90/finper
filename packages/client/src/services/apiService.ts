@@ -273,8 +273,11 @@ export const editYield = (id: string, params: Partial<YieldInput>): Promise<{ da
 export const deleteYield = (id: string): Promise<{ error?: string }> =>
   axios.delete(`${YIELDS}/${id}`).then(() => ({})).catch((error: any) => ({ error: extractError(error) }))
 
-export const linkYieldTransactions = (id: string, transactionIds: string[]): Promise<{ error?: string }> =>
-  axios.post(`${YIELDS}/${id}/link-transactions`, { transactionIds }).then(() => ({})).catch((error: any) => ({ error: extractError(error) }))
+export const linkYieldTransactions = (id: string, payload: { transactionIds: string[], settlementId?: string | null, tae?: number | null, averageBalance?: number | null }): Promise<{ error?: string }> =>
+  axios.post(`${YIELDS}/${id}/link-transactions`, payload).then(() => ({})).catch((error: any) => ({ error: extractError(error) }))
+
+export const editYieldSettlement = (id: string, settlementId: string, payload: { tae?: number | null, averageBalance?: number | null }): Promise<{ error?: string }> =>
+  axios.put(`${YIELDS}/${id}/settlements/${settlementId}`, payload).then(() => ({})).catch((error: any) => ({ error: extractError(error) }))
 
 export const unlinkYieldTransaction = (id: string, transactionId: string): Promise<{ error?: string }> =>
   axios.delete(`${YIELDS}/${id}/unlink-transactions/${transactionId}`).then(() => ({})).catch((error: any) => ({ error: extractError(error) }))

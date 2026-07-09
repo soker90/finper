@@ -1,9 +1,11 @@
-import { useState } from 'react'
+import React, { useState } from 'react'
 import {
   Typography, Box, Checkbox, List, ListItem,
   ListItemText, ListItemIcon, CircularProgress, Alert,
-  FormControl, InputLabel, Select, MenuItem
+  FormControl, InputLabel, Select, MenuItem, Radio, RadioGroup,
+  FormControlLabel, Grid
 } from '@mui/material'
+import InputForm from 'components/forms/InputForm'
 import { SearchOutlined } from '@ant-design/icons'
 import useSWR from 'swr'
 import ModalGrid from 'components/modals/ModalGrid'
@@ -11,7 +13,7 @@ import { format } from 'utils'
 import { Yield, YieldEntry } from 'types'
 import { YIELDS } from 'constants/api-paths'
 import { linkYieldTransactions } from 'services/apiService'
-import { useCategories } from 'hooks/useCategories'
+import { useYield } from 'hooks/useYields'
 
 type Props = {
   item: Yield
@@ -20,14 +22,21 @@ type Props = {
 }
 
 const LinkTransactionsModal = ({ item, onClose, onLinked }: Props) => {
-  const { categories } = useCategories()
   const [selected, setSelected] = useState<Set<string>>(new Set())
   const [submitting, setSubmitting] = useState(false)
   const [linkError, setLinkError] = useState<string | null>(null)
-  const [categoryId, setCategoryId] = useState<string>(item.categoryId)
+
+  // Options for linking
+  const [linkMode, setLinkMode] = useState<'new' | 'existing'>('new')
+  const [targetSettlementId, setTargetSettlementId] = useState<string>('')
+  const [tae, setTae] = useState<string>('')
+  const [averageBalance, setAverageBalance] = useState<string>('')
+
+  const { yieldData } = useYield(item._id)
+  const existingSettlements = yieldData?.settlements ?? []
 
   const { data: transactions, isLoading } = useSWR<YieldEntry[]>(
-    `${YIELDS}/${item._id}/matching-transactions?categoryId=${categoryId}`
+    `${YIELDS}/${item._id}/matching-transactions`
   )
 
   const toggle = (id: string) =>
@@ -39,9 +48,19 @@ const LinkTransactionsModal = ({ item, onClose, onLinked }: Props) => {
 
   const handleSubmit = async () => {
     if (selected.size === 0) return
+    if (linkMode === 'existing' && !targetSettlementId) return
+
     setSubmitting(true)
     setLinkError(null)
-    const result = await linkYieldTransactions(item._id, [...selected])
+
+    const payload = {
+      transactionIds: [...selected],
+      settlementId: linkMode === 'existing' ? targetSettlementId : null,
+      tae: (linkMode === 'new' && tae) ? parseFloat(tae) : null,
+      averageBalance: (linkMode === 'new' && averageBalance) ? parseFloat(averageBalance) : null
+    }
+
+    const result = await linkYieldTransactions(item._id, payload)
     setSubmitting(false)
     if (result.error) {
       setLinkError(result.error)
@@ -57,32 +76,72 @@ const LinkTransactionsModal = ({ item, onClose, onLinked }: Props) => {
       title={`Movimientos de ${item.name}`}
       onClose={onClose}
       action={handleSubmit}
-      actionDisabled={submitting || selected.size === 0}
+      actionDisabled={submitting || selected.size === 0 || (linkMode === 'existing' && !targetSettlementId)}
     >
       <Box sx={{ width: '100%', gridColumn: '1 / -1' }}>
         <Typography variant='caption' color='textSecondary' sx={{ display: 'block', mb: 2 }}>
-          Marca tanto el abono como, si tu banco lo separa, el impuesto retenido o los recibos
-          relacionados — todos se enlazan a este rendimiento.
+          Selecciona los movimientos sin enlazar para agruparlos en una liquidación.
         </Typography>
 
-        <FormControl fullWidth size='small' sx={{ mb: 2 }}>
-          <InputLabel id='category-filter-label'>Filtrar por categoría</InputLabel>
-          <Select
-            labelId='category-filter-label'
-            value={categoryId}
-            label='Filtrar por categoría'
-            onChange={(e) => {
-              setCategoryId(e.target.value as string)
-              setSelected(new Set())
-            }}
+        {/* Link options */}
+        <FormControl component='fieldset' fullWidth sx={{ mb: 2 }}>
+          <RadioGroup
+            row
+            value={linkMode}
+            onChange={(e) => setLinkMode(e.target.value as 'new' | 'existing')}
           >
-            {categories.map((cat) => (
-              <MenuItem key={cat._id} value={cat._id}>
-                {cat.name}
-              </MenuItem>
-            ))}
-          </Select>
+            <FormControlLabel value='new' control={<Radio size='small' />} label='Nueva liquidación' />
+            {existingSettlements.length > 0 && (
+              <FormControlLabel value='existing' control={<Radio size='small' />} label='Añadir a liquidación existente' />
+            )}
+          </RadioGroup>
         </FormControl>
+
+        {linkMode === 'new' && item.type === 'interest' && (
+          <Grid container spacing={2} sx={{ mb: 2 }}>
+            <InputForm
+              id='tae'
+              label='TAE (%) (Opcional)'
+              type='number'
+              value={tae}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setTae(e.target.value)}
+              inputProps={{ step: 'any' }}
+              size={6}
+              error={false}
+              errorText=''
+            />
+            <InputForm
+              id='averageBalance'
+              label='Saldo Medio (€) (Opcional)'
+              type='number'
+              value={averageBalance}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setAverageBalance(e.target.value)}
+              inputProps={{ step: 'any' }}
+              size={6}
+              error={false}
+              errorText=''
+            />
+          </Grid>
+        )}
+
+        {/* Render options for existing settlement */}
+        {linkMode === 'existing' && (
+          <FormControl fullWidth size='small' sx={{ mb: 2 }}>
+            <InputLabel id='settlement-select-label'>Seleccionar liquidación</InputLabel>
+            <Select
+              labelId='settlement-select-label'
+              value={targetSettlementId}
+              label='Seleccionar liquidación'
+              onChange={(e) => setTargetSettlementId(e.target.value as string)}
+            >
+              {existingSettlements.map((settlement, index) => (
+                <MenuItem key={settlement.id} value={settlement.id}>
+                  Liquidación #{index + 1} ({settlement.entries.length} movimientos)
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        )}
 
         {isLoading && (
           <Box sx={{ display: 'flex', justifyContent: 'center', py: 3 }}>
@@ -92,12 +151,12 @@ const LinkTransactionsModal = ({ item, onClose, onLinked }: Props) => {
 
         {!isLoading && (!transactions || transactions.length === 0) && (
           <Alert severity='info' icon={<SearchOutlined />}>
-            No hay movimientos sin enlazar en esta categoría para la cuenta {item.account.name}.
+            No hay movimientos candidatos sin enlazar para la cuenta {item.account.name}.
           </Alert>
         )}
 
         {linkError && (
-          <Alert severity='error' sx={{ mt: 1 }}>{linkError}</Alert>
+          <Alert severity='error' sx={{ mt: 1, mb: 1 }}>{linkError}</Alert>
         )}
 
         {!isLoading && transactions && transactions.length > 0 && (
@@ -105,7 +164,7 @@ const LinkTransactionsModal = ({ item, onClose, onLinked }: Props) => {
             <Typography variant='caption' color='textSecondary' sx={{ display: 'block', mb: 1 }}>
               {transactions.length} movimiento{transactions.length > 1 ? 's' : ''} encontrado{transactions.length > 1 ? 's' : ''} · cuenta {item.account.name}
             </Typography>
-            <Box sx={{ maxHeight: 360, overflowY: 'auto', pr: 0.5 }}>
+            <Box sx={{ maxHeight: 280, overflowY: 'auto', pr: 0.5 }}>
               <List dense disablePadding>
                 {transactions.map((tx) => {
                   const checked = selected.has(tx._id)
@@ -132,18 +191,18 @@ const LinkTransactionsModal = ({ item, onClose, onLinked }: Props) => {
                         primary={
                           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                             <Typography variant='body2' sx={{ fontWeight: checked ? 600 : 400 }}>
-                              {format.date(tx.date)}
+                              {format.date(tx.date)} · {tx.note || 'Sin nota'}
                             </Typography>
                             <Typography variant='body2' sx={{ fontWeight: 600, color: checked ? 'primary.main' : 'inherit' }}>
                               {format.euro(tx.amount)}
                             </Typography>
                           </Box>
-                        }
+                         }
                         secondary={
                           <Typography variant='caption' color='textSecondary'>
-                            {tx.category?.name} · {tx.type === 'income' ? 'Ingreso' : 'Gasto'}
+                            Categoría: {tx.category?.name} · {tx.type === 'income' ? 'Ingreso' : 'Gasto'}
                           </Typography>
-                        }
+                         }
                       />
                     </ListItem>
                   )
