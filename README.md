@@ -66,6 +66,7 @@ Actualmente Finper cubre, entre otros, estos módulos:
 - Seguimiento de pensión
 - Gestión de suscripciones recurrentes
 - Gestión de suministros e inmuebles
+- Rendimientos (intereses, cashback y similares) al estilo de suscripciones: se enlazan movimientos ya existentes a un rendimiento
 - Tickets y utilidades auxiliares
 
 ## Arquitectura del proyecto
@@ -424,6 +425,7 @@ Hay documentación técnica más detallada para algunos módulos:
 
 - `docs/loan-module.md`
 - `docs/subscription-module.md`
+- `docs/yields-module.md`
 
 ## Healthcheck
 

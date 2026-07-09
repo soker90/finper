@@ -4,6 +4,7 @@ import { accounts } from './accounts';
 import { categories } from './categories';
 import { stores } from './stores';
 import { subscriptions } from './subscriptions';
+import { yields } from './yields';
 
 
 
@@ -17,6 +18,12 @@ export const transactions = sqliteTable('transactions', {
   note: text('note'),
   storeId: text('store_id').references(() => stores.id),
   subscriptionId: text('subscription_id').references(() => subscriptions.id),
+  // Enlace opcional a un Rendimiento (ver schema/yields.ts). Un movimiento de
+  // ingreso enlazado es el abono; uno de gasto es el impuesto retenido
+  // (rendimientos de tipo 'interest') o el recibo que generó el cashback
+  // (tipo 'cashback') — el papel se deduce del `type` de la transacción y
+  // del `type` del rendimiento, sin necesidad de columnas adicionales.
+  yieldId: text('yield_id').references(() => yields.id),
   tags: text('tags', { mode: 'json' }).$type<string[]>().notNull().default([]),
   user: text('user').notNull().references(() => users.username),
 }, (table) => ({

@@ -12,7 +12,8 @@ import {
   HomeOutlined,
   StockOutlined,
   TrophyOutlined,
-  TagsOutlined
+  TagsOutlined,
+  RiseOutlined
 } from '@ant-design/icons'
 import { BeachIcon } from 'components'
 
@@ -141,6 +142,14 @@ const dashboard = {
       type: 'item',
       url: '/seguimientos',
       icon: TagsOutlined,
+      breadcrumbs: true
+    },
+    {
+      id: 'yields',
+      title: 'Rendimientos',
+      type: 'item',
+      url: '/rendimientos',
+      icon: RiseOutlined,
       breadcrumbs: true
     }
   ]

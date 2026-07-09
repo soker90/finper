@@ -11,4 +11,5 @@ export * from './properties';
 export * from './stocks';
 export * from './stores';
 export * from './subscriptions';
+export * from './yields';
 export * from './transactions';

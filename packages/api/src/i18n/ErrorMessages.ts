@@ -14,6 +14,10 @@ export const ERROR_MESSAGE = {
   TRANSACTION: {
     NOT_FOUND: 'No existe el movimiento'
   },
+  YIELD: {
+    NOT_FOUND: 'El rendimiento no existe',
+    TRANSACTION_IDS_REQUIRED: 'Selecciona al menos un movimiento para enlazar'
+  },
   DEBT: {
     NOT_FOUND: 'La deuda no existe'
   },
