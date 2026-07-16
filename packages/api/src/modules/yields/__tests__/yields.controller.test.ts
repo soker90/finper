@@ -97,6 +97,17 @@ describe('Yields Controller', () => {
 
       expect(res.body).toMatchObject({ name: 'Intereses Cuenta Naranja', type: 'interest', accountId, categoryIds: [categoryId] })
     })
+
+    test('when successful without name, it should create the yield with null name and format default on GET', async () => {
+      const res = await supertest(server.app).post(path).auth(token, { type: 'bearer' })
+        .send({ type: 'cashback', accountId, categoryIds: [categoryId] })
+        .expect(200)
+
+      expect(res.body).toMatchObject({ name: null, type: 'cashback', accountId, categoryIds: [categoryId] })
+
+      const getRes = await supertest(server.app).get(path).auth(token, { type: 'bearer' }).expect(200)
+      expect(getRes.body[0]).toMatchObject({ name: 'A - Cashback' })
+    })
   })
 
   describe('GET /', () => {

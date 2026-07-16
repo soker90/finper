@@ -8,7 +8,7 @@ import { accounts } from './accounts';
 //   - 'cashback': solo ingresos (abono); los gastos enlazados son los recibos.
 export const yields = sqliteTable('yields', {
   id: text('id').primaryKey(),
-  name: text('name').notNull(),
+  name: text('name'), // nullable: si no se provee, la API formatea un nombre por defecto
   type: text('type').notNull(), // 'interest' | 'cashback'
   accountId: text('account_id').notNull().references(() => accounts.id),
   categoryIds: text('category_ids', { mode: 'json' }).$type<string[]>().notNull().default([]),

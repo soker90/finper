@@ -1,11 +1,11 @@
 import { roundMoney, TRANSACTION } from '@soker90/finper-db'
 import type { YieldRow, YieldTransactionRow } from './yields.repository'
 
-type Yield = { id: string, name: string, type: string, accountId: string, categoryIds: string[], user: string }
+type Yield = { id: string, name?: string | null, type: string, accountId: string, categoryIds: string[], user: string }
 
 export const serializeYield = (y: Yield) => ({
   _id: y.id,
-  name: y.name,
+  name: y.name || null,
   type: y.type,
   accountId: y.accountId,
   categoryIds: y.categoryIds
@@ -131,9 +131,12 @@ export const serializeYieldSummary = (y: YieldRow, entries: YieldTransactionRow[
     }
   }, 0)
 
+  const defaultName = `${y.accountName ?? 'Cuenta'} - ${y.type === 'interest' ? 'Intereses' : 'Cashback'}`
+  const name = y.name || defaultName
+
   return {
     _id: y.id,
-    name: y.name,
+    name,
     type: y.type,
     accountId: y.accountId,
     categoryIds: y.categoryIds,

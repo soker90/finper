@@ -21,7 +21,7 @@ export class YieldsService {
     return serializeYieldDetail(y, entries, settlements)
   }
 
-  public addYield (params: { name: string, type: string, accountId: string, categoryIds: string[], user: string }) {
+  public addYield (params: { name?: string | null, type: string, accountId: string, categoryIds: string[], user: string }) {
     const created = this.repository.create(params)
     return serializeYield(created)
   }

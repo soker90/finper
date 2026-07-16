@@ -37,29 +37,11 @@ const YieldForm = ({ editingYield, onClose, onSubmit }: Props) => {
         categoryIds: []
       }
 
-  const { register, handleSubmit, formState: { errors, isSubmitting }, reset, watch, setValue, getValues, control } = useForm<YieldInput>({
+  const { register, handleSubmit, formState: { errors, isSubmitting }, reset, control } = useForm<YieldInput>({
     defaultValues
   })
 
   const [submitError, setSubmitError] = useState<string | null>(null)
-
-  const typeWatch = watch('type')
-  const accountIdWatch = watch('accountId')
-
-  // Auto-suggestion for Yield Name based on Account + Type
-  useEffect(() => {
-    if (!editingYield) {
-      const selectedAccount = accounts.find((a) => a._id === accountIdWatch)
-      if (selectedAccount && typeWatch) {
-        const typeLabel = typeWatch === 'interest' ? 'Intereses' : 'Cashback'
-        const suggestion = `${selectedAccount.name} - ${typeLabel}`
-        const currentName = getValues('name')
-        if (!currentName || currentName.includes(' - Intereses') || currentName.includes(' - Cashback')) {
-          setValue('name', suggestion)
-        }
-      }
-    }
-  }, [typeWatch, accountIdWatch, editingYield, accounts, setValue, getValues])
 
   useEffect(() => {
     reset(defaultValues)
@@ -86,12 +68,12 @@ const YieldForm = ({ editingYield, onClose, onSubmit }: Props) => {
     >
       <InputForm
         id='name'
-        label='Nombre'
-        placeholder='Ej. Intereses Cuenta Naranja'
+        label='Nombre (opcional)'
+        placeholder='Por defecto: Cuenta - Tipo'
         size={6}
-        error={Boolean(errors.name)}
-        errorText='El nombre es obligatorio'
-        {...register('name', { required: true })}
+        error={false}
+        errorText=''
+        {...register('name')}
       />
 
       <SelectForm

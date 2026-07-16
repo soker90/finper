@@ -78,13 +78,16 @@ export const yieldsHandlers = [
 
   http.post('/yields', async ({ request }) => {
     const body = await request.json() as Record<string, any>
-    return HttpResponse.json({ ...makeYield(), ...body }, { status: 200 })
+    const base = makeYield()
+    const name = body.name || `${base.account.name} - ${body.type === 'interest' ? 'Intereses' : 'Cashback'}`
+    return HttpResponse.json({ ...base, ...body, name }, { status: 200 })
   }),
 
   http.put('/yields/:id', async ({ params, request }) => {
     const body = await request.json() as Record<string, any>
     const found = YIELDS_LIST.find(y => y._id === params.id) ?? YIELDS_LIST[0]
-    return HttpResponse.json({ ...found, ...body })
+    const name = body.name !== undefined ? (body.name || `${found.account.name} - ${body.type || found.type === 'interest' ? 'Intereses' : 'Cashback'}`) : found.name
+    return HttpResponse.json({ ...found, ...body, name })
   }),
 
   http.delete('/yields/:id', () => {

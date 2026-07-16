@@ -17,7 +17,7 @@ export interface Yield {
 }
 
 export interface YieldInput {
-  name: string
+  name?: string | null
   type: YieldType
   accountId: string
   categoryIds: string[]
