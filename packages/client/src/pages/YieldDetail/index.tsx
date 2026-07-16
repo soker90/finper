@@ -47,6 +47,7 @@ const YieldDetail = () => {
 
   const [showForm, setShowForm] = useState(false)
   const [showLinkModal, setShowLinkModal] = useState(false)
+  const [fixedSettlement, setFixedSettlement] = useState<YieldSettlement | null>(null)
   const [editingSettlement, setEditingSettlement] = useState<YieldSettlement | null>(null)
 
   if (loadingDetail) {
@@ -123,7 +124,10 @@ const YieldDetail = () => {
           <Button
             variant='outlined'
             startIcon={<SearchOutlined />}
-            onClick={() => setShowLinkModal(true)}
+            onClick={() => {
+              setFixedSettlement(null)
+              setShowLinkModal(true)
+            }}
           >
             Enlazar movimientos
           </Button>
@@ -154,7 +158,11 @@ const YieldDetail = () => {
       <MainCard title='Detalle de Liquidaciones' content={false}>
         <YieldSettlementsTable
           yieldData={yieldData}
-          onEditSettlement={(s) => setEditingSettlement(s)}
+          onEditSettlement={(settlement) => setEditingSettlement(settlement)}
+          onLinkToSettlement={(settlement) => {
+            setFixedSettlement(settlement)
+            setShowLinkModal(true)
+          }}
           onUnlinkTransaction={handleUnlink}
         />
       </MainCard>
@@ -178,8 +186,14 @@ const YieldDetail = () => {
       {showLinkModal && (
         <LinkTransactionsModal
           item={yieldData}
-          onClose={() => setShowLinkModal(false)}
+          fixedSettlement={fixedSettlement ?? undefined}
+          onClose={() => {
+            setShowLinkModal(false)
+            setFixedSettlement(null)
+          }}
           onLinked={async () => {
+            setShowLinkModal(false)
+            setFixedSettlement(null)
             await mutateDetail()
             mutate(YIELDS)
           }}

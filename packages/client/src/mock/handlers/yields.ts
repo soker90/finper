@@ -26,6 +26,51 @@ const makeYield = (index: number = 0) => {
 
 export const YIELDS_LIST = Array.from({ length: 3 }, (_, i) => makeYield(i))
 
+// Two settlements: one with income (settlementDate set) and one pending (settlementDate null)
+const MOCK_DETAIL_SETTLEMENTS = [
+  {
+    id: 'settlement1',
+    settlementDate: new Date('2026-07-01').getTime(),
+    grossIncome: 100,
+    taxExpense: 0,
+    net: 100,
+    tae: 2.5,
+    averageBalance: 48000,
+    taeSource: 'provided',
+    balanceSource: 'calculated',
+    billsTotal: 0,
+    cashbackAmount: 100,
+    percentage: null,
+    status: 'completed',
+    entries: [
+      {
+        _id: 'tx1',
+        date: new Date('2026-07-01').getTime(),
+        amount: 100,
+        type: 'income',
+        category: { _id: 'cat1', name: 'Intereses' },
+        note: 'Abono intereses'
+      }
+    ]
+  },
+  {
+    id: 'settlement2',
+    settlementDate: null,
+    grossIncome: 60,
+    taxExpense: 0,
+    net: 60,
+    tae: null,
+    averageBalance: null,
+    taeSource: null,
+    balanceSource: null,
+    billsTotal: 60,
+    cashbackAmount: 0,
+    percentage: null,
+    status: 'pending',
+    entries: []
+  }
+]
+
 export const yieldsHandlers = [
   http.get('/yields', () => {
     return HttpResponse.json(YIELDS_LIST)
@@ -60,32 +105,7 @@ export const yieldsHandlers = [
           note: 'Abono intereses'
         }
       ],
-      settlements: [
-        {
-          id: 'settlement1',
-          grossIncome: 100,
-          taxExpense: 0,
-          net: 100,
-          tae: 2.5,
-          averageBalance: 48000,
-          taeSource: 'provided',
-          balanceSource: 'calculated',
-          billsTotal: 0,
-          cashbackAmount: 100,
-          percentage: null,
-          status: 'completed',
-          entries: [
-            {
-              _id: 'tx1',
-              date: new Date('2026-07-01').getTime(),
-              amount: 100,
-              type: 'income',
-              category: { _id: 'cat1', name: 'Intereses' },
-              note: 'Abono intereses'
-            }
-          ]
-        }
-      ]
+      settlements: MOCK_DETAIL_SETTLEMENTS
     })
   }),
 

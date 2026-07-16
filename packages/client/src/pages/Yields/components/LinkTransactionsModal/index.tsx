@@ -10,7 +10,7 @@ import { SearchOutlined } from '@ant-design/icons'
 import useSWR from 'swr'
 import ModalGrid from 'components/modals/ModalGrid'
 import { format } from 'utils'
-import { Yield, YieldEntry } from 'types'
+import { Yield, YieldEntry, YieldSettlement } from 'types'
 import { YIELDS } from 'constants/api-paths'
 import { linkYieldTransactions } from 'services/apiService'
 import { useYield } from 'hooks/useYields'
@@ -19,21 +19,24 @@ type Props = {
   item: Yield
   onClose: () => void
   onLinked: () => void
+  /** When provided, the modal is pre-fixed to this settlement: no RadioGroup or Select is shown. */
+  fixedSettlement?: YieldSettlement
 }
 
-const LinkTransactionsModal = ({ item, onClose, onLinked }: Props) => {
+const LinkTransactionsModal = ({ item, onClose, onLinked, fixedSettlement }: Props) => {
   const [selected, setSelected] = useState<Set<string>>(new Set())
   const [submitting, setSubmitting] = useState(false)
   const [linkError, setLinkError] = useState<string | null>(null)
 
-  // Options for linking
-  const [linkMode, setLinkMode] = useState<'new' | 'existing'>('new')
-  const [targetSettlementId, setTargetSettlementId] = useState<string>('')
+  // When fixedSettlement is provided, we are implicitly in 'existing' mode
+  const [linkMode, setLinkMode] = useState<'new' | 'existing'>(fixedSettlement ? 'existing' : 'new')
+  const [targetSettlementId, setTargetSettlementId] = useState<string>(fixedSettlement?.id ?? '')
   const [tae, setTae] = useState<string>('')
   const [averageBalance, setAverageBalance] = useState<string>('')
 
+  // Only fetch existing settlements when no fixed settlement is provided (SWR deduplication handles cache)
   const { yieldData } = useYield(item._id)
-  const existingSettlements = yieldData?.settlements ?? []
+  const existingSettlements = (!fixedSettlement && yieldData?.settlements) ? yieldData.settlements : []
 
   const { data: transactions, isLoading } = useSWR<YieldEntry[]>(
     `${YIELDS}/${item._id}/matching-transactions`
@@ -70,6 +73,13 @@ const LinkTransactionsModal = ({ item, onClose, onLinked }: Props) => {
     onClose()
   }
 
+  const getSettlementLabel = (settlement: YieldSettlement) => {
+    const dateLabel = settlement.settlementDate
+      ? format.date(settlement.settlementDate)
+      : 'Pendiente'
+    return `${dateLabel} (${settlement.entries.length} movimientos)`
+  }
+
   return (
     <ModalGrid
       show
@@ -83,21 +93,23 @@ const LinkTransactionsModal = ({ item, onClose, onLinked }: Props) => {
           Selecciona los movimientos sin enlazar para agruparlos en una liquidación.
         </Typography>
 
-        {/* Link options */}
-        <FormControl component='fieldset' fullWidth sx={{ mb: 2 }}>
-          <RadioGroup
-            row
-            value={linkMode}
-            onChange={(e) => setLinkMode(e.target.value as 'new' | 'existing')}
-          >
-            <FormControlLabel value='new' control={<Radio size='small' />} label='Nueva liquidación' />
-            {existingSettlements.length > 0 && (
-              <FormControlLabel value='existing' control={<Radio size='small' />} label='Añadir a liquidación existente' />
-            )}
-          </RadioGroup>
-        </FormControl>
+        {/* Link options – hidden when settlement is already fixed from a table row */}
+        {!fixedSettlement && (
+          <FormControl component='fieldset' fullWidth sx={{ mb: 2 }}>
+            <RadioGroup
+              row
+              value={linkMode}
+              onChange={(e) => setLinkMode(e.target.value as 'new' | 'existing')}
+            >
+              <FormControlLabel value='new' control={<Radio size='small' />} label='Nueva liquidación' />
+              {existingSettlements.length > 0 && (
+                <FormControlLabel value='existing' control={<Radio size='small' />} label='Añadir a liquidación existente' />
+              )}
+            </RadioGroup>
+          </FormControl>
+        )}
 
-        {linkMode === 'new' && item.type === 'interest' && (
+        {!fixedSettlement && linkMode === 'new' && item.type === 'interest' && (
           <Grid container spacing={2} sx={{ mb: 2 }}>
             <InputForm
               id='tae'
@@ -124,8 +136,8 @@ const LinkTransactionsModal = ({ item, onClose, onLinked }: Props) => {
           </Grid>
         )}
 
-        {/* Render options for existing settlement */}
-        {linkMode === 'existing' && (
+        {/* Settlement selector – hidden when fixedSettlement is provided */}
+        {!fixedSettlement && linkMode === 'existing' && (
           <FormControl fullWidth size='small' sx={{ mb: 2 }}>
             <InputLabel id='settlement-select-label'>Seleccionar liquidación</InputLabel>
             <Select
@@ -134,9 +146,9 @@ const LinkTransactionsModal = ({ item, onClose, onLinked }: Props) => {
               label='Seleccionar liquidación'
               onChange={(e) => setTargetSettlementId(e.target.value as string)}
             >
-              {existingSettlements.map((settlement, index) => (
+              {existingSettlements.map((settlement) => (
                 <MenuItem key={settlement.id} value={settlement.id}>
-                  Liquidación #{index + 1} ({settlement.entries.length} movimientos)
+                  {getSettlementLabel(settlement)}
                 </MenuItem>
               ))}
             </Select>

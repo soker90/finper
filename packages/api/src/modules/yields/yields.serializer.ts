@@ -24,10 +24,15 @@ export const serializeYieldTransaction = (row: YieldTransactionRow) => {
 }
 
 export const groupEntriesBySettlement = ({ type, entries, settlements }: { type: string, entries: YieldTransactionRow[], settlements: any[] }) => {
-  return settlements.map((settlement) => {
+  const mapped = settlements.map((settlement) => {
     const settlementEntries = entries.filter((e) => e.yieldSettlementId === settlement.id)
     const income = settlementEntries.filter((e) => e.type === TRANSACTION.Income).reduce((sum, e) => sum + e.amount, 0)
     const expense = settlementEntries.filter((e) => e.type === TRANSACTION.Expense).reduce((sum, e) => sum + e.amount, 0)
+
+    const incomeEntries = settlementEntries.filter((e) => e.type === TRANSACTION.Income)
+    const settlementDate = incomeEntries.length > 0
+      ? Math.max(...incomeEntries.map((e) => e.date))
+      : null
 
     if (type === 'interest') {
       const net = income - expense
@@ -75,6 +80,7 @@ export const groupEntriesBySettlement = ({ type, entries, settlements }: { type:
 
       return {
         id: settlement.id,
+        settlementDate,
         grossIncome: roundMoney(income),
         taxExpense: roundMoney(expense),
         net: roundMoney(net),
@@ -94,6 +100,7 @@ export const groupEntriesBySettlement = ({ type, entries, settlements }: { type:
 
       return {
         id: settlement.id,
+        settlementDate,
         billsTotal: roundMoney(billsTotal),
         cashbackAmount: roundMoney(cashbackAmount),
         percentage,
@@ -101,6 +108,14 @@ export const groupEntriesBySettlement = ({ type, entries, settlements }: { type:
         entries: settlementEntries.map(serializeYieldTransaction)
       }
     }
+  })
+
+  // Sort: most recent settlementDate first; null (no income yet) goes last
+  return mapped.sort((rowA, rowB) => {
+    if (rowA.settlementDate === null && rowB.settlementDate === null) return 0
+    if (rowA.settlementDate === null) return 1
+    if (rowB.settlementDate === null) return -1
+    return rowB.settlementDate - rowA.settlementDate
   })
 }
 

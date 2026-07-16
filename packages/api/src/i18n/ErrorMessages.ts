@@ -16,6 +16,7 @@ export const ERROR_MESSAGE = {
   },
   YIELD: {
     NOT_FOUND: 'El rendimiento no existe',
+    SETTLEMENT_NOT_FOUND: 'La liquidación no existe o no pertenece a este rendimiento',
     TRANSACTION_IDS_REQUIRED: 'Selecciona al menos un movimiento para enlazar',
     ALREADY_EXISTS: 'Ya existe un rendimiento de este tipo para esta cuenta'
   },

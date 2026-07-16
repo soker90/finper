@@ -5,7 +5,7 @@ import {
   ListItemText, Tooltip, IconButton, Stack, Chip
 } from '@mui/material'
 import {
-  DownOutlined, UpOutlined, EditOutlined, DeleteOutlined
+  DownOutlined, UpOutlined, EditOutlined, DeleteOutlined, PlusOutlined
 } from '@ant-design/icons'
 import { format } from 'utils'
 import { YieldDetail, YieldSettlement } from 'types'
@@ -13,17 +13,16 @@ import { YieldDetail, YieldSettlement } from 'types'
 interface Props {
   yieldData: YieldDetail
   onEditSettlement: (settlement: YieldSettlement) => void
+  onLinkToSettlement: (settlement: YieldSettlement) => void
   onUnlinkTransaction: (transactionId: string) => void
 }
 
-const YieldSettlementsTable = ({ yieldData, onEditSettlement, onUnlinkTransaction }: Props) => {
+const YieldSettlementsTable = ({ yieldData, onEditSettlement, onLinkToSettlement, onUnlinkTransaction }: Props) => {
   const [expanded, setExpanded] = useState<Record<string, boolean>>({})
 
   const toggle = (id: string) => {
     setExpanded((prev) => ({ ...prev, [id]: !prev[id] }))
   }
-
-  const settlementsCount = yieldData.settlements.length
 
   return (
     <TableContainer>
@@ -49,7 +48,7 @@ const YieldSettlementsTable = ({ yieldData, onEditSettlement, onUnlinkTransactio
                   <TableCell align='right'>% Devuelto</TableCell>
                 </>
                 )}
-            <TableCell align='center' width={100}>Acciones</TableCell>
+            <TableCell align='center' width={120}>Acciones</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
@@ -64,9 +63,11 @@ const YieldSettlementsTable = ({ yieldData, onEditSettlement, onUnlinkTransactio
               </TableRow>
               )
             : (
-                yieldData.settlements.map((settlement, index) => {
+                yieldData.settlements.map((settlement) => {
                   const isOpen = Boolean(expanded[settlement.id])
-                  const label = `Liquidación #${settlementsCount - index}`
+                  const label = settlement.settlementDate
+                    ? format.date(settlement.settlementDate)
+                    : 'Pendiente'
 
                   return (
                     <React.Fragment key={settlement.id}>
@@ -147,6 +148,15 @@ const YieldSettlementsTable = ({ yieldData, onEditSettlement, onUnlinkTransactio
                             </>
                             )}
                         <TableCell align='center' onClick={(e) => e.stopPropagation()}>
+                          <Tooltip title='Añadir movimiento a esta liquidación'>
+                            <IconButton
+                              size='small'
+                              onClick={() => onLinkToSettlement(settlement)}
+                              aria-label={`Añadir movimiento a ${label}`}
+                            >
+                              <PlusOutlined />
+                            </IconButton>
+                          </Tooltip>
                           {yieldData.type === 'interest' && (
                             <Tooltip title='Editar TAE / Saldo Medio'>
                               <IconButton
@@ -189,7 +199,7 @@ const YieldSettlementsTable = ({ yieldData, onEditSettlement, onUnlinkTransactio
                                           <DeleteOutlined />
                                         </IconButton>
                                       </Tooltip>
-                                }
+                                  }
                                   >
                                     <ListItemText
                                       primary={

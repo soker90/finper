@@ -5,7 +5,7 @@ import { db as sqliteDb } from '../../db'
 import { schema } from '@soker90/finper-db'
 import { ERROR_MESSAGE } from '../../i18n'
 
-const { yields, accounts, categories } = schema
+const { yields, accounts, categories, yieldSettlements } = schema
 
 const YIELD_TYPES = ['interest', 'cashback']
 
@@ -63,6 +63,16 @@ export const validateYieldCreateParams = (params: Record<string, any>) => {
   return value
 }
 
+export const validateSettlementBelongsToYield = ({ yieldId, settlementId, user }: { yieldId: string, settlementId: string, user: string }) => {
+  const exists = sqliteDb.select({ id: yieldSettlements.id }).from(yieldSettlements)
+    .where(and(
+      eq(yieldSettlements.id, settlementId),
+      eq(yieldSettlements.yieldId, yieldId),
+      eq(yieldSettlements.user, user)
+    )).get()
+  if (!exists) throw Boom.notFound(ERROR_MESSAGE.YIELD.SETTLEMENT_NOT_FOUND).output
+}
+
 export const validateYieldExist = (id: string, user: string) => {
   const exists = sqliteDb.select({ id: yields.id }).from(yields)
     .where(and(eq(yields.id, id), eq(yields.user, user))).get()
@@ -113,6 +123,7 @@ const editSettlementSchema = Joi.object({
 
 export const validateSettlementEditParams = ({ params, body, user }: { params: Record<string, string>, body: Record<string, any>, user: string }) => {
   validateYieldExist(params.id, user)
+  validateSettlementBelongsToYield({ yieldId: params.id, settlementId: params.settlementId, user })
   const { error, value } = editSettlementSchema.validate(body)
   if (error) throw Boom.badData(error.message).output
   return { id: params.id, settlementId: params.settlementId, value }

@@ -34,6 +34,7 @@ export interface YieldEntry {
 
 export interface YieldSettlement {
   id: string
+  settlementDate?: number | null
   grossIncome?: number
   taxExpense?: number
   net?: number

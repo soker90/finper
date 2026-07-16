@@ -5,7 +5,8 @@ import {
   validateYieldEditParams,
   validateYieldExist,
   validateYieldLinkParams,
-  validateSettlementEditParams
+  validateSettlementEditParams,
+  validateSettlementBelongsToYield
 } from './yields.validators'
 import Boom from '@hapi/boom'
 import { ERROR_MESSAGE } from '../../i18n'
@@ -69,6 +70,9 @@ export class YieldsController {
     this.logger.logInfo(`/link-transactions - yield: ${id}`)
     validateYieldExist(id, req.user)
     const parsed = validateYieldLinkParams(req.body)
+    if (parsed.settlementId) {
+      validateSettlementBelongsToYield({ yieldId: id, settlementId: parsed.settlementId, user: req.user })
+    }
     this.yieldsService.linkTransactions({
       id,
       transactionIds: parsed.transactionIds,
