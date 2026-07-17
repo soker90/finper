@@ -19,8 +19,8 @@ const makeYield = (index: number = 0) => {
     },
     netAccumulated: net,
     annualBreakdown: [
-      { year: 2026, net: Number((net * 0.6).toFixed(2)), grossIncome: Number((net * 0.6).toFixed(2)), taxExpense: 0, billsTotal: 100, cashbackAmount: Number((net * 0.6).toFixed(2)) },
-      { year: 2025, net: Number((net * 0.4).toFixed(2)), grossIncome: Number((net * 0.4).toFixed(2)), taxExpense: 0, billsTotal: 80, cashbackAmount: Number((net * 0.4).toFixed(2)) }
+      { year: 2026, net: Number((net * 0.6).toFixed(2)), grossIncome: Number((net * 0.6).toFixed(2)), taxExpense: 0, billsTotal: 100, cashbackAmount: Number((net * 0.6).toFixed(2)), settlementsCount: 1, weightedTae: 2.5, percentage: 3.2 },
+      { year: 2025, net: Number((net * 0.4).toFixed(2)), grossIncome: Number((net * 0.4).toFixed(2)), taxExpense: 0, billsTotal: 80, cashbackAmount: Number((net * 0.4).toFixed(2)), settlementsCount: 1, weightedTae: 2.0, percentage: 3.0 }
     ],
     entriesCount: faker.number.int({ min: 0, max: 5 }),
     paymentsCount: faker.number.int({ min: 0, max: 3 })
@@ -44,7 +44,6 @@ const MOCK_DETAIL_SETTLEMENTS = [
     billsTotal: 60,
     cashbackAmount: 0,
     percentage: null,
-    grossPercentage: null,
     status: 'pending',
     entries: []
   },
@@ -61,7 +60,6 @@ const MOCK_DETAIL_SETTLEMENTS = [
     billsTotal: 0,
     cashbackAmount: 100,
     percentage: null,
-    grossPercentage: null,
     status: 'completed',
     entries: [
       {

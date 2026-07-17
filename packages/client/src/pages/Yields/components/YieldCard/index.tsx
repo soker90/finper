@@ -32,12 +32,13 @@ const YieldCard = ({ item, selectedYear = 'all', onEdit, onDelete, onSearchTrans
   const displayLabel = isAnnual ? `neto en ${selectedYear}` : 'neto acumulado'
 
   let annualPercentageLabel: string | null = null
-  if (isAnnual && item.type === 'cashback' && annualStats) {
-    if ((annualStats.billsTotal ?? 0) > 0 && (annualStats.cashbackAmount ?? 0) > 0) {
-      const rate = (annualStats.cashbackAmount / annualStats.billsTotal) * 100
-      if (rate > 0) {
-        annualPercentageLabel = `% devuelto en ${selectedYear}: ${format.number(rate)}%`
-      }
+  if (isAnnual && annualStats) {
+    if (item.type === 'cashback') {
+      const p = annualStats.percentage
+      annualPercentageLabel = p !== null && p !== undefined ? `% devuelto en ${selectedYear}: ${format.number(p)}%` : `% devuelto en ${selectedYear}: —`
+    } else if (item.type === 'interest') {
+      const t = annualStats.weightedTae
+      annualPercentageLabel = t !== null && t !== undefined ? `TAE media en ${selectedYear}: ${format.number(t)}%` : `TAE media en ${selectedYear}: —`
     }
   }
 

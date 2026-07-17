@@ -5,7 +5,7 @@ import {
   ListItemText, Tooltip, IconButton, Stack, Chip
 } from '@mui/material'
 import {
-  DownOutlined, UpOutlined, EditOutlined, DeleteOutlined, PlusOutlined
+  DownOutlined, UpOutlined, EditOutlined, DeleteOutlined, PlusOutlined, ExclamationCircleOutlined
 } from '@ant-design/icons'
 import { format } from 'utils'
 import { YieldDetail, YieldSettlement } from 'types'
@@ -26,14 +26,7 @@ const YieldSettlementsTable = ({ yieldData, viewMode = 'settlement', onEditSettl
   }
 
   if (viewMode === 'annual') {
-    const annualMap = new Map<number, YieldSettlement[]>()
-    for (const s of yieldData.settlements) {
-      const year = s.settlementDate ? new Date(s.settlementDate).getFullYear() : new Date().getFullYear()
-      const list = annualMap.get(year) ?? []
-      list.push(s)
-      annualMap.set(year, list)
-    }
-    const annualYears = Array.from(annualMap.keys()).sort((a, b) => b - a)
+    const annualBreakdown = yieldData.annualBreakdown ?? []
 
     return (
       <TableContainer>
@@ -64,32 +57,18 @@ const YieldSettlementsTable = ({ yieldData, viewMode = 'settlement', onEditSettl
             </TableRow>
           </TableHead>
           <TableBody>
-            {annualYears.map((year) => {
-              const list = annualMap.get(year) ?? []
-              const grossIncome = list.reduce((sum, s) => sum + (s.grossIncome ?? 0), 0)
-              const taxExpense = list.reduce((sum, s) => sum + (s.taxExpense ?? 0), 0)
-              const net = list.reduce((sum, s) => sum + (s.net ?? 0), 0)
-              const billsTotal = list.reduce((sum, s) => sum + (s.billsTotal ?? 0), 0)
-              const cashbackAmount = list.reduce((sum, s) => sum + (s.cashbackAmount ?? 0), 0)
-
-              const validPercentages = list.filter((s) => (s.percentage ?? 0) > 0)
-              const avgPercentage = billsTotal > 0 && cashbackAmount > 0
-                ? (cashbackAmount / billsTotal) * 100
-                : validPercentages.length > 0
-                  ? validPercentages.reduce((sum, s) => sum + (s.percentage ?? 0), 0) / validPercentages.length
-                  : 0
-
-              const validGrossPercentages = list.filter((s) => (s.grossPercentage ?? 0) > 0)
-              const avgGrossPercentage = validGrossPercentages.length > 0
-                ? validGrossPercentages.reduce((sum, s) => sum + (s.grossPercentage ?? 0), 0) / validGrossPercentages.length
-                : null
-
-              const validTaes = list.filter((s) => (s.tae ?? 0) > 0)
-              const avgTae = validTaes.length > 0
-                ? validTaes.reduce((sum, s) => sum + (s.tae ?? 0), 0) / validTaes.length
-                : null
-
+            {annualBreakdown.map((stat) => {
+              const year = stat.year
+              const grossIncome = stat.grossIncome ?? 0
+              const taxExpense = stat.taxExpense ?? 0
+              const net = stat.net ?? 0
+              const billsTotal = stat.billsTotal ?? 0
+              const cashbackAmount = stat.cashbackAmount ?? 0
               const isYearExpanded = Boolean(expanded[`year-${year}`])
+              const list = yieldData.settlements.filter(s => {
+                const y = s.settlementDate ? new Date(s.settlementDate).getFullYear() : new Date().getFullYear()
+                return y === year
+              })
 
               return (
                 <React.Fragment key={year}>
@@ -101,7 +80,7 @@ const YieldSettlementsTable = ({ yieldData, viewMode = 'settlement', onEditSettl
                     </TableCell>
                     <TableCell>
                       <Typography variant='subtitle1' sx={{ fontWeight: 600 }}>{year}</Typography>
-                      <Typography variant='caption' color='textSecondary'>{list.length} liquidación{list.length === 1 ? '' : 'es'}</Typography>
+                      <Typography variant='caption' color='textSecondary'>{stat.settlementsCount} liquidación{stat.settlementsCount === 1 ? '' : 'es'}</Typography>
                     </TableCell>
                     {yieldData.type === 'interest'
                       ? (
@@ -109,8 +88,8 @@ const YieldSettlementsTable = ({ yieldData, viewMode = 'settlement', onEditSettl
                           <TableCell align='right'>{format.euro(grossIncome)}</TableCell>
                           <TableCell align='right'>{format.euro(taxExpense)}</TableCell>
                           <TableCell align='right'><Typography sx={{ fontWeight: 600 }} color='primary'>{format.euro(net)}</Typography></TableCell>
-                          <TableCell align='right'>{avgTae ? `${format.number(avgTae)}%` : '—'}</TableCell>
-                          <TableCell align='right'>{list.length}</TableCell>
+                          <TableCell align='right'>{stat.weightedTae !== null && stat.weightedTae !== undefined ? `${format.number(stat.weightedTae)}%` : '—'}</TableCell>
+                          <TableCell align='right'>{stat.settlementsCount}</TableCell>
                         </>
                         )
                       : (
@@ -121,11 +100,7 @@ const YieldSettlementsTable = ({ yieldData, viewMode = 'settlement', onEditSettl
                           <TableCell align='right'><Typography sx={{ fontWeight: 600 }} color='primary'>{format.euro(cashbackAmount)}</Typography></TableCell>
                           <TableCell align='right'>
                             <Typography sx={{ fontWeight: 600 }} color='primary'>
-                              {avgPercentage > 0
-                                ? avgGrossPercentage
-                                  ? `${format.number(avgPercentage)}% (${format.number(avgGrossPercentage)}% bruto)`
-                                  : `${format.number(avgPercentage)}%`
-                                : '0%'}
+                              {stat.percentage !== null && stat.percentage !== undefined ? `${format.number(stat.percentage)}%` : '—'}
                             </Typography>
                           </TableCell>
                         </>
@@ -152,14 +127,11 @@ const YieldSettlementsTable = ({ yieldData, viewMode = 'settlement', onEditSettl
                                   : (s.billsTotal ?? 0) > 0 && (s.cashbackAmount ?? 0) > 0
                                       ? `${format.number(((s.cashbackAmount ?? 0) / (s.billsTotal ?? 0)) * 100)}%`
                                       : null
-                                const sGrossStr = s.grossPercentage !== null && s.grossPercentage !== undefined
-                                  ? ` (${format.number(s.grossPercentage)}% bruto)`
-                                  : ''
 
                                 const secondaryParts = [`${s.entries?.length ?? 0} movimiento${(s.entries?.length ?? 0) === 1 ? '' : 's'}`]
                                 if (yieldData.type === 'cashback') {
                                   if (sPercentage) {
-                                    secondaryParts.push(`% devuelto: ${sPercentage}${sGrossStr}`)
+                                    secondaryParts.push(`% devuelto: ${sPercentage}`)
                                   } else if (s.status === 'pending') {
                                     secondaryParts.push('% devuelto: Pendiente')
                                   }
@@ -181,9 +153,18 @@ const YieldSettlementsTable = ({ yieldData, viewMode = 'settlement', onEditSettl
                                   >
                                     <ListItemText
                                       primary={
-                                        <Typography variant='body2' sx={{ fontWeight: 600 }}>
-                                          {label}
-                                        </Typography>
+                                        <Stack direction='row' spacing={1} sx={{ alignItems: 'center' }}>
+                                          <Typography variant='body2' sx={{ fontWeight: 600 }}>
+                                            {label}
+                                          </Typography>
+                                          {s.warning === 'no_income' && (
+                                            <Tooltip title='Esta liquidación no tiene ningún movimiento de ingreso enlazado'>
+                                              <Box component='span' sx={{ color: 'warning.main', display: 'inline-flex', alignItems: 'center' }}>
+                                                <ExclamationCircleOutlined />
+                                              </Box>
+                                            </Tooltip>
+                                          )}
+                                        </Stack>
                                       }
                                       secondary={
                                         <Typography variant='caption' color='textSecondary'>
@@ -271,7 +252,18 @@ const YieldSettlementsTable = ({ yieldData, viewMode = 'settlement', onEditSettl
                             {isOpen ? <UpOutlined /> : <DownOutlined />}
                           </IconButton>
                         </TableCell>
-                        <TableCell sx={{ fontWeight: 600 }}>{label}</TableCell>
+                        <TableCell sx={{ fontWeight: 600 }}>
+                          <Stack direction='row' spacing={1} sx={{ alignItems: 'center' }}>
+                            <span>{label}</span>
+                            {settlement.warning === 'no_income' && (
+                              <Tooltip title='Esta liquidación no tiene ningún movimiento de ingreso enlazado'>
+                                <Box component='span' sx={{ color: 'warning.main', display: 'inline-flex', alignItems: 'center' }}>
+                                  <ExclamationCircleOutlined />
+                                </Box>
+                              </Tooltip>
+                            )}
+                          </Stack>
+                        </TableCell>
                         {yieldData.type === 'interest'
                           ? (
                             <>
@@ -335,12 +327,8 @@ const YieldSettlementsTable = ({ yieldData, viewMode = 'settlement', onEditSettl
                                     )
                                   : (
                                       settlement.percentage !== null && settlement.percentage !== undefined
-                                        ? settlement.grossPercentage !== null && settlement.grossPercentage !== undefined && settlement.grossPercentage !== settlement.percentage
-                                          ? `${format.number(settlement.percentage)}% (${format.number(settlement.grossPercentage)}% bruto)`
-                                          : `${format.number(settlement.percentage)}%`
-                                        : settlement.grossPercentage !== null && settlement.grossPercentage !== undefined
-                                          ? `${format.number(settlement.grossPercentage)}% bruto`
-                                          : '—'
+                                        ? `${format.number(settlement.percentage)}%`
+                                        : '—'
                                     )}
                               </TableCell>
                             </>

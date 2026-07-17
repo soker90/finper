@@ -18,6 +18,9 @@ export interface Yield {
     taxExpense: number
     billsTotal: number
     cashbackAmount: number
+    settlementsCount: number
+    weightedTae: number | null
+    percentage: number | null
   }[]
   entriesCount: number
   paymentsCount: number
@@ -51,7 +54,7 @@ export interface YieldSettlement {
   billsTotal?: number
   cashbackAmount?: number
   percentage?: number | null
-  grossPercentage?: number | null
+  warning?: string | null
   status?: 'pending' | 'completed'
   entries: YieldEntry[]
 }

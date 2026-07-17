@@ -20,22 +20,14 @@ const YieldDetailKpi = ({ yieldData, currentBalance, viewMode = 'settlement' }: 
     const latestYearStats = yieldData.annualBreakdown[0]
     if (yieldData.type === 'interest') {
       lastSettlementValue = format.euro(latestYearStats.net ?? 0)
-      lastSettlementSubtitle = `Neto en ${latestYearStats.year}`
+      lastSettlementSubtitle = latestYearStats.weightedTae !== null && latestYearStats.weightedTae !== undefined
+        ? `Neto en ${latestYearStats.year} (${format.number(latestYearStats.weightedTae)}% TAE)`
+        : `Neto en ${latestYearStats.year}`
     } else {
-      let annualRate = 0
-      if ((latestYearStats.billsTotal ?? 0) > 0 && (latestYearStats.cashbackAmount ?? 0) > 0) {
-        annualRate = (latestYearStats.cashbackAmount / latestYearStats.billsTotal) * 100
-      } else {
-        const yearSettlements = yieldData.settlements.filter(s => {
-          const y = s.settlementDate ? new Date(s.settlementDate).getFullYear() : new Date().getFullYear()
-          return y === latestYearStats.year && (s.percentage ?? 0) > 0
-        })
-        if (yearSettlements.length > 0) {
-          annualRate = yearSettlements.reduce((sum, s) => sum + (s.percentage ?? 0), 0) / yearSettlements.length
-        }
-      }
-      lastSettlementValue = `${format.number(annualRate)}%`
-      lastSettlementSubtitle = `% devuelto medio en ${latestYearStats.year}`
+      lastSettlementValue = latestYearStats.percentage !== null && latestYearStats.percentage !== undefined
+        ? `${format.number(latestYearStats.percentage)}%`
+        : '—'
+      lastSettlementSubtitle = `% devuelto en ${latestYearStats.year}`
     }
   } else if (lastSettlement) {
     if (yieldData.type === 'interest') {
@@ -55,16 +47,10 @@ const YieldDetailKpi = ({ yieldData, currentBalance, viewMode = 'settlement' }: 
         lastSettlementValue = 'Pendiente'
         lastSettlementSubtitle = 'Pendiente de abono'
       } else {
-        const netStr = lastSettlement.percentage !== null && lastSettlement.percentage !== undefined
+        lastSettlementValue = lastSettlement.percentage !== null && lastSettlement.percentage !== undefined
           ? `${format.number(lastSettlement.percentage)}%`
-          : '0%'
-        const grossStr = lastSettlement.grossPercentage !== null && lastSettlement.grossPercentage !== undefined
-          ? `${format.number(lastSettlement.grossPercentage)}%`
-          : null
-        lastSettlementValue = netStr
-        lastSettlementSubtitle = grossStr
-          ? `% devuelto neto (Bruto: ${grossStr})`
-          : '% devuelto en últ. liquidación'
+          : '—'
+        lastSettlementSubtitle = '% devuelto en últ. liquidación'
       }
     }
   }

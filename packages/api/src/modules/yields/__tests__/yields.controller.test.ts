@@ -144,7 +144,7 @@ describe('Yields Controller', () => {
       expect(res.body.netAccumulated).toBe(81)
     })
 
-    test('interest: should return positive net when a single net interest transaction is linked (even if recorded as expense)', async () => {
+    test('interest: should return warning no_income and exact net when only an expense transaction is linked', async () => {
       const yieldId = insertYield('interest')
       const settlementId = generateId()
       sqliteDb.insert(yieldSettlements).values({ id: settlementId, yieldId, user: username }).run()
@@ -156,12 +156,13 @@ describe('Yields Controller', () => {
       expect(res.body.settlements).toHaveLength(1)
       expect(res.body.settlements[0]).toMatchObject({
         id: settlementId,
-        grossIncome: 25.5,
-        taxExpense: 0,
-        net: 25.5,
-        settlementDate: txDate
+        grossIncome: 0,
+        taxExpense: 25.5,
+        net: -25.5,
+        settlementDate: txDate,
+        warning: 'no_income'
       })
-      expect(res.body.netAccumulated).toBe(25.5)
+      expect(res.body.netAccumulated).toBe(-25.5)
     })
 
     test('cashback: should return pending status when billsTotal > 0 and cashbackAmount = 0', async () => {
@@ -178,30 +179,26 @@ describe('Yields Controller', () => {
         billsTotal: 60,
         cashbackAmount: 0,
         percentage: null,
-        grossPercentage: null,
         status: 'pending'
       })
     })
 
-    test('cashback: should separate tax withholding from bills and calculate net cashbackAmount', async () => {
+    test('cashback: should sum all expenses as billsTotal and incomes as cashbackAmount', async () => {
       const yieldId = insertYield('cashback')
       const settlementId = generateId()
       sqliteDb.insert(yieldSettlements).values({ id: settlementId, yieldId, user: username }).run()
 
       insertTransaction({ type: TRANSACTION.Expense, amount: 100, yieldId, yieldSettlementId: settlementId })
       insertTransaction({ type: TRANSACTION.Income, amount: 5, yieldId, yieldSettlementId: settlementId })
-      insertTransaction({ type: TRANSACTION.Expense, amount: 0.95, yieldId, yieldSettlementId: settlementId, note: 'Retención IRPF cashback' })
 
       const res = await supertest(server.app).get(`${path}/${yieldId}`).auth(token, { type: 'bearer' }).expect(200)
       expect(res.body.settlements).toHaveLength(1)
       expect(res.body.settlements[0]).toMatchObject({
         id: settlementId,
         billsTotal: 100,
-        grossIncome: 5,
-        taxExpense: 0.95,
-        cashbackAmount: 4.05,
-        percentage: 4.05,
-        grossPercentage: 5,
+        cashbackAmount: 5,
+        net: 5,
+        percentage: 5,
         status: 'completed'
       })
     })

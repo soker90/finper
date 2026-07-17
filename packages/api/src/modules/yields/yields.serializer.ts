@@ -37,23 +37,7 @@ export const groupEntriesBySettlement = ({ type, entries, settlements }: { type:
       if (settlementDate === null && settlementEntries.length > 0) {
         settlementDate = Math.max(...settlementEntries.map((e) => e.date))
       }
-      let finalIncome = income
-      let finalExpense = expense
-      let net = finalIncome - finalExpense
-
-      if (settlementEntries.length === 1) {
-        const single = settlementEntries[0]
-        if (single.type === TRANSACTION.Expense || single.amount < 0 || net < 0) {
-          const absVal = Math.abs(single.amount)
-          finalIncome = absVal
-          finalExpense = 0
-          net = absVal
-        }
-      } else if (net < 0 && finalIncome === 0 && finalExpense > 0) {
-        finalIncome = finalExpense
-        finalExpense = 0
-        net = finalIncome
-      }
+      const net = income - expense
 
       let calculatedTae: number | null = null
       let calculatedBalance: number | null = null
@@ -100,36 +84,21 @@ export const groupEntriesBySettlement = ({ type, entries, settlements }: { type:
       return {
         id: settlement.id,
         settlementDate,
-        grossIncome: roundMoney(finalIncome),
-        taxExpense: roundMoney(finalExpense),
+        grossIncome: roundMoney(income),
+        taxExpense: roundMoney(expense),
         net: roundMoney(net),
         tae: calculatedTae !== null ? roundMoney(calculatedTae) : null,
         averageBalance: calculatedBalance !== null ? roundMoney(calculatedBalance) : null,
         taeSource,
         balanceSource,
+        warning: income === 0 ? 'no_income' : null,
         entries: settlementEntries.map(serializeYieldTransaction)
       }
     } else {
-      const taxEntries = settlementEntries.filter((e) =>
-        e.type === TRANSACTION.Expense &&
-        (/retenci|impuest|irpf|tax|hacienda|tribut/i.test(e.categoryName || '') ||
-         (e.note !== null && /retenci|impuest|irpf|tax|hacienda|tribut/i.test(e.note)))
-      )
-      const billEntries = settlementEntries.filter((e) =>
-        e.type === TRANSACTION.Expense && !taxEntries.includes(e)
-      )
-      const incomeEntriesList = settlementEntries.filter((e) => e.type === TRANSACTION.Income)
-
-      const grossIncome = incomeEntriesList.reduce((sum, e) => sum + e.amount, 0)
-      const taxExpense = taxEntries.reduce((sum, e) => sum + e.amount, 0)
-      const billsTotal = billEntries.reduce((sum, e) => sum + e.amount, 0)
-      const cashbackAmount = grossIncome - taxExpense
-
+      const billsTotal = expense
+      const cashbackAmount = income
       const percentage = (billsTotal > 0 && cashbackAmount > 0)
         ? roundMoney((cashbackAmount / billsTotal) * 100)
-        : null
-      const grossPercentage = (billsTotal > 0 && grossIncome > 0)
-        ? roundMoney((grossIncome / billsTotal) * 100)
         : null
       const status = (billsTotal > 0 && cashbackAmount === 0) ? 'pending' : 'completed'
 
@@ -137,12 +106,9 @@ export const groupEntriesBySettlement = ({ type, entries, settlements }: { type:
         id: settlement.id,
         settlementDate,
         billsTotal: roundMoney(billsTotal),
-        grossIncome: roundMoney(grossIncome),
-        taxExpense: roundMoney(taxExpense),
         cashbackAmount: roundMoney(cashbackAmount),
         net: roundMoney(cashbackAmount),
         percentage,
-        grossPercentage,
         status,
         entries: settlementEntries.map(serializeYieldTransaction)
       }
@@ -170,27 +136,55 @@ export const serializeYieldSummary = (y: YieldRow, entries: YieldTransactionRow[
     }
   }, 0)
 
-  const annualMap = new Map<number, { net: number, grossIncome: number, taxExpense: number, billsTotal: number, cashbackAmount: number }>()
+  const rowsByYear = new Map<number, typeof settlementRows>()
   for (const row of settlementRows) {
     const year = row.settlementDate ? new Date(row.settlementDate).getFullYear() : new Date().getFullYear()
-    const current = annualMap.get(year) ?? { net: 0, grossIncome: 0, taxExpense: 0, billsTotal: 0, cashbackAmount: 0 }
-    current.net += (row.net ?? 0)
-    current.grossIncome += (row.grossIncome ?? 0)
-    current.taxExpense += (row.taxExpense ?? 0)
-    current.billsTotal += (row.billsTotal ?? 0)
-    current.cashbackAmount += (row.cashbackAmount ?? 0)
-    annualMap.set(year, current)
+    const list = rowsByYear.get(year) ?? []
+    list.push(row)
+    rowsByYear.set(year, list)
   }
 
-  const annualBreakdown = Array.from(annualMap.entries())
-    .map(([year, stats]) => ({
-      year,
-      net: roundMoney(stats.net),
-      grossIncome: roundMoney(stats.grossIncome),
-      taxExpense: roundMoney(stats.taxExpense),
-      billsTotal: roundMoney(stats.billsTotal),
-      cashbackAmount: roundMoney(stats.cashbackAmount)
-    }))
+  const annualBreakdown = Array.from(rowsByYear.entries())
+    .map(([year, rows]) => {
+      const net = rows.reduce((sum, r) => sum + (r.net ?? 0), 0)
+      const grossIncome = rows.reduce((sum, r) => sum + (r.grossIncome ?? 0), 0)
+      const taxExpense = rows.reduce((sum, r) => sum + (r.taxExpense ?? 0), 0)
+      const billsTotal = rows.reduce((sum, r) => sum + (r.billsTotal ?? 0), 0)
+      const cashbackAmount = rows.reduce((sum, r) => sum + (r.cashbackAmount ?? 0), 0)
+      const settlementsCount = rows.length
+
+      let weightedTae: number | null = null
+      let percentage: number | null = null
+
+      if (y.type === 'interest') {
+        const validRows = rows.filter(
+          (r) => r.tae !== null && r.tae !== undefined && r.averageBalance !== null && r.averageBalance !== undefined
+        )
+        if (validRows.length > 0) {
+          const totalBalance = validRows.reduce((sum, r) => sum + (r.averageBalance as number), 0)
+          if (totalBalance !== 0) {
+            const weightedSum = validRows.reduce((sum, r) => sum + (r.tae as number) * (r.averageBalance as number), 0)
+            weightedTae = roundMoney(weightedSum / totalBalance)
+          }
+        }
+      } else {
+        if (billsTotal > 0 && cashbackAmount > 0) {
+          percentage = roundMoney((cashbackAmount / billsTotal) * 100)
+        }
+      }
+
+      return {
+        year,
+        net: roundMoney(net),
+        grossIncome: roundMoney(grossIncome),
+        taxExpense: roundMoney(taxExpense),
+        billsTotal: roundMoney(billsTotal),
+        cashbackAmount: roundMoney(cashbackAmount),
+        settlementsCount,
+        weightedTae,
+        percentage
+      }
+    })
     .sort((a, b) => b.year - a.year)
 
   return {
