@@ -48,8 +48,6 @@ const YieldSettlementsTable = ({ yieldData, viewMode = 'settlement', onEditSettl
                 : (
                   <>
                     <TableCell align='right'>Recibos Totales</TableCell>
-                    <TableCell align='right'>Cashback Bruto</TableCell>
-                    <TableCell align='right'>Retención</TableCell>
                     <TableCell align='right'>Cashback Neto</TableCell>
                     <TableCell align='right'>% Devuelto</TableCell>
                   </>
@@ -59,8 +57,6 @@ const YieldSettlementsTable = ({ yieldData, viewMode = 'settlement', onEditSettl
           <TableBody>
             {annualBreakdown.map((stat) => {
               const year = stat.year
-              const grossIncome = stat.grossIncome ?? 0
-              const taxExpense = stat.taxExpense ?? 0
               const net = stat.net ?? 0
               const billsTotal = stat.billsTotal ?? 0
               const cashbackAmount = stat.cashbackAmount ?? 0
@@ -69,6 +65,7 @@ const YieldSettlementsTable = ({ yieldData, viewMode = 'settlement', onEditSettl
                 const y = s.settlementDate ? new Date(s.settlementDate).getFullYear() : new Date().getFullYear()
                 return y === year
               })
+              const colSpan = yieldData.type === 'interest' ? 7 : 5
 
               return (
                 <React.Fragment key={year}>
@@ -85,8 +82,8 @@ const YieldSettlementsTable = ({ yieldData, viewMode = 'settlement', onEditSettl
                     {yieldData.type === 'interest'
                       ? (
                         <>
-                          <TableCell align='right'>{format.euro(grossIncome)}</TableCell>
-                          <TableCell align='right'>{format.euro(taxExpense)}</TableCell>
+                          <TableCell align='right'>{format.euro(stat.grossIncome ?? 0)}</TableCell>
+                          <TableCell align='right'>{format.euro(stat.taxExpense ?? 0)}</TableCell>
                           <TableCell align='right'><Typography sx={{ fontWeight: 600 }} color='primary'>{format.euro(net)}</Typography></TableCell>
                           <TableCell align='right'>{stat.weightedTae !== null && stat.weightedTae !== undefined ? `${format.number(stat.weightedTae)}%` : '—'}</TableCell>
                           <TableCell align='right'>{stat.settlementsCount}</TableCell>
@@ -95,8 +92,6 @@ const YieldSettlementsTable = ({ yieldData, viewMode = 'settlement', onEditSettl
                       : (
                         <>
                           <TableCell align='right'>{format.euro(billsTotal)}</TableCell>
-                          <TableCell align='right'>{format.euro(grossIncome)}</TableCell>
-                          <TableCell align='right'>{format.euro(taxExpense)}</TableCell>
                           <TableCell align='right'><Typography sx={{ fontWeight: 600 }} color='primary'>{format.euro(cashbackAmount)}</Typography></TableCell>
                           <TableCell align='right'>
                             <Typography sx={{ fontWeight: 600 }} color='primary'>
@@ -108,7 +103,7 @@ const YieldSettlementsTable = ({ yieldData, viewMode = 'settlement', onEditSettl
                   </TableRow>
                   {isYearExpanded && (
                     <TableRow>
-                      <TableCell colSpan={7} sx={{ py: 0, bgcolor: 'action.hover' }}>
+                      <TableCell colSpan={colSpan} sx={{ py: 0, bgcolor: 'action.hover' }}>
                         <Collapse in={isYearExpanded} timeout='auto' unmountOnExit>
                           <Box sx={{ margin: 2, pl: 4 }}>
                             <Typography variant='h6' gutterBottom component='div'>
@@ -124,9 +119,7 @@ const YieldSettlementsTable = ({ yieldData, viewMode = 'settlement', onEditSettl
 
                                 const sPercentage = s.percentage !== null && s.percentage !== undefined
                                   ? `${format.number(s.percentage)}%`
-                                  : (s.billsTotal ?? 0) > 0 && (s.cashbackAmount ?? 0) > 0
-                                      ? `${format.number(((s.cashbackAmount ?? 0) / (s.billsTotal ?? 0)) * 100)}%`
-                                      : null
+                                  : null
 
                                 const secondaryParts = [`${s.entries?.length ?? 0} movimiento${(s.entries?.length ?? 0) === 1 ? '' : 's'}`]
                                 if (yieldData.type === 'cashback') {

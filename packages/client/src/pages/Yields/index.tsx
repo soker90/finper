@@ -12,6 +12,12 @@ import { unlinkYieldTransaction } from 'services/apiService'
 import { YieldCard, YieldForm, LinkTransactionsModal, YieldRemoveModal } from './components'
 import { YieldsSummary, YieldsEmpty, YieldsSkeleton } from './utils'
 
+const handleUnlinkTransaction = async (yieldId: string, transactionId: string) => {
+  await unlinkYieldTransaction(yieldId, transactionId)
+  mutate(YIELDS)
+  mutate(`${YIELDS}/${yieldId}`)
+}
+
 const Yields = () => {
   const { yields, isLoading, createYield, updateYield, removeYield } = useYields()
 
@@ -47,12 +53,6 @@ const Yields = () => {
       mutate(`${YIELDS}/${searchTarget._id}`)
       mutate(`${YIELDS}/${searchTarget._id}/matching-transactions`)
     }
-  }
-
-  const handleUnlinkTransaction = async (yieldId: string, transactionId: string) => {
-    await unlinkYieldTransaction(yieldId, transactionId)
-    mutate(YIELDS)
-    mutate(`${YIELDS}/${yieldId}`)
   }
 
   return (
