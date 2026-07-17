@@ -2,9 +2,12 @@ import React, { useState } from 'react'
 import { Alert, Box } from '@mui/material'
 import ModalGrid from 'components/modals/ModalGrid'
 import InputForm from 'components/forms/InputForm'
+import { useSubmitError } from '../../Yields/hooks/useSubmitError'
+import { useSnackbar } from 'contexts'
+import { YieldSettlement } from 'types'
 
 interface Props {
-  settlement: any
+  settlement: YieldSettlement
   onClose: () => void
   onSubmit: (tae: number | null, averageBalance: number | null) => Promise<{ error?: string } | void>
 }
@@ -17,21 +20,22 @@ const EditSettlementModal = ({ settlement, onClose, onSubmit }: Props) => {
     settlement.averageBalance !== null && settlement.averageBalance !== undefined ? String(settlement.averageBalance) : ''
   )
   const [submitting, setSubmitting] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const { error, runSubmit } = useSubmitError()
+  const { showSuccess } = useSnackbar()
 
   const handleFormSubmit = async () => {
     setSubmitting(true)
-    setError(null)
-    const result = await onSubmit(
-      tae ? parseFloat(tae) : null,
-      averageBalance ? parseFloat(averageBalance) : null
-    )
-    setSubmitting(false)
-    if (result && result.error) {
-      setError(result.error)
-      return
+    try {
+      await runSubmit(
+        () => onSubmit(tae ? parseFloat(tae) : null, averageBalance ? parseFloat(averageBalance) : null),
+        () => {
+          onClose()
+          showSuccess('Liquidación actualizada')
+        }
+      )
+    } finally {
+      setSubmitting(false)
     }
-    onClose()
   }
 
   return (

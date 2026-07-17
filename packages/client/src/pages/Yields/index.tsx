@@ -1,25 +1,20 @@
-import { useState, useMemo } from 'react'
+import { useState } from 'react'
 import { Grid, Box, ToggleButtonGroup, ToggleButton } from '@mui/material'
 import { PlusOutlined } from '@ant-design/icons'
-import { mutate } from 'swr'
+import { useSWRConfig } from 'swr'
 
 import { HeaderButtons } from 'components'
-import { useYields } from 'hooks/useYields'
+import { useYields, useUnlinkYieldTransaction } from 'hooks/useYields'
 import { Yield, YieldInput } from 'types'
-import { YIELDS } from 'constants/api-paths'
-import { unlinkYieldTransaction } from 'services/apiService'
+import { YIELDS, YIELD_DETAIL, YIELD_MATCHING_TRANSACTIONS } from 'constants/api-paths'
 
 import { YieldCard, YieldForm, LinkTransactionsModal, YieldRemoveModal } from './components'
 import { YieldsSummary, YieldsEmpty, YieldsSkeleton } from './utils'
 
-const handleUnlinkTransaction = async (yieldId: string, transactionId: string) => {
-  await unlinkYieldTransaction(yieldId, transactionId)
-  mutate(YIELDS)
-  mutate(`${YIELDS}/${yieldId}`)
-}
-
 const Yields = () => {
-  const { yields, isLoading, createYield, updateYield, removeYield } = useYields()
+  const { mutate } = useSWRConfig()
+  const { yields, isLoading, createYield, updateYield } = useYields()
+  const unlinkTransaction = useUnlinkYieldTransaction()
 
   const [showForm, setShowForm] = useState(false)
   const [editTarget, setEditTarget] = useState<Yield | undefined>()
@@ -27,17 +22,15 @@ const Yields = () => {
   const [deleteTarget, setDeleteTarget] = useState<Yield | null>(null)
   const [selectedYear, setSelectedYear] = useState<number | 'all'>('all')
 
-  const availableYears = useMemo(() => {
+  const availableYears = (() => {
     const yearsSet = new Set<number>()
-    for (const y of yields) {
-      if (y.annualBreakdown) {
-        for (const a of y.annualBreakdown) {
-          yearsSet.add(a.year)
-        }
+    for (const yieldItem of yields) {
+      for (const stat of yieldItem.annualBreakdown ?? []) {
+        yearsSet.add(stat.year)
       }
     }
     return Array.from(yearsSet).sort((a, b) => b - a)
-  }, [yields])
+  })()
 
   const handleEdit = (y: Yield) => setEditTarget(y)
   const handleCloseForm = () => { setShowForm(false); setEditTarget(undefined) }
@@ -50,8 +43,8 @@ const Yields = () => {
   const handleLinked = () => {
     mutate(YIELDS)
     if (searchTarget) {
-      mutate(`${YIELDS}/${searchTarget._id}`)
-      mutate(`${YIELDS}/${searchTarget._id}/matching-transactions`)
+      mutate(YIELD_DETAIL(searchTarget._id))
+      mutate(YIELD_MATCHING_TRANSACTIONS(searchTarget._id))
     }
   }
 
@@ -104,7 +97,7 @@ const Yields = () => {
                 onEdit={handleEdit}
                 onDelete={setDeleteTarget}
                 onSearchTransactions={setSearchTarget}
-                onUnlinkTransaction={handleUnlinkTransaction}
+                onUnlinkTransaction={unlinkTransaction}
               />
             </Grid>
           ))}
@@ -131,10 +124,6 @@ const Yields = () => {
         <YieldRemoveModal
           item={deleteTarget}
           onClose={() => setDeleteTarget(null)}
-          onConfirm={async () => {
-            await removeYield(deleteTarget._id)
-            setDeleteTarget(null)
-          }}
         />
       )}
     </>

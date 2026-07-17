@@ -1,4 +1,4 @@
-import { sqliteTable, text, real } from 'drizzle-orm/sqlite-core';
+import { sqliteTable, text, real, uniqueIndex } from 'drizzle-orm/sqlite-core';
 import { users } from './users';
 import { accounts } from './accounts';
 
@@ -12,7 +12,9 @@ export const yields = sqliteTable('yields', {
   accountId: text('account_id').notNull().references(() => accounts.id),
   categoryIds: text('category_ids', { mode: 'json' }).$type<string[]>().notNull().default([]),
   user: text('user').notNull().references(() => users.username),
-});
+}, (table) => ({
+  userAccountTypeIdx: uniqueIndex('yields_user_account_type_idx').on(table.user, table.accountId, table.type),
+}));
 
 export const yieldSettlements = sqliteTable('yield_settlements', {
   id: text('id').primaryKey(),
@@ -20,4 +22,9 @@ export const yieldSettlements = sqliteTable('yield_settlements', {
   user: text('user').notNull().references(() => users.username),
   tae: real('tae'), // real, nullable
   averageBalance: real('average_balance'), // real, nullable
-});
+}, (table) => ({
+  // Lets transactions reference (yield_settlement_id, yield_id) together, so
+  // the DB itself rejects a transaction whose settlement belongs to a
+  // different yield than the one it's linked to.
+  idYieldIdIdx: uniqueIndex('yield_settlements_id_yield_id_idx').on(table.id, table.yieldId),
+}));

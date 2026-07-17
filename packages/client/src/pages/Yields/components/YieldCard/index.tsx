@@ -5,7 +5,7 @@ import useSWR from 'swr'
 import { MainCard } from 'components'
 import { format } from 'utils'
 import { Yield, YieldEntry } from 'types'
-import { YIELDS } from 'constants/api-paths'
+import { YIELD_DETAIL } from 'constants/api-paths'
 import { hoverCardSx } from '../../../Dashboard/components/shared'
 import YieldCardHeader from './YieldCardHeader'
 import YieldEntryList from './YieldEntryList'
@@ -21,7 +21,7 @@ type Props = {
 
 const YieldCard = ({ item, selectedYear = 'all', onEdit, onDelete, onSearchTransactions, onUnlinkTransaction }: Props) => {
   const navigate = useNavigate()
-  const { data: detail } = useSWR<Yield & { entries: YieldEntry[] }>(`${YIELDS}/${item._id}`)
+  const { data: detail } = useSWR<Yield & { entries: YieldEntry[] }>(YIELD_DETAIL(item._id))
   const lastEntries = detail?.entries.slice(0, 3) ?? []
 
   const isAnnual = selectedYear !== 'all'

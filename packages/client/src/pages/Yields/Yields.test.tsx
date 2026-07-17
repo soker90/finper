@@ -1,5 +1,5 @@
 // @vitest-environment happy-dom
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import { waitFor } from '@testing-library/react'
 import { http, HttpResponse } from 'msw'
 import { SWRConfig } from 'swr'
@@ -9,6 +9,12 @@ import Yields from './index'
 import { YIELDS_LIST } from '../../mock/handlers/yields'
 import { calcTotalNet } from './utils'
 import { format } from 'utils'
+
+const navigateMock = vi.fn()
+vi.mock('react-router', async (importOriginal) => {
+  const original = await importOriginal<typeof import('react-router')>()
+  return { ...original, useNavigate: () => navigateMock }
+})
 
 const renderFresh = () =>
   render(
@@ -75,6 +81,34 @@ describe('Yields', () => {
     const buttons = await findAllByLabelText('Enlazar movimientos')
     buttons[0].click()
     expect(await findByText(/Movimientos de/)).toBeDefined()
+  })
+
+  it('shows a link to the existing yield when editing conflicts with another (same account+type)', async () => {
+    const existingYieldId = 'other-yield-id'
+    server.use(
+      // The account dropdown only lists accounts from /accounts, so it must
+      // include the edited yield's own account for the native <select> to
+      // keep it selected (and pass the "required" validation on submit).
+      http.get('/accounts', () => HttpResponse.json([{
+        _id: YIELDS_LIST[0].accountId,
+        name: YIELDS_LIST[0].account.name,
+        bank: YIELDS_LIST[0].account.bank,
+        balance: 100
+      }])),
+      http.put('/yields/:id', () => HttpResponse.json({ message: 'Ya existe un rendimiento de este tipo para esta cuenta', existingYieldId }, { status: 422 }))
+    )
+    const { findAllByLabelText, findAllByText, findByText, findByRole } = renderFresh()
+    await findAllByText(new RegExp(YIELDS_LIST[0].account.name))
+    const editButtons = await findAllByLabelText('Editar')
+    editButtons[0].click()
+    await findByText('Editar rendimiento')
+
+    const submitBtn = await findByRole('button', { name: 'Aceptar' })
+    submitBtn.click()
+
+    const linkBtn = await findByText('Ver rendimiento')
+    linkBtn.click()
+    expect(navigateMock).toHaveBeenCalledWith(`/rendimientos/${existingYieldId}`)
   })
 
   it('click delete icon opens confirmation modal and confirming removes the yield', async () => {

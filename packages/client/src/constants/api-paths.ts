@@ -21,6 +21,8 @@ export const STOCKS = 'stocks'
 export const STOCKS_SUMMARY = 'stocks/summary'
 export const GOALS = 'goals'
 export const YIELDS = 'yields'
+export const YIELD_DETAIL = (id: string) => `${YIELDS}/${id}`
+export const YIELD_MATCHING_TRANSACTIONS = (id: string) => `${YIELD_DETAIL(id)}/matching-transactions`
 export const STATS_TAGS_BY_YEAR = (year: number) => `stats/tags?year=${year}`
 export const STATS_TAGS_AVAILABLE = 'stats/tags/available'
 export const STATS_TAGS_YEARS = 'stats/tags/years'

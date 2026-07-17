@@ -1,10 +1,10 @@
-import { eq, and, desc, isNull, inArray, count } from 'drizzle-orm'
+import { eq, and, desc, isNull, inArray, count, like } from 'drizzle-orm'
 import { type DB, schema, generateId } from '@soker90/finper-db'
 
 const { yields, yieldSettlements, transactions, categories, accounts } = schema
 
 type Yield = typeof yields.$inferSelect
-type YieldSettlement = typeof yieldSettlements.$inferSelect
+export type YieldSettlement = typeof yieldSettlements.$inferSelect
 
 export interface YieldTransactionRow {
   id: string
@@ -76,10 +76,10 @@ export const createYieldsRepository = (db: DB) => ({
     db.delete(yields).where(and(eq(yields.id, id), eq(yields.user, user))).run()
   },
 
-  unlinkAllTransactions: (yieldId: string): void => {
+  unlinkAllTransactions: (yieldId: string, user: string): void => {
     db.update(transactions)
       .set({ yieldId: null, yieldSettlementId: null })
-      .where(eq(transactions.yieldId, yieldId))
+      .where(and(eq(transactions.yieldId, yieldId), eq(transactions.user, user)))
       .run()
   },
 
@@ -89,13 +89,17 @@ export const createYieldsRepository = (db: DB) => ({
       .orderBy(desc(transactions.date))
       .all() as YieldTransactionRow[],
 
-  findMatchingTransactions: ({ accountId, categoryIds, user }: { accountId: string, categoryIds: string[], user: string }): YieldTransactionRow[] =>
+  findMatchingTransactions: ({ accountId, categoryIds, user, search }: { accountId: string, categoryIds: string[], user: string, search?: string }): YieldTransactionRow[] =>
     transactionsSelect(db)
       .where(and(
         eq(transactions.user, user),
         eq(transactions.accountId, accountId),
         inArray(transactions.categoryId, categoryIds),
-        isNull(transactions.yieldId)
+        isNull(transactions.yieldId),
+        // Only the 50 most recent unlinked matches are returned; a search
+        // term narrows the WHERE clause first so older matches (otherwise
+        // invisible past the limit) can still be found.
+        search ? like(transactions.note, `%${search}%`) : undefined
       ))
       .orderBy(desc(transactions.date))
       .limit(50)
@@ -104,14 +108,29 @@ export const createYieldsRepository = (db: DB) => ({
   linkTransactions: (yieldId: string, yieldSettlementId: string, transactionIds: string[], user: string): void => {
     db.update(transactions)
       .set({ yieldId, yieldSettlementId })
-      .where(and(inArray(transactions.id, transactionIds), eq(transactions.user, user)))
+      .where(and(
+        inArray(transactions.id, transactionIds),
+        eq(transactions.user, user),
+        isNull(transactions.yieldId)
+      ))
       .run()
   },
 
-  unlinkTransaction: (transactionId: string, user: string): void => {
+  unlinkTransactionsBySettlement: (settlementId: string, user: string): void => {
     db.update(transactions)
       .set({ yieldId: null, yieldSettlementId: null })
-      .where(and(eq(transactions.id, transactionId), eq(transactions.user, user)))
+      .where(and(eq(transactions.yieldSettlementId, settlementId), eq(transactions.user, user)))
+      .run()
+  },
+
+  unlinkTransaction: (yieldId: string, transactionId: string, user: string): void => {
+    db.update(transactions)
+      .set({ yieldId: null, yieldSettlementId: null })
+      .where(and(
+        eq(transactions.id, transactionId),
+        eq(transactions.yieldId, yieldId),
+        eq(transactions.user, user)
+      ))
       .run()
   },
 
@@ -144,8 +163,10 @@ export const createYieldsRepository = (db: DB) => ({
     db.delete(yieldSettlements).where(and(eq(yieldSettlements.id, id), eq(yieldSettlements.user, user))).run()
   },
 
-  deleteSettlementsByYield: (yieldId: string): void => {
-    db.delete(yieldSettlements).where(eq(yieldSettlements.yieldId, yieldId)).run()
+  deleteSettlementsByYield: (yieldId: string, user: string): void => {
+    db.delete(yieldSettlements)
+      .where(and(eq(yieldSettlements.yieldId, yieldId), eq(yieldSettlements.user, user)))
+      .run()
   },
 
   isSettlementEmpty: (settlementId: string): boolean => {

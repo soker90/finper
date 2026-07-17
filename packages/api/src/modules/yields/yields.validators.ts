@@ -33,7 +33,10 @@ const assertNoDuplicateYield = ({ accountId, type, user, excludeYieldId }: { acc
   const duplicate = sqliteDb.select({ id: yields.id }).from(yields)
     .where(and(...conditions)).get()
   if (duplicate) {
-    throw Boom.badData(ERROR_MESSAGE.YIELD.ALREADY_EXISTS).output
+    const conflict = Boom.badData(ERROR_MESSAGE.YIELD.ALREADY_EXISTS)
+    // Lets the client link straight to the conflicting yield instead of a dead-end error.
+    conflict.output.payload.existingYieldId = duplicate.id
+    throw conflict.output
   }
 }
 

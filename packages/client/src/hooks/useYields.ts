@@ -1,14 +1,15 @@
-import useSWR from 'swr'
+import useSWR, { useSWRConfig } from 'swr'
 import { Yield, YieldInput, YieldDetail } from 'types'
-import { YIELDS } from 'constants/api-paths'
-import { addYield, editYield, deleteYield } from 'services/apiService'
+import { YIELDS, YIELD_DETAIL } from 'constants/api-paths'
+import { addYield, editYield, deleteYield, unlinkYieldTransaction, deleteYieldSettlement } from 'services/apiService'
+import { useSnackbar } from 'contexts'
 
 export const useYields = (): {
   yields: Yield[]
   isLoading: boolean
   error: any
-  createYield: (params: YieldInput) => Promise<{ error?: string }>
-  updateYield: (id: string, params: Partial<YieldInput>) => Promise<{ error?: string }>
+  createYield: (params: YieldInput) => Promise<{ error?: string, existingYieldId?: string }>
+  updateYield: (id: string, params: Partial<YieldInput>) => Promise<{ error?: string, existingYieldId?: string }>
   removeYield: (id: string) => Promise<{ error?: string }>
 } => {
   const { data, error, mutate, isLoading } = useSWR<Yield[]>(YIELDS)
@@ -56,11 +57,42 @@ export const useYield = (id?: string): {
   error: any
   mutate: () => Promise<any>
 } => {
-  const { data, error, mutate, isLoading } = useSWR<YieldDetail>(id ? `${YIELDS}/${id}` : null)
+  const { data, error, mutate: mutateYield, isLoading } = useSWR<YieldDetail>(id ? YIELD_DETAIL(id) : null)
   return {
     yieldData: data ?? null,
     isLoading,
     error,
-    mutate
+    mutate: mutateYield
+  }
+}
+
+/** Unlinks a transaction from a yield, refreshes both caches and reports the result. */
+export const useUnlinkYieldTransaction = (): (yieldId: string, transactionId: string) => Promise<{ error?: string }> => {
+  const { mutate } = useSWRConfig()
+  const { showSuccess, showError } = useSnackbar()
+
+  return async (yieldId: string, transactionId: string) => {
+    const result = await unlinkYieldTransaction(yieldId, transactionId)
+    if (result.error) {
+      showError(result.error)
+      return result
+    }
+    await mutate(YIELDS)
+    await mutate(YIELD_DETAIL(yieldId))
+    showSuccess('Movimiento desenlazado')
+    return result
+  }
+}
+
+/** Unlinks every transaction of a settlement and deletes it, then refreshes both caches. */
+export const useDeleteYieldSettlement = (): (yieldId: string, settlementId: string) => Promise<{ error?: string }> => {
+  const { mutate } = useSWRConfig()
+
+  return async (yieldId: string, settlementId: string) => {
+    const result = await deleteYieldSettlement(yieldId, settlementId)
+    if (result.error) return result
+    await mutate(YIELDS)
+    await mutate(YIELD_DETAIL(yieldId))
+    return result
   }
 }

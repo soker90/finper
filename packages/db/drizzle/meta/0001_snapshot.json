@@ -1496,7 +1496,16 @@
           "autoincrement": false
         }
       },
-      "indexes": {},
+      "indexes": {
+        "yield_settlements_id_yield_id_idx": {
+          "name": "yield_settlements_id_yield_id_idx",
+          "columns": [
+            "id",
+            "yield_id"
+          ],
+          "isUnique": true
+        }
+      },
       "foreignKeys": {
         "yield_settlements_yield_id_yields_id_fk": {
           "name": "yield_settlements_yield_id_yields_id_fk",
@@ -1569,7 +1578,17 @@
           "autoincrement": false
         }
       },
-      "indexes": {},
+      "indexes": {
+        "yields_user_account_type_idx": {
+          "name": "yields_user_account_type_idx",
+          "columns": [
+            "user",
+            "account_id",
+            "type"
+          ],
+          "isUnique": true
+        }
+      },
       "foreignKeys": {
         "yields_account_id_accounts_id_fk": {
           "name": "yields_account_id_accounts_id_fk",
@@ -1782,15 +1801,17 @@
           "onDelete": "no action",
           "onUpdate": "no action"
         },
-        "transactions_yield_settlement_id_yield_settlements_id_fk": {
-          "name": "transactions_yield_settlement_id_yield_settlements_id_fk",
+        "transactions_yield_settlement_id_yield_id_yield_settlements_id_yield_id_fk": {
+          "name": "transactions_yield_settlement_id_yield_id_yield_settlements_id_yield_id_fk",
           "tableFrom": "transactions",
           "tableTo": "yield_settlements",
           "columnsFrom": [
-            "yield_settlement_id"
+            "yield_settlement_id",
+            "yield_id"
           ],
           "columnsTo": [
-            "id"
+            "id",
+            "yield_id"
           ],
           "onDelete": "no action",
           "onUpdate": "no action"

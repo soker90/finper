@@ -275,6 +275,22 @@ describe('Yields Controller', () => {
       expect(returnedIds).toContain(unlinkedTx2)
       expect(returnedIds).not.toContain(linkedTxId)
     })
+
+    test('search narrows results by note, letting older matches past the 50-item cap be found', async () => {
+      const yieldId = insertYield('interest')
+      const matchingTx = insertTransaction({ type: TRANSACTION.Income, amount: 10, note: 'Abono diciembre' })
+      const otherTx = insertTransaction({ type: TRANSACTION.Income, amount: 20, note: 'Abono enero' })
+
+      const res = await supertest(server.app)
+        .get(`${path}/${yieldId}/matching-transactions`)
+        .query({ search: 'diciembre' })
+        .auth(token, { type: 'bearer' })
+        .expect(200)
+
+      const returnedIds = res.body.map((t: any) => t._id)
+      expect(returnedIds).toContain(matchingTx)
+      expect(returnedIds).not.toContain(otherTx)
+    })
   })
 
   describe('POST /:id/link-transactions', () => {
@@ -391,6 +407,45 @@ describe('Yields Controller', () => {
         .put(`${path}/${yieldId}/settlements/${settlementId}`)
         .auth(token, { type: 'bearer' })
         .send({ tae: 1.0 })
+        .expect(404)
+    })
+  })
+
+  describe('DELETE /:id/settlements/:settlementId', () => {
+    test('unlinks every transaction of the settlement and deletes it', async () => {
+      const yieldId = insertYield('interest')
+      const settlementId = generateId()
+      sqliteDb.insert(yieldSettlements).values({ id: settlementId, yieldId, user: username }).run()
+      const tx1 = insertTransaction({ type: TRANSACTION.Income, amount: 10, yieldId, yieldSettlementId: settlementId })
+      const tx2 = insertTransaction({ type: TRANSACTION.Expense, amount: 2, yieldId, yieldSettlementId: settlementId })
+
+      await supertest(server.app)
+        .delete(`${path}/${yieldId}/settlements/${settlementId}`)
+        .auth(token, { type: 'bearer' })
+        .expect(204)
+
+      const remainingSettlement = sqliteDb.select().from(yieldSettlements).where(eq(yieldSettlements.id, settlementId)).get()
+      expect(remainingSettlement).toBeUndefined()
+
+      const updatedTx1 = sqliteDb.select().from(transactions).where(eq(transactions.id, tx1)).get()
+      const updatedTx2 = sqliteDb.select().from(transactions).where(eq(transactions.id, tx2)).get()
+      expect(updatedTx1?.yieldId).toBeNull()
+      expect(updatedTx1?.yieldSettlementId).toBeNull()
+      expect(updatedTx2?.yieldId).toBeNull()
+      expect(updatedTx2?.yieldSettlementId).toBeNull()
+    })
+
+    test('returns 404 when the settlementId does not belong to this yield', async () => {
+      const yieldId = insertYield('interest')
+      const otherYieldId = generateId()
+      sqliteDb.insert(yields).values({ id: otherYieldId, type: 'cashback', accountId, categoryIds: [categoryId], user: username }).run()
+
+      const settlementId = generateId()
+      sqliteDb.insert(yieldSettlements).values({ id: settlementId, yieldId: otherYieldId, user: username }).run()
+
+      await supertest(server.app)
+        .delete(`${path}/${yieldId}/settlements/${settlementId}`)
+        .auth(token, { type: 'bearer' })
         .expect(404)
     })
   })

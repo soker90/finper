@@ -1,10 +1,13 @@
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { useForm, Controller } from 'react-hook-form'
-import { Alert, Box, Autocomplete, TextField, InputLabel, FormHelperText, Stack, Grid } from '@mui/material'
+import { useNavigate } from 'react-router'
+import { Alert, Box, Button, Autocomplete, TextField, InputLabel, FormHelperText, Stack, Grid } from '@mui/material'
 import ModalGrid from 'components/modals/ModalGrid'
 import SelectForm from 'components/forms/SelectForm'
 import { useAccounts } from 'hooks/useAccounts'
 import { useCategories } from 'hooks/useCategories'
+import { useSubmitError } from '../../hooks/useSubmitError'
+import { useSnackbar } from 'contexts'
 import { Yield, YieldInput } from 'types'
 
 const YIELD_TYPE_OPTIONS = [
@@ -12,15 +15,18 @@ const YIELD_TYPE_OPTIONS = [
   { value: 'cashback', label: 'Cashback' }
 ]
 
+type SubmitResult = { error?: string, existingYieldId?: string }
+
 type Props = {
   editingYield?: Yield
   onClose: () => void
-  onSubmit: (data: YieldInput) => Promise<{ error?: string }>
+  onSubmit: (data: YieldInput) => Promise<SubmitResult>
 }
 
 const YieldForm = ({ editingYield, onClose, onSubmit }: Props) => {
   const { accounts } = useAccounts()
   const { categories } = useCategories()
+  const navigate = useNavigate()
 
   const defaultValues = editingYield
     ? {
@@ -38,22 +44,18 @@ const YieldForm = ({ editingYield, onClose, onSubmit }: Props) => {
     defaultValues
   })
 
-  const [submitError, setSubmitError] = useState<string | null>(null)
+  const { error: submitError, result: submitResult, runSubmit } = useSubmitError<SubmitResult>()
+  const { showSuccess } = useSnackbar()
 
   useEffect(() => {
     reset(defaultValues)
   // eslint-disable-next-line react-hooks/exhaustive-deps -- reset(defaultValues) on external prop change; defaultValues is rebuilt each render by design
-  }, [reset, editingYield, accounts, categories])
+  }, [reset, editingYield])
 
-  const handleFormSubmit = handleSubmit(async (data) => {
-    setSubmitError(null)
-    const result = await onSubmit(data)
-    if (result?.error) {
-      setSubmitError(result.error)
-      return
-    }
+  const handleFormSubmit = handleSubmit((data) => runSubmit(() => onSubmit(data), () => {
     onClose()
-  })
+    showSuccess(editingYield ? 'Rendimiento actualizado' : 'Rendimiento creado')
+  }))
 
   return (
     <ModalGrid
@@ -75,17 +77,26 @@ const YieldForm = ({ editingYield, onClose, onSubmit }: Props) => {
         {...register('type', { required: true })}
       />
 
-      <SelectForm
-        id='accountId'
-        label='Cuenta'
-        size={6}
-        options={accounts}
-        optionValue='_id'
-        optionLabel='name'
-        voidOption
-        error={Boolean(errors.accountId)}
-        errorText='La cuenta es obligatoria'
-        {...register('accountId', { required: true })}
+      <Controller
+        name='accountId'
+        control={control}
+        rules={{ required: true }}
+        render={({ field }) => (
+          <SelectForm
+            id='accountId'
+            label='Cuenta'
+            size={6}
+            options={accounts}
+            optionValue='_id'
+            optionLabel='name'
+            voidOption
+            error={Boolean(errors.accountId)}
+            errorText='La cuenta es obligatoria'
+            value={field.value}
+            onChange={(e) => field.onChange(e.target.value)}
+            inputRef={field.ref}
+          />
+        )}
       />
 
       <Grid size={{ md: 12, xs: 12 }}>
@@ -101,9 +112,9 @@ const YieldForm = ({ editingYield, onClose, onSubmit }: Props) => {
                 id='categoryIds'
                 options={categories}
                 getOptionLabel={(option) => typeof option === 'string' ? option : option.name}
-                value={categories.filter((c) => c._id && field.value?.includes(c._id)) || []}
+                value={categories.filter((category) => category._id && field.value?.includes(category._id)) || []}
                 onChange={(_, newValue) => {
-                  const ids = newValue.flatMap((v) => typeof v === 'string' ? [v] : (v._id ? [v._id] : []))
+                  const ids = newValue.flatMap((selectedCategory) => typeof selectedCategory === 'string' ? [selectedCategory] : (selectedCategory._id ? [selectedCategory._id] : []))
                   field.onChange(ids)
                 }}
                 renderInput={(params) => (
@@ -116,15 +127,28 @@ const YieldForm = ({ editingYield, onClose, onSubmit }: Props) => {
               />
             )}
           />
-          {errors.categoryIds && (
-            <FormHelperText error>Selecciona al menos una categoría</FormHelperText>
-          )}
+          {errors.categoryIds
+            ? <FormHelperText error>Selecciona al menos una categoría</FormHelperText>
+            : <FormHelperText>Se usan para sugerir qué movimientos enlazar a este rendimiento</FormHelperText>}
         </Stack>
       </Grid>
 
       {submitError && (
         <Box sx={{ gridColumn: '1 / -1', width: '100%', mt: 1 }}>
-          <Alert severity='error'>{submitError}</Alert>
+          <Alert
+            severity='error'
+            action={submitResult?.existingYieldId && (
+              <Button
+                color='inherit'
+                size='small'
+                onClick={() => navigate(`/rendimientos/${submitResult.existingYieldId}`)}
+              >
+                Ver rendimiento
+              </Button>
+            )}
+          >
+            {submitError}
+          </Alert>
         </Box>
       )}
     </ModalGrid>

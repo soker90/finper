@@ -59,9 +59,10 @@ export class YieldsController {
 
   public getMatchingTransactions (req: Request, res: Response): void {
     const { id } = req.params
+    const search = typeof req.query.search === 'string' ? req.query.search : undefined
     this.logger.logInfo(`/matching-transactions - yield: ${id}`)
     validateYieldExist(id, req.user)
-    const response = this.yieldsService.getMatchingTransactions({ id, user: req.user })
+    const response = this.yieldsService.getMatchingTransactions({ id, user: req.user, search })
     res.send(response)
   }
 
@@ -88,7 +89,7 @@ export class YieldsController {
     const { id, transactionId } = req.params
     this.logger.logInfo(`/unlink-transaction - yield: ${id}, transaction: ${transactionId}`)
     validateYieldExist(id, req.user)
-    this.yieldsService.unlinkTransaction(transactionId, req.user)
+    this.yieldsService.unlinkTransaction({ yieldId: id, transactionId, user: req.user })
     res.status(204).send()
   }
 
@@ -99,5 +100,13 @@ export class YieldsController {
     const response = this.yieldsService.editSettlement({ settlementId, value, user: req.user })
     if (!response) throw Boom.notFound(ERROR_MESSAGE.YIELD.NOT_FOUND).output
     res.send(response)
+  }
+
+  public deleteSettlement (req: Request, res: Response): void {
+    const { id, settlementId } = req.params
+    this.logger.logInfo(`/delete-settlement - yield: ${id}, settlement: ${settlementId}`)
+    validateSettlementBelongsToYield({ yieldId: id, settlementId, user: req.user })
+    this.yieldsService.deleteSettlement({ settlementId, user: req.user })
+    res.status(204).send()
   }
 }

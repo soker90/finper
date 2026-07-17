@@ -11,9 +11,13 @@ import useSWR from 'swr'
 import ModalGrid from 'components/modals/ModalGrid'
 import { format } from 'utils'
 import { Yield, YieldEntry, YieldSettlement } from 'types'
-import { YIELDS } from 'constants/api-paths'
+import { YIELD_MATCHING_TRANSACTIONS } from 'constants/api-paths'
 import { linkYieldTransactions } from 'services/apiService'
 import { useYield } from 'hooks/useYields'
+import { useDebouncedValue } from 'hooks/useDebouncedValue'
+import { objectToParams } from 'utils/objectToParams'
+import { useSubmitError } from '../../hooks/useSubmitError'
+import { useSnackbar } from 'contexts'
 
 type Props = {
   item: Yield
@@ -23,10 +27,18 @@ type Props = {
   fixedSettlement?: YieldSettlement
 }
 
+const getSettlementLabel = (settlement: YieldSettlement) => {
+  const dateLabel = settlement.settlementDate
+    ? format.date(settlement.settlementDate)
+    : 'Pendiente'
+  return `${dateLabel} (${settlement.entries.length} movimientos)`
+}
+
 const LinkTransactionsModal = ({ item, onClose, onLinked, fixedSettlement }: Props) => {
   const [selected, setSelected] = useState<Set<string>>(new Set())
   const [submitting, setSubmitting] = useState(false)
-  const [linkError, setLinkError] = useState<string | null>(null)
+  const { error: linkError, runSubmit } = useSubmitError()
+  const { showSuccess } = useSnackbar()
 
   // When fixedSettlement is provided, we are implicitly in 'existing' mode
   const [linkMode, setLinkMode] = useState<'new' | 'existing'>(fixedSettlement ? 'existing' : 'new')
@@ -38,8 +50,13 @@ const LinkTransactionsModal = ({ item, onClose, onLinked, fixedSettlement }: Pro
   const { yieldData } = useYield(item._id)
   const existingSettlements = (!fixedSettlement && yieldData?.settlements) ? yieldData.settlements : []
 
+  const [search, setSearch] = useState('')
+  const debouncedSearch = useDebouncedValue(search, 300)
+
+  // The API only returns the 50 most recent unlinked matches: search narrows
+  // that set server-side so older movements (otherwise invisible) can be found.
   const { data: transactions, isLoading } = useSWR<YieldEntry[]>(
-    `${YIELDS}/${item._id}/matching-transactions`
+    `${YIELD_MATCHING_TRANSACTIONS(item._id)}${objectToParams({ search: debouncedSearch || undefined })}`
   )
 
   const toggle = (id: string) =>
@@ -54,30 +71,18 @@ const LinkTransactionsModal = ({ item, onClose, onLinked, fixedSettlement }: Pro
     if (linkMode === 'existing' && !targetSettlementId) return
 
     setSubmitting(true)
-    setLinkError(null)
-
     const payload = {
       transactionIds: [...selected],
       settlementId: linkMode === 'existing' ? targetSettlementId : null,
       tae: (linkMode === 'new' && tae) ? parseFloat(tae) : null,
       averageBalance: (linkMode === 'new' && averageBalance) ? parseFloat(averageBalance) : null
     }
-
-    const result = await linkYieldTransactions(item._id, payload)
+    await runSubmit(() => linkYieldTransactions(item._id, payload), () => {
+      onLinked()
+      onClose()
+      showSuccess('Movimientos enlazados')
+    })
     setSubmitting(false)
-    if (result.error) {
-      setLinkError(result.error)
-      return
-    }
-    onLinked()
-    onClose()
-  }
-
-  const getSettlementLabel = (settlement: YieldSettlement) => {
-    const dateLabel = settlement.settlementDate
-      ? format.date(settlement.settlementDate)
-      : 'Pendiente'
-    return `${dateLabel} (${settlement.entries.length} movimientos)`
   }
 
   return (
@@ -155,6 +160,17 @@ const LinkTransactionsModal = ({ item, onClose, onLinked, fixedSettlement }: Pro
           </FormControl>
         )}
 
+        <InputForm
+          id='search'
+          label='Buscar por nota'
+          placeholder='p. ej. diciembre, recibo luz…'
+          value={search}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearch(e.target.value)}
+          size={12}
+          error={false}
+          errorText=''
+        />
+
         {isLoading && (
           <Box sx={{ display: 'flex', justifyContent: 'center', py: 3 }}>
             <CircularProgress size={28} />
@@ -163,7 +179,9 @@ const LinkTransactionsModal = ({ item, onClose, onLinked, fixedSettlement }: Pro
 
         {!isLoading && (!transactions || transactions.length === 0) && (
           <Alert severity='info' icon={<SearchOutlined />}>
-            No hay movimientos candidatos sin enlazar para la cuenta {item.account.name}.
+            {search
+              ? `Sin resultados para "${search}".`
+              : `No hay movimientos candidatos sin enlazar para la cuenta ${item.account.name}.`}
           </Alert>
         )}
 
@@ -175,6 +193,7 @@ const LinkTransactionsModal = ({ item, onClose, onLinked, fixedSettlement }: Pro
           <>
             <Typography variant='caption' color='textSecondary' sx={{ display: 'block', mb: 1 }}>
               {transactions.length} movimiento{transactions.length > 1 ? 's' : ''} encontrado{transactions.length > 1 ? 's' : ''} · cuenta {item.account.name}
+              {transactions.length === 50 && ' · mostrando los 50 más recientes, busca por nota para encontrar otros más antiguos'}
             </Typography>
             <Box sx={{ maxHeight: 280, overflowY: 'auto', pr: 0.5 }}>
               <List dense disablePadding>
@@ -185,6 +204,14 @@ const LinkTransactionsModal = ({ item, onClose, onLinked, fixedSettlement }: Pro
                       key={tx._id}
                       disablePadding
                       onClick={() => toggle(tx._id)}
+                      role='button'
+                      tabIndex={0}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault()
+                          toggle(tx._id)
+                        }
+                      }}
                       sx={{
                         cursor: 'pointer',
                         borderRadius: 1,
@@ -197,7 +224,7 @@ const LinkTransactionsModal = ({ item, onClose, onLinked, fixedSettlement }: Pro
                       }}
                     >
                       <ListItemIcon sx={{ minWidth: 36 }}>
-                        <Checkbox checked={checked} size='small' color='primary' tabIndex={-1} />
+                        <Checkbox checked={checked} size='small' color='primary' tabIndex={-1} disableRipple />
                       </ListItemIcon>
                       <ListItemText
                         primary={

@@ -1,9 +1,9 @@
 import React, { useState, Suspense } from 'react'
 import { useParams, useNavigate } from 'react-router'
-import { mutate } from 'swr'
+import useSWR, { mutate } from 'swr'
 import {
   Stack, Box, Typography, Chip, IconButton, Button,
-  Avatar, CircularProgress, ToggleButtonGroup, ToggleButton
+  Avatar, CircularProgress, ToggleButtonGroup, ToggleButton, Alert
 } from '@mui/material'
 import {
   ArrowLeftOutlined, EditOutlined, SearchOutlined, BankOutlined,
@@ -11,19 +11,20 @@ import {
 } from '@ant-design/icons'
 
 import MainCard from 'components/MainCard'
-import { YIELDS } from 'constants/api-paths'
+import { YIELDS, YIELD_MATCHING_TRANSACTIONS } from 'constants/api-paths'
 import { useAccounts } from 'hooks/useAccounts'
-import { useYield, useYields } from 'hooks/useYields'
-import { unlinkYieldTransaction, editYieldSettlement } from 'services/apiService'
+import { useYield, useYields, useUnlinkYieldTransaction } from 'hooks/useYields'
+import { editYieldSettlement } from 'services/apiService'
 
 // Subcomponents
 import YieldDetailKpi from './components/YieldDetailKpi'
 import YieldSettlementsTable from './components/YieldSettlementsTable'
 import EditSettlementModal from './components/EditSettlementModal'
+import DeleteSettlementModal from './components/DeleteSettlementModal'
 import YieldForm from '../Yields/components/YieldForm'
 import LinkTransactionsModal from '../Yields/components/LinkTransactionsModal'
 import YieldRemoveModal from '../Yields/components/YieldRemoveModal'
-import { YieldSettlement } from 'types'
+import { YieldSettlement, YieldEntry } from 'types'
 
 // Lazy loaded chart to comply with React Doctor recommendations
 const YieldSettlementChart = React.lazy(() => import('./components/YieldSettlementChart'))
@@ -44,13 +45,17 @@ const YieldDetail = () => {
 
   const { yieldData, isLoading: loadingDetail, mutate: mutateDetail } = useYield(id)
   const { accounts } = useAccounts()
-  const { updateYield, removeYield } = useYields()
+  const { updateYield } = useYields()
+  const unlinkTransaction = useUnlinkYieldTransaction()
+  // Suggests linking recent unlinked movements instead of relying on the user to remember.
+  const { data: matchingTransactions } = useSWR<YieldEntry[]>(id ? YIELD_MATCHING_TRANSACTIONS(id) : null)
 
   const [showForm, setShowForm] = useState(false)
   const [showLinkModal, setShowLinkModal] = useState(false)
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [fixedSettlement, setFixedSettlement] = useState<YieldSettlement | null>(null)
   const [editingSettlement, setEditingSettlement] = useState<YieldSettlement | null>(null)
+  const [deletingSettlement, setDeletingSettlement] = useState<YieldSettlement | null>(null)
   const [viewMode, setViewMode] = useState<'settlement' | 'annual'>('settlement')
 
   if (loadingDetail) {
@@ -69,18 +74,14 @@ const YieldDetail = () => {
     )
   }
 
-  const account = accounts.find((a) => a._id === yieldData.accountId)
+  const account = accounts.find((accountItem) => accountItem._id === yieldData.accountId)
   const currentBalance = account ? account.balance : 0
 
-  const handleUnlink = async (transactionId: string) => {
-    await unlinkYieldTransaction(yieldData._id, transactionId)
-    await mutateDetail()
-    mutate(YIELDS)
-  }
+  const handleUnlink = (transactionId: string) => unlinkTransaction(yieldData._id, transactionId)
 
   const handleEditSettlementSubmit = async (tae: number | null, averageBalance: number | null) => {
     if (!editingSettlement) return
-    const result = await editYieldSettlement(yieldData._id, editingSettlement.id, { tae, averageBalance })
+    const result = await editYieldSettlement({ id: yieldData._id, settlementId: editingSettlement.id, payload: { tae, averageBalance } })
     if (result.error) {
       return result
     }
@@ -152,8 +153,28 @@ const YieldDetail = () => {
         </Stack>
       </Stack>
 
+      {matchingTransactions && matchingTransactions.length > 0 && (
+        <Alert
+          severity='info'
+          action={
+            <Button
+              color='inherit'
+              size='small'
+              onClick={() => {
+                setFixedSettlement(null)
+                setShowLinkModal(true)
+              }}
+            >
+              Enlazar ahora
+            </Button>
+          }
+        >
+          Tienes {matchingTransactions.length} movimiento{matchingTransactions.length === 1 ? '' : 's'} sin enlazar en esta cuenta.
+        </Alert>
+      )}
+
       {/* KPI Stats */}
-      <YieldDetailKpi yieldData={yieldData} currentBalance={currentBalance} />
+      <YieldDetailKpi yieldData={yieldData} currentBalance={currentBalance} viewMode={viewMode} />
 
       <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: -1 }}>
         <ToggleButtonGroup
@@ -185,7 +206,7 @@ const YieldDetail = () => {
       </Suspense>
 
       {/* Settlements Table */}
-      <MainCard title={viewMode === 'annual' ? 'Resumen Anual de Liquidaciones' : 'Detalle de Liquidaciones'} content={false}>
+      <MainCard title={viewMode === 'annual' ? 'Resumen Anual de Liquidaciones' : 'Detalle de Liquidaciones'} content={false} sx={{ overflowX: 'auto' }}>
         <YieldSettlementsTable
           yieldData={yieldData}
           viewMode={viewMode}
@@ -195,6 +216,7 @@ const YieldDetail = () => {
             setShowLinkModal(true)
           }}
           onUnlinkTransaction={handleUnlink}
+          onDeleteSettlement={(settlement) => setDeletingSettlement(settlement)}
         />
       </MainCard>
 
@@ -227,6 +249,7 @@ const YieldDetail = () => {
             setFixedSettlement(null)
             await mutateDetail()
             mutate(YIELDS)
+            mutate(YIELD_MATCHING_TRANSACTIONS(yieldData._id))
           }}
         />
       )}
@@ -243,11 +266,15 @@ const YieldDetail = () => {
         <YieldRemoveModal
           item={yieldData}
           onClose={() => setShowDeleteModal(false)}
-          onConfirm={async () => {
-            await removeYield(yieldData._id)
-            setShowDeleteModal(false)
-            navigate('/rendimientos')
-          }}
+          onDeleted={() => navigate('/rendimientos')}
+        />
+      )}
+
+      {deletingSettlement && (
+        <DeleteSettlementModal
+          yieldId={yieldData._id}
+          settlement={deletingSettlement}
+          onClose={() => setDeletingSettlement(null)}
         />
       )}
     </Stack>

@@ -1,4 +1,4 @@
-import { sqliteTable, text, primaryKey, integer, real, index } from 'drizzle-orm/sqlite-core';
+import { sqliteTable, text, primaryKey, integer, real, index, foreignKey } from 'drizzle-orm/sqlite-core';
 import { users } from './users';
 import { accounts } from './accounts';
 import { categories } from './categories';
@@ -24,12 +24,19 @@ export const transactions = sqliteTable('transactions', {
   // (tipo 'cashback') — el papel se deduce del `type` de la transacción y
   // del `type` del rendimiento, sin necesidad de columnas adicionales.
   yieldId: text('yield_id').references(() => yields.id),
-  yieldSettlementId: text('yield_settlement_id').references(() => yieldSettlements.id),
+  yieldSettlementId: text('yield_settlement_id'),
   tags: text('tags', { mode: 'json' }).$type<string[]>().notNull().default([]),
   user: text('user').notNull().references(() => users.username),
 }, (table) => ({
   userTypeDateIdx: index('transactions_user_type_date_idx').on(table.user, table.type, table.date),
   userIdx: index('transactions_user_idx').on(table.user),
+  // Composite FK: guarantees yield_settlement_id always belongs to yield_id
+  // (both NULL is allowed — SQLite only enforces a multi-column FK when none
+  // of its columns are NULL).
+  yieldSettlementBelongsToYieldFk: foreignKey({
+    columns: [table.yieldSettlementId, table.yieldId],
+    foreignColumns: [yieldSettlements.id, yieldSettlements.yieldId]
+  }),
 }));
 
 

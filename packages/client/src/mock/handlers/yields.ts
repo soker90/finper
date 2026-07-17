@@ -87,7 +87,10 @@ export const yieldsHandlers = [
 
   http.put('/yields/:id', async ({ params, request }) => {
     const body = await request.json() as Record<string, any>
-    const found = YIELDS_LIST.find(y => y._id === params.id) ?? YIELDS_LIST[0]
+    const found = YIELDS_LIST.find((yieldItem) => yieldItem._id === params.id)
+    if (!found) {
+      return HttpResponse.json({ message: 'Yield not found' }, { status: 404 })
+    }
     return HttpResponse.json({ ...found, ...body })
   }),
 
@@ -96,7 +99,10 @@ export const yieldsHandlers = [
   }),
 
   http.get('/yields/:id', ({ params }) => {
-    const found = YIELDS_LIST.find(y => y._id === params.id) ?? YIELDS_LIST[0]
+    const found = YIELDS_LIST.find((yieldItem) => yieldItem._id === params.id)
+    if (!found) {
+      return HttpResponse.json({ message: 'Yield not found' }, { status: 404 })
+    }
     return HttpResponse.json({
       ...found,
       entries: [

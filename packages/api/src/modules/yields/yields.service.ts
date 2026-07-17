@@ -1,6 +1,15 @@
+import Boom from '@hapi/boom'
 import { serializeYield, serializeYieldSummary, serializeYieldDetail, serializeYieldTransaction } from './yields.serializer'
+import { ERROR_MESSAGE } from '../../i18n'
 
 type IYieldsRepository = ReturnType<typeof import('./yields.repository').createYieldsRepository>
+
+// SQLite reports the violated columns, not the index name (e.g. "UNIQUE
+// constraint failed: yields.user, yields.account_id, yields.type"). Since
+// create/update only ever write to the `yields` table, the error code alone
+// is specific enough to identify this constraint.
+const isDuplicateYieldError = (error: unknown): boolean =>
+  typeof error === 'object' && error !== null && (error as { code?: string }).code === 'SQLITE_CONSTRAINT_UNIQUE'
 
 export class YieldsService {
   constructor (private repository: IYieldsRepository) {}
@@ -22,28 +31,42 @@ export class YieldsService {
   }
 
   public addYield (params: { type: string, accountId: string, categoryIds: string[], user: string }) {
-    const created = this.repository.create(params)
-    return serializeYield(created)
+    try {
+      const created = this.repository.create(params)
+      return serializeYield(created)
+    } catch (error) {
+      // Defense in depth: the app-level duplicate check (assertNoDuplicateYield)
+      // can race between two concurrent requests; the DB unique index is the
+      // real guard, so its violation is translated to the same user-facing error.
+      if (isDuplicateYieldError(error)) throw Boom.badData(ERROR_MESSAGE.YIELD.ALREADY_EXISTS).output
+      throw error
+    }
   }
 
-  public editYield ({ id, value, user }: { id: string, value: any, user: string }) {
-    const updated = this.repository.update(id, user, value)
-    return updated ? serializeYield(updated) : null
+  public editYield ({ id, value, user }: { id: string, value: Partial<{ type: string, accountId: string, categoryIds: string[] }>, user: string }) {
+    try {
+      const updated = this.repository.update(id, user, value)
+      return updated ? serializeYield(updated) : null
+    } catch (error) {
+      if (isDuplicateYieldError(error)) throw Boom.badData(ERROR_MESSAGE.YIELD.ALREADY_EXISTS).output
+      throw error
+    }
   }
 
   public deleteYield (id: string, user: string): void {
-    this.repository.unlinkAllTransactions(id)
-    this.repository.deleteSettlementsByYield(id)
+    this.repository.unlinkAllTransactions(id, user)
+    this.repository.deleteSettlementsByYield(id, user)
     this.repository.delete(id, user)
   }
 
-  public getMatchingTransactions ({ id, user }: { id: string, user: string }) {
+  public getMatchingTransactions ({ id, user, search }: { id: string, user: string, search?: string }) {
     const y = this.repository.findByIdPopulated(id, user)
     if (!y) return []
     return this.repository.findMatchingTransactions({
       accountId: y.accountId,
       categoryIds: y.categoryIds,
-      user
+      user,
+      search
     }).map(serializeYieldTransaction)
   }
 
@@ -62,9 +85,9 @@ export class YieldsService {
     this.repository.linkTransactions(id, targetSettlementId, transactionIds, user)
   }
 
-  public unlinkTransaction (transactionId: string, user: string): void {
+  public unlinkTransaction ({ yieldId, transactionId, user }: { yieldId: string, transactionId: string, user: string }): void {
     const settlementId = this.repository.findTransactionSettlementId(transactionId, user)
-    this.repository.unlinkTransaction(transactionId, user)
+    this.repository.unlinkTransaction(yieldId, transactionId, user)
     if (settlementId) {
       const isEmpty = this.repository.isSettlementEmpty(settlementId)
       if (isEmpty) {
@@ -79,5 +102,11 @@ export class YieldsService {
       averageBalance: value.averageBalance !== undefined ? value.averageBalance : undefined
     })
     return updated || null
+  }
+
+  /** Unlinks every transaction in the settlement, then removes it. */
+  public deleteSettlement ({ settlementId, user }: { settlementId: string, user: string }): void {
+    this.repository.unlinkTransactionsBySettlement(settlementId, user)
+    this.repository.deleteSettlement(settlementId, user)
   }
 }
