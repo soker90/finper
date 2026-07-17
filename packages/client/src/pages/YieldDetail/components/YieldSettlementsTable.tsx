@@ -186,6 +186,8 @@ const YieldSettlementsTable = ({ yieldData, viewMode = 'settlement', onEditSettl
     )
   }
 
+  const colSpan = yieldData.type === 'interest' ? 8 : 6
+
   return (
     <TableContainer>
       <Table>
@@ -206,8 +208,6 @@ const YieldSettlementsTable = ({ yieldData, viewMode = 'settlement', onEditSettl
               : (
                 <>
                   <TableCell align='right'>Recibos (Gastos)</TableCell>
-                  <TableCell align='right'>Cashback Bruto</TableCell>
-                  <TableCell align='right'>Retención</TableCell>
                   <TableCell align='right'>Cashback Neto</TableCell>
                   <TableCell align='right'>% Devuelto</TableCell>
                 </>
@@ -219,7 +219,7 @@ const YieldSettlementsTable = ({ yieldData, viewMode = 'settlement', onEditSettl
           {yieldData.settlements.length === 0
             ? (
               <TableRow>
-                <TableCell colSpan={8} align='center' sx={{ py: 3 }}>
+                <TableCell colSpan={colSpan} align='center' sx={{ py: 3 }}>
                   <Typography color='textSecondary'>
                     No hay liquidaciones creadas. Usa "Enlazar movimientos" para crear una.
                   </Typography>
@@ -306,10 +306,6 @@ const YieldSettlementsTable = ({ yieldData, viewMode = 'settlement', onEditSettl
                           : (
                             <>
                               <TableCell align='right'>{format.euro(settlement.billsTotal ?? 0)}</TableCell>
-                              <TableCell align='right'>{format.euro(settlement.grossIncome ?? settlement.cashbackAmount ?? 0)}</TableCell>
-                              <TableCell align='right' sx={{ color: 'error.main' }}>
-                                {settlement.taxExpense ? `-${format.euro(settlement.taxExpense)}` : '—'}
-                              </TableCell>
                               <TableCell align='right' sx={{ fontWeight: 600, color: 'success.main' }}>
                                 {format.euro(settlement.cashbackAmount ?? 0)}
                               </TableCell>
@@ -350,7 +346,7 @@ const YieldSettlementsTable = ({ yieldData, viewMode = 'settlement', onEditSettl
                         </TableCell>
                       </TableRow>
                       <TableRow>
-                        <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={8}>
+                        <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={colSpan}>
                           <Collapse in={isOpen} timeout='auto' unmountOnExit>
                             <Box sx={{ margin: 2, pl: 4 }}>
                               <Typography variant='h6' gutterBottom component='div'>
