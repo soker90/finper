@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { Grid } from '@mui/material'
+import { useState, useMemo } from 'react'
+import { Grid, Box, ToggleButtonGroup, ToggleButton } from '@mui/material'
 import { PlusOutlined } from '@ant-design/icons'
 import { mutate } from 'swr'
 
@@ -9,7 +9,7 @@ import { Yield, YieldInput } from 'types'
 import { YIELDS } from 'constants/api-paths'
 import { unlinkYieldTransaction } from 'services/apiService'
 
-import { YieldCard, YieldForm, LinkTransactionsModal } from './components'
+import { YieldCard, YieldForm, LinkTransactionsModal, YieldRemoveModal } from './components'
 import { YieldsSummary, YieldsEmpty, YieldsSkeleton } from './utils'
 
 const Yields = () => {
@@ -18,6 +18,20 @@ const Yields = () => {
   const [showForm, setShowForm] = useState(false)
   const [editTarget, setEditTarget] = useState<Yield | undefined>()
   const [searchTarget, setSearchTarget] = useState<Yield | null>(null)
+  const [deleteTarget, setDeleteTarget] = useState<Yield | null>(null)
+  const [selectedYear, setSelectedYear] = useState<number | 'all'>('all')
+
+  const availableYears = useMemo(() => {
+    const yearsSet = new Set<number>()
+    for (const y of yields) {
+      if (y.annualBreakdown) {
+        for (const a of y.annualBreakdown) {
+          yearsSet.add(a.year)
+        }
+      }
+    }
+    return Array.from(yearsSet).sort((a, b) => b - a)
+  }, [yields])
 
   const handleEdit = (y: Yield) => setEditTarget(y)
   const handleCloseForm = () => { setShowForm(false); setEditTarget(undefined) }
@@ -48,7 +62,31 @@ const Yields = () => {
         desktopSx={{ marginTop: -7 }}
       />
 
-      <YieldsSummary items={yields} />
+      {availableYears.length > 0 && (
+        <Box sx={{ mb: 2, display: 'flex', justifyContent: 'flex-end' }}>
+          <ToggleButtonGroup
+            size='small'
+            value={selectedYear}
+            exclusive
+            onChange={(_, val) => {
+              if (val !== null) setSelectedYear(val)
+            }}
+            aria-label='Filtrar por año'
+            color='primary'
+          >
+            <ToggleButton value='all' sx={{ px: 2, textTransform: 'none', fontWeight: 600 }}>
+              Histórico completo
+            </ToggleButton>
+            {availableYears.map((yr) => (
+              <ToggleButton key={yr} value={yr} sx={{ px: 2, fontWeight: 600 }}>
+                {yr}
+              </ToggleButton>
+            ))}
+          </ToggleButtonGroup>
+        </Box>
+      )}
+
+      <YieldsSummary items={yields} selectedYear={selectedYear} />
 
       {isLoading && <YieldsSkeleton />}
 
@@ -62,8 +100,9 @@ const Yields = () => {
             <Grid key={item._id} size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
               <YieldCard
                 item={item}
+                selectedYear={selectedYear}
                 onEdit={handleEdit}
-                onDelete={(y) => removeYield(y._id)}
+                onDelete={setDeleteTarget}
                 onSearchTransactions={setSearchTarget}
                 onUnlinkTransaction={handleUnlinkTransaction}
               />
@@ -85,6 +124,17 @@ const Yields = () => {
           item={searchTarget}
           onClose={() => setSearchTarget(null)}
           onLinked={handleLinked}
+        />
+      )}
+
+      {deleteTarget && (
+        <YieldRemoveModal
+          item={deleteTarget}
+          onClose={() => setDeleteTarget(null)}
+          onConfirm={async () => {
+            await removeYield(deleteTarget._id)
+            setDeleteTarget(null)
+          }}
         />
       )}
     </>

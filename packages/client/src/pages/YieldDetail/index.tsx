@@ -3,11 +3,11 @@ import { useParams, useNavigate } from 'react-router'
 import { mutate } from 'swr'
 import {
   Stack, Box, Typography, Chip, IconButton, Button,
-  Avatar, CircularProgress
+  Avatar, CircularProgress, ToggleButtonGroup, ToggleButton
 } from '@mui/material'
 import {
   ArrowLeftOutlined, EditOutlined, SearchOutlined, BankOutlined,
-  ShoppingOutlined
+  ShoppingOutlined, DeleteOutlined
 } from '@ant-design/icons'
 
 import MainCard from 'components/MainCard'
@@ -22,13 +22,14 @@ import YieldSettlementsTable from './components/YieldSettlementsTable'
 import EditSettlementModal from './components/EditSettlementModal'
 import YieldForm from '../Yields/components/YieldForm'
 import LinkTransactionsModal from '../Yields/components/LinkTransactionsModal'
+import YieldRemoveModal from '../Yields/components/YieldRemoveModal'
 import { YieldSettlement } from 'types'
 
 // Lazy loaded chart to comply with React Doctor recommendations
 const YieldSettlementChart = React.lazy(() => import('./components/YieldSettlementChart'))
 
 const TYPE_LABEL: Record<string, string> = {
-  interest: 'Intereses',
+  interest: 'Remunerada',
   cashback: 'Cashback'
 }
 
@@ -43,12 +44,14 @@ const YieldDetail = () => {
 
   const { yieldData, isLoading: loadingDetail, mutate: mutateDetail } = useYield(id)
   const { accounts } = useAccounts()
-  const { updateYield } = useYields()
+  const { updateYield, removeYield } = useYields()
 
   const [showForm, setShowForm] = useState(false)
   const [showLinkModal, setShowLinkModal] = useState(false)
+  const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [fixedSettlement, setFixedSettlement] = useState<YieldSettlement | null>(null)
   const [editingSettlement, setEditingSettlement] = useState<YieldSettlement | null>(null)
+  const [viewMode, setViewMode] = useState<'settlement' | 'annual'>('settlement')
 
   if (loadingDetail) {
     return (
@@ -106,7 +109,7 @@ const YieldDetail = () => {
             {TYPE_ICON[yieldData.type]}
           </Avatar>
           <Box>
-            <Typography variant='h3'>{yieldData.name}</Typography>
+            <Typography variant='h3'>{yieldData.account.name} - {TYPE_LABEL[yieldData.type] ?? yieldData.type}</Typography>
             <Stack direction='row' spacing={1} sx={{ alignItems: 'center', mt: 0.5 }}>
               <Typography variant='caption' color='textSecondary'>
                 Cuenta: {yieldData.account.name} ({yieldData.account.bank})
@@ -138,11 +141,38 @@ const YieldDetail = () => {
           >
             Editar
           </Button>
+          <Button
+            variant='outlined'
+            color='error'
+            startIcon={<DeleteOutlined />}
+            onClick={() => setShowDeleteModal(true)}
+          >
+            Eliminar
+          </Button>
         </Stack>
       </Stack>
 
       {/* KPI Stats */}
       <YieldDetailKpi yieldData={yieldData} currentBalance={currentBalance} />
+
+      <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: -1 }}>
+        <ToggleButtonGroup
+          size='small'
+          value={viewMode}
+          exclusive
+          onChange={(_, val) => {
+            if (val !== null) setViewMode(val)
+          }}
+          color='primary'
+        >
+          <ToggleButton value='settlement' sx={{ px: 2, textTransform: 'none', fontWeight: 600 }}>
+            Por liquidación
+          </ToggleButton>
+          <ToggleButton value='annual' sx={{ px: 2, textTransform: 'none', fontWeight: 600 }}>
+            Vista Anual
+          </ToggleButton>
+        </ToggleButtonGroup>
+      </Box>
 
       {/* Recharts lazy loaded under Suspense */}
       <Suspense fallback={
@@ -151,13 +181,14 @@ const YieldDetail = () => {
         </Box>
       }
       >
-        <YieldSettlementChart yieldData={yieldData} />
+        <YieldSettlementChart yieldData={yieldData} viewMode={viewMode} />
       </Suspense>
 
       {/* Settlements Table */}
-      <MainCard title='Detalle de Liquidaciones' content={false}>
+      <MainCard title={viewMode === 'annual' ? 'Resumen Anual de Liquidaciones' : 'Detalle de Liquidaciones'} content={false}>
         <YieldSettlementsTable
           yieldData={yieldData}
+          viewMode={viewMode}
           onEditSettlement={(settlement) => setEditingSettlement(settlement)}
           onLinkToSettlement={(settlement) => {
             setFixedSettlement(settlement)
@@ -205,6 +236,18 @@ const YieldDetail = () => {
           settlement={editingSettlement}
           onClose={() => setEditingSettlement(null)}
           onSubmit={handleEditSettlementSubmit}
+        />
+      )}
+
+      {showDeleteModal && (
+        <YieldRemoveModal
+          item={yieldData}
+          onClose={() => setShowDeleteModal(false)}
+          onConfirm={async () => {
+            await removeYield(yieldData._id)
+            setShowDeleteModal(false)
+            navigate('/rendimientos')
+          }}
         />
       )}
     </Stack>

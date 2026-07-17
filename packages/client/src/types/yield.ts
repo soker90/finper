@@ -2,7 +2,6 @@ export type YieldType = 'interest' | 'cashback'
 
 export interface Yield {
   _id: string
-  name: string
   type: YieldType
   accountId: string
   categoryIds: string[]
@@ -12,12 +11,19 @@ export interface Yield {
     bank: string
   }
   netAccumulated: number
+  annualBreakdown?: {
+    year: number
+    net: number
+    grossIncome: number
+    taxExpense: number
+    billsTotal: number
+    cashbackAmount: number
+  }[]
   entriesCount: number
   paymentsCount: number
 }
 
 export interface YieldInput {
-  name?: string | null
   type: YieldType
   accountId: string
   categoryIds: string[]
@@ -45,6 +51,7 @@ export interface YieldSettlement {
   billsTotal?: number
   cashbackAmount?: number
   percentage?: number | null
+  grossPercentage?: number | null
   status?: 'pending' | 'completed'
   entries: YieldEntry[]
 }

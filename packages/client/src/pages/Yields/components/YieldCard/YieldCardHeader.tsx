@@ -11,7 +11,7 @@ type Props = {
 }
 
 const TYPE_LABEL: Record<string, string> = {
-  interest: 'Intereses',
+  interest: 'Remunerada',
   cashback: 'Cashback'
 }
 
@@ -43,7 +43,7 @@ const YieldCardHeader = ({ item, onEdit, onDelete, onSearchTransactions }: Props
       </Avatar>
       <Stack spacing={0} sx={{ minWidth: 0 }}>
         <Typography variant='h6' color='textSecondary' noWrap>
-          {item.name}
+          {item.account.name} - {TYPE_LABEL[item.type] ?? item.type}
         </Typography>
         <Chip label={TYPE_LABEL[item.type] ?? item.type} size='small' sx={{ height: 18, fontSize: 11, alignSelf: 'flex-start' }} />
       </Stack>

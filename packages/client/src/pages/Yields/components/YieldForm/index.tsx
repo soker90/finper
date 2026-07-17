@@ -3,13 +3,12 @@ import { useForm, Controller } from 'react-hook-form'
 import { Alert, Box, Autocomplete, TextField, InputLabel, FormHelperText, Stack, Grid } from '@mui/material'
 import ModalGrid from 'components/modals/ModalGrid'
 import SelectForm from 'components/forms/SelectForm'
-import InputForm from 'components/forms/InputForm'
 import { useAccounts } from 'hooks/useAccounts'
 import { useCategories } from 'hooks/useCategories'
 import { Yield, YieldInput } from 'types'
 
 const YIELD_TYPE_OPTIONS = [
-  { value: 'interest', label: 'Intereses' },
+  { value: 'interest', label: 'Remunerada' },
   { value: 'cashback', label: 'Cashback' }
 ]
 
@@ -25,13 +24,11 @@ const YieldForm = ({ editingYield, onClose, onSubmit }: Props) => {
 
   const defaultValues = editingYield
     ? {
-        name: editingYield.name,
         type: editingYield.type,
         accountId: editingYield.accountId,
         categoryIds: editingYield.categoryIds || []
       }
     : {
-        name: '',
         type: 'interest' as const,
         accountId: '',
         categoryIds: []
@@ -66,20 +63,10 @@ const YieldForm = ({ editingYield, onClose, onSubmit }: Props) => {
       action={handleFormSubmit}
       actionDisabled={isSubmitting}
     >
-      <InputForm
-        id='name'
-        label='Nombre (opcional)'
-        placeholder='Por defecto: Cuenta - Tipo'
-        size={6}
-        error={false}
-        errorText=''
-        {...register('name')}
-      />
-
       <SelectForm
         id='type'
         label='Tipo'
-        size={3}
+        size={6}
         options={YIELD_TYPE_OPTIONS}
         optionValue='value'
         optionLabel='label'
@@ -91,7 +78,7 @@ const YieldForm = ({ editingYield, onClose, onSubmit }: Props) => {
       <SelectForm
         id='accountId'
         label='Cuenta'
-        size={3}
+        size={6}
         options={accounts}
         optionValue='_id'
         optionLabel='name'

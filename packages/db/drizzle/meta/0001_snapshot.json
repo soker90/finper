@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "12b5e732-e7ba-47ea-bce4-142cd9ffb531",
+  "id": "b73e8322-79df-4199-853d-f0f5cc362247",
   "prevId": "315b8516-8559-44f4-a439-60776f5ba687",
   "tables": {
     "accounts": {
@@ -1536,13 +1536,6 @@
           "name": "id",
           "type": "text",
           "primaryKey": true,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "name": {
-          "name": "name",
-          "type": "text",
-          "primaryKey": false,
           "notNull": true,
           "autoincrement": false
         },

@@ -12,16 +12,204 @@ import { YieldDetail, YieldSettlement } from 'types'
 
 interface Props {
   yieldData: YieldDetail
+  viewMode?: 'settlement' | 'annual'
   onEditSettlement: (settlement: YieldSettlement) => void
   onLinkToSettlement: (settlement: YieldSettlement) => void
   onUnlinkTransaction: (transactionId: string) => void
 }
 
-const YieldSettlementsTable = ({ yieldData, onEditSettlement, onLinkToSettlement, onUnlinkTransaction }: Props) => {
+const YieldSettlementsTable = ({ yieldData, viewMode = 'settlement', onEditSettlement, onLinkToSettlement, onUnlinkTransaction }: Props) => {
   const [expanded, setExpanded] = useState<Record<string, boolean>>({})
 
   const toggle = (id: string) => {
     setExpanded((prev) => ({ ...prev, [id]: !prev[id] }))
+  }
+
+  if (viewMode === 'annual') {
+    const annualMap = new Map<number, YieldSettlement[]>()
+    for (const s of yieldData.settlements) {
+      const year = s.settlementDate ? new Date(s.settlementDate).getFullYear() : new Date().getFullYear()
+      const list = annualMap.get(year) ?? []
+      list.push(s)
+      annualMap.set(year, list)
+    }
+    const annualYears = Array.from(annualMap.keys()).sort((a, b) => b - a)
+
+    return (
+      <TableContainer>
+        <Table>
+          <TableHead>
+            <TableRow>
+              <TableCell sx={{ pl: 3 }} width={50} />
+              <TableCell>Año</TableCell>
+              {yieldData.type === 'interest'
+                ? (
+                  <>
+                    <TableCell align='right'>Ingreso Bruto</TableCell>
+                    <TableCell align='right'>Impuesto Retenido</TableCell>
+                    <TableCell align='right'>Neto Anual</TableCell>
+                    <TableCell align='right'>TAE (%)</TableCell>
+                    <TableCell align='right'>Liquidaciones</TableCell>
+                  </>
+                  )
+                : (
+                  <>
+                    <TableCell align='right'>Recibos Totales</TableCell>
+                    <TableCell align='right'>Cashback Bruto</TableCell>
+                    <TableCell align='right'>Retención</TableCell>
+                    <TableCell align='right'>Cashback Neto</TableCell>
+                    <TableCell align='right'>% Devuelto</TableCell>
+                  </>
+                  )}
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {annualYears.map((year) => {
+              const list = annualMap.get(year) ?? []
+              const grossIncome = list.reduce((sum, s) => sum + (s.grossIncome ?? 0), 0)
+              const taxExpense = list.reduce((sum, s) => sum + (s.taxExpense ?? 0), 0)
+              const net = list.reduce((sum, s) => sum + (s.net ?? 0), 0)
+              const billsTotal = list.reduce((sum, s) => sum + (s.billsTotal ?? 0), 0)
+              const cashbackAmount = list.reduce((sum, s) => sum + (s.cashbackAmount ?? 0), 0)
+
+              const validPercentages = list.filter((s) => (s.percentage ?? 0) > 0)
+              const avgPercentage = billsTotal > 0 && cashbackAmount > 0
+                ? (cashbackAmount / billsTotal) * 100
+                : validPercentages.length > 0
+                  ? validPercentages.reduce((sum, s) => sum + (s.percentage ?? 0), 0) / validPercentages.length
+                  : 0
+
+              const validGrossPercentages = list.filter((s) => (s.grossPercentage ?? 0) > 0)
+              const avgGrossPercentage = validGrossPercentages.length > 0
+                ? validGrossPercentages.reduce((sum, s) => sum + (s.grossPercentage ?? 0), 0) / validGrossPercentages.length
+                : null
+
+              const validTaes = list.filter((s) => (s.tae ?? 0) > 0)
+              const avgTae = validTaes.length > 0
+                ? validTaes.reduce((sum, s) => sum + (s.tae ?? 0), 0) / validTaes.length
+                : null
+
+              const isYearExpanded = Boolean(expanded[`year-${year}`])
+
+              return (
+                <React.Fragment key={year}>
+                  <TableRow hover sx={{ cursor: 'pointer' }} onClick={() => toggle(`year-${year}`)}>
+                    <TableCell sx={{ pl: 3 }}>
+                      <IconButton size='small' onClick={(e) => { e.stopPropagation(); toggle(`year-${year}`) }}>
+                        {isYearExpanded ? <UpOutlined /> : <DownOutlined />}
+                      </IconButton>
+                    </TableCell>
+                    <TableCell>
+                      <Typography variant='subtitle1' sx={{ fontWeight: 600 }}>{year}</Typography>
+                      <Typography variant='caption' color='textSecondary'>{list.length} liquidación{list.length === 1 ? '' : 'es'}</Typography>
+                    </TableCell>
+                    {yieldData.type === 'interest'
+                      ? (
+                        <>
+                          <TableCell align='right'>{format.euro(grossIncome)}</TableCell>
+                          <TableCell align='right'>{format.euro(taxExpense)}</TableCell>
+                          <TableCell align='right'><Typography sx={{ fontWeight: 600 }} color='primary'>{format.euro(net)}</Typography></TableCell>
+                          <TableCell align='right'>{avgTae ? `${format.number(avgTae)}%` : '—'}</TableCell>
+                          <TableCell align='right'>{list.length}</TableCell>
+                        </>
+                        )
+                      : (
+                        <>
+                          <TableCell align='right'>{format.euro(billsTotal)}</TableCell>
+                          <TableCell align='right'>{format.euro(grossIncome)}</TableCell>
+                          <TableCell align='right'>{format.euro(taxExpense)}</TableCell>
+                          <TableCell align='right'><Typography sx={{ fontWeight: 600 }} color='primary'>{format.euro(cashbackAmount)}</Typography></TableCell>
+                          <TableCell align='right'>
+                            <Typography sx={{ fontWeight: 600 }} color='primary'>
+                              {avgPercentage > 0
+                                ? avgGrossPercentage
+                                  ? `${format.number(avgPercentage)}% (${format.number(avgGrossPercentage)}% bruto)`
+                                  : `${format.number(avgPercentage)}%`
+                                : '0%'}
+                            </Typography>
+                          </TableCell>
+                        </>
+                        )}
+                  </TableRow>
+                  {isYearExpanded && (
+                    <TableRow>
+                      <TableCell colSpan={7} sx={{ py: 0, bgcolor: 'action.hover' }}>
+                        <Collapse in={isYearExpanded} timeout='auto' unmountOnExit>
+                          <Box sx={{ margin: 2, pl: 4 }}>
+                            <Typography variant='h6' gutterBottom component='div'>
+                              Liquidaciones del año
+                            </Typography>
+                            <List dense disablePadding>
+                              {list.map((s, idx) => {
+                                const isPending = s.status === 'pending' || !s.settlementDate
+                                const label = !isPending
+                                  ? (format.monthYear(s.settlementDate!) ?? `Liq. #${idx + 1}`)
+                                  : 'Pendiente de abono'
+                                const amount = yieldData.type === 'interest' ? (s.net ?? 0) : (s.cashbackAmount ?? 0)
+
+                                const sPercentage = s.percentage !== null && s.percentage !== undefined
+                                  ? `${format.number(s.percentage)}%`
+                                  : (s.billsTotal ?? 0) > 0 && (s.cashbackAmount ?? 0) > 0
+                                      ? `${format.number(((s.cashbackAmount ?? 0) / (s.billsTotal ?? 0)) * 100)}%`
+                                      : null
+                                const sGrossStr = s.grossPercentage !== null && s.grossPercentage !== undefined
+                                  ? ` (${format.number(s.grossPercentage)}% bruto)`
+                                  : ''
+
+                                const secondaryParts = [`${s.entries?.length ?? 0} movimiento${(s.entries?.length ?? 0) === 1 ? '' : 's'}`]
+                                if (yieldData.type === 'cashback') {
+                                  if (sPercentage) {
+                                    secondaryParts.push(`% devuelto: ${sPercentage}${sGrossStr}`)
+                                  } else if (s.status === 'pending') {
+                                    secondaryParts.push('% devuelto: Pendiente')
+                                  }
+                                } else if (yieldData.type === 'interest' && s.tae) {
+                                  secondaryParts.push(`TAE: ${format.number(s.tae)}%`)
+                                }
+
+                                return (
+                                  <ListItem
+                                    key={s.id}
+                                    sx={{
+                                      border: '1px solid',
+                                      borderColor: 'divider',
+                                      borderRadius: 1,
+                                      mb: 1,
+                                      bgcolor: 'background.paper',
+                                      pr: 2
+                                    }}
+                                  >
+                                    <ListItemText
+                                      primary={
+                                        <Typography variant='body2' sx={{ fontWeight: 600 }}>
+                                          {label}
+                                        </Typography>
+                                      }
+                                      secondary={
+                                        <Typography variant='caption' color='textSecondary'>
+                                          {secondaryParts.join(' · ')}
+                                        </Typography>
+                                      }
+                                    />
+                                    <Typography variant='body2' sx={{ fontWeight: 600, color: 'success.main' }}>
+                                      {format.euro(amount)}
+                                    </Typography>
+                                  </ListItem>
+                                )
+                              })}
+                            </List>
+                          </Box>
+                        </Collapse>
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </React.Fragment>
+              )
+            })}
+          </TableBody>
+        </Table>
+      </TableContainer>
+    )
   }
 
   return (
@@ -44,7 +232,9 @@ const YieldSettlementsTable = ({ yieldData, onEditSettlement, onLinkToSettlement
               : (
                 <>
                   <TableCell align='right'>Recibos (Gastos)</TableCell>
-                  <TableCell align='right'>Cashback Devuelto</TableCell>
+                  <TableCell align='right'>Cashback Bruto</TableCell>
+                  <TableCell align='right'>Retención</TableCell>
+                  <TableCell align='right'>Cashback Neto</TableCell>
                   <TableCell align='right'>% Devuelto</TableCell>
                 </>
                 )}
@@ -55,7 +245,7 @@ const YieldSettlementsTable = ({ yieldData, onEditSettlement, onLinkToSettlement
           {yieldData.settlements.length === 0
             ? (
               <TableRow>
-                <TableCell colSpan={yieldData.type === 'interest' ? 9 : 7} align='center' sx={{ py: 3 }}>
+                <TableCell colSpan={8} align='center' sx={{ py: 3 }}>
                   <Typography color='textSecondary'>
                     No hay liquidaciones creadas. Usa "Enlazar movimientos" para crear una.
                   </Typography>
@@ -131,6 +321,10 @@ const YieldSettlementsTable = ({ yieldData, onEditSettlement, onLinkToSettlement
                           : (
                             <>
                               <TableCell align='right'>{format.euro(settlement.billsTotal ?? 0)}</TableCell>
+                              <TableCell align='right'>{format.euro(settlement.grossIncome ?? settlement.cashbackAmount ?? 0)}</TableCell>
+                              <TableCell align='right' sx={{ color: 'error.main' }}>
+                                {settlement.taxExpense ? `-${format.euro(settlement.taxExpense)}` : '—'}
+                              </TableCell>
                               <TableCell align='right' sx={{ fontWeight: 600, color: 'success.main' }}>
                                 {format.euro(settlement.cashbackAmount ?? 0)}
                               </TableCell>
@@ -141,8 +335,12 @@ const YieldSettlementsTable = ({ yieldData, onEditSettlement, onLinkToSettlement
                                     )
                                   : (
                                       settlement.percentage !== null && settlement.percentage !== undefined
-                                        ? `${format.number(settlement.percentage)}%`
-                                        : '—'
+                                        ? settlement.grossPercentage !== null && settlement.grossPercentage !== undefined && settlement.grossPercentage !== settlement.percentage
+                                          ? `${format.number(settlement.percentage)}% (${format.number(settlement.grossPercentage)}% bruto)`
+                                          : `${format.number(settlement.percentage)}%`
+                                        : settlement.grossPercentage !== null && settlement.grossPercentage !== undefined
+                                          ? `${format.number(settlement.grossPercentage)}% bruto`
+                                          : '—'
                                     )}
                               </TableCell>
                             </>
@@ -171,7 +369,7 @@ const YieldSettlementsTable = ({ yieldData, onEditSettlement, onLinkToSettlement
                         </TableCell>
                       </TableRow>
                       <TableRow>
-                        <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={yieldData.type === 'interest' ? 9 : 7}>
+                        <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={8}>
                           <Collapse in={isOpen} timeout='auto' unmountOnExit>
                             <Box sx={{ margin: 2, pl: 4 }}>
                               <Typography variant='h6' gutterBottom component='div'>

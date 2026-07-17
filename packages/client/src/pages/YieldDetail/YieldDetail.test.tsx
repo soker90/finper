@@ -1,5 +1,6 @@
 // @vitest-environment happy-dom
 import { afterEach, describe, expect, it, vi } from 'vitest'
+import { waitFor } from '@testing-library/react'
 import { http, HttpResponse } from 'msw'
 import { SWRConfig } from 'swr'
 import { server } from '../../mock/server'
@@ -74,9 +75,9 @@ describe('YieldDetail', () => {
   })
 
   it('renders yield detail elements after loading', async () => {
-    const { findByText, container } = renderFresh()
+    const { findByText, findAllByText, container } = renderFresh()
 
-    expect(await findByText(YIELDS_LIST[0].name)).toBeDefined()
+    expect((await findAllByText(new RegExp(YIELDS_LIST[0].account.name))).length).toBeGreaterThanOrEqual(1)
     expect(await findByText('Saldo actual cuenta')).toBeDefined()
     expect(await findByText('Neto acumulado')).toBeDefined()
     expect(await findByText('Última liquidación')).toBeDefined()
@@ -135,6 +136,56 @@ describe('YieldDetail', () => {
     expect(chips.length).toBeGreaterThanOrEqual(1)
   })
 
+  it('shows "Gasto pendiente" and estimated cashback instead of "Saldo actual cuenta" for cashback yields', async () => {
+    server.use(
+      http.get('/yields/:id', () =>
+        HttpResponse.json(makeMockDetail({
+          type: 'cashback',
+          settlements: [
+            makeCashbackSettlement({
+              id: 'sett-cashback-pending',
+              billsTotal: 100,
+              status: 'pending'
+            }),
+            makeCashbackSettlement({
+              id: 'sett-cashback-completed',
+              billsTotal: 200,
+              cashbackAmount: 10,
+              percentage: 5,
+              status: 'completed',
+              settlementDate: new Date('2026-01-01').getTime()
+            })
+          ]
+        }))
+      )
+    )
+    const { findByText, queryByText } = renderFresh()
+    expect(await findByText('Gasto pendiente')).toBeDefined()
+    expect(await findByText(/Estimado:/)).toBeDefined()
+    expect(queryByText('Saldo actual cuenta')).toBeNull()
+  })
+
+  it('shows estimated monthly interest in "Saldo actual cuenta" card for interest yields with TAE', async () => {
+    server.use(
+      http.get('/yields/:id', () =>
+        HttpResponse.json(makeMockDetail({
+          type: 'interest',
+          settlements: [
+            makeInterestSettlement({
+              id: 'sett-interest-tae',
+              tae: 3,
+              taeSource: 'provided',
+              settlementDate: new Date('2026-01-01').getTime()
+            })
+          ]
+        }))
+      )
+    )
+    const { findByText } = renderFresh()
+    expect(await findByText('Saldo actual cuenta')).toBeDefined()
+    expect(await findByText(/Est\. mensual:/)).toBeDefined()
+  })
+
   it('shows "introd." and "calc." chips on an interest settlement with TAE and balance', async () => {
     server.use(
       http.get('/yields/:id', () =>
@@ -184,5 +235,18 @@ describe('YieldDetail', () => {
 
     // RadioGroup must NOT exist since the settlement is pre-fixed
     expect(queryByRole('radiogroup')).toBeNull()
+  })
+
+  it('click delete button opens confirmation modal and confirming removes the yield', async () => {
+    const { findByRole, findByText, findAllByRole, queryByText } = renderFresh()
+    const deleteBtn = await findByRole('button', { name: /eliminar/i })
+    deleteBtn.click()
+    expect(await findByText('¿Quieres borrar el rendimiento?')).toBeDefined()
+
+    const confirmBtns = await findAllByRole('button', { name: 'Eliminar' })
+    confirmBtns[0].click()
+    await waitFor(() =>
+      expect(queryByText('¿Quieres borrar el rendimiento?')).toBeNull()
+    )
   })
 })

@@ -29,7 +29,6 @@ export interface YieldRow extends Omit<Yield, 'categoryIds'> {
 
 const selectWithJoins = (db: DB) => db.select({
   id: yields.id,
-  name: yields.name,
   type: yields.type,
   accountId: yields.accountId,
   categoryIds: yields.categoryIds,
@@ -65,9 +64,9 @@ export const createYieldsRepository = (db: DB) => ({
   findByIdPopulated: (id: string, user: string): YieldRow | undefined =>
     selectWithJoins(db).where(and(eq(yields.id, id), eq(yields.user, user))).get() as YieldRow | undefined,
 
-  create: (data: { name?: string | null, type: string, accountId: string, categoryIds: string[], user: string }): Yield => {
+  create: (data: { type: string, accountId: string, categoryIds: string[], user: string }): Yield => {
     const id = generateId()
-    return db.insert(yields).values({ ...data, name: data.name || null, id }).returning().get()
+    return db.insert(yields).values({ ...data, id }).returning().get()
   },
 
   update: (id: string, user: string, data: Partial<Omit<Yield, 'id' | 'user'>>): Yield | undefined =>

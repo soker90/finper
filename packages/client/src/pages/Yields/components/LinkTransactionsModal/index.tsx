@@ -83,7 +83,7 @@ const LinkTransactionsModal = ({ item, onClose, onLinked, fixedSettlement }: Pro
   return (
     <ModalGrid
       show
-      title={`Movimientos de ${item.name}`}
+      title={`Movimientos de ${item.account.name} - ${item.type === 'interest' ? 'Remunerada' : 'Cashback'}`}
       onClose={onClose}
       action={handleSubmit}
       actionDisabled={submitting || selected.size === 0 || (linkMode === 'existing' && !targetSettlementId)}

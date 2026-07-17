@@ -20,11 +20,11 @@ describe('Yields Controller', () => {
 
   const insertYield = (type: string = 'interest'): string => {
     const id = generateId()
-    sqliteDb.insert(yields).values({ id, name: 'Test yield', type, accountId, categoryIds: [categoryId], user: username }).run()
+    sqliteDb.insert(yields).values({ id, type, accountId, categoryIds: [categoryId], user: username }).run()
     return id
   }
 
-  const insertTransaction = (params: { type: string, amount: number, yieldId?: string | null, yieldSettlementId?: string | null, date?: number, categoryId?: string }): string => {
+  const insertTransaction = (params: { type: string, amount: number, yieldId?: string | null, yieldSettlementId?: string | null, date?: number, categoryId?: string, note?: string }): string => {
     const id = generateId()
     sqliteDb.insert(transactions).values({
       id,
@@ -33,6 +33,7 @@ describe('Yields Controller', () => {
       amount: params.amount,
       type: params.type,
       accountId,
+      note: params.note ?? null,
       yieldId: params.yieldId ?? null,
       yieldSettlementId: params.yieldSettlementId ?? null,
       user: username
@@ -70,20 +71,20 @@ describe('Yields Controller', () => {
 
     test('when the type is not valid, it should respond 422', async () => {
       await supertest(server.app).post(path).auth(token, { type: 'bearer' })
-        .send({ name: 'X', type: 'invalid', accountId, categoryIds: [categoryId] })
+        .send({ type: 'invalid', accountId, categoryIds: [categoryId] })
         .expect(422)
     })
 
     test('when the account does not exist, it should respond 404', async () => {
       await supertest(server.app).post(path).auth(token, { type: 'bearer' })
-        .send({ name: 'X', type: 'interest', accountId: generateId(), categoryIds: [categoryId] })
+        .send({ type: 'interest', accountId: generateId(), categoryIds: [categoryId] })
         .expect(404)
     })
 
     test('when duplicate yield (same account and type) is created, it should respond 422', async () => {
       insertYield('interest')
       await supertest(server.app).post(path).auth(token, { type: 'bearer' })
-        .send({ name: 'Intereses Cuenta Naranja 2', type: 'interest', accountId, categoryIds: [categoryId] })
+        .send({ type: 'interest', accountId, categoryIds: [categoryId] })
         .expect(422)
         .expect((res) => {
           expect(res.body.message).toBe(ERROR_MESSAGE.YIELD.ALREADY_EXISTS)
@@ -92,21 +93,10 @@ describe('Yields Controller', () => {
 
     test('when successful, it should create the yield', async () => {
       const res = await supertest(server.app).post(path).auth(token, { type: 'bearer' })
-        .send({ name: 'Intereses Cuenta Naranja', type: 'interest', accountId, categoryIds: [categoryId] })
+        .send({ type: 'interest', accountId, categoryIds: [categoryId] })
         .expect(200)
 
-      expect(res.body).toMatchObject({ name: 'Intereses Cuenta Naranja', type: 'interest', accountId, categoryIds: [categoryId] })
-    })
-
-    test('when successful without name, it should create the yield with null name and format default on GET', async () => {
-      const res = await supertest(server.app).post(path).auth(token, { type: 'bearer' })
-        .send({ type: 'cashback', accountId, categoryIds: [categoryId] })
-        .expect(200)
-
-      expect(res.body).toMatchObject({ name: null, type: 'cashback', accountId, categoryIds: [categoryId] })
-
-      const getRes = await supertest(server.app).get(path).auth(token, { type: 'bearer' }).expect(200)
-      expect(getRes.body[0]).toMatchObject({ name: 'A - Cashback' })
+      expect(res.body).toMatchObject({ type: 'interest', accountId, categoryIds: [categoryId] })
     })
   })
 
@@ -154,6 +144,26 @@ describe('Yields Controller', () => {
       expect(res.body.netAccumulated).toBe(81)
     })
 
+    test('interest: should return positive net when a single net interest transaction is linked (even if recorded as expense)', async () => {
+      const yieldId = insertYield('interest')
+      const settlementId = generateId()
+      sqliteDb.insert(yieldSettlements).values({ id: settlementId, yieldId, user: username }).run()
+
+      const txDate = new Date('2026-03-15').getTime()
+      insertTransaction({ type: TRANSACTION.Expense, amount: 25.5, yieldId, yieldSettlementId: settlementId, date: txDate })
+
+      const res = await supertest(server.app).get(`${path}/${yieldId}`).auth(token, { type: 'bearer' }).expect(200)
+      expect(res.body.settlements).toHaveLength(1)
+      expect(res.body.settlements[0]).toMatchObject({
+        id: settlementId,
+        grossIncome: 25.5,
+        taxExpense: 0,
+        net: 25.5,
+        settlementDate: txDate
+      })
+      expect(res.body.netAccumulated).toBe(25.5)
+    })
+
     test('cashback: should return pending status when billsTotal > 0 and cashbackAmount = 0', async () => {
       const yieldId = insertYield('cashback')
       const settlementId = generateId()
@@ -168,7 +178,31 @@ describe('Yields Controller', () => {
         billsTotal: 60,
         cashbackAmount: 0,
         percentage: null,
+        grossPercentage: null,
         status: 'pending'
+      })
+    })
+
+    test('cashback: should separate tax withholding from bills and calculate net cashbackAmount', async () => {
+      const yieldId = insertYield('cashback')
+      const settlementId = generateId()
+      sqliteDb.insert(yieldSettlements).values({ id: settlementId, yieldId, user: username }).run()
+
+      insertTransaction({ type: TRANSACTION.Expense, amount: 100, yieldId, yieldSettlementId: settlementId })
+      insertTransaction({ type: TRANSACTION.Income, amount: 5, yieldId, yieldSettlementId: settlementId })
+      insertTransaction({ type: TRANSACTION.Expense, amount: 0.95, yieldId, yieldSettlementId: settlementId, note: 'Retención IRPF cashback' })
+
+      const res = await supertest(server.app).get(`${path}/${yieldId}`).auth(token, { type: 'bearer' }).expect(200)
+      expect(res.body.settlements).toHaveLength(1)
+      expect(res.body.settlements[0]).toMatchObject({
+        id: settlementId,
+        billsTotal: 100,
+        grossIncome: 5,
+        taxExpense: 0.95,
+        cashbackAmount: 4.05,
+        percentage: 4.05,
+        grossPercentage: 5,
+        status: 'completed'
       })
     })
 
@@ -196,7 +230,7 @@ describe('Yields Controller', () => {
       expect(res.body.settlements[0].settlementDate).toBeNull()
     })
 
-    test('settlements are sorted: most recent settlementDate first, null last', async () => {
+    test('settlements are sorted: pending (null) first, then most recent settlementDate first', async () => {
       const yieldId = insertYield('interest')
 
       const oldSettlementId = generateId()
@@ -214,9 +248,9 @@ describe('Yields Controller', () => {
 
       const res = await supertest(server.app).get(`${path}/${yieldId}`).auth(token, { type: 'bearer' }).expect(200)
       const settlementIds = res.body.settlements.map((s: any) => s.id)
-      expect(settlementIds[0]).toBe(newSettlementId)
-      expect(settlementIds[1]).toBe(oldSettlementId)
-      expect(settlementIds[2]).toBe(pendingSettlementId)
+      expect(settlementIds[0]).toBe(pendingSettlementId)
+      expect(settlementIds[1]).toBe(newSettlementId)
+      expect(settlementIds[2]).toBe(oldSettlementId)
     })
   })
 
@@ -226,7 +260,7 @@ describe('Yields Controller', () => {
       sqliteDb.insert(categories).values({ id: categoryId2, name: 'Cat2', type: TRANSACTION.Income, user: username }).run()
 
       const yieldId = generateId()
-      sqliteDb.insert(yields).values({ id: yieldId, name: 'Multi-cat', type: 'interest', accountId, categoryIds: [categoryId, categoryId2], user: username }).run()
+      sqliteDb.insert(yields).values({ id: yieldId, type: 'interest', accountId, categoryIds: [categoryId, categoryId2], user: username }).run()
 
       const unlinkedTx1 = insertTransaction({ type: TRANSACTION.Income, amount: 10, categoryId })
       const unlinkedTx2 = insertTransaction({ type: TRANSACTION.Income, amount: 20, categoryId: categoryId2 })
@@ -316,7 +350,7 @@ describe('Yields Controller', () => {
     test('returns 404 when the provided settlementId does not belong to this yield', async () => {
       const yieldId = insertYield('interest')
       const otherYieldId = generateId()
-      sqliteDb.insert(yields).values({ id: otherYieldId, name: 'Other', type: 'cashback', accountId, categoryIds: [categoryId], user: username }).run()
+      sqliteDb.insert(yields).values({ id: otherYieldId, type: 'cashback', accountId, categoryIds: [categoryId], user: username }).run()
 
       const settlementId = generateId()
       sqliteDb.insert(yieldSettlements).values({ id: settlementId, yieldId: otherYieldId, user: username }).run()
@@ -351,7 +385,7 @@ describe('Yields Controller', () => {
     test('returns 404 when the settlementId does not belong to this yield', async () => {
       const yieldId = insertYield('interest')
       const otherYieldId = generateId()
-      sqliteDb.insert(yields).values({ id: otherYieldId, name: 'Other', type: 'cashback', accountId, categoryIds: [categoryId], user: username }).run()
+      sqliteDb.insert(yields).values({ id: otherYieldId, type: 'cashback', accountId, categoryIds: [categoryId], user: username }).run()
 
       const settlementId = generateId()
       sqliteDb.insert(yieldSettlements).values({ id: settlementId, yieldId: otherYieldId, user: username }).run()

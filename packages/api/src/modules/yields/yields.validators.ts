@@ -38,7 +38,6 @@ const assertNoDuplicateYield = ({ accountId, type, user, excludeYieldId }: { acc
 }
 
 const createSchema = Joi.object({
-  name: Joi.string().optional().allow(null, ''),
   type: Joi.string().valid(...YIELD_TYPES).required(),
   accountId: Joi.string().required(),
   categoryIds: Joi.array().items(Joi.string()).min(1).required(),
@@ -46,7 +45,6 @@ const createSchema = Joi.object({
 })
 
 const editSchema = Joi.object({
-  name: Joi.string().optional().allow(null, ''),
   type: Joi.string().valid(...YIELD_TYPES).optional(),
   accountId: Joi.string().optional(),
   categoryIds: Joi.array().items(Joi.string()).min(1).optional()

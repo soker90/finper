@@ -4,14 +4,22 @@ import { format } from 'utils'
 import { Yield } from 'types'
 import KpiCard from '../Dashboard/components/KpiCard'
 
-export const calcTotalNet = (items: Yield[]) => items.reduce((acc, y) => acc + y.netAccumulated, 0)
+export const calcTotalNet = (items: Yield[], selectedYear?: number | 'all') =>
+  items.reduce((acc, y) => {
+    if (selectedYear && selectedYear !== 'all') {
+      const found = y.annualBreakdown?.find((a) => a.year === selectedYear)
+      return acc + (found?.net ?? 0)
+    }
+    return acc + y.netAccumulated
+  }, 0)
 
 // --- Summary row ---
-type SummaryProps = { items: Yield[] }
+type SummaryProps = { items: Yield[], selectedYear?: number | 'all' }
 
-export const YieldsSummary = ({ items }: SummaryProps) => {
-  const totalNet = calcTotalNet(items)
+export const YieldsSummary = ({ items, selectedYear = 'all' }: SummaryProps) => {
+  const totalNet = calcTotalNet(items, selectedYear)
   const totalEntries = items.reduce((acc, y) => acc + y.entriesCount, 0)
+  const isAnnual = selectedYear !== 'all'
 
   return (
     <Grid
@@ -24,9 +32,9 @@ export const YieldsSummary = ({ items }: SummaryProps) => {
     >
       <Grid size={{ xs: 12, sm: 4 }}>
         <KpiCard
-          title='Neto acumulado'
+          title={isAnnual ? `Neto en ${selectedYear}` : 'Neto acumulado'}
           value={format.euro(totalNet)}
-          subtitle='Suma de todos los rendimientos'
+          subtitle={isAnnual ? `Suma de rendimientos en ${selectedYear}` : 'Suma de todos los rendimientos'}
           icon={<RiseOutlined />}
           color='primary'
         />

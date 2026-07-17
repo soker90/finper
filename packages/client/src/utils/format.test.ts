@@ -1,9 +1,14 @@
 import { test, expect, describe } from 'vitest'
-import { dateShort, euro, monthToNumber, runwayTime } from 'utils/format'
+import { dateShort, euro, monthToNumber, monthYear, runwayTime } from 'utils/format'
 
 test('date returned is valid', () => {
   const sDate = dateShort(new Date(2022, 0, 1).getTime())
   expect(sDate).eq('1 ene')
+})
+
+test('monthYear returned is valid', () => {
+  const sMonthYear = monthYear(new Date(2022, 0, 15).getTime())
+  expect(sMonthYear).eq('Ene 2022')
 })
 
 test('returned a valid formatted number', () => {

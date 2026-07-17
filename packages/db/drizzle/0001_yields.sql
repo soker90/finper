@@ -10,7 +10,6 @@ CREATE TABLE `yield_settlements` (
 --> statement-breakpoint
 CREATE TABLE `yields` (
 	`id` text PRIMARY KEY NOT NULL,
-	`name` text,
 	`type` text NOT NULL,
 	`account_id` text NOT NULL,
 	`category_ids` text DEFAULT '[]' NOT NULL,

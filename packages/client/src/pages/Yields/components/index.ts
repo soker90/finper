@@ -1,3 +1,4 @@
 export { default as YieldCard } from './YieldCard'
 export { default as YieldForm } from './YieldForm'
 export { default as LinkTransactionsModal } from './LinkTransactionsModal'
+export { default as YieldRemoveModal } from './YieldRemoveModal'

@@ -1,11 +1,10 @@
 import { roundMoney, TRANSACTION } from '@soker90/finper-db'
 import type { YieldRow, YieldTransactionRow } from './yields.repository'
 
-type Yield = { id: string, name?: string | null, type: string, accountId: string, categoryIds: string[], user: string }
+type Yield = { id: string, type: string, accountId: string, categoryIds: string[], user: string }
 
 export const serializeYield = (y: Yield) => ({
   _id: y.id,
-  name: y.name || null,
   type: y.type,
   accountId: y.accountId,
   categoryIds: y.categoryIds
@@ -30,12 +29,32 @@ export const groupEntriesBySettlement = ({ type, entries, settlements }: { type:
     const expense = settlementEntries.filter((e) => e.type === TRANSACTION.Expense).reduce((sum, e) => sum + e.amount, 0)
 
     const incomeEntries = settlementEntries.filter((e) => e.type === TRANSACTION.Income)
-    const settlementDate = incomeEntries.length > 0
+    let settlementDate = incomeEntries.length > 0
       ? Math.max(...incomeEntries.map((e) => e.date))
       : null
 
     if (type === 'interest') {
-      const net = income - expense
+      if (settlementDate === null && settlementEntries.length > 0) {
+        settlementDate = Math.max(...settlementEntries.map((e) => e.date))
+      }
+      let finalIncome = income
+      let finalExpense = expense
+      let net = finalIncome - finalExpense
+
+      if (settlementEntries.length === 1) {
+        const single = settlementEntries[0]
+        if (single.type === TRANSACTION.Expense || single.amount < 0 || net < 0) {
+          const absVal = Math.abs(single.amount)
+          finalIncome = absVal
+          finalExpense = 0
+          net = absVal
+        }
+      } else if (net < 0 && finalIncome === 0 && finalExpense > 0) {
+        finalIncome = finalExpense
+        finalExpense = 0
+        net = finalIncome
+      }
+
       let calculatedTae: number | null = null
       let calculatedBalance: number | null = null
       let taeSource: 'provided' | 'calculated' | null = null
@@ -81,8 +100,8 @@ export const groupEntriesBySettlement = ({ type, entries, settlements }: { type:
       return {
         id: settlement.id,
         settlementDate,
-        grossIncome: roundMoney(income),
-        taxExpense: roundMoney(expense),
+        grossIncome: roundMoney(finalIncome),
+        taxExpense: roundMoney(finalExpense),
         net: roundMoney(net),
         tae: calculatedTae !== null ? roundMoney(calculatedTae) : null,
         averageBalance: calculatedBalance !== null ? roundMoney(calculatedBalance) : null,
@@ -91,10 +110,26 @@ export const groupEntriesBySettlement = ({ type, entries, settlements }: { type:
         entries: settlementEntries.map(serializeYieldTransaction)
       }
     } else {
-      const billsTotal = expense
-      const cashbackAmount = income
+      const taxEntries = settlementEntries.filter((e) =>
+        e.type === TRANSACTION.Expense &&
+        (/retenci|impuest|irpf|tax|hacienda|tribut/i.test(e.categoryName || '') ||
+         (e.note !== null && /retenci|impuest|irpf|tax|hacienda|tribut/i.test(e.note)))
+      )
+      const billEntries = settlementEntries.filter((e) =>
+        e.type === TRANSACTION.Expense && !taxEntries.includes(e)
+      )
+      const incomeEntriesList = settlementEntries.filter((e) => e.type === TRANSACTION.Income)
+
+      const grossIncome = incomeEntriesList.reduce((sum, e) => sum + e.amount, 0)
+      const taxExpense = taxEntries.reduce((sum, e) => sum + e.amount, 0)
+      const billsTotal = billEntries.reduce((sum, e) => sum + e.amount, 0)
+      const cashbackAmount = grossIncome - taxExpense
+
       const percentage = (billsTotal > 0 && cashbackAmount > 0)
         ? roundMoney((cashbackAmount / billsTotal) * 100)
+        : null
+      const grossPercentage = (billsTotal > 0 && grossIncome > 0)
+        ? roundMoney((grossIncome / billsTotal) * 100)
         : null
       const status = (billsTotal > 0 && cashbackAmount === 0) ? 'pending' : 'completed'
 
@@ -102,19 +137,23 @@ export const groupEntriesBySettlement = ({ type, entries, settlements }: { type:
         id: settlement.id,
         settlementDate,
         billsTotal: roundMoney(billsTotal),
+        grossIncome: roundMoney(grossIncome),
+        taxExpense: roundMoney(taxExpense),
         cashbackAmount: roundMoney(cashbackAmount),
+        net: roundMoney(cashbackAmount),
         percentage,
+        grossPercentage,
         status,
         entries: settlementEntries.map(serializeYieldTransaction)
       }
     }
   })
 
-  // Sort: most recent settlementDate first; null (no income yet) goes last
+  // Sort: pending (settlementDate null) first, then most recent settlementDate first
   return mapped.sort((rowA, rowB) => {
     if (rowA.settlementDate === null && rowB.settlementDate === null) return 0
-    if (rowA.settlementDate === null) return 1
-    if (rowB.settlementDate === null) return -1
+    if (rowA.settlementDate === null) return -1
+    if (rowB.settlementDate === null) return 1
     return rowB.settlementDate - rowA.settlementDate
   })
 }
@@ -131,17 +170,37 @@ export const serializeYieldSummary = (y: YieldRow, entries: YieldTransactionRow[
     }
   }, 0)
 
-  const defaultName = `${y.accountName ?? 'Cuenta'} - ${y.type === 'interest' ? 'Intereses' : 'Cashback'}`
-  const name = y.name || defaultName
+  const annualMap = new Map<number, { net: number, grossIncome: number, taxExpense: number, billsTotal: number, cashbackAmount: number }>()
+  for (const row of settlementRows) {
+    const year = row.settlementDate ? new Date(row.settlementDate).getFullYear() : new Date().getFullYear()
+    const current = annualMap.get(year) ?? { net: 0, grossIncome: 0, taxExpense: 0, billsTotal: 0, cashbackAmount: 0 }
+    current.net += (row.net ?? 0)
+    current.grossIncome += (row.grossIncome ?? 0)
+    current.taxExpense += (row.taxExpense ?? 0)
+    current.billsTotal += (row.billsTotal ?? 0)
+    current.cashbackAmount += (row.cashbackAmount ?? 0)
+    annualMap.set(year, current)
+  }
+
+  const annualBreakdown = Array.from(annualMap.entries())
+    .map(([year, stats]) => ({
+      year,
+      net: roundMoney(stats.net),
+      grossIncome: roundMoney(stats.grossIncome),
+      taxExpense: roundMoney(stats.taxExpense),
+      billsTotal: roundMoney(stats.billsTotal),
+      cashbackAmount: roundMoney(stats.cashbackAmount)
+    }))
+    .sort((a, b) => b.year - a.year)
 
   return {
     _id: y.id,
-    name,
     type: y.type,
     accountId: y.accountId,
     categoryIds: y.categoryIds,
     account: { _id: y.accountId, name: y.accountName, bank: y.accountBank },
     netAccumulated: roundMoney(netAccumulated),
+    annualBreakdown,
     entriesCount: entries.length,
     paymentsCount
   }
