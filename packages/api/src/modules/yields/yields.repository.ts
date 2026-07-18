@@ -32,6 +32,7 @@ const selectWithJoins = (db: DB) => db.select({
   type: yields.type,
   accountId: yields.accountId,
   categoryIds: yields.categoryIds,
+  taxCategoryId: yields.taxCategoryId,
   user: yields.user,
   accountName: accounts.name,
   accountBank: accounts.bank
@@ -64,7 +65,7 @@ export const createYieldsRepository = (db: DB) => ({
   findByIdPopulated: (id: string, user: string): YieldRow | undefined =>
     selectWithJoins(db).where(and(eq(yields.id, id), eq(yields.user, user))).get() as YieldRow | undefined,
 
-  create: (data: { type: string, accountId: string, categoryIds: string[], user: string }): Yield => {
+  create: (data: { type: string, accountId: string, categoryIds: string[], taxCategoryId?: string | null, user: string }): Yield => {
     const id = generateId()
     return db.insert(yields).values({ ...data, id }).returning().get()
   },

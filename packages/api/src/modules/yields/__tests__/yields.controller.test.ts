@@ -98,6 +98,38 @@ describe('Yields Controller', () => {
 
       expect(res.body).toMatchObject({ type: 'interest', accountId, categoryIds: [categoryId] })
     })
+
+    test('when taxCategoryId is provided for an interest yield, it should respond 422', async () => {
+      await supertest(server.app).post(path).auth(token, { type: 'bearer' })
+        .send({ type: 'interest', accountId, categoryIds: [categoryId], taxCategoryId: categoryId })
+        .expect(422)
+        .expect((res) => {
+          expect(res.body.message).toBe(ERROR_MESSAGE.YIELD.TAX_CATEGORY_ONLY_FOR_CASHBACK)
+        })
+    })
+
+    test('when taxCategoryId is not one of the tracked categories, it should respond 422', async () => {
+      const otherCategoryId = generateId()
+      sqliteDb.insert(categories).values({ id: otherCategoryId, name: 'Other', type: TRANSACTION.Expense, user: username }).run()
+
+      await supertest(server.app).post(path).auth(token, { type: 'bearer' })
+        .send({ type: 'cashback', accountId, categoryIds: [categoryId], taxCategoryId: otherCategoryId })
+        .expect(422)
+        .expect((res) => {
+          expect(res.body.message).toBe(ERROR_MESSAGE.YIELD.TAX_CATEGORY_NOT_TRACKED)
+        })
+    })
+
+    test('when successful with a valid taxCategoryId for cashback, it should create the yield', async () => {
+      const taxCategoryId = generateId()
+      sqliteDb.insert(categories).values({ id: taxCategoryId, name: 'Retención', type: TRANSACTION.Expense, user: username }).run()
+
+      const res = await supertest(server.app).post(path).auth(token, { type: 'bearer' })
+        .send({ type: 'cashback', accountId, categoryIds: [categoryId, taxCategoryId], taxCategoryId })
+        .expect(200)
+
+      expect(res.body).toMatchObject({ type: 'cashback', taxCategoryId })
+    })
   })
 
   describe('GET /', () => {
@@ -201,6 +233,43 @@ describe('Yields Controller', () => {
         percentage: 5,
         status: 'completed'
       })
+    })
+
+    test('cashback: taxCategoryId separates tax from real receipts, and net subtracts tax', async () => {
+      const taxCategoryId = generateId()
+      sqliteDb.insert(categories).values({ id: taxCategoryId, name: 'Retención', type: TRANSACTION.Expense, user: username }).run()
+
+      const yieldId = generateId()
+      sqliteDb.insert(yields).values({ id: yieldId, type: 'cashback', accountId, categoryIds: [categoryId, taxCategoryId], taxCategoryId, user: username }).run()
+      const settlementId = generateId()
+      sqliteDb.insert(yieldSettlements).values({ id: settlementId, yieldId, user: username }).run()
+
+      insertTransaction({ type: TRANSACTION.Income, amount: 20, yieldId, yieldSettlementId: settlementId })
+      insertTransaction({ type: TRANSACTION.Expense, amount: 100, yieldId, yieldSettlementId: settlementId })
+      insertTransaction({ type: TRANSACTION.Expense, amount: 4, yieldId, yieldSettlementId: settlementId, categoryId: taxCategoryId })
+
+      const res = await supertest(server.app).get(`${path}/${yieldId}`).auth(token, { type: 'bearer' }).expect(200)
+      expect(res.body.settlements).toHaveLength(1)
+      expect(res.body.settlements[0]).toMatchObject({
+        billsTotal: 100,
+        taxExpense: 4,
+        cashbackAmount: 20,
+        net: 16,
+        percentage: 20
+      })
+      expect(res.body.netAccumulated).toBe(16)
+    })
+
+    test('cashback: without taxCategoryId, all expenses count as receipts (backward compatible)', async () => {
+      const yieldId = insertYield('cashback')
+      const settlementId = generateId()
+      sqliteDb.insert(yieldSettlements).values({ id: settlementId, yieldId, user: username }).run()
+
+      insertTransaction({ type: TRANSACTION.Income, amount: 20, yieldId, yieldSettlementId: settlementId })
+      insertTransaction({ type: TRANSACTION.Expense, amount: 100, yieldId, yieldSettlementId: settlementId })
+
+      const res = await supertest(server.app).get(`${path}/${yieldId}`).auth(token, { type: 'bearer' }).expect(200)
+      expect(res.body.settlements[0]).toMatchObject({ billsTotal: 100, taxExpense: 0, cashbackAmount: 20, net: 20, percentage: 20 })
     })
 
     test('settlementDate equals the income transaction date when there is an income entry', async () => {

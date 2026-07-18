@@ -1,8 +1,8 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "b73e8322-79df-4199-853d-f0f5cc362247",
-  "prevId": "315b8516-8559-44f4-a439-60776f5ba687",
+  "id": "4f98b077-0170-4115-9938-9e162afb9f1b",
+  "prevId": "b73e8322-79df-4199-853d-f0f5cc362247",
   "tables": {
     "accounts": {
       "name": "accounts",
@@ -1821,6 +1821,19 @@
           "onDelete": "no action",
           "onUpdate": "no action"
         },
+        "transactions_user_users_username_fk": {
+          "name": "transactions_user_users_username_fk",
+          "tableFrom": "transactions",
+          "tableTo": "users",
+          "columnsFrom": [
+            "user"
+          ],
+          "columnsTo": [
+            "username"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
         "transactions_yield_settlement_id_yield_id_yield_settlements_id_yield_id_fk": {
           "name": "transactions_yield_settlement_id_yield_id_yield_settlements_id_yield_id_fk",
           "tableFrom": "transactions",
@@ -1832,19 +1845,6 @@
           "columnsTo": [
             "id",
             "yield_id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        },
-        "transactions_user_users_username_fk": {
-          "name": "transactions_user_users_username_fk",
-          "tableFrom": "transactions",
-          "tableTo": "users",
-          "columnsFrom": [
-            "user"
-          ],
-          "columnsTo": [
-            "username"
           ],
           "onDelete": "no action",
           "onUpdate": "no action"

@@ -32,17 +32,32 @@ const YieldForm = ({ editingYield, onClose, onSubmit }: Props) => {
     ? {
         type: editingYield.type,
         accountId: editingYield.accountId,
-        categoryIds: editingYield.categoryIds || []
+        categoryIds: editingYield.categoryIds || [],
+        taxCategoryId: editingYield.taxCategoryId ?? ''
       }
     : {
         type: 'interest' as const,
         accountId: '',
-        categoryIds: []
+        categoryIds: [],
+        taxCategoryId: ''
       }
 
-  const { register, handleSubmit, formState: { errors, isSubmitting }, reset, control } = useForm<YieldInput>({
+  const { register, handleSubmit, formState: { errors, isSubmitting }, reset, control, watch, setValue } = useForm<YieldInput>({
     defaultValues
   })
+
+  // eslint-disable-next-line react-hooks/incompatible-library -- react-hook-form watch() is safe here; no compiler-incompatible pattern
+  const watchedType = watch('type')
+  const watchedCategoryIds = watch('categoryIds')
+  const watchedTaxCategoryId = watch('taxCategoryId')
+  const taxCategoryOptions = categories.filter((category) => category._id && watchedCategoryIds?.includes(category._id))
+
+  useEffect(() => {
+    if (watchedType !== 'cashback' || (watchedTaxCategoryId && !watchedCategoryIds?.includes(watchedTaxCategoryId))) {
+      setValue('taxCategoryId', '')
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- clears taxCategoryId only when it becomes invalid for the current type/categories
+  }, [watchedType, watchedCategoryIds])
 
   const { error: submitError, result: submitResult, runSubmit } = useSubmitError<SubmitResult>()
   const { showSuccess } = useSnackbar()
@@ -52,7 +67,7 @@ const YieldForm = ({ editingYield, onClose, onSubmit }: Props) => {
   // eslint-disable-next-line react-hooks/exhaustive-deps -- reset(defaultValues) on external prop change; defaultValues is rebuilt each render by design
   }, [reset, editingYield])
 
-  const handleFormSubmit = handleSubmit((data) => runSubmit(() => onSubmit(data), () => {
+  const handleFormSubmit = handleSubmit((data) => runSubmit(() => onSubmit({ ...data, taxCategoryId: data.taxCategoryId || null }), () => {
     onClose()
     showSuccess(editingYield ? 'Rendimiento actualizado' : 'Rendimiento creado')
   }))
@@ -132,6 +147,30 @@ const YieldForm = ({ editingYield, onClose, onSubmit }: Props) => {
             : <FormHelperText>Se usan para sugerir qué movimientos enlazar a este rendimiento</FormHelperText>}
         </Stack>
       </Grid>
+
+      {watchedType === 'cashback' && taxCategoryOptions.length > 0 && (
+        <Controller
+          name='taxCategoryId'
+          control={control}
+          render={({ field }) => (
+            <SelectForm
+              id='taxCategoryId'
+              label='Categoría de impuesto (opcional)'
+              size={12}
+              options={taxCategoryOptions}
+              optionValue='_id'
+              optionLabel='name'
+              voidOption
+              voidLabel='Ninguna: todos los gastos son recibos'
+              helperText='Si el cashback retiene impuesto, indica su categoría para no contarlo como recibo'
+              error={false}
+              errorText=''
+              value={field.value ?? ''}
+              onChange={(e) => field.onChange(e.target.value)}
+            />
+          )}
+        />
+      )}
 
       {submitError && (
         <Box sx={{ gridColumn: '1 / -1', width: '100%', mt: 1 }}>

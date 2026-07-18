@@ -20,7 +20,7 @@ const AnnualTable = ({ yieldData }: Props) => {
   const toggleYear = (year: number) => setExpandedYears((prev) => ({ ...prev, [year]: !prev[year] }))
 
   const annualBreakdown = yieldData.annualBreakdown ?? []
-  const colSpan = yieldData.type === 'interest' ? 7 : 5
+  const colSpan = yieldData.type === 'interest' ? 7 : 6
 
   return (
     <TableContainer sx={{ overflowX: 'auto' }}>
@@ -42,6 +42,7 @@ const AnnualTable = ({ yieldData }: Props) => {
               : (
                 <>
                   <TableCell align='right'>Recibos Totales</TableCell>
+                  <TableCell align='right'>Impuesto Retenido</TableCell>
                   <TableCell align='right'>Cashback Neto</TableCell>
                   <TableCell align='right'>% Devuelto</TableCell>
                 </>
@@ -86,7 +87,8 @@ const AnnualTable = ({ yieldData }: Props) => {
                       : (
                         <>
                           <TableCell align='right'>{format.euro(stat.billsTotal ?? 0)}</TableCell>
-                          <TableCell align='right'><Typography sx={{ fontWeight: 600 }} color='primary'>{format.euro(stat.cashbackAmount ?? 0)}</Typography></TableCell>
+                          <TableCell align='right'>{format.euro(stat.taxExpense ?? 0)}</TableCell>
+                          <TableCell align='right'><Typography sx={{ fontWeight: 600 }} color='primary'>{format.euro(stat.net ?? 0)}</Typography></TableCell>
                           <TableCell align='right'>
                             <Typography sx={{ fontWeight: 600 }} color='primary'>
                               {stat.percentage !== null && stat.percentage !== undefined ? `${format.number(stat.percentage)}%` : '—'}
@@ -109,7 +111,7 @@ const AnnualTable = ({ yieldData }: Props) => {
                                 const label = !isPending
                                   ? (format.monthYear(settlement.settlementDate!) ?? `Liq. #${idx + 1}`)
                                   : 'Pendiente de abono'
-                                const amount = yieldData.type === 'interest' ? (settlement.net ?? 0) : (settlement.cashbackAmount ?? 0)
+                                const amount = settlement.net ?? 0
 
                                 const percentageLabel = settlement.percentage !== null && settlement.percentage !== undefined
                                   ? `${format.number(settlement.percentage)}%`

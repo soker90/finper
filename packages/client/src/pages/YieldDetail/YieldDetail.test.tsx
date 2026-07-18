@@ -7,6 +7,7 @@ import { server } from '../../mock/server'
 import { render } from '../../test/testUtils'
 import YieldDetail from './index'
 import { YIELDS_LIST } from '../../mock/handlers/yields'
+import { format } from 'utils'
 
 vi.mock('./components/YieldSettlementChart', () => {
   return {
@@ -163,6 +164,34 @@ describe('YieldDetail', () => {
     expect(await findByText('Gasto pendiente')).toBeDefined()
     expect(await findByText(/Estimado:/)).toBeDefined()
     expect(queryByText('Saldo actual cuenta')).toBeNull()
+  })
+
+  it('shows the "Impuesto Retenido" column and after-tax net for a cashback settlement', async () => {
+    server.use(
+      http.get('/yields/:id', () =>
+        HttpResponse.json(makeMockDetail({
+          type: 'cashback',
+          settlements: [makeCashbackSettlement({
+            id: 'sett-cashback-tax',
+            billsTotal: 100,
+            taxExpense: 4,
+            cashbackAmount: 20,
+            net: 16,
+            percentage: 20,
+            status: 'completed',
+            settlementDate: new Date('2026-01-01').getTime()
+          })]
+        }))
+      )
+    )
+    const { findByText, findAllByText } = renderFresh()
+    expect(await findByText('Impuesto Retenido')).toBeDefined()
+    // The "Cashback Neto" column shows the after-tax net (16), not the gross cashback (20).
+    // "Neto acumulado" (KPI) coincides with the same value here (single settlement), so
+    // there can be more than one match — assert presence, not uniqueness.
+    const expectedNet = format.euro(16).replace(/\s/g, '\\s')
+    const matches = await findAllByText(new RegExp(expectedNet))
+    expect(matches.length).toBeGreaterThanOrEqual(1)
   })
 
   it('shows estimated monthly interest in "Saldo actual cuenta" card for interest yields with TAE', async () => {

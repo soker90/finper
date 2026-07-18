@@ -23,7 +23,7 @@ const SettlementTable = ({ yieldData, onEditSettlement, onLinkToSettlement, onUn
   const [expanded, setExpanded] = useState<Record<string, boolean>>({})
   const toggle = (id: string) => setExpanded((prev) => ({ ...prev, [id]: !prev[id] }))
 
-  const colSpan = yieldData.type === 'interest' ? 8 : 6
+  const colSpan = yieldData.type === 'interest' ? 8 : 7
 
   return (
     <TableContainer sx={{ overflowX: 'auto' }}>
@@ -45,6 +45,7 @@ const SettlementTable = ({ yieldData, onEditSettlement, onLinkToSettlement, onUn
               : (
                 <>
                   <TableCell align='right'>Recibos (Gastos)</TableCell>
+                  <TableCell align='right'>Impuesto Retenido</TableCell>
                   <TableCell align='right'>Cashback Neto</TableCell>
                   <TableCell align='right'>% Devuelto</TableCell>
                 </>
@@ -119,8 +120,11 @@ const SettlementTable = ({ yieldData, onEditSettlement, onLinkToSettlement, onUn
                       : (
                         <>
                           <TableCell align='right'>{format.euro(settlement.billsTotal ?? 0)}</TableCell>
+                          <TableCell align='right' sx={{ color: 'error.main' }}>
+                            {settlement.taxExpense ? `-${format.euro(settlement.taxExpense)}` : '—'}
+                          </TableCell>
                           <TableCell align='right' sx={{ fontWeight: 600, color: 'success.main' }}>
-                            {format.euro(settlement.cashbackAmount ?? 0)}
+                            {format.euro(settlement.net ?? settlement.cashbackAmount ?? 0)}
                           </TableCell>
                           <TableCell align='right' sx={{ fontWeight: 600 }}>
                             {settlement.status === 'pending'

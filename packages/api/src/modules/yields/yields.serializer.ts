@@ -1,13 +1,14 @@
 import { roundMoney, TRANSACTION } from '@soker90/finper-db'
 import type { YieldRow, YieldTransactionRow, YieldSettlement } from './yields.repository'
 
-type Yield = { id: string, type: string, accountId: string, categoryIds: string[], user: string }
+type Yield = { id: string, type: string, accountId: string, categoryIds: string[], taxCategoryId?: string | null, user: string }
 
 export const serializeYield = (y: Yield) => ({
   _id: y.id,
   type: y.type,
   accountId: y.accountId,
-  categoryIds: y.categoryIds
+  categoryIds: y.categoryIds,
+  taxCategoryId: y.taxCategoryId ?? null
 })
 
 export const serializeYieldTransaction = (row: YieldTransactionRow) => {
@@ -113,15 +114,23 @@ const buildInterestSettlementRow = ({ settlement, settlementEntries, income, exp
   }
 }
 
-const buildCashbackSettlementRow = ({ settlement, settlementEntries, income, expense, settlementDate }: {
+const buildCashbackSettlementRow = ({ settlement, settlementEntries, income, settlementDate, taxCategoryId }: {
   settlement: YieldSettlement
   settlementEntries: YieldTransactionRow[]
   income: number
-  expense: number
   settlementDate: number | null
+  taxCategoryId?: string | null
 }): SettlementRow => {
-  const billsTotal = expense
+  // The tax withheld on the cashback itself (if tracked via taxCategoryId) is
+  // kept separate from the real receipts that generated it: only receipts
+  // count towards billsTotal/percentage, while tax reduces the net like interest.
+  const expenseEntries = settlementEntries.filter((e) => e.type === TRANSACTION.Expense)
+  const taxExpense = taxCategoryId
+    ? expenseEntries.filter((e) => e.categoryId === taxCategoryId).reduce((sum, e) => sum + e.amount, 0)
+    : 0
+  const billsTotal = expenseEntries.filter((e) => e.categoryId !== taxCategoryId).reduce((sum, e) => sum + e.amount, 0)
   const cashbackAmount = income
+  const net = cashbackAmount - taxExpense
   const percentage = (billsTotal > 0 && cashbackAmount > 0)
     ? roundMoney((cashbackAmount / billsTotal) * 100)
     : null
@@ -131,15 +140,16 @@ const buildCashbackSettlementRow = ({ settlement, settlementEntries, income, exp
     id: settlement.id,
     settlementDate,
     billsTotal: roundMoney(billsTotal),
+    taxExpense: roundMoney(taxExpense),
     cashbackAmount: roundMoney(cashbackAmount),
-    net: roundMoney(cashbackAmount),
+    net: roundMoney(net),
     percentage,
     status,
     entries: settlementEntries.map(serializeYieldTransaction)
   }
 }
 
-export const groupEntriesBySettlement = ({ type, entries, settlements }: { type: string, entries: YieldTransactionRow[], settlements: YieldSettlement[] }): SettlementRow[] => {
+export const groupEntriesBySettlement = ({ type, entries, settlements, taxCategoryId }: { type: string, entries: YieldTransactionRow[], settlements: YieldSettlement[], taxCategoryId?: string | null }): SettlementRow[] => {
   const mapped = settlements.map((settlement) => {
     const settlementEntries = entries.filter((e) => e.yieldSettlementId === settlement.id)
     const income = settlementEntries.filter((e) => e.type === TRANSACTION.Income).reduce((sum, e) => sum + e.amount, 0)
@@ -152,7 +162,7 @@ export const groupEntriesBySettlement = ({ type, entries, settlements }: { type:
 
     return type === 'interest'
       ? buildInterestSettlementRow({ settlement, settlementEntries, income, expense, settlementDate })
-      : buildCashbackSettlementRow({ settlement, settlementEntries, income, expense, settlementDate })
+      : buildCashbackSettlementRow({ settlement, settlementEntries, income, settlementDate, taxCategoryId })
   })
 
   // Sort: pending (settlementDate null) first, then most recent settlementDate first
@@ -188,14 +198,8 @@ const aggregateCashbackYear = (billsTotal: number, cashbackAmount: number): { pe
 export const serializeYieldSummary = (y: YieldRow, entries: YieldTransactionRow[], settlements: YieldSettlement[], settlementRows?: SettlementRow[]) => {
   const paymentsCount = entries.filter((e) => e.type === TRANSACTION.Income).length
 
-  const rows = settlementRows ?? groupEntriesBySettlement({ type: y.type, entries, settlements })
-  const netAccumulated = rows.reduce((sum, row) => {
-    if (y.type === 'interest') {
-      return sum + (row.net ?? 0)
-    } else {
-      return sum + (row.cashbackAmount ?? 0)
-    }
-  }, 0)
+  const rows = settlementRows ?? groupEntriesBySettlement({ type: y.type, entries, settlements, taxCategoryId: y.taxCategoryId })
+  const netAccumulated = rows.reduce((sum, row) => sum + (row.net ?? 0), 0)
 
   // Pending settlements (no settlementDate yet) don't belong to a closed year:
   // counting them under the current calendar year would distort past years'
@@ -240,6 +244,7 @@ export const serializeYieldSummary = (y: YieldRow, entries: YieldTransactionRow[
     type: y.type,
     accountId: y.accountId,
     categoryIds: y.categoryIds,
+    taxCategoryId: y.taxCategoryId ?? null,
     account: { _id: y.accountId, name: y.accountName, bank: y.accountBank },
     netAccumulated: roundMoney(netAccumulated),
     annualBreakdown,
@@ -249,7 +254,7 @@ export const serializeYieldSummary = (y: YieldRow, entries: YieldTransactionRow[
 }
 
 export const serializeYieldDetail = (y: YieldRow, entries: YieldTransactionRow[], settlements: YieldSettlement[]) => {
-  const settlementRows = groupEntriesBySettlement({ type: y.type, entries, settlements })
+  const settlementRows = groupEntriesBySettlement({ type: y.type, entries, settlements, taxCategoryId: y.taxCategoryId })
   const summary = serializeYieldSummary(y, entries, settlements, settlementRows)
   return {
     ...summary,

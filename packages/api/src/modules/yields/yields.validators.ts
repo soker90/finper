@@ -44,14 +44,25 @@ const createSchema = Joi.object({
   type: Joi.string().valid(...YIELD_TYPES).required(),
   accountId: Joi.string().required(),
   categoryIds: Joi.array().items(Joi.string()).min(1).required(),
+  taxCategoryId: Joi.string().optional().allow(null),
   user: Joi.string()
 })
 
 const editSchema = Joi.object({
   type: Joi.string().valid(...YIELD_TYPES).optional(),
   accountId: Joi.string().optional(),
-  categoryIds: Joi.array().items(Joi.string()).min(1).optional()
+  categoryIds: Joi.array().items(Joi.string()).min(1).optional(),
+  taxCategoryId: Joi.string().optional().allow(null)
 })
+
+// taxCategoryId distinguishes, for cashback yields, the tax withheld on the
+// cashback itself from the real receipts that generated it. It must be one
+// of the yield's own tracked categories, and only makes sense for cashback.
+const assertValidTaxCategory = ({ taxCategoryId, type, categoryIds }: { taxCategoryId: string | null | undefined, type: string, categoryIds: string[] }) => {
+  if (!taxCategoryId) return
+  if (type !== 'cashback') throw Boom.badData(ERROR_MESSAGE.YIELD.TAX_CATEGORY_ONLY_FOR_CASHBACK).output
+  if (!categoryIds.includes(taxCategoryId)) throw Boom.badData(ERROR_MESSAGE.YIELD.TAX_CATEGORY_NOT_TRACKED).output
+}
 
 export const validateYieldCreateParams = (params: Record<string, any>) => {
   const { error, value } = createSchema.validate(params)
@@ -61,6 +72,7 @@ export const validateYieldCreateParams = (params: Record<string, any>) => {
     assertCategoryExists(catId, params.user)
   }
   assertNoDuplicateYield({ accountId: params.accountId, type: params.type, user: params.user })
+  assertValidTaxCategory({ taxCategoryId: value.taxCategoryId, type: value.type, categoryIds: value.categoryIds })
   return value
 }
 
@@ -99,6 +111,12 @@ export const validateYieldEditParams = ({ params, body, user }: { params: Record
     for (const catId of body.categoryIds) {
       assertCategoryExists(catId, user)
     }
+  }
+
+  if ('taxCategoryId' in body) {
+    const targetType = body.type || currentYield.type
+    const targetCategoryIds = body.categoryIds || currentYield.categoryIds
+    assertValidTaxCategory({ taxCategoryId: value.taxCategoryId, type: targetType, categoryIds: targetCategoryIds })
   }
 
   return { id: params.id, value }

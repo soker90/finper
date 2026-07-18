@@ -5,6 +5,8 @@ export interface Yield {
   type: YieldType
   accountId: string
   categoryIds: string[]
+  /** Only meaningful for type 'cashback': the tracked category that represents tax withheld on the cashback itself. */
+  taxCategoryId?: string | null
   account: {
     _id: string
     name: string
@@ -30,6 +32,7 @@ export interface YieldInput {
   type: YieldType
   accountId: string
   categoryIds: string[]
+  taxCategoryId?: string | null
 }
 
 export interface YieldEntry {

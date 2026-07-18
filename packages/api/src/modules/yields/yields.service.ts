@@ -30,7 +30,7 @@ export class YieldsService {
     return serializeYieldDetail(y, entries, settlements)
   }
 
-  public addYield (params: { type: string, accountId: string, categoryIds: string[], user: string }) {
+  public addYield (params: { type: string, accountId: string, categoryIds: string[], taxCategoryId?: string | null, user: string }) {
     try {
       const created = this.repository.create(params)
       return serializeYield(created)
@@ -43,7 +43,7 @@ export class YieldsService {
     }
   }
 
-  public editYield ({ id, value, user }: { id: string, value: Partial<{ type: string, accountId: string, categoryIds: string[] }>, user: string }) {
+  public editYield ({ id, value, user }: { id: string, value: Partial<{ type: string, accountId: string, categoryIds: string[], taxCategoryId: string | null }>, user: string }) {
     try {
       const updated = this.repository.update(id, user, value)
       return updated ? serializeYield(updated) : null

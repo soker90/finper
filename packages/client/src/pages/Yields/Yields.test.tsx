@@ -111,6 +111,24 @@ describe('Yields', () => {
     expect(navigateMock).toHaveBeenCalledWith(`/rendimientos/${existingYieldId}`)
   })
 
+  it('shows the tax-category select when editing a cashback yield with more than one category', async () => {
+    const catA = { _id: 'cat-a', name: 'Intereses', type: 'income' }
+    const catB = { _id: 'cat-b', name: 'Comisiones', type: 'expense' }
+    const cashbackYield = { ...YIELDS_LIST[0], type: 'cashback', categoryIds: [catA._id, catB._id] }
+    server.use(
+      http.get('/categories', () => HttpResponse.json([catA, catB])),
+      http.get('/yields', () => HttpResponse.json([cashbackYield]))
+    )
+    const { findAllByText, findAllByLabelText, findByText } = renderFresh()
+    await findAllByText(new RegExp(cashbackYield.account.name))
+    const editButtons = await findAllByLabelText('Editar')
+    editButtons[0].click()
+    await findByText('Editar rendimiento')
+
+    expect(await findByText('Categoría de impuesto (opcional)')).toBeDefined()
+    expect(document.querySelector('#taxCategoryId')).not.toBeNull()
+  })
+
   it('click delete icon opens confirmation modal and confirming removes the yield', async () => {
     const { findAllByLabelText, findAllByText, findByText, findAllByRole, queryByText } = renderFresh()
     await findAllByText(new RegExp(YIELDS_LIST[0].account.name))
