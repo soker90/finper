@@ -59,14 +59,18 @@ export class YieldsService {
     this.repository.delete(id, user)
   }
 
-  public getMatchingTransactions ({ id, user, search }: { id: string, user: string, search?: string }) {
+  public getMatchingTransactions ({ id, user, categoryId, dateFrom, dateTo }: { id: string, user: string, categoryId?: string, dateFrom?: number, dateTo?: number }) {
     const y = this.repository.findByIdPopulated(id, user)
     if (!y) return []
+    // Ignore a categoryId outside this yield's own categories rather than erroring.
+    const validCategoryId = categoryId && y.categoryIds.includes(categoryId) ? categoryId : undefined
     return this.repository.findMatchingTransactions({
       accountId: y.accountId,
       categoryIds: y.categoryIds,
       user,
-      search
+      categoryId: validCategoryId,
+      dateFrom,
+      dateTo
     }).map(serializeYieldTransaction)
   }
 

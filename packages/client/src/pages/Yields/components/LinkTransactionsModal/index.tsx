@@ -3,9 +3,12 @@ import {
   Typography, Box, Checkbox, List, ListItem,
   ListItemText, ListItemIcon, CircularProgress, Alert,
   FormControl, InputLabel, Select, MenuItem, Radio, RadioGroup,
-  FormControlLabel, Grid
+  FormControlLabel, Grid, Stack
 } from '@mui/material'
+import { DatePicker } from '@mui/x-date-pickers'
+import { Dayjs } from 'dayjs'
 import InputForm from 'components/forms/InputForm'
+import SelectForm from 'components/forms/SelectForm'
 import { SearchOutlined } from '@ant-design/icons'
 import useSWR from 'swr'
 import ModalGrid from 'components/modals/ModalGrid'
@@ -14,7 +17,7 @@ import { Yield, YieldEntry, YieldSettlement } from 'types'
 import { YIELD_MATCHING_TRANSACTIONS } from 'constants/api-paths'
 import { linkYieldTransactions } from 'services/apiService'
 import { useYield } from 'hooks/useYields'
-import { useDebouncedValue } from 'hooks/useDebouncedValue'
+import { useCategories } from 'hooks/useCategories'
 import { objectToParams } from 'utils/objectToParams'
 import { useSubmitError } from '../../hooks/useSubmitError'
 import { useSnackbar } from 'contexts'
@@ -50,13 +53,21 @@ const LinkTransactionsModal = ({ item, onClose, onLinked, fixedSettlement }: Pro
   const { yieldData } = useYield(item._id)
   const existingSettlements = (!fixedSettlement && yieldData?.settlements) ? yieldData.settlements : []
 
-  const [search, setSearch] = useState('')
-  const debouncedSearch = useDebouncedValue(search, 300)
+  const { categories } = useCategories()
+  const yieldCategories = categories.filter((category) => category._id && item.categoryIds.includes(category._id))
 
-  // The API only returns the 50 most recent unlinked matches: search narrows
-  // that set server-side so older movements (otherwise invisible) can be found.
+  const [categoryFilter, setCategoryFilter] = useState('')
+  const [dateFrom, setDateFrom] = useState<Dayjs | null>(null)
+  const [dateTo, setDateTo] = useState<Dayjs | null>(null)
+
+  // The API only returns the 50 most recent unlinked matches: narrowing by
+  // category and/or date range lets older movements (otherwise invisible) be found.
   const { data: transactions, isLoading } = useSWR<YieldEntry[]>(
-    `${YIELD_MATCHING_TRANSACTIONS(item._id)}${objectToParams({ search: debouncedSearch || undefined })}`
+    `${YIELD_MATCHING_TRANSACTIONS(item._id)}${objectToParams({
+      categoryId: categoryFilter || undefined,
+      dateFrom: dateFrom ? dateFrom.startOf('day').valueOf() : undefined,
+      dateTo: dateTo ? dateTo.endOf('day').valueOf() : undefined
+    })}`
   )
 
   const toggle = (id: string) =>
@@ -160,16 +171,46 @@ const LinkTransactionsModal = ({ item, onClose, onLinked, fixedSettlement }: Pro
           </FormControl>
         )}
 
-        <InputForm
-          id='search'
-          label='Buscar por nota'
-          placeholder='p. ej. diciembre, recibo luz…'
-          value={search}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearch(e.target.value)}
-          size={12}
-          error={false}
-          errorText=''
-        />
+        <Grid container spacing={2} sx={{ mb: 1 }}>
+          {yieldCategories.length > 1 && (
+            <SelectForm
+              id='categoryFilter'
+              label='Categoría'
+              options={yieldCategories}
+              optionValue='_id'
+              optionLabel='name'
+              voidOption
+              voidLabel='Todas'
+              value={categoryFilter}
+              onChange={(e) => setCategoryFilter(e.target.value)}
+              size={4}
+              error={false}
+              errorText=''
+            />
+          )}
+          <Grid size={{ md: yieldCategories.length > 1 ? 4 : 6, xs: 6 }}>
+            <Stack spacing={1}>
+              <InputLabel htmlFor='dateFrom'>Desde</InputLabel>
+              <DatePicker
+                value={dateFrom}
+                onChange={setDateFrom}
+                format='DD/MM/YYYY'
+                slotProps={{ textField: { id: 'dateFrom', size: 'small', fullWidth: true } }}
+              />
+            </Stack>
+          </Grid>
+          <Grid size={{ md: yieldCategories.length > 1 ? 4 : 6, xs: 6 }}>
+            <Stack spacing={1}>
+              <InputLabel htmlFor='dateTo'>Hasta</InputLabel>
+              <DatePicker
+                value={dateTo}
+                onChange={setDateTo}
+                format='DD/MM/YYYY'
+                slotProps={{ textField: { id: 'dateTo', size: 'small', fullWidth: true } }}
+              />
+            </Stack>
+          </Grid>
+        </Grid>
 
         {isLoading && (
           <Box sx={{ display: 'flex', justifyContent: 'center', py: 3 }}>
@@ -179,8 +220,8 @@ const LinkTransactionsModal = ({ item, onClose, onLinked, fixedSettlement }: Pro
 
         {!isLoading && (!transactions || transactions.length === 0) && (
           <Alert severity='info' icon={<SearchOutlined />}>
-            {search
-              ? `Sin resultados para "${search}".`
+            {categoryFilter || dateFrom || dateTo
+              ? 'Sin resultados para este filtro.'
               : `No hay movimientos candidatos sin enlazar para la cuenta ${item.account.name}.`}
           </Alert>
         )}
@@ -193,7 +234,7 @@ const LinkTransactionsModal = ({ item, onClose, onLinked, fixedSettlement }: Pro
           <>
             <Typography variant='caption' color='textSecondary' sx={{ display: 'block', mb: 1 }}>
               {transactions.length} movimiento{transactions.length > 1 ? 's' : ''} encontrado{transactions.length > 1 ? 's' : ''} · cuenta {item.account.name}
-              {transactions.length === 50 && ' · mostrando los 50 más recientes, busca por nota para encontrar otros más antiguos'}
+              {transactions.length === 50 && ' · mostrando los 50 más recientes, filtra por categoría o fecha para encontrar otros más antiguos'}
             </Typography>
             <Box sx={{ maxHeight: 280, overflowY: 'auto', pr: 0.5 }}>
               <List dense disablePadding>

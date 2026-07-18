@@ -59,10 +59,12 @@ export class YieldsController {
 
   public getMatchingTransactions (req: Request, res: Response): void {
     const { id } = req.params
-    const search = typeof req.query.search === 'string' ? req.query.search : undefined
+    const categoryId = typeof req.query.categoryId === 'string' ? req.query.categoryId : undefined
+    const dateFrom = typeof req.query.dateFrom === 'string' ? Number(req.query.dateFrom) : undefined
+    const dateTo = typeof req.query.dateTo === 'string' ? Number(req.query.dateTo) : undefined
     this.logger.logInfo(`/matching-transactions - yield: ${id}`)
     validateYieldExist(id, req.user)
-    const response = this.yieldsService.getMatchingTransactions({ id, user: req.user, search })
+    const response = this.yieldsService.getMatchingTransactions({ id, user: req.user, categoryId, dateFrom, dateTo })
     res.send(response)
   }
 

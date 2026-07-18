@@ -1,9 +1,9 @@
 import React, { useState, Suspense } from 'react'
 import { useParams, useNavigate } from 'react-router'
-import useSWR, { mutate } from 'swr'
+import { mutate } from 'swr'
 import {
   Stack, Box, Typography, Chip, IconButton, Button,
-  Avatar, CircularProgress, ToggleButtonGroup, ToggleButton, Alert
+  Avatar, CircularProgress, ToggleButtonGroup, ToggleButton
 } from '@mui/material'
 import {
   ArrowLeftOutlined, EditOutlined, SearchOutlined, BankOutlined,
@@ -11,7 +11,7 @@ import {
 } from '@ant-design/icons'
 
 import MainCard from 'components/MainCard'
-import { YIELDS, YIELD_MATCHING_TRANSACTIONS } from 'constants/api-paths'
+import { YIELDS } from 'constants/api-paths'
 import { useAccounts } from 'hooks/useAccounts'
 import { useYield, useYields, useUnlinkYieldTransaction } from 'hooks/useYields'
 import { editYieldSettlement } from 'services/apiService'
@@ -24,7 +24,7 @@ import DeleteSettlementModal from './components/DeleteSettlementModal'
 import YieldForm from '../Yields/components/YieldForm'
 import LinkTransactionsModal from '../Yields/components/LinkTransactionsModal'
 import YieldRemoveModal from '../Yields/components/YieldRemoveModal'
-import { YieldSettlement, YieldEntry } from 'types'
+import { YieldSettlement } from 'types'
 
 // Lazy loaded chart to comply with React Doctor recommendations
 const YieldSettlementChart = React.lazy(() => import('./components/YieldSettlementChart'))
@@ -47,8 +47,6 @@ const YieldDetail = () => {
   const { accounts } = useAccounts()
   const { updateYield } = useYields()
   const unlinkTransaction = useUnlinkYieldTransaction()
-  // Suggests linking recent unlinked movements instead of relying on the user to remember.
-  const { data: matchingTransactions } = useSWR<YieldEntry[]>(id ? YIELD_MATCHING_TRANSACTIONS(id) : null)
 
   const [showForm, setShowForm] = useState(false)
   const [showLinkModal, setShowLinkModal] = useState(false)
@@ -153,26 +151,6 @@ const YieldDetail = () => {
         </Stack>
       </Stack>
 
-      {matchingTransactions && matchingTransactions.length > 0 && (
-        <Alert
-          severity='info'
-          action={
-            <Button
-              color='inherit'
-              size='small'
-              onClick={() => {
-                setFixedSettlement(null)
-                setShowLinkModal(true)
-              }}
-            >
-              Enlazar ahora
-            </Button>
-          }
-        >
-          Tienes {matchingTransactions.length} movimiento{matchingTransactions.length === 1 ? '' : 's'} sin enlazar en esta cuenta.
-        </Alert>
-      )}
-
       {/* KPI Stats */}
       <YieldDetailKpi yieldData={yieldData} currentBalance={currentBalance} viewMode={viewMode} />
 
@@ -249,7 +227,6 @@ const YieldDetail = () => {
             setFixedSettlement(null)
             await mutateDetail()
             mutate(YIELDS)
-            mutate(YIELD_MATCHING_TRANSACTIONS(yieldData._id))
           }}
         />
       )}

@@ -1,6 +1,6 @@
 // @vitest-environment happy-dom
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { waitFor } from '@testing-library/react'
+import { waitFor, fireEvent } from '@testing-library/react'
 import { http, HttpResponse } from 'msw'
 import { SWRConfig } from 'swr'
 import { server } from '../../mock/server'
@@ -360,6 +360,28 @@ describe('YieldDetail', () => {
       expect(await findByText('No se pudo enlazar')).toBeDefined()
       expect(await findByText(/Movimientos de/)).toBeDefined()
     })
+
+    it('shows a category filter when the yield tracks more than one category, and narrows results by it', async () => {
+      const catA = { _id: 'cat-a', name: 'Intereses', type: 'income' }
+      const catB = { _id: 'cat-b', name: 'Comisiones', type: 'expense' }
+      server.use(
+        http.get('/categories', () => HttpResponse.json([catA, catB])),
+        http.get('/yields/:id', () => HttpResponse.json(makeMockDetail({ settlements: [], categoryIds: [catA._id, catB._id] }))),
+        http.get('/yields/:id/matching-transactions', ({ request }) => {
+          const categoryId = new URL(request.url).searchParams.get('categoryId')
+          return HttpResponse.json(categoryId === catB._id ? [] : [matchingTx])
+        })
+      )
+      const { findByRole, findByText, queryByText } = renderFresh()
+      const linkBtn = await findByRole('button', { name: /enlazar movimientos/i })
+      linkBtn.click()
+      await findByText(/Abono junio/)
+
+      const categorySelect = document.getElementById('categoryFilter') as HTMLSelectElement
+      fireEvent.change(categorySelect, { target: { value: catB._id } })
+
+      await waitFor(() => expect(queryByText(/Abono junio/)).toBeNull())
+    })
   })
 
   describe('unlink transaction', () => {
@@ -470,28 +492,6 @@ describe('YieldDetail', () => {
       confirmBtns[0].click()
       expect(await findByText('No se pudo eliminar la liquidación')).toBeDefined()
       expect(await findByText('¿Quieres borrar esta liquidación?')).toBeDefined()
-    })
-  })
-
-  describe('unlinked movements banner', () => {
-    it('suggests linking when there are unlinked matching movements', async () => {
-      server.use(
-        http.get('/yields/:id/matching-transactions', () => HttpResponse.json([
-          { _id: 'tx1', date: Date.now(), amount: 10, type: 'income', category: { _id: 'cat1', name: 'Intereses' } }
-        ]))
-      )
-      const { findByText } = renderFresh()
-      expect(await findByText(/1 movimiento sin enlazar/)).toBeDefined()
-
-      const linkBtn = await findByText('Enlazar ahora')
-      linkBtn.click()
-      expect(await findByText(/Movimientos de/)).toBeDefined()
-    })
-
-    it('shows nothing when there are no unlinked matching movements', async () => {
-      const { findByText, queryByText } = renderFresh()
-      await findByText('Detalle de Liquidaciones')
-      expect(queryByText(/sin enlazar en esta cuenta/)).toBeNull()
     })
   })
 })

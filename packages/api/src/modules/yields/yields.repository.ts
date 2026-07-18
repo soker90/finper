@@ -1,4 +1,4 @@
-import { eq, and, desc, isNull, inArray, count, like } from 'drizzle-orm'
+import { eq, and, desc, isNull, inArray, count, gte, lte } from 'drizzle-orm'
 import { type DB, schema, generateId } from '@soker90/finper-db'
 
 const { yields, yieldSettlements, transactions, categories, accounts } = schema
@@ -89,17 +89,25 @@ export const createYieldsRepository = (db: DB) => ({
       .orderBy(desc(transactions.date))
       .all() as YieldTransactionRow[],
 
-  findMatchingTransactions: ({ accountId, categoryIds, user, search }: { accountId: string, categoryIds: string[], user: string, search?: string }): YieldTransactionRow[] =>
+  findMatchingTransactions: ({ accountId, categoryIds, user, categoryId, dateFrom, dateTo }: {
+    accountId: string
+    categoryIds: string[]
+    user: string
+    // Only the 50 most recent unlinked matches are returned; narrowing by a
+    // single category and/or a date range lets older matches (otherwise
+    // invisible past the limit) be found.
+    categoryId?: string
+    dateFrom?: number
+    dateTo?: number
+  }): YieldTransactionRow[] =>
     transactionsSelect(db)
       .where(and(
         eq(transactions.user, user),
         eq(transactions.accountId, accountId),
-        inArray(transactions.categoryId, categoryIds),
+        categoryId ? eq(transactions.categoryId, categoryId) : inArray(transactions.categoryId, categoryIds),
         isNull(transactions.yieldId),
-        // Only the 50 most recent unlinked matches are returned; a search
-        // term narrows the WHERE clause first so older matches (otherwise
-        // invisible past the limit) can still be found.
-        search ? like(transactions.note, `%${search}%`) : undefined
+        dateFrom ? gte(transactions.date, dateFrom) : undefined,
+        dateTo ? lte(transactions.date, dateTo) : undefined
       ))
       .orderBy(desc(transactions.date))
       .limit(50)

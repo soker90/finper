@@ -276,20 +276,58 @@ describe('Yields Controller', () => {
       expect(returnedIds).not.toContain(linkedTxId)
     })
 
-    test('search narrows results by note, letting older matches past the 50-item cap be found', async () => {
-      const yieldId = insertYield('interest')
-      const matchingTx = insertTransaction({ type: TRANSACTION.Income, amount: 10, note: 'Abono diciembre' })
-      const otherTx = insertTransaction({ type: TRANSACTION.Income, amount: 20, note: 'Abono enero' })
+    test('categoryId narrows results to a single one of the yield categories', async () => {
+      const categoryId2 = generateId()
+      sqliteDb.insert(categories).values({ id: categoryId2, name: 'Cat2', type: TRANSACTION.Income, user: username }).run()
+
+      const yieldId = generateId()
+      sqliteDb.insert(yields).values({ id: yieldId, type: 'interest', accountId, categoryIds: [categoryId, categoryId2], user: username }).run()
+
+      const tx1 = insertTransaction({ type: TRANSACTION.Income, amount: 10, categoryId })
+      const tx2 = insertTransaction({ type: TRANSACTION.Income, amount: 20, categoryId: categoryId2 })
 
       const res = await supertest(server.app)
         .get(`${path}/${yieldId}/matching-transactions`)
-        .query({ search: 'diciembre' })
+        .query({ categoryId: categoryId2 })
         .auth(token, { type: 'bearer' })
         .expect(200)
 
       const returnedIds = res.body.map((t: any) => t._id)
-      expect(returnedIds).toContain(matchingTx)
-      expect(returnedIds).not.toContain(otherTx)
+      expect(returnedIds).toContain(tx2)
+      expect(returnedIds).not.toContain(tx1)
+    })
+
+    test('ignores a categoryId that does not belong to this yield', async () => {
+      const foreignCategoryId = generateId()
+      sqliteDb.insert(categories).values({ id: foreignCategoryId, name: 'Foreign', type: TRANSACTION.Income, user: username }).run()
+
+      const yieldId = insertYield('interest')
+      const tx1 = insertTransaction({ type: TRANSACTION.Income, amount: 10 })
+
+      const res = await supertest(server.app)
+        .get(`${path}/${yieldId}/matching-transactions`)
+        .query({ categoryId: foreignCategoryId })
+        .auth(token, { type: 'bearer' })
+        .expect(200)
+
+      const returnedIds = res.body.map((t: any) => t._id)
+      expect(returnedIds).toContain(tx1)
+    })
+
+    test('dateFrom/dateTo narrow results by date, letting older matches past the 50-item cap be found', async () => {
+      const yieldId = insertYield('interest')
+      const oldTx = insertTransaction({ type: TRANSACTION.Income, amount: 10, date: new Date('2025-01-01').getTime() })
+      const recentTx = insertTransaction({ type: TRANSACTION.Income, amount: 20, date: new Date('2026-06-01').getTime() })
+
+      const res = await supertest(server.app)
+        .get(`${path}/${yieldId}/matching-transactions`)
+        .query({ dateFrom: new Date('2024-12-01').getTime(), dateTo: new Date('2025-02-01').getTime() })
+        .auth(token, { type: 'bearer' })
+        .expect(200)
+
+      const returnedIds = res.body.map((t: any) => t._id)
+      expect(returnedIds).toContain(oldTx)
+      expect(returnedIds).not.toContain(recentTx)
     })
   })
 
