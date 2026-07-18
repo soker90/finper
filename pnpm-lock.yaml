@@ -46,7 +46,7 @@ importers:
         version: 17.4.2
       drizzle-orm:
         specifier: 0.45.2
-        version: 0.45.2(@cloudflare/workers-types@4.20260317.1)(@types/better-sqlite3@7.6.12)(better-sqlite3@12.11.1)(gel@2.2.0)
+        version: 0.45.2(@cloudflare/workers-types@5.20260708.1)(@types/better-sqlite3@7.6.12)(better-sqlite3@12.11.1)(gel@2.2.0)
       express:
         specifier: 5.2.1
         version: 5.2.1
@@ -197,8 +197,8 @@ importers:
         version: 4.12.25
     devDependencies:
       '@cloudflare/workers-types':
-        specifier: 4.20260317.1
-        version: 4.20260317.1
+        specifier: 5.20260708.1
+        version: 5.20260708.1
       '@typescript-eslint/eslint-plugin':
         specifier: 8.59.3
         version: 8.59.3(@typescript-eslint/parser@8.57.1(eslint@9.39.4)(typescript@5.9.3))(eslint@9.39.4)(typescript@5.9.3)
@@ -222,7 +222,7 @@ importers:
         version: 5.9.3
       wrangler:
         specifier: 4.75.0
-        version: 4.75.0(@cloudflare/workers-types@4.20260317.1)
+        version: 4.75.0(@cloudflare/workers-types@5.20260708.1)
 
   packages/client:
     dependencies:
@@ -373,7 +373,7 @@ importers:
         version: 6.10.3
       drizzle-orm:
         specifier: 0.45.2
-        version: 0.45.2(@cloudflare/workers-types@4.20260317.1)(@types/better-sqlite3@7.6.12)(better-sqlite3@12.11.1)(gel@2.2.0)
+        version: 0.45.2(@cloudflare/workers-types@5.20260708.1)(@types/better-sqlite3@7.6.12)(better-sqlite3@12.11.1)(gel@2.2.0)
     devDependencies:
       '@types/better-sqlite3':
         specifier: 7.6.12
@@ -422,7 +422,7 @@ importers:
         version: 12.11.1
       drizzle-orm:
         specifier: 0.45.2
-        version: 0.45.2(@cloudflare/workers-types@4.20260317.1)(@types/better-sqlite3@7.6.12)(better-sqlite3@12.11.1)(gel@2.2.0)
+        version: 0.45.2(@cloudflare/workers-types@5.20260708.1)(@types/better-sqlite3@7.6.12)(better-sqlite3@12.11.1)(gel@2.2.0)
       mongodb:
         specifier: 6.12.0
         version: 6.12.0(snappy@7.3.3(@emnapi/core@1.11.2)(@emnapi/runtime@1.11.2))
@@ -1140,8 +1140,8 @@ packages:
     cpu: [x64]
     os: [win32]
 
-  '@cloudflare/workers-types@4.20260317.1':
-    resolution: {integrity: sha512-+G4eVwyCpm8Au1ex8vQBCuA9wnwqetz4tPNRoB/53qvktERWBRMQnrtvC1k584yRE3emMThtuY0gWshvSJ++PQ==}
+  '@cloudflare/workers-types@5.20260708.1':
+    resolution: {integrity: sha512-FSRyCsxALKmmNnk/2HMkTiX9Iz9yqTiTWX/BJZdffGznMSunXmQgb3mKy9wGBX2BCTLOuRYWL36uh7/3Gm05Eg==}
 
   '@colors/colors@1.6.0':
     resolution: {integrity: sha512-Ir+AOibqzrIsL6ajt3Rz3LskB7OiMVHqltZmspbW/TJuTVuyOMirVqAkjfY6JISiLHgyNqicAC8AyHHGzNd/dA==}
@@ -8169,7 +8169,7 @@ snapshots:
   '@cloudflare/workerd-windows-64@1.20260317.1':
     optional: true
 
-  '@cloudflare/workers-types@4.20260317.1': {}
+  '@cloudflare/workers-types@5.20260708.1': {}
 
   '@colors/colors@1.6.0': {}
 
@@ -11107,9 +11107,9 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  drizzle-orm@0.45.2(@cloudflare/workers-types@4.20260317.1)(@types/better-sqlite3@7.6.12)(better-sqlite3@12.11.1)(gel@2.2.0):
+  drizzle-orm@0.45.2(@cloudflare/workers-types@5.20260708.1)(@types/better-sqlite3@7.6.12)(better-sqlite3@12.11.1)(gel@2.2.0):
     optionalDependencies:
-      '@cloudflare/workers-types': 4.20260317.1
+      '@cloudflare/workers-types': 5.20260708.1
       '@types/better-sqlite3': 7.6.12
       better-sqlite3: 12.11.1
       gel: 2.2.0
@@ -14737,7 +14737,7 @@ snapshots:
       '@cloudflare/workerd-linux-arm64': 1.20260317.1
       '@cloudflare/workerd-windows-64': 1.20260317.1
 
-  wrangler@4.75.0(@cloudflare/workers-types@4.20260317.1):
+  wrangler@4.75.0(@cloudflare/workers-types@5.20260708.1):
     dependencies:
       '@cloudflare/kv-asset-handler': 0.4.2
       '@cloudflare/unenv-preset': 2.15.0(unenv@2.0.0-rc.24)(workerd@1.20260317.1)
@@ -14748,7 +14748,7 @@ snapshots:
       unenv: 2.0.0-rc.24
       workerd: 1.20260317.1
     optionalDependencies:
-      '@cloudflare/workers-types': 4.20260317.1
+      '@cloudflare/workers-types': 5.20260708.1
       fsevents: 2.3.3
     transitivePeerDependencies:
       - bufferutil
