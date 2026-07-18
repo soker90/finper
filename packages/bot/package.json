@@ -22,7 +22,7 @@
     "neostandard": "0.13.0",
     "tsx": "4.22.5",
     "typescript": "5.9.3",
-    "wrangler": "4.75.0"
+    "wrangler": "4.110.0"
   },
   "dependencies": {
     "hono": "4.12.25"
