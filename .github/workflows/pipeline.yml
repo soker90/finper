@@ -247,3 +247,70 @@ jobs:
         uses: codecov/codecov-action@v6
         with:
           flags: client
+
+  ## Bot ##
+  changes-bot:
+    runs-on: ubuntu-latest
+    outputs:
+      bot: ${{ steps.filter.outputs.bot }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            bot:
+              - 'packages/bot/**'
+
+  lint-bot:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - uses: pnpm/action-setup@v5
+      - uses: actions/setup-node@v7
+        with:
+          cache: 'pnpm'
+          node-version-file: '.nvmrc'
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile --filter @soker90/finper-bot
+      - name: Lint
+        run: make lint-bot
+
+  type-check-bot:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - uses: pnpm/action-setup@v5
+      - uses: actions/setup-node@v7
+        with:
+          cache: 'pnpm'
+          node-version-file: '.nvmrc'
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile --filter @soker90/finper-bot
+      - name: Type check
+        run: make type-check-bot
+
+  deploy-bot:
+    needs: [ changes-bot, lint-bot, type-check-bot ]
+    if: github.ref == 'refs/heads/master' && github.event_name == 'push' && needs.changes-bot.outputs.bot == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - uses: pnpm/action-setup@v5
+      - uses: actions/setup-node@v7
+        with:
+          cache: 'pnpm'
+          node-version-file: '.nvmrc'
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile --filter @soker90/finper-bot
+      - name: Deploy
+        run: make deploy-bot
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
