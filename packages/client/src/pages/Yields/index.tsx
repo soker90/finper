@@ -56,7 +56,7 @@ const Yields = () => {
       />
 
       {availableYears.length > 0 && (
-        <Box sx={{ mb: 2, display: 'flex', justifyContent: 'flex-end' }}>
+        <Box sx={{ mt: 2, mb: 2, display: 'flex', justifyContent: 'flex-end' }}>
           <ToggleButtonGroup
             size='small'
             value={selectedYear}
