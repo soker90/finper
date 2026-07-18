@@ -1,4 +1,5 @@
 export * from './account'
+export * from './yield'
 export * from './budget'
 export * from './category'
 export * from './debt'

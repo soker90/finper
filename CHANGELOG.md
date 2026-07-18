@@ -7,6 +7,52 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.1.0] - 2026-07-18
+
+### Added
+
+- **client/api**: New yields (rendimientos) module: settlements management, annual breakdown
+  tables, category and tax-category support for cashback yields, date range/category filters,
+  and direct linking of transactions to yields.
+
+- **client/api**: Track remunerated accounts (TAE, average balance and accrued interest).
+
+### Changed
+
+- **client**: Modularize yields forms, filters, tables and headers into smaller components.
+
+### Dependencies
+
+- Bump `recharts` from 3.8.1 to 3.9.2 ([#841](https://github.com/soker90/finper/pull/841), [#855](https://github.com/soker90/finper/pull/855)).
+- Bump `yahoo-finance2` from 3.15.3 to 3.15.4 ([#845](https://github.com/soker90/finper/pull/845)).
+- Bump `better-sqlite3` from 12.10.0 to 12.11.1 ([#842](https://github.com/soker90/finper/pull/842)).
+- Bump `vite` from 8.0.16 to 8.1.3 ([#846](https://github.com/soker90/finper/pull/846)).
+- Bump `vitest` and `@vitest/coverage-v8` from 4.1.6 to 4.1.10 ([#844](https://github.com/soker90/finper/pull/844), [#849](https://github.com/soker90/finper/pull/849)).
+- Bump `ts-jest` from 29.4.10 to 29.4.11 ([#848](https://github.com/soker90/finper/pull/848)).
+- Bump `tsx` from 4.22.0 to 4.22.5 ([#843](https://github.com/soker90/finper/pull/843)).
+- Bump `@types/node` from 25.8.0 to 26.1.0 ([#847](https://github.com/soker90/finper/pull/847)).
+- Bump `morgan` from 1.10.1 to 1.11.0 ([#852](https://github.com/soker90/finper/pull/852)).
+- Bump `actions/setup-node` from 6 to 7 ([#853](https://github.com/soker90/finper/pull/853)).
+
+---
+
+## [2.0.4] - 2026-07-04
+
+### Changed
+
+- **client**: Simplify `runwayTime` using `Intl.ListFormat` and a `pluralize` helper. ([#834](https://github.com/soker90/finper/pull/834))
+
+- **ci**: Configure Dependabot to scan the root directory for pnpm workspaces. ([#835](https://github.com/soker90/finper/pull/835))
+
+### Dependencies
+
+- Bump `typescript-eslint` from 8.59.3 to 8.62.0 ([#837](https://github.com/soker90/finper/pull/837)).
+- Bump `yahoo-finance2` from 3.14.1 to 3.15.3 ([#839](https://github.com/soker90/finper/pull/839)).
+- Bump `@ant-design/icons` from 6.2.2 to 6.3.1 ([#836](https://github.com/soker90/finper/pull/836)).
+- Bump `uuid` from 14.0.0 to 14.0.1 ([#838](https://github.com/soker90/finper/pull/838)).
+
+---
+
 ## [2.0.3] - 2026-07-04
 
 ### Fixed

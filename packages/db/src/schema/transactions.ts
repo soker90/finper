@@ -1,9 +1,10 @@
-import { sqliteTable, text, primaryKey, integer, real, index } from 'drizzle-orm/sqlite-core';
+import { sqliteTable, text, primaryKey, integer, real, index, foreignKey } from 'drizzle-orm/sqlite-core';
 import { users } from './users';
 import { accounts } from './accounts';
 import { categories } from './categories';
 import { stores } from './stores';
 import { subscriptions } from './subscriptions';
+import { yields, yieldSettlements } from './yields';
 
 
 
@@ -17,11 +18,25 @@ export const transactions = sqliteTable('transactions', {
   note: text('note'),
   storeId: text('store_id').references(() => stores.id),
   subscriptionId: text('subscription_id').references(() => subscriptions.id),
+  // Enlace opcional a un Rendimiento (ver schema/yields.ts). Un movimiento de
+  // ingreso enlazado es el abono; uno de gasto es el impuesto retenido
+  // (rendimientos de tipo 'interest') o el recibo que generó el cashback
+  // (tipo 'cashback') — el papel se deduce del `type` de la transacción y
+  // del `type` del rendimiento, sin necesidad de columnas adicionales.
+  yieldId: text('yield_id').references(() => yields.id),
+  yieldSettlementId: text('yield_settlement_id'),
   tags: text('tags', { mode: 'json' }).$type<string[]>().notNull().default([]),
   user: text('user').notNull().references(() => users.username),
 }, (table) => ({
   userTypeDateIdx: index('transactions_user_type_date_idx').on(table.user, table.type, table.date),
   userIdx: index('transactions_user_idx').on(table.user),
+  // Composite FK: guarantees yield_settlement_id always belongs to yield_id
+  // (both NULL is allowed — SQLite only enforces a multi-column FK when none
+  // of its columns are NULL).
+  yieldSettlementBelongsToYieldFk: foreignKey({
+    columns: [table.yieldSettlementId, table.yieldId],
+    foreignColumns: [yieldSettlements.id, yieldSettlements.yieldId]
+  }),
 }));
 
 

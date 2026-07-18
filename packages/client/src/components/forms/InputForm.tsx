@@ -13,6 +13,10 @@ interface Props {
   defaultValue?: number | string
   autoFocus?: boolean
   ref?: Ref<HTMLInputElement>
+  value?: any
+  onChange?: any
+  name?: string
+  onBlur?: any
 }
 
 const InputForm = ({ id, label, errorText, size = 4, inputProps, ref, ...others }: Props) => (

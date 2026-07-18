@@ -74,6 +74,16 @@ export const date = (cell: number) => {
   })
 }
 
+export const monthYear = (cell?: number | null) => {
+  if (!cell) {
+    return null
+  }
+  const d = new Date(cell)
+  const month = capitalize(d.toLocaleString('es-ES', { month: 'short' }).replace('.', ''))
+  const year = d.getFullYear()
+  return `${month} ${year}`
+}
+
 export const monthShort = (month: number): string => {
   const d = new Date()
   d.setMonth(month, 1)

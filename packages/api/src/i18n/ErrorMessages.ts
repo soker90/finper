@@ -14,6 +14,14 @@ export const ERROR_MESSAGE = {
   TRANSACTION: {
     NOT_FOUND: 'No existe el movimiento'
   },
+  YIELD: {
+    NOT_FOUND: 'El rendimiento no existe',
+    SETTLEMENT_NOT_FOUND: 'La liquidación no existe o no pertenece a este rendimiento',
+    TRANSACTION_IDS_REQUIRED: 'Selecciona al menos un movimiento para enlazar',
+    ALREADY_EXISTS: 'Ya existe un rendimiento de este tipo para esta cuenta',
+    TAX_CATEGORY_ONLY_FOR_CASHBACK: 'La categoría de impuesto solo aplica a rendimientos de tipo cashback',
+    TAX_CATEGORY_NOT_TRACKED: 'La categoría de impuesto debe ser una de las categorías del rendimiento'
+  },
   DEBT: {
     NOT_FOUND: 'La deuda no existe'
   },

@@ -22,6 +22,8 @@ const CompareTariffsPage = lazy(() => import('../pages/SupplyDetail/CompareTarif
 const Goals = lazy(() => import('../pages/Goals'))
 const Trackings = lazy(() => import('../pages/Trackings'))
 const TrackingDetail = lazy(() => import('../pages/TrackingDetail'))
+const Yields = lazy(() => import('../pages/Yields'))
+const YieldDetail = lazy(() => import('../pages/YieldDetail'))
 
 const MainRoutes = {
   path: '/',
@@ -115,6 +117,14 @@ const MainRoutes = {
     {
       path: 'seguimientos/:tagName',
       element: <TrackingDetail />
+    },
+    {
+      path: 'rendimientos',
+      element: <Yields />
+    },
+    {
+      path: 'rendimientos/:id',
+      element: <YieldDetail />
     }
   ]
 }

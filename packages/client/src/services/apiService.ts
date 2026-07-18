@@ -1,7 +1,7 @@
 import axios from 'axios'
-import { ACCOUNTS, BUDGETS, CATEGORIES, DEBTS, LOANS, LOAN_DETAIL, LOAN_SIMULATE, PENSIONS, TICKETS, TRANSACTIONS, SUBSCRIPTIONS, SUBSCRIPTION_CANDIDATES, SUPPLIES, SUPPLIES_PROPERTIES, SUPPLIES_READINGS, STOCKS, GOALS } from 'constants/api-paths'
+import { ACCOUNTS, BUDGETS, CATEGORIES, DEBTS, LOANS, LOAN_DETAIL, LOAN_SIMULATE, PENSIONS, TICKETS, TRANSACTIONS, SUBSCRIPTIONS, SUBSCRIPTION_CANDIDATES, SUPPLIES, SUPPLIES_PROPERTIES, SUPPLIES_READINGS, STOCKS, GOALS, YIELDS, YIELD_DETAIL } from 'constants/api-paths'
 import type { TransactionType } from '@soker90/finper-types'
-import type { Category, Transaction, Account, Pension, PensionTransaction, Debt, Loan, SubscriptionInput, SupplyReadingInput, StockPurchase, Goal, SimulationResult } from 'types'
+import type { Category, Transaction, Account, Pension, PensionTransaction, Debt, Loan, SubscriptionInput, SupplyReadingInput, StockPurchase, Goal, SimulationResult, YieldInput } from 'types'
 
 const extractError = (error: any) => error.response?.data?.message || error.message
 
@@ -262,3 +262,29 @@ export const fundGoal = (id: string, amount: number): Promise<{ data?: Goal, err
 
 export const withdrawGoal = (id: string, amount: number): Promise<{ data?: Goal, error?: string }> =>
   axios.post(`${GOALS}/${id}/withdraw`, { amount }).then((data: any) => ({ data: data as Goal })).catch((error: any) => ({ error: extractError(error) }))
+
+// Yields (Rendimientos)
+// When creation/edit conflicts with an existing yield (same account+type), the
+// API attaches the conflicting yield's id so the UI can link straight to it.
+const extractExistingYieldId = (error: any): string | undefined => error.response?.data?.existingYieldId
+
+export const addYield = (params: YieldInput): Promise<{ data?: any, error?: string, existingYieldId?: string }> =>
+  axios.post(YIELDS, params).then((data: any) => ({ data })).catch((error: any) => ({ error: extractError(error), existingYieldId: extractExistingYieldId(error) }))
+
+export const editYield = (id: string, params: Partial<YieldInput>): Promise<{ data?: any, error?: string, existingYieldId?: string }> =>
+  axios.put(YIELD_DETAIL(id), params).then((data: any) => ({ data })).catch((error: any) => ({ error: extractError(error), existingYieldId: extractExistingYieldId(error) }))
+
+export const deleteYield = (id: string): Promise<{ error?: string }> =>
+  axios.delete(YIELD_DETAIL(id)).then(() => ({})).catch((error: any) => ({ error: extractError(error) }))
+
+export const linkYieldTransactions = (id: string, payload: { transactionIds: string[], settlementId?: string | null, tae?: number | null, averageBalance?: number | null }): Promise<{ error?: string }> =>
+  axios.post(`${YIELD_DETAIL(id)}/link-transactions`, payload).then(() => ({})).catch((error: any) => ({ error: extractError(error) }))
+
+export const editYieldSettlement = ({ id, settlementId, payload }: { id: string, settlementId: string, payload: { tae?: number | null, averageBalance?: number | null } }): Promise<{ error?: string }> =>
+  axios.put(`${YIELD_DETAIL(id)}/settlements/${settlementId}`, payload).then(() => ({})).catch((error: any) => ({ error: extractError(error) }))
+
+export const unlinkYieldTransaction = (id: string, transactionId: string): Promise<{ error?: string }> =>
+  axios.delete(`${YIELD_DETAIL(id)}/unlink-transactions/${transactionId}`).then(() => ({})).catch((error: any) => ({ error: extractError(error) }))
+
+export const deleteYieldSettlement = (id: string, settlementId: string): Promise<{ error?: string }> =>
+  axios.delete(`${YIELD_DETAIL(id)}/settlements/${settlementId}`).then(() => ({})).catch((error: any) => ({ error: extractError(error) }))
