@@ -8,7 +8,7 @@
     "migrate": "pnpm run build && node finper-migrate.cjs"
   },
   "dependencies": {
-    "mongodb": "6.12.0",
+    "mongodb": "7.5.0",
     "better-sqlite3": "12.11.1",
     "drizzle-orm": "0.45.2",
     "@soker90/finper-db": "workspace:*"
