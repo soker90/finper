@@ -1,9 +1,8 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
 import { Alert, Box } from '@mui/material'
 import ModalGrid from 'components/modals/ModalGrid'
-import InputForm from 'components/forms/InputForm'
 import { useSubmitError } from '../../Yields/hooks/useSubmitError'
-import { useSnackbar } from 'contexts'
+import SettlementRateFields from '../../Yields/components/SettlementRateFields'
 import { YieldSettlement } from 'types'
 
 interface Props {
@@ -21,21 +20,13 @@ const EditSettlementModal = ({ settlement, onClose, onSubmit }: Props) => {
   )
   const [submitting, setSubmitting] = useState(false)
   const { error, runSubmit } = useSubmitError()
-  const { showSuccess } = useSnackbar()
 
-  const handleFormSubmit = async () => {
+  const handleFormSubmit = () => {
     setSubmitting(true)
-    try {
-      await runSubmit(
-        () => onSubmit(tae ? parseFloat(tae) : null, averageBalance ? parseFloat(averageBalance) : null),
-        () => {
-          onClose()
-          showSuccess('Liquidación actualizada')
-        }
-      )
-    } finally {
-      setSubmitting(false)
-    }
+    return runSubmit(
+      () => onSubmit(tae ? parseFloat(tae) : null, averageBalance ? parseFloat(averageBalance) : null),
+      onClose
+    ).finally(() => setSubmitting(false))
   }
 
   return (
@@ -46,27 +37,11 @@ const EditSettlementModal = ({ settlement, onClose, onSubmit }: Props) => {
       action={handleFormSubmit}
       actionDisabled={submitting}
     >
-      <InputForm
-        id='tae'
-        label='TAE (%)'
-        type='number'
-        value={tae}
-        onChange={(e: React.ChangeEvent<HTMLInputElement>) => setTae(e.target.value)}
-        inputProps={{ step: 'any' }}
-        size={6}
-        error={false}
-        errorText=''
-      />
-      <InputForm
-        id='averageBalance'
-        label='Saldo Medio (€)'
-        type='number'
-        value={averageBalance}
-        onChange={(e: React.ChangeEvent<HTMLInputElement>) => setAverageBalance(e.target.value)}
-        inputProps={{ step: 'any' }}
-        size={6}
-        error={false}
-        errorText=''
+      <SettlementRateFields
+        tae={tae}
+        onTaeChange={setTae}
+        averageBalance={averageBalance}
+        onAverageBalanceChange={setAverageBalance}
       />
       {error && (
         <Box sx={{ gridColumn: '1 / -1', width: '100%', mt: 1 }}>

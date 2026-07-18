@@ -4,12 +4,13 @@ import {
   TableRow, Collapse, Box, Typography, List, ListItem,
   ListItemText, Tooltip, IconButton, Stack, Chip
 } from '@mui/material'
-import { DownOutlined, UpOutlined, EditOutlined, DeleteOutlined, PlusOutlined } from '@ant-design/icons'
+import { EditOutlined, DeleteOutlined, PlusOutlined } from '@ant-design/icons'
 import { format } from 'utils'
 import { YieldDetail, YieldSettlement } from 'types'
 import NoIncomeWarning from './NoIncomeWarning'
 import SourceChip from './SourceChip'
 import EmptyRow from './EmptyRow'
+import ExpandToggleButton from './ExpandToggleButton'
 
 type Props = {
   yieldData: YieldDetail
@@ -70,14 +71,7 @@ const SettlementTable = ({ yieldData, onEditSettlement, onLinkToSettlement, onUn
                     sx={{ cursor: 'pointer', '& > *': { borderBottom: 'unset' } }}
                   >
                     <TableCell sx={{ pl: 3 }}>
-                      <IconButton
-                        size='small'
-                        onClick={(e) => { e.stopPropagation(); toggle(settlement.id) }}
-                        aria-label={`${isOpen ? 'Contraer' : 'Expandir'} liquidación ${label}`}
-                        aria-expanded={isOpen}
-                      >
-                        {isOpen ? <UpOutlined /> : <DownOutlined />}
-                      </IconButton>
+                      <ExpandToggleButton isOpen={isOpen} label={`liquidación ${label}`} onToggle={() => toggle(settlement.id)} />
                     </TableCell>
                     <TableCell sx={{ fontWeight: 600 }}>
                       <Stack direction='row' spacing={1} sx={{ alignItems: 'center' }}>

@@ -4,7 +4,6 @@ import { YieldSettlement } from 'types'
 import { format } from 'utils'
 import { useDeleteYieldSettlement } from 'hooks/useYields'
 import { useSubmitError } from '../../Yields/hooks/useSubmitError'
-import { useSnackbar } from 'contexts'
 
 interface Props {
   yieldId: string
@@ -15,15 +14,11 @@ interface Props {
 const DeleteSettlementModal = ({ yieldId, settlement, onClose }: Props) => {
   const deleteSettlement = useDeleteYieldSettlement()
   const { error, runSubmit } = useSubmitError()
-  const { showSuccess } = useSnackbar()
 
   const label = settlement.settlementDate ? format.date(settlement.settlementDate) : 'Pendiente'
   const entriesCount = settlement.entries.length
 
-  const handleConfirm = () => runSubmit(() => deleteSettlement(yieldId, settlement.id), () => {
-    onClose()
-    showSuccess('Liquidación eliminada')
-  })
+  const handleConfirm = () => runSubmit(() => deleteSettlement(yieldId, settlement.id), onClose)
 
   return (
     <ConfirmModal

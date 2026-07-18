@@ -2,13 +2,8 @@ import React, { useState, Suspense } from 'react'
 import { useParams, useNavigate } from 'react-router'
 import { mutate } from 'swr'
 import {
-  Stack, Box, Typography, Chip, IconButton, Button,
-  Avatar, CircularProgress, ToggleButtonGroup, ToggleButton
+  Stack, Box, Typography, CircularProgress, ToggleButtonGroup, ToggleButton
 } from '@mui/material'
-import {
-  ArrowLeftOutlined, EditOutlined, SearchOutlined, BankOutlined,
-  ShoppingOutlined, DeleteOutlined
-} from '@ant-design/icons'
 
 import MainCard from 'components/MainCard'
 import { YIELDS } from 'constants/api-paths'
@@ -17,6 +12,7 @@ import { useYield, useYields, useUnlinkYieldTransaction } from 'hooks/useYields'
 import { editYieldSettlement } from 'services/apiService'
 
 // Subcomponents
+import YieldDetailHeader from './components/YieldDetailHeader'
 import YieldDetailKpi from './components/YieldDetailKpi'
 import YieldSettlementsTable from './components/YieldSettlementsTable'
 import EditSettlementModal from './components/EditSettlementModal'
@@ -28,16 +24,6 @@ import { YieldSettlement } from 'types'
 
 // Lazy loaded chart to comply with React Doctor recommendations
 const YieldSettlementChart = React.lazy(() => import('./components/YieldSettlementChart'))
-
-const TYPE_LABEL: Record<string, string> = {
-  interest: 'Remunerada',
-  cashback: 'Cashback'
-}
-
-const TYPE_ICON: Record<string, React.ReactNode> = {
-  interest: <BankOutlined />,
-  cashback: <ShoppingOutlined />
-}
 
 const YieldDetail = () => {
   const { id } = useParams<{ id: string }>()
@@ -89,67 +75,16 @@ const YieldDetail = () => {
 
   return (
     <Stack spacing={3}>
-      {/* Header */}
-      <Stack
-        direction='row'
-        sx={{
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          flexWrap: 'wrap',
-          gap: 2,
-          mt: -5
+      <YieldDetailHeader
+        yieldData={yieldData}
+        onBack={() => navigate('/rendimientos')}
+        onSearchTransactions={() => {
+          setFixedSettlement(null)
+          setShowLinkModal(true)
         }}
-      >
-        <Stack direction='row' spacing={2} sx={{ alignItems: 'center' }}>
-          <IconButton onClick={() => navigate('/rendimientos')} color='inherit' aria-label='Volver'>
-            <ArrowLeftOutlined />
-          </IconButton>
-          <Avatar sx={{ bgcolor: 'primary.lighter', color: 'primary.main', width: 44, height: 44 }}>
-            {TYPE_ICON[yieldData.type]}
-          </Avatar>
-          <Box>
-            <Typography variant='h3'>{yieldData.account.name} - {TYPE_LABEL[yieldData.type] ?? yieldData.type}</Typography>
-            <Stack direction='row' spacing={1} sx={{ alignItems: 'center', mt: 0.5 }}>
-              <Typography variant='caption' color='textSecondary'>
-                Cuenta: {yieldData.account.name} ({yieldData.account.bank})
-              </Typography>
-              <Chip
-                label={TYPE_LABEL[yieldData.type] ?? yieldData.type}
-                size='small'
-                sx={{ height: 18, fontSize: 10 }}
-              />
-            </Stack>
-          </Box>
-        </Stack>
-
-        <Stack direction='row' spacing={1}>
-          <Button
-            variant='outlined'
-            startIcon={<SearchOutlined />}
-            onClick={() => {
-              setFixedSettlement(null)
-              setShowLinkModal(true)
-            }}
-          >
-            Enlazar movimientos
-          </Button>
-          <Button
-            variant='contained'
-            startIcon={<EditOutlined />}
-            onClick={() => setShowForm(true)}
-          >
-            Editar
-          </Button>
-          <Button
-            variant='outlined'
-            color='error'
-            startIcon={<DeleteOutlined />}
-            onClick={() => setShowDeleteModal(true)}
-          >
-            Eliminar
-          </Button>
-        </Stack>
-      </Stack>
+        onEdit={() => setShowForm(true)}
+        onDelete={() => setShowDeleteModal(true)}
+      />
 
       {/* KPI Stats */}
       <YieldDetailKpi yieldData={yieldData} currentBalance={currentBalance} viewMode={viewMode} />

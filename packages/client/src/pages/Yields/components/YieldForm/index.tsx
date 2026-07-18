@@ -7,7 +7,6 @@ import SelectForm from 'components/forms/SelectForm'
 import { useAccounts } from 'hooks/useAccounts'
 import { useCategories } from 'hooks/useCategories'
 import { useSubmitError } from '../../hooks/useSubmitError'
-import { useSnackbar } from 'contexts'
 import { Yield, YieldInput } from 'types'
 
 const YIELD_TYPE_OPTIONS = [
@@ -60,17 +59,13 @@ const YieldForm = ({ editingYield, onClose, onSubmit }: Props) => {
   }, [watchedType, watchedCategoryIds])
 
   const { error: submitError, result: submitResult, runSubmit } = useSubmitError<SubmitResult>()
-  const { showSuccess } = useSnackbar()
 
   useEffect(() => {
     reset(defaultValues)
   // eslint-disable-next-line react-hooks/exhaustive-deps -- reset(defaultValues) on external prop change; defaultValues is rebuilt each render by design
   }, [reset, editingYield])
 
-  const handleFormSubmit = handleSubmit((data) => runSubmit(() => onSubmit({ ...data, taxCategoryId: data.taxCategoryId || null }), () => {
-    onClose()
-    showSuccess(editingYield ? 'Rendimiento actualizado' : 'Rendimiento creado')
-  }))
+  const handleFormSubmit = handleSubmit((data) => runSubmit(() => onSubmit({ ...data, taxCategoryId: data.taxCategoryId || null }), onClose))
 
   return (
     <ModalGrid

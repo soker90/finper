@@ -2,7 +2,6 @@ import useSWR, { useSWRConfig } from 'swr'
 import { Yield, YieldInput, YieldDetail } from 'types'
 import { YIELDS, YIELD_DETAIL } from 'constants/api-paths'
 import { addYield, editYield, deleteYield, unlinkYieldTransaction, deleteYieldSettlement } from 'services/apiService'
-import { useSnackbar } from 'contexts'
 
 export const useYields = (): {
   yields: Yield[]
@@ -69,17 +68,12 @@ export const useYield = (id?: string): {
 /** Unlinks a transaction from a yield, refreshes both caches and reports the result. */
 export const useUnlinkYieldTransaction = (): (yieldId: string, transactionId: string) => Promise<{ error?: string }> => {
   const { mutate } = useSWRConfig()
-  const { showSuccess, showError } = useSnackbar()
 
   return async (yieldId: string, transactionId: string) => {
     const result = await unlinkYieldTransaction(yieldId, transactionId)
-    if (result.error) {
-      showError(result.error)
-      return result
-    }
+    if (result.error) return result
     await mutate(YIELDS)
     await mutate(YIELD_DETAIL(yieldId))
-    showSuccess('Movimiento desenlazado')
     return result
   }
 }

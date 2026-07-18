@@ -162,7 +162,7 @@ const YieldSettlementChart = ({ yieldData, viewMode = 'settlement' }: Props) => 
             <ChartTooltip formatter={tooltipFormatter} labelFormatter={(label) => viewMode === 'annual' ? `Año: ${label}` : `Liquidación: ${label}`} />
             <Bar dataKey='value' radius={[4, 4, 0, 0]} maxBarSize={50}>
               {chartData.map((entry, index) => (
-                <Cell key={`cell-${index}`} fill={entry.isPending ? alpha(chartColors[index % chartColors.length], 0.35) : chartColors[index % chartColors.length]} />
+                <Cell key={entry.label} fill={entry.isPending ? alpha(chartColors[index % chartColors.length], 0.35) : chartColors[index % chartColors.length]} />
               ))}
             </Bar>
           </BarChart>

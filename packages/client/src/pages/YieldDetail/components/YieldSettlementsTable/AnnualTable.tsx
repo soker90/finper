@@ -2,14 +2,14 @@ import React, { useState } from 'react'
 import {
   Table, TableBody, TableCell, TableContainer, TableHead,
   TableRow, Collapse, Box, Typography, List, ListItem,
-  ListItemText, Stack, IconButton
+  ListItemText, Stack
 } from '@mui/material'
-import { DownOutlined, UpOutlined } from '@ant-design/icons'
 import { format } from 'utils'
 import { YieldDetail } from 'types'
 import { getSettlementYear } from '../../utils'
 import NoIncomeWarning from './NoIncomeWarning'
 import EmptyRow from './EmptyRow'
+import ExpandToggleButton from './ExpandToggleButton'
 
 type Props = {
   yieldData: YieldDetail
@@ -61,14 +61,7 @@ const AnnualTable = ({ yieldData }: Props) => {
                 <React.Fragment key={year}>
                   <TableRow hover sx={{ cursor: 'pointer' }} onClick={() => toggleYear(year)}>
                     <TableCell sx={{ pl: 3 }}>
-                      <IconButton
-                        size='small'
-                        onClick={(e) => { e.stopPropagation(); toggleYear(year) }}
-                        aria-label={`${isYearExpanded ? 'Contraer' : 'Expandir'} año ${year}`}
-                        aria-expanded={isYearExpanded}
-                      >
-                        {isYearExpanded ? <UpOutlined /> : <DownOutlined />}
-                      </IconButton>
+                      <ExpandToggleButton isOpen={isYearExpanded} label={`año ${year}`} onToggle={() => toggleYear(year)} />
                     </TableCell>
                     <TableCell>
                       <Typography variant='subtitle1' sx={{ fontWeight: 600 }}>{year}</Typography>

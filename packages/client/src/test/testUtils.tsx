@@ -5,7 +5,7 @@ import { BrowserRouter } from 'react-router'
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
 import ThemeCustomization from 'themes/index'
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider'
-import { SwrProvider, SnackbarProvider } from 'contexts/index'
+import { SwrProvider } from 'contexts/index'
 import Auth from 'components/Auth'
 import 'dayjs/locale/es'
 
@@ -16,12 +16,10 @@ const AllTheProviders = ({ children }: { children: ReactNode }) => {
         <ThemeCustomization>
           <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale='es'>
             <SwrProvider>
-              <SnackbarProvider>
-                <Auth>
+              <Auth>
 
-                  {children}
-                </Auth>
-              </SnackbarProvider>
+                {children}
+              </Auth>
             </SwrProvider>
           </LocalizationProvider>
         </ThemeCustomization>

@@ -1,15 +1,10 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
 import {
-  Typography, Box, Checkbox, List, ListItem,
-  ListItemText, ListItemIcon, CircularProgress, Alert,
+  Typography, Box, Alert,
   FormControl, InputLabel, Select, MenuItem, Radio, RadioGroup,
-  FormControlLabel, Grid, Stack
+  FormControlLabel, Grid
 } from '@mui/material'
-import { DatePicker } from '@mui/x-date-pickers'
 import { Dayjs } from 'dayjs'
-import InputForm from 'components/forms/InputForm'
-import SelectForm from 'components/forms/SelectForm'
-import { SearchOutlined } from '@ant-design/icons'
 import useSWR from 'swr'
 import ModalGrid from 'components/modals/ModalGrid'
 import { format } from 'utils'
@@ -20,7 +15,9 @@ import { useYield } from 'hooks/useYields'
 import { useCategories } from 'hooks/useCategories'
 import { objectToParams } from 'utils/objectToParams'
 import { useSubmitError } from '../../hooks/useSubmitError'
-import { useSnackbar } from 'contexts'
+import SettlementRateFields from '../SettlementRateFields'
+import TransactionFilters from './TransactionFilters'
+import TransactionCheckList from './TransactionCheckList'
 
 type Props = {
   item: Yield
@@ -41,7 +38,6 @@ const LinkTransactionsModal = ({ item, onClose, onLinked, fixedSettlement }: Pro
   const [selected, setSelected] = useState<Set<string>>(new Set())
   const [submitting, setSubmitting] = useState(false)
   const { error: linkError, runSubmit } = useSubmitError()
-  const { showSuccess } = useSnackbar()
 
   // When fixedSettlement is provided, we are implicitly in 'existing' mode
   const [linkMode, setLinkMode] = useState<'new' | 'existing'>(fixedSettlement ? 'existing' : 'new')
@@ -91,7 +87,6 @@ const LinkTransactionsModal = ({ item, onClose, onLinked, fixedSettlement }: Pro
     await runSubmit(() => linkYieldTransactions(item._id, payload), () => {
       onLinked()
       onClose()
-      showSuccess('Movimientos enlazados')
     })
     setSubmitting(false)
   }
@@ -127,27 +122,12 @@ const LinkTransactionsModal = ({ item, onClose, onLinked, fixedSettlement }: Pro
 
         {!fixedSettlement && linkMode === 'new' && item.type === 'interest' && (
           <Grid container spacing={2} sx={{ mb: 2 }}>
-            <InputForm
-              id='tae'
-              label='TAE (%) (Opcional)'
-              type='number'
-              value={tae}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setTae(e.target.value)}
-              inputProps={{ step: 'any' }}
-              size={6}
-              error={false}
-              errorText=''
-            />
-            <InputForm
-              id='averageBalance'
-              label='Saldo Medio (€) (Opcional)'
-              type='number'
-              value={averageBalance}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setAverageBalance(e.target.value)}
-              inputProps={{ step: 'any' }}
-              size={6}
-              error={false}
-              errorText=''
+            <SettlementRateFields
+              tae={tae}
+              onTaeChange={setTae}
+              averageBalance={averageBalance}
+              onAverageBalanceChange={setAverageBalance}
+              optional
             />
           </Grid>
         )}
@@ -171,126 +151,28 @@ const LinkTransactionsModal = ({ item, onClose, onLinked, fixedSettlement }: Pro
           </FormControl>
         )}
 
-        <Grid container spacing={2} sx={{ mb: 1 }}>
-          {yieldCategories.length > 1 && (
-            <SelectForm
-              id='categoryFilter'
-              label='Categoría'
-              options={yieldCategories}
-              optionValue='_id'
-              optionLabel='name'
-              voidOption
-              voidLabel='Todas'
-              value={categoryFilter}
-              onChange={(e) => setCategoryFilter(e.target.value)}
-              size={4}
-              error={false}
-              errorText=''
-            />
-          )}
-          <Grid size={{ md: yieldCategories.length > 1 ? 4 : 6, xs: 6 }}>
-            <Stack spacing={1}>
-              <InputLabel htmlFor='dateFrom'>Desde</InputLabel>
-              <DatePicker
-                value={dateFrom}
-                onChange={setDateFrom}
-                format='DD/MM/YYYY'
-                slotProps={{ textField: { id: 'dateFrom', size: 'small', fullWidth: true } }}
-              />
-            </Stack>
-          </Grid>
-          <Grid size={{ md: yieldCategories.length > 1 ? 4 : 6, xs: 6 }}>
-            <Stack spacing={1}>
-              <InputLabel htmlFor='dateTo'>Hasta</InputLabel>
-              <DatePicker
-                value={dateTo}
-                onChange={setDateTo}
-                format='DD/MM/YYYY'
-                slotProps={{ textField: { id: 'dateTo', size: 'small', fullWidth: true } }}
-              />
-            </Stack>
-          </Grid>
-        </Grid>
-
-        {isLoading && (
-          <Box sx={{ display: 'flex', justifyContent: 'center', py: 3 }}>
-            <CircularProgress size={28} />
-          </Box>
-        )}
-
-        {!isLoading && (!transactions || transactions.length === 0) && (
-          <Alert severity='info' icon={<SearchOutlined />}>
-            {categoryFilter || dateFrom || dateTo
-              ? 'Sin resultados para este filtro.'
-              : `No hay movimientos candidatos sin enlazar para la cuenta ${item.account.name}.`}
-          </Alert>
-        )}
+        <TransactionFilters
+          categories={yieldCategories}
+          categoryFilter={categoryFilter}
+          onCategoryFilterChange={setCategoryFilter}
+          dateFrom={dateFrom}
+          onDateFromChange={setDateFrom}
+          dateTo={dateTo}
+          onDateToChange={setDateTo}
+        />
 
         {linkError && (
           <Alert severity='error' sx={{ mt: 1, mb: 1 }}>{linkError}</Alert>
         )}
 
-        {!isLoading && transactions && transactions.length > 0 && (
-          <>
-            <Typography variant='caption' color='textSecondary' sx={{ display: 'block', mb: 1 }}>
-              {transactions.length} movimiento{transactions.length > 1 ? 's' : ''} encontrado{transactions.length > 1 ? 's' : ''} · cuenta {item.account.name}
-              {transactions.length === 50 && ' · mostrando los 50 más recientes, filtra por categoría o fecha para encontrar otros más antiguos'}
-            </Typography>
-            <Box sx={{ maxHeight: 280, overflowY: 'auto', pr: 0.5 }}>
-              <List dense disablePadding>
-                {transactions.map((tx) => {
-                  const checked = selected.has(tx._id)
-                  return (
-                    <ListItem
-                      key={tx._id}
-                      disablePadding
-                      onClick={() => toggle(tx._id)}
-                      role='button'
-                      tabIndex={0}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter' || e.key === ' ') {
-                          e.preventDefault()
-                          toggle(tx._id)
-                        }
-                      }}
-                      sx={{
-                        cursor: 'pointer',
-                        borderRadius: 1,
-                        mb: 0.5,
-                        px: 1,
-                        bgcolor: checked ? 'primary.lighter' : 'transparent',
-                        border: '1px solid',
-                        borderColor: checked ? 'primary.light' : 'divider',
-                        transition: 'all 0.15s'
-                      }}
-                    >
-                      <ListItemIcon sx={{ minWidth: 36 }}>
-                        <Checkbox checked={checked} size='small' color='primary' tabIndex={-1} disableRipple />
-                      </ListItemIcon>
-                      <ListItemText
-                        primary={
-                          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                            <Typography variant='body2' sx={{ fontWeight: checked ? 600 : 400 }}>
-                              {format.date(tx.date)} · {tx.note || 'Sin nota'}
-                            </Typography>
-                            <Typography variant='body2' sx={{ fontWeight: 600, color: checked ? 'primary.main' : 'inherit' }}>
-                              {format.euro(tx.amount)}
-                            </Typography>
-                          </Box>
-                         }
-                        secondary={
-                          <Typography variant='caption' color='textSecondary'>
-                            Categoría: {tx.category?.name} · {tx.type === 'income' ? 'Ingreso' : 'Gasto'}
-                          </Typography>
-                         }
-                      />
-                    </ListItem>
-                  )
-                })}
-              </List>
-            </Box>
-          </>
-        )}
+        <TransactionCheckList
+          isLoading={isLoading}
+          transactions={transactions}
+          selected={selected}
+          onToggle={toggle}
+          accountName={item.account.name}
+          hasActiveFilter={Boolean(categoryFilter || dateFrom || dateTo)}
+        />
       </Box>
     </ModalGrid>
   )

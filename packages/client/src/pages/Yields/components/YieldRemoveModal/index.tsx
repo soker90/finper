@@ -3,7 +3,6 @@ import { Yield } from 'types'
 import { ConfirmModal } from 'components'
 import { useYields } from 'hooks/useYields'
 import { useSubmitError } from '../../hooks/useSubmitError'
-import { useSnackbar } from 'contexts'
 
 interface Props {
   item: Yield
@@ -20,12 +19,10 @@ const TYPE_LABEL: Record<string, string> = {
 const YieldRemoveModal = ({ item, onClose, onDeleted }: Props) => {
   const { removeYield } = useYields()
   const { error, runSubmit } = useSubmitError()
-  const { showSuccess } = useSnackbar()
 
   const handleConfirm = () => runSubmit(() => removeYield(item._id), () => {
     onClose()
     onDeleted?.()
-    showSuccess('Rendimiento eliminado')
   })
 
   return (
