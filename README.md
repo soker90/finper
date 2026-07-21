@@ -423,6 +423,7 @@ finper/
 
 Hay documentación técnica más detallada para algunos módulos:
 
+- `docs/auth.md`
 - `docs/loan-module.md`
 - `docs/subscription-module.md`
 - `docs/yields-module.md`

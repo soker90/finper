@@ -7,6 +7,6 @@ const workerId = process.env.JEST_WORKER_ID ?? '0'
 process.env.DATABASE_FILE = path.join(os.tmpdir(), `finper-test-${workerId}-${process.pid}.db`)
 
 const db = createDb(process.env.DATABASE_FILE)
-migrate(db as any, {
+migrate(db, {
   migrationsFolder: path.resolve(__dirname, '../db/drizzle'),
 })
