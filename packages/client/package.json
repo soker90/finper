@@ -20,7 +20,7 @@
     "@emotion/styled": "11.14.1",
     "@mui/material": "9.2.0",
     "@mui/x-date-pickers": "9.1.0",
-    "@tanstack/react-virtual": "3.13.24",
+    "@tanstack/react-virtual": "3.14.6",
     "axios": "1.16.1",
     "dayjs": "1.11.20",
     "eslint-plugin-import": "2.32.0",
