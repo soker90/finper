@@ -3,3 +3,4 @@ export * from './objectToParams'
 export const capitalize = (word: string) => `${word.charAt(0).toUpperCase()}${word.slice(1)}`
 export * from './getPreviousMonthYear'
 export { sanitizeTag } from './sanitizeTag'
+export { isTokenPresent } from './isTokenPresent'
