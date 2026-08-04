@@ -59,9 +59,9 @@ const Auth = ({ children }: { children: any }): JSX.Element => {
       } catch (error) {
         console.error('Failed to initialize authentication:', error)
         forceLogout()
-      } finally {
-        setInitialized(true)
       }
+
+      setInitialized(true)
     }
 
     initAuth()
