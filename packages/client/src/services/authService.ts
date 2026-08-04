@@ -3,6 +3,19 @@ import axios from 'axios'
 import { FINPER_TOKEN } from 'config'
 import { isTokenPresent } from 'utils/isTokenPresent'
 
+const decodeToken = (accessToken: string): { exp?: number } | null => {
+  try {
+    return jwtDecode(accessToken)
+  } catch {
+    return null
+  }
+}
+
+const clearStoredSession = () => {
+  localStorage.removeItem(FINPER_TOKEN)
+  delete axios.defaults.headers.common.Authorization
+}
+
 class AuthService {
   setAxiosInterceptors = ({ onLogout }: { onLogout: () => void }) => {
     axios.interceptors.response.use(
@@ -10,8 +23,7 @@ class AuthService {
       error => {
         if (error.response && error.response.status === 401) {
           this.setSession(null)
-
-          if (onLogout) onLogout()
+          onLogout()
         }
 
         return Promise.reject(error)
@@ -42,8 +54,8 @@ class AuthService {
           resolve(data.token)
         } else reject(data.error)
       })
-      .catch(({ response }) => {
-        reject(response.data)
+      .catch(error => {
+        reject(error?.response?.data || error)
       })
   })
 
@@ -76,16 +88,14 @@ class AuthService {
       localStorage.setItem(FINPER_TOKEN, accessToken)
       axios.defaults.headers.common.Authorization = `Bearer ${accessToken}`
     } else {
-      localStorage.removeItem(FINPER_TOKEN)
-      delete axios.defaults.headers.common.Authorization
+      clearStoredSession()
     }
   }
 
   getAccessToken = (): string | null => {
     const storedToken = localStorage.getItem(FINPER_TOKEN)
     if (!isTokenPresent(storedToken)) {
-      localStorage.removeItem(FINPER_TOKEN)
-      delete axios.defaults.headers.common.Authorization
+      clearStoredSession()
       return null
     }
     return storedToken
@@ -94,26 +104,11 @@ class AuthService {
   isValidToken = (accessToken: string | null): boolean => {
     if (!isTokenPresent(accessToken)) return false
 
-    try {
-      const decodedToken: { exp?: number } = jwtDecode(accessToken)
-      if (!decodedToken || typeof decodedToken.exp !== 'number') return false
+    const decodedToken = decodeToken(accessToken)
+    if (!decodedToken || typeof decodedToken.exp !== 'number') return false
 
-      const currentTimeInSeconds = Date.now() / 1000
-      return decodedToken.exp > currentTimeInSeconds
-    } catch {
-      return false
-    }
-  }
-
-  getExpireToken = (accessToken: string | null): number => {
-    if (!isTokenPresent(accessToken)) return 0
-
-    try {
-      const decodedToken: { exp?: number } = jwtDecode(accessToken)
-      return decodedToken.exp || 0
-    } catch {
-      return 0
-    }
+    const currentTimeInSeconds = Date.now() / 1000
+    return decodedToken.exp > currentTimeInSeconds
   }
 
   isAuthenticated = (): boolean => {

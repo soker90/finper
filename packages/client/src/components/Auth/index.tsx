@@ -1,4 +1,4 @@
-import { type JSX, useEffect, useState } from 'react'
+import { type ReactNode, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router'
 
 import SplashScreen from 'components/SplashScreen'
@@ -10,7 +10,7 @@ const isUnauthorizedError = (error: unknown): boolean => {
   return status === 401 || statusCode === 401
 }
 
-const Auth = ({ children }: { children: any }): JSX.Element => {
+const Auth = ({ children }: { children: ReactNode }): ReactNode => {
   const [isInitialized, setInitialized] = useState(false)
   const { handleLogout, setAccessToken } = useAuth()
   const navigate = useNavigate()
