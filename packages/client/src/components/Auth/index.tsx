@@ -5,29 +5,63 @@ import SplashScreen from 'components/SplashScreen'
 import authService from 'services/authService'
 import useAuth from 'hooks/useAuth'
 
+const isUnauthorizedError = (error: unknown): boolean => {
+  const { status, statusCode } = (error ?? {}) as { status?: number, statusCode?: number }
+  return status === 401 || statusCode === 401
+}
+
 const Auth = ({ children }: { children: any }): JSX.Element => {
   const [isInitialized, setInitialized] = useState(false)
   const { handleLogout, setAccessToken } = useAuth()
   const navigate = useNavigate()
 
   useEffect(() => {
-    const initAuth = async () => {
-      authService.setAxiosInterceptors({
-        onLogout: () => {
-          handleLogout()
-          navigate('/login')
-        }
-      })
+    const forceLogout = () => {
+      authService.logout()
+      handleLogout()
+    }
 
-      authService.handleAuthentication()
-
-      if (authService.isAuthenticated()) {
+    const refreshSessionToken = async () => {
+      try {
         const token = await authService.loginInWithToken()
         setAccessToken(token)
-        // initialize dashboard
-      }
+      } catch (authError) {
+        if (isUnauthorizedError(authError)) {
+          forceLogout()
+          return
+        }
 
-      setInitialized(true)
+        const currentToken = authService.getAccessToken()
+        if (currentToken && authService.isValidToken(currentToken)) {
+          setAccessToken(currentToken)
+        } else {
+          forceLogout()
+        }
+      }
+    }
+
+    const initAuth = async () => {
+      try {
+        authService.setAxiosInterceptors({
+          onLogout: () => {
+            handleLogout()
+            navigate('/login')
+          }
+        })
+
+        authService.handleAuthentication()
+
+        if (authService.isAuthenticated()) {
+          await refreshSessionToken()
+        } else {
+          forceLogout()
+        }
+      } catch (error) {
+        console.error('Failed to initialize authentication:', error)
+        forceLogout()
+      } finally {
+        setInitialized(true)
+      }
     }
 
     initAuth()
