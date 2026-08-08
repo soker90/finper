@@ -76,5 +76,11 @@ export const ERROR_MESSAGE = {
     EXCEEDS_BALANCE: 'El total asignado a todas las metas supera el balance de las cuentas',
     INVALID_AMOUNT: 'La cantidad debe ser mayor que 0',
     INSUFFICIENT_FUNDS: 'No se puede retirar más dinero del asignado a la meta'
+  },
+  CREDIT_CARD: {
+    NOT_FOUND: 'La tarjeta de crédito no existe',
+    MOVEMENT_NOT_FOUND: 'El movimiento de tarjeta no existe',
+    INVALID_PAYMENT: 'No hay movimientos pendientes para pagar o los parámetros son inválidos',
+    ALREADY_PAID: 'Este movimiento ya ha sido pagado'
   }
 }

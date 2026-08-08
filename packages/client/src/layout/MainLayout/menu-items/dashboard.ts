@@ -73,6 +73,15 @@ const dashboard = {
       breadcrumbs: true
     },
     {
+      id: 'creditCards',
+      title: 'Tarjetas',
+      type: 'item',
+      url: '/tarjetas',
+      icon: CreditCardOutlined,
+      breadcrumbs: true
+    },
+
+    {
       id: 'categories',
       title: 'Categorías',
       type: 'item',

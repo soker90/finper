@@ -24,6 +24,7 @@ const Trackings = lazy(() => import('../pages/Trackings'))
 const TrackingDetail = lazy(() => import('../pages/TrackingDetail'))
 const Yields = lazy(() => import('../pages/Yields'))
 const YieldDetail = lazy(() => import('../pages/YieldDetail'))
+const CreditCards = lazy(() => import('../pages/CreditCards'))
 
 const MainRoutes = {
   path: '/',
@@ -46,6 +47,11 @@ const MainRoutes = {
       path: 'cuentas',
       element: <Accounts />
     },
+    {
+      path: 'tarjetas',
+      element: <CreditCards />
+    },
+
     {
       path: 'categorias',
       element: <Categories />

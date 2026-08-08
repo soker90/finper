@@ -28,3 +28,7 @@ export const STATS_TAGS_AVAILABLE = 'stats/tags/available'
 export const STATS_TAGS_YEARS = 'stats/tags/years'
 export const STATS_TAG_HISTORIC = (tagName: string) => `stats/tags/${tagName}`
 export const STATS_TAG_DETAIL = (tagName: string, year: number) => `stats/tags/${tagName}/${year}`
+export const CREDIT_CARDS = 'credit-cards'
+export const CREDIT_CARD_DETAIL = (id: string) => `credit-cards/${id}`
+export const CREDIT_CARD_MOVEMENTS = (id: string) => `credit-cards/${id}/movements`
+export const CREDIT_CARD_PAY_DEBT = (id: string) => `credit-cards/${id}/pay-debt`
