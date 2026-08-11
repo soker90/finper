@@ -34,5 +34,6 @@ export const serializeTransactionPopulated = (row: TransactionRow) => {
   if (row.note !== null && row.note !== undefined) result.note = row.note
   if (row.storeId) result.store = { _id: row.storeId, name: row.storeName }
   if (row.subscriptionId) result.subscriptionId = row.subscriptionId
+  if (row.creditCardId) result.creditCard = { id: row.creditCardId, name: row.creditCardName }
   return result
 }

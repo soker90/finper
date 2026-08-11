@@ -1,4 +1,6 @@
-export const serializeCreditCard = (card: any) => {
+import type { CreditCardRow, CreditCardMovementRow } from './credit-cards.repository'
+
+export const serializeCreditCard = (card: CreditCardRow | undefined | null) => {
   if (!card) return null
   return {
     _id: card.id,
@@ -20,7 +22,7 @@ export const serializeCreditCard = (card: any) => {
   }
 }
 
-export const serializeCreditCardMovement = (movement: any) => {
+export const serializeCreditCardMovement = (movement: CreditCardMovementRow | undefined | null) => {
   if (!movement) return null
   return {
     _id: movement.id,

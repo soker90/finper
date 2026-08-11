@@ -70,5 +70,44 @@ export const creditCardHandlers = [
       paidCount: 1,
       totalPaid: 150
     })
+  }),
+
+  http.patch('*/credit-cards/:id', async ({ params, request }) => {
+    const body: any = await request.json()
+    return HttpResponse.json({
+      id: params.id,
+      _id: params.id,
+      name: body.name ?? 'Visa Pass',
+      accountId: body.accountId ?? 'acc-1',
+      limit: body.limit ?? 2000,
+      currentDebt: 150,
+      user: 'testuser'
+    })
+  }),
+
+  http.delete('*/credit-cards/:id', () => {
+    return new HttpResponse(null, { status: 204 })
+  }),
+
+  http.patch('*/credit-cards/:id/movements/:movementId', async ({ params, request }) => {
+    const body: any = await request.json()
+    return HttpResponse.json({
+      id: params.movementId,
+      _id: params.movementId,
+      creditCardId: params.id,
+      date: body.date ?? 1700000000000,
+      amount: body.amount ?? 150,
+      type: body.type ?? 'expense',
+      categoryId: body.categoryId ?? 'cat-1',
+      category: { id: 'cat-1', _id: 'cat-1', name: 'Supermercado', type: 'expense' },
+      storeId: body.storeId ?? null,
+      note: body.note ?? null,
+      status: 'pending',
+      user: 'testuser'
+    })
+  }),
+
+  http.delete('*/credit-cards/:id/movements/:movementId', () => {
+    return new HttpResponse(null, { status: 204 })
   })
 ]

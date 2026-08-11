@@ -5,6 +5,7 @@ import { categories } from './categories';
 import { stores } from './stores';
 import { subscriptions } from './subscriptions';
 import { yields, yieldSettlements } from './yields';
+import { creditCards } from './credit-cards';
 
 
 
@@ -25,6 +26,10 @@ export const transactions = sqliteTable('transactions', {
   // del `type` del rendimiento, sin necesidad de columnas adicionales.
   yieldId: text('yield_id').references(() => yields.id),
   yieldSettlementId: text('yield_settlement_id'),
+  // Enlace opcional a la tarjeta de crédito que originó esta transacción al
+  // liquidar su deuda (ver schema/credit-card-movements.ts). Null para
+  // transacciones normales no originadas por un pago de tarjeta.
+  creditCardId: text('credit_card_id').references(() => creditCards.id),
   tags: text('tags', { mode: 'json' }).$type<string[]>().notNull().default([]),
   user: text('user').notNull().references(() => users.username),
 }, (table) => ({

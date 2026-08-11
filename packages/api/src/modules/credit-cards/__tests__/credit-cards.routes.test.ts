@@ -40,8 +40,8 @@ describe('Credit Cards Routes', () => {
 
   afterAll(async () => {
     sqliteDb.delete(creditCardMovements).where(eq(creditCardMovements.user, username)).run()
-    sqliteDb.delete(creditCards).where(eq(creditCards.user, username)).run()
     sqliteDb.delete(transactions).where(eq(transactions.user, username)).run()
+    sqliteDb.delete(creditCards).where(eq(creditCards.user, username)).run()
     sqliteDb.delete(accounts).where(eq(accounts.user, username)).run()
     sqliteDb.delete(categories).where(eq(categories.user, username)).run()
     sqliteDb.delete(users).where(eq(users.username, username)).run()
@@ -49,8 +49,8 @@ describe('Credit Cards Routes', () => {
 
   afterEach(async () => {
     sqliteDb.delete(creditCardMovements).where(eq(creditCardMovements.user, username)).run()
-    sqliteDb.delete(creditCards).where(eq(creditCards.user, username)).run()
     sqliteDb.delete(transactions).where(eq(transactions.user, username)).run()
+    sqliteDb.delete(creditCards).where(eq(creditCards.user, username)).run()
   })
 
   describe('CRUD /api/credit-cards', () => {
@@ -196,6 +196,215 @@ describe('Credit Cards Routes', () => {
         .expect(200)
 
       expect(cardFinal.body.currentDebt).toBe(0)
+    })
+  })
+
+  describe('Auth & validation errors', () => {
+    test('GET / without token returns 401', async () => {
+      await supertest(server.app).get(path).expect(401)
+    })
+
+    test('GET /:id for a non-existent card returns 404', async () => {
+      await supertest(server.app)
+        .get(`${path}/nonexistent-id`)
+        .set('Authorization', `Bearer ${token}`)
+        .expect(404)
+    })
+
+    test('GET /:id/movements/:movementId edit for non-existent movement returns 404', async () => {
+      const created = await supertest(server.app)
+        .post(path)
+        .set('Authorization', `Bearer ${token}`)
+        .send({ name: 'Card', accountId })
+
+      await supertest(server.app)
+        .patch(`${path}/${created.body.id}/movements/nonexistent-movement`)
+        .set('Authorization', `Bearer ${token}`)
+        .send({ amount: 10 })
+        .expect(404)
+    })
+
+    test('POST / with empty name returns 422', async () => {
+      await supertest(server.app)
+        .post(path)
+        .set('Authorization', `Bearer ${token}`)
+        .send({ name: '', accountId })
+        .expect(422)
+    })
+
+    test('POST /:id/movements with negative amount returns 422', async () => {
+      const created = await supertest(server.app)
+        .post(path)
+        .set('Authorization', `Bearer ${token}`)
+        .send({ name: 'Card', accountId })
+
+      await supertest(server.app)
+        .post(`${path}/${created.body.id}/movements`)
+        .set('Authorization', `Bearer ${token}`)
+        .send({ date: Date.now(), amount: -10, categoryId })
+        .expect(422)
+    })
+
+    test('POST / with invalid accountId (not a string) returns 422', async () => {
+      await supertest(server.app)
+        .post(path)
+        .set('Authorization', `Bearer ${token}`)
+        .send({ name: 'Card', accountId: 123 })
+        .expect(422)
+    })
+  })
+
+  describe('Paid movements protections', () => {
+    const createCardWithPaidMovement = async (): Promise<{ cardId: string, movementId: string }> => {
+      const cardRes = await supertest(server.app)
+        .post(path)
+        .set('Authorization', `Bearer ${token}`)
+        .send({ name: 'Card with paid movement', accountId })
+        .expect(201)
+      const cardId = cardRes.body.id
+
+      const movementRes = await supertest(server.app)
+        .post(`${path}/${cardId}/movements`)
+        .set('Authorization', `Bearer ${token}`)
+        .send({ date: Date.now(), amount: 20, type: 'expense', categoryId })
+        .expect(201)
+      const movementId = movementRes.body.id
+
+      await supertest(server.app)
+        .post(`${path}/${cardId}/pay-debt`)
+        .set('Authorization', `Bearer ${token}`)
+        .send({ all: true })
+        .expect(200)
+
+      return { cardId, movementId }
+    }
+
+    test('PATCH on a paid movement returns error (not 200)', async () => {
+      const { movementId, cardId } = await createCardWithPaidMovement()
+
+      const response = await supertest(server.app)
+        .patch(`${path}/${cardId}/movements/${movementId}`)
+        .set('Authorization', `Bearer ${token}`)
+        .send({ amount: 30 })
+
+      expect(response.status).not.toBe(200)
+    })
+
+    test('DELETE on a paid movement returns error (not 204)', async () => {
+      const { movementId, cardId } = await createCardWithPaidMovement()
+
+      const response = await supertest(server.app)
+        .delete(`${path}/${cardId}/movements/${movementId}`)
+        .set('Authorization', `Bearer ${token}`)
+
+      expect(response.status).not.toBe(204)
+    })
+
+    test('DELETE credit card with paid movements returns conflict', async () => {
+      const { cardId } = await createCardWithPaidMovement()
+
+      await supertest(server.app)
+        .delete(`${path}/${cardId}`)
+        .set('Authorization', `Bearer ${token}`)
+        .expect(409)
+    })
+
+    test('DELETE credit card with only pending movements succeeds', async () => {
+      const cardRes = await supertest(server.app)
+        .post(path)
+        .set('Authorization', `Bearer ${token}`)
+        .send({ name: 'Card with pending movement', accountId })
+        .expect(201)
+
+      await supertest(server.app)
+        .post(`${path}/${cardRes.body.id}/movements`)
+        .set('Authorization', `Bearer ${token}`)
+        .send({ date: Date.now(), amount: 20, type: 'expense', categoryId })
+        .expect(201)
+
+      await supertest(server.app)
+        .delete(`${path}/${cardRes.body.id}`)
+        .set('Authorization', `Bearer ${token}`)
+        .expect(204)
+
+      await supertest(server.app)
+        .get(`${path}/${cardRes.body.id}`)
+        .set('Authorization', `Bearer ${token}`)
+        .expect(404)
+    })
+  })
+
+  describe('payDebt partial amount & getMovements filter', () => {
+    test('pay-debt with partial amount pays oldest movements first', async () => {
+      const cardRes = await supertest(server.app)
+        .post(path)
+        .set('Authorization', `Bearer ${token}`)
+        .send({ name: 'Partial Pay Card', accountId })
+        .expect(201)
+      const cardId = cardRes.body.id
+
+      await supertest(server.app)
+        .post(`${path}/${cardId}/movements`)
+        .set('Authorization', `Bearer ${token}`)
+        .send({ date: 1000, amount: 40, type: 'expense', categoryId })
+        .expect(201)
+
+      await supertest(server.app)
+        .post(`${path}/${cardId}/movements`)
+        .set('Authorization', `Bearer ${token}`)
+        .send({ date: 2000, amount: 60, type: 'expense', categoryId })
+        .expect(201)
+
+      const payRes = await supertest(server.app)
+        .post(`${path}/${cardId}/pay-debt`)
+        .set('Authorization', `Bearer ${token}`)
+        .send({ amount: 40 })
+        .expect(200)
+
+      expect(payRes.body.paidCount).toBe(1)
+      expect(payRes.body.totalPaid).toBe(40)
+    })
+
+    test('GET /:id/movements?status=paid only returns paid movements', async () => {
+      const cardRes = await supertest(server.app)
+        .post(path)
+        .set('Authorization', `Bearer ${token}`)
+        .send({ name: 'Filter Card', accountId })
+        .expect(201)
+      const cardId = cardRes.body.id
+
+      await supertest(server.app)
+        .post(`${path}/${cardId}/movements`)
+        .set('Authorization', `Bearer ${token}`)
+        .send({ date: Date.now(), amount: 10, type: 'expense', categoryId })
+        .expect(201)
+
+      await supertest(server.app)
+        .post(`${path}/${cardId}/movements`)
+        .set('Authorization', `Bearer ${token}`)
+        .send({ date: Date.now(), amount: 20, type: 'expense', categoryId })
+        .expect(201)
+
+      await supertest(server.app)
+        .post(`${path}/${cardId}/pay-debt`)
+        .set('Authorization', `Bearer ${token}`)
+        .send({ all: true })
+        .expect(200)
+
+      const paidMovements = await supertest(server.app)
+        .get(`${path}/${cardId}/movements?status=paid`)
+        .set('Authorization', `Bearer ${token}`)
+        .expect(200)
+
+      expect(paidMovements.body.length).toBe(2)
+      expect(paidMovements.body.every((m: { status: string }) => m.status === 'paid')).toBe(true)
+
+      const pendingMovements = await supertest(server.app)
+        .get(`${path}/${cardId}/movements?status=pending`)
+        .set('Authorization', `Bearer ${token}`)
+        .expect(200)
+
+      expect(pendingMovements.body.length).toBe(0)
     })
   })
 })

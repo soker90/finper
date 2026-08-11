@@ -81,6 +81,7 @@ export const ERROR_MESSAGE = {
     NOT_FOUND: 'La tarjeta de crédito no existe',
     MOVEMENT_NOT_FOUND: 'El movimiento de tarjeta no existe',
     INVALID_PAYMENT: 'No hay movimientos pendientes para pagar o los parámetros son inválidos',
-    ALREADY_PAID: 'Este movimiento ya ha sido pagado'
+    ALREADY_PAID: 'Este movimiento ya ha sido pagado',
+    HAS_PAID_MOVEMENTS: 'No se puede eliminar la tarjeta porque tiene movimientos ya pagados'
   }
 }

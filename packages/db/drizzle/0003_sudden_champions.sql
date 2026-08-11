@@ -1,0 +1,1 @@
+ALTER TABLE `transactions` ADD `credit_card_id` text REFERENCES credit_cards(id);

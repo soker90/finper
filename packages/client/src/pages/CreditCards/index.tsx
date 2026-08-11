@@ -31,17 +31,14 @@ import {
 
 import { HeaderButtons, MainCard } from 'components'
 import KpiCard from '../Dashboard/components/KpiCard'
-import { format } from 'utils'
+import { format, getId } from 'utils'
 import { useCreditCards, useCreditCardMovements, useCreditCardMutate } from './hooks/useCreditCards'
-import { CreditCardCard } from './CreditCardCard'
-import { ModalCreditCard } from './ModalCreditCard'
-import { ModalMovement } from './ModalMovement'
-import { ModalPayDebt } from './ModalPayDebt'
+import { CreditCardCard, ModalCreditCard, ModalMovement, ModalPayDebt } from './components'
 import { deleteCreditCard, deleteCreditCardMovement } from 'services/apiService'
 import type { CreditCard, CreditCardMovement } from 'types'
 
 const CreditCardsPage: React.FC = () => {
-  const { creditCards, isLoading: loadingCards } = useCreditCards()
+  const { creditCards, isLoading: loadingCards, error: creditCardsError } = useCreditCards()
   const [selectedCardIdFilter, setSelectedCardIdFilter] = useState<string>('')
   const [statusFilter, setStatusFilter] = useState<'pending' | 'paid' | 'all'>('pending')
 
@@ -56,7 +53,7 @@ const CreditCardsPage: React.FC = () => {
   const [openPayModal, setOpenPayModal] = useState(false)
   const [activeCardForPay, setActiveCardForPay] = useState<CreditCard | null>(null)
 
-  const activeCardIdForMovements = selectedCardIdFilter || (creditCards.length > 0 ? (creditCards[0].id || creditCards[0]._id) : '')
+  const activeCardIdForMovements = selectedCardIdFilter || (creditCards.length > 0 ? getId(creditCards[0]) : '')
 
   const { movements, isLoading: loadingMovements } = useCreditCardMovements(
     activeCardIdForMovements,
@@ -82,7 +79,7 @@ const CreditCardsPage: React.FC = () => {
 
   const handleDeleteCard = async (card: CreditCard) => {
     if (window.confirm(`¿Estás seguro de eliminar la tarjeta "${card.name}"?`)) {
-      const id = card.id || card._id
+      const id = getId(card)
       await deleteCreditCard(id)
       triggerMutate()
     }
@@ -121,6 +118,13 @@ const CreditCardsPage: React.FC = () => {
         ]}
         desktopSx={{ marginTop: -7 }}
       />
+
+      {/* Error state */}
+      {creditCardsError && (
+        <Alert severity='error' sx={{ mb: 3 }}>
+          No se han podido cargar las tarjetas de crédito. Inténtalo de nuevo más tarde.
+        </Alert>
+      )}
 
       {/* KPI Summary Cards */}
       <Grid container spacing={3} sx={{ mb: 3, mt: 1 }}>
@@ -169,7 +173,7 @@ const CreditCardsPage: React.FC = () => {
           : (
             <Grid container spacing={3} sx={{ mb: 4 }}>
               {creditCards.map((card, idx) => {
-                const id = card.id || card._id
+                const id = getId(card)
                 return (
                   <Grid size={{ xs: 12, sm: 6, md: 4 }} key={id}>
                     <CreditCardCard
@@ -201,7 +205,7 @@ const CreditCardsPage: React.FC = () => {
                 sx={{ minWidth: 160 }}
               >
                 {creditCards.map((card) => {
-                  const id = card.id || card._id
+                  const id = getId(card)
                   return (
                     <MenuItem key={id} value={id}>
                       {card.name}
@@ -252,9 +256,9 @@ const CreditCardsPage: React.FC = () => {
                     </TableHead>
                     <TableBody>
                       {movements.map((m) => {
-                        const id = m.id || m._id
+                        const id = getId(m)
                         const cardForMovement = creditCards.find(
-                          (c) => (c.id || c._id) === m.creditCardId
+                          (c) => getId(c) === m.creditCardId
                         )
                         const isPending = m.status === 'pending'
                         return (
@@ -331,7 +335,7 @@ const CreditCardsPage: React.FC = () => {
         <ModalMovement
           open={openMovementModal}
           onClose={() => setOpenMovementModal(false)}
-          creditCardId={activeCardForMovement.id || activeCardForMovement._id}
+          creditCardId={getId(activeCardForMovement)}
           movement={editingMovement}
           onSuccess={triggerMutate}
         />
