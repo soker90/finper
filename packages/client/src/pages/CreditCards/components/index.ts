@@ -1,4 +1,7 @@
 export { CreditCardCard } from './CreditCardCard'
+export { CreditCardsSummary } from './CreditCardsSummary'
+export { CreditCardsGrid } from './CreditCardsGrid'
+export { CreditCardMovementsTable } from './CreditCardMovementsTable'
 export { ModalCreditCard } from './ModalCreditCard'
 export { ModalMovement } from './ModalMovement'
 export { ModalPayDebt } from './ModalPayDebt'
