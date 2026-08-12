@@ -26,7 +26,6 @@ import { EditOutlined, DeleteOutlined } from '@ant-design/icons'
 import { MainCard } from 'components'
 import { format, getId } from 'utils'
 import type { CreditCard, CreditCardMovement } from 'types'
-
 type StatusFilter = 'pending' | 'paid' | 'all'
 
 interface CreditCardMovementsTableProps {
@@ -56,9 +55,19 @@ export const CreditCardMovementsTable: React.FC<CreditCardMovementsTableProps> =
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
 
   return (
-    <MainCard
-      title='Movimientos de Tarjeta'
-      secondary={
+    <MainCard content={false}>
+      <Stack
+        direction={isMobile ? 'column' : 'row'}
+        spacing={2}
+        sx={{
+          alignItems: isMobile ? 'stretch' : 'center',
+          justifyContent: 'space-between',
+          flexWrap: 'wrap',
+          p: 2.5
+        }}
+      >
+        <Typography variant='subtitle1'>Movimientos de Tarjeta</Typography>
+
         <Stack
           direction={isMobile ? 'column' : 'row'}
           spacing={2}
@@ -94,9 +103,9 @@ export const CreditCardMovementsTable: React.FC<CreditCardMovementsTableProps> =
             <Tab label='Todos' value='all' />
           </Tabs>
         </Stack>
-      }
-      content={false}
-    >
+      </Stack>
+
+      <Divider />
       {isLoading
         ? (
           <Box sx={{ display: 'flex', justifyContent: 'center', my: 4 }}>
