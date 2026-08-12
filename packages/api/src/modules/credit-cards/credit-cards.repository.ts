@@ -1,6 +1,8 @@
+import Boom from '@hapi/boom'
 import { type DB, schema, generateId, roundMoney } from '@soker90/finper-db'
 import { eq, and, sql, desc } from 'drizzle-orm'
 import { db as sqliteDb } from '../../db'
+import { ERROR_MESSAGE } from '../../i18n'
 
 const { creditCards, creditCardMovements, accounts, categories, stores, transactions } = schema
 
@@ -200,7 +202,7 @@ export class CreditCardsRepository implements ICreditCardsRepository {
       user,
       name: data.name,
       accountId: data.accountId,
-      limit: data.limit ? roundMoney(data.limit) : null
+      limit: data.limit != null ? roundMoney(data.limit) : null
     }
 
     await this.db.insert(creditCards).values(newCard).run()
@@ -211,7 +213,7 @@ export class CreditCardsRepository implements ICreditCardsRepository {
     const updateData: Partial<CreditCard> = {}
     if (data.name !== undefined) updateData.name = data.name
     if (data.accountId !== undefined) updateData.accountId = data.accountId
-    if (data.limit !== undefined) updateData.limit = data.limit ? roundMoney(data.limit) : null
+    if (data.limit !== undefined) updateData.limit = data.limit != null ? roundMoney(data.limit) : null
 
     if (Object.keys(updateData).length > 0) {
       await this.db.update(creditCards)
@@ -344,8 +346,12 @@ export class CreditCardsRepository implements ICreditCardsRepository {
     let movementsToPay: CreditCardMovementRow[] = []
 
     if (payload.movementIds && payload.movementIds.length > 0) {
-      const selectedSet = new Set(payload.movementIds)
-      movementsToPay = pendingMovements.filter((m) => selectedSet.has(m.id))
+      const pendingById = new Map(pendingMovements.map((m) => [m.id, m]))
+      movementsToPay = payload.movementIds.map((movementId) => {
+        const movement = pendingById.get(movementId)
+        if (!movement) throw Boom.badRequest(ERROR_MESSAGE.CREDIT_CARD.INVALID_PAYMENT).output
+        return movement
+      })
     } else if (payload.all) {
       movementsToPay = [...pendingMovements]
     } else if (payload.amount && payload.amount > 0) {
@@ -353,8 +359,11 @@ export class CreditCardsRepository implements ICreditCardsRepository {
       const target = payload.amount
       const sorted = [...pendingMovements].sort((a, b) => a.date - b.date)
       for (const m of sorted) {
-        movementsToPay.push(m)
         const net = m.type === 'expense' ? m.amount : -m.amount
+        // Always include at least one movement so a small payment still makes progress,
+        // but don't let further movements push the total past the requested amount.
+        if (movementsToPay.length > 0 && accumulated + net > target) break
+        movementsToPay.push(m)
         accumulated += net
         if (accumulated >= target) break
       }
@@ -365,14 +374,37 @@ export class CreditCardsRepository implements ICreditCardsRepository {
     }
 
     const now = Date.now()
+    const paidMovements: CreditCardMovementRow[] = []
 
     this.db.transaction((tx) => {
       let netDebtPaid = 0
 
       for (const m of movementsToPay) {
         const txId = generateId()
+
+        // Guard against concurrent pay-debt requests: reserve the movement first by
+        // flipping it to paid only if it is still pending and belongs to this user.
+        // The transactionId FK requires the transactions row to exist first, so it's
+        // set in a second update right after inserting it below.
+        const updateResult = tx.update(creditCardMovements)
+          .set({
+            status: 'paid',
+            paidAt: now
+          })
+          .where(and(
+            eq(creditCardMovements.id, m.id),
+            eq(creditCardMovements.user, user),
+            eq(creditCardMovements.status, 'pending')
+          ))
+          .run()
+
+        if ((updateResult.changes ?? 0) === 0) {
+          throw Boom.badRequest(ERROR_MESSAGE.CREDIT_CARD.ALREADY_PAID).output
+        }
+
         const net = m.type === 'expense' ? m.amount : -m.amount
         netDebtPaid += net
+        paidMovements.push(m)
 
         const noteText = m.note ? `Pago tarjeta ${card.name}: ${m.note}` : `Pago tarjeta ${card.name}`
 
@@ -390,11 +422,7 @@ export class CreditCardsRepository implements ICreditCardsRepository {
         }).run()
 
         tx.update(creditCardMovements)
-          .set({
-            status: 'paid',
-            paidAt: now,
-            transactionId: txId
-          })
+          .set({ transactionId: txId })
           .where(eq(creditCardMovements.id, m.id))
           .run()
       }
@@ -409,11 +437,11 @@ export class CreditCardsRepository implements ICreditCardsRepository {
     })
 
     const updatedCard = await this.findById(card.id, user)
-    const totalPaid = movementsToPay.reduce((acc, m) => acc + (m.type === 'expense' ? m.amount : -m.amount), 0)
+    const totalPaid = paidMovements.reduce((acc, m) => acc + (m.type === 'expense' ? m.amount : -m.amount), 0)
 
     return {
       card: updatedCard,
-      paidCount: movementsToPay.length,
+      paidCount: paidMovements.length,
       totalPaid: roundMoney(totalPaid)
     }
   }

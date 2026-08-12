@@ -55,9 +55,11 @@ export class CreditCardsService {
     return serializeCreditCardMovement(movement)
   }
 
-  public async editMovement ({ id, user, value }: { id: string, user: string, value: UpdateCreditCardMovementData }) {
+  public async editMovement ({ id, creditCardId, user, value }: { id: string, creditCardId: string, user: string, value: UpdateCreditCardMovementData }) {
     const movement = await this.repository.findMovementById(id, user)
-    if (!movement) throw Boom.notFound(ERROR_MESSAGE.CREDIT_CARD.MOVEMENT_NOT_FOUND).output
+    if (!movement || movement.creditCardId !== creditCardId) {
+      throw Boom.notFound(ERROR_MESSAGE.CREDIT_CARD.MOVEMENT_NOT_FOUND).output
+    }
     if (movement.status === 'paid') {
       throw Boom.badRequest(ERROR_MESSAGE.CREDIT_CARD.ALREADY_PAID).output
     }
@@ -65,9 +67,11 @@ export class CreditCardsService {
     return serializeCreditCardMovement(updated)
   }
 
-  public async deleteMovement ({ id, user }: { id: string, user: string }): Promise<boolean> {
+  public async deleteMovement ({ id, creditCardId, user }: { id: string, creditCardId: string, user: string }): Promise<boolean> {
     const movement = await this.repository.findMovementById(id, user)
-    if (!movement) throw Boom.notFound(ERROR_MESSAGE.CREDIT_CARD.MOVEMENT_NOT_FOUND).output
+    if (!movement || movement.creditCardId !== creditCardId) {
+      throw Boom.notFound(ERROR_MESSAGE.CREDIT_CARD.MOVEMENT_NOT_FOUND).output
+    }
     if (movement.status === 'paid') {
       throw Boom.badRequest(ERROR_MESSAGE.CREDIT_CARD.ALREADY_PAID).output
     }

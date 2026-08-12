@@ -74,11 +74,15 @@ export const ModalPayDebt = ({ open, onClose, creditCard, onSuccess }: ModalPayD
   if (mode === 'all') {
     totalToPay = currentDebt
   } else if (mode === 'amount') {
-    totalToPay = watchedAmount ? parseFloat(watchedAmount) : 0
+    const parsedAmount = parseFloat(watchedAmount)
+    totalToPay = Number.isFinite(parsedAmount) ? parsedAmount : 0
   } else if (mode === 'selected') {
     const selectedSet = new Set(watchedMovementIds)
     totalToPay = pendingMovements
-      .filter((movement) => selectedSet.has(getId(movement)))
+      .filter((movement) => {
+        const id = getId(movement)
+        return id !== undefined && selectedSet.has(id)
+      })
       .reduce((acc, movement) => acc + netAmount(movement), 0)
   }
   totalToPay = Math.max(0, Math.round(totalToPay * 100) / 100)
@@ -86,13 +90,17 @@ export const ModalPayDebt = ({ open, onClose, creditCard, onSuccess }: ModalPayD
   const currentBalance = account?.balance ?? 0
   const projectedBalance = Math.round((currentBalance - totalToPay) * 100) / 100
 
-  const handleFormSubmit = handleSubmit((data) => runSubmit(() => {
+  const handleFormSubmit = handleSubmit((data) => runSubmit(async () => {
+    if (!cardId) return { error: 'No se pudo identificar la tarjeta' }
+    if (data.mode === 'amount' && totalToPay > currentDebt) {
+      return { error: `El importe no puede superar la deuda pendiente (${format.euro(currentDebt)})` }
+    }
     const payload = data.mode === 'all'
       ? { all: true }
       : data.mode === 'amount'
         ? { amount: totalToPay }
         : { movementIds: data.movementIds }
-    return payCreditCardDebt(cardId!, payload)
+    return payCreditCardDebt(cardId, payload)
   }, () => {
     onSuccess()
     onClose()
@@ -233,8 +241,8 @@ export const ModalPayDebt = ({ open, onClose, creditCard, onSuccess }: ModalPayD
                     render={({ field }) => (
                       <Paper variant='outlined' sx={{ maxHeight: 200, overflow: 'auto' }}>
                         <List dense disablePadding>
-                          {pendingMovements.map((movement) => {
-                            const id = getId(movement)
+                          {pendingMovements.filter((movement) => getId(movement) !== undefined).map((movement) => {
+                            const id = getId(movement) as string
                             const isChecked = field.value.includes(id)
                             const toggle = () => field.onChange(
                               isChecked ? field.value.filter((item) => item !== id) : [...field.value, id]

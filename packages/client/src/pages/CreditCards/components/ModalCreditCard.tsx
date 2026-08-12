@@ -49,15 +49,18 @@ export const ModalCreditCard = ({ open, onClose, creditCard, onSuccess }: ModalC
 
   const { error: submitError, runSubmit } = useSubmitError()
 
-  const handleFormSubmit = handleSubmit((data) => runSubmit(() => {
+  const handleFormSubmit = handleSubmit((data) => runSubmit(async () => {
     const payload = {
       name: data.name.trim(),
       accountId: data.accountId,
       limit: data.limit.trim() ? parseFloat(data.limit) : null
     }
-    return creditCard
-      ? editCreditCard(getId(creditCard), payload)
-      : addCreditCard(payload)
+    if (creditCard) {
+      const id = getId(creditCard)
+      if (!id) return { error: 'No se pudo identificar la tarjeta a editar' }
+      return editCreditCard(id, payload)
+    }
+    return addCreditCard(payload)
   }, () => {
     onSuccess()
     onClose()

@@ -53,7 +53,7 @@ const CreditCardsPage: React.FC = () => {
   const [openPayModal, setOpenPayModal] = useState(false)
   const [activeCardForPay, setActiveCardForPay] = useState<CreditCard | null>(null)
 
-  const activeCardIdForMovements = selectedCardIdFilter || (creditCards.length > 0 ? getId(creditCards[0]) : '')
+  const activeCardIdForMovements = selectedCardIdFilter || (creditCards.length > 0 ? getId(creditCards[0]) ?? '' : '')
 
   const { movements, isLoading: loadingMovements } = useCreditCardMovements(
     activeCardIdForMovements,
@@ -61,6 +61,10 @@ const CreditCardsPage: React.FC = () => {
   )
 
   const triggerMutate = useCreditCardMutate(activeCardIdForMovements)
+  const mutateMovementCard = useCreditCardMutate(activeCardForMovement ? getId(activeCardForMovement) : undefined)
+  const mutatePayCard = useCreditCardMutate(activeCardForPay ? getId(activeCardForPay) : undefined)
+
+  const [actionError, setActionError] = useState<string | null>(null)
 
   // Calculations for KPI Summary Cards
   const totalDebt = creditCards.reduce((acc, c) => acc + (c.currentDebt ?? 0), 0)
@@ -80,7 +84,13 @@ const CreditCardsPage: React.FC = () => {
   const handleDeleteCard = async (card: CreditCard) => {
     if (window.confirm(`¿Estás seguro de eliminar la tarjeta "${card.name}"?`)) {
       const id = getId(card)
-      await deleteCreditCard(id)
+      if (!id) return
+      const { error } = await deleteCreditCard(id)
+      if (error) {
+        setActionError(error)
+        return
+      }
+      setActionError(null)
       triggerMutate()
     }
   }
@@ -99,7 +109,12 @@ const CreditCardsPage: React.FC = () => {
 
   const handleDeleteMovement = async (cardId: string, mId: string) => {
     if (window.confirm('¿Deseas eliminar este movimiento de tarjeta?')) {
-      await deleteCreditCardMovement(cardId, mId)
+      const { error } = await deleteCreditCardMovement(cardId, mId)
+      if (error) {
+        setActionError(error)
+        return
+      }
+      setActionError(null)
       triggerMutate()
     }
   }
@@ -123,6 +138,12 @@ const CreditCardsPage: React.FC = () => {
       {creditCardsError && (
         <Alert severity='error' sx={{ mb: 3 }}>
           No se han podido cargar las tarjetas de crédito. Inténtalo de nuevo más tarde.
+        </Alert>
+      )}
+
+      {actionError && (
+        <Alert severity='error' sx={{ mb: 3 }} onClose={() => setActionError(null)}>
+          {actionError}
         </Alert>
       )}
 
@@ -291,7 +312,7 @@ const CreditCardsPage: React.FC = () => {
                               />
                             </TableCell>
                             <TableCell align='center'>
-                              {isPending && cardForMovement && (
+                              {isPending && cardForMovement && id && (
                                 <Stack direction='row' spacing={0.5} sx={{ justifyContent: 'center' }}>
                                   <Tooltip title='Editar movimiento'>
                                     <IconButton
@@ -335,9 +356,9 @@ const CreditCardsPage: React.FC = () => {
         <ModalMovement
           open={openMovementModal}
           onClose={() => setOpenMovementModal(false)}
-          creditCardId={getId(activeCardForMovement)}
+          creditCardId={getId(activeCardForMovement) ?? ''}
           movement={editingMovement}
-          onSuccess={triggerMutate}
+          onSuccess={() => { mutateMovementCard(); triggerMutate() }}
         />
       )}
 
@@ -345,7 +366,7 @@ const CreditCardsPage: React.FC = () => {
         open={openPayModal}
         onClose={() => setOpenPayModal(false)}
         creditCard={activeCardForPay}
-        onSuccess={triggerMutate}
+        onSuccess={() => { mutatePayCard(); triggerMutate() }}
       />
     </>
   )

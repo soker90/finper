@@ -59,6 +59,24 @@ export const creditCardHandlers = [
     }, { status: 201 })
   }),
 
+  http.post('*/credit-cards/:id/movements', async ({ params, request }) => {
+    const body: any = await request.json()
+    return HttpResponse.json({
+      id: 'mov-new',
+      _id: 'mov-new',
+      creditCardId: params.id,
+      date: body.date,
+      amount: body.amount,
+      type: body.type ?? 'expense',
+      categoryId: body.categoryId,
+      category: { id: 'cat-1', _id: 'cat-1', name: 'Supermercado', type: 'expense' },
+      storeId: body.storeId ?? null,
+      note: body.note ?? null,
+      status: 'pending',
+      user: 'testuser'
+    }, { status: 201 })
+  }),
+
   http.post('*/credit-cards/:id/pay-debt', () => {
     return HttpResponse.json({
       card: {

@@ -181,15 +181,24 @@ describe('CreditCardsService', () => {
       const repository = buildRepository({ findMovementById: jest.fn().mockResolvedValue(undefined) })
       const service = new CreditCardsService(repository)
 
-      await expect(service.editMovement({ id: 'missing', user: 'user1', value: {} }))
+      await expect(service.editMovement({ id: 'missing', creditCardId: 'card-1', user: 'user1', value: {} }))
         .rejects.toMatchObject({ statusCode: 404 })
+    })
+
+    it('throws 404 when the movement belongs to a different credit card', async () => {
+      const repository = buildRepository({ findMovementById: jest.fn().mockResolvedValue(buildMovement({ creditCardId: 'card-2' })) })
+      const service = new CreditCardsService(repository)
+
+      await expect(service.editMovement({ id: 'mov-1', creditCardId: 'card-1', user: 'user1', value: { amount: 50 } }))
+        .rejects.toMatchObject({ statusCode: 404 })
+      expect(repository.updateMovement).not.toHaveBeenCalled()
     })
 
     it('throws when the movement is already paid', async () => {
       const repository = buildRepository({ findMovementById: jest.fn().mockResolvedValue(buildMovement({ status: 'paid' })) })
       const service = new CreditCardsService(repository)
 
-      await expect(service.editMovement({ id: 'mov-1', user: 'user1', value: { amount: 50 } }))
+      await expect(service.editMovement({ id: 'mov-1', creditCardId: 'card-1', user: 'user1', value: { amount: 50 } }))
         .rejects.toMatchObject({ statusCode: 400 })
       expect(repository.updateMovement).not.toHaveBeenCalled()
     })
@@ -201,7 +210,7 @@ describe('CreditCardsService', () => {
       })
       const service = new CreditCardsService(repository)
 
-      const result = await service.editMovement({ id: 'mov-1', user: 'user1', value: { amount: 200 } })
+      const result = await service.editMovement({ id: 'mov-1', creditCardId: 'card-1', user: 'user1', value: { amount: 200 } })
 
       expect(result?.amount).toBe(200)
     })
@@ -212,15 +221,24 @@ describe('CreditCardsService', () => {
       const repository = buildRepository({ findMovementById: jest.fn().mockResolvedValue(undefined) })
       const service = new CreditCardsService(repository)
 
-      await expect(service.deleteMovement({ id: 'missing', user: 'user1' }))
+      await expect(service.deleteMovement({ id: 'missing', creditCardId: 'card-1', user: 'user1' }))
         .rejects.toMatchObject({ statusCode: 404 })
+    })
+
+    it('throws 404 when the movement belongs to a different credit card', async () => {
+      const repository = buildRepository({ findMovementById: jest.fn().mockResolvedValue(buildMovement({ creditCardId: 'card-2' })) })
+      const service = new CreditCardsService(repository)
+
+      await expect(service.deleteMovement({ id: 'mov-1', creditCardId: 'card-1', user: 'user1' }))
+        .rejects.toMatchObject({ statusCode: 404 })
+      expect(repository.deleteMovement).not.toHaveBeenCalled()
     })
 
     it('throws when the movement is already paid', async () => {
       const repository = buildRepository({ findMovementById: jest.fn().mockResolvedValue(buildMovement({ status: 'paid' })) })
       const service = new CreditCardsService(repository)
 
-      await expect(service.deleteMovement({ id: 'mov-1', user: 'user1' }))
+      await expect(service.deleteMovement({ id: 'mov-1', creditCardId: 'card-1', user: 'user1' }))
         .rejects.toMatchObject({ statusCode: 400 })
     })
 
@@ -231,7 +249,7 @@ describe('CreditCardsService', () => {
       })
       const service = new CreditCardsService(repository)
 
-      const result = await service.deleteMovement({ id: 'mov-1', user: 'user1' })
+      const result = await service.deleteMovement({ id: 'mov-1', creditCardId: 'card-1', user: 'user1' })
 
       expect(result).toBe(true)
     })

@@ -67,7 +67,7 @@ export const ModalMovement = ({ open, onClose, creditCardId, movement, onSuccess
 
   const { error: submitError, runSubmit } = useSubmitError()
 
-  const handleFormSubmit = handleSubmit((data) => runSubmit(() => {
+  const handleFormSubmit = handleSubmit((data) => runSubmit(async () => {
     const payload = {
       date: new Date(data.date).getTime(),
       amount: parseFloat(data.amount),
@@ -76,9 +76,12 @@ export const ModalMovement = ({ open, onClose, creditCardId, movement, onSuccess
       storeId: data.storeId || null,
       note: data.note.trim() || null
     }
-    return movement
-      ? editCreditCardMovement(creditCardId, getId(movement), payload)
-      : addCreditCardMovement(creditCardId, payload)
+    if (movement) {
+      const id = getId(movement)
+      if (!id) return { error: 'No se pudo identificar el movimiento a editar' }
+      return editCreditCardMovement(creditCardId, id, payload)
+    }
+    return addCreditCardMovement(creditCardId, payload)
   }, () => {
     onSuccess()
     onClose()

@@ -80,7 +80,7 @@ export const CreditCardCard: React.FC<CreditCardCardProps> = ({
             {card.name}
           </Typography>
         </Stack>
-        <IconButton onClick={handleMenuOpen} size='small'>
+        <IconButton onClick={handleMenuOpen} size='small' aria-label={`Acciones de ${card.name}`}>
           <MoreOutlined style={{ fontSize: 18 }} />
         </IconButton>
       </Stack>

@@ -21,7 +21,7 @@ import { transactions } from './transactions';
 // movimiento).
 export const creditCardMovements = sqliteTable('credit_card_movements', {
   id: text('id').primaryKey(),
-  creditCardId: text('credit_card_id').notNull().references(() => creditCards.id),
+  creditCardId: text('credit_card_id').notNull().references(() => creditCards.id, { onDelete: 'cascade' }),
   date: integer('date').notNull(),
   categoryId: text('category_id').notNull().references(() => categories.id),
   amount: real('amount').notNull(),

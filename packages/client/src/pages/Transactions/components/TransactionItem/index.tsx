@@ -41,7 +41,9 @@ const TransactionItem: FC<TransactionItemProps> = ({ transaction, forceExpand, c
               />
               {transaction.creditCard && (
                 <Tooltip title={transaction.creditCard.name}>
-                  <CreditCardOutlined style={{ fontSize: 16 }} />
+                  <span role='img' aria-label={transaction.creditCard.name} tabIndex={0}>
+                    <CreditCardOutlined style={{ fontSize: 16 }} />
+                  </span>
                 </Tooltip>
               )}
               <span>{format.dateShort(transaction.date)}</span>
