@@ -1,11 +1,13 @@
 import { useEffect } from 'react'
-import { useForm, Controller } from 'react-hook-form'
+import { useForm, Controller, type Control } from 'react-hook-form'
 import { Alert, Box } from '@mui/material'
 import ModalGrid from 'components/modals/ModalGrid'
 import InputForm from 'components/forms/InputForm'
 import SelectForm from 'components/forms/SelectForm'
-import { useCategories } from 'hooks/useCategories'
-import { useStores } from 'hooks/useStores'
+import SelectGroupForm from 'components/forms/SelectGroupForm'
+import AutocompleteForm from 'components/forms/AutocompleteForm'
+import TagsInput from 'components/forms/TagsInput'
+import { useGroupedCategories, useStores, useAvailableTags } from 'hooks'
 import { addCreditCardMovement, editCreditCardMovement } from 'services/apiService'
 import { getId } from 'utils'
 import { useSubmitError } from '../hooks/useSubmitError'
@@ -23,6 +25,7 @@ interface MovementFormValues {
   categoryId: string
   storeId: string
   note: string
+  tags: string[]
 }
 
 interface ModalMovementProps {
@@ -41,8 +44,9 @@ const buildDefaultValues = (movement?: CreditCardMovement | null): MovementFormV
       amount: String(movement.amount),
       type: movement.type || 'expense',
       categoryId: movement.categoryId || '',
-      storeId: movement.storeId || '',
-      note: movement.note || ''
+      storeId: movement.store?.name || '',
+      note: movement.note || '',
+      tags: movement.tags || []
     }
   : {
       date: '',
@@ -50,12 +54,14 @@ const buildDefaultValues = (movement?: CreditCardMovement | null): MovementFormV
       type: 'expense',
       categoryId: '',
       storeId: '',
-      note: ''
+      note: '',
+      tags: []
     }
 
 export const ModalMovement = ({ open, onClose, creditCardId, movement, onSuccess }: ModalMovementProps) => {
-  const { categories } = useCategories()
+  const { categories } = useGroupedCategories()
   const { stores } = useStores()
+  const { tags: availableTags } = useAvailableTags()
 
   const { register, handleSubmit, formState: { errors, isSubmitting }, reset, control } = useForm<MovementFormValues>({
     defaultValues: buildDefaultValues(movement)
@@ -74,7 +80,8 @@ export const ModalMovement = ({ open, onClose, creditCardId, movement, onSuccess
       type: data.type,
       categoryId: data.categoryId,
       storeId: data.storeId || null,
-      note: data.note.trim() || null
+      note: data.note.trim() || null,
+      tags: data.tags
     }
     if (movement) {
       const id = getId(movement)
@@ -101,7 +108,7 @@ export const ModalMovement = ({ open, onClose, creditCardId, movement, onSuccess
         id='date'
         label='Fecha'
         type='date'
-        size={6}
+        size={4}
         error={Boolean(errors.date)}
         errorText='La fecha es obligatoria'
         {...register('date', { required: true })}
@@ -110,7 +117,7 @@ export const ModalMovement = ({ open, onClose, creditCardId, movement, onSuccess
       <SelectForm
         id='type'
         label='Tipo'
-        size={6}
+        size={4}
         options={MOVEMENT_TYPE_OPTIONS}
         optionValue='value'
         optionLabel='label'
@@ -124,7 +131,7 @@ export const ModalMovement = ({ open, onClose, creditCardId, movement, onSuccess
         label='Importe (€)'
         placeholder='Ej. 49.99'
         type='number'
-        size={6}
+        size={4}
         error={Boolean(errors.amount)}
         errorText='El importe debe ser mayor a 0'
         inputProps={{ step: '0.01', min: '0.01' }}
@@ -136,10 +143,10 @@ export const ModalMovement = ({ open, onClose, creditCardId, movement, onSuccess
         control={control}
         rules={{ required: true }}
         render={({ field }) => (
-          <SelectForm
+          <SelectGroupForm
             id='categoryId'
             label='Categoría'
-            size={6}
+            size={4}
             options={categories}
             optionValue='_id'
             optionLabel='name'
@@ -153,33 +160,30 @@ export const ModalMovement = ({ open, onClose, creditCardId, movement, onSuccess
         )}
       />
 
-      <Controller
-        name='storeId'
-        control={control}
-        render={({ field }) => (
-          <SelectForm
-            id='storeId'
-            label='Comercio / Tienda (opcional)'
-            size={6}
-            options={stores}
-            optionValue='_id'
-            optionLabel='name'
-            voidOption
-            voidLabel='-- Ninguno --'
-            error={false}
-            errorText=''
-            value={field.value}
-            onChange={(e) => field.onChange(e.target.value)}
-            inputRef={field.ref}
-          />
-        )}
+      <AutocompleteForm
+        options={stores}
+        optionLabel='name' id='storeId' label='Tienda'
+        placeholder='Tienda'
+        size={4}
+        error={false}
+        errorText=''
+        {...register('storeId')}
+        {...(movement?.store && { defaultValue: movement.store })}
+      />
+
+      <TagsInput
+        name='tags'
+        control={control as unknown as Control<any>}
+        availableTags={availableTags}
+        label='Etiquetas'
+        size={4}
       />
 
       <InputForm
         id='note'
         label='Nota / Concepto (opcional)'
         placeholder='Ej. Compra supermercado'
-        size={6}
+        size={12}
         error={false}
         errorText=''
         {...register('note')}

@@ -40,6 +40,7 @@ export const creditCardHandlers = [
         type: 'expense',
         categoryId: 'cat-1',
         category: { id: 'cat-1', _id: 'cat-1', name: 'Supermercado', type: 'expense' },
+        tags: [],
         status: 'pending',
         user: 'testuser'
       }
@@ -71,7 +72,9 @@ export const creditCardHandlers = [
       categoryId: body.categoryId,
       category: { id: 'cat-1', _id: 'cat-1', name: 'Supermercado', type: 'expense' },
       storeId: body.storeId ?? null,
+      store: body.storeId ? { id: 'store-new', _id: 'store-new', name: body.storeId } : null,
       note: body.note ?? null,
+      tags: body.tags ?? [],
       status: 'pending',
       user: 'testuser'
     }, { status: 201 })
@@ -119,7 +122,9 @@ export const creditCardHandlers = [
       categoryId: body.categoryId ?? 'cat-1',
       category: { id: 'cat-1', _id: 'cat-1', name: 'Supermercado', type: 'expense' },
       storeId: body.storeId ?? null,
+      store: body.storeId ? { id: 'store-new', _id: 'store-new', name: body.storeId } : null,
       note: body.note ?? null,
+      tags: body.tags ?? [],
       status: 'pending',
       user: 'testuser'
     })

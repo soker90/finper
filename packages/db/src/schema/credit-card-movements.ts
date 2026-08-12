@@ -31,6 +31,7 @@ export const creditCardMovements = sqliteTable('credit_card_movements', {
   status: text('status').notNull().default('pending'), // 'pending' | 'paid'
   paidAt: integer('paid_at'),
   transactionId: text('transaction_id').references(() => transactions.id),
+  tags: text('tags', { mode: 'json' }).$type<string[]>().notNull().default([]),
   user: text('user').notNull().references(() => users.username),
 }, (table) => ({
   cardUserIdx: index('cc_movements_card_user_idx').on(table.creditCardId, table.user),

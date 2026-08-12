@@ -1,5 +1,6 @@
 import Boom from '@hapi/boom'
 import { ERROR_MESSAGE } from '../../i18n'
+import { sanitizeTags } from '../../utils'
 import { creditCardsRepository, type ICreditCardsRepository, type CreateCreditCardData, type UpdateCreditCardData, type CreateCreditCardMovementData, type UpdateCreditCardMovementData, type PayDebtPayload } from './credit-cards.repository'
 import { serializeCreditCard, serializeCreditCardMovement } from './credit-cards.serializer'
 
@@ -49,8 +50,9 @@ export class CreditCardsService {
   public async addMovement ({ creditCardId, user, data }: { creditCardId: string, user: string, data: Omit<CreateCreditCardMovementData, 'creditCardId'> }) {
     await this.getCreditCardById(creditCardId, user)
     const movement = await this.repository.createMovement(user, {
-      creditCardId,
-      ...data
+      ...data,
+      tags: sanitizeTags(data.tags),
+      creditCardId
     })
     return serializeCreditCardMovement(movement)
   }
@@ -63,7 +65,10 @@ export class CreditCardsService {
     if (movement.status === 'paid') {
       throw Boom.badRequest(ERROR_MESSAGE.CREDIT_CARD.ALREADY_PAID).output
     }
-    const updated = await this.repository.updateMovement(id, user, value)
+    const updated = await this.repository.updateMovement(id, user, {
+      ...value,
+      ...(value.tags !== undefined && { tags: sanitizeTags(value.tags) })
+    })
     return serializeCreditCardMovement(updated)
   }
 

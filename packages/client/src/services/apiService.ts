@@ -307,6 +307,7 @@ export const addCreditCardMovement = (creditCardId: string, params: {
   categoryId: string
   storeId?: string | null
   note?: string | null
+  tags?: string[]
 }): Promise<{ data?: any, error?: string }> =>
   axios.post(`${CREDIT_CARDS}/${creditCardId}/movements`, params).then((res: any) => ({ data: res.data })).catch((error: any) => ({ error: extractError(error) }))
 
@@ -317,6 +318,7 @@ export const editCreditCardMovement = (creditCardId: string, movementId: string,
   categoryId?: string
   storeId?: string | null
   note?: string | null
+  tags?: string[]
 }): Promise<{ data?: any, error?: string }> =>
   axios.patch(`${CREDIT_CARDS}/${creditCardId}/movements/${movementId}`, params).then((res: any) => ({ data: res.data })).catch((error: any) => ({ error: extractError(error) }))
 

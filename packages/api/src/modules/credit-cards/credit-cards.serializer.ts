@@ -55,6 +55,7 @@ export const serializeCreditCardMovement = (movement: CreditCardMovementRow | un
     status: movement.status,
     paidAt: movement.paidAt ?? null,
     transactionId: movement.transactionId ?? null,
+    tags: movement.tags ?? [],
     user: movement.user
   }
 }

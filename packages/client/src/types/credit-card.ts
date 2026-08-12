@@ -30,5 +30,6 @@ export interface CreditCardMovement {
   status: CreditCardMovementStatus
   paidAt?: number | null
   transactionId?: string | null
+  tags?: string[]
   user: string
 }

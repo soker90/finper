@@ -44,6 +44,9 @@ const MOVEMENTS_LIST = [
 
 const ACCOUNTS_LIST = [{ id: 'a1', _id: 'a1', name: 'Cuenta Nómina', bank: 'BBVA', balance: 1000 }]
 const CATEGORIES_LIST = [{ id: 'cat-1', _id: 'cat-1', name: 'Supermercado', type: 'expense' }]
+const GROUPED_CATEGORIES_LIST = [
+  { _id: 'group-1', name: 'Gastos', children: [{ _id: 'cat-1', name: 'Supermercado' }] }
+]
 
 describe('CreditCards Page', () => {
   it('renders title and empty state when there are no cards', async () => {
@@ -142,7 +145,9 @@ describe('CreditCards Page', () => {
       http.get('*/credit-cards', () => HttpResponse.json(CARDS_LIST)),
       http.get('*/credit-cards/c1/movements', () => HttpResponse.json([])),
       http.get('*/categories', () => HttpResponse.json(CATEGORIES_LIST)),
+      http.get('*/categories/grouped', () => HttpResponse.json(GROUPED_CATEGORIES_LIST)),
       http.get('*/stores', () => HttpResponse.json([])),
+      http.get('*/stats/tags/available', () => HttpResponse.json([])),
       http.post('*/credit-cards/c1/movements', () => HttpResponse.json({ id: 'm2', _id: 'm2', creditCardId: 'c1', amount: 10, type: 'expense', status: 'pending' }, { status: 201 }))
     )
     const { findByText, getByLabelText, findByRole, queryByText } = renderFresh()

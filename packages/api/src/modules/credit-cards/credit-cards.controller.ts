@@ -7,9 +7,22 @@ import {
   validateCreditCardMovementEditParams,
   validateCreditCardPayDebtParams
 } from './credit-cards.validators'
+import { createStoresRepository } from '../stores/stores.repository'
+import { StoresService } from '../stores/stores.service'
+import { db } from '../../db'
 import loggerHandler from '../../utils/logger'
 
 const logger = loggerHandler('CreditCardsController')
+const storesService = new StoresService(createStoresRepository(db))
+
+// storeId travels as a free-text store name from the client (same UX as
+// transactions' `store` field) and is resolved/upserted here to a real
+// store id scoped to the user, reusing storesService.getAndReplaceStore.
+const resolveStoreId = (storeId: string | null | undefined, user: string): string | null => {
+  if (!storeId) return null
+  const resolved = storesService.getAndReplaceStore({ store: storeId, user })
+  return resolved.store ?? null
+}
 
 export class CreditCardsController {
   public async getCreditCards (req: Request, res: Response): Promise<void> {
@@ -59,6 +72,7 @@ export class CreditCardsController {
     const { id } = req.params
     logger.logInfo(`/credit-cards/${id}/movements - add movement`)
     const data = validateCreditCardMovementCreateParams(req.body, req.user as string)
+    data.storeId = resolveStoreId(data.storeId, req.user as string)
     const movement = await creditCardsService.addMovement({ creditCardId: id, user: req.user as string, data })
     res.status(201).send(movement)
   }
@@ -67,6 +81,7 @@ export class CreditCardsController {
     const { id, movementId } = req.params
     logger.logInfo(`/credit-cards/${id}/movements/${movementId} - edit movement`)
     const value = validateCreditCardMovementEditParams(req.body, req.user as string)
+    if (value.storeId !== undefined) value.storeId = resolveStoreId(value.storeId, req.user as string)
     const movement = await creditCardsService.editMovement({ id: movementId, creditCardId: id, user: req.user as string, value })
     res.send(movement)
   }

@@ -8,7 +8,7 @@ import { eq } from 'drizzle-orm'
 import { creditCardsRoutes } from '../credit-cards.routes'
 import { accountsRepository } from '../../accounts/accounts.repository'
 
-const { creditCards, creditCardMovements, accounts, categories, transactions, users } = schema
+const { creditCards, creditCardMovements, accounts, categories, transactions, users, stores } = schema
 
 describe('Credit Cards Routes', () => {
   let token: string
@@ -44,6 +44,7 @@ describe('Credit Cards Routes', () => {
     sqliteDb.delete(creditCards).where(eq(creditCards.user, username)).run()
     sqliteDb.delete(accounts).where(eq(accounts.user, username)).run()
     sqliteDb.delete(categories).where(eq(categories.user, username)).run()
+    sqliteDb.delete(stores).where(eq(stores.user, username)).run()
     sqliteDb.delete(users).where(eq(users.username, username)).run()
   })
 
@@ -572,6 +573,85 @@ describe('Credit Cards Routes', () => {
 
       sqliteDb.delete(categories).where(eq(categories.user, otherUsername)).run()
       sqliteDb.delete(users).where(eq(users.username, otherUsername)).run()
+    })
+  })
+
+  describe('tags & store-by-name (parity with bank transactions)', () => {
+    test('POST /:id/movements accepts tags and a free-text store name', async () => {
+      const cardRes = await supertest(server.app)
+        .post(path)
+        .set('Authorization', `Bearer ${token}`)
+        .send({ name: 'Tags Card', accountId })
+        .expect(201)
+
+      const movementRes = await supertest(server.app)
+        .post(`${path}/${cardRes.body.id}/movements`)
+        .set('Authorization', `Bearer ${token}`)
+        .send({
+          date: Date.now(),
+          amount: 25,
+          categoryId,
+          storeId: 'Mercadona',
+          tags: ['Groceries', 'groceries', '  Food  ']
+        })
+        .expect(201)
+
+      expect(movementRes.body.tags).toEqual(['groceries', 'food'])
+      expect(movementRes.body.store.name).toBe('Mercadona')
+
+      // Reusing the same store name should reuse the existing store, not duplicate it.
+      const storeRows = sqliteDb.select().from(stores).where(eq(stores.user, username)).all()
+      expect(storeRows.filter((s) => s.name === 'Mercadona')).toHaveLength(1)
+    })
+
+    test('PATCH /:id/movements/:movementId updates tags', async () => {
+      const cardRes = await supertest(server.app)
+        .post(path)
+        .set('Authorization', `Bearer ${token}`)
+        .send({ name: 'Tags Edit Card', accountId })
+        .expect(201)
+
+      const movementRes = await supertest(server.app)
+        .post(`${path}/${cardRes.body.id}/movements`)
+        .set('Authorization', `Bearer ${token}`)
+        .send({ date: Date.now(), amount: 10, categoryId, tags: ['old-tag'] })
+        .expect(201)
+
+      const updated = await supertest(server.app)
+        .patch(`${path}/${cardRes.body.id}/movements/${movementRes.body.id}`)
+        .set('Authorization', `Bearer ${token}`)
+        .send({ tags: ['new-tag'] })
+        .expect(200)
+
+      expect(updated.body.tags).toEqual(['new-tag'])
+    })
+
+    test('pay-debt propagates the movement tags to the created transaction', async () => {
+      const cardRes = await supertest(server.app)
+        .post(path)
+        .set('Authorization', `Bearer ${token}`)
+        .send({ name: 'Tags Pay Card', accountId })
+        .expect(201)
+      const cardId = cardRes.body.id
+
+      const movementRes = await supertest(server.app)
+        .post(`${path}/${cardId}/movements`)
+        .set('Authorization', `Bearer ${token}`)
+        .send({ date: Date.now(), amount: 30, categoryId, tags: ['recurring'] })
+        .expect(201)
+
+      await supertest(server.app)
+        .post(`${path}/${cardId}/pay-debt`)
+        .set('Authorization', `Bearer ${token}`)
+        .send({ all: true })
+        .expect(200)
+
+      const paidMovement = await sqliteDb.select().from(creditCardMovements)
+        .where(eq(creditCardMovements.id, movementRes.body.id)).get()!
+      const createdTransaction = sqliteDb.select().from(transactions)
+        .where(eq(transactions.id, paidMovement.transactionId!)).get()!
+
+      expect(createdTransaction.tags).toEqual(['recurring'])
     })
   })
 })

@@ -8,7 +8,7 @@ import { ERROR_MESSAGE } from '../../i18n'
 import { creditCardsRepository } from './credit-cards.repository'
 import type { CreateCreditCardData, UpdateCreditCardData, CreateCreditCardMovementData, UpdateCreditCardMovementData, PayDebtPayload, CreditCardRow } from './credit-cards.repository'
 
-const { accounts, categories, stores } = schema
+const { accounts, categories } = schema
 
 const createCardSchema = Joi.object({
   name: Joi.string().required(),
@@ -27,8 +27,12 @@ const createMovementSchema = Joi.object({
   amount: Joi.number().positive().required(),
   type: Joi.string().valid('expense', 'income').default('expense'),
   categoryId: Joi.string().required(),
+  // storeId accepts a free-text store name (like transactions' `store` field);
+  // it is resolved to an actual store id via an upsert-by-name in the
+  // controller (see storesService.getAndReplaceStore), scoped to the user.
   storeId: Joi.string().allow(null, ''),
-  note: Joi.string().allow(null, '')
+  note: Joi.string().allow(null, ''),
+  tags: Joi.array().items(Joi.string().max(30)).max(10).optional()
 })
 
 const editMovementSchema = Joi.object({
@@ -37,7 +41,8 @@ const editMovementSchema = Joi.object({
   type: Joi.string().valid('expense', 'income'),
   categoryId: Joi.string(),
   storeId: Joi.string().allow(null, ''),
-  note: Joi.string().allow(null, '')
+  note: Joi.string().allow(null, ''),
+  tags: Joi.array().items(Joi.string().max(30)).max(10).optional()
 }).min(1)
 
 const payDebtSchema = Joi.object({
@@ -58,13 +63,6 @@ const assertCategoryExists = (id: string, user: string): void => {
   const exists = sqliteDb.select({ id: categories.id }).from(categories)
     .where(and(eq(categories.id, id), eq(categories.user, user))).get()
   if (!exists) throw Boom.notFound(ERROR_MESSAGE.CATEGORY.NOT_FOUND).output
-}
-
-const assertStoreExists = (id: string, user: string): void => {
-  if (!isValidId(id)) throw Boom.badRequest(ERROR_MESSAGE.COMMON.INVALID_ID).output
-  const exists = sqliteDb.select({ id: stores.id }).from(stores)
-    .where(and(eq(stores.id, id), eq(stores.user, user))).get()
-  if (!exists) throw Boom.notFound(ERROR_MESSAGE.COMMON.NOT_VALID).output
 }
 
 export const validateCreditCardCreateParams = (body: Record<string, any>, user: string): CreateCreditCardData => {
@@ -95,7 +93,6 @@ export const validateCreditCardMovementCreateParams = (body: Record<string, any>
   const { error, value } = createMovementSchema.validate(body)
   if (error) throw Boom.badData(error.message).output
   assertCategoryExists(value.categoryId, user)
-  if (value.storeId) assertStoreExists(value.storeId, user)
   return value
 }
 
@@ -103,7 +100,6 @@ export const validateCreditCardMovementEditParams = (body: Record<string, any>, 
   const { error, value } = editMovementSchema.validate(body)
   if (error) throw Boom.badData(error.message).output
   if (value.categoryId !== undefined) assertCategoryExists(value.categoryId, user)
-  if (value.storeId) assertStoreExists(value.storeId, user)
   return value
 }
 

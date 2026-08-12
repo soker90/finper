@@ -25,6 +25,7 @@ const buildMovement = (overrides: Partial<CreditCardMovementRow> = {}): CreditCa
   status: 'pending',
   paidAt: null,
   transactionId: null,
+  tags: [],
   user: 'user1',
   category: { id: 'cat-1', name: 'Shopping', type: 'expense' },
   store: null,
@@ -171,7 +172,7 @@ describe('CreditCardsService', () => {
       const data = { date: 1000, amount: 100, type: 'expense' as const, categoryId: 'cat-1' }
       const result = await service.addMovement({ creditCardId: 'card-1', user: 'user1', data })
 
-      expect(repository.createMovement).toHaveBeenCalledWith('user1', { creditCardId: 'card-1', ...data })
+      expect(repository.createMovement).toHaveBeenCalledWith('user1', { creditCardId: 'card-1', ...data, tags: [] })
       expect(result?.id).toBe('mov-1')
     })
   })

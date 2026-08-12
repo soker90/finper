@@ -51,6 +51,7 @@ export interface CreateCreditCardMovementData {
   categoryId: string
   storeId?: string | null
   note?: string | null
+  tags?: string[]
 }
 
 export interface UpdateCreditCardMovementData {
@@ -60,6 +61,7 @@ export interface UpdateCreditCardMovementData {
   categoryId?: string
   storeId?: string | null
   note?: string | null
+  tags?: string[]
 }
 
 export interface PayDebtPayload {
@@ -102,6 +104,7 @@ const movementSelectFields = {
   status: creditCardMovements.status,
   paidAt: creditCardMovements.paidAt,
   transactionId: creditCardMovements.transactionId,
+  tags: creditCardMovements.tags,
   user: creditCardMovements.user,
   category: {
     id: categories.id,
@@ -307,6 +310,7 @@ export class CreditCardsRepository implements ICreditCardsRepository {
       categoryId: data.categoryId,
       storeId: data.storeId || null,
       note: data.note || null,
+      tags: data.tags ?? [],
       status: 'pending' as const
     }
 
@@ -322,6 +326,7 @@ export class CreditCardsRepository implements ICreditCardsRepository {
     if (data.categoryId !== undefined) updateData.categoryId = data.categoryId
     if (data.storeId !== undefined) updateData.storeId = data.storeId || null
     if (data.note !== undefined) updateData.note = data.note || null
+    if (data.tags !== undefined) updateData.tags = data.tags
 
     if (Object.keys(updateData).length > 0) {
       await this.db.update(creditCardMovements)
@@ -418,6 +423,7 @@ export class CreditCardsRepository implements ICreditCardsRepository {
           note: noteText,
           storeId: m.storeId || null,
           creditCardId: card.id,
+          tags: m.tags ?? [],
           user
         }).run()
 
