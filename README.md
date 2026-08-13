@@ -381,10 +381,11 @@ La persistencia SQLite se monta como bind mount en `/home/node/app/data`; ajusta
 
 El `docker-compose.yml` utiliza variables como:
 
+- `DATA_PATH` (ruta en el host montada en `/home/node/app/data`)
 - `DATABASE_FILE`
 - `JWT_SECRET`
 - `SALT_ROUNDS`
-- `LOKI_USER` / `LOKI_PASSWORD`
+- `API_UPSTREAM` (opcional, para redirigir el proxy Nginx si el backend no escucha en `api:3008`)
 - `TICKET_BOT_URL`
 - `TICKET_BOT_API_KEY`
 

@@ -31,6 +31,8 @@ services:
   client:
     image: soker90/finper-client:latest
     restart: unless-stopped
+    environment:
+      API_UPSTREAM: ${API_UPSTREAM:-api:3008}
     depends_on:
       api:
         condition: service_healthy
