@@ -2,6 +2,7 @@ export interface Ticket {
   id: string
   telegram_message_id: number
   telegram_chat_id: number
+  telegram_user_id: number | null
   image_url: string | null
   date: number | null
   store: string | null
@@ -15,7 +16,7 @@ export interface Ticket {
 
 export interface ITicketService {
   isConfigured(): boolean
-  getTickets(status?: string): Promise<Ticket[]>
+  getTickets(status: string, finperUsername: string): Promise<Ticket[]>
   reviewTicket(id: string): Promise<void>
   deleteTicket(id: string): Promise<void>
 }
@@ -42,8 +43,10 @@ export default class TicketService implements ITicketService {
     }
   }
 
-  public async getTickets (status: string = 'pending'): Promise<Ticket[]> {
-    const res = await fetch(`${this.botUrl}/api/tickets?status=${status}`, {
+  public async getTickets (status: string = 'pending', finperUsername: string): Promise<Ticket[]> {
+    const params = new URLSearchParams({ status, finper_username: finperUsername })
+
+    const res = await fetch(`${this.botUrl}/api/tickets?${params.toString()}`, {
       headers: this.headers()
     })
 

@@ -1,20 +1,38 @@
 import type { Context } from 'hono'
-import type { Env } from '../types'
-import { getTickets, markTicketReviewed, getTicketById, deleteTicket } from '../db/tickets'
+import type { Env, Ticket } from '../types'
+import { getTickets, getTicketById, deleteTicket } from '../db/tickets'
 
 /**
- * GET /api/tickets?status=pending|reviewed|all
+ * Deletes a ticket's image from R2 (if present) and its row from D1.
+ */
+async function deleteTicketAndImage (env: Env, ticket: Ticket): Promise<boolean> {
+  if (ticket.image_url) {
+    await env.TICKET_IMAGES.delete(ticket.image_url)
+  }
+  return deleteTicket(env.DB, ticket.id)
+}
+
+/**
+ * GET /api/tickets?status=pending|reviewed|all&finper_username=
  * Returns tickets list for finper-api to consume.
  * image_url is transformed from R2 key to a full Worker URL (/images/<key>).
+ * finper_username is required: only tickets sent by Telegram users linked to
+ * that Finper username are returned. Tickets without a telegram_user_id
+ * (legacy rows) are never returned.
  */
 export async function getTicketsHandler (c: Context<{ Bindings: Env }>): Promise<Response> {
   const status = (c.req.query('status') as 'pending' | 'reviewed' | 'all') || 'pending'
+  const finperUsername = c.req.query('finper_username')
 
   if (!['pending', 'reviewed', 'all'].includes(status)) {
     return c.json({ error: 'Invalid status. Use: pending, reviewed, all' }, 400)
   }
 
-  const tickets = await getTickets(c.env.DB, status)
+  if (!finperUsername) {
+    return c.json({ error: 'Missing finper_username' }, 400)
+  }
+
+  const tickets = await getTickets(c.env.DB, status, finperUsername)
 
   // Build base URL from the incoming request (works in both dev and prod)
   const url = new URL(c.req.url)
@@ -30,7 +48,9 @@ export async function getTicketsHandler (c: Context<{ Bindings: Env }>): Promise
 
 /**
  * PATCH /api/tickets/:id
- * Marks a ticket as reviewed
+ * Marks a ticket as reviewed. The transaction has already been created in
+ * Finper at this point, so the ticket and its image are no longer needed
+ * and are deleted (same as DELETE).
  */
 export async function reviewTicketHandler (c: Context<{ Bindings: Env }>): Promise<Response> {
   const id = c.req.param('id')
@@ -48,9 +68,9 @@ export async function reviewTicketHandler (c: Context<{ Bindings: Env }>): Promi
     return c.json({ error: 'Ticket already reviewed' }, 409)
   }
 
-  const updated = await markTicketReviewed(c.env.DB, id)
+  const deleted = await deleteTicketAndImage(c.env, ticket)
 
-  if (!updated) {
+  if (!deleted) {
     return c.json({ error: 'Failed to update ticket' }, 500)
   }
 
@@ -73,12 +93,7 @@ export async function deleteTicketHandler (c: Context<{ Bindings: Env }>): Promi
     return c.json({ error: 'Ticket not found' }, 404)
   }
 
-  // Delete image from R2 if present
-  if (ticket.image_url) {
-    await c.env.TICKET_IMAGES.delete(ticket.image_url)
-  }
-
-  const deleted = await deleteTicket(c.env.DB, id)
+  const deleted = await deleteTicketAndImage(c.env, ticket)
   if (!deleted) {
     return c.json({ error: 'Failed to delete ticket' }, 500)
   }

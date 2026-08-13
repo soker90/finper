@@ -74,17 +74,18 @@ export async function telegramWebhookHandler (c: Context<{ Bindings: Env }>): Pr
       if (text.startsWith('/adduser')) {
         const parts = text.split(/\s+/)
         const targetId = parts[1] ? parseInt(parts[1], 10) : NaN
-        if (isNaN(targetId)) {
-          await sendTelegramMessage(chatId, '⚠️ Uso: /adduser <id_de_telegram>', c.env.TELEGRAM_BOT_TOKEN)
+        const finperUsername = parts[2]
+        if (isNaN(targetId) || !finperUsername) {
+          await sendTelegramMessage(chatId, '⚠️ Uso: /adduser <id_de_telegram> <usuario_finper>', c.env.TELEGRAM_BOT_TOKEN)
           return c.json({ ok: true })
         }
         if (targetId === adminUserId) {
           await sendTelegramMessage(chatId, 'ℹ️ El administrador ya tiene acceso por defecto.', c.env.TELEGRAM_BOT_TOKEN)
           return c.json({ ok: true })
         }
-        const added = await addAllowedUser(c.env.DB, targetId, adminUserId)
+        const added = await addAllowedUser(c.env.DB, targetId, adminUserId, finperUsername)
         if (added) {
-          await sendTelegramMessage(chatId, `✅ Usuario <code>${targetId}</code> añadido correctamente.`, c.env.TELEGRAM_BOT_TOKEN)
+          await sendTelegramMessage(chatId, `✅ Usuario <code>${targetId}</code> añadido correctamente y vinculado a <code>${finperUsername}</code>.`, c.env.TELEGRAM_BOT_TOKEN)
         } else {
           await sendTelegramMessage(chatId, `ℹ️ El usuario <code>${targetId}</code> ya tenía acceso.`, c.env.TELEGRAM_BOT_TOKEN)
         }
@@ -120,7 +121,8 @@ export async function telegramWebhookHandler (c: Context<{ Bindings: Env }>): Pr
           lines.push(`• <code>${adminUserId}</code> — admin (tú)`)
           for (const u of users) {
             const date = formatDate(u.added_at)
-            lines.push(`• <code>${u.user_id}</code> — añadido el ${date}`)
+            const linkInfo = u.finper_username ? `finper: ${u.finper_username}` : 'sin vincular'
+            lines.push(`• <code>${u.user_id}</code> — añadido el ${date} — ${linkInfo}`)
           }
           await sendTelegramMessage(chatId, lines.join('\n'), c.env.TELEGRAM_BOT_TOKEN)
         }
@@ -178,6 +180,7 @@ async function processTicketText (
       id: ticketId,
       telegram_message_id: messageId,
       telegram_chat_id: chatId,
+      telegram_user_id: userId,
       image_url: null,
       date: extraction.date,
       store: extraction.store,
@@ -252,6 +255,7 @@ async function processTicketPhoto (
       id: ticketId,
       telegram_message_id: messageId,
       telegram_chat_id: chatId,
+      telegram_user_id: userId,
       image_url: r2Key,
       date: extraction.date,
       store: extraction.store,
