@@ -368,34 +368,31 @@ make lint-db
 
 ## Docker
 
-El repositorio incluye dos ficheros Compose:
+El repositorio incluye un fichero `docker-compose.yml` orientado a despliegue, usando las imágenes publicadas (`soker90/finper-api:latest` y `soker90/finper-client:latest`).
 
-- `docker-compose.yml`: entorno base con la **API** (construye la imagen localmente)
-- `docker-compose.prod.yml`: variante orientada a despliegue usando imagen publicada de la API
+### Qué levanta el Compose
 
-### Qué levanta el Compose actual
+- `api`: sirve la API en `/api/*` (sin publicar el puerto 3008 por defecto; descomenta esa línea solo si necesitas acceso directo).
+- `client`: sirve el frontend en el puerto `3009` y hace de proxy hacia la API bajo `/api/` (ver `packages/client/nginx.conf.template`).
 
-Según la configuración actual, el Compose raíz levanta:
-
-- `api` en el puerto `3008`
-
-La persistencia SQLite se guarda en el volumen `finperdb` montado en `/home/node/app/data`. No levanta ningún contenedor de base de datos ni el cliente web.
+La persistencia SQLite se monta como bind mount en `/home/node/app/data`; ajusta la ruta del host a la carpeta donde vive tu fichero `.db`.
 
 ### Variables necesarias para Compose
 
 El `docker-compose.yml` utiliza variables como:
 
+- `DATA_PATH` (ruta en el host montada en `/home/node/app/data`)
 - `DATABASE_FILE`
 - `JWT_SECRET`
 - `SALT_ROUNDS`
-- `LOKI_USER` / `LOKI_PASSWORD`
+- `API_UPSTREAM` (opcional, para redirigir el proxy Nginx si el backend no escucha en `api:3008`)
 - `TICKET_BOT_URL`
 - `TICKET_BOT_API_KEY`
 
 Arranque típico:
 
 ```bash
-docker compose up --build
+docker compose up
 ```
 
 ## Estructura del repositorio
@@ -412,7 +409,6 @@ finper/
 │   └── types/
 ├── .env.example
 ├── docker-compose.yml
-├── docker-compose.prod.yml
 ├── Makefile
 ├── package.json
 ├── pnpm-lock.yaml
