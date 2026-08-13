@@ -92,7 +92,7 @@ start-bot:
 	@pnpm --filter @soker90/finper-bot dev
 
 deploy-bot:
-	@pnpm --filter @soker90/finper-bot deploy
+	@pnpm --filter @soker90/finper-bot run deploy
 
 lint-bot:
 	@pnpm --filter @soker90/finper-bot lint
