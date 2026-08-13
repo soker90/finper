@@ -23,9 +23,10 @@ export class TicketController {
     }
 
     const status = (req.query.status as string) || 'pending'
+    const finperUsername = req.user as string
     this.logger.logInfo(`/tickets - list tickets status=${status}`)
 
-    const tickets = await this.ticketService.getTickets(status)
+    const tickets = await this.ticketService.getTickets(status, finperUsername)
 
     res.send({ tickets, total: tickets.length })
   }

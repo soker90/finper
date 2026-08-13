@@ -2,6 +2,7 @@ export interface Ticket {
   id: string
   telegram_message_id: number
   telegram_chat_id: number
+  telegram_user_id: number | null
   image_url: string | null
   date: number | null
   store: string | null
