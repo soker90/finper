@@ -11,8 +11,6 @@ services:
       DATABASE_FILE: ${DATABASE_FILE:-/home/node/app/data/finper.db}
       JWT_SECRET: ${JWT_SECRET}
       SALT_ROUNDS: ${SALT_ROUNDS}
-      LOKI_USER: ${LOKI_USER}
-      LOKI_PASSWORD: ${LOKI_PASSWORD}
       TICKET_BOT_URL: ${TICKET_BOT_URL}
       TICKET_BOT_API_KEY: ${TICKET_BOT_API_KEY}
     # Da margen al graceful shutdown (checkpoint del WAL de SQLite, ver
@@ -36,8 +34,6 @@ services:
     depends_on:
       api:
         condition: service_healthy
-    # Publicado para acceso directo por LAN (http://<IP-NAS>:3009).
-    # cloudflared llega por la red interna (http://client:3009), no por aquí.
     ports:
       - 3009:3009
     networks:
@@ -45,8 +41,5 @@ services:
 
 networks:
   finper-network:
-    # Nombre fijo (no el que Compose generaría a partir del nombre del
-    # Project) para que el Project de cloudflared pueda referenciarla como
-    # red externa de forma predecible.
     name: finper-network
     driver: bridge
