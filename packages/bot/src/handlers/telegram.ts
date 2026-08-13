@@ -76,18 +76,14 @@ export async function telegramWebhookHandler (c: Context<{ Bindings: Env }>): Pr
         const targetId = parts[1] ? parseInt(parts[1], 10) : NaN
         const finperUsername = parts[2]
         if (isNaN(targetId) || !finperUsername) {
-          await sendTelegramMessage(chatId, '⚠️ Uso: /adduser <id_de_telegram> <usuario_finper>', c.env.TELEGRAM_BOT_TOKEN)
-          return c.json({ ok: true })
-        }
-        if (targetId === adminUserId) {
-          await sendTelegramMessage(chatId, 'ℹ️ El administrador ya tiene acceso por defecto.', c.env.TELEGRAM_BOT_TOKEN)
+          await sendTelegramMessage(chatId, '⚠️ Uso: /adduser <id_de_telegram> <usuario_finper>\n\nTambién puedes vincular tu propio ID de admin para que tus tickets se asocien a un usuario de Finper.', c.env.TELEGRAM_BOT_TOKEN)
           return c.json({ ok: true })
         }
         const added = await addAllowedUser(c.env.DB, targetId, adminUserId, finperUsername)
         if (added) {
           await sendTelegramMessage(chatId, `✅ Usuario <code>${targetId}</code> añadido correctamente y vinculado a <code>${finperUsername}</code>.`, c.env.TELEGRAM_BOT_TOKEN)
         } else {
-          await sendTelegramMessage(chatId, `ℹ️ El usuario <code>${targetId}</code> ya tenía acceso.`, c.env.TELEGRAM_BOT_TOKEN)
+          await sendTelegramMessage(chatId, `ℹ️ El usuario <code>${targetId}</code> ya estaba vinculado. Usa /removeuser y vuelve a añadirlo para cambiar el usuario de Finper.`, c.env.TELEGRAM_BOT_TOKEN)
         }
         return c.json({ ok: true })
       }
@@ -97,10 +93,6 @@ export async function telegramWebhookHandler (c: Context<{ Bindings: Env }>): Pr
         const targetId = parts[1] ? parseInt(parts[1], 10) : NaN
         if (isNaN(targetId)) {
           await sendTelegramMessage(chatId, '⚠️ Uso: /removeuser <id_de_telegram>', c.env.TELEGRAM_BOT_TOKEN)
-          return c.json({ ok: true })
-        }
-        if (targetId === adminUserId) {
-          await sendTelegramMessage(chatId, '⛔ No puedes eliminar al administrador.', c.env.TELEGRAM_BOT_TOKEN)
           return c.json({ ok: true })
         }
         const removed = await removeAllowedUser(c.env.DB, targetId)
@@ -114,18 +106,23 @@ export async function telegramWebhookHandler (c: Context<{ Bindings: Env }>): Pr
 
       if (text.startsWith('/listusers')) {
         const users = await listAllowedUsers(c.env.DB)
-        if (users.length === 0) {
-          await sendTelegramMessage(chatId, 'ℹ️ No hay usuarios adicionales con acceso.\n\nSolo tú (admin) tienes acceso actualmente.', c.env.TELEGRAM_BOT_TOKEN)
+        const adminEntry = users.find(u => u.user_id === adminUserId)
+        const otherUsers = users.filter(u => u.user_id !== adminUserId)
+
+        const lines = ['👥 <b>Usuarios con acceso:</b>', '']
+        const adminLinkInfo = adminEntry?.finper_username ? `finper: ${adminEntry.finper_username}` : 'sin vincular'
+        lines.push(`• <code>${adminUserId}</code> — admin (tú) — ${adminLinkInfo}`)
+
+        if (otherUsers.length === 0) {
+          lines.push('', 'ℹ️ No hay usuarios adicionales con acceso.')
         } else {
-          const lines = ['👥 <b>Usuarios con acceso:</b>', '']
-          lines.push(`• <code>${adminUserId}</code> — admin (tú)`)
-          for (const u of users) {
+          for (const u of otherUsers) {
             const date = formatDate(u.added_at)
             const linkInfo = u.finper_username ? `finper: ${u.finper_username}` : 'sin vincular'
             lines.push(`• <code>${u.user_id}</code> — añadido el ${date} — ${linkInfo}`)
           }
-          await sendTelegramMessage(chatId, lines.join('\n'), c.env.TELEGRAM_BOT_TOKEN)
         }
+        await sendTelegramMessage(chatId, lines.join('\n'), c.env.TELEGRAM_BOT_TOKEN)
         return c.json({ ok: true })
       }
     }

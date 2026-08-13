@@ -7,8 +7,10 @@ export interface AllowedUser {
 
 /**
  * Returns true if the given userId is allowed to use the bot.
- * The admin (checked separately via env var) is always allowed and is NOT
- * stored in this table.
+ * The admin (checked separately via env var) is always allowed regardless
+ * of whether it has a row in this table. The admin can still be added here
+ * (via /adduser) purely to link its Telegram ID to a Finper username, so its
+ * own tickets are filterable too.
  */
 export async function isUserAllowed (db: D1Database, userId: number): Promise<boolean> {
   const result = await db
@@ -63,19 +65,4 @@ export async function listAllowedUsers (db: D1Database): Promise<AllowedUser[]> 
     .prepare('SELECT user_id, added_by, added_at, finper_username FROM allowed_users ORDER BY added_at ASC')
     .all<AllowedUser>()
   return result.results
-}
-
-/**
- * Returns the Telegram user IDs linked to the given Finper username.
- * Used to filter tickets by the currently authenticated Finper user.
- */
-export async function listTelegramUserIdsByFinperUsername (
-  db: D1Database,
-  finperUsername: string
-): Promise<number[]> {
-  const result = await db
-    .prepare('SELECT user_id FROM allowed_users WHERE finper_username = ?')
-    .bind(finperUsername)
-    .all<{ user_id: number }>()
-  return result.results.map(row => row.user_id)
 }
