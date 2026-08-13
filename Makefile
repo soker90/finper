@@ -114,11 +114,11 @@ lint-client:
 	@pnpm --filter @soker90/finper-client lint
 
 build-image-client-daily:
-	@docker build . -t soker90/finper-client:daily -f ./packages/client/Dockerfile
+	@docker build . -t soker90/finper-client:daily -f ./packages/client/Dockerfile $(if $(API_HOST),--build-arg API_HOST=$(API_HOST),)
 	@docker push soker90/finper-client:daily
 
 build-image-client-latest:
-	@docker build . -t soker90/finper-client:latest -f ./packages/client/Dockerfile
+	@docker build . -t soker90/finper-client:latest -f ./packages/client/Dockerfile $(if $(API_HOST),--build-arg API_HOST=$(API_HOST),)
 	@docker push soker90/finper-client:latest
 
 .PHONY: clean

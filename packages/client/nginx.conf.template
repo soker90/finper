@@ -1,0 +1,28 @@
+# Resolver embebido de Docker: permite que "api" (o cualquier hostname de
+# ${API_UPSTREAM}) se resuelva en cada petición en vez de una sola vez al
+# arrancar. Sin esto, si el hostname no resuelve en el momento del arranque
+# (orden de arranque, reinicio del otro contenedor...) nginx no arranca.
+resolver 127.0.0.11 valid=10s;
+
+server {
+
+  listen 3009;
+
+  location /api/ {
+    # proxy_pass sin URI: con variables nginx NO recorta/reescribe el path
+    # (esa reescritura solo pasa con un proxy_pass literal), así que hay que
+    # reenviar la petición tal cual para no perder todo lo que va tras /api/.
+    set $upstream_api ${API_UPSTREAM};
+    proxy_pass http://$upstream_api;
+    proxy_set_header Host $host;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+  }
+
+  location / {
+    root   /usr/share/nginx/html;
+    index  index.html index.htm;
+    try_files $uri $uri/ /index.html;
+  }
+
+}

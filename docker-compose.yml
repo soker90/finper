@@ -1,7 +1,7 @@
-version: "3.9"
 services:
   api:
-    image: finper-api:latest
+    image: soker90/finper-api:latest
+    restart: unless-stopped
     env_file: .env
     environment:
       # Ruta del fichero SQLite DENTRO del contenedor.
@@ -15,23 +15,38 @@ services:
       LOKI_PASSWORD: ${LOKI_PASSWORD}
       TICKET_BOT_URL: ${TICKET_BOT_URL}
       TICKET_BOT_API_KEY: ${TICKET_BOT_API_KEY}
-    build:
-      context: .
-      dockerfile: ./packages/api/Dockerfile
     # Da margen al graceful shutdown (checkpoint del WAL de SQLite, ver
     # server.ts SHUTDOWN_TIMEOUT_MS) antes de que Docker mande SIGKILL.
     stop_grace_period: 15s
     volumes:
-      - finperdb:/home/node/app/data
-    ports:
-      - 3008:3008
+      # Ruta del host definida en DATA_PATH (.env) — carpeta donde vive tu
+      # SQLite actual.
+      - ${DATA_PATH}:/home/node/app/data
+    # Descomenta solo si necesitas pegarle a la API directamente (depuración,
+    # otra integración). Para el túnel de Cloudflare no hace falta: el
+    # cliente ya la expone vía proxy en /api/.
+    # ports:
+    #   - 3008:3008
     networks:
       - finper-network
 
-volumes:
-  finperdb:
-    driver: local
+  client:
+    image: soker90/finper-client:latest
+    restart: unless-stopped
+    depends_on:
+      api:
+        condition: service_healthy
+    # Publicado para acceso directo por LAN (http://<IP-NAS>:3009).
+    # cloudflared llega por la red interna (http://client:3009), no por aquí.
+    ports:
+      - 3009:3009
+    networks:
+      - finper-network
 
 networks:
   finper-network:
+    # Nombre fijo (no el que Compose generaría a partir del nombre del
+    # Project) para que el Project de cloudflared pueda referenciarla como
+    # red externa de forma predecible.
+    name: finper-network
     driver: bridge

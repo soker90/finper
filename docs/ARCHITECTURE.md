@@ -17,7 +17,7 @@ finper/
 │   └── client/   @soker90/finper-client   — React 19 + Vite SPA en :5173
 ├── docs/                                  — documentación técnica
 ├── Makefile                               — entrada para todos los comandos
-├── docker-compose.yml                     — SQLite + API
+├── docker-compose.yml                     — API + client (imágenes publicadas) + SQLite
 └── pnpm-workspace.yaml
 ```
 
