@@ -23,6 +23,12 @@ server {
     root   /usr/share/nginx/html;
     index  index.html index.htm;
     try_files $uri $uri/ /index.html;
+    add_header Cache-Control "no-cache";
+  }
+
+  location ~* \.(sw|registerSW)\.js$ {
+    root   /usr/share/nginx/html;
+    add_header Cache-Control "no-cache";
   }
 
 }
