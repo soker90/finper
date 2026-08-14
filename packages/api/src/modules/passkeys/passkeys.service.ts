@@ -1,3 +1,4 @@
+import { randomUUID } from 'node:crypto'
 import jwt from 'jsonwebtoken'
 import Boom from '@hapi/boom'
 import {
@@ -20,10 +21,24 @@ type ChallengeTokenPayload = {
   challenge: string
   username: string
   purpose: ChallengePurpose
+  jti: string
 }
 
-const signChallengeToken = (payload: ChallengeTokenPayload): string =>
-  jwt.sign(payload, config.webauthn.challengeTokenSecret, { expiresIn: config.webauthn.challengeTokenTtl } as any)
+// Tracks consumed challenge jtis so a captured (challengeToken, response) pair can't be replayed
+// while the token is still within its TTL. Each entry self-expires shortly after the token would anyway.
+const consumedChallengeJtis = new Set<string>()
+const CHALLENGE_JTI_RETENTION_MS = 10 * 60 * 1000
+
+const consumeChallengeJti = (jti: string): void => {
+  if (consumedChallengeJtis.has(jti)) {
+    throw new Error('Challenge already used')
+  }
+  consumedChallengeJtis.add(jti)
+  setTimeout(() => consumedChallengeJtis.delete(jti), CHALLENGE_JTI_RETENTION_MS).unref()
+}
+
+const signChallengeToken = (payload: Omit<ChallengeTokenPayload, 'jti'>): string =>
+  jwt.sign({ ...payload, jti: randomUUID() }, config.webauthn.challengeTokenSecret, { expiresIn: config.webauthn.challengeTokenTtl } as any)
 
 const verifyChallengeToken = (token: string, purpose: ChallengePurpose): ChallengeTokenPayload => {
   try {
@@ -31,6 +46,7 @@ const verifyChallengeToken = (token: string, purpose: ChallengePurpose): Challen
     if (payload.purpose !== purpose) {
       throw new Error('Unexpected challenge purpose')
     }
+    consumeChallengeJti(payload.jti)
     return payload
   } catch {
     throw Boom.unauthorized(ERROR_MESSAGE.PASSKEY.INVALID_CHALLENGE).output
@@ -71,12 +87,12 @@ export const createPasskeysService = (repo: ReturnType<typeof createPasskeysRepo
     return { options, challengeToken }
   },
 
-  verifyRegistration: async (
-    username: string,
-    response: RegistrationResponseJSON,
-    challengeToken: string,
+  verifyRegistration: async ({ username, response, challengeToken, deviceLabel }: {
+    username: string
+    response: RegistrationResponseJSON
+    challengeToken: string
     deviceLabel?: string
-  ) => {
+  }) => {
     const { challenge, username: tokenUsername } = verifyChallengeToken(challengeToken, 'registration')
     if (tokenUsername !== username) {
       throw Boom.unauthorized().output
@@ -94,6 +110,10 @@ export const createPasskeysService = (repo: ReturnType<typeof createPasskeysRepo
     }
 
     const { credential } = verification.registrationInfo
+
+    if (repo.findByCredentialId(credential.id)) {
+      throw Boom.conflict(ERROR_MESSAGE.PASSKEY.ALREADY_REGISTERED).output
+    }
 
     repo.create(username, {
       credentialId: credential.id,

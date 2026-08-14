@@ -10,9 +10,9 @@ const asyncHandler = (fn: any) => (req: any, res: any, next: any) => {
 }
 
 // Authenticated — called right after a successful password login
-passkeysRouter.post('/registration-options', authMiddleware, asyncHandler(passkeysController.registrationOptions))
-passkeysRouter.post('/registration-verify', authMiddleware, asyncHandler(passkeysController.registrationVerify))
+passkeysRouter.post('/registration-options', authMiddleware, asyncHandler(passkeysController.registrationOptions.bind(passkeysController)))
+passkeysRouter.post('/registration-verify', authMiddleware, asyncHandler(passkeysController.registrationVerify.bind(passkeysController)))
 
 // Public — no JWT exists yet at this point of the login flow
-passkeysRouter.post('/authentication-options', asyncHandler(passkeysController.authenticationOptions))
-passkeysRouter.post('/authentication-verify', asyncHandler(passkeysController.authenticationVerify))
+passkeysRouter.post('/authentication-options', asyncHandler(passkeysController.authenticationOptions.bind(passkeysController)))
+passkeysRouter.post('/authentication-verify', asyncHandler(passkeysController.authenticationVerify.bind(passkeysController)))

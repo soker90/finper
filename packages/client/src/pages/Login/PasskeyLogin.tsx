@@ -1,7 +1,7 @@
 import { type ReactNode, useState } from 'react'
 import { Button, FormHelperText, Grid, Stack } from '@mui/material'
 import authService from 'services/authService'
-import { usePasskeyLogin } from './hooks'
+import { usePasskeyLogin } from './hooks/usePasskeyLogin'
 
 const PasskeyLogin = ({ children }: { children: ReactNode }) => {
   const [usePasswordInstead, setUsePasswordInstead] = useState(false)

@@ -80,6 +80,7 @@ export const ERROR_MESSAGE = {
   PASSKEY: {
     NOT_FOUND: 'No hay huella registrada para este usuario',
     INVALID_CHALLENGE: 'El reto de verificación ha caducado o no es válido',
-    VERIFICATION_FAILED: 'No se ha podido verificar la huella'
+    VERIFICATION_FAILED: 'No se ha podido verificar la huella',
+    ALREADY_REGISTERED: 'Esta huella ya está registrada'
   }
 }

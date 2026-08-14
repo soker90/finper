@@ -14,7 +14,8 @@ import {
 } from '@mui/material'
 import { EyeOutlined, EyeInvisibleOutlined } from '@ant-design/icons'
 import { useForm } from 'react-hook-form'
-import { SendLoginParams, useLogin, usePasskeySupport } from './hooks'
+import { SendLoginParams, useLogin } from './hooks/useLogin'
+import { usePasskeySupport } from './hooks/usePasskeySupport'
 
 const AuthLogin = () => {
   const [showPassword, setShowPassword] = useState(false)

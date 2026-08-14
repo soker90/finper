@@ -18,7 +18,7 @@ const mockedGenerateAuthenticationOptions = simplewebauthn.generateAuthenticatio
 const mockedVerifyAuthenticationResponse = simplewebauthn.verifyAuthenticationResponse as jest.Mock
 
 const signChallengeToken = (payload: Record<string, unknown>): string =>
-  jwt.sign(payload, config.webauthn.challengeTokenSecret, { expiresIn: '5m' })
+  jwt.sign({ ...payload, jti: generateId() }, config.webauthn.challengeTokenSecret, { expiresIn: '5m' })
 
 describe('passkeys.service', () => {
   let db: DB
@@ -94,7 +94,7 @@ describe('passkeys.service', () => {
 
       const challengeToken = signChallengeToken({ challenge: 'reg-challenge', username, purpose: 'registration' })
 
-      await service.verifyRegistration(username, {} as any, challengeToken, 'iPhone de prueba')
+      await service.verifyRegistration({ username, response: {} as any, challengeToken, deviceLabel: 'iPhone de prueba' })
 
       const stored = repo.findAllByUsername(username)
       expect(stored).toHaveLength(1)
@@ -110,7 +110,7 @@ describe('passkeys.service', () => {
     test('rejects when the challengeToken belongs to a different user', async () => {
       const challengeToken = signChallengeToken({ challenge: 'reg-challenge', username: 'someone-else', purpose: 'registration' })
 
-      await expect(service.verifyRegistration(username, {} as any, challengeToken))
+      await expect(service.verifyRegistration({ username, response: {} as any, challengeToken }))
         .rejects.toMatchObject({ statusCode: 401 })
       expect(repo.findAllByUsername(username)).toHaveLength(0)
     })
@@ -118,12 +118,12 @@ describe('passkeys.service', () => {
     test('rejects when the challengeToken purpose does not match', async () => {
       const challengeToken = signChallengeToken({ challenge: 'reg-challenge', username, purpose: 'authentication' })
 
-      await expect(service.verifyRegistration(username, {} as any, challengeToken))
+      await expect(service.verifyRegistration({ username, response: {} as any, challengeToken }))
         .rejects.toMatchObject({ statusCode: 401 })
     })
 
     test('rejects when the challengeToken is expired or tampered', async () => {
-      await expect(service.verifyRegistration(username, {} as any, 'not-a-valid-token'))
+      await expect(service.verifyRegistration({ username, response: {} as any, challengeToken: 'not-a-valid-token' }))
         .rejects.toMatchObject({ statusCode: 401 })
     })
 
@@ -131,9 +131,37 @@ describe('passkeys.service', () => {
       mockedVerifyRegistrationResponse.mockResolvedValue({ verified: false })
       const challengeToken = signChallengeToken({ challenge: 'reg-challenge', username, purpose: 'registration' })
 
-      await expect(service.verifyRegistration(username, {} as any, challengeToken))
+      await expect(service.verifyRegistration({ username, response: {} as any, challengeToken }))
         .rejects.toMatchObject({ statusCode: 400 })
       expect(repo.findAllByUsername(username)).toHaveLength(0)
+    })
+
+    test('rejects when the credential id is already registered', async () => {
+      mockedVerifyRegistrationResponse.mockResolvedValue({
+        verified: true,
+        registrationInfo: {
+          credential: {
+            id: 'existing-cred',
+            publicKey: Buffer.from('public-key-bytes'),
+            counter: 0,
+            transports: ['internal']
+          }
+        }
+      })
+      db.insert(schema.passkeys).values({
+        id: generateId(),
+        user: username,
+        credentialId: 'existing-cred',
+        publicKey: 'pk',
+        counter: 0,
+        transports: '["internal"]',
+        createdAt: new Date()
+      }).run()
+      const challengeToken = signChallengeToken({ challenge: 'reg-challenge', username, purpose: 'registration' })
+
+      await expect(service.verifyRegistration({ username, response: {} as any, challengeToken }))
+        .rejects.toMatchObject({ statusCode: 409 })
+      expect(repo.findAllByUsername(username)).toHaveLength(1)
     })
   })
 
@@ -195,6 +223,19 @@ describe('passkeys.service', () => {
       expect(typeof token).toBe('string')
       expect((jwt.decode(token) as Record<string, unknown>).username).toBe(username)
       expect(repo.findAllByUsername(username)[0].counter).toBe(4)
+    })
+
+    test('rejects replaying the same challengeToken a second time', async () => {
+      mockedVerifyAuthenticationResponse.mockResolvedValue({
+        verified: true,
+        authenticationInfo: { newCounter: 4 }
+      })
+      const challengeToken = signChallengeToken({ challenge: 'auth-challenge', username, purpose: 'authentication' })
+
+      await service.verifyAuthentication({ id: 'existing-cred' } as any, challengeToken)
+
+      await expect(service.verifyAuthentication({ id: 'existing-cred' } as any, challengeToken))
+        .rejects.toMatchObject({ statusCode: 401 })
     })
 
     test('rejects when the credential id is unknown', async () => {

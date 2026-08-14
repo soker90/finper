@@ -23,7 +23,7 @@ export const createPasskeysController = (service: typeof passkeysService) => ({
     const { response, challengeToken, deviceLabel } = validateRegistrationVerifyInput(req.body)
     logger.logInfo(`/registration-verify - user: ${username}`)
 
-    await service.verifyRegistration(username, response, challengeToken, deviceLabel)
+    await service.verifyRegistration({ username, response, challengeToken, deviceLabel })
     res.status(204).send()
   },
 

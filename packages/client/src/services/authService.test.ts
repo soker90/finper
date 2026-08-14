@@ -122,5 +122,14 @@ describe('authService passkeys', () => {
       await expect(authService.loginWithPasskey(PASSKEY_USERNAMES.noCredential))
         .rejects.toMatchObject({ statusCode: 404 })
     })
+
+    it('updates the stored last username when logging in with a different user', async () => {
+      authenticateWithPasskey.mockResolvedValue({ id: 'cred-1', rawId: 'cred-1', response: {}, type: 'public-key' })
+      authService.rememberPasskeyDevice('previous-user')
+
+      await authService.loginWithPasskey(PASSKEY_USERNAMES.hasCredential)
+
+      expect(authService.getLastUsername()).toBe(PASSKEY_USERNAMES.hasCredential)
+    })
   })
 })

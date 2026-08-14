@@ -85,6 +85,7 @@ class AuthService {
         .then(({ data }) => {
           if (data.token) {
             this.setSession(data.token)
+            localStorage.setItem(FINPER_LAST_USERNAME, username)
             resolve(data.token)
           } else reject(data.error)
         }))

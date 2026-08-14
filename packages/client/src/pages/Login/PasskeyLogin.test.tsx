@@ -1,9 +1,9 @@
 // @vitest-environment happy-dom
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { render, screen, waitFor } from '@testing-library/react'
+import { screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { MemoryRouter } from 'react-router'
 
+import { render } from '../../test/testUtils'
 import PasskeyLogin from './PasskeyLogin'
 
 const { setAccessToken } = vi.hoisted(() => ({ setAccessToken: vi.fn() }))
@@ -16,17 +16,19 @@ const authServiceMock = vi.hoisted(() => ({
   hasPasskey: vi.fn(),
   getLastUsername: vi.fn(),
   loginWithPasskey: vi.fn(),
-  forgetPasskeyDevice: vi.fn()
+  forgetPasskeyDevice: vi.fn(),
+  setAxiosInterceptors: vi.fn(),
+  handleAuthentication: vi.fn(),
+  isAuthenticated: vi.fn(() => false),
+  logout: vi.fn()
 }))
 
 vi.mock('services/authService', () => ({ default: authServiceMock }))
 
 const renderPasskeyLogin = () => render(
-  <MemoryRouter>
-    <PasskeyLogin>
-      <div>formulario de contraseña</div>
-    </PasskeyLogin>
-  </MemoryRouter>
+  <PasskeyLogin>
+    <div>formulario de contraseña</div>
+  </PasskeyLogin>
 )
 
 describe('PasskeyLogin', () => {

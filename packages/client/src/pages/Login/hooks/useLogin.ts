@@ -37,7 +37,7 @@ export const useLogin = () => {
           return
         }
 
-        // Registrar la huella es un extra: si falla no debe impedir el login.
+        // Registering the passkey is an extra step: a failure here must not block login.
         authService.registerPasskey()
           .then(() => authService.rememberPasskeyDevice(username))
           .catch(() => {})
