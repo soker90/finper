@@ -2,27 +2,31 @@ import { useState } from 'react'
 
 import {
   Button,
+  FormControlLabel,
   FormHelperText,
   Grid,
   IconButton,
   InputAdornment,
   InputLabel,
   OutlinedInput,
-  Stack
+  Stack,
+  Switch
 } from '@mui/material'
 import { EyeOutlined, EyeInvisibleOutlined } from '@ant-design/icons'
 import { useForm } from 'react-hook-form'
-import { SendLoginParams, useLogin } from './hooks'
+import { SendLoginParams, useLogin, usePasskeySupport } from './hooks'
 
 const AuthLogin = () => {
   const [showPassword, setShowPassword] = useState(false)
   const { register, handleSubmit, formState: { errors } } = useForm({
     defaultValues: {
       username: '',
-      password: ''
+      password: '',
+      usePasskey: false
     }
   })
   const { sendLogin, error, loading } = useLogin()
+  const passkeySupported = usePasskeySupport()
 
   const onSubmit = handleSubmit(data => {
     sendLogin(data as SendLoginParams)
@@ -82,6 +86,15 @@ const AuthLogin = () => {
             )}
           </Stack>
         </Grid>
+
+        {passkeySupported && (
+          <Grid size={12}>
+            <FormControlLabel
+              control={<Switch {...register('usePasskey')} data-testid='use-passkey-switch' />}
+              label='Usar huella para próximos accesos'
+            />
+          </Grid>
+        )}
 
         {error && (
           <Grid size={12}>

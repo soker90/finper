@@ -6,6 +6,7 @@ import authService from 'services/authService'
 export type SendLoginParams = {
   username: string
   password: string
+  usePasskey?: boolean
 }
 
 const ERROR_MESSAGES: Record<number | string, string> = {
@@ -25,12 +26,22 @@ export const useLogin = () => {
     setError(message)
   }
 
-  const sendLogin = ({ username, password }: SendLoginParams) => {
+  const sendLogin = ({ username, password, usePasskey }: SendLoginParams) => {
     setLoading(true)
     authService.loginWithUsernameAndPassword(username, password)
       .then((token) => {
         setAccessToken(token)
-        navigate('/')
+
+        if (!usePasskey) {
+          navigate('/')
+          return
+        }
+
+        // Registrar la huella es un extra: si falla no debe impedir el login.
+        authService.registerPasskey()
+          .then(() => authService.rememberPasskeyDevice(username))
+          .catch(() => {})
+          .finally(() => navigate('/'))
       })
       .catch(response => handleErrors(response))
       .finally(() => setLoading(false))

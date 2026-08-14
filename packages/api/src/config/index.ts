@@ -16,6 +16,14 @@ export default {
     saltRounds: process.env.SALT_ROUNDS || '10',
     timeout: '1h'
   },
+  webauthn: {
+    rpName: process.env.WEBAUTHN_RP_NAME || 'Finper',
+    rpID: process.env.WEBAUTHN_RP_ID || 'localhost',
+    expectedOrigin: (process.env.WEBAUTHN_ORIGIN || 'http://localhost:5173,http://localhost:3008')
+      .split(',').map(origin => origin.trim()),
+    challengeTokenSecret: process.env.WEBAUTHN_CHALLENGE_SECRET || process.env.JWT_SECRET || 'test',
+    challengeTokenTtl: '5m'
+  },
   logger: {
     loki: {
       isActive: true,
