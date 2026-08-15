@@ -2,27 +2,39 @@ import { useState } from 'react'
 
 import {
   Button,
+  FormControlLabel,
   FormHelperText,
   Grid,
   IconButton,
   InputAdornment,
   InputLabel,
   OutlinedInput,
-  Stack
+  Stack,
+  Switch
 } from '@mui/material'
 import { EyeOutlined, EyeInvisibleOutlined } from '@ant-design/icons'
 import { useForm } from 'react-hook-form'
-import { SendLoginParams, useLogin } from './hooks'
+import { SendLoginParams, useLogin } from './hooks/useLogin'
+import { usePasskeySupport } from './hooks/usePasskeySupport'
 
 const AuthLogin = () => {
   const [showPassword, setShowPassword] = useState(false)
   const { register, handleSubmit, formState: { errors } } = useForm({
     defaultValues: {
       username: '',
-      password: ''
+      password: '',
+      usePasskey: false
     }
   })
-  const { sendLogin, error, loading } = useLogin()
+  const {
+    sendLogin,
+    error,
+    loading,
+    awaitingPasskeyConfirmation,
+    confirmPasskeyRegistration,
+    skipPasskeyRegistration
+  } = useLogin()
+  const passkeySupported = usePasskeySupport()
 
   const onSubmit = handleSubmit(data => {
     sendLogin(data as SendLoginParams)
@@ -30,6 +42,38 @@ const AuthLogin = () => {
 
   const handleClickShowPassword = () => {
     setShowPassword(state => !state)
+  }
+
+  if (awaitingPasskeyConfirmation) {
+    return (
+      <Grid container spacing={3}>
+        <Grid size={12}>
+          <Stack spacing={1}>
+            <Button
+              disableElevation
+              fullWidth
+              size='large'
+              variant='contained'
+              color='primary'
+              data-testid='confirm-passkey-button'
+              onClick={confirmPasskeyRegistration}
+            >
+              Activar huella ahora
+            </Button>
+          </Stack>
+        </Grid>
+        <Grid size={12}>
+          <Button
+            fullWidth
+            variant='text'
+            data-testid='skip-passkey-button'
+            onClick={skipPasskeyRegistration}
+          >
+            Ahora no
+          </Button>
+        </Grid>
+      </Grid>
+    )
   }
 
   return (
@@ -82,6 +126,15 @@ const AuthLogin = () => {
             )}
           </Stack>
         </Grid>
+
+        {passkeySupported && (
+          <Grid size={12}>
+            <FormControlLabel
+              control={<Switch {...register('usePasskey')} data-testid='use-passkey-switch' />}
+              label='Usar huella para próximos accesos'
+            />
+          </Grid>
+        )}
 
         {error && (
           <Grid size={12}>

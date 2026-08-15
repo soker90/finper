@@ -13,6 +13,14 @@ services:
       SALT_ROUNDS: ${SALT_ROUNDS}
       TICKET_BOT_URL: ${TICKET_BOT_URL}
       TICKET_BOT_API_KEY: ${TICKET_BOT_API_KEY}
+      # Orígenes CORS adicionales separados por comas (ej: dominio público del
+      # túnel de Cloudflare). Ver CORS_EXTRA_ORIGINS en .env.example.
+      CORS_EXTRA_ORIGINS: ${CORS_EXTRA_ORIGINS}
+      # Login con huella (WebAuthn). Ver WEBAUTHN_* en .env.example.
+      WEBAUTHN_RP_ID: ${WEBAUTHN_RP_ID:-localhost}
+      WEBAUTHN_ORIGIN: ${WEBAUTHN_ORIGIN}
+      WEBAUTHN_RP_NAME: ${WEBAUTHN_RP_NAME:-Finper}
+      WEBAUTHN_CHALLENGE_SECRET: ${WEBAUTHN_CHALLENGE_SECRET}
     # Da margen al graceful shutdown (checkpoint del WAL de SQLite, ver
     # server.ts SHUTDOWN_TIMEOUT_MS) antes de que Docker mande SIGKILL.
     stop_grace_period: 15s

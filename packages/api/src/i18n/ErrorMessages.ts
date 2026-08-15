@@ -76,5 +76,11 @@ export const ERROR_MESSAGE = {
     EXCEEDS_BALANCE: 'El total asignado a todas las metas supera el balance de las cuentas',
     INVALID_AMOUNT: 'La cantidad debe ser mayor que 0',
     INSUFFICIENT_FUNDS: 'No se puede retirar más dinero del asignado a la meta'
+  },
+  PASSKEY: {
+    NOT_FOUND: 'No hay huella registrada para este usuario',
+    INVALID_CHALLENGE: 'El reto de verificación ha caducado o no es válido',
+    VERIFICATION_FAILED: 'No se ha podido verificar la huella',
+    ALREADY_REGISTERED: 'Esta huella ya está registrada'
   }
 }

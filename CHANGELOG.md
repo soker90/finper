@@ -5,6 +5,27 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.2.0] - 2026-08-15
+
+### Added
+
+- **client/api**: Passkey (WebAuthn) login. Users can enable a device passkey right after signing in with username/password; from then on the login screen offers "Entrar con huella" and authenticates with the device's fingerprint/biometric sensor instead of typing credentials again, with a "usar contraseña" fallback always available. ([#881](https://github.com/soker90/finper/pull/881))
+- **api**: New `passkeys` module (`/api/auth/webauthn/*`) using `@simplewebauthn/server` to generate/verify WebAuthn registration and authentication ceremonies, backed by a new `passkeys` table (per-device credentials, FK to `users.username`).
+- **client**: WebAuthn feature detection (`utils/webauthn.ts`), passkey registration/login in `authService`, and a dedicated login flow (`PasskeyLogin`, `usePasskeyLogin`) with graceful self-healing if a device's passkey is revoked or missing server-side.
+
+### Changed
+
+- **api**: JWT session timeout reduced from `1h` to `30m`.
+- **api**: `WEBAUTHN_CHALLENGE_SECRET`/`JWT_SECRET` are now required in production — the server fails fast at startup instead of silently signing challenge tokens with a public default secret.
+- **client**: nginx now scopes the `no-cache` header to `index.html` and the service worker files only; hashed static assets (`.js`, `.css`, images) get long-lived, immutable caching. Fixed a pre-existing regex that never actually matched `sw.js`/`registerSW.js`.
+- **client**: PWA service worker now sets `skipWaiting`/`clientsClaim`/`cleanupOutdatedCaches` so a new deployment takes effect on the next load instead of requiring the app to be fully closed and reopened.
+
+### Dependencies
+
+- Add `@simplewebauthn/server` (api) and `@simplewebauthn/browser` (client).
+
+---
+
 ## [2.1.1] - 2026-08-04
 
 ### Fixed
