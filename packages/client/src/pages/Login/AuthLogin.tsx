@@ -26,7 +26,14 @@ const AuthLogin = () => {
       usePasskey: false
     }
   })
-  const { sendLogin, error, loading } = useLogin()
+  const {
+    sendLogin,
+    error,
+    loading,
+    awaitingPasskeyConfirmation,
+    confirmPasskeyRegistration,
+    skipPasskeyRegistration
+  } = useLogin()
   const passkeySupported = usePasskeySupport()
 
   const onSubmit = handleSubmit(data => {
@@ -35,6 +42,38 @@ const AuthLogin = () => {
 
   const handleClickShowPassword = () => {
     setShowPassword(state => !state)
+  }
+
+  if (awaitingPasskeyConfirmation) {
+    return (
+      <Grid container spacing={3}>
+        <Grid size={12}>
+          <Stack spacing={1}>
+            <Button
+              disableElevation
+              fullWidth
+              size='large'
+              variant='contained'
+              color='primary'
+              data-testid='confirm-passkey-button'
+              onClick={confirmPasskeyRegistration}
+            >
+              Activar huella ahora
+            </Button>
+          </Stack>
+        </Grid>
+        <Grid size={12}>
+          <Button
+            fullWidth
+            variant='text'
+            data-testid='skip-passkey-button'
+            onClick={skipPasskeyRegistration}
+          >
+            Ahora no
+          </Button>
+        </Grid>
+      </Grid>
+    )
   }
 
   return (

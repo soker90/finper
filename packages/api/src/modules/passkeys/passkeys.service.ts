@@ -76,7 +76,12 @@ export const createPasskeysService = (repo: ReturnType<typeof createPasskeysRepo
         transports: parseTransports(credential.transports) as any
       })),
       authenticatorSelection: {
-        residentKey: 'preferred',
+        // 'discouraged': no necesitamos una passkey "discoverable"/sincronizable
+        // (siempre pedimos el username explícitamente antes de autenticar). Con
+        // 'preferred' Android ofrece elegir gestor de passkeys (Samsung Pass,
+        // Google Password Manager...); con 'discouraged' va directo al sensor
+        // de huella del propio dispositivo.
+        residentKey: 'discouraged',
         userVerification: 'required',
         authenticatorAttachment: 'platform'
       }

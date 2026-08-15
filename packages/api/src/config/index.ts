@@ -14,7 +14,7 @@ export default {
   jwt: {
     secret: process.env.JWT_SECRET || 'test',
     saltRounds: process.env.SALT_ROUNDS || '10',
-    timeout: '1h'
+    timeout: '30m'
   },
   webauthn: {
     rpName: process.env.WEBAUTHN_RP_NAME || 'Finper',

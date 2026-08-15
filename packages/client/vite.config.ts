@@ -68,6 +68,13 @@ export default defineConfig({
       },
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
+        // Sin esto, un service worker nuevo se queda "esperando" y no toma
+        // el control hasta que se cierran todas las pestañas/instancias de
+        // la PWA; con ellos, la próxima carga ya sirve el build recién
+        // desplegado sin necesidad de reinstalar la app.
+        skipWaiting: true,
+        clientsClaim: true,
+        cleanupOutdatedCaches: true,
         runtimeCaching: [
           {
             urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
