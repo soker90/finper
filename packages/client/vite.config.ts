@@ -68,10 +68,10 @@ export default defineConfig({
       },
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
-        // Sin esto, un service worker nuevo se queda "esperando" y no toma
-        // el control hasta que se cierran todas las pestañas/instancias de
-        // la PWA; con ellos, la próxima carga ya sirve el build recién
-        // desplegado sin necesidad de reinstalar la app.
+        // Without these, a new service worker stays "waiting" and doesn't
+        // take control until every tab/instance of the PWA is closed; with
+        // them, the next load already serves the freshly deployed build
+        // without needing to reinstall the app.
         skipWaiting: true,
         clientsClaim: true,
         cleanupOutdatedCaches: true,

@@ -15,10 +15,9 @@ const ERROR_MESSAGES: Record<number | string, string> = {
   default: 'Error desconocido'
 }
 
-// El navegador pide la huella igualmente (para comprobar la identidad) y
-// solo entonces descubre que este dispositivo ya tiene una credencial
-// registrada para esta cuenta — no es un fallo real, la huella ya estaba
-// activada de antes.
+// The browser still asks for the fingerprint (to verify identity) and only
+// then discovers this device already has a credential registered for this
+// account — not a real failure, the passkey was already active.
 const isAlreadyRegisteredError = (err: unknown): boolean =>
   (err as { name?: string })?.name === 'InvalidStateError'
 
@@ -46,20 +45,20 @@ export const useLogin = () => {
           return
         }
 
-        // setAccessToken se aplaza a propósito: en cuanto se llama, GuestGuard
-        // (que envuelve esta página) detecta hasToken()=true y redirige a '/',
-        // desmontando esta pantalla. El token de sesión ya está operativo
-        // igualmente (authService.setSession ya fijó la cabecera Authorization
-        // de axios), así que registerPasskey() puede llamar a la API sin
-        // problema mientras esperamos.
+        // setAccessToken is deferred on purpose: as soon as it's called,
+        // GuestGuard (which wraps this page) detects hasToken()=true and
+        // redirects to '/', unmounting this screen. The session is already
+        // usable regardless (authService.setSession already set axios'
+        // Authorization header), so registerPasskey() can call the API fine
+        // while we wait.
         pendingToken.current = token
         pendingUsername.current = username
 
-        // Intento directo, encadenado al propio toque de "Iniciar sesión":
-        // en la mayoría de navegadores un solo salto de red (login ->
-        // registration-options -> huella) conserva la "activación" del
-        // gesto. Si el navegador lo rechaza (gesto perdido o el usuario
-        // cancela), se ofrece como último recurso un botón explícito.
+        // Direct attempt, chained off the "Iniciar sesión" tap itself: in
+        // most browsers a single network hop (login -> registration-options
+        // -> fingerprint) keeps the gesture "activation". If the browser
+        // rejects it (lost activation or the user cancels), an explicit
+        // button is offered as a last resort.
         authService.registerPasskey()
           .then(() => {
             authService.rememberPasskeyDevice(username)
