@@ -53,7 +53,7 @@ describe('CreditCardsRepository (integration)', () => {
     })
 
     const cards = await repository.findByUser(username)
-    expect(cards.find((c) => c.id === card!.id)?.currentDebt).toBe(70)
+    expect(cards.find((creditCard) => creditCard.id === card!.id)?.currentDebt).toBe(70)
   })
 
   it('findMovementById includes category and store joins', async () => {

@@ -83,5 +83,11 @@ export const ERROR_MESSAGE = {
     INVALID_PAYMENT: 'No hay movimientos pendientes para pagar o los parámetros son inválidos',
     ALREADY_PAID: 'Este movimiento ya ha sido pagado',
     HAS_PAID_MOVEMENTS: 'No se puede eliminar la tarjeta porque tiene movimientos ya pagados'
+  },
+  PASSKEY: {
+    NOT_FOUND: 'No hay huella registrada para este usuario',
+    INVALID_CHALLENGE: 'El reto de verificación ha caducado o no es válido',
+    VERIFICATION_FAILED: 'No se ha podido verificar la huella',
+    ALREADY_REGISTERED: 'Esta huella ya está registrada'
   }
 }

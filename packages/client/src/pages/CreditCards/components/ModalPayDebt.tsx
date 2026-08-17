@@ -83,7 +83,7 @@ export const ModalPayDebt = ({ open, onClose, creditCard, onSuccess }: ModalPayD
         const id = getId(movement)
         return id !== undefined && selectedSet.has(id)
       })
-      .reduce((acc, movement) => acc + netAmount(movement), 0)
+      .reduce((accumulatedAmount, movement) => accumulatedAmount + netAmount(movement), 0)
   }
   totalToPay = Math.max(0, Math.round(totalToPay * 100) / 100)
 

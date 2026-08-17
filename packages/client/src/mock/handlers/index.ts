@@ -1,4 +1,5 @@
 import { loginHandlers } from './auth/login'
+import { passkeysHandlers } from './auth/passkeys'
 import { accountsHandlers } from './accounts'
 import { categoriesHandlers } from './categories'
 import { dashboardHandlers } from './dashboard'
@@ -19,6 +20,7 @@ import { creditCardHandlers } from './creditCards'
 
 export const handlers = [
   ...loginHandlers,
+  ...passkeysHandlers,
   ...accountsHandlers,
   ...categoriesHandlers,
   ...dashboardHandlers,

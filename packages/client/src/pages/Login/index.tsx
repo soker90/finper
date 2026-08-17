@@ -1,6 +1,7 @@
 import { Grid, Stack, Typography } from '@mui/material'
 
 import AuthLogin from './AuthLogin'
+import PasskeyLogin from './PasskeyLogin'
 
 const Login = () => (
   <Grid container spacing={3}>
@@ -17,7 +18,9 @@ const Login = () => (
       </Stack>
     </Grid>
     <Grid size={12}>
-      <AuthLogin />
+      <PasskeyLogin>
+        <AuthLogin />
+      </PasskeyLogin>
     </Grid>
   </Grid>
 )

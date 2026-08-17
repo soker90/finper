@@ -14,6 +14,7 @@ import path from 'node:path'
 import { MonitRoutes } from './modules/monit/monit.routes'
 import handleError from './middlewares/handle-error'
 import { usersRouter } from './modules/users/users.routes'
+import { passkeysRouter } from './modules/passkeys/passkeys.routes'
 import { accountsRoutes } from './modules/accounts/accounts.routes'
 import { budgetsRoutes } from './modules/budgets/budgets.routes'
 import { categoriesRoutes } from './modules/categories/categories.routes'
@@ -109,6 +110,7 @@ class Server {
   public routes (): void {
     this.app.use('/api/monit', new MonitRoutes().router)
     this.app.use('/api/auth', usersRouter)
+    this.app.use('/api/auth/webauthn', passkeysRouter)
     this.app.use('/api/accounts', accountsRoutes)
     this.app.use('/api/budgets', budgetsRoutes)
     this.app.use('/api/dashboard', dashboardRoutes)

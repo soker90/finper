@@ -10,8 +10,9 @@ CREATE TABLE `credit_card_movements` (
 	`status` text DEFAULT 'pending' NOT NULL,
 	`paid_at` integer,
 	`transaction_id` text,
+	`tags` text DEFAULT '[]' NOT NULL,
 	`user` text NOT NULL,
-	FOREIGN KEY (`credit_card_id`) REFERENCES `credit_cards`(`id`) ON UPDATE no action ON DELETE no action,
+	FOREIGN KEY (`credit_card_id`) REFERENCES `credit_cards`(`id`) ON UPDATE no action ON DELETE cascade,
 	FOREIGN KEY (`category_id`) REFERENCES `categories`(`id`) ON UPDATE no action ON DELETE no action,
 	FOREIGN KEY (`store_id`) REFERENCES `stores`(`id`) ON UPDATE no action ON DELETE no action,
 	FOREIGN KEY (`transaction_id`) REFERENCES `transactions`(`id`) ON UPDATE no action ON DELETE no action,
@@ -30,4 +31,5 @@ CREATE TABLE `credit_cards` (
 	FOREIGN KEY (`user`) REFERENCES `users`(`username`) ON UPDATE no action ON DELETE no action
 );
 --> statement-breakpoint
-CREATE INDEX `credit_cards_user_idx` ON `credit_cards` (`user`);
+CREATE INDEX `credit_cards_user_idx` ON `credit_cards` (`user`);--> statement-breakpoint
+ALTER TABLE `transactions` ADD `credit_card_id` text REFERENCES credit_cards(id);

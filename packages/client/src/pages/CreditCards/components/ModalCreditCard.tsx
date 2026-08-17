@@ -102,7 +102,7 @@ export const ModalCreditCard = ({ open, onClose, creditCard, onSuccess }: ModalC
             error={Boolean(errors.accountId)}
             errorText='Debes seleccionar una cuenta asociada'
             value={field.value}
-            onChange={(e) => field.onChange(e.target.value)}
+            onChange={(event) => field.onChange(event.target.value)}
             inputRef={field.ref}
           />
         )}

@@ -82,15 +82,15 @@ const CreditCardsPage: React.FC = () => {
     setOpenMovementModal(true)
   }
 
-  const handleOpenEditMovement = (card: CreditCard, m: CreditCardMovement) => {
+  const handleOpenEditMovement = (card: CreditCard, movement: CreditCardMovement) => {
     setActiveCardForMovement(card)
-    setEditingMovement(m)
+    setEditingMovement(movement)
     setOpenMovementModal(true)
   }
 
-  const handleDeleteMovement = async (cardId: string, mId: string) => {
+  const handleDeleteMovement = async (cardId: string, movementId: string) => {
     if (window.confirm('¿Deseas eliminar este movimiento de tarjeta?')) {
-      const { error } = await deleteCreditCardMovement(cardId, mId)
+      const { error } = await deleteCreditCardMovement(cardId, movementId)
       if (error) {
         setActionError(error)
         return
@@ -149,7 +149,7 @@ const CreditCardsPage: React.FC = () => {
           creditCards={creditCards}
           movements={movements}
           isLoading={loadingMovements}
-          selectedCardIdFilter={selectedCardIdFilter}
+          selectedCardIdFilter={activeCardIdForMovements}
           onSelectCardIdFilter={setSelectedCardIdFilter}
           statusFilter={statusFilter}
           onSelectStatusFilter={setStatusFilter}

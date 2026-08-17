@@ -68,6 +68,7 @@ Actualmente Finper cubre, entre otros, estos módulos:
 - Gestión de suministros e inmuebles
 - Rendimientos (intereses, cashback y similares) al estilo de suscripciones: se enlazan movimientos ya existentes a un rendimiento
 - Tickets y utilidades auxiliares
+- Login con passkey (WebAuthn): además de usuario/contraseña, permite iniciar sesión con huella, Face ID o llave física
 
 ## Arquitectura del proyecto
 
@@ -127,6 +128,7 @@ En Finper esto se refleja en:
 - TypeScript
 - SQLite (better-sqlite3) + Drizzle ORM
 - Passport + JWT
+- WebAuthn (`@simplewebauthn/server`) para login con passkey
 - Joi para validación
 
 ### Frontend
@@ -136,6 +138,7 @@ En Finper esto se refleja en:
 - Material UI
 - React Router
 - SWR
+- WebAuthn (`@simplewebauthn/browser`) para login con passkey
 - Vitest + Testing Library
 
 ### Tooling
@@ -201,6 +204,10 @@ Variables principales para desarrollo local:
 | `GRAFANA_LOGGER_PASSWORD` | No | Password del logger externo |
 | `TICKET_BOT_URL` | No | URL del servicio externo de tickets |
 | `TICKET_BOT_API_KEY` | No | API key del servicio de tickets |
+| `WEBAUTHN_RP_ID` | No | Dominio (sin esquema ni puerto) para el login con passkey; por defecto `localhost` |
+| `WEBAUTHN_ORIGIN` | No | Orígenes permitidos para WebAuthn, separados por comas |
+| `WEBAUTHN_RP_NAME` | No | Nombre mostrado en el diálogo de huella del sistema operativo |
+| `WEBAUTHN_CHALLENGE_SECRET` | No | Secreto para firmar el challenge de WebAuthn; si falta, se reutiliza `JWT_SECRET` |
 
 ### 2. Variables adicionales si usas Docker Compose
 
@@ -368,34 +375,32 @@ make lint-db
 
 ## Docker
 
-El repositorio incluye dos ficheros Compose:
+El repositorio incluye un fichero `docker-compose.yml` orientado a despliegue, usando las imágenes publicadas (`soker90/finper-api:latest` y `soker90/finper-client:latest`).
 
-- `docker-compose.yml`: entorno base con la **API** (construye la imagen localmente)
-- `docker-compose.prod.yml`: variante orientada a despliegue usando imagen publicada de la API
+### Qué levanta el Compose
 
-### Qué levanta el Compose actual
+- `api`: sirve la API en `/api/*` (sin publicar el puerto 3008 por defecto; descomenta esa línea solo si necesitas acceso directo).
+- `client`: sirve el frontend en el puerto `3009` y hace de proxy hacia la API bajo `/api/` (ver `packages/client/nginx.conf.template`).
 
-Según la configuración actual, el Compose raíz levanta:
-
-- `api` en el puerto `3008`
-
-La persistencia SQLite se guarda en el volumen `finperdb` montado en `/home/node/app/data`. No levanta ningún contenedor de base de datos ni el cliente web.
+La persistencia SQLite se monta como bind mount en `/home/node/app/data`; ajusta la ruta del host a la carpeta donde vive tu fichero `.db`.
 
 ### Variables necesarias para Compose
 
 El `docker-compose.yml` utiliza variables como:
 
+- `DATA_PATH` (ruta en el host montada en `/home/node/app/data`)
 - `DATABASE_FILE`
 - `JWT_SECRET`
 - `SALT_ROUNDS`
-- `LOKI_USER` / `LOKI_PASSWORD`
+- `API_UPSTREAM` (opcional, para redirigir el proxy Nginx si el backend no escucha en `api:3008`)
 - `TICKET_BOT_URL`
 - `TICKET_BOT_API_KEY`
+- `WEBAUTHN_RP_ID`, `WEBAUTHN_ORIGIN`, `WEBAUTHN_RP_NAME`, `WEBAUTHN_CHALLENGE_SECRET` (login con passkey)
 
 Arranque típico:
 
 ```bash
-docker compose up --build
+docker compose up
 ```
 
 ## Estructura del repositorio
@@ -404,7 +409,9 @@ docker compose up --build
 finper/
 ├── docs/
 │   ├── loan-module.md
-│   └── subscription-module.md
+│   ├── subscription-module.md
+│   ├── yields-module.md
+│   └── passkey-authentication.md
 ├── packages/
 │   ├── api/
 │   ├── client/
@@ -412,7 +419,6 @@ finper/
 │   └── types/
 ├── .env.example
 ├── docker-compose.yml
-├── docker-compose.prod.yml
 ├── Makefile
 ├── package.json
 ├── pnpm-lock.yaml
@@ -426,6 +432,7 @@ Hay documentación técnica más detallada para algunos módulos:
 - `docs/loan-module.md`
 - `docs/subscription-module.md`
 - `docs/yields-module.md`
+- `docs/passkey-authentication.md`
 
 ## Healthcheck
 

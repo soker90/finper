@@ -1,3 +1,12 @@
+const resolveChallengeTokenSecret = (): string => {
+  const secret = process.env.WEBAUTHN_CHALLENGE_SECRET || process.env.JWT_SECRET
+  if (secret) return secret
+  if (process.env.NODE_ENV === 'production') {
+    throw new Error('WEBAUTHN_CHALLENGE_SECRET or JWT_SECRET must be set in production')
+  }
+  return 'test'
+}
+
 export default {
   port: 3008,
   cors: {
@@ -14,7 +23,15 @@ export default {
   jwt: {
     secret: process.env.JWT_SECRET || 'test',
     saltRounds: process.env.SALT_ROUNDS || '10',
-    timeout: '1h'
+    timeout: '30m'
+  },
+  webauthn: {
+    rpName: process.env.WEBAUTHN_RP_NAME || 'Finper',
+    rpID: process.env.WEBAUTHN_RP_ID || 'localhost',
+    expectedOrigin: (process.env.WEBAUTHN_ORIGIN || 'http://localhost:5173,http://localhost:3008')
+      .split(',').map(origin => origin.trim()),
+    challengeTokenSecret: resolveChallengeTokenSecret(),
+    challengeTokenTtl: '5m'
   },
   logger: {
     loki: {

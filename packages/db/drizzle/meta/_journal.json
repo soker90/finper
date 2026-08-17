@@ -19,29 +19,15 @@
     {
       "idx": 2,
       "version": "6",
-      "when": 1786176895374,
-      "tag": "0002_lean_stranger",
+      "when": 1786699393115,
+      "tag": "0002_dashing_ted_forrester",
       "breakpoints": true
     },
     {
       "idx": 3,
       "version": "6",
-      "when": 1786441873004,
-      "tag": "0003_sudden_champions",
-      "breakpoints": true
-    },
-    {
-      "idx": 4,
-      "version": "6",
-      "when": 1786546093678,
-      "tag": "0004_freezing_lenny_balinger",
-      "breakpoints": true
-    },
-    {
-      "idx": 5,
-      "version": "6",
-      "when": 1786547503043,
-      "tag": "0005_spicy_major_mapleleaf",
+      "when": 1786958401776,
+      "tag": "0003_tired_quentin_quire",
       "breakpoints": true
     }
   ]

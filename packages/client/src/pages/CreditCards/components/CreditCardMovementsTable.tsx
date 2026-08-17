@@ -87,7 +87,7 @@ export const CreditCardMovementsTable: React.FC<CreditCardMovementsTableProps> =
             size='small'
             label='Tarjeta'
             value={selectedCardIdFilter}
-            onChange={(e) => onSelectCardIdFilter(e.target.value)}
+            onChange={(event) => onSelectCardIdFilter(event.target.value)}
             sx={{ minWidth: isMobile ? '100%' : 160 }}
           >
             {creditCards.map((card) => {
@@ -102,7 +102,7 @@ export const CreditCardMovementsTable: React.FC<CreditCardMovementsTableProps> =
 
           <Tabs
             value={statusFilter}
-            onChange={(_, val) => onSelectStatusFilter(val)}
+            onChange={(_event, statusValue) => onSelectStatusFilter(statusValue)}
             textColor='primary'
             indicatorColor='primary'
             variant={isMobile ? 'fullWidth' : 'standard'}
@@ -130,39 +130,39 @@ export const CreditCardMovementsTable: React.FC<CreditCardMovementsTableProps> =
             )
           : (
             <MovementsList>
-              {movements.map((m) => {
-                const id = getId(m)
+              {movements.map((movement) => {
+                const id = getId(movement)
                 const cardForMovement = creditCards.find(
-                  (c) => getId(c) === m.creditCardId
+                  (creditCard) => getId(creditCard) === movement.creditCardId
                 )
-                const isPending = m.status === 'pending'
+                const isPending = movement.status === 'pending'
                 return (
                   <Paper key={id} component='li' elevation={0}>
                     <ItemContent sx={{ flexWrap: 'wrap', rowGap: 1 }}>
                       <Stack direction='row' spacing={1.5} sx={{ alignItems: 'center', minWidth: 160 }}>
                         <Typography variant='body2' color='text.secondary'>
-                          {new Date(m.date).toLocaleDateString('es-ES')}
+                          {new Date(movement.date).toLocaleDateString('es-ES')}
                         </Typography>
-                        <Chip label={m.category?.name || 'General'} size='small' variant='outlined' />
+                        <Chip label={movement.category?.name || 'General'} size='small' variant='outlined' />
                       </Stack>
 
                       <Stack direction='row' spacing={1} sx={{ alignItems: 'center', flexWrap: 'wrap', flex: 1, minWidth: 160 }}>
-                        {m.store?.name && (
-                          <Typography variant='body2'>{m.store.name}</Typography>
+                        {movement.store?.name && (
+                          <Typography variant='body2'>{movement.store.name}</Typography>
                         )}
-                        {m.note && (
-                          <Typography variant='body2' color='text.secondary'>{m.note}</Typography>
+                        {movement.note && (
+                          <Typography variant='body2' color='text.secondary'>{movement.note}</Typography>
                         )}
-                        {m.tags?.map((tag) => (
+                        {movement.tags?.map((tag) => (
                           <Chip key={tag} label={tag} size='small' variant='outlined' />
                         ))}
                       </Stack>
 
                       <Typography
                         variant='h5'
-                        color={m.type === 'expense' ? 'error.main' : 'success.main'}
+                        color={movement.type === 'expense' ? 'error.main' : 'success.main'}
                       >
-                        {m.type === 'expense' ? '-' : '+'}{format.euro(m.amount)}
+                        {movement.type === 'expense' ? '-' : '+'}{format.euro(movement.amount)}
                       </Typography>
 
                       <Stack direction='row' spacing={1} sx={{ alignItems: 'center' }}>
@@ -177,7 +177,7 @@ export const CreditCardMovementsTable: React.FC<CreditCardMovementsTableProps> =
                             <Tooltip title='Editar movimiento'>
                               <IconButton
                                 size='small'
-                                onClick={() => onEditMovement(cardForMovement, m)}
+                                onClick={() => onEditMovement(cardForMovement, movement)}
                               >
                                 <EditOutlined style={{ fontSize: 16 }} />
                               </IconButton>
@@ -186,7 +186,7 @@ export const CreditCardMovementsTable: React.FC<CreditCardMovementsTableProps> =
                               <IconButton
                                 size='small'
                                 color='error'
-                                onClick={() => onDeleteMovement(m.creditCardId, id)}
+                                onClick={() => onDeleteMovement(movement.creditCardId, id)}
                               >
                                 <DeleteOutlined style={{ fontSize: 16 }} />
                               </IconButton>

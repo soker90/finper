@@ -154,7 +154,7 @@ export const ModalMovement = ({ open, onClose, creditCardId, movement, onSuccess
             error={Boolean(errors.categoryId)}
             errorText='Selecciona una categoría'
             value={field.value}
-            onChange={(e) => field.onChange(e.target.value)}
+            onChange={(event) => field.onChange(event.target.value)}
             inputRef={field.ref}
           />
         )}

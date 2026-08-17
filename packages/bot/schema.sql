@@ -5,6 +5,7 @@ CREATE TABLE IF NOT EXISTS tickets (
   id TEXT PRIMARY KEY,
   telegram_message_id INTEGER NOT NULL,
   telegram_chat_id INTEGER NOT NULL,
+  telegram_user_id INTEGER,                -- Telegram user ID of the sender (nullable for legacy rows)
   image_url TEXT,                          -- nullable: text-sourced tickets have no image
   -- Data extracted by Gemini
   date INTEGER,                            -- Unix timestamp (ms) extracted from ticket
@@ -20,10 +21,12 @@ CREATE TABLE IF NOT EXISTS tickets (
 
 CREATE INDEX IF NOT EXISTS idx_tickets_status ON tickets(status);
 CREATE INDEX IF NOT EXISTS idx_tickets_created_at ON tickets(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_tickets_telegram_user_id ON tickets(telegram_user_id);
 
 -- Users allowed to send tickets to the bot (managed by the admin via bot commands)
 CREATE TABLE IF NOT EXISTS allowed_users (
-  user_id   INTEGER PRIMARY KEY,  -- Telegram user ID
-  added_by  INTEGER NOT NULL,      -- Telegram user ID of the admin who added them
-  added_at  INTEGER NOT NULL       -- Unix timestamp (ms)
+  user_id         INTEGER PRIMARY KEY,  -- Telegram user ID
+  added_by        INTEGER NOT NULL,     -- Telegram user ID of the admin who added them
+  added_at        INTEGER NOT NULL,     -- Unix timestamp (ms)
+  finper_username TEXT                  -- Finper username this Telegram user is linked to (several telegram_user_id can share the same finper_username)
 );

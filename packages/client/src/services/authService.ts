@@ -1,7 +1,8 @@
 import { jwtDecode } from 'jwt-decode'
 import axios from 'axios'
-import { FINPER_TOKEN } from 'config'
+import { FINPER_TOKEN, FINPER_HAS_PASSKEY, FINPER_LAST_USERNAME } from 'config'
 import { isTokenPresent } from 'utils/isTokenPresent'
+import { registerPasskey as startPasskeyRegistration, authenticateWithPasskey } from 'utils/webauthn'
 
 const decodeToken = (accessToken: string): { exp?: number } | null => {
   try {
@@ -51,6 +52,7 @@ class AuthService {
       .then(({ data }) => {
         if (data.token) {
           this.setSession(data.token)
+          localStorage.setItem(FINPER_LAST_USERNAME, username)
           resolve(data.token)
         } else reject(data.error)
       })
@@ -58,6 +60,52 @@ class AuthService {
         reject(error?.response?.data || error)
       })
   })
+
+  registerPasskey = (deviceLabel?: string): Promise<void> => new Promise((resolve, reject) => {
+    axios.post('/auth/webauthn/registration-options', {})
+      .then(({ data }) => startPasskeyRegistration(data.options)
+        .then(response => axios.post('/auth/webauthn/registration-verify', {
+          response,
+          challengeToken: data.challengeToken,
+          deviceLabel
+        }))
+        .then(() => resolve()))
+      .catch(error => {
+        reject(error?.response?.data || error)
+      })
+  })
+
+  loginWithPasskey = (username: string): Promise<string> => new Promise((resolve, reject) => {
+    axios.post('/auth/webauthn/authentication-options', { username })
+      .then(({ data }) => authenticateWithPasskey(data.options)
+        .then(response => axios.post('/auth/webauthn/authentication-verify', {
+          response,
+          challengeToken: data.challengeToken
+        }))
+        .then(({ data }) => {
+          if (data.token) {
+            this.setSession(data.token)
+            localStorage.setItem(FINPER_LAST_USERNAME, username)
+            resolve(data.token)
+          } else reject(data.error)
+        }))
+      .catch(error => {
+        reject(error?.response?.data || error)
+      })
+  })
+
+  hasPasskey = (): boolean => localStorage.getItem(FINPER_HAS_PASSKEY) === 'true'
+
+  getLastUsername = (): string | null => localStorage.getItem(FINPER_LAST_USERNAME)
+
+  rememberPasskeyDevice = (username: string): void => {
+    localStorage.setItem(FINPER_HAS_PASSKEY, 'true')
+    localStorage.setItem(FINPER_LAST_USERNAME, username)
+  }
+
+  forgetPasskeyDevice = (): void => {
+    localStorage.removeItem(FINPER_HAS_PASSKEY)
+  }
 
   loginInWithToken = (): Promise<string> => new Promise((resolve, reject) => {
     axios.get('/auth/me')

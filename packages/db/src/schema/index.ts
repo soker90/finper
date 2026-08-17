@@ -6,6 +6,7 @@ export * from './debts';
 export * from './goals';
 export * from './loans';
 export * from './loan-payments';
+export * from './passkeys';
 export * from './pensions';
 export * from './properties';
 export * from './stocks';

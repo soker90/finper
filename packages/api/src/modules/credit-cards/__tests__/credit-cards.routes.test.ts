@@ -369,8 +369,8 @@ describe('Credit Cards Routes', () => {
         .set('Authorization', `Bearer ${token}`)
         .expect(200)
 
-      const oldest = movementsAfter.body.find((m: { date: number }) => m.date === 1000)
-      const newest = movementsAfter.body.find((m: { date: number }) => m.date === 2000)
+      const oldest = movementsAfter.body.find((movement: { date: number }) => movement.date === 1000)
+      const newest = movementsAfter.body.find((movement: { date: number }) => movement.date === 2000)
       expect(oldest.status).toBe('paid')
       expect(newest.status).toBe('pending')
     })
@@ -601,7 +601,7 @@ describe('Credit Cards Routes', () => {
 
       // Reusing the same store name should reuse the existing store, not duplicate it.
       const storeRows = sqliteDb.select().from(stores).where(eq(stores.user, username)).all()
-      expect(storeRows.filter((s) => s.name === 'Mercadona')).toHaveLength(1)
+      expect(storeRows.filter((store) => store.name === 'Mercadona')).toHaveLength(1)
     })
 
     test('PATCH /:id/movements/:movementId updates tags', async () => {

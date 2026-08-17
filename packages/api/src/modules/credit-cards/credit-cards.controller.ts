@@ -72,6 +72,7 @@ export class CreditCardsController {
     const { id } = req.params
     logger.logInfo(`/credit-cards/${id}/movements - add movement`)
     const data = validateCreditCardMovementCreateParams(req.body, req.user as string)
+    await creditCardsService.getCreditCardById(id, req.user as string)
     data.storeId = resolveStoreId(data.storeId, req.user as string)
     const movement = await creditCardsService.addMovement({ creditCardId: id, user: req.user as string, data })
     res.status(201).send(movement)
@@ -81,7 +82,10 @@ export class CreditCardsController {
     const { id, movementId } = req.params
     logger.logInfo(`/credit-cards/${id}/movements/${movementId} - edit movement`)
     const value = validateCreditCardMovementEditParams(req.body, req.user as string)
-    if (value.storeId !== undefined) value.storeId = resolveStoreId(value.storeId, req.user as string)
+    if (value.storeId !== undefined) {
+      await creditCardsService.getCreditCardById(id, req.user as string)
+      value.storeId = resolveStoreId(value.storeId, req.user as string)
+    }
     const movement = await creditCardsService.editMovement({ id: movementId, creditCardId: id, user: req.user as string, value })
     res.send(movement)
   }

@@ -1,1 +1,0 @@
-ALTER TABLE `credit_card_movements` ADD `tags` text DEFAULT '[]' NOT NULL;

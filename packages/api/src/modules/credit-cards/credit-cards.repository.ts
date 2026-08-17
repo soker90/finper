@@ -351,7 +351,7 @@ export class CreditCardsRepository implements ICreditCardsRepository {
     let movementsToPay: CreditCardMovementRow[] = []
 
     if (payload.movementIds && payload.movementIds.length > 0) {
-      const pendingById = new Map(pendingMovements.map((m) => [m.id, m]))
+      const pendingById = new Map(pendingMovements.map((movement) => [movement.id, movement]))
       movementsToPay = payload.movementIds.map((movementId) => {
         const movement = pendingById.get(movementId)
         if (!movement) throw Boom.badRequest(ERROR_MESSAGE.CREDIT_CARD.INVALID_PAYMENT).output
@@ -363,12 +363,12 @@ export class CreditCardsRepository implements ICreditCardsRepository {
       let accumulated = 0
       const target = payload.amount
       const sorted = [...pendingMovements].sort((a, b) => a.date - b.date)
-      for (const m of sorted) {
-        const net = m.type === 'expense' ? m.amount : -m.amount
+      for (const movement of sorted) {
+        const net = movement.type === 'expense' ? movement.amount : -movement.amount
         // Always include at least one movement so a small payment still makes progress,
         // but don't let further movements push the total past the requested amount.
         if (movementsToPay.length > 0 && accumulated + net > target) break
-        movementsToPay.push(m)
+        movementsToPay.push(movement)
         accumulated += net
         if (accumulated >= target) break
       }
@@ -384,7 +384,7 @@ export class CreditCardsRepository implements ICreditCardsRepository {
     this.db.transaction((tx) => {
       let netDebtPaid = 0
 
-      for (const m of movementsToPay) {
+      for (const movement of movementsToPay) {
         const txId = generateId()
 
         // Guard against concurrent pay-debt requests: reserve the movement first by
@@ -397,7 +397,7 @@ export class CreditCardsRepository implements ICreditCardsRepository {
             paidAt: now
           })
           .where(and(
-            eq(creditCardMovements.id, m.id),
+            eq(creditCardMovements.id, movement.id),
             eq(creditCardMovements.user, user),
             eq(creditCardMovements.status, 'pending')
           ))
@@ -407,29 +407,29 @@ export class CreditCardsRepository implements ICreditCardsRepository {
           throw Boom.badRequest(ERROR_MESSAGE.CREDIT_CARD.ALREADY_PAID).output
         }
 
-        const net = m.type === 'expense' ? m.amount : -m.amount
+        const net = movement.type === 'expense' ? movement.amount : -movement.amount
         netDebtPaid += net
-        paidMovements.push(m)
+        paidMovements.push(movement)
 
-        const noteText = m.note ? `Pago tarjeta ${card.name}: ${m.note}` : `Pago tarjeta ${card.name}`
+        const noteText = movement.note ? `Pago tarjeta ${card.name}: ${movement.note}` : `Pago tarjeta ${card.name}`
 
         tx.insert(transactions).values({
           id: txId,
           date: now,
-          categoryId: m.categoryId,
-          amount: m.amount,
-          type: m.type,
+          categoryId: movement.categoryId,
+          amount: movement.amount,
+          type: movement.type,
           accountId: card.accountId,
           note: noteText,
-          storeId: m.storeId || null,
+          storeId: movement.storeId || null,
           creditCardId: card.id,
-          tags: m.tags ?? [],
+          tags: movement.tags ?? [],
           user
         }).run()
 
         tx.update(creditCardMovements)
           .set({ transactionId: txId })
-          .where(eq(creditCardMovements.id, m.id))
+          .where(eq(creditCardMovements.id, movement.id))
           .run()
       }
 
