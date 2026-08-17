@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 import { useForm, Controller, type Control } from 'react-hook-form'
 import { Alert, Box } from '@mui/material'
 import ModalGrid from 'components/modals/ModalGrid'
+import DateForm from 'components/forms/DateForm'
 import InputForm from 'components/forms/InputForm'
 import SelectForm from 'components/forms/SelectForm'
 import SelectGroupForm from 'components/forms/SelectGroupForm'
@@ -19,7 +20,7 @@ const MOVEMENT_TYPE_OPTIONS = [
 ]
 
 interface MovementFormValues {
-  date: string
+  date: number | null
   amount: string
   type: 'expense' | 'income'
   categoryId: string
@@ -36,11 +37,9 @@ interface ModalMovementProps {
   onSuccess: () => void
 }
 
-const toDateInputValue = (date: number | string) => new Date(date).toISOString().split('T')[0]
-
 const buildDefaultValues = (movement?: CreditCardMovement | null): MovementFormValues => movement
   ? {
-      date: toDateInputValue(movement.date),
+      date: movement.date,
       amount: String(movement.amount),
       type: movement.type || 'expense',
       categoryId: movement.categoryId || '',
@@ -49,7 +48,7 @@ const buildDefaultValues = (movement?: CreditCardMovement | null): MovementFormV
       tags: movement.tags || []
     }
   : {
-      date: '',
+      date: Date.now(),
       amount: '',
       type: 'expense',
       categoryId: '',
@@ -75,7 +74,7 @@ export const ModalMovement = ({ open, onClose, creditCardId, movement, onSuccess
 
   const handleFormSubmit = handleSubmit((data) => runSubmit(async () => {
     const payload = {
-      date: new Date(data.date).getTime(),
+      date: new Date(data.date!).getTime(),
       amount: parseFloat(data.amount),
       type: data.type,
       categoryId: data.categoryId,
@@ -104,14 +103,14 @@ export const ModalMovement = ({ open, onClose, creditCardId, movement, onSuccess
       action={handleFormSubmit}
       actionDisabled={isSubmitting}
     >
-      <InputForm
+      <DateForm
+        placeholder='Introduce una fecha'
         id='date'
         label='Fecha'
-        type='date'
         size={4}
         error={Boolean(errors.date)}
         errorText='La fecha es obligatoria'
-        {...register('date', { required: true })}
+        control={control}
       />
 
       <SelectForm

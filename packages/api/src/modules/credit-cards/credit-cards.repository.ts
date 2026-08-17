@@ -35,12 +35,14 @@ export interface CreateCreditCardData {
   name: string
   accountId: string
   limit?: number | null
+  logoBank?: string | null
 }
 
 export interface UpdateCreditCardData {
   name?: string
   accountId?: string
   limit?: number | null
+  logoBank?: string | null
 }
 
 export interface CreateCreditCardMovementData {
@@ -126,6 +128,7 @@ export class CreditCardsRepository implements ICreditCardsRepository {
       name: creditCards.name,
       accountId: creditCards.accountId,
       limit: creditCards.limit,
+      logoBank: creditCards.logoBank,
       user: creditCards.user,
       account: {
         id: accounts.id,
@@ -165,6 +168,7 @@ export class CreditCardsRepository implements ICreditCardsRepository {
       name: creditCards.name,
       accountId: creditCards.accountId,
       limit: creditCards.limit,
+      logoBank: creditCards.logoBank,
       user: creditCards.user,
       account: {
         id: accounts.id,
@@ -205,7 +209,8 @@ export class CreditCardsRepository implements ICreditCardsRepository {
       user,
       name: data.name,
       accountId: data.accountId,
-      limit: data.limit != null ? roundMoney(data.limit) : null
+      limit: data.limit != null ? roundMoney(data.limit) : null,
+      logoBank: data.logoBank || null
     }
 
     await this.db.insert(creditCards).values(newCard).run()
@@ -217,6 +222,7 @@ export class CreditCardsRepository implements ICreditCardsRepository {
     if (data.name !== undefined) updateData.name = data.name
     if (data.accountId !== undefined) updateData.accountId = data.accountId
     if (data.limit !== undefined) updateData.limit = data.limit != null ? roundMoney(data.limit) : null
+    if (data.logoBank !== undefined) updateData.logoBank = data.logoBank || null
 
     if (Object.keys(updateData).length > 0) {
       await this.db.update(creditCards)

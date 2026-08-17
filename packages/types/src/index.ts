@@ -13,6 +13,7 @@ export interface CreditCard {
   name: string
   accountId: string
   limit?: number | null
+  logoBank?: string | null
   currentDebt?: number
   user: string
 }

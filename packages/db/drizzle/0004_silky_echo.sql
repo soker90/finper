@@ -1,0 +1,1 @@
+ALTER TABLE `credit_cards` ADD `logo_bank` text;

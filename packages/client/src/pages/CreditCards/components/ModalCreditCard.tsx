@@ -6,6 +6,7 @@ import InputForm from 'components/forms/InputForm'
 import SelectForm from 'components/forms/SelectForm'
 import { useAccounts } from 'hooks/useAccounts'
 import { addCreditCard, editCreditCard } from 'services/apiService'
+import { BANK_OPTIONS } from 'constants/banks'
 import { getId } from 'utils'
 import { useSubmitError } from '../hooks/useSubmitError'
 import type { CreditCard } from 'types'
@@ -14,6 +15,7 @@ interface CreditCardFormValues {
   name: string
   accountId: string
   limit: string
+  logoBank: string
 }
 
 interface ModalCreditCardProps {
@@ -30,12 +32,14 @@ export const ModalCreditCard = ({ open, onClose, creditCard, onSuccess }: ModalC
     ? {
         name: creditCard.name || '',
         accountId: creditCard.accountId || '',
-        limit: creditCard.limit !== undefined && creditCard.limit !== null ? String(creditCard.limit) : ''
+        limit: creditCard.limit !== undefined && creditCard.limit !== null ? String(creditCard.limit) : '',
+        logoBank: creditCard.logoBank || ''
       }
     : {
         name: '',
         accountId: '',
-        limit: ''
+        limit: '',
+        logoBank: ''
       }
 
   const { register, handleSubmit, formState: { errors, isSubmitting }, reset, control } = useForm<CreditCardFormValues>({
@@ -53,7 +57,8 @@ export const ModalCreditCard = ({ open, onClose, creditCard, onSuccess }: ModalC
     const payload = {
       name: data.name.trim(),
       accountId: data.accountId,
-      limit: data.limit.trim() ? parseFloat(data.limit) : null
+      limit: data.limit.trim() ? parseFloat(data.limit) : null,
+      logoBank: data.logoBank || null
     }
     if (creditCard) {
       const id = getId(creditCard)
@@ -80,10 +85,22 @@ export const ModalCreditCard = ({ open, onClose, creditCard, onSuccess }: ModalC
         id='name'
         label='Nombre de la tarjeta'
         placeholder='Ej. Visa Pass, Tarjeta Oro'
-        size={12}
+        size={6}
         error={Boolean(errors.name)}
         errorText='El nombre de la tarjeta es obligatorio'
         {...register('name', { required: true })}
+      />
+
+      <InputForm
+        id='limit'
+        label='Límite de crédito (€)'
+        placeholder='Ej. 1500 (opcional)'
+        type='number'
+        size={6}
+        error={false}
+        errorText=''
+        inputProps={{ step: '0.01', min: '0' }}
+        {...register('limit')}
       />
 
       <Controller
@@ -108,16 +125,19 @@ export const ModalCreditCard = ({ open, onClose, creditCard, onSuccess }: ModalC
         )}
       />
 
-      <InputForm
-        id='limit'
-        label='Límite de crédito (€)'
-        placeholder='Ej. 1500 (opcional)'
-        type='number'
+      <SelectForm
+        id='logoBank'
+        label='Logo de la tarjeta'
         size={6}
+        options={BANK_OPTIONS}
+        optionValue='value'
+        optionLabel='label'
+        voidOption
+        voidLabel='Usar el logo del banco de la cuenta'
+        voidValue=''
         error={false}
         errorText=''
-        inputProps={{ step: '0.01', min: '0' }}
-        {...register('limit')}
+        {...register('logoBank')}
       />
 
       {submitError && (

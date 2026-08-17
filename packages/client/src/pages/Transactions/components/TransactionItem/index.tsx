@@ -5,7 +5,7 @@ import { Transaction } from 'types'
 import { format } from 'utils'
 
 import { BankIcon } from 'components/icons'
-import { AMOUNT_COLORS, TRANSACTION_SYMBOL } from './constans'
+import { AMOUNT_COLORS, TRANSACTION_SYMBOL } from 'constants/transactions'
 import styles from './styles.module.css'
 import { ItemContent } from 'components'
 import TransactionEdit from '../TransactionEdit'

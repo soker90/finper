@@ -7,6 +7,7 @@ const buildCard = (overrides: Partial<CreditCardRow> = {}): CreditCardRow => ({
   name: 'Visa',
   accountId: 'acc-1',
   limit: 1000,
+  logoBank: null,
   user: 'user1',
   account: { id: 'acc-1', name: 'Main', bank: 'BBVA', balance: 500 },
   currentDebt: 0,

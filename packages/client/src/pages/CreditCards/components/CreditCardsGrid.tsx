@@ -8,6 +8,7 @@ interface CreditCardsGridProps {
   creditCards: CreditCard[]
   isLoading: boolean
   onAddCard: () => void
+  onOpenDetail: (card: CreditCard) => void
   onAddMovement: (card: CreditCard) => void
   onPayDebt: (card: CreditCard) => void
   onEdit: (card: CreditCard) => void
@@ -18,6 +19,7 @@ export const CreditCardsGrid: React.FC<CreditCardsGridProps> = ({
   creditCards,
   isLoading,
   onAddCard,
+  onOpenDetail,
   onAddMovement,
   onPayDebt,
   onEdit,
@@ -46,6 +48,7 @@ export const CreditCardsGrid: React.FC<CreditCardsGridProps> = ({
           <CreditCardCard
             card={card}
             index={idx}
+            onOpenDetail={onOpenDetail}
             onAddMovement={onAddMovement}
             onPayDebt={onPayDebt}
             onEdit={onEdit}

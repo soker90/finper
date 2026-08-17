@@ -13,6 +13,7 @@ const bankinter = lazy(() => import('./BankinterIcon'))
 const bbva = lazy(() => import('./BBVAIcon'))
 const sabadell = lazy(() => import('./SabadellIcon'))
 const paypal = lazy(() => import('./PaypalIcon'))
+const eci = lazy(() => import('./EciIcon'))
 
 type BankIconsProps = {
   name: string
@@ -34,8 +35,11 @@ const Icons: Record<string, FC<any>> = {
   bankinter,
   bbva,
   sabadell,
-  paypal
+  paypal,
+  eci
 }
+
+export const BANK_KEYS = Object.keys(Icons)
 
 const BankIcon: FC<BankIconsProps> = ({ name, ...props }) => {
   const Icon = Icons[name?.toLowerCase()] || Fragment

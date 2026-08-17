@@ -13,6 +13,9 @@ export const creditCards = sqliteTable('credit_cards', {
   name: text('name').notNull(),
   accountId: text('account_id').notNull().references(() => accounts.id),
   limit: real('limit'),
+  // Banco cuyo logo se muestra para la tarjeta (clave de components/icons/BankIcon
+  // en el cliente). Si es null, el cliente usa el banco de la cuenta asociada.
+  logoBank: text('logo_bank'),
   user: text('user').notNull().references(() => users.username),
 }, (table) => ({
   userIdx: index('credit_cards_user_idx').on(table.user),

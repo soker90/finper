@@ -18,6 +18,7 @@ export const serializeCreditCard = (card: CreditCardRow | undefined | null) => {
         }
       : null,
     limit: card.limit ?? null,
+    logoBank: card.logoBank ?? null,
     currentDebt: card.currentDebt ?? 0,
     user: card.user
   }

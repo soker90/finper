@@ -18,13 +18,14 @@ import {
   DeleteOutlined,
   BankOutlined
 } from '@ant-design/icons'
-import { MainCard } from 'components'
+import { BankIcon, MainCard } from 'components'
 import { format } from 'utils'
 import type { CreditCard } from 'types'
 
 interface CreditCardCardProps {
   card: CreditCard
   index: number
+  onOpenDetail: (card: CreditCard) => void
   onAddMovement: (card: CreditCard) => void
   onPayDebt: (card: CreditCard) => void
   onEdit: (card: CreditCard) => void
@@ -33,6 +34,7 @@ interface CreditCardCardProps {
 
 export const CreditCardCard: React.FC<CreditCardCardProps> = ({
   card,
+  onOpenDetail,
   onAddMovement,
   onPayDebt,
   onEdit,
@@ -42,6 +44,7 @@ export const CreditCardCard: React.FC<CreditCardCardProps> = ({
   const openMenu = Boolean(anchorEl)
 
   const handleMenuOpen = (e: React.MouseEvent<HTMLElement>) => {
+    e.stopPropagation()
     setAnchorEl(e.currentTarget)
   }
   const handleMenuClose = () => {
@@ -51,31 +54,38 @@ export const CreditCardCard: React.FC<CreditCardCardProps> = ({
   const currentDebt = card.currentDebt ?? 0
   const limit = card.limit
   const hasLimit = limit !== null && limit !== undefined && limit > 0
+  const cardBank = card.logoBank || card.account?.bank
 
   const usagePercent = hasLimit ? Math.min(100, Math.round((currentDebt / limit) * 100)) : 0
   const availableCredit = hasLimit ? Math.max(0, limit - currentDebt) : null
 
   return (
     <MainCard
+      onClick={() => onOpenDetail(card)}
       sx={{
         position: 'relative',
-        overflow: 'hidden'
+        overflow: 'hidden',
+        cursor: 'pointer'
       }}
     >
-      {/* Top Header: Card Name, Chip graphic & Overflow Menu */}
+      {/* Top Header: Card Name, Bank Logo & Overflow Menu */}
       <Stack direction='row' sx={{ justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
         <Stack direction='row' sx={{ alignItems: 'center', gap: 1 }}>
-          <Box
-            sx={{
-              width: 32,
-              height: 22,
-              borderRadius: 1,
-              bgcolor: 'warning.main',
-              border: '1px solid',
-              borderColor: 'warning.dark',
-              display: 'inline-block'
-            }}
-          />
+          {cardBank
+            ? <BankIcon name={cardBank} width={32} height={32} />
+            : (
+              <Box
+                sx={{
+                  width: 32,
+                  height: 22,
+                  borderRadius: 1,
+                  bgcolor: 'warning.main',
+                  border: '1px solid',
+                  borderColor: 'warning.dark',
+                  display: 'inline-block'
+                }}
+              />
+              )}
           <Typography variant='h5' sx={{ fontWeight: 700 }}>
             {card.name}
           </Typography>
@@ -149,7 +159,7 @@ export const CreditCardCard: React.FC<CreditCardCardProps> = ({
           variant='outlined'
           size='small'
           startIcon={<PlusOutlined />}
-          onClick={() => onAddMovement(card)}
+          onClick={(e) => { e.stopPropagation(); onAddMovement(card) }}
           fullWidth
         >
           Movimiento
@@ -160,7 +170,7 @@ export const CreditCardCard: React.FC<CreditCardCardProps> = ({
           size='small'
           color='success'
           startIcon={<DollarOutlined />}
-          onClick={() => onPayDebt(card)}
+          onClick={(e) => { e.stopPropagation(); onPayDebt(card) }}
           disabled={currentDebt <= 0}
           fullWidth
           sx={{ fontWeight: 700 }}
@@ -170,7 +180,7 @@ export const CreditCardCard: React.FC<CreditCardCardProps> = ({
       </Stack>
 
       {/* Overflow Menu */}
-      <Menu anchorEl={anchorEl} open={openMenu} onClose={handleMenuClose}>
+      <Menu anchorEl={anchorEl} open={openMenu} onClose={handleMenuClose} onClick={(e) => e.stopPropagation()}>
         <MenuItem
           onClick={() => {
             handleMenuClose()

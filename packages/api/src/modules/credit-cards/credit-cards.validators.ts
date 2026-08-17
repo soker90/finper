@@ -13,13 +13,15 @@ const { accounts, categories } = schema
 const createCardSchema = Joi.object({
   name: Joi.string().required(),
   accountId: Joi.string().required(),
-  limit: Joi.number().min(0).allow(null)
+  limit: Joi.number().min(0).allow(null),
+  logoBank: Joi.string().allow(null, '')
 })
 
 const editCardSchema = Joi.object({
   name: Joi.string(),
   accountId: Joi.string(),
-  limit: Joi.number().min(0).allow(null)
+  limit: Joi.number().min(0).allow(null),
+  logoBank: Joi.string().allow(null, '')
 }).min(1)
 
 const createMovementSchema = Joi.object({

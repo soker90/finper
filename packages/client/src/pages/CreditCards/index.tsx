@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { Alert } from '@mui/material'
 import { PlusOutlined } from '@ant-design/icons'
+import { useNavigate } from 'react-router'
 
 import { HeaderButtons } from 'components'
 import { getId } from 'utils'
@@ -13,15 +14,13 @@ import {
   ModalMovement,
   ModalPayDebt
 } from './components'
-import { deleteCreditCard, deleteCreditCardMovement } from 'services/apiService'
-import type { CreditCard, CreditCardMovement } from 'types'
-
-type StatusFilter = 'pending' | 'paid' | 'all'
+import { deleteCreditCard } from 'services/apiService'
+import type { CreditCard } from 'types'
 
 const CreditCardsPage: React.FC = () => {
+  const navigate = useNavigate()
   const { creditCards, isLoading: loadingCards, error: creditCardsError } = useCreditCards()
   const [selectedCardIdFilter, setSelectedCardIdFilter] = useState<string>('')
-  const [statusFilter, setStatusFilter] = useState<StatusFilter>('pending')
 
   // Modals state
   const [openCardModal, setOpenCardModal] = useState(false)
@@ -29,7 +28,6 @@ const CreditCardsPage: React.FC = () => {
 
   const [openMovementModal, setOpenMovementModal] = useState(false)
   const [activeCardForMovement, setActiveCardForMovement] = useState<CreditCard | null>(null)
-  const [editingMovement, setEditingMovement] = useState<CreditCardMovement | null>(null)
 
   const [openPayModal, setOpenPayModal] = useState(false)
   const [activeCardForPay, setActiveCardForPay] = useState<CreditCard | null>(null)
@@ -38,10 +36,8 @@ const CreditCardsPage: React.FC = () => {
 
   const activeCardIdForMovements = selectedCardIdFilter || (creditCards.length > 0 ? getId(creditCards[0]) ?? '' : '')
 
-  const { movements, isLoading: loadingMovements } = useCreditCardMovements(
-    activeCardIdForMovements,
-    statusFilter === 'all' ? undefined : statusFilter
-  )
+  const { movements, isLoading: loadingMovements } = useCreditCardMovements(activeCardIdForMovements, 'pending')
+  const recentMovements = movements.slice(0, 10)
 
   const triggerMutate = useCreditCardMutate(activeCardIdForMovements)
   const mutateMovementCard = useCreditCardMutate(activeCardForMovement ? getId(activeCardForMovement) : undefined)
@@ -51,6 +47,11 @@ const CreditCardsPage: React.FC = () => {
   const totalDebt = creditCards.reduce((acc, c) => acc + (c.currentDebt ?? 0), 0)
   const totalLimit = creditCards.reduce((acc, c) => acc + (c.limit ?? 0), 0)
   const availableCredit = Math.max(0, totalLimit - totalDebt)
+
+  const handleOpenDetail = (card: CreditCard) => {
+    const id = getId(card)
+    if (id) navigate(`/tarjetas/${id}`)
+  }
 
   const handleOpenAddCard = () => {
     setEditingCard(null)
@@ -78,26 +79,7 @@ const CreditCardsPage: React.FC = () => {
 
   const handleOpenAddMovement = (card: CreditCard) => {
     setActiveCardForMovement(card)
-    setEditingMovement(null)
     setOpenMovementModal(true)
-  }
-
-  const handleOpenEditMovement = (card: CreditCard, movement: CreditCardMovement) => {
-    setActiveCardForMovement(card)
-    setEditingMovement(movement)
-    setOpenMovementModal(true)
-  }
-
-  const handleDeleteMovement = async (cardId: string, movementId: string) => {
-    if (window.confirm('¿Deseas eliminar este movimiento de tarjeta?')) {
-      const { error } = await deleteCreditCardMovement(cardId, movementId)
-      if (error) {
-        setActionError(error)
-        return
-      }
-      setActionError(null)
-      triggerMutate()
-    }
   }
 
   const handleOpenPayDebt = (card: CreditCard) => {
@@ -138,6 +120,7 @@ const CreditCardsPage: React.FC = () => {
         creditCards={creditCards}
         isLoading={loadingCards}
         onAddCard={handleOpenAddCard}
+        onOpenDetail={handleOpenDetail}
         onAddMovement={handleOpenAddMovement}
         onPayDebt={handleOpenPayDebt}
         onEdit={handleOpenEditCard}
@@ -147,14 +130,10 @@ const CreditCardsPage: React.FC = () => {
       {creditCards.length > 0 && (
         <CreditCardMovementsTable
           creditCards={creditCards}
-          movements={movements}
+          movements={recentMovements}
           isLoading={loadingMovements}
           selectedCardIdFilter={activeCardIdForMovements}
           onSelectCardIdFilter={setSelectedCardIdFilter}
-          statusFilter={statusFilter}
-          onSelectStatusFilter={setStatusFilter}
-          onEditMovement={handleOpenEditMovement}
-          onDeleteMovement={handleDeleteMovement}
         />
       )}
 
@@ -171,7 +150,7 @@ const CreditCardsPage: React.FC = () => {
           open={openMovementModal}
           onClose={() => setOpenMovementModal(false)}
           creditCardId={getId(activeCardForMovement) ?? ''}
-          movement={editingMovement}
+          movement={null}
           onSuccess={() => { mutateMovementCard(); triggerMutate() }}
         />
       )}

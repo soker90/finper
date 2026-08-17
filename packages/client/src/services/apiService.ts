@@ -291,10 +291,10 @@ export const deleteYieldSettlement = (id: string, settlementId: string): Promise
   axios.delete(`${YIELD_DETAIL(id)}/settlements/${settlementId}`).then(() => ({})).catch((error: any) => ({ error: extractError(error) }))
 
 // Credit Cards
-export const addCreditCard = (params: { name: string, accountId: string, limit?: number | null }): Promise<{ data?: any, error?: string }> =>
+export const addCreditCard = (params: { name: string, accountId: string, limit?: number | null, logoBank?: string | null }): Promise<{ data?: any, error?: string }> =>
   axios.post(CREDIT_CARDS, params).then((res: any) => ({ data: res.data })).catch((error: any) => ({ error: extractError(error) }))
 
-export const editCreditCard = (id: string, params: { name?: string, accountId?: string, limit?: number | null }): Promise<{ data?: any, error?: string }> =>
+export const editCreditCard = (id: string, params: { name?: string, accountId?: string, limit?: number | null, logoBank?: string | null }): Promise<{ data?: any, error?: string }> =>
   axios.patch(`${CREDIT_CARDS}/${id}`, params).then((res: any) => ({ data: res.data })).catch((error: any) => ({ error: extractError(error) }))
 
 export const deleteCreditCard = (id: string): Promise<{ error?: string }> =>

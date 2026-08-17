@@ -1,28 +1,8 @@
 import React from 'react'
-import {
-  Box,
-  Typography,
-  Tabs,
-  Tab,
-  Chip,
-  IconButton,
-  MenuItem,
-  TextField,
-  CircularProgress,
-  Tooltip,
-  Stack,
-  Paper,
-  Divider,
-  styled,
-  useMediaQuery,
-  useTheme
-} from '@mui/material'
-import { EditOutlined, DeleteOutlined } from '@ant-design/icons'
-import { MainCard, ItemContent } from 'components'
-import { format, getId } from 'utils'
+import { Typography, MenuItem, TextField, Stack, useMediaQuery, useTheme } from '@mui/material'
+import { CreditCardMovementsList } from './CreditCardMovementsList'
+import { getId } from 'utils'
 import type { CreditCard, CreditCardMovement } from 'types'
-
-type StatusFilter = 'pending' | 'paid' | 'all'
 
 interface CreditCardMovementsTableProps {
   creditCards: CreditCard[]
@@ -30,41 +10,21 @@ interface CreditCardMovementsTableProps {
   isLoading: boolean
   selectedCardIdFilter: string
   onSelectCardIdFilter: (id: string) => void
-  statusFilter: StatusFilter
-  onSelectStatusFilter: (status: StatusFilter) => void
-  onEditMovement: (card: CreditCard, movement: CreditCardMovement) => void
-  onDeleteMovement: (cardId: string, movementId: string) => void
 }
-
-// Reuses the same list-row pattern as the bank Transactions list
-// (ItemContent + Paper component='li') instead of a MUI Table, since
-// credit card movements now share the same data shape (category, store,
-// tags, note) as bank transactions.
-const MovementsList = styled('ul')({
-  padding: 0,
-  margin: 0,
-  listStyleType: 'none',
-  '& > li': {
-    marginTop: 8
-  }
-})
 
 export const CreditCardMovementsTable: React.FC<CreditCardMovementsTableProps> = ({
   creditCards,
   movements,
   isLoading,
   selectedCardIdFilter,
-  onSelectCardIdFilter,
-  statusFilter,
-  onSelectStatusFilter,
-  onEditMovement,
-  onDeleteMovement
+  onSelectCardIdFilter
 }) => {
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
+  const selectedCard = creditCards.find((card) => getId(card) === selectedCardIdFilter)
 
   return (
-    <MainCard content={false}>
+    <>
       <Stack
         direction={isMobile ? 'column' : 'row'}
         spacing={2}
@@ -72,134 +32,37 @@ export const CreditCardMovementsTable: React.FC<CreditCardMovementsTableProps> =
           alignItems: isMobile ? 'stretch' : 'center',
           justifyContent: 'space-between',
           flexWrap: 'wrap',
-          p: 2.5
+          mt: 3,
+          mb: 1
         }}
       >
-        <Typography variant='subtitle1'>Movimientos de Tarjeta</Typography>
+        <Typography variant='subtitle1'>Últimos movimientos pendientes</Typography>
 
-        <Stack
-          direction={isMobile ? 'column' : 'row'}
-          spacing={2}
-          sx={{ alignItems: isMobile ? 'stretch' : 'center', flexWrap: 'wrap', width: isMobile ? '100%' : undefined }}
+        <TextField
+          select
+          size='small'
+          label='Tarjeta'
+          value={selectedCardIdFilter}
+          onChange={(event) => onSelectCardIdFilter(event.target.value)}
+          sx={{ minWidth: isMobile ? '100%' : 160 }}
         >
-          <TextField
-            select
-            size='small'
-            label='Tarjeta'
-            value={selectedCardIdFilter}
-            onChange={(event) => onSelectCardIdFilter(event.target.value)}
-            sx={{ minWidth: isMobile ? '100%' : 160 }}
-          >
-            {creditCards.map((card) => {
-              const id = getId(card)
-              return (
-                <MenuItem key={id} value={id}>
-                  {card.name}
-                </MenuItem>
-              )
-            })}
-          </TextField>
-
-          <Tabs
-            value={statusFilter}
-            onChange={(_event, statusValue) => onSelectStatusFilter(statusValue)}
-            textColor='primary'
-            indicatorColor='primary'
-            variant={isMobile ? 'fullWidth' : 'standard'}
-          >
-            <Tab label='Pendientes' value='pending' />
-            <Tab label='Pagados' value='paid' />
-            <Tab label='Todos' value='all' />
-          </Tabs>
-        </Stack>
+          {creditCards.map((card) => {
+            const id = getId(card)
+            return (
+              <MenuItem key={id} value={id}>
+                {card.name}
+              </MenuItem>
+            )
+          })}
+        </TextField>
       </Stack>
 
-      <Divider />
-
-      {isLoading
-        ? (
-          <Box sx={{ display: 'flex', justifyContent: 'center', my: 4 }}>
-            <CircularProgress />
-          </Box>
-          )
-        : movements.length === 0
-          ? (
-            <Typography color='text.secondary' sx={{ p: 4, textAlign: 'center' }}>
-              No hay movimientos para los filtros seleccionados.
-            </Typography>
-            )
-          : (
-            <MovementsList>
-              {movements.map((movement) => {
-                const id = getId(movement)
-                const cardForMovement = creditCards.find(
-                  (creditCard) => getId(creditCard) === movement.creditCardId
-                )
-                const isPending = movement.status === 'pending'
-                return (
-                  <Paper key={id} component='li' elevation={0}>
-                    <ItemContent sx={{ flexWrap: 'wrap', rowGap: 1 }}>
-                      <Stack direction='row' spacing={1.5} sx={{ alignItems: 'center', minWidth: 160 }}>
-                        <Typography variant='body2' color='text.secondary'>
-                          {new Date(movement.date).toLocaleDateString('es-ES')}
-                        </Typography>
-                        <Chip label={movement.category?.name || 'General'} size='small' variant='outlined' />
-                      </Stack>
-
-                      <Stack direction='row' spacing={1} sx={{ alignItems: 'center', flexWrap: 'wrap', flex: 1, minWidth: 160 }}>
-                        {movement.store?.name && (
-                          <Typography variant='body2'>{movement.store.name}</Typography>
-                        )}
-                        {movement.note && (
-                          <Typography variant='body2' color='text.secondary'>{movement.note}</Typography>
-                        )}
-                        {movement.tags?.map((tag) => (
-                          <Chip key={tag} label={tag} size='small' variant='outlined' />
-                        ))}
-                      </Stack>
-
-                      <Typography
-                        variant='h5'
-                        color={movement.type === 'expense' ? 'error.main' : 'success.main'}
-                      >
-                        {movement.type === 'expense' ? '-' : '+'}{format.euro(movement.amount)}
-                      </Typography>
-
-                      <Stack direction='row' spacing={1} sx={{ alignItems: 'center' }}>
-                        <Chip
-                          label={isPending ? 'Pendiente' : 'Pagado'}
-                          color={isPending ? 'warning' : 'success'}
-                          size='small'
-                          variant={isPending ? 'filled' : 'outlined'}
-                        />
-                        {isPending && cardForMovement && id && (
-                          <Stack direction='row' spacing={0.5}>
-                            <Tooltip title='Editar movimiento'>
-                              <IconButton
-                                size='small'
-                                onClick={() => onEditMovement(cardForMovement, movement)}
-                              >
-                                <EditOutlined style={{ fontSize: 16 }} />
-                              </IconButton>
-                            </Tooltip>
-                            <Tooltip title='Eliminar movimiento'>
-                              <IconButton
-                                size='small'
-                                color='error'
-                                onClick={() => onDeleteMovement(movement.creditCardId, id)}
-                              >
-                                <DeleteOutlined style={{ fontSize: 16 }} />
-                              </IconButton>
-                            </Tooltip>
-                          </Stack>
-                        )}
-                      </Stack>
-                    </ItemContent>
-                  </Paper>
-                )
-              })}
-            </MovementsList>
-            )}
-    </MainCard>
+      <CreditCardMovementsList
+        movements={movements}
+        isLoading={isLoading}
+        emptyMessage='No hay movimientos pendientes para esta tarjeta.'
+        bank={selectedCard?.logoBank || selectedCard?.account?.bank}
+      />
+    </>
   )
 }

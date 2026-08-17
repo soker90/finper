@@ -62,9 +62,9 @@ describe('CreditCards Page', () => {
       http.get('*/credit-cards', () => HttpResponse.json(CARDS_LIST)),
       http.get('*/credit-cards/c1/movements', () => HttpResponse.json([]))
     )
-    const { findByText, findAllByText } = renderFresh()
+    const { findAllByText } = renderFresh()
 
-    expect(await findByText('Visa Pass')).toBeDefined()
+    expect((await findAllByText('Visa Pass')).length).toBeGreaterThan(0)
     const elements = await findAllByText(/150/)
     expect(elements.length).toBeGreaterThan(0)
   })
@@ -103,8 +103,8 @@ describe('CreditCards Page', () => {
       http.get('*/credit-cards/c1/movements', () => HttpResponse.json([])),
       http.get('*/accounts', () => HttpResponse.json(ACCOUNTS_LIST))
     )
-    const { findByText, getByDisplayValue } = renderFresh()
-    await findByText('Visa Pass')
+    const { findAllByText, findByText, getByDisplayValue } = renderFresh()
+    await findAllByText('Visa Pass')
 
     const menuButtons = document.querySelectorAll('button')
     const moreButton = Array.from(menuButtons).find((button) => button.querySelector('.anticon-more'))
@@ -127,8 +127,8 @@ describe('CreditCards Page', () => {
     )
     const originalConfirm = window.confirm
     window.confirm = () => true
-    const { findByText } = renderFresh()
-    await findByText('Visa Pass')
+    const { findAllByText, findByText } = renderFresh()
+    await findAllByText('Visa Pass')
 
     const menuButtons = document.querySelectorAll('button')
     const moreButton = Array.from(menuButtons).find((button) => button.querySelector('.anticon-more'))
@@ -150,8 +150,8 @@ describe('CreditCards Page', () => {
       http.get('*/stats/tags/available', () => HttpResponse.json([])),
       http.post('*/credit-cards/c1/movements', () => HttpResponse.json({ id: 'm2', _id: 'm2', creditCardId: 'c1', amount: 10, type: 'expense', status: 'pending' }, { status: 201 }))
     )
-    const { findByText, getByLabelText, findByRole, queryByText } = renderFresh()
-    await findByText('Visa Pass')
+    const { findAllByText, findByText, getByLabelText, findByRole, queryByText } = renderFresh()
+    await findAllByText('Visa Pass')
 
     const movementBtn = await findByRole('button', { name: /movimiento/i })
     fireEvent.click(movementBtn)
@@ -159,7 +159,6 @@ describe('CreditCards Page', () => {
 
     fireEvent.change(getByLabelText('Importe (€)'), { target: { value: '25.5' } })
     fireEvent.change(document.querySelector('#categoryId')!, { target: { value: 'cat-1' } })
-    fireEvent.change(getByLabelText('Fecha'), { target: { value: '2024-01-15' } })
 
     fireEvent.submit(document.querySelector('form')!)
     await waitFor(() => expect(queryByText('Nuevo movimiento con tarjeta')).toBeNull())
@@ -170,22 +169,26 @@ describe('CreditCards Page', () => {
     server.use(
       http.get('*/credit-cards', () => HttpResponse.json(CARDS_LIST)),
       http.get('*/credit-cards/c1/movements', () => HttpResponse.json(MOVEMENTS_LIST)),
+      http.get('*/categories', () => HttpResponse.json(CATEGORIES_LIST)),
+      http.get('*/categories/grouped', () => HttpResponse.json(GROUPED_CATEGORIES_LIST)),
+      http.get('*/stores', () => HttpResponse.json([])),
+      http.get('*/stats/tags/available', () => HttpResponse.json([])),
       http.delete('*/credit-cards/c1/movements/m1', () => {
         deleteCalled = true
         return new HttpResponse(null, { status: 204 })
       })
     )
-    const originalConfirm = window.confirm
-    window.confirm = () => true
-    const { findByText, findByLabelText } = renderFresh()
-    await findByText('Visa Pass')
-    await findByText('Supermercado')
+    const { findAllByText, findByText, findByRole } = renderFresh()
+    await findAllByText('Visa Pass')
+    const movementRow = await findByText('Supermercado')
+    fireEvent.click(movementRow)
 
-    const deleteButton = await findByLabelText('Eliminar movimiento')
-    fireEvent.click(deleteButton.closest('button')!)
+    const deleteButton = await findByRole('button', { name: 'Eliminar' })
+    fireEvent.click(deleteButton)
+
+    fireEvent.click(await findByRole('button', { name: 'Eliminar movimiento' }))
 
     await waitFor(() => expect(deleteCalled).toBe(true))
-    window.confirm = originalConfirm
   })
 
   it('pays the total debt of a card', async () => {
@@ -198,8 +201,8 @@ describe('CreditCards Page', () => {
         return HttpResponse.json({ card: { ...CARDS_LIST[0], currentDebt: 0 }, paidCount: 1, totalPaid: 150 })
       })
     )
-    const { findByText, findByRole, queryByText } = renderFresh()
-    await findByText('Visa Pass')
+    const { findAllByText, findByText, findByRole, queryByText } = renderFresh()
+    await findAllByText('Visa Pass')
 
     const payBtn = await findByRole('button', { name: /pagar deuda/i })
     fireEvent.click(payBtn)
@@ -216,8 +219,8 @@ describe('CreditCards Page', () => {
       http.get('*/credit-cards', () => HttpResponse.json(CARDS_LIST)),
       http.get('*/credit-cards/c1/movements', () => HttpResponse.json(MOVEMENTS_LIST))
     )
-    const { findByText, findByRole, findByLabelText } = renderFresh()
-    await findByText('Visa Pass')
+    const { findAllByText, findByText, findByRole, findByLabelText } = renderFresh()
+    await findAllByText('Visa Pass')
 
     const payBtn = await findByRole('button', { name: /pagar deuda/i })
     fireEvent.click(payBtn)
