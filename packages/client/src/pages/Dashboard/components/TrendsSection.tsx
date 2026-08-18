@@ -132,7 +132,7 @@ const TrendsSection = ({ stats, tickets, ticketsEnabled, ticketsLoading, chartHe
               {/* Deudas */}
               <MiniKpi
                 title='Deudas Totales'
-                value={format.euro(stats.totalDebts)}
+                value={format.euro(stats.totalDebts + stats.totalCreditCardDebt)}
                 icon={<BankOutlined />}
                 color='error'
               />

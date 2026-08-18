@@ -22,6 +22,7 @@ const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate()
 const DASHBOARD_STATS_DATA: DashboardStats = {
   totalBalance: faker.number.float({ min: 5000, max: 50000, multipleOf: 0.01 }),
   totalDebts: faker.number.float({ min: 0, max: 5000, multipleOf: 0.01 }),
+  totalCreditCardDebt: faker.number.float({ min: 0, max: 2000, multipleOf: 0.01 }),
   netWorth: faker.number.float({ min: 1000, max: 45000, multipleOf: 0.01 }),
   monthlyIncome: currentMonth.income,
   monthlyExpenses: currentMonth.expenses,

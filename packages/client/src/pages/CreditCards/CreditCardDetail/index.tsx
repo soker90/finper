@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router'
 import { Box, Button, CircularProgress, Stack, Typography } from '@mui/material'
 import { ArrowLeftOutlined, PlusOutlined, DollarOutlined, EditOutlined } from '@ant-design/icons'
 
-import { BankIcon } from 'components'
+import { BankIcon, HeaderButtons } from 'components'
 import { useCreditCardDetail, useCreditCardMovements, useCreditCardMutate } from '../hooks/useCreditCards'
 import { CreditCardMovementsList, ModalCreditCard, ModalMovement, ModalPayDebt } from '../components'
 
@@ -46,6 +46,17 @@ const CreditCardDetail: React.FC = () => {
 
   const cardBank = creditCard.logoBank || creditCard.account?.bank
 
+  const actionButtons = [
+    { Icon: PlusOutlined, title: 'Movimiento', onClick: handleOpenAddMovement },
+    {
+      Icon: DollarOutlined,
+      title: 'Pagar Deuda',
+      onClick: () => setOpenPayModal(true),
+      disabled: (creditCard.currentDebt ?? 0) <= 0
+    },
+    { Icon: EditOutlined, title: 'Editar', onClick: () => setOpenCardModal(true) }
+  ]
+
   return (
     <Stack spacing={3}>
       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 1 }}>
@@ -56,23 +67,7 @@ const CreditCardDetail: React.FC = () => {
           <Typography variant='h4'>{creditCard.name}</Typography>
           {cardBank && <BankIcon name={cardBank} width={24} height={24} />}
         </Box>
-        <Stack direction='row' spacing={1} sx={{ flexWrap: 'wrap' }}>
-          <Button variant='outlined' startIcon={<PlusOutlined />} onClick={handleOpenAddMovement}>
-            Movimiento
-          </Button>
-          <Button
-            variant='contained'
-            color='success'
-            startIcon={<DollarOutlined />}
-            onClick={() => setOpenPayModal(true)}
-            disabled={(creditCard.currentDebt ?? 0) <= 0}
-          >
-            Pagar Deuda
-          </Button>
-          <Button variant='outlined' startIcon={<EditOutlined />} onClick={() => setOpenCardModal(true)}>
-            Editar
-          </Button>
-        </Stack>
+        <HeaderButtons buttons={actionButtons} desktopSx={{}} />
       </Box>
 
       <Typography variant='subtitle1'>Movimientos pendientes</Typography>

@@ -50,6 +50,7 @@ export interface DashboardStats {
   monthlyExpenses: number
   netWorth: number
   totalDebts: number
+  totalCreditCardDebt: number
   savingsRate: number
   topExpenseCategories: Array<{ name: string; amount: number; parentName?: string }>
   topStores: Array<{ name: string; amount: number }>

@@ -47,6 +47,7 @@ export class DashboardService {
     // Agregaciones (SQLite, síncronas)
     const totalBalance = repo.sumActiveAccountsBalance(user)
     const totalLoansPending = repo.sumPendingLoans(user)
+    const totalCreditCardDebt = repo.sumPendingCreditCardDebt(user)
     const currentMonthAgg = repo.monthIncomeExpenses(user, currentMonthStart, currentMonthEnd)
     const previousMonthAgg = repo.monthIncomeExpenses(user, previousMonthStart, previousMonthEnd)
     const last6MonthsAgg = repo.last6MonthsSummary(user, last6MonthsStart, currentMonthEnd)
@@ -66,7 +67,7 @@ export class DashboardService {
     const totalDebts = roundMoney(totalOwed)
     const totalReceivable = roundMoney(totalReceiv)
 
-    const netWorth = roundMoney(totalBalance - totalDebts - totalLoansPending + totalReceivable)
+    const netWorth = roundMoney(totalBalance - totalDebts - totalLoansPending - totalCreditCardDebt + totalReceivable)
 
     const monthlyIncome = roundMoney(currentMonthAgg.income)
     const monthlyExpenses = roundMoney(currentMonthAgg.expenses)
@@ -132,7 +133,7 @@ export class DashboardService {
     // Health Score
     const healthScore = computeHealthScore(
       historicalSavingsRate,
-      totalDebts + totalLoansPending,
+      totalDebts + totalLoansPending + totalCreditCardDebt,
       totalBalance,
       budgetAdherencePct,
       cashRunwayMonths,
@@ -153,6 +154,7 @@ export class DashboardService {
       totalBalance,
       totalDebts,
       totalLoansPending,
+      totalCreditCardDebt,
       netWorth,
       monthlyIncome,
       monthlyExpenses,

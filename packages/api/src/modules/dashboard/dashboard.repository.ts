@@ -2,7 +2,7 @@ import { eq, and, gte, lt } from 'drizzle-orm'
 import { type DB, schema } from '@soker90/finper-db'
 import { roundMoney } from '@soker90/finper-db'
 
-const { accounts, loans, transactions, categories, stores, budgets } = schema
+const { accounts, loans, transactions, categories, stores, budgets, creditCardMovements } = schema
 
 const EXPENSE = 'expense'
 const INCOME = 'income'
@@ -56,6 +56,15 @@ export const createDashboardRepository = (db: DB) => {
       const rows = db.select({ pendingAmount: loans.pendingAmount }).from(loans)
         .where(eq(loans.user, user)).all()
       return roundMoney(rows.filter(r => r.pendingAmount > 0).reduce((s, r) => s + r.pendingAmount, 0))
+    },
+
+    // 3b. Suma de deuda pendiente de tarjetas de crédito (movimientos sin liquidar).
+    sumPendingCreditCardDebt: (user: string): number => {
+      const rows = db.select({ amount: creditCardMovements.amount, type: creditCardMovements.type })
+        .from(creditCardMovements)
+        .where(and(eq(creditCardMovements.user, user), eq(creditCardMovements.status, 'pending'))).all()
+      const debt = rows.reduce((s, r) => s + (r.type === 'expense' ? r.amount : -r.amount), 0)
+      return roundMoney(debt)
     },
 
     // 4/5. Ingresos y gastos en un rango.

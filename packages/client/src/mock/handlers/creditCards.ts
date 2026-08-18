@@ -1,5 +1,21 @@
 import { http, HttpResponse } from 'msw'
 
+let movements: Array<Record<string, any>> = [
+  {
+    id: 'mov-1',
+    _id: 'mov-1',
+    creditCardId: 'card-1',
+    date: 1700000000000,
+    amount: 150,
+    type: 'expense',
+    categoryId: 'cat-1',
+    category: { id: 'cat-1', _id: 'cat-1', name: 'Supermercado', type: 'expense' },
+    tags: [],
+    status: 'pending',
+    user: 'testuser'
+  }
+]
+
 export const creditCardHandlers = [
   http.get('*/credit-cards', () => {
     return HttpResponse.json([
@@ -29,22 +45,8 @@ export const creditCardHandlers = [
     })
   }),
 
-  http.get('*/credit-cards/:id/movements', () => {
-    return HttpResponse.json([
-      {
-        id: 'mov-1',
-        _id: 'mov-1',
-        creditCardId: 'card-1',
-        date: 1700000000000,
-        amount: 150,
-        type: 'expense',
-        categoryId: 'cat-1',
-        category: { id: 'cat-1', _id: 'cat-1', name: 'Supermercado', type: 'expense' },
-        tags: [],
-        status: 'pending',
-        user: 'testuser'
-      }
-    ])
+  http.get('*/credit-cards/:id/movements', ({ params }) => {
+    return HttpResponse.json(movements.filter((movement) => movement.creditCardId === params.id))
   }),
 
   http.post('*/credit-cards', async ({ request }) => {
@@ -62,10 +64,10 @@ export const creditCardHandlers = [
 
   http.post('*/credit-cards/:id/movements', async ({ params, request }) => {
     const body: any = await request.json()
-    return HttpResponse.json({
-      id: 'mov-new',
-      _id: 'mov-new',
-      creditCardId: params.id,
+    const movement = {
+      id: `mov-${movements.length + 1}`,
+      _id: `mov-${movements.length + 1}`,
+      creditCardId: params.id as string,
       date: body.date,
       amount: body.amount,
       type: body.type ?? 'expense',
@@ -77,7 +79,9 @@ export const creditCardHandlers = [
       tags: body.tags ?? [],
       status: 'pending',
       user: 'testuser'
-    }, { status: 201 })
+    }
+    movements = [...movements, movement]
+    return HttpResponse.json(movement, { status: 201 })
   }),
 
   http.post('*/credit-cards/:id/pay-debt', () => {
@@ -112,25 +116,30 @@ export const creditCardHandlers = [
 
   http.patch('*/credit-cards/:id/movements/:movementId', async ({ params, request }) => {
     const body: any = await request.json()
-    return HttpResponse.json({
+    const existing = movements.find((movement) => movement.id === params.movementId)
+    const updated = {
+      ...existing,
       id: params.movementId,
       _id: params.movementId,
       creditCardId: params.id,
-      date: body.date ?? 1700000000000,
-      amount: body.amount ?? 150,
-      type: body.type ?? 'expense',
-      categoryId: body.categoryId ?? 'cat-1',
+      date: body.date ?? existing?.date ?? 1700000000000,
+      amount: body.amount ?? existing?.amount ?? 150,
+      type: body.type ?? existing?.type ?? 'expense',
+      categoryId: body.categoryId ?? existing?.categoryId ?? 'cat-1',
       category: { id: 'cat-1', _id: 'cat-1', name: 'Supermercado', type: 'expense' },
       storeId: body.storeId ?? null,
       store: body.storeId ? { id: 'store-new', _id: 'store-new', name: body.storeId } : null,
       note: body.note ?? null,
-      tags: body.tags ?? [],
-      status: 'pending',
+      tags: body.tags ?? existing?.tags ?? [],
+      status: existing?.status ?? 'pending',
       user: 'testuser'
-    })
+    }
+    movements = movements.map((movement) => movement.id === params.movementId ? updated : movement)
+    return HttpResponse.json(updated)
   }),
 
-  http.delete('*/credit-cards/:id/movements/:movementId', () => {
+  http.delete('*/credit-cards/:id/movements/:movementId', ({ params }) => {
+    movements = movements.filter((movement) => movement.id !== params.movementId)
     return new HttpResponse(null, { status: 204 })
   })
 ]
