@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.3.0] - 2026-08-19
+
+### Added
+
+- **client/api**: Credit Cards module. Comprehensive credit card management including debt tracking, billing cycles, settlement generation, store name auto-resolution, tag support, and credit card stats integration on the main Dashboard (`CreditCardMiniCard`).
+- **api**: New `credit-cards` module endpoints (`/api/credit-cards/*`) backed by `credit_cards` and `credit_card_movements` SQLite tables.
+- **client**: Dedicated credit cards page, movement modal matching bank transaction fields, and responsive table/card layout for mobile screens.
+
+---
+
 ## [2.2.0] - 2026-08-15
 
 ### Added
