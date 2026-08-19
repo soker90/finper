@@ -35,7 +35,6 @@ jobs:
             soker90/finper-client:${{ github.event.release.tag_name }}
           context: .
           file: ./packages/client/Dockerfile
-          build-args: API_HOST=${{ secrets.API_HOST }}
 
       - name: Build and push api
         uses: docker/build-push-action@v7
