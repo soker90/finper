@@ -135,6 +135,7 @@ describe('Dashboard', () => {
     const baseStats = {
       totalBalance: 1000,
       totalDebts: 0,
+      totalCreditCardDebt: 0,
       netWorth: 1000,
       monthlyIncome: 2000,
       monthlyExpenses: 500,

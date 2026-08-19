@@ -1,6 +1,6 @@
 import { eq, and, desc, type SQL } from 'drizzle-orm'
 import { type DB, schema } from '@soker90/finper-db'
-const { transactions, categories, accounts, stores } = schema
+const { transactions, categories, accounts, stores, creditCards } = schema
 
 type Transaction = typeof transactions.$inferSelect
 
@@ -19,6 +19,7 @@ export interface TransactionRow extends Transaction {
   accountName: string | null
   accountBank: string | null
   storeName: string | null
+  creditCardName: string | null
 }
 
 export const createTransactionsRepository = (db: DB) => ({
@@ -49,12 +50,15 @@ export const createTransactionsRepository = (db: DB) => ({
       categoryName: categories.name,
       accountName: accounts.name,
       accountBank: accounts.bank,
-      storeName: stores.name
+      storeName: stores.name,
+      creditCardId: transactions.creditCardId,
+      creditCardName: creditCards.name
     })
       .from(transactions)
       .leftJoin(categories, eq(transactions.categoryId, categories.id))
       .leftJoin(accounts, eq(transactions.accountId, accounts.id))
       .leftJoin(stores, eq(transactions.storeId, stores.id))
+      .leftJoin(creditCards, eq(transactions.creditCardId, creditCards.id))
       .where(and(...conditions))
       .orderBy(desc(transactions.date))
       .limit(limit)

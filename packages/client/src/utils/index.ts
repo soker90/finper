@@ -4,3 +4,4 @@ export const capitalize = (word: string) => `${word.charAt(0).toUpperCase()}${wo
 export * from './getPreviousMonthYear'
 export { sanitizeTag } from './sanitizeTag'
 export { isTokenPresent } from './isTokenPresent'
+export { getId } from './getId'

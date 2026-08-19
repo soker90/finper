@@ -243,6 +243,25 @@ Routes: `ticket.routes.ts`. Sin modelo Mongoose propio (datos vienen del bot).
 
 ---
 
+## Credit Cards — `/api/credit-cards`
+
+| Método | Ruta | Descripción |
+|---|---|---|
+| GET | `/` | Listar tarjetas del usuario (incluye `currentDebt` calculada de movimientos `pending`). |
+| POST | `/` | Crear tarjeta (asociada a una cuenta bancaria vía `accountId`). |
+| GET | `/:id` | Detalle de tarjeta. |
+| PATCH | `/:id` | Editar tarjeta. |
+| DELETE | `/:id` | Eliminar tarjeta. Falla con `409` si tiene movimientos `paid` (ya materializados como `transactions`); si solo tiene movimientos `pending`, se eliminan en cascada junto con la tarjeta. |
+| GET | `/:id/movements` | Listar movimientos de la tarjeta (filtro opcional `status=pending\|paid`). |
+| POST | `/:id/movements` | Registrar movimiento (queda en estado `pending`). |
+| PATCH | `/:id/movements/:movementId` | Editar movimiento. Falla si el movimiento ya está `paid`. |
+| DELETE | `/:id/movements/:movementId` | Eliminar movimiento. Falla si el movimiento ya está `paid`. |
+| POST | `/:id/pay-debt` | Liquidar deuda (total, por importe parcial o por lista de `movementIds`). Marca los movimientos afectados como `paid` y crea una transacción real en la cuenta asociada (`accountId` de la tarjeta), enlazada vía `transactionId`. |
+
+Routes: `credit-cards.routes.ts`. Schema Drizzle: `creditCards`, `creditCardMovements` (`packages/db/src/schema/`). Ver comentarios de diseño en el schema sobre el ciclo de vida `pending → paid → transacción real`.
+
+---
+
 ## Dashboard — `/api/dashboard`
 
 | Método | Ruta | Descripción |

@@ -6,3 +6,29 @@ export type StockType = 'buy' | 'sell' | 'dividend'
 export type SupplyType = 'electricity' | 'water' | 'gas' | 'other'
 export type LoanPaymentType = 'ordinary' | 'extraordinary'
 export type BudgetRuleClassType = 'needs' | 'wants' | 'savings' | 'none'
+export type CreditCardMovementStatus = 'pending' | 'paid'
+
+export interface CreditCard {
+  id: string
+  name: string
+  accountId: string
+  limit?: number | null
+  logoBank?: string | null
+  currentDebt?: number
+  user: string
+}
+
+export interface CreditCardMovement {
+  id: string
+  creditCardId: string
+  date: number
+  amount: number
+  type: 'expense' | 'income'
+  categoryId: string
+  storeId?: string | null
+  note?: string | null
+  status: CreditCardMovementStatus
+  paidAt?: number | null
+  transactionId?: string | null
+  user: string
+}

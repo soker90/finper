@@ -1,5 +1,6 @@
 import axios from 'axios'
-import { ACCOUNTS, BUDGETS, CATEGORIES, DEBTS, LOANS, LOAN_DETAIL, LOAN_SIMULATE, PENSIONS, TICKETS, TRANSACTIONS, SUBSCRIPTIONS, SUBSCRIPTION_CANDIDATES, SUPPLIES, SUPPLIES_PROPERTIES, SUPPLIES_READINGS, STOCKS, GOALS, YIELDS, YIELD_DETAIL } from 'constants/api-paths'
+import { ACCOUNTS, BUDGETS, CATEGORIES, DEBTS, LOANS, LOAN_DETAIL, LOAN_SIMULATE, PENSIONS, TICKETS, TRANSACTIONS, SUBSCRIPTIONS, SUBSCRIPTION_CANDIDATES, SUPPLIES, SUPPLIES_PROPERTIES, SUPPLIES_READINGS, STOCKS, GOALS, YIELDS, YIELD_DETAIL, CREDIT_CARDS } from 'constants/api-paths'
+
 import type { TransactionType } from '@soker90/finper-types'
 import type { Category, Transaction, Account, Pension, PensionTransaction, Debt, Loan, SubscriptionInput, SupplyReadingInput, StockPurchase, Goal, SimulationResult, YieldInput } from 'types'
 
@@ -288,3 +289,45 @@ export const unlinkYieldTransaction = (id: string, transactionId: string): Promi
 
 export const deleteYieldSettlement = (id: string, settlementId: string): Promise<{ error?: string }> =>
   axios.delete(`${YIELD_DETAIL(id)}/settlements/${settlementId}`).then(() => ({})).catch((error: any) => ({ error: extractError(error) }))
+
+// Credit Cards
+export const addCreditCard = (params: { name: string, accountId: string, limit?: number | null, logoBank?: string | null }): Promise<{ data?: any, error?: string }> =>
+  axios.post(CREDIT_CARDS, params).then((res: any) => ({ data: res.data })).catch((error: any) => ({ error: extractError(error) }))
+
+export const editCreditCard = (id: string, params: { name?: string, accountId?: string, limit?: number | null, logoBank?: string | null }): Promise<{ data?: any, error?: string }> =>
+  axios.patch(`${CREDIT_CARDS}/${id}`, params).then((res: any) => ({ data: res.data })).catch((error: any) => ({ error: extractError(error) }))
+
+export const deleteCreditCard = (id: string): Promise<{ error?: string }> =>
+  axios.delete(`${CREDIT_CARDS}/${id}`).then(() => ({})).catch((error: any) => ({ error: extractError(error) }))
+
+export const addCreditCardMovement = (creditCardId: string, params: {
+  date: number
+  amount: number
+  type?: 'expense' | 'income'
+  categoryId: string
+  storeId?: string | null
+  note?: string | null
+  tags?: string[]
+}): Promise<{ data?: any, error?: string }> =>
+  axios.post(`${CREDIT_CARDS}/${creditCardId}/movements`, params).then((res: any) => ({ data: res.data })).catch((error: any) => ({ error: extractError(error) }))
+
+export const editCreditCardMovement = (creditCardId: string, movementId: string, params: {
+  date?: number
+  amount?: number
+  type?: 'expense' | 'income'
+  categoryId?: string
+  storeId?: string | null
+  note?: string | null
+  tags?: string[]
+}): Promise<{ data?: any, error?: string }> =>
+  axios.patch(`${CREDIT_CARDS}/${creditCardId}/movements/${movementId}`, params).then((res: any) => ({ data: res.data })).catch((error: any) => ({ error: extractError(error) }))
+
+export const deleteCreditCardMovement = (creditCardId: string, movementId: string): Promise<{ error?: string }> =>
+  axios.delete(`${CREDIT_CARDS}/${creditCardId}/movements/${movementId}`).then(() => ({})).catch((error: any) => ({ error: extractError(error) }))
+
+export const payCreditCardDebt = (creditCardId: string, payload: {
+  movementIds?: string[]
+  amount?: number
+  all?: boolean
+}): Promise<{ data?: any, error?: string }> =>
+  axios.post(`${CREDIT_CARDS}/${creditCardId}/pay-debt`, payload).then((res: any) => ({ data: res.data })).catch((error: any) => ({ error: extractError(error) }))

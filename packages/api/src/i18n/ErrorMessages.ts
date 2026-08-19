@@ -77,6 +77,13 @@ export const ERROR_MESSAGE = {
     INVALID_AMOUNT: 'La cantidad debe ser mayor que 0',
     INSUFFICIENT_FUNDS: 'No se puede retirar más dinero del asignado a la meta'
   },
+  CREDIT_CARD: {
+    NOT_FOUND: 'La tarjeta de crédito no existe',
+    MOVEMENT_NOT_FOUND: 'El movimiento de tarjeta no existe',
+    INVALID_PAYMENT: 'No hay movimientos pendientes para pagar o los parámetros son inválidos',
+    ALREADY_PAID: 'Este movimiento ya ha sido pagado',
+    HAS_PAID_MOVEMENTS: 'No se puede eliminar la tarjeta porque tiene movimientos ya pagados'
+  },
   PASSKEY: {
     NOT_FOUND: 'No hay huella registrada para este usuario',
     INVALID_CHALLENGE: 'El reto de verificación ha caducado o no es válido',

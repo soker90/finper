@@ -1,10 +1,11 @@
 import { FC, useState } from 'react'
-import { Chip, Collapse, Divider, Paper, Stack, Typography, useMediaQuery, useTheme } from '@mui/material'
+import { Chip, Collapse, Divider, Paper, Stack, Tooltip, Typography, useMediaQuery, useTheme } from '@mui/material'
+import { CreditCardOutlined } from '@ant-design/icons'
 import { Transaction } from 'types'
 import { format } from 'utils'
 
 import { BankIcon } from 'components/icons'
-import { AMOUNT_COLORS, TRANSACTION_SYMBOL } from './constans'
+import { AMOUNT_COLORS, TRANSACTION_SYMBOL } from 'constants/transactions'
 import styles from './styles.module.css'
 import { ItemContent } from 'components'
 import TransactionEdit from '../TransactionEdit'
@@ -38,6 +39,13 @@ const TransactionItem: FC<TransactionItemProps> = ({ transaction, forceExpand, c
                 name={transaction.account?.bank} className={styles.bankLogo} height={32}
                 width={32}
               />
+              {transaction.creditCard && (
+                <Tooltip title={transaction.creditCard.name}>
+                  <span role='img' aria-label={transaction.creditCard.name} tabIndex={0}>
+                    <CreditCardOutlined style={{ fontSize: 16 }} />
+                  </span>
+                </Tooltip>
+              )}
               <span>{format.dateShort(transaction.date)}</span>
             </div>
             <Stack spacing={1} direction='row' sx={{ alignItems: 'center', pr: isDesktop ? '50%' : undefined }}>

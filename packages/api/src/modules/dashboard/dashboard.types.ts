@@ -27,6 +27,7 @@ export interface DashboardStatsResult {
   totalBalance: number
   totalDebts: number
   totalLoansPending: number
+  totalCreditCardDebt: number
   netWorth: number
 
   // Current month

@@ -33,6 +33,7 @@ import { stocksRouter } from './modules/stocks/stocks.routes'
 import { goalsRouter } from './modules/goals/goals.routes'
 import { statsRoutes } from './modules/stats/stats.routes'
 import { yieldsRoutes } from './modules/yields/yields.routes'
+import { creditCardsRoutes } from './modules/credit-cards/credit-cards.routes'
 
 interface WalCheckpointResult {
   busy: number
@@ -128,6 +129,7 @@ class Server {
     this.app.use('/api/goals', goalsRouter)
     this.app.use('/api/stats', statsRoutes)
     this.app.use('/api/yields', yieldsRoutes)
+    this.app.use('/api/credit-cards', creditCardsRoutes)
   }
 
   public preMiddlewareConfig (): void {

@@ -18,6 +18,10 @@ export interface Transaction {
   store?: {
     name: string,
   },
+  creditCard?: {
+    id: string,
+    name: string,
+  } | null,
   tags?: string[],
 }
 
