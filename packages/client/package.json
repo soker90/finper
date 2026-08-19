@@ -22,7 +22,7 @@
     "@mui/x-date-pickers": "9.11.0",
     "@simplewebauthn/browser": "13.3.0",
     "@tanstack/react-virtual": "3.14.9",
-    "axios": "1.16.1",
+    "axios": "1.18.0",
     "dayjs": "1.11.20",
     "eslint-plugin-import": "2.32.0",
     "eslint-plugin-promise": "7.3.0",
