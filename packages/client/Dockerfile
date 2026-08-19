@@ -1,6 +1,6 @@
 FROM node:24-alpine as build
 
-RUN corepack enable && corepack prepare pnpm@latest --activate
+RUN corepack enable && corepack prepare pnpm@10.29.3 --activate
 RUN mkdir -p /home/node/app && chown -R node:node /home/node/app
 
 WORKDIR /home/node/app

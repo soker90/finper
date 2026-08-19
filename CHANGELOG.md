@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.3.1] - 2026-08-19
+
+### Fixed
+
+- **docker/ci**: Remove obsolete `build-args: API_HOST` from GitHub Actions docker workflow so client Docker image uses the default `/api/` upstream proxy.
+- **client**: Add fallback `|| '/api/'` to `API_HOST` in client config to prevent empty baseURL when `VITE_API_HOST` is not set.
+- **client**: Pin pnpm version in `packages/client/Dockerfile` to `10.29.3`.
+
+---
+
 ## [2.3.0] - 2026-08-19
 
 ### Added
