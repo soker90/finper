@@ -29,8 +29,9 @@ export const ERROR_MESSAGE = {
     INVALID_AMOUNT: 'La cantidad no es válida',
     YEAR_MONTH_INVALID: 'El año y/o el mes no son válidos'
   },
-  PENSION: {
-    NOT_FOUND: 'El movimiento de la pensión no existe'
+  PENSION_PLAN: {
+    NOT_FOUND: 'El plan de pensiones no existe',
+    MOVEMENT_NOT_FOUND: 'El movimiento de la pensión no existe'
   },
   LOAN: {
     NOT_FOUND: 'El préstamo no existe',

@@ -1,4 +1,4 @@
-import { EditOutlined } from '@ant-design/icons'
+import { EditOutlined, DeleteOutlined } from '@ant-design/icons'
 import ScrollableTable, { Column, Action } from 'components/ScrollableTable'
 import { format } from 'utils'
 import { PensionTransaction } from 'types'
@@ -15,11 +15,13 @@ const COLUMNS: Column<PensionTransaction>[] = [
 interface Props {
   transactions: PensionTransaction[]
   onEdit: (transaction: PensionTransaction) => void
+  onDelete?: (transaction: PensionTransaction) => void
 }
 
-const PensionTransactionsTable = ({ transactions, onEdit }: Props) => {
+const PensionTransactionsTable = ({ transactions, onEdit, onDelete }: Props) => {
   const actions: Action<PensionTransaction>[] = [
-    { icon: EditOutlined, tooltip: 'Editar', onClick: onEdit }
+    { icon: EditOutlined, tooltip: 'Editar', onClick: onEdit },
+    ...(onDelete ? [{ icon: DeleteOutlined, tooltip: 'Eliminar', onClick: onDelete }] : [])
   ]
 
   return (

@@ -20,7 +20,7 @@ import { budgetsRoutes } from './modules/budgets/budgets.routes'
 import { categoriesRoutes } from './modules/categories/categories.routes'
 import { dashboardRoutes } from './modules/dashboard/dashboard.routes'
 import { debtsRouter } from './modules/debts/debts.routes'
-import { PensionsRoutes } from './modules/pensions/pensions.routes'
+import { pensionPlansRoutes } from './modules/pension-plans/pension-plans.routes'
 import { transactionsRoutes } from './modules/transactions/transactions.routes'
 import { storesRoutes } from './modules/stores/stores.routes'
 import { TicketRoutes } from './modules/ticket/ticket.routes'
@@ -116,7 +116,7 @@ class Server {
     this.app.use('/api/dashboard', dashboardRoutes)
     this.app.use('/api/debts', debtsRouter)
     this.app.use('/api/categories', categoriesRoutes)
-    this.app.use('/api/pensions', new PensionsRoutes().router)
+    this.app.use('/api/pension-plans', pensionPlansRoutes)
     this.app.use('/api/transactions', transactionsRoutes)
     this.app.use('/api/stores', storesRoutes)
     this.app.use('/api/tickets', new TicketRoutes().router)

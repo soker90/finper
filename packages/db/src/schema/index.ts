@@ -8,6 +8,7 @@ export * from './loans';
 export * from './loan-payments';
 export * from './passkeys';
 export * from './pensions';
+export * from './pension-plans';
 export * from './properties';
 export * from './stocks';
 export * from './stores';

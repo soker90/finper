@@ -279,21 +279,6 @@ export const insertGoal = async (params: Record<string, any> = {}): Promise<any>
   return data
 }
 
-export const insertPension = async (params: Record<string, any> = {}): Promise<any> => {
-  const data = {
-    id: generateId(),
-    date: params.date ?? faker.date.past().getTime(),
-    value: params.value ?? faker.number.int(),
-    companyAmount: params.companyAmount ?? faker.number.int(),
-    companyUnits: params.companyUnits ?? faker.number.int(),
-    employeeUnits: params.employeeUnits ?? faker.number.int(),
-    employeeAmount: params.employeeAmount ?? faker.number.int(),
-    user: ensureUser(params.user)
-  }
-  sqliteDb.insert(schema.pensions).values(data).run()
-  return data
-}
-
 export const insertProperty = (params: Record<string, any> = {}) => {
   const user = ensureUser(params.user)
   return propertyRepository.create({ name: params.name ?? faker.location.streetAddress(), user })

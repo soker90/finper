@@ -1,19 +1,18 @@
 import { useForm } from 'react-hook-form'
-import { useSWRConfig } from 'swr'
 
 import { ModalGrid, DateForm, InputForm } from 'components'
 import { type PensionTransaction } from 'types'
-import { PENSIONS } from 'constants/api-paths'
-import { addPensionApi, editPensionApi } from 'services/apiService'
+import { addPensionMovement, editPensionMovement } from 'services/apiService'
+import { usePensionPlanMutate } from '../hooks'
 
 interface Props {
-
+  planId: string;
   onClose: () => void;
   transaction?: PensionTransaction;
 }
 
-const TransactionModal = ({ onClose, transaction }: Props) => {
-  const { mutate } = useSWRConfig()
+const TransactionModal = ({ planId, onClose, transaction }: Props) => {
+  const triggerMutate = usePensionPlanMutate(planId)
   const { register, handleSubmit, formState: { errors }, control, setError } = useForm({
     defaultValues: {
       date: transaction?.date || null,
@@ -39,10 +38,12 @@ const TransactionModal = ({ onClose, transaction }: Props) => {
       employeeUnits: params.employeeUnits
     } as PensionTransaction
 
-    const { error } = transaction?._id ? await editPensionApi(transaction._id, formattedParams) : await addPensionApi(formattedParams)
+    const { error } = transaction?._id
+      ? await editPensionMovement(planId, transaction._id, formattedParams)
+      : await addPensionMovement(planId, formattedParams)
 
     if (!error) {
-      await mutate(PENSIONS)
+      triggerMutate()
       onClose()
     }
   })

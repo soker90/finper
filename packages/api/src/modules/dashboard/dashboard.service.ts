@@ -1,8 +1,8 @@
 import { roundMoney } from '@soker90/finper-db'
 import { db } from '../../db'
 import { debtsService } from '../debts/debts.service'
-import { createPensionsRepository } from '../pensions/pensions.repository'
-import { PensionsService } from '../pensions/pensions.service'
+import { createPensionPlansRepository } from '../pension-plans/pension-plans.repository'
+import { PensionPlansService } from '../pension-plans/pension-plans.service'
 import { computeHealthScore, computeBudgetAdherence, computeHistoricalSavingsRate } from './utils/health-score'
 import { computeFilteredAvgMonthlyExpense } from './utils/cash-runway'
 import { generateInsights } from './utils/insights'
@@ -25,7 +25,7 @@ export class DashboardService {
   constructor (private repository: IDashboardRepository) {}
 
   getStats ({ user }: { user: string }): DashboardStatsResult {
-    const pensionsService = new PensionsService(createPensionsRepository(db))
+    const pensionPlansService = new PensionPlansService(createPensionPlansRepository(db))
     const now = new Date()
     const currentYear = now.getFullYear()
     const currentMonth = now.getMonth() // 0-indexed
@@ -42,7 +42,7 @@ export class DashboardService {
     const repo = this.repository
 
     const debtsResult = debtsService.getDebts(user)
-    const pensionData = pensionsService.getPensions(user)
+    const pensionData = pensionPlansService.getAggregateSummary(user)
 
     // Agregaciones (SQLite, síncronas)
     const totalBalance = repo.sumActiveAccountsBalance(user)

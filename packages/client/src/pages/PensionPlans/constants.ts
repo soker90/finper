@@ -1,6 +1,6 @@
-import { Pension } from 'types'
+import { PensionPlan } from 'types'
 
-export const STATS: { title: string, value: keyof Omit<Pension, 'transactions'>, currency?: boolean }[] = [
+export const STATS: { title: string, value: keyof Omit<PensionPlan, '_id' | 'id' | 'name' | 'user'>, currency?: boolean }[] = [
   { title: 'Total', value: 'total' },
   { title: 'Unidades', value: 'units', currency: false },
   { title: 'Aportado', value: 'amount' },

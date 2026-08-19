@@ -42,6 +42,7 @@ const DATA_TABLES = [
   schema.budgets,
   schema.stocks,
   schema.pensions,
+  schema.pensionPlans,
   schema.debts,
   schema.goals,
   schema.categories,

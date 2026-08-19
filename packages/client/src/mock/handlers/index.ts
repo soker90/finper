@@ -7,7 +7,7 @@ import { transactionsHandlers } from './transactions'
 import { debtsHandlers } from './debts'
 import { budgetsHandlers } from './budgets'
 import { ticketsHandlers } from './tickets'
-import { pensionsHandlers } from './pensions'
+import { pensionPlansHandlers } from './pensionPlans'
 import { loansHandlers } from './loans'
 import { subscriptionsHandlers } from './subscriptions'
 import { suppliesHandlers } from './supplies'
@@ -28,7 +28,7 @@ export const handlers = [
   ...debtsHandlers,
   ...budgetsHandlers,
   ...ticketsHandlers,
-  ...pensionsHandlers,
+  ...pensionPlansHandlers,
   ...loansHandlers,
   ...subscriptionsHandlers,
   ...suppliesHandlers,
