@@ -10,6 +10,7 @@ export interface PensionAggregateSummary extends PensionAggregate {
 }
 
 interface MovementLike {
+  planId: string
   employeeAmount: number
   employeeUnits: number
   companyAmount: number
@@ -38,6 +39,27 @@ const computeAggregate = (movements: MovementLike[]): PensionAggregate => {
   return { amount, units, employeeAmount, companyAmount, total }
 }
 
+/** Agrupa movimientos de varios planes y suma los agregados calculados por
+ * plan, para no mezclar valores de unidad de planes distintos. */
+const computeAggregateAcrossPlans = (movements: MovementLike[]): PensionAggregate => {
+  const movementsByPlan = new Map<string, MovementLike[]>()
+  for (const movement of movements) {
+    const planMovements = movementsByPlan.get(movement.planId) ?? []
+    planMovements.push(movement)
+    movementsByPlan.set(movement.planId, planMovements)
+  }
+
+  const aggregates = Array.from(movementsByPlan.values()).map(computeAggregate)
+
+  return aggregates.reduce((acc, aggregate) => ({
+    amount: acc.amount + aggregate.amount,
+    units: acc.units + aggregate.units,
+    employeeAmount: acc.employeeAmount + aggregate.employeeAmount,
+    companyAmount: acc.companyAmount + aggregate.companyAmount,
+    total: acc.total + aggregate.total
+  }), { amount: 0, units: 0, employeeAmount: 0, companyAmount: 0, total: 0 })
+}
+
 export class PensionPlansService {
   constructor (private repository: IPensionPlansRepository) {}
 
@@ -56,12 +78,12 @@ export class PensionPlansService {
     return serializePensionPlan(plan, computeAggregate(movements))
   }
 
-  public createPlan ({ user, data }: { user: string, data: { name: string } }) {
+  public createPlan ({ user, data }: { user: string, data: { name: string, color: string } }) {
     const plan = this.repository.createPlan({ ...data, user })
     return serializePensionPlan(plan, computeAggregate([]))
   }
 
-  public editPlan ({ id, user, value }: { id: string, user: string, value: { name?: string } }) {
+  public editPlan ({ id, user, value }: { id: string, user: string, value: { name?: string, color?: string } }) {
     const plan = this.repository.updatePlan(id, user, value)
     if (!plan) throw Boom.notFound(ERROR_MESSAGE.PENSION_PLAN.NOT_FOUND).output
 
@@ -75,6 +97,10 @@ export class PensionPlansService {
 
   public getMovements (planId: string, user: string) {
     return this.repository.findMovements(planId, user).map(serializePensionMovement)
+  }
+
+  public getAllMovements (user: string) {
+    return this.repository.findAllMovementsByUser(user).map(serializePensionMovement)
   }
 
   public addMovement ({ planId, user, data }: { planId: string, user: string, data: any }) {
@@ -105,7 +131,7 @@ export class PensionPlansService {
   public getAggregateSummary (user: string): PensionAggregateSummary {
     const movements = this.repository.findAllMovementsByUser(user)
     return {
-      ...computeAggregate(movements),
+      ...computeAggregateAcrossPlans(movements),
       transactions: movements.map(serializePensionMovement)
     }
   }

@@ -26,6 +26,11 @@ export class PensionPlansController {
     res.send(pensionPlansService.getPlanById(id, req.user as string))
   }
 
+  public getAllMovements (req: Request, res: Response): void {
+    logger.logInfo(`/pension-plans/movements - list movements for ${req.user as string}`)
+    res.send(pensionPlansService.getAllMovements(req.user as string))
+  }
+
   public createPlan (req: Request, res: Response): void {
     logger.logInfo('/pension-plans - create plan')
     const data = validatePlanCreateParams(req.body)

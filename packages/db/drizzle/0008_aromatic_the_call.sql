@@ -1,0 +1,1 @@
+ALTER TABLE `pension_plans` ADD `color` text;

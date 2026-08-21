@@ -1,9 +1,10 @@
 import { useForm } from 'react-hook-form'
+import { Alert, Box } from '@mui/material'
 
 import { ModalGrid, DateForm, InputForm } from 'components'
 import { type PensionTransaction } from 'types'
 import { addPensionMovement, editPensionMovement } from 'services/apiService'
-import { usePensionPlanMutate } from '../hooks'
+import { usePensionPlanMutate, useSubmitError } from '../hooks'
 
 interface Props {
   planId: string;
@@ -13,6 +14,7 @@ interface Props {
 
 const TransactionModal = ({ planId, onClose, transaction }: Props) => {
   const triggerMutate = usePensionPlanMutate(planId)
+  const { error: submitError, runSubmit } = useSubmitError()
   const { register, handleSubmit, formState: { errors }, control, setError } = useForm({
     defaultValues: {
       date: transaction?.date || null,
@@ -38,14 +40,15 @@ const TransactionModal = ({ planId, onClose, transaction }: Props) => {
       employeeUnits: params.employeeUnits
     } as PensionTransaction
 
-    const { error } = transaction?._id
-      ? await editPensionMovement(planId, transaction._id, formattedParams)
-      : await addPensionMovement(planId, formattedParams)
-
-    if (!error) {
-      triggerMutate()
-      onClose()
-    }
+    await runSubmit(
+      () => (transaction?._id
+        ? editPensionMovement(planId, transaction._id, formattedParams)
+        : addPensionMovement(planId, formattedParams)),
+      () => {
+        triggerMutate()
+        onClose()
+      }
+    )
   })
 
   return (
@@ -94,6 +97,12 @@ const TransactionModal = ({ planId, onClose, transaction }: Props) => {
         error={!!errors.value} {...register('value', { required: true, valueAsNumber: true })}
         errorText='Introduce un número válido'
       />
+
+      {submitError && (
+        <Box sx={{ gridColumn: '1 / -1', width: '100%', mt: 1 }}>
+          <Alert severity='error'>{submitError}</Alert>
+        </Box>
+      )}
     </ModalGrid>
   )
 }

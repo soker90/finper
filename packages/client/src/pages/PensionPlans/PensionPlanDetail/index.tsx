@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
-import { useParams, useNavigate } from 'react-router'
-import { Box, Button, CircularProgress, Grid, Stack, Typography } from '@mui/material'
+import { useParams, useNavigate, Navigate } from 'react-router'
+import { Alert, Box, Button, CircularProgress, Grid, Stack, Typography } from '@mui/material'
 import { ArrowLeftOutlined, PlusOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons'
 
 import { HeaderButtons } from 'components'
@@ -21,10 +21,10 @@ const PensionPlanDetail: React.FC = () => {
   const [openPlanModal, setOpenPlanModal] = useState(false)
   const [openMovementModal, setOpenMovementModal] = useState(false)
   const [editingTransaction, setEditingTransaction] = useState<PensionTransaction | undefined>(undefined)
+  const [actionError, setActionError] = useState<string | null>(null)
 
   if (!id) {
-    navigate('/pensiones', { replace: true })
-    return null
+    return <Navigate to='/pensiones' replace />
   }
 
   if (loadingPlan) {
@@ -57,14 +57,23 @@ const PensionPlanDetail: React.FC = () => {
     if (!transaction._id) return
     if (window.confirm('¿Estás seguro de eliminar este movimiento?')) {
       const { error } = await deletePensionMovement(id, transaction._id)
-      if (!error) triggerMutate()
+      if (error) {
+        setActionError(error)
+        return
+      }
+      setActionError(null)
+      triggerMutate()
     }
   }
 
   const handleDeletePlan = async () => {
     if (window.confirm(`¿Estás seguro de eliminar el plan "${pensionPlan.name}"? Se eliminarán también todos sus movimientos.`)) {
       const { error } = await deletePensionPlan(id)
-      if (!error) navigate('/pensiones')
+      if (error) {
+        setActionError(error)
+        return
+      }
+      navigate('/pensiones')
     }
   }
 
@@ -85,6 +94,12 @@ const PensionPlanDetail: React.FC = () => {
         </Box>
         <HeaderButtons buttons={actionButtons} desktopSx={{}} />
       </Box>
+
+      {actionError && (
+        <Alert severity='error' onClose={() => setActionError(null)}>
+          {actionError}
+        </Alert>
+      )}
 
       <Grid container spacing={3}>
         {STATS.map((stat) => (

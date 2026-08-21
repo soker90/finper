@@ -1,5 +1,5 @@
 import useSWR, { mutate } from 'swr'
-import { PENSION_PLANS, PENSION_PLAN_DETAIL, PENSION_PLAN_MOVEMENTS } from 'constants/api-paths'
+import { PENSION_PLANS, PENSION_PLAN_DETAIL, PENSION_PLAN_MOVEMENTS, PENSION_PLAN_ALL_MOVEMENTS } from 'constants/api-paths'
 import type { PensionPlan, PensionTransaction } from 'types'
 
 export const usePensionPlans = () => {
@@ -29,8 +29,18 @@ export const usePensionPlanMovements = (id?: string) => {
   }
 }
 
+export const useAllPensionMovements = () => {
+  const { data, error, isLoading } = useSWR<PensionTransaction[]>(PENSION_PLAN_ALL_MOVEMENTS)
+  return {
+    movements: data ?? [],
+    isLoading,
+    error: error as Error | undefined
+  }
+}
+
 export const usePensionPlanMutate = (id?: string) => () => {
   mutate(PENSION_PLANS)
+  mutate(PENSION_PLAN_ALL_MOVEMENTS)
   if (id) {
     mutate(PENSION_PLAN_DETAIL(id))
     mutate(PENSION_PLAN_MOVEMENTS(id))

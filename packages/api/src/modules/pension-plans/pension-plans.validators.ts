@@ -8,12 +8,19 @@ import { ERROR_MESSAGE } from '../../i18n'
 
 const { pensionPlans } = schema
 
+export const PENSION_PLAN_COLORS = [
+  '#4CAF50', '#2196F3', '#9C27B0', '#FF9800', '#F44336',
+  '#00BCD4', '#795548', '#607D8B', '#E91E63', '#FFC107'
+] as const
+
 const planCreateSchema = Joi.object({
-  name: Joi.string().required()
+  name: Joi.string().required(),
+  color: Joi.string().valid(...PENSION_PLAN_COLORS).required()
 })
 
 const planEditSchema = Joi.object({
-  name: Joi.string()
+  name: Joi.string(),
+  color: Joi.string().valid(...PENSION_PLAN_COLORS)
 }).min(1)
 
 const movementCreateSchema = Joi.object({

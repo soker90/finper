@@ -3,13 +3,18 @@ import { useForm } from 'react-hook-form'
 import { Alert, Box } from '@mui/material'
 import ModalGrid from 'components/modals/ModalGrid'
 import InputForm from 'components/forms/InputForm'
+import SelectForm from 'components/forms/SelectForm'
 import { addPensionPlan, editPensionPlan } from 'services/apiService'
 import { getId } from 'utils'
 import { useSubmitError } from '../hooks'
+import { PENSION_PLAN_COLORS } from '../constants'
 import type { PensionPlan } from 'types'
+
+const colorOptions = PENSION_PLAN_COLORS
 
 interface PensionPlanFormValues {
   name: string
+  color: string
 }
 
 interface ModalPensionPlanProps {
@@ -21,7 +26,8 @@ interface ModalPensionPlanProps {
 
 export const ModalPensionPlan = ({ open, onClose, pensionPlan, onSuccess }: ModalPensionPlanProps) => {
   const defaultValues: PensionPlanFormValues = {
-    name: pensionPlan?.name || ''
+    name: pensionPlan?.name || '',
+    color: pensionPlan?.color || PENSION_PLAN_COLORS[0].value
   }
 
   const { register, handleSubmit, formState: { errors, isSubmitting }, reset } = useForm<PensionPlanFormValues>({
@@ -36,7 +42,7 @@ export const ModalPensionPlan = ({ open, onClose, pensionPlan, onSuccess }: Moda
   const { error: submitError, runSubmit } = useSubmitError()
 
   const handleFormSubmit = handleSubmit((data) => runSubmit(async () => {
-    const payload = { name: data.name.trim() }
+    const payload = { name: data.name.trim(), color: data.color }
     if (pensionPlan) {
       const id = getId(pensionPlan)
       if (!id) return { error: 'No se pudo identificar el plan a editar' }
@@ -65,6 +71,17 @@ export const ModalPensionPlan = ({ open, onClose, pensionPlan, onSuccess }: Moda
         error={Boolean(errors.name)}
         errorText='El nombre del plan es obligatorio'
         {...register('name', { required: true })}
+      />
+
+      <SelectForm
+        id='color'
+        label='Color'
+        error={Boolean(errors.color)}
+        errorText='Selecciona un color'
+        options={colorOptions}
+        optionValue='value'
+        optionLabel='label'
+        {...register('color', { required: true })}
       />
 
       {submitError && (

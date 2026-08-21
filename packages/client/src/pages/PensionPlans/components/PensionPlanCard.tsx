@@ -3,6 +3,7 @@ import {
   Typography,
   Box,
   Button,
+  Chip,
   IconButton,
   Menu,
   MenuItem,
@@ -13,7 +14,9 @@ import {
   MoreOutlined,
   EditOutlined,
   DeleteOutlined,
-  FundOutlined
+  FundOutlined,
+  RiseOutlined,
+  FallOutlined
 } from '@ant-design/icons'
 import { MainCard } from 'components'
 import { format } from 'utils'
@@ -36,6 +39,9 @@ export const PensionPlanCard: React.FC<PensionPlanCardProps> = ({
 }) => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
   const openMenu = Boolean(anchorEl)
+  const returnPct = plan.amount > 0 ? ((plan.total - plan.amount) / plan.amount) * 100 : null
+  // Plans created before the color picker existed have no color set.
+  const color = plan.color ?? '#607D8B'
 
   const handleMenuOpen = (e: React.MouseEvent<HTMLElement>) => {
     e.stopPropagation()
@@ -56,7 +62,20 @@ export const PensionPlanCard: React.FC<PensionPlanCardProps> = ({
     >
       <Stack direction='row' sx={{ justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
         <Stack direction='row' sx={{ alignItems: 'center', gap: 1 }}>
-          <FundOutlined style={{ fontSize: 24 }} />
+          <Box
+            sx={{
+              width: 32,
+              height: 32,
+              borderRadius: '50%',
+              backgroundColor: color,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              flexShrink: 0
+            }}
+          >
+            <FundOutlined style={{ fontSize: 18, color: '#fff' }} />
+          </Box>
           <Typography variant='h5' sx={{ fontWeight: 700 }}>
             {plan.name}
           </Typography>
@@ -67,9 +86,21 @@ export const PensionPlanCard: React.FC<PensionPlanCardProps> = ({
       </Stack>
 
       <Box sx={{ my: 2 }}>
-        <Typography variant='caption' color='text.secondary' sx={{ textTransform: 'uppercase', letterSpacing: 0.5, fontWeight: 600 }}>
-          Valor actual
-        </Typography>
+        <Stack direction='row' sx={{ alignItems: 'center', justifyContent: 'space-between' }}>
+          <Typography variant='caption' color='text.secondary' sx={{ textTransform: 'uppercase', letterSpacing: 0.5, fontWeight: 600 }}>
+            Valor actual
+          </Typography>
+          {returnPct !== null && (
+            <Chip
+              size='small'
+              icon={returnPct >= 0
+                ? <RiseOutlined style={{ fontSize: '0.75rem' }} />
+                : <FallOutlined style={{ fontSize: '0.75rem' }} />}
+              label={`${returnPct >= 0 ? '+' : ''}${returnPct.toFixed(2)}%`}
+              color={returnPct >= 0 ? 'success' : 'error'}
+            />
+          )}
+        </Stack>
         <Typography variant='h3' sx={{ fontWeight: 800, mt: 0.5 }}>
           {format.euro(plan.total)}
         </Typography>

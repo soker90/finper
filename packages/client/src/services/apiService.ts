@@ -319,10 +319,10 @@ export const payCreditCardDebt = (creditCardId: string, payload: {
   axios.post(`${CREDIT_CARDS}/${creditCardId}/pay-debt`, payload).then((res: any) => ({ data: res.data })).catch((error: any) => ({ error: extractError(error) }))
 
 // Pension Plans
-export const addPensionPlan = (params: { name: string }): Promise<{ data?: any, error?: string }> =>
+export const addPensionPlan = (params: { name: string, color: string }): Promise<{ data?: any, error?: string }> =>
   axios.post(PENSION_PLANS, params).then((res: any) => ({ data: res.data })).catch((error: any) => ({ error: extractError(error) }))
 
-export const editPensionPlan = (id: string, params: { name?: string }): Promise<{ data?: any, error?: string }> =>
+export const editPensionPlan = (id: string, params: { name?: string, color?: string }): Promise<{ data?: any, error?: string }> =>
   axios.patch(PENSION_PLAN_DETAIL(id), params).then((res: any) => ({ data: res.data })).catch((error: any) => ({ error: extractError(error) }))
 
 export const deletePensionPlan = (id: string): Promise<{ error?: string }> =>

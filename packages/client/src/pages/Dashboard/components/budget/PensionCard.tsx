@@ -18,12 +18,28 @@ interface PensionCardProps {
 const PensionCard = ({ pension, pensionReturnPct }: PensionCardProps) => {
   const theme = useTheme()
 
-  const sparkline = (pension?.transactions ?? [])
-    .toSorted((a, b) => a.date - b.date)
+  // Sum contributions per calendar month across every plan: mixing individual
+  // movements from plans of very different sizes on the same series produces
+  // phantom drops/spikes that don't reflect any real change in the portfolio.
+  const monthlyTotals = new Map<number, { date: Date, value: number }>()
+  for (const t of pension?.transactions ?? []) {
+    const date = new Date(t.date)
+    const monthKey = date.getFullYear() * 12 + date.getMonth()
+    const contribution = t.value * (t.employeeUnits + t.companyUnits)
+    const existing = monthlyTotals.get(monthKey)
+    if (existing) {
+      existing.value += contribution
+    } else {
+      monthlyTotals.set(monthKey, { date, value: contribution })
+    }
+  }
+
+  const sparkline = Array.from(monthlyTotals.entries())
+    .toSorted(([a], [b]) => a - b)
     .slice(-12)
-    .map(t => ({
-      date: new Date(t.date).toLocaleDateString('es-ES', { month: 'short', year: '2-digit' }),
-      value: t.value * (t.employeeUnits + t.companyUnits)
+    .map(([, { date, value }]) => ({
+      date: date.toLocaleDateString('es-ES', { month: 'short', year: '2-digit' }),
+      value
     }))
 
   return (
@@ -83,7 +99,7 @@ const PensionCard = ({ pension, pensionReturnPct }: PensionCardProps) => {
                 <Divider />
                 <Box sx={{ mt: 1 }}>
                   <Typography variant='body2' color='textSecondary' sx={{ mb: 0.5 }}>
-                    Evolución (últimos {sparkline.length} aportes)
+                    Evolución (últimos {sparkline.length} meses con aportaciones)
                   </Typography>
                   <ResponsiveContainer width='100%' height={60}>
                     <AreaChart data={sparkline}>

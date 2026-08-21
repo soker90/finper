@@ -16,6 +16,7 @@ export const serializePensionPlan = (plan: Plan, aggregate: PensionAggregate) =>
     _id: plan.id,
     id: plan.id,
     name: plan.name,
+    color: plan.color,
     user: plan.user,
     amount: aggregate.amount,
     units: aggregate.units,

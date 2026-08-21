@@ -6,6 +6,7 @@ export const pensionPlansRoutes = Router()
 
 pensionPlansRoutes.get('/', authMiddleware, pensionPlansController.getPlans.bind(pensionPlansController))
 pensionPlansRoutes.post('/', authMiddleware, pensionPlansController.createPlan.bind(pensionPlansController))
+pensionPlansRoutes.get('/movements', authMiddleware, pensionPlansController.getAllMovements.bind(pensionPlansController))
 pensionPlansRoutes.get('/:id', authMiddleware, pensionPlansController.getPlan.bind(pensionPlansController))
 pensionPlansRoutes.patch('/:id', authMiddleware, pensionPlansController.editPlan.bind(pensionPlansController))
 pensionPlansRoutes.delete('/:id', authMiddleware, pensionPlansController.deletePlan.bind(pensionPlansController))

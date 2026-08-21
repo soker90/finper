@@ -22,6 +22,7 @@ export interface PensionPlan {
   _id: string;
   id: string;
   name: string;
+  color?: string;
   amount: number;
   units: number;
   employeeAmount: number;

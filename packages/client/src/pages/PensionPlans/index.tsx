@@ -1,11 +1,11 @@
 import React, { useState } from 'react'
-import { Alert, MenuItem, Stack, TextField, Typography } from '@mui/material'
+import { Alert, Typography } from '@mui/material'
 import { PlusOutlined } from '@ant-design/icons'
 import { useNavigate } from 'react-router'
 
 import { HeaderButtons } from 'components'
 import { getId } from 'utils'
-import { usePensionPlans, usePensionPlanMovements, usePensionPlanMutate } from './hooks'
+import { usePensionPlans, useAllPensionMovements, usePensionPlanMutate } from './hooks'
 import {
   PensionPlansSummary,
   PensionPlansGrid,
@@ -19,7 +19,6 @@ import type { PensionPlan, PensionTransaction } from 'types'
 const PensionPlansPage: React.FC = () => {
   const navigate = useNavigate()
   const { pensionPlans, isLoading: loadingPlans, error: plansError } = usePensionPlans()
-  const [selectedPlanIdFilter, setSelectedPlanIdFilter] = useState<string>('')
 
   const [openPlanModal, setOpenPlanModal] = useState(false)
   const [editingPlan, setEditingPlan] = useState<PensionPlan | null>(null)
@@ -30,12 +29,11 @@ const PensionPlansPage: React.FC = () => {
 
   const [actionError, setActionError] = useState<string | null>(null)
 
-  const activePlanIdForMovements = selectedPlanIdFilter || (pensionPlans.length > 0 ? getId(pensionPlans[0]) ?? '' : '')
-
-  const { movements, isLoading: loadingMovements } = usePensionPlanMovements(activePlanIdForMovements)
+  const { movements, isLoading: loadingMovements } = useAllPensionMovements()
   const recentMovements = movements.slice(0, 10)
+  const planNameById = Object.fromEntries(pensionPlans.map((plan) => [getId(plan) ?? '', plan.name]))
 
-  const triggerMutate = usePensionPlanMutate(activePlanIdForMovements)
+  const triggerMutate = usePensionPlanMutate()
 
   const totalContributed = pensionPlans.reduce((acc, p) => acc + (p.amount ?? 0), 0)
   const totalValue = pensionPlans.reduce((acc, p) => acc + (p.total ?? 0), 0)
@@ -76,7 +74,7 @@ const PensionPlansPage: React.FC = () => {
   }
 
   const handleEditMovement = (transaction: PensionTransaction) => {
-    const plan = pensionPlans.find((p) => getId(p) === activePlanIdForMovements)
+    const plan = pensionPlans.find((p) => getId(p) === transaction.planId)
     if (!plan) return
     setActivePlanForMovement(plan)
     setEditingTransaction(transaction)
@@ -122,26 +120,11 @@ const PensionPlansPage: React.FC = () => {
 
       {pensionPlans.length > 0 && (
         <>
-          <Stack direction='row' sx={{ alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', mt: 3, mb: 1 }}>
-            <Typography variant='subtitle1'>Movimientos recientes</Typography>
-            <TextField
-              select
-              size='small'
-              label='Plan'
-              value={activePlanIdForMovements}
-              onChange={(event) => setSelectedPlanIdFilter(event.target.value)}
-              sx={{ minWidth: 200 }}
-            >
-              {pensionPlans.map((plan) => (
-                <MenuItem key={getId(plan)} value={getId(plan)}>
-                  {plan.name}
-                </MenuItem>
-              ))}
-            </TextField>
-          </Stack>
+          <Typography variant='subtitle1' sx={{ mt: 3, mb: 1 }}>Movimientos recientes</Typography>
           <PensionTransactionsTable
             transactions={loadingMovements ? [] : recentMovements}
             onEdit={handleEditMovement}
+            planNameById={planNameById}
           />
         </>
       )}
