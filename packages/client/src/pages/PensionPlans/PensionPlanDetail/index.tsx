@@ -4,7 +4,7 @@ import { Alert, Box, Button, CircularProgress, Grid, Stack, Typography } from '@
 import { ArrowLeftOutlined, PlusOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons'
 
 import { HeaderButtons } from 'components'
-import { usePensionPlanDetail, usePensionPlanMovements, usePensionPlanMutate } from '../hooks'
+import { usePensionPlanDetail, usePensionPlanMovements, usePensionPlanMutate } from '../hooks/usePensionPlans'
 import { PensionStatCard, PensionTransactionsTable, ModalPensionPlan, TransactionModal } from '../components'
 import { STATS } from '../constants'
 import { deletePensionPlan, deletePensionMovement } from 'services/apiService'

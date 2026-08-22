@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router'
 
 import { HeaderButtons } from 'components'
 import { getId } from 'utils'
-import { usePensionPlans, useAllPensionMovements, usePensionPlanMutate } from './hooks'
+import { usePensionPlans, useAllPensionMovements, usePensionPlanMutate } from './hooks/usePensionPlans'
 import {
   PensionPlansSummary,
   PensionPlansGrid,
@@ -29,7 +29,7 @@ const PensionPlansPage: React.FC = () => {
 
   const [actionError, setActionError] = useState<string | null>(null)
 
-  const { movements, isLoading: loadingMovements } = useAllPensionMovements()
+  const { movements, isLoading: loadingMovements, error: movementsError } = useAllPensionMovements()
   const recentMovements = movements.slice(0, 10)
   const planNameById = Object.fromEntries(pensionPlans.map((plan) => [getId(plan) ?? '', plan.name]))
 
@@ -121,6 +121,11 @@ const PensionPlansPage: React.FC = () => {
       {pensionPlans.length > 0 && (
         <>
           <Typography variant='subtitle1' sx={{ mt: 3, mb: 1 }}>Movimientos recientes</Typography>
+          {movementsError && (
+            <Alert severity='error' sx={{ mb: 2 }}>
+              No se han podido cargar los movimientos recientes. Inténtalo de nuevo más tarde.
+            </Alert>
+          )}
           <PensionTransactionsTable
             transactions={loadingMovements ? [] : recentMovements}
             onEdit={handleEditMovement}

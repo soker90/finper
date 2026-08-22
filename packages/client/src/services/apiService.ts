@@ -331,7 +331,7 @@ export const deletePensionPlan = (id: string): Promise<{ error?: string }> =>
 export const addPensionMovement = (planId: string, params: PensionTransaction): Promise<{ data?: any, error?: string }> =>
   axios.post(PENSION_PLAN_MOVEMENTS(planId), params).then((res: any) => ({ data: res.data })).catch((error: any) => ({ error: extractError(error) }))
 
-export const editPensionMovement = (planId: string, movementId: string, params: Partial<PensionTransaction>): Promise<{ data?: any, error?: string }> =>
+export const editPensionMovement = ({ planId, movementId, params }: { planId: string, movementId: string, params: Partial<PensionTransaction> }): Promise<{ data?: any, error?: string }> =>
   axios.patch(`${PENSION_PLAN_MOVEMENTS(planId)}/${movementId}`, params).then((res: any) => ({ data: res.data })).catch((error: any) => ({ error: extractError(error) }))
 
 export const deletePensionMovement = (planId: string, movementId: string): Promise<{ error?: string }> =>

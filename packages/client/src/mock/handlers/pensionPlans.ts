@@ -34,6 +34,7 @@ let movements: MockMovement[] = [
 ]
 
 let planIdCounter = 1
+let movementIdCounter = movements.length
 
 export const pensionPlansHandlers = [
   http.get('*/pension-plans', () => {
@@ -41,7 +42,7 @@ export const pensionPlansHandlers = [
   }),
 
   http.get('*/pension-plans/movements', () => {
-    return HttpResponse.json([...movements].sort((a, b) => b.date - a.date))
+    return HttpResponse.json(movements.toSorted((leftMovement, rightMovement) => rightMovement.date - leftMovement.date))
   }),
 
   http.get('*/pension-plans/:id', ({ params }) => {
@@ -92,7 +93,8 @@ export const pensionPlansHandlers = [
 
   http.post('*/pension-plans/:id/movements', async ({ params, request }) => {
     const body = await request.json() as Partial<PensionTransaction>
-    const id = `mov-${movements.length + 1}`
+    movementIdCounter += 1
+    const id = `mov-${movementIdCounter}`
     const movement: MockMovement = {
       id,
       _id: id,

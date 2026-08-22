@@ -4,7 +4,8 @@ import { Alert, Box } from '@mui/material'
 import { ModalGrid, DateForm, InputForm } from 'components'
 import { type PensionTransaction } from 'types'
 import { addPensionMovement, editPensionMovement } from 'services/apiService'
-import { usePensionPlanMutate, useSubmitError } from '../hooks'
+import { usePensionPlanMutate } from '../hooks/usePensionPlans'
+import { useSubmitError } from '../hooks/useSubmitError'
 
 interface Props {
   planId: string;
@@ -42,7 +43,7 @@ const TransactionModal = ({ planId, onClose, transaction }: Props) => {
 
     await runSubmit(
       () => (transaction?._id
-        ? editPensionMovement(planId, transaction._id, formattedParams)
+        ? editPensionMovement({ planId, movementId: transaction._id, params: formattedParams })
         : addPensionMovement(planId, formattedParams)),
       () => {
         triggerMutate()

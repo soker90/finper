@@ -6,7 +6,7 @@ import InputForm from 'components/forms/InputForm'
 import SelectForm from 'components/forms/SelectForm'
 import { addPensionPlan, editPensionPlan } from 'services/apiService'
 import { getId } from 'utils'
-import { useSubmitError } from '../hooks'
+import { useSubmitError } from '../hooks/useSubmitError'
 import { PENSION_PLAN_COLORS } from '../constants'
 import type { PensionPlan } from 'types'
 

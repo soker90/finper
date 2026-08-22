@@ -22,10 +22,10 @@ const PensionCard = ({ pension, pensionReturnPct }: PensionCardProps) => {
   // movements from plans of very different sizes on the same series produces
   // phantom drops/spikes that don't reflect any real change in the portfolio.
   const monthlyTotals = new Map<number, { date: Date, value: number }>()
-  for (const t of pension?.transactions ?? []) {
-    const date = new Date(t.date)
-    const monthKey = date.getFullYear() * 12 + date.getMonth()
-    const contribution = t.value * (t.employeeUnits + t.companyUnits)
+  for (const transaction of pension?.transactions ?? []) {
+    const date = new Date(transaction.date)
+    const monthKey = date.getUTCFullYear() * 12 + date.getUTCMonth()
+    const contribution = transaction.value * (transaction.employeeUnits + transaction.companyUnits)
     const existing = monthlyTotals.get(monthKey)
     if (existing) {
       existing.value += contribution
@@ -38,7 +38,7 @@ const PensionCard = ({ pension, pensionReturnPct }: PensionCardProps) => {
     .toSorted(([a], [b]) => a - b)
     .slice(-12)
     .map(([, { date, value }]) => ({
-      date: date.toLocaleDateString('es-ES', { month: 'short', year: '2-digit' }),
+      date: date.toLocaleDateString('es-ES', { month: 'short', year: '2-digit', timeZone: 'UTC' }),
       value
     }))
 
