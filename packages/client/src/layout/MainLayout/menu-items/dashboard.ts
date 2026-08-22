@@ -99,9 +99,9 @@ const dashboard = {
     },
     {
       id: 'pensions',
-      title: 'Pensión',
+      title: 'Planes de Pensión',
       type: 'item',
-      url: '/pension',
+      url: '/pensiones',
       icon: BeachIcon,
       breadcrumbs: true
     },

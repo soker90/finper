@@ -1,8 +1,8 @@
 import axios from 'axios'
-import { ACCOUNTS, BUDGETS, CATEGORIES, DEBTS, LOANS, LOAN_DETAIL, LOAN_SIMULATE, PENSIONS, TICKETS, TRANSACTIONS, SUBSCRIPTIONS, SUBSCRIPTION_CANDIDATES, SUPPLIES, SUPPLIES_PROPERTIES, SUPPLIES_READINGS, STOCKS, GOALS, YIELDS, YIELD_DETAIL, CREDIT_CARDS } from 'constants/api-paths'
+import { ACCOUNTS, BUDGETS, CATEGORIES, DEBTS, LOANS, LOAN_DETAIL, LOAN_SIMULATE, PENSION_PLANS, PENSION_PLAN_DETAIL, PENSION_PLAN_MOVEMENTS, TICKETS, TRANSACTIONS, SUBSCRIPTIONS, SUBSCRIPTION_CANDIDATES, SUPPLIES, SUPPLIES_PROPERTIES, SUPPLIES_READINGS, STOCKS, GOALS, YIELDS, YIELD_DETAIL, CREDIT_CARDS } from 'constants/api-paths'
 
 import type { TransactionType } from '@soker90/finper-types'
-import type { Category, Transaction, Account, Pension, PensionTransaction, Debt, Loan, SubscriptionInput, SupplyReadingInput, StockPurchase, Goal, SimulationResult, YieldInput } from 'types'
+import type { Category, Transaction, Account, PensionTransaction, Debt, Loan, SubscriptionInput, SupplyReadingInput, StockPurchase, Goal, SimulationResult, YieldInput } from 'types'
 
 const extractError = (error: any) => error.response?.data?.message || error.message
 
@@ -95,20 +95,6 @@ export const editTransaction = (id: string, params: {
 
 export const deleteTransaction = (id: string): Promise<{ data?: any, error?: string }> => {
   return axios.delete(`${TRANSACTIONS}/${id}`).then((data: any) => ({ data: data as Transaction })).catch((error: any) => ({ error: extractError(error) }))
-}
-
-export const addPensionApi = (params: PensionTransaction): Promise<{
-  data?: any,
-  error?: string
-}> => {
-  return axios.post(PENSIONS, params).then((data: any) => ({ data: data as Pension })).catch((error: any) => ({ error: extractError(error) }))
-}
-
-export const editPensionApi = (id: string, params: PensionTransaction): Promise<{
-  data?: any,
-  error?: string
-}> => {
-  return axios.put(`${PENSIONS}/${id}`, params).then((data: any) => ({ data: data as Pension })).catch((error: any) => ({ error: extractError(error) }))
 }
 
 export const editDebt = (id: string, params: Debt): Promise<{
@@ -331,3 +317,22 @@ export const payCreditCardDebt = (creditCardId: string, payload: {
   all?: boolean
 }): Promise<{ data?: any, error?: string }> =>
   axios.post(`${CREDIT_CARDS}/${creditCardId}/pay-debt`, payload).then((res: any) => ({ data: res.data })).catch((error: any) => ({ error: extractError(error) }))
+
+// Pension Plans
+export const addPensionPlan = (params: { name: string, color: string }): Promise<{ data?: any, error?: string }> =>
+  axios.post(PENSION_PLANS, params).then((res: any) => ({ data: res.data })).catch((error: any) => ({ error: extractError(error) }))
+
+export const editPensionPlan = (id: string, params: { name?: string, color?: string }): Promise<{ data?: any, error?: string }> =>
+  axios.patch(PENSION_PLAN_DETAIL(id), params).then((res: any) => ({ data: res.data })).catch((error: any) => ({ error: extractError(error) }))
+
+export const deletePensionPlan = (id: string): Promise<{ error?: string }> =>
+  axios.delete(PENSION_PLAN_DETAIL(id)).then(() => ({})).catch((error: any) => ({ error: extractError(error) }))
+
+export const addPensionMovement = (planId: string, params: PensionTransaction): Promise<{ data?: any, error?: string }> =>
+  axios.post(PENSION_PLAN_MOVEMENTS(planId), params).then((res: any) => ({ data: res.data })).catch((error: any) => ({ error: extractError(error) }))
+
+export const editPensionMovement = ({ planId, movementId, params }: { planId: string, movementId: string, params: Partial<PensionTransaction> }): Promise<{ data?: any, error?: string }> =>
+  axios.patch(`${PENSION_PLAN_MOVEMENTS(planId)}/${movementId}`, params).then((res: any) => ({ data: res.data })).catch((error: any) => ({ error: extractError(error) }))
+
+export const deletePensionMovement = (planId: string, movementId: string): Promise<{ error?: string }> =>
+  axios.delete(`${PENSION_PLAN_MOVEMENTS(planId)}/${movementId}`).then(() => ({})).catch((error: any) => ({ error: extractError(error) }))

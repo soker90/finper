@@ -231,5 +231,34 @@ describe('Dashboard', () => {
       expect(successAlert).not.toBeNull()
       expect(errorAlert).not.toBeNull()
     })
+
+    it('groups pension movements from several plans by month instead of by individual movement', async () => {
+      const movement = { employeeAmount: 100, employeeUnits: 5, companyAmount: 50, companyUnits: 2, value: 10 }
+      server.use(
+        http.get('/dashboard/stats', () => HttpResponse.json({
+          ...baseStats,
+          insights: [],
+          pension: {
+            employeeAmount: 400,
+            companyAmount: 200,
+            total: 600,
+            transactions: [
+              // Two movements in the same month (e.g. two different plans contributing in January)...
+              { ...movement, date: Date.UTC(2024, 0, 5) },
+              { ...movement, date: Date.UTC(2024, 0, 20) },
+              // ...and one movement each in two other months.
+              { ...movement, date: Date.UTC(2024, 1, 10) },
+              { ...movement, date: Date.UTC(2024, 2, 15) }
+            ]
+          }
+        }))
+      )
+
+      const { findByText, queryByText } = renderWithFreshCache()
+
+      // 4 movements across 3 distinct months -> the label must reflect months, not movements.
+      expect(await findByText('Evolución (últimos 3 meses con aportaciones)')).toBeDefined()
+      expect(queryByText('Evolución (últimos 4 meses con aportaciones)')).toBeNull()
+    })
   })
 })
