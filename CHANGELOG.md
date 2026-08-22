@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.4.0] - 2026-08-22
+
+### Added
+
+- **client/api/db**: Pension Plans module. Full multi-plan support with customizable colors, transaction management (employee and company contributions, unit valuation), portfolio summary KPIs, and dashboard integration.
+- **db**: New `pension_plans` table, foreign key `plan_id` on `pensions`, and backfill migrations from legacy single-plan pension records.
+- **api**: New `pension-plans` module endpoints (`/api/pension-plans/*`) replacing the legacy pensions module, supporting CRUD operations for plans and scoped movements.
+- **client**: Dedicated Pension Plans overview with plan cards, summary stats, recent movements table, plan creation/editing modals with color picker, movement modals, and a detailed plan view with individual statistics and history.
+
+---
+
 ## [2.3.1] - 2026-08-19
 
 ### Fixed
