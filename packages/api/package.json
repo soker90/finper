@@ -63,7 +63,7 @@
   },
   "devDependencies": {
     "@babel/core": "7.29.6",
-    "@babel/preset-env": "7.29.3",
+    "@babel/preset-env": "8.0.2",
     "@faker-js/faker": "10.6.0",
     "@tsconfig/node22": "22.0.5",
     "@types/bcrypt": "6.0.0",
