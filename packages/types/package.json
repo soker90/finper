@@ -19,7 +19,7 @@
   "license": "GPL-3.0-or-later",
   "devDependencies": {
     "@tsconfig/node22": "22.0.5",
-    "@typescript-eslint/eslint-plugin": "8.59.3",
+    "@typescript-eslint/eslint-plugin": "8.67.0",
     "@typescript-eslint/parser": "8.67.0",
     "eslint": "9.39.2",
     "globals": "17.6.0",
