@@ -168,14 +168,14 @@ class Server {
     console.log('[finper-api] Drizzle SQLite migrations applied')
   }
 
-  /* istanbul ignore next — start() is only called outside of test env */
+  /* v8 ignore next — start() is only called outside of test env */
   public start (): void {
     this.httpServer = this.app.listen(this.app.get('port'), () => {
       console.log(`API is running at http://localhost:${this.app.get('port')}`)
     })
   }
 
-  /* istanbul ignore next — only invoked on SIGTERM/SIGINT/uncaught errors */
+  /* v8 ignore next — only invoked on SIGTERM/SIGINT/uncaught errors */
   public shutdown ({ reason, immediate = false }: ShutdownOptions): void {
     if (this.isShuttingDown) {
       console.log('[finper-api] Shutdown already in progress, ignoring duplicate trigger.')
@@ -219,7 +219,7 @@ class Server {
 
 export const server = new Server()
 
-/* istanbul ignore next — server.start() and process-level handlers are skipped in test env */
+/* v8 ignore next — server.start() and process-level handlers are skipped in test env */
 if (process.env.NODE_ENV !== 'test') {
   server.start()
 

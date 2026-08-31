@@ -23,14 +23,14 @@ export default class SupplyReadingService implements ISupplyReadingService {
 
   public async editReading ({ id, value, user }: { id: string, value: any, user: string }): Promise<SerializedReading> {
     const updated = supplyReadingRepository.update(id, user, value)
-    /* istanbul ignore next */
+    /* v8 ignore next */
     if (!updated) throw Boom.notFound(ERROR_MESSAGE.SUPPLY_READING.NOT_FOUND).output
     return serializeReading(updated)
   }
 
   public async deleteReading ({ id, user }: { id: string, user: string }): Promise<void> {
     const deleted = supplyReadingRepository.delete(id, user)
-    /* istanbul ignore next */
+    /* v8 ignore next */
     if (!deleted) throw Boom.notFound(ERROR_MESSAGE.SUPPLY_READING.NOT_FOUND).output
   }
 }

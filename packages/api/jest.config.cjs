@@ -1,9 +1,18 @@
 /** @type {import('jest').Config} */
 module.exports = {
   setupFiles: ['<rootDir>/jest.setup.ts'],
+  coverageProvider: 'v8',
   transform: {
-    '^.+\\.ts?$': ['ts-jest', { diagnostics: true }],
-    '^.+\\.js$': ['babel-jest', { presets: [['@babel/preset-env', { targets: { node: 'current' } }]] }]
+    '^.+\\.ts$': ['@swc/jest', {
+      sourceMaps: true,
+      module: { type: 'commonjs' },
+      jsc: { parser: { syntax: 'typescript' }, target: 'es2022' }
+    }],
+    '^.+\\.js$': ['@swc/jest', {
+      sourceMaps: true,
+      module: { type: 'commonjs' },
+      jsc: { parser: { syntax: 'ecmascript' }, target: 'es2022' }
+    }]
   },
   transformIgnorePatterns: [
     '/node_modules/(?!(\\.pnpm|@faker-js/faker)/)',
@@ -18,6 +27,8 @@ module.exports = {
     'src/**/*.{ts,js}',
     '!**/node_modules/**',
     '!**/dist/**',
+    '!src/**/*.types.ts',
+    '!src/types/**',
     '!src/scripts/**',
     '!src/helpers/hash-password.ts',
     '!src/middlewares/logger.ts',

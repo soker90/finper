@@ -40,12 +40,10 @@ export const validateReadingCreateParams = async (data: Record<string, string | 
 }
 
 export const validateReadingEditParams = async ({ params, body, user }: { params: Record<string, string>, body: Record<string, any>, user: string }) => {
-  /* istanbul ignore else — params.id is always present when editing via route (URL param) */
   if (params.id) {
     await validateReadingExist({ id: params.id, user })
   }
 
-  /* istanbul ignore else — supplyId is always present in the body for edit requests */
   if (body.supplyId) {
     await validateSupplyExist({ id: body.supplyId, user })
   }

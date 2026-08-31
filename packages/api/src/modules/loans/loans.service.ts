@@ -166,7 +166,7 @@ export class LoansService {
     const payment = this.repository.findPaymentById(paymentId, loanId, user)
     const loan = this.repository.findById(loanId, user)
     if (!payment) throw Boom.notFound(ERROR_MESSAGE.LOAN.PAYMENT_NOT_FOUND).output
-    /* istanbul ignore next — validateLoanExist runs before via route */
+    /* v8 ignore next — validateLoanExist runs before via route */
     if (!loan) throw Boom.notFound(ERROR_MESSAGE.LOAN.NOT_FOUND).output
 
     this.repository.transaction(() => {
@@ -189,7 +189,7 @@ export class LoansService {
     const payment = this.repository.findPaymentById(paymentId, loanId, user)
     const loan = this.repository.findById(loanId, user)
     if (!payment) throw Boom.notFound(ERROR_MESSAGE.LOAN.PAYMENT_NOT_FOUND).output
-    /* istanbul ignore next — validateLoanExist runs before via route */
+    /* v8 ignore next — validateLoanExist runs before via route */
     if (!loan) throw Boom.notFound(ERROR_MESSAGE.LOAN.NOT_FOUND).output
 
     const originalAmount = payment.amount
@@ -318,7 +318,7 @@ export class LoansService {
 
   private _deductFromAccount (accountId: string, amount: number): void {
     const changes = this.repository.deductFromBalance(accountId, amount)
-    /* istanbul ignore next — validateLoanExist runs before loan operations via route */
+    /* v8 ignore next — validateLoanExist runs before loan operations via route */
     if (changes === 0) throw Boom.notFound(ERROR_MESSAGE.ACCOUNT.NOT_FOUND).output
   }
 

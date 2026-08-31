@@ -1,7 +1,7 @@
 import type { CreditCardRow, CreditCardMovementRow } from './credit-cards.repository'
 
 export const serializeCreditCard = (card: CreditCardRow | undefined | null) => {
-  /* istanbul ignore next — defensive guard; callers always pass an existing card validated upstream */
+  /* v8 ignore next — defensive guard; callers always pass an existing card validated upstream */
   if (!card) return null
   return {
     _id: card.id,
@@ -25,7 +25,7 @@ export const serializeCreditCard = (card: CreditCardRow | undefined | null) => {
 }
 
 export const serializeCreditCardMovement = (movement: CreditCardMovementRow | undefined | null) => {
-  /* istanbul ignore next — defensive guard; callers always pass an existing movement validated upstream */
+  /* v8 ignore next — defensive guard; callers always pass an existing movement validated upstream */
   if (!movement) return null
   return {
     _id: movement.id,

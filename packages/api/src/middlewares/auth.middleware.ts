@@ -29,7 +29,7 @@ const refreshToken = (res: Response, username: string) => {
  */
 const checkAuthorization = (req: Request, res: Response, next: NextFunction) => {
   passport.authenticate('jwt', (err: any, user: AuthenticatedUser | false) => {
-    /* istanbul ignore next — DB errors in Passport JWT verify are not reproducible in tests */
+    /* v8 ignore next — DB errors in Passport JWT verify are not reproducible in tests */
     if (err) {
       return next(err)
     }
@@ -38,7 +38,6 @@ const checkAuthorization = (req: Request, res: Response, next: NextFunction) => 
       return next(Boom.unauthorized().output)
     }
 
-    /* istanbul ignore else — user always has username when passport JWT verify succeeds */
     if (user.username) {
       refreshToken(res, user.username)
       req.user = user.username

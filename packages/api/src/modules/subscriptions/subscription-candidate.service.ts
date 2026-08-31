@@ -46,7 +46,7 @@ export class SubscriptionCandidateService {
   public assignSubscription (candidateId: string, subscriptionId: string): void {
     const candidate = this.repository.findCandidateById(candidateId)
     this.repository.deleteCandidate(candidateId)
-    /* istanbul ignore next — validateCandidateExist runs before via controller */
+    /* v8 ignore next — validateCandidateExist runs before via controller */
     if (!candidate) return
 
     this.repository.linkTransactions(subscriptionId, [candidate.transactionId])
