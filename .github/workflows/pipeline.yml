@@ -1,6 +1,5 @@
 # CI pipeline: lint, build and test each package in parallel, run only when
-# relevant files change. `ci-ok` aggregates all jobs so branch protection
-# only needs a single required check.
+# relevant files change.
 
 name: CI
 
@@ -214,19 +213,3 @@ jobs:
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-
-  ## Aggregator: unique required check for branch protection ##
-  ci-ok:
-    needs: [lint-api, build-api, test-api, lint-client, build-client, test-client, lint-bot, type-check-bot]
-    if: always()
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-    steps:
-      - name: Check all jobs passed
-        run: |
-          results='${{ join(needs.*.result, ' ') }}'
-          if [[ "$results" =~ failure || "$results" =~ cancelled ]]; then
-            echo "CI failed. Job results: $results"
-            exit 1
-          fi
-          echo "All CI jobs succeeded (skipped jobs excluded): $results"
