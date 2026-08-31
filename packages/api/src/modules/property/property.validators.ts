@@ -26,7 +26,6 @@ export const validatePropertyCreateParams = async (data: Record<string, string>)
 }
 
 export const validatePropertyEditParams = async ({ params, body, user }: { params: Record<string, string>, body: Record<string, any>, user: string }) => {
-  /* istanbul ignore else — params.id is always present when editing via route (URL param) */
   if (params.id) {
     await validatePropertyExist({ id: params.id, user })
   }
@@ -37,7 +36,7 @@ export const validatePropertyEditParams = async ({ params, body, user }: { param
 
   const { error, value } = schema.validate(body, { stripUnknown: true })
 
-  /* istanbul ignore next — Joi error branch not exercised for property edit in current tests */
+  /* v8 ignore next — Joi error branch not exercised for property edit in current tests */
   if (error) {
     throw Boom.badData(error.message).output
   }

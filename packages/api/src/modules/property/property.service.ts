@@ -20,7 +20,7 @@ export default class PropertyService implements IPropertyService {
 
   public async editProperty ({ id, value, user }: { id: string, value: any, user: string }): Promise<SerializedProperty> {
     const updated = propertyRepository.update(id, user, value)
-    /* istanbul ignore next — validatePropertyExist corre antes vía ruta */
+    /* v8 ignore next — validatePropertyExist corre antes vía ruta */
     if (!updated) throw Boom.notFound(ERROR_MESSAGE.PROPERTY.NOT_FOUND).output
     return serializeProperty(updated)
   }
@@ -30,7 +30,7 @@ export default class PropertyService implements IPropertyService {
     supplyReadingRepository.deleteBySupplyIds(supplyIds)
     supplyRepository.deleteByPropertyId(id)
     const deleted = propertyRepository.delete(id, user)
-    /* istanbul ignore next */
+    /* v8 ignore next */
     if (!deleted) throw Boom.notFound(ERROR_MESSAGE.PROPERTY.NOT_FOUND).output
   }
 }

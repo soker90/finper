@@ -13,7 +13,6 @@ export const validateSupplyExist = async ({ id, message, user }: { id: string, m
 }
 
 export const validateSupplyCreateParams = async (data: Record<string, string>) => {
-  /* istanbul ignore else — propertyId is always provided when creating a supply via route */
   if (data.propertyId) {
     await validatePropertyExist({ id: data.propertyId, user: data.user })
   }
@@ -38,7 +37,7 @@ export const validateSupplyCreateParams = async (data: Record<string, string>) =
 
   const { error, value } = schema.validate(data, { stripUnknown: true })
 
-  /* istanbul ignore next — Joi error branch not exercised for supply create in current tests */
+  /* v8 ignore next — Joi error branch not exercised for supply create in current tests */
   if (error) {
     throw Boom.badData(error.message).output
   }
@@ -47,12 +46,10 @@ export const validateSupplyCreateParams = async (data: Record<string, string>) =
 }
 
 export const validateSupplyEditParams = async ({ params, body, user }: { params: Record<string, string>, body: Record<string, any>, user: string }) => {
-  /* istanbul ignore else — params.id is always present when editing via route (URL param) */
   if (params.id) {
     await validateSupplyExist({ id: params.id, user })
   }
 
-  /* istanbul ignore else — propertyId is always present in the body for supply edit requests */
   if (body.propertyId) {
     await validatePropertyExist({ id: body.propertyId, user })
   }
@@ -76,7 +73,7 @@ export const validateSupplyEditParams = async ({ params, body, user }: { params:
 
   const { error, value } = schema.validate(body, { stripUnknown: true })
 
-  /* istanbul ignore next — Joi error branch not exercised for supply edit in current tests */
+  /* v8 ignore next — Joi error branch not exercised for supply edit in current tests */
   if (error) {
     throw Boom.badData(error.message).output
   }

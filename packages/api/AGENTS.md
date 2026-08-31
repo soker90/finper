@@ -20,7 +20,7 @@
 7. **DI manual sin contenedor**: singletons en `services/index.ts`. Cada `routes/*.routes.ts` instancia su controller inline. No `new XxxService()` ad-hoc dentro de otros services.
 8. **Order matters al montar rutas** (`server.ts:57-59`): `/api/supplies/properties` y `/api/supplies/readings` van **antes** de `/api/supplies` para evitar shadowing.
 9. **`models.connect` es no-op si `NODE_ENV=test`** (`config/db.ts:19`); los tests conectan vía `test/test-db.js`.
-10. **`/* istanbul ignore next — <razón> */`** con razón explícita. No quitarlas al refactorizar.
+10. **`/* v8 ignore next — <razón> */`** con razón explícita. No quitarlas al refactorizar. `v8 ignore` solo admite rangos (`next`, `start/stop`), no condiciones de rama: los `if` sin `else` no llevan hint.
 
 ---
 

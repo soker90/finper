@@ -113,6 +113,21 @@ jobs:
           token: ${{ secrets.CODECOV_TOKEN }}
           fail_ci_if_error: false
 
+  type-check-api:
+    needs: changes
+    if: needs.changes.outputs.api == 'true' || needs.changes.outputs.db == 'true' || needs.changes.outputs.types == 'true' || needs.changes.outputs.shared == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+        with:
+          filter: '@soker90/finper-api'
+      - name: Type check
+        run: make type-check-api
+
   ## Frontend ##
   lint-client:
     needs: changes
@@ -149,6 +164,10 @@ jobs:
     if: needs.changes.outputs.client == 'true' || needs.changes.outputs.types == 'true' || needs.changes.outputs.shared == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2]
     steps:
       - uses: actions/checkout@v7
         with:
@@ -156,8 +175,8 @@ jobs:
       - uses: ./.github/actions/setup
         with:
           filter: '@soker90/finper-client'
-      - name: Test
-        run: make test-client
+      - name: Test (shard ${{ matrix.shard }}/2)
+        run: make test-client SHARD=--shard=${{ matrix.shard }}/2
       - name: Codecov
         uses: codecov/codecov-action@v6
         with:

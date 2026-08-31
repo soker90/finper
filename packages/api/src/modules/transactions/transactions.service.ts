@@ -64,7 +64,7 @@ export class TransactionsService {
 
   public editTransaction ({ id, value }: { id: string, value: any }): any {
     const oldTransaction = this.repository.findById(id, value.user)
-    /* istanbul ignore next — validateTransactionExist runs before via route */
+    /* v8 ignore next — validateTransactionExist runs before via route */
     if (!oldTransaction) throw Boom.notFound(ERROR_MESSAGE.TRANSACTION.NOT_FOUND).output
 
     const oldAmount = amountOf(oldTransaction)
@@ -102,7 +102,7 @@ export class TransactionsService {
 
   public deleteTransaction (id: string, user: string): void {
     const transaction = this.repository.findById(id, user)
-    /* istanbul ignore next — validateTransactionExist runs before via route */
+    /* v8 ignore next — validateTransactionExist runs before via route */
     if (!transaction) throw Boom.notFound(ERROR_MESSAGE.TRANSACTION.NOT_FOUND).output
 
     const amount = amountOf(transaction)

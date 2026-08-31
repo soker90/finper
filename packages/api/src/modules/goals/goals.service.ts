@@ -61,7 +61,7 @@ export class GoalService implements IGoalService {
     if (value.icon !== undefined) data.icon = value.icon
 
     const updated = this.repo.update(id, user, data)
-    /* istanbul ignore next — validator validateGoalExist runs before this method via route */
+    /* v8 ignore next — validator validateGoalExist runs before this method via route */
     if (!updated) throw Boom.notFound(ERROR_MESSAGE.GOAL.NOT_FOUND).output
     return updated
   }
@@ -76,27 +76,27 @@ export class GoalService implements IGoalService {
 
   public deleteGoal ({ id, user }: { id: string, user: string }): void {
     const deleted = this.repo.delete(id, user)
-    /* istanbul ignore next — validator validateGoalExist runs before this method via route */
+    /* v8 ignore next — validator validateGoalExist runs before this method via route */
     if (!deleted) throw Boom.notFound(ERROR_MESSAGE.GOAL.NOT_FOUND).output
   }
 
   public fundGoal ({ id, user, amount }: { id: string, user: string, amount: number }): any {
     const goal = this.repo.findById(id, user)
-    /* istanbul ignore next — validator validateGoalExist runs before this method via route */
+    /* v8 ignore next — validator validateGoalExist runs before this method via route */
     if (!goal) throw Boom.notFound(ERROR_MESSAGE.GOAL.NOT_FOUND).output
 
     const newAmount = roundMoney(goal.currentAmount + amount)
     validateTotalAllocation(this.repo, user, newAmount, id)
 
     const updated = this.repo.update(id, user, { currentAmount: newAmount })
-    /* istanbul ignore next — validator validateGoalExist runs before this method via route */
+    /* v8 ignore next — validator validateGoalExist runs before this method via route */
     if (!updated) throw Boom.notFound(ERROR_MESSAGE.GOAL.NOT_FOUND).output
     return updated
   }
 
   public withdrawGoal ({ id, user, amount }: { id: string, user: string, amount: number }): any {
     const goal = this.repo.findById(id, user)
-    /* istanbul ignore next — validator validateGoalExist runs before this method via route */
+    /* v8 ignore next — validator validateGoalExist runs before this method via route */
     if (!goal) throw Boom.notFound(ERROR_MESSAGE.GOAL.NOT_FOUND).output
 
     if (goal.currentAmount < amount) {
@@ -105,7 +105,7 @@ export class GoalService implements IGoalService {
 
     const newAmount = roundMoney(goal.currentAmount - amount)
     const updated = this.repo.update(id, user, { currentAmount: newAmount })
-    /* istanbul ignore next — validator validateGoalExist runs before this method via route */
+    /* v8 ignore next — validator validateGoalExist runs before this method via route */
     if (!updated) throw Boom.notFound(ERROR_MESSAGE.GOAL.NOT_FOUND).output
     return updated
   }

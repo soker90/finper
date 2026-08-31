@@ -28,6 +28,7 @@ define help
     start-client:              launch client
     deploy-bot:                deploy bot to Cloudflare Workers
     type-check-bot:            typecheck the bot
+    type-check-api:            typecheck the API (src + tests)
     clean:                     clean all build artifacts.
 
 endef
@@ -78,6 +79,9 @@ build-api: build-types build-db
 lint-api: build-types build-db
 	@pnpm --filter @soker90/finper-api lint
 
+type-check-api: build-types build-db
+	@pnpm --filter @soker90/finper-api type-check
+
 # temporal
 build-image-api-daily:
 	@docker build . -t soker90/finper-api:daily -f ./packages/api/Dockerfile
@@ -105,7 +109,7 @@ start-client:
 	@pnpm --filter @soker90/finper-client dev
 
 test-client:
-	@pnpm --filter @soker90/finper-client test
+	@pnpm --filter @soker90/finper-client test $(SHARD)
 
 build-client:
 	@pnpm --filter @soker90/finper-client build
