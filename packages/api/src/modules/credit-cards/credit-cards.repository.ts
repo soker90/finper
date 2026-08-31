@@ -421,7 +421,7 @@ export class CreditCardsRepository implements ICreditCardsRepository {
 
         tx.insert(transactions).values({
           id: txId,
-          date: now,
+          date: movement.date,
           categoryId: movement.categoryId,
           amount: movement.amount,
           type: movement.type,

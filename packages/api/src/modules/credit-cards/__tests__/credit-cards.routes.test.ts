@@ -653,5 +653,34 @@ describe('Credit Cards Routes', () => {
 
       expect(createdTransaction.tags).toEqual(['recurring'])
     })
+
+    test('pay-debt keeps the original movement date on the created transaction', async () => {
+      const cardRes = await supertest(server.app)
+        .post(path)
+        .set('Authorization', `Bearer ${token}`)
+        .send({ name: 'Date Pay Card', accountId })
+        .expect(201)
+      const cardId = cardRes.body.id
+
+      const originalDate = Date.now() - 30 * 24 * 60 * 60 * 1000
+      const movementRes = await supertest(server.app)
+        .post(`${path}/${cardId}/movements`)
+        .set('Authorization', `Bearer ${token}`)
+        .send({ date: originalDate, amount: 20, type: 'expense', categoryId })
+        .expect(201)
+
+      await supertest(server.app)
+        .post(`${path}/${cardId}/pay-debt`)
+        .set('Authorization', `Bearer ${token}`)
+        .send({ all: true })
+        .expect(200)
+
+      const paidMovement = await sqliteDb.select().from(creditCardMovements)
+        .where(eq(creditCardMovements.id, movementRes.body.id)).get()!
+      const createdTransaction = sqliteDb.select().from(transactions)
+        .where(eq(transactions.id, paidMovement.transactionId!)).get()!
+
+      expect(createdTransaction.date).toBe(originalDate)
+    })
   })
 })
