@@ -79,7 +79,7 @@ build-api: build-types build-db
 lint-api: build-types build-db
 	@pnpm --filter @soker90/finper-api lint
 
-type-check-api:
+type-check-api: build-types build-db
 	@pnpm --filter @soker90/finper-api type-check
 
 # temporal
