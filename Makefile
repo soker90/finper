@@ -70,7 +70,7 @@ start-api:
 	@pnpm --filter @soker90/finper-api start
 
 test-api:
-	@pnpm --filter @soker90/finper-api test
+	@pnpm --filter @soker90/finper-api test $(SHARD)
 
 build-api: build-types build-db
 	@pnpm --filter @soker90/finper-api build

@@ -1,0 +1,27 @@
+name: Setup Node environment
+description: Install Node.js and pnpm dependencies (requires the repo to already be checked out)
+
+inputs:
+  filter:
+    description: 'Optional pnpm package name to install only its workspace dependencies (e.g. @soker90/finper-api)'
+    required: false
+    default: ''
+
+runs:
+  using: composite
+  steps:
+    - uses: pnpm/action-setup@v6
+
+    - uses: actions/setup-node@v7
+      with:
+        cache: pnpm
+        node-version-file: .nvmrc
+
+    - name: Install dependencies
+      shell: bash
+      run: |
+        if [ -n "${{ inputs.filter }}" ]; then
+          pnpm install --frozen-lockfile --prefer-offline --filter "${{ inputs.filter }}..."
+        else
+          pnpm install --frozen-lockfile --prefer-offline
+        fi
