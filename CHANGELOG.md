@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.4.1] - 2026-08-31
+
+### Fixed
+
+- **api**: Paying a credit card debt no longer overwrites the original movement date on the generated transaction; each movement keeps the date the expense actually happened, while the settlement date (`paidAt`) still records when the payment occurred. Previously created transactions are not retroactively changed.
+- **client**: Add more spacing between the credit card icon and the date in the movements list.
+
+---
+
 ## [2.4.0] - 2026-08-22
 
 ### Added
