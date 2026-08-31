@@ -5,6 +5,10 @@ on:
   push:
     branches: [master]
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/master' }}
+
 permissions:
   contents: read
   pull-requests: write # required to post PR comments
@@ -12,11 +16,13 @@ permissions:
 jobs:
   react-doctor:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v7
         with:
+          persist-credentials: false
           fetch-depth: 0 # required for `diff`
-      - uses: millionco/react-doctor@main
+      - uses: millionco/react-doctor@v2
         with:
           diff: master
           github-token: ${{ secrets.GITHUB_TOKEN }}

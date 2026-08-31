@@ -69,13 +69,13 @@ seed-user:
 start-api:
 	@pnpm --filter @soker90/finper-api start
 
-test-api:
-	@pnpm --filter @soker90/finper-api test
+test-api: build-types build-db
+	@pnpm --filter @soker90/finper-api test $(SHARD)
 
 build-api: build-types build-db
 	@pnpm --filter @soker90/finper-api build
 
-lint-api:
+lint-api: build-types build-db
 	@pnpm --filter @soker90/finper-api lint
 
 # temporal

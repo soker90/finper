@@ -1,14 +1,15 @@
-# This workflow will do a clean install of node dependencies, build the source code and run tests across different versions of node
-# For more information see: https://help.github.com/actions/language-and-framework-guides/using-nodejs-with-github-actions
+# CI pipeline: lint, build and test each package in parallel, run only when
+# relevant files change.
 
-name: Node.js CI
+name: CI
 
 on:
   push:
     branches: [ master ]
   pull_request:
     branches: [ master ]
-    types: [opened, synchronize]
+    types: [opened, reopened, synchronize]
+  workflow_dispatch:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -18,300 +19,195 @@ permissions:
   contents: read
 
 jobs:
-  ## Types ##
-  build-types:
+  changes:
     runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      types: ${{ steps.filter.outputs.types }}
+      db: ${{ steps.filter.outputs.db }}
+      api: ${{ steps.filter.outputs.api }}
+      client: ${{ steps.filter.outputs.client }}
+      bot: ${{ steps.filter.outputs.bot }}
+      shared: ${{ steps.filter.outputs.shared }}
     steps:
       - uses: actions/checkout@v7
         with:
           fetch-depth: 0
-      - uses: pnpm/action-setup@v6
-      - uses: actions/setup-node@v7
+          persist-credentials: false
+      - uses: dorny/paths-filter@v4
+        id: filter
         with:
-          cache: 'pnpm'
-          node-version-file: '.nvmrc'
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile --filter @soker90/finper-types
-      - name: Build
-        run: make build-types
-      - uses: actions/upload-artifact@v7
-        with:
-          name: types
-          path: packages/types/dist
-
-  ## DB ##
-  lint-db:
-    needs: [ build-types ]
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v7
-        with:
-          fetch-depth: 0
-      - uses: pnpm/action-setup@v6
-      - uses: actions/setup-node@v7
-        with:
-          cache: 'pnpm'
-          node-version-file: '.nvmrc'
-      - uses: actions/download-artifact@v8
-        with:
-          name: types
-          path: packages/types/dist
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-      - name: Lint
-        run: make lint-db
-
-  build-db:
-    needs: [ build-types ]
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v7
-        with:
-          fetch-depth: 0
-      - uses: pnpm/action-setup@v6
-      - uses: actions/setup-node@v7
-        with:
-          cache: 'pnpm'
-          node-version-file: '.nvmrc'
-      - uses: actions/download-artifact@v8
-        with:
-          name: types
-          path: packages/types/dist
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-      - name: Build
-        run: make build-db
-      - uses: actions/upload-artifact@v7
-        with:
-          name: db
-          path: packages/db/dist
-
-  test-db:
-    needs: [ lint-db, build-db ]
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v7
-        with:
-          fetch-depth: 0
-      - uses: pnpm/action-setup@v6
-      - uses: actions/setup-node@v7
-        with:
-          cache: 'pnpm'
-          node-version-file: '.nvmrc'
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-      - name: Test
-        run: make test-db
-      - name: Codecov
-        uses: codecov/codecov-action@v6
-        with:
-          flags: db
+          # On manual dispatch there is no event "before" commit: diff against HEAD~1
+          base: ${{ github.event_name == 'workflow_dispatch' && 'HEAD~1' || '' }}
+          filters: |
+            types:
+              - 'packages/types/**'
+            db:
+              - 'packages/db/**'
+            api:
+              - 'packages/api/**'
+            client:
+              - 'packages/client/**'
+            bot:
+              - 'packages/bot/**'
+            shared:
+              - 'pnpm-lock.yaml'
+              - 'Makefile'
+              - 'package.json'
+              - '.github/workflows/pipeline.yml'
+              - '.github/actions/**'
 
   ## API ##
   lint-api:
-    needs: [ build-types, build-db ]
+    needs: changes
+    if: needs.changes.outputs.api == 'true' || needs.changes.outputs.db == 'true' || needs.changes.outputs.types == 'true' || needs.changes.outputs.shared == 'true'
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v7
         with:
-          fetch-depth: 0
-      - uses: pnpm/action-setup@v6
-      - uses: actions/setup-node@v7
+          persist-credentials: false
+      - uses: ./.github/actions/setup
         with:
-          cache: 'pnpm'
-          node-version-file: '.nvmrc'
-      - uses: actions/download-artifact@v8
-        with:
-          name: types
-          path: packages/types/dist
-      - uses: actions/download-artifact@v8
-        with:
-          name: db
-          path: packages/db/dist
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile --filter @soker90/finper-api...
+          filter: '@soker90/finper-api'
       - name: Lint
         run: make lint-api
 
   build-api:
-    needs: [ build-db ]
+    needs: changes
+    if: needs.changes.outputs.api == 'true' || needs.changes.outputs.db == 'true' || needs.changes.outputs.types == 'true' || needs.changes.outputs.shared == 'true'
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v7
         with:
-          fetch-depth: 0
-      - uses: pnpm/action-setup@v6
-      - uses: actions/setup-node@v7
+          persist-credentials: false
+      - uses: ./.github/actions/setup
         with:
-          cache: 'pnpm'
-          node-version-file: '.nvmrc'
-      - uses: actions/download-artifact@v8
-        with:
-          name: types
-          path: packages/types/dist
-      - uses: actions/download-artifact@v8
-        with:
-          name: db
-          path: packages/db/dist
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile --filter @soker90/finper-api...
+          filter: '@soker90/finper-api'
       - name: Build
         run: make build-api
 
   test-api:
-    needs: [ lint-api, build-api ]
+    needs: changes
+    if: needs.changes.outputs.api == 'true' || needs.changes.outputs.db == 'true' || needs.changes.outputs.types == 'true' || needs.changes.outputs.shared == 'true'
     runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2]
     steps:
       - uses: actions/checkout@v7
         with:
-          fetch-depth: 0
-      - uses: pnpm/action-setup@v6
-      - uses: actions/setup-node@v7
+          persist-credentials: false
+      - uses: ./.github/actions/setup
         with:
-          cache: 'pnpm'
-          node-version-file: '.nvmrc'
-      - uses: actions/download-artifact@v8
-        with:
-          name: types
-          path: packages/types/dist
-      - uses: actions/download-artifact@v8
-        with:
-          name: db
-          path: packages/db/dist
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile --filter @soker90/finper-api...
-      - name: Test
-        run: make test-api
+          filter: '@soker90/finper-api'
+      - name: Test (shard ${{ matrix.shard }}/2)
+        run: make test-api SHARD=--shard=${{ matrix.shard }}/2
       - name: Codecov
         uses: codecov/codecov-action@v6
         with:
           flags: api
+          token: ${{ secrets.CODECOV_TOKEN }}
+          fail_ci_if_error: false
 
   ## Frontend ##
   lint-client:
-    needs: [ build-types ]
+    needs: changes
+    if: needs.changes.outputs.client == 'true' || needs.changes.outputs.types == 'true' || needs.changes.outputs.shared == 'true'
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v7
         with:
-          fetch-depth: 0
-      - uses: pnpm/action-setup@v6
-      - uses: actions/setup-node@v7
+          persist-credentials: false
+      - uses: ./.github/actions/setup
         with:
-          cache: 'pnpm'
-          node-version-file: '.nvmrc'
-      - uses: actions/download-artifact@v8
-        with:
-          name: types
-          path: packages/types/dist
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile --filter @soker90/finper-client...
+          filter: '@soker90/finper-client'
       - name: Lint
         run: make lint-client
 
   build-client:
-    needs: [ build-types ]
+    needs: changes
+    if: needs.changes.outputs.client == 'true' || needs.changes.outputs.types == 'true' || needs.changes.outputs.shared == 'true'
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v7
         with:
-          fetch-depth: 0
-      - uses: pnpm/action-setup@v6
-      - uses: actions/setup-node@v7
+          persist-credentials: false
+      - uses: ./.github/actions/setup
         with:
-          cache: 'pnpm'
-          node-version-file: '.nvmrc'
-      - uses: actions/download-artifact@v8
-        with:
-          name: types
-          path: packages/types/dist
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile --filter @soker90/finper-client...
+          filter: '@soker90/finper-client'
       - name: Build
         run: make build-client
 
   test-client:
-    needs: [ lint-client, build-client ]
+    needs: changes
+    if: needs.changes.outputs.client == 'true' || needs.changes.outputs.types == 'true' || needs.changes.outputs.shared == 'true'
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v7
         with:
-          fetch-depth: 0
-      - uses: pnpm/action-setup@v6
-      - uses: actions/setup-node@v7
+          persist-credentials: false
+      - uses: ./.github/actions/setup
         with:
-          cache: 'pnpm'
-          node-version-file: '.nvmrc'
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile --filter @soker90/finper-client...
+          filter: '@soker90/finper-client'
       - name: Test
         run: make test-client
       - name: Codecov
         uses: codecov/codecov-action@v6
         with:
           flags: client
+          token: ${{ secrets.CODECOV_TOKEN }}
+          fail_ci_if_error: false
 
   ## Bot ##
-  changes-bot:
-    runs-on: ubuntu-latest
-    outputs:
-      bot: ${{ steps.filter.outputs.bot }}
-    steps:
-      - uses: actions/checkout@v7
-      - uses: dorny/paths-filter@v4
-        id: filter
-        with:
-          filters: |
-            bot:
-              - 'packages/bot/**'
-
   lint-bot:
+    needs: changes
+    if: needs.changes.outputs.bot == 'true' || needs.changes.outputs.shared == 'true'
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v7
         with:
-          fetch-depth: 0
-      - uses: pnpm/action-setup@v6
-      - uses: actions/setup-node@v7
+          persist-credentials: false
+      - uses: ./.github/actions/setup
         with:
-          cache: 'pnpm'
-          node-version-file: '.nvmrc'
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile --filter @soker90/finper-bot
+          filter: '@soker90/finper-bot'
       - name: Lint
         run: make lint-bot
 
   type-check-bot:
+    needs: changes
+    if: needs.changes.outputs.bot == 'true' || needs.changes.outputs.shared == 'true'
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v7
         with:
-          fetch-depth: 0
-      - uses: pnpm/action-setup@v6
-      - uses: actions/setup-node@v7
+          persist-credentials: false
+      - uses: ./.github/actions/setup
         with:
-          cache: 'pnpm'
-          node-version-file: '.nvmrc'
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile --filter @soker90/finper-bot
+          filter: '@soker90/finper-bot'
       - name: Type check
         run: make type-check-bot
 
   deploy-bot:
-    needs: [ changes-bot, lint-bot, type-check-bot ]
-    if: github.ref == 'refs/heads/master' && github.event_name == 'push' && needs.changes-bot.outputs.bot == 'true'
+    needs: [changes, lint-bot, type-check-bot]
+    if: github.ref == 'refs/heads/master' && github.event_name == 'push' && needs.changes.outputs.bot == 'true'
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v7
         with:
-          fetch-depth: 0
-      - uses: pnpm/action-setup@v6
-      - uses: actions/setup-node@v7
+          persist-credentials: false
+      - uses: ./.github/actions/setup
         with:
-          cache: 'pnpm'
-          node-version-file: '.nvmrc'
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile --filter @soker90/finper-bot
+          filter: '@soker90/finper-bot'
       - name: Deploy
         run: make deploy-bot
         env:

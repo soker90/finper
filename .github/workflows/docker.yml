@@ -4,18 +4,30 @@ on:
   release:
     types: [published]
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
 permissions:
   contents: read
 
 jobs:
   docker:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: client
+            dockerfile: ./packages/client/Dockerfile
+          - name: api
+            dockerfile: ./packages/api/Dockerfile
     steps:
       - name: Check out code
         uses: actions/checkout@v7
-
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v4
+        with:
+          persist-credentials: false
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v4
@@ -26,22 +38,14 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build and push client
+      - name: Build and push finper-${{ matrix.name }}
         uses: docker/build-push-action@v7
         with:
           push: true
           tags: |
-            soker90/finper-client:latest
-            soker90/finper-client:${{ github.event.release.tag_name }}
+            soker90/finper-${{ matrix.name }}:latest
+            soker90/finper-${{ matrix.name }}:${{ github.event.release.tag_name }}
           context: .
-          file: ./packages/client/Dockerfile
-
-      - name: Build and push api
-        uses: docker/build-push-action@v7
-        with:
-          push: true
-          tags: |
-            soker90/finper-api:latest
-            soker90/finper-api:${{ github.event.release.tag_name }}
-          context: .
-          file: ./packages/api/Dockerfile
+          file: ${{ matrix.dockerfile }}
+          cache-from: type=gha,scope=${{ matrix.name }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.name }}
