@@ -31,4 +31,4 @@ jobs:
         env:
           OPENCODE_API_KEY: ${{ secrets.OPENCODE_API_KEY }}
         with:
-          model: opencode-go/glm-5-3-flash
+          model: glm-5.3-flash
