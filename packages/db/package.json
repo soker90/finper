@@ -6,8 +6,10 @@
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsc",
-    "test": "echo \"Error: no test specified\" && exit 0",
-    "lint": "echo '[db] lint pending eslint.config setup' && exit 0",
+    "test": "vitest run --coverage",
+    "test:watch": "vitest",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
     "generate": "drizzle-kit generate"
   },
   "dependencies": {
@@ -17,7 +19,14 @@
   },
   "devDependencies": {
     "@types/better-sqlite3": "7.6.12",
+    "@typescript-eslint/eslint-plugin": "8.67.0",
+    "@typescript-eslint/parser": "8.67.0",
+    "@vitest/coverage-v8": "4.1.11",
     "drizzle-kit": "0.31.10",
-    "typescript": "5.9.3"
+    "eslint": "9.39.2",
+    "globals": "17.6.0",
+    "neostandard": "0.13.0",
+    "typescript": "5.9.3",
+    "vitest": "4.1.11"
   }
 }

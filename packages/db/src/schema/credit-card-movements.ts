@@ -1,9 +1,9 @@
-import { sqliteTable, text, integer, real, index } from 'drizzle-orm/sqlite-core';
-import { users } from './users';
-import { creditCards } from './credit-cards';
-import { categories } from './categories';
-import { stores } from './stores';
-import { transactions } from './transactions';
+import { sqliteTable, text, integer, real, index } from 'drizzle-orm/sqlite-core'
+import { users } from './users'
+import { creditCards } from './credit-cards'
+import { categories } from './categories'
+import { stores } from './stores'
+import { transactions } from './transactions'
 
 // Ciclo de vida de un movimiento de tarjeta:
 //   1. 'pending': el gasto/ingreso se registra en la tarjeta pero todavía NO
@@ -36,4 +36,4 @@ export const creditCardMovements = sqliteTable('credit_card_movements', {
 }, (table) => ({
   cardUserIdx: index('cc_movements_card_user_idx').on(table.creditCardId, table.user),
   userStatusIdx: index('cc_movements_user_status_idx').on(table.user, table.status),
-}));
+}))

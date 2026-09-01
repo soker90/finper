@@ -1,6 +1,6 @@
-import { sqliteTable, text, integer, real, index } from 'drizzle-orm/sqlite-core';
-import { users } from './users';
-import { loans } from './loans';
+import { sqliteTable, text, integer, real, index } from 'drizzle-orm/sqlite-core'
+import { users } from './users'
+import { loans } from './loans'
 
 export const loanEvents = sqliteTable('loan_events', {
   id: text('id').primaryKey(),
@@ -12,7 +12,7 @@ export const loanEvents = sqliteTable('loan_events', {
 }, (table) => ({
   loanUserIdx: index('loan_events_loan_user_idx').on(table.loanId, table.user),
   userIdx: index('loan_events_user_idx').on(table.user),
-}));
+}))
 
 export const loanPayments = sqliteTable('loan_payments', {
   id: text('id').primaryKey(),
@@ -28,4 +28,4 @@ export const loanPayments = sqliteTable('loan_payments', {
 }, (table) => ({
   loanUserDateIdx: index('loan_payments_loan_user_date_idx').on(table.loanId, table.user, table.date),
   userIdx: index('loan_payments_user_idx').on(table.user),
-}));
+}))

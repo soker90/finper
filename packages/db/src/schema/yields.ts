@@ -1,7 +1,7 @@
-import { sqliteTable, text, real, uniqueIndex } from 'drizzle-orm/sqlite-core';
-import { users } from './users';
-import { accounts } from './accounts';
-import { categories } from './categories';
+import { sqliteTable, text, real, uniqueIndex } from 'drizzle-orm/sqlite-core'
+import { users } from './users'
+import { accounts } from './accounts'
+import { categories } from './categories'
 
 // Un Rendimiento es una entidad genérica a la que se enlazan transacciones
 // ya existentes. El "type" determina cómo se interpretan esas transacciones:
@@ -21,7 +21,7 @@ export const yields = sqliteTable('yields', {
   user: text('user').notNull().references(() => users.username),
 }, (table) => ({
   userAccountTypeIdx: uniqueIndex('yields_user_account_type_idx').on(table.user, table.accountId, table.type),
-}));
+}))
 
 export const yieldSettlements = sqliteTable('yield_settlements', {
   id: text('id').primaryKey(),
@@ -34,4 +34,4 @@ export const yieldSettlements = sqliteTable('yield_settlements', {
   // the DB itself rejects a transaction whose settlement belongs to a
   // different yield than the one it's linked to.
   idYieldIdIdx: uniqueIndex('yield_settlements_id_yield_id_idx').on(table.id, table.yieldId),
-}));
+}))

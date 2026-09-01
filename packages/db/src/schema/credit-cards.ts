@@ -1,6 +1,6 @@
-import { sqliteTable, text, real, index } from 'drizzle-orm/sqlite-core';
-import { users } from './users';
-import { accounts } from './accounts';
+import { sqliteTable, text, real, index } from 'drizzle-orm/sqlite-core'
+import { users } from './users'
+import { accounts } from './accounts'
 
 // Una tarjeta de crédito lleva asociada una cuenta bancaria (accountId) que
 // es la que finalmente asume el cargo cuando se liquida la deuda. Los
@@ -19,4 +19,4 @@ export const creditCards = sqliteTable('credit_cards', {
   user: text('user').notNull().references(() => users.username),
 }, (table) => ({
   userIdx: index('credit_cards_user_idx').on(table.user),
-}));
+}))
