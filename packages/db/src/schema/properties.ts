@@ -1,11 +1,11 @@
-import {  sqliteTable, text, integer, real  } from 'drizzle-orm/sqlite-core';
-import { users } from './users';
+import { sqliteTable, text, integer, real } from 'drizzle-orm/sqlite-core'
+import { users } from './users'
 
 export const properties = sqliteTable('properties', {
   id: text('id').primaryKey(),
   name: text('name').notNull(),
   user: text('user').notNull().references(() => users.username),
-});
+})
 
 export const supplies = sqliteTable('supplies', {
   id: text('id').primaryKey(),
@@ -20,7 +20,7 @@ export const supplies = sqliteTable('supplies', {
   currentPriceEnergyFlat: real('current_price_energy_flat'),
   currentPriceEnergyOffPeak: real('current_price_energy_off_peak'),
   user: text('user').notNull().references(() => users.username),
-});
+})
 
 export const supplyReadings = sqliteTable('supply_readings', {
   id: text('id').primaryKey(),
@@ -33,4 +33,4 @@ export const supplyReadings = sqliteTable('supply_readings', {
   consumptionFlat: real('consumption_flat'),
   consumptionOffPeak: real('consumption_off_peak'),
   user: text('user').notNull().references(() => users.username),
-});
+})

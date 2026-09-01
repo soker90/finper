@@ -1,7 +1,7 @@
-import {  sqliteTable, text, integer, real  } from 'drizzle-orm/sqlite-core';
-import { users } from './users';
-import { accounts } from './accounts';
-import { categories } from './categories';
+import { sqliteTable, text, integer, real } from 'drizzle-orm/sqlite-core'
+import { users } from './users'
+import { accounts } from './accounts'
+import { categories } from './categories'
 
 export const subscriptions = sqliteTable('subscriptions', {
   id: text('id').primaryKey(),
@@ -14,7 +14,7 @@ export const subscriptions = sqliteTable('subscriptions', {
   accountId: text('account_id').notNull().references(() => accounts.id),
   logoUrl: text('logo_url'),
   user: text('user').notNull().references(() => users.username),
-});
+})
 
 export const subscriptionCandidates = sqliteTable('subscription_candidates', {
   id: text('id').primaryKey(),
@@ -22,4 +22,4 @@ export const subscriptionCandidates = sqliteTable('subscription_candidates', {
   subscriptionIds: text('subscription_ids', { mode: 'json' }).$type<string[]>().notNull(),
   user: text('user').notNull().references(() => users.username),
   createdAt: integer('created_at').notNull(),
-});
+})

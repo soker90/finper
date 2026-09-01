@@ -1,7 +1,7 @@
-import { sqliteTable, text, integer, real, index } from 'drizzle-orm/sqlite-core';
-import { users } from './users';
-import { accounts } from './accounts';
-import { categories } from './categories';
+import { sqliteTable, text, integer, real, index } from 'drizzle-orm/sqlite-core'
+import { users } from './users'
+import { accounts } from './accounts'
+import { categories } from './categories'
 
 export const loans = sqliteTable('loans', {
   id: text('id').primaryKey(),
@@ -17,4 +17,4 @@ export const loans = sqliteTable('loans', {
   user: text('user').notNull().references(() => users.username),
 }, (table) => ({
   userIdx: index('loans_user_idx').on(table.user),
-}));
+}))

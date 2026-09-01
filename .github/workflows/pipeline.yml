@@ -57,6 +57,43 @@ jobs:
               - '.github/workflows/pipeline.yml'
               - '.github/actions/**'
 
+  ## DB ##
+  lint-db:
+    needs: changes
+    if: needs.changes.outputs.db == 'true' || needs.changes.outputs.shared == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+        with:
+          filter: '@soker90/finper-db'
+      - name: Lint
+        run: make lint-db
+
+  test-db:
+    needs: changes
+    if: needs.changes.outputs.db == 'true' || needs.changes.outputs.shared == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+        with:
+          filter: '@soker90/finper-db'
+      - name: Test
+        run: make test-db
+      - name: Codecov
+        uses: codecov/codecov-action@v6
+        with:
+          flags: db
+          token: ${{ secrets.CODECOV_TOKEN }}
+          fail_ci_if_error: false
+
   ## API ##
   lint-api:
     needs: changes

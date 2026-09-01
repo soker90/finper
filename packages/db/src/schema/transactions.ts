@@ -1,13 +1,11 @@
-import { sqliteTable, text, primaryKey, integer, real, index, foreignKey } from 'drizzle-orm/sqlite-core';
-import { users } from './users';
-import { accounts } from './accounts';
-import { categories } from './categories';
-import { stores } from './stores';
-import { subscriptions } from './subscriptions';
-import { yields, yieldSettlements } from './yields';
-import { creditCards } from './credit-cards';
-
-
+import { sqliteTable, text, integer, real, index, foreignKey } from 'drizzle-orm/sqlite-core'
+import { users } from './users'
+import { accounts } from './accounts'
+import { categories } from './categories'
+import { stores } from './stores'
+import { subscriptions } from './subscriptions'
+import { yields, yieldSettlements } from './yields'
+import { creditCards } from './credit-cards'
 
 export const transactions = sqliteTable('transactions', {
   id: text('id').primaryKey(),
@@ -42,6 +40,4 @@ export const transactions = sqliteTable('transactions', {
     columns: [table.yieldSettlementId, table.yieldId],
     foreignColumns: [yieldSettlements.id, yieldSettlements.yieldId]
   }),
-}));
-
-
+}))

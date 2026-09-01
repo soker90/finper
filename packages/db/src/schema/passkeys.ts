@@ -1,5 +1,5 @@
-import { sqliteTable, text, integer, uniqueIndex } from 'drizzle-orm/sqlite-core';
-import { users } from './users';
+import { sqliteTable, text, integer, uniqueIndex } from 'drizzle-orm/sqlite-core'
+import { users } from './users'
 
 export const passkeys = sqliteTable('passkeys', {
   id: text('id').primaryKey(),
@@ -12,4 +12,4 @@ export const passkeys = sqliteTable('passkeys', {
   createdAt: integer('created_at', { mode: 'timestamp_ms' }).notNull(),
 }, (table) => ({
   credentialIdIdx: uniqueIndex('passkeys_credential_id_idx').on(table.credentialId),
-}));
+}))
