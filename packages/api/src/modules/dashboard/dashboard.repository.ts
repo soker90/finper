@@ -1,6 +1,7 @@
 import { eq, and, gte, lt } from 'drizzle-orm'
 import { type DB, schema } from '@soker90/finper-db'
 import { roundMoney } from '@soker90/finper-db'
+import { findEffectiveCategoryRows } from '../transactions/effective-category-rows'
 
 const { accounts, loans, transactions, categories, stores, budgets, creditCardMovements } = schema
 
@@ -30,8 +31,7 @@ export const createDashboardRepository = (db: DB) => {
     return new Map(rows.map(r => [r.id, { name: r.name, parentId: r.parentId }]))
   }
 
-  // Transacciones en [from, to) opcionalmente filtradas por tipo.
-  const txInRange = (user: string, from: number, to: number, type?: string) => {
+  const parentTxInRange = (user: string, from: number, to: number, type?: string) => {
     const conds = [eq(transactions.user, user), gte(transactions.date, from), lt(transactions.date, to)]
     if (type) conds.push(eq(transactions.type, type))
     return db.select({
@@ -42,6 +42,9 @@ export const createDashboardRepository = (db: DB) => {
       storeId: transactions.storeId
     }).from(transactions).where(and(...conds)).all()
   }
+
+  const effectiveTxInRange = (user: string, from: number, to: number, type?: string) =>
+    findEffectiveCategoryRows(db, { user, from, to, type })
 
   return {
     // 1. Suma de balances de cuentas activas.
@@ -70,7 +73,7 @@ export const createDashboardRepository = (db: DB) => {
     // 4/5. Ingresos y gastos en un rango.
     monthIncomeExpenses: (user: string, from: number, to: number): { income: number, expenses: number } => {
       let income = 0; let expenses = 0
-      for (const tx of txInRange(user, from, to)) {
+      for (const tx of parentTxInRange(user, from, to)) {
         if (tx.type === INCOME) income += tx.amount
         else if (tx.type === EXPENSE) expenses += tx.amount
       }
@@ -80,7 +83,7 @@ export const createDashboardRepository = (db: DB) => {
     // 6. Resumen mensual [{ year, month, income, expenses }] (mes Madrid, 1-indexed), ordenado.
     last6MonthsSummary: (user: string, from: number, to: number): MonthlyData[] => {
       const grouped = new Map<string, MonthlyData>()
-      for (const tx of txInRange(user, from, to)) {
+      for (const tx of parentTxInRange(user, from, to)) {
         if (tx.type !== INCOME && tx.type !== EXPENSE) continue
         const { year, month } = partsInMadrid(tx.date)
         const key = `${year}-${month}`
@@ -95,7 +98,7 @@ export const createDashboardRepository = (db: DB) => {
     // 7/8. Gasto diario (día Madrid) -> [{ _id: day, amount }] ordenado por día.
     dailyExpenses: (user: string, from: number, to: number): Array<{ _id: number, amount: number }> => {
       const grouped = new Map<number, number>()
-      for (const tx of txInRange(user, from, to, EXPENSE)) {
+      for (const tx of parentTxInRange(user, from, to, EXPENSE)) {
         const { day } = partsInMadrid(tx.date)
         grouped.set(day, (grouped.get(day) ?? 0) + tx.amount)
       }
@@ -106,7 +109,7 @@ export const createDashboardRepository = (db: DB) => {
     topExpenseCategories: (user: string, from: number, to: number): Array<{ name: string, parentName?: string, amount: number }> => {
       const cats = categoryMap(user)
       const grouped = new Map<string, number>()
-      for (const tx of txInRange(user, from, to, EXPENSE)) {
+      for (const tx of effectiveTxInRange(user, from, to, EXPENSE)) {
         grouped.set(tx.categoryId, (grouped.get(tx.categoryId) ?? 0) + tx.amount)
       }
       return [...grouped.entries()].map(([categoryId, amount]) => {
@@ -121,7 +124,7 @@ export const createDashboardRepository = (db: DB) => {
       const storeRows = db.select({ id: stores.id, name: stores.name }).from(stores).where(eq(stores.user, user)).all()
       const storeNames = new Map(storeRows.map(s => [s.id, s.name]))
       const grouped = new Map<string, number>()
-      for (const tx of txInRange(user, from, to, EXPENSE)) {
+      for (const tx of parentTxInRange(user, from, to, EXPENSE)) {
         if (!tx.storeId) continue
         grouped.set(tx.storeId, (grouped.get(tx.storeId) ?? 0) + tx.amount)
       }
@@ -132,13 +135,13 @@ export const createDashboardRepository = (db: DB) => {
 
     // 13. Gasto real total del rango.
     realExpenses: (user: string, from: number, to: number): number =>
-      roundMoney(txInRange(user, from, to, EXPENSE).reduce((s, tx) => s + tx.amount, 0)),
+      roundMoney(parentTxInRange(user, from, to, EXPENSE).reduce((s, tx) => s + tx.amount, 0)),
 
     // 14. Gasto del mes por categoría con name [{ categoryId, name, total, count }].
     currentMonthByCategory: (user: string, from: number, to: number): CategorySpendingRow[] => {
       const cats = categoryMap(user)
       const grouped = new Map<string, { total: number, count: number }>()
-      for (const tx of txInRange(user, from, to, EXPENSE)) {
+      for (const tx of effectiveTxInRange(user, from, to, EXPENSE)) {
         const entry = grouped.get(tx.categoryId) ?? { total: 0, count: 0 }
         entry.total += tx.amount; entry.count += 1
         grouped.set(tx.categoryId, entry)
@@ -156,7 +159,7 @@ export const createDashboardRepository = (db: DB) => {
     last3MonthsAvgByCategory: (user: string, from: number, to: number): CategoryHistoryRow[] => {
       const cats = categoryMap(user)
       const monthly = new Map<string, Map<string, number>>() // categoryId -> (year-month -> total)
-      for (const tx of txInRange(user, from, to, EXPENSE)) {
+      for (const tx of effectiveTxInRange(user, from, to, EXPENSE)) {
         const { year, month } = partsInMadrid(tx.date)
         const ym = `${year}-${month}`
         const perCat = monthly.get(tx.categoryId) ?? new Map<string, number>()
@@ -177,7 +180,7 @@ export const createDashboardRepository = (db: DB) => {
     // 16. Transacciones de gasto agrupadas por mes [{ transactions, total, count }].
     last3MonthsTransactions: (user: string, from: number, to: number): MonthTransactionsRow[] => {
       const grouped = new Map<string, MonthTransactionsRow>()
-      for (const tx of txInRange(user, from, to, EXPENSE)) {
+      for (const tx of parentTxInRange(user, from, to, EXPENSE)) {
         const { year, month } = partsInMadrid(tx.date)
         const key = `${year}-${month}`
         const entry = grouped.get(key) ?? { transactions: [], total: 0, count: 0 }

@@ -8,7 +8,7 @@ import { eq } from 'drizzle-orm'
 import { ERROR_MESSAGE } from '../../../i18n'
 import { yieldsRoutes } from '../yields.routes'
 
-const { yields, yieldSettlements, transactions, categories, accounts, users } = schema
+const { yields, yieldSettlements, transactions, categories, accounts, users, transactionSplits } = schema
 
 describe('Yields Controller', () => {
   let token: string
@@ -480,6 +480,21 @@ describe('Yields Controller', () => {
       await supertest(server.app).post(`${path}/${yieldId}/link-transactions`).auth(token, { type: 'bearer' })
         .send({ transactionIds: [txId], settlementId })
         .expect(404)
+    })
+
+    test('rejects linking a split transaction', async () => {
+      const yieldId = insertYield('interest')
+      const txId = insertTransaction({ type: TRANSACTION.Income, amount: 100 })
+      const otherCat = generateId()
+      sqliteDb.insert(categories).values({ id: otherCat, name: 'Extra', type: TRANSACTION.Income, user: username }).run()
+      sqliteDb.insert(transactionSplits).values([
+        { id: generateId(), transactionId: txId, categoryId, amount: 60, user: username },
+        { id: generateId(), transactionId: txId, categoryId: otherCat, amount: 40, user: username }
+      ]).run()
+
+      await supertest(server.app).post(`${path}/${yieldId}/link-transactions`).auth(token, { type: 'bearer' })
+        .send({ transactionIds: [txId] })
+        .expect(422)
     })
   })
 

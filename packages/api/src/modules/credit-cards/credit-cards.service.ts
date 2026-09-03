@@ -49,9 +49,11 @@ export class CreditCardsService {
 
   public async addMovement ({ creditCardId, user, data }: { creditCardId: string, user: string, data: Omit<CreateCreditCardMovementData, 'creditCardId'> }) {
     await this.getCreditCardById(creditCardId, user)
+    const hasSplits = Array.isArray(data.splits) && data.splits.length >= 2
     const movement = await this.repository.createMovement(user, {
       ...data,
-      tags: sanitizeTags(data.tags),
+      tags: hasSplits ? [] : sanitizeTags(data.tags),
+      splits: data.splits?.map(split => ({ ...split, tags: sanitizeTags(split.tags) })),
       creditCardId
     })
     return serializeCreditCardMovement(movement)
@@ -65,9 +67,15 @@ export class CreditCardsService {
     if (movement.status === 'paid') {
       throw Boom.badRequest(ERROR_MESSAGE.CREDIT_CARD.ALREADY_PAID).output
     }
+    const hasSplits = Array.isArray(value.splits) && value.splits.length >= 2
     const updated = await this.repository.updateMovement(id, user, {
       ...value,
-      ...(value.tags !== undefined && { tags: sanitizeTags(value.tags) })
+      ...(hasSplits
+        ? { tags: [] }
+        : (value.tags !== undefined && { tags: sanitizeTags(value.tags) })),
+      ...(value.splits !== undefined && {
+        splits: value.splits.map(split => ({ ...split, tags: sanitizeTags(split.tags) }))
+      })
     })
     return serializeCreditCardMovement(updated)
   }

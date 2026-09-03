@@ -1,10 +1,30 @@
 import { schema } from '@soker90/finper-db'
 import type { TransactionRow } from './transactions.repository'
+import type { SplitRow } from './effective-category-rows'
 
 type Transaction = typeof schema.transactions.$inferSelect
 
-// POST/PUT: doc sin populate (ids planos), 1:1 con el viejo.
-export const serializeTransaction = (t: Transaction) => {
+const serializeSplitPlain = (split: SplitRow) => {
+  const result: Record<string, any> = {
+    _id: split.id,
+    category: split.categoryId,
+    amount: split.amount,
+    tags: split.tags ?? []
+  }
+  return result
+}
+
+const serializeSplitPopulated = (split: SplitRow) => {
+  const result: Record<string, any> = {
+    _id: split.id,
+    category: { _id: split.categoryId, name: split.categoryName },
+    amount: split.amount,
+    tags: split.tags ?? []
+  }
+  return result
+}
+
+export const serializeTransaction = (t: Transaction, splits?: SplitRow[]) => {
   const result: Record<string, any> = {
     _id: t.id,
     date: t.date,
@@ -17,11 +37,11 @@ export const serializeTransaction = (t: Transaction) => {
   if (t.note !== null && t.note !== undefined) result.note = t.note
   if (t.storeId) result.store = t.storeId
   if (t.subscriptionId) result.subscriptionId = t.subscriptionId
+  if (splits && splits.length >= 2) result.splits = splits.map(serializeSplitPlain)
   return result
 }
 
-// GET: con populate (objetos anidados).
-export const serializeTransactionPopulated = (row: TransactionRow) => {
+export const serializeTransactionPopulated = (row: TransactionRow, splits?: SplitRow[]) => {
   const result: Record<string, any> = {
     _id: row.id,
     date: row.date,
@@ -35,5 +55,6 @@ export const serializeTransactionPopulated = (row: TransactionRow) => {
   if (row.storeId) result.store = { _id: row.storeId, name: row.storeName }
   if (row.subscriptionId) result.subscriptionId = row.subscriptionId
   if (row.creditCardId) result.creditCard = { id: row.creditCardId, name: row.creditCardName }
+  if (splits && splits.length >= 2) result.splits = splits.map(serializeSplitPopulated)
   return result
 }

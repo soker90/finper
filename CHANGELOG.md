@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.5.0] - 2026-09-03
+
+### Added
+
+- **client/api/db**: Split transactions. A movement can be divided into two or more category lines whose amounts must sum to the parent total. Account balance uses the parent amount; budgets, dashboard category stats and tag stats use the split lines (no double-counting). Store, note and yield stay on the parent. Mixed types and yields-with-splits are out of scope.
+- **db**: New `transaction_splits` table. Parent `categoryId` is the first line; tags live on each line (parent `tags: []` when split).
+- **api**: `POST`/`PUT /api/transactions` accept optional `splits[]` (`{ category, amount, tags? }`, min 2). Category filter also matches split lines. Yield matching excludes split transactions; subscription matching includes split categories.
+- **client**: «Dividir movimiento» in transaction create/edit with remaining amount, «Asignar resto», and a split badge on list items. Parent tags are hidden in split mode and copied onto the first line when enabling.
+- **client/api/db**: Credit card pending movements can also be split. New `credit_card_movement_splits` table; `payDebt` copies the lines onto the generated transaction so stats stay correct after settlement.
+
+---
+
 ## [2.4.2] - 2026-09-03
 
 ### Fixed

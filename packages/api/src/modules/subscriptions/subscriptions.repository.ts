@@ -1,6 +1,6 @@
-import { eq, and, asc, desc, isNull, inArray, gte, lte } from 'drizzle-orm'
+import { eq, and, asc, desc, isNull, inArray, gte, lte, or } from 'drizzle-orm'
 import { type DB, schema, generateId } from '@soker90/finper-db'
-const { subscriptions, transactions, categories, accounts, stores, subscriptionCandidates } = schema
+const { subscriptions, transactions, categories, accounts, stores, subscriptionCandidates, transactionSplits } = schema
 
 type Subscription = typeof subscriptions.$inferSelect
 type CandidateRow = typeof subscriptionCandidates.$inferSelect
@@ -114,17 +114,28 @@ export const createSubscriptionsRepository = (db: DB) => ({
       .orderBy(desc(transactions.date))
       .all() as SubscriptionTransactionRow[],
 
-  findMatchingTransactions: (categoryId: string, accountId: string, user: string): SubscriptionTransactionRow[] =>
-    transactionsSelect(db)
+  findSplitCategoryIds: (transactionId: string): string[] =>
+    db.select({ categoryId: transactionSplits.categoryId })
+      .from(transactionSplits)
+      .where(eq(transactionSplits.transactionId, transactionId))
+      .all()
+      .map(row => row.categoryId),
+
+  findMatchingTransactions: (categoryId: string, accountId: string, user: string): SubscriptionTransactionRow[] => {
+    const splitMatches = db.select({ id: transactionSplits.transactionId })
+      .from(transactionSplits)
+      .where(and(eq(transactionSplits.categoryId, categoryId), eq(transactionSplits.user, user)))
+    return transactionsSelect(db)
       .where(and(
         eq(transactions.user, user),
-        eq(transactions.categoryId, categoryId),
         eq(transactions.accountId, accountId),
-        isNull(transactions.subscriptionId)
+        isNull(transactions.subscriptionId),
+        or(eq(transactions.categoryId, categoryId), inArray(transactions.id, splitMatches))
       ))
       .orderBy(desc(transactions.date))
       .limit(50)
-      .all() as SubscriptionTransactionRow[],
+      .all() as SubscriptionTransactionRow[]
+  },
 
   linkTransactions: (subscriptionId: string, transactionIds: string[]): void => {
     db.update(transactions).set({ subscriptionId }).where(inArray(transactions.id, transactionIds)).run()

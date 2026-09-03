@@ -1,7 +1,7 @@
 import Joi from 'joi'
 import Boom from '@hapi/boom'
 import { eq, and } from 'drizzle-orm'
-import { schema } from '@soker90/finper-db'
+import { schema, roundMoney } from '@soker90/finper-db'
 import { db as sqliteDb } from '../../db'
 import { isValidId } from '../../utils'
 import { ERROR_MESSAGE } from '../../i18n'
@@ -9,6 +9,12 @@ import { creditCardsRepository } from './credit-cards.repository'
 import type { CreateCreditCardData, UpdateCreditCardData, CreateCreditCardMovementData, UpdateCreditCardMovementData, PayDebtPayload, CreditCardRow } from './credit-cards.repository'
 
 const { accounts, categories } = schema
+
+const splitSchema = Joi.object({
+  categoryId: Joi.string().required(),
+  amount: Joi.number().positive().required(),
+  tags: Joi.array().items(Joi.string().max(30)).max(10).optional()
+})
 
 const createCardSchema = Joi.object({
   name: Joi.string().required(),
@@ -34,7 +40,8 @@ const createMovementSchema = Joi.object({
   // controller (see storesService.getAndReplaceStore), scoped to the user.
   storeId: Joi.string().allow(null, ''),
   note: Joi.string().allow(null, ''),
-  tags: Joi.array().items(Joi.string().max(30)).max(10).optional()
+  tags: Joi.array().items(Joi.string().max(30)).max(10).optional(),
+  splits: Joi.array().items(splitSchema).optional()
 })
 
 const editMovementSchema = Joi.object({
@@ -44,7 +51,8 @@ const editMovementSchema = Joi.object({
   categoryId: Joi.string(),
   storeId: Joi.string().allow(null, ''),
   note: Joi.string().allow(null, ''),
-  tags: Joi.array().items(Joi.string().max(30)).max(10).optional()
+  tags: Joi.array().items(Joi.string().max(30)).max(10).optional(),
+  splits: Joi.array().items(splitSchema).optional()
 }).min(1)
 
 const payDebtSchema = Joi.object({
@@ -60,11 +68,32 @@ const assertAccountExists = (id: string, user: string): void => {
   if (!exists) throw Boom.notFound(ERROR_MESSAGE.ACCOUNT.NOT_FOUND).output
 }
 
-const assertCategoryExists = (id: string, user: string): void => {
+const getCategory = (id: string, user: string) => {
   if (!isValidId(id)) throw Boom.badRequest(ERROR_MESSAGE.COMMON.INVALID_ID).output
-  const exists = sqliteDb.select({ id: categories.id }).from(categories)
+  const row = sqliteDb.select({ id: categories.id, type: categories.type }).from(categories)
     .where(and(eq(categories.id, id), eq(categories.user, user))).get()
-  if (!exists) throw Boom.notFound(ERROR_MESSAGE.CATEGORY.NOT_FOUND).output
+  if (!row) throw Boom.notFound(ERROR_MESSAGE.CATEGORY.NOT_FOUND).output
+  return row
+}
+
+const assertCategoryExists = (id: string, user: string): void => {
+  getCategory(id, user)
+}
+
+const validateSplits = (params: { splits?: Array<{ categoryId: string, amount: number }>, amount?: number, type?: string, user: string }) => {
+  if (!params.splits) return
+  if (params.splits.length === 1) throw Boom.badData(ERROR_MESSAGE.TRANSACTION.SPLIT_MIN).output
+  if (params.splits.length < 2) return
+  if (params.amount === undefined) throw Boom.badData(ERROR_MESSAGE.TRANSACTION.SPLIT_SUM_MISMATCH).output
+
+  const total = roundMoney(params.splits.reduce((sum, split) => sum + split.amount, 0))
+  if (total !== roundMoney(params.amount)) throw Boom.badData(ERROR_MESSAGE.TRANSACTION.SPLIT_SUM_MISMATCH).output
+
+  const movementType = params.type ?? 'expense'
+  for (const split of params.splits) {
+    const category = getCategory(split.categoryId, params.user)
+    if (category.type !== movementType) throw Boom.badData(ERROR_MESSAGE.TRANSACTION.SPLIT_TYPE_MISMATCH).output
+  }
 }
 
 export const validateCreditCardCreateParams = (body: Record<string, any>, user: string): CreateCreditCardData => {
@@ -95,6 +124,7 @@ export const validateCreditCardMovementCreateParams = (body: Record<string, any>
   const { error, value } = createMovementSchema.validate(body)
   if (error) throw Boom.badData(error.message).output
   assertCategoryExists(value.categoryId, user)
+  validateSplits({ ...value, user })
   return value
 }
 
@@ -102,6 +132,7 @@ export const validateCreditCardMovementEditParams = (body: Record<string, any>, 
   const { error, value } = editMovementSchema.validate(body)
   if (error) throw Boom.badData(error.message).output
   if (value.categoryId !== undefined) assertCategoryExists(value.categoryId, user)
+  validateSplits({ ...value, user })
   return value
 }
 

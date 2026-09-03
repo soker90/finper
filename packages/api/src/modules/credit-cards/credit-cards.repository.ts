@@ -1,10 +1,10 @@
 import Boom from '@hapi/boom'
 import { type DB, schema, generateId, roundMoney } from '@soker90/finper-db'
-import { eq, and, sql, desc } from 'drizzle-orm'
+import { eq, and, sql, desc, inArray } from 'drizzle-orm'
 import { db as sqliteDb } from '../../db'
 import { ERROR_MESSAGE } from '../../i18n'
 
-const { creditCards, creditCardMovements, accounts, categories, stores, transactions } = schema
+const { creditCards, creditCardMovements, creditCardMovementSplits, accounts, categories, stores, transactions, transactionSplits } = schema
 
 export type CreditCard = typeof creditCards.$inferSelect
 export type CreditCardMovement = typeof creditCardMovements.$inferSelect
@@ -19,6 +19,14 @@ export interface CreditCardRow extends CreditCard {
   currentDebt: number
 }
 
+export interface CreditCardMovementSplitRow {
+  id: string
+  categoryId: string
+  amount: number
+  tags: string[]
+  categoryName: string | null
+}
+
 export interface CreditCardMovementRow extends CreditCardMovement {
   category: {
     id: string
@@ -29,7 +37,10 @@ export interface CreditCardMovementRow extends CreditCardMovement {
     id: string
     name: string
   } | null
+  splits?: CreditCardMovementSplitRow[]
 }
+
+export type MovementSplitInput = { categoryId: string, amount: number, tags?: string[] }
 
 export interface CreateCreditCardData {
   name: string
@@ -54,6 +65,7 @@ export interface CreateCreditCardMovementData {
   storeId?: string | null
   note?: string | null
   tags?: string[]
+  splits?: MovementSplitInput[]
 }
 
 export interface UpdateCreditCardMovementData {
@@ -64,6 +76,7 @@ export interface UpdateCreditCardMovementData {
   storeId?: string | null
   note?: string | null
   tags?: string[]
+  splits?: MovementSplitInput[]
 }
 
 export interface PayDebtPayload {
@@ -117,6 +130,59 @@ const movementSelectFields = {
     id: stores.id,
     name: stores.name
   }
+}
+
+const persistMovementSplits = (tx: { delete: typeof sqliteDb.delete, insert: typeof sqliteDb.insert }, params: { movementId: string, user: string, splits?: MovementSplitInput[] }) => {
+  tx.delete(creditCardMovementSplits).where(eq(creditCardMovementSplits.movementId, params.movementId)).run()
+  if (!params.splits || params.splits.length < 2) return
+  for (const split of params.splits) {
+    tx.insert(creditCardMovementSplits).values({
+      id: generateId(),
+      movementId: params.movementId,
+      categoryId: split.categoryId,
+      amount: roundMoney(split.amount),
+      tags: split.tags ?? [],
+      user: params.user
+    }).run()
+  }
+}
+
+const loadSplitsByMovementIds = (db: DB, movementIds: string[]): Map<string, CreditCardMovementSplitRow[]> => {
+  const grouped = new Map<string, CreditCardMovementSplitRow[]>()
+  if (movementIds.length === 0) return grouped
+  const rows = db.select({
+    id: creditCardMovementSplits.id,
+    movementId: creditCardMovementSplits.movementId,
+    categoryId: creditCardMovementSplits.categoryId,
+    amount: creditCardMovementSplits.amount,
+    tags: creditCardMovementSplits.tags,
+    categoryName: categories.name
+  })
+    .from(creditCardMovementSplits)
+    .leftJoin(categories, eq(creditCardMovementSplits.categoryId, categories.id))
+    .where(inArray(creditCardMovementSplits.movementId, movementIds))
+    .all()
+
+  for (const row of rows) {
+    const list = grouped.get(row.movementId) ?? []
+    list.push({
+      id: row.id,
+      categoryId: row.categoryId,
+      amount: row.amount,
+      tags: row.tags ?? [],
+      categoryName: row.categoryName
+    })
+    grouped.set(row.movementId, list)
+  }
+  return grouped
+}
+
+const attachSplits = (db: DB, movements: CreditCardMovementRow[]): CreditCardMovementRow[] => {
+  const splitsByMovement = loadSplitsByMovementIds(db, movements.map(movement => movement.id))
+  return movements.map(movement => {
+    const splits = splitsByMovement.get(movement.id)
+    return splits && splits.length >= 2 ? { ...movement, splits } : movement
+  })
 }
 
 export class CreditCardsRepository implements ICreditCardsRepository {
@@ -290,7 +356,7 @@ export class CreditCardsRepository implements ICreditCardsRepository {
       .orderBy(desc(creditCardMovements.date))
       .all()
 
-    return rows as CreditCardMovementRow[]
+    return attachSplits(this.db, rows as CreditCardMovementRow[])
   }
 
   public async findMovementById (id: string, user: string): Promise<CreditCardMovementRow | undefined> {
@@ -301,11 +367,14 @@ export class CreditCardsRepository implements ICreditCardsRepository {
       .where(and(eq(creditCardMovements.id, id), eq(creditCardMovements.user, user)))
       .all()
 
-    return rows.length > 0 ? (rows[0] as CreditCardMovementRow) : undefined
+    const withSplits = attachSplits(this.db, rows as CreditCardMovementRow[])
+    return withSplits[0]
   }
 
   public async createMovement (user: string, data: CreateCreditCardMovementData): Promise<CreditCardMovementRow | undefined> {
     const id = generateId()
+    const movementSplits = data.splits
+    const hasSplits = Array.isArray(movementSplits) && movementSplits.length >= 2
     const newMovement = {
       id,
       user,
@@ -313,33 +382,47 @@ export class CreditCardsRepository implements ICreditCardsRepository {
       date: data.date,
       amount: roundMoney(data.amount),
       type: data.type,
-      categoryId: data.categoryId,
+      categoryId: hasSplits ? movementSplits[0].categoryId : data.categoryId,
       storeId: data.storeId || null,
       note: data.note || null,
-      tags: data.tags ?? [],
+      tags: hasSplits ? [] : (data.tags ?? []),
       status: 'pending' as const
     }
 
-    await this.db.insert(creditCardMovements).values(newMovement).run()
+    this.db.transaction((tx) => {
+      tx.insert(creditCardMovements).values(newMovement).run()
+      persistMovementSplits(tx, { movementId: id, user, splits: data.splits })
+    })
     return this.findMovementById(id, user)
   }
 
   public async updateMovement (id: string, user: string, data: UpdateCreditCardMovementData): Promise<CreditCardMovementRow | undefined> {
+    const hasSplits = Array.isArray(data.splits) && data.splits.length >= 2
     const updateData: Partial<CreditCardMovement> = {}
     if (data.date !== undefined) updateData.date = data.date
     if (data.amount !== undefined) updateData.amount = roundMoney(data.amount)
     if (data.type !== undefined) updateData.type = data.type
-    if (data.categoryId !== undefined) updateData.categoryId = data.categoryId
+    if (hasSplits) {
+      updateData.categoryId = data.splits![0].categoryId
+      updateData.tags = []
+    } else {
+      if (data.categoryId !== undefined) updateData.categoryId = data.categoryId
+      if (data.tags !== undefined) updateData.tags = data.tags
+    }
     if (data.storeId !== undefined) updateData.storeId = data.storeId || null
     if (data.note !== undefined) updateData.note = data.note || null
-    if (data.tags !== undefined) updateData.tags = data.tags
 
-    if (Object.keys(updateData).length > 0) {
-      await this.db.update(creditCardMovements)
-        .set(updateData)
-        .where(and(eq(creditCardMovements.id, id), eq(creditCardMovements.user, user)))
-        .run()
-    }
+    this.db.transaction((tx) => {
+      if (Object.keys(updateData).length > 0) {
+        tx.update(creditCardMovements)
+          .set(updateData)
+          .where(and(eq(creditCardMovements.id, id), eq(creditCardMovements.user, user)))
+          .run()
+      }
+      if (data.splits !== undefined) {
+        persistMovementSplits(tx, { movementId: id, user, splits: data.splits })
+      }
+    })
 
     return this.findMovementById(id, user)
   }
@@ -418,20 +501,33 @@ export class CreditCardsRepository implements ICreditCardsRepository {
         paidMovements.push(movement)
 
         const noteText = movement.note ? `Pago tarjeta ${card.name}: ${movement.note}` : `Pago tarjeta ${card.name}`
+        const movementSplits = movement.splits && movement.splits.length >= 2 ? movement.splits : []
+        const hasSplits = movementSplits.length >= 2
 
         tx.insert(transactions).values({
           id: txId,
           date: movement.date,
-          categoryId: movement.categoryId,
+          categoryId: hasSplits ? movementSplits[0].categoryId : movement.categoryId,
           amount: movement.amount,
           type: movement.type,
           accountId: card.accountId,
           note: noteText,
           storeId: movement.storeId || null,
           creditCardId: card.id,
-          tags: movement.tags ?? [],
+          tags: hasSplits ? [] : (movement.tags ?? []),
           user
         }).run()
+
+        for (const split of movementSplits) {
+          tx.insert(transactionSplits).values({
+            id: generateId(),
+            transactionId: txId,
+            categoryId: split.categoryId,
+            amount: split.amount,
+            tags: split.tags ?? [],
+            user
+          }).run()
+        }
 
         tx.update(creditCardMovements)
           .set({ transactionId: txId })

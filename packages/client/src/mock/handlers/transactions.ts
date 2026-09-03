@@ -21,5 +21,14 @@ const TRANSACTIONS_LIST = Array.from({ length: 5 }, () => ({
 export const transactionsHandlers = [
   http.get('/transactions', () => {
     return HttpResponse.json(TRANSACTIONS_LIST)
-  })
+  }),
+  http.post('/transactions', async ({ request }) => {
+    const body = await request.json() as Record<string, unknown>
+    return HttpResponse.json({ _id: faker.database.mongodbObjectId(), ...body })
+  }),
+  http.put('/transactions/:id', async ({ params, request }) => {
+    const body = await request.json() as Record<string, unknown>
+    return HttpResponse.json({ _id: params.id, ...body })
+  }),
+  http.delete('/transactions/:id', () => HttpResponse.json(null, { status: 204 }))
 ]

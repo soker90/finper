@@ -8,7 +8,7 @@ import { eq } from 'drizzle-orm'
 import { creditCardsRoutes } from '../credit-cards.routes'
 import { accountsRepository } from '../../accounts/accounts.repository'
 
-const { creditCards, creditCardMovements, accounts, categories, transactions, users, stores } = schema
+const { creditCards, creditCardMovements, accounts, categories, transactions, transactionSplits, users, stores } = schema
 
 describe('Credit Cards Routes', () => {
   let token: string
@@ -681,6 +681,113 @@ describe('Credit Cards Routes', () => {
         .where(eq(transactions.id, paidMovement.transactionId!)).get()!
 
       expect(createdTransaction.date).toBe(originalDate)
+    })
+
+    test('creates a split pending movement and pay-debt copies lines to the transaction', async () => {
+      const hogarId = generateId()
+      sqliteDb.insert(categories).values({ id: hogarId, name: 'Hogar', type: 'expense', user: username }).run()
+
+      const cardRes = await supertest(server.app)
+        .post(path)
+        .set('Authorization', `Bearer ${token}`)
+        .send({ name: 'Split Pay Card', accountId })
+        .expect(201)
+      const cardId = cardRes.body.id
+
+      const movementRes = await supertest(server.app)
+        .post(`${path}/${cardId}/movements`)
+        .set('Authorization', `Bearer ${token}`)
+        .send({
+          date: Date.now(),
+          amount: 100,
+          categoryId,
+          splits: [
+            { categoryId, amount: 65, tags: ['comida'] },
+            { categoryId: hogarId, amount: 35, tags: ['hogar'] }
+          ]
+        })
+        .expect(201)
+
+      expect(movementRes.body.categoryId).toBe(categoryId)
+      expect(movementRes.body.tags).toEqual([])
+      expect(movementRes.body.splits).toHaveLength(2)
+      expect(movementRes.body.splits[0]).toMatchObject({ categoryId, amount: 65, tags: ['comida'] })
+
+      await supertest(server.app)
+        .post(`${path}/${cardId}/pay-debt`)
+        .set('Authorization', `Bearer ${token}`)
+        .send({ all: true })
+        .expect(200)
+
+      const paidMovement = sqliteDb.select().from(creditCardMovements)
+        .where(eq(creditCardMovements.id, movementRes.body.id)).get()!
+      const createdTransaction = sqliteDb.select().from(transactions)
+        .where(eq(transactions.id, paidMovement.transactionId!)).get()!
+      expect(createdTransaction.categoryId).toBe(categoryId)
+      expect(createdTransaction.tags).toEqual([])
+
+      const lines = sqliteDb.select().from(transactionSplits)
+        .where(eq(transactionSplits.transactionId, createdTransaction.id)).all()
+      expect(lines).toHaveLength(2)
+      expect(lines.map(line => line.amount).sort()).toEqual([35, 65])
+    })
+
+    test('replaces splits on a pending movement', async () => {
+      const hogarId = generateId()
+      sqliteDb.insert(categories).values({ id: hogarId, name: 'Hogar', type: 'expense', user: username }).run()
+
+      const cardRes = await supertest(server.app)
+        .post(path)
+        .set('Authorization', `Bearer ${token}`)
+        .send({ name: 'Edit Split Card', accountId })
+        .expect(201)
+      const cardId = cardRes.body.id
+
+      const movementRes = await supertest(server.app)
+        .post(`${path}/${cardId}/movements`)
+        .set('Authorization', `Bearer ${token}`)
+        .send({
+          date: Date.now(),
+          amount: 80,
+          categoryId,
+          splits: [
+            { categoryId, amount: 50 },
+            { categoryId: hogarId, amount: 30 }
+          ]
+        })
+        .expect(201)
+
+      const edited = await supertest(server.app)
+        .patch(`${path}/${cardId}/movements/${movementRes.body.id}`)
+        .set('Authorization', `Bearer ${token}`)
+        .send({
+          amount: 90,
+          categoryId: hogarId,
+          splits: [
+            { categoryId: hogarId, amount: 40, tags: ['hogar'] },
+            { categoryId, amount: 50 }
+          ]
+        })
+        .expect(200)
+
+      expect(edited.body.categoryId).toBe(hogarId)
+      expect(edited.body.tags).toEqual([])
+      expect(edited.body.splits).toHaveLength(2)
+      expect(edited.body.splits[0]).toMatchObject({ categoryId: hogarId, amount: 40, tags: ['hogar'] })
+    })
+
+    test('rejects a movement with a single split line', async () => {
+      const cardRes = await supertest(server.app)
+        .post(path)
+        .set('Authorization', `Bearer ${token}`)
+        .send({ name: 'Bad Split Card', accountId })
+        .expect(201)
+
+      await supertest(server.app)
+        .post(`${path}/${cardRes.body.id}/movements`)
+        .set('Authorization', `Bearer ${token}`)
+        .send({ date: Date.now(), amount: 10, categoryId, splits: [{ categoryId, amount: 10 }] })
+        .expect(422)
     })
   })
 })
