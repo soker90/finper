@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.4.2] - 2026-09-03
+
+### Fixed
+
+- **api**: Sort tracking tag categories (`byCategory`) by amount descending so Seguimientos cards show the highest-spend categories first.
+- **client**: Sort Dashboard budget cards by actual spend descending before showing the top 10 categories.
+
+---
+
 ## [2.4.1] - 2026-08-31
 
 ### Fixed

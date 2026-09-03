@@ -8,6 +8,10 @@ const NO_CATEGORY = 'Sin categoría'
 const yearOf = (date: number): number => new Date(date).getUTCFullYear()
 const yearRange = (year: number) => ({ from: Date.UTC(year, 0, 1), to: Date.UTC(year + 1, 0, 1) - 1 })
 
+const toCategoryBreakdown = (categories: Map<string, TagCategoryBreakdown>): TagCategoryBreakdown[] =>
+  Array.from(categories.values(), category => ({ ...category, amount: roundMoney(category.amount) }))
+    .toSorted((first, second) => second.amount - first.amount)
+
 export class StatsService {
   constructor (private repository: IStatsRepository) {}
 
@@ -54,14 +58,12 @@ export class StatsService {
       }
     }
 
-    return [...byTag.entries()]
-      .map(([tag, entry]) => ({
-        tag,
-        totalAmount: roundMoney(entry.totalAmount),
-        transactionCount: entry.transactionCount,
-        byCategory: [...entry.categories.values()].map(c => ({ ...c, amount: roundMoney(c.amount) }))
-      }))
-      .sort((a, b) => b.totalAmount - a.totalAmount)
+    return Array.from(byTag, ([tag, entry]) => ({
+      tag,
+      totalAmount: roundMoney(entry.totalAmount),
+      transactionCount: entry.transactionCount,
+      byCategory: toCategoryBreakdown(entry.categories)
+    })).toSorted((first, second) => second.totalAmount - first.totalAmount)
   }
 
   public getTagHistoric (user: string, tagName: string): TagHistoric {
@@ -103,9 +105,7 @@ export class StatsService {
       cat.count += 1
     }
 
-    const byCategory = [...byCat.values()]
-      .map(c => ({ ...c, amount: roundMoney(c.amount) }))
-      .sort((a, b) => b.amount - a.amount)
+    const byCategory = toCategoryBreakdown(byCat)
 
     const totalAmount = roundMoney(byCategory.reduce((sum, c) => sum + c.amount, 0))
 

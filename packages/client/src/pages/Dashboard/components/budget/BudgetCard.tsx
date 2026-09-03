@@ -16,15 +16,18 @@ interface BudgetCardProps {
   growTimeout: number
 }
 
+const getBudgetReal = (item: Budget) => item.budgets?.[0]?.real ?? 0
+
 const toBudgetRows = (items: Budget[], allowOver: boolean): BudgetRow[] =>
   items
-    .filter(b => b.budgets?.[0]?.amount > 0)
+    .filter(item => item.budgets?.[0]?.amount > 0)
+    .toSorted((first, second) => getBudgetReal(second) - getBudgetReal(first))
     .slice(0, 10)
-    .map(b => {
-      const estimated = b.budgets?.[0]?.amount ?? 0
-      const real = b.budgets?.[0]?.real ?? 0
+    .map(item => {
+      const estimated = item.budgets?.[0]?.amount ?? 0
+      const real = item.budgets?.[0]?.real ?? 0
       const pct = estimated > 0 ? Math.min((real / estimated) * 100, 100) : 0
-      return { name: b.name, real, estimated, pct, over: allowOver && real > estimated }
+      return { name: item.name, real, estimated, pct, over: allowOver && real > estimated }
     })
 
 const BudgetCard = ({
