@@ -6,14 +6,18 @@ import { render } from '../../../../test/testUtils'
 import TransactionEdit from '.'
 import type { Transaction } from 'types'
 
-vi.mock('hooks', () => ({
-  useGroupedCategories: () => ({
-    categories: [{ _id: 'parent', name: 'Casa', children: [{ _id: 'cat1', name: 'Comida' }, { _id: 'cat2', name: 'Hogar' }] }]
-  }),
-  useAccounts: () => ({ accounts: [{ _id: 'acc1', name: 'Nómina' }] }),
-  useStores: () => ({ stores: [] }),
-  useAvailableTags: () => ({ tags: [] })
-}))
+vi.mock('hooks', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('hooks')>()
+  return {
+    ...actual,
+    useGroupedCategories: () => ({
+      categories: [{ _id: 'parent', name: 'Casa', children: [{ _id: 'cat1', name: 'Comida' }, { _id: 'cat2', name: 'Hogar' }] }]
+    }),
+    useAccounts: () => ({ accounts: [{ _id: 'acc1', name: 'Nómina' }] }),
+    useStores: () => ({ stores: [] }),
+    useAvailableTags: () => ({ tags: [] })
+  }
+})
 
 const addTransaction = vi.fn<(params: unknown) => Promise<{ data: object }>>(async () => ({ data: {} }))
 const editTransaction = vi.fn<(id: string, params: unknown) => Promise<{ data: object }>>(async () => ({ data: {} }))

@@ -1,21 +1,18 @@
 import { useState } from 'react'
-import { useForm, useFieldArray, type Control } from 'react-hook-form'
-import { Button, FormHelperText, Grid, IconButton, Stack, Typography } from '@mui/material'
-import { DeleteOutlined, PlusOutlined } from '@ant-design/icons'
+import { useForm, type Control } from 'react-hook-form'
+import { Button, FormHelperText, Grid } from '@mui/material'
+import { PlusOutlined } from '@ant-design/icons'
 import { mutate } from 'swr'
 
-import { DateForm, InputForm, SelectForm, SelectGroupForm } from 'components'
+import { DateForm, InputForm, SelectForm, SelectGroupForm, SplitLinesEditor } from 'components'
 import { addTransaction, deleteTransaction, editTransaction } from 'services/apiService'
 import { BUDGETS, DASHBOARD_STATS, TRANSACTIONS } from 'constants/api-paths'
 import { Transaction } from 'types'
-import { useAccounts, useGroupedCategories, useStores, useAvailableTags } from 'hooks'
+import { useAccounts, useGroupedCategories, useStores, useAvailableTags, useSplitLines } from 'hooks'
 import './style.module.css'
 import { TYPES_TRANSACTIONS_ENTRIES } from 'constants/transactions'
 import AutocompleteForm from 'components/forms/AutocompleteForm'
 import TagsInput from 'components/forms/TagsInput'
-
-const roundMoney = (value: number): number =>
-  Math.sign(value) * Math.round((Math.abs(value) + Number.EPSILON) * 100) / 100
 
 const revalidateRelated = () =>
   mutate((key) => typeof key === 'string' && (
@@ -48,7 +45,6 @@ const TransactionEdit = ({
       tags: split.tags || []
     }))
     : []
-  const [splitMode, setSplitMode] = useState(existingSplits.length >= 2)
   const [error, setError] = useState<string | undefined>(undefined)
   const { register, handleSubmit, formState: { errors }, control, watch, setValue } = useForm<FormValues>({
     defaultValues: {
@@ -63,42 +59,20 @@ const TransactionEdit = ({
       splits: existingSplits
     }
   })
-  const { fields, append, remove } = useFieldArray({ control, name: 'splits' })
   const { categories } = useGroupedCategories()
   const { accounts } = useAccounts()
   const { stores } = useStores()
   const { tags: availableTags } = useAvailableTags()
-  const watchedAmount = Number(watch('amount') || 0)
-  const watchedSplits = watch('splits')
-  const assigned = roundMoney((watchedSplits || []).reduce((sum, split) => sum + (Number(split.amount) || 0), 0))
-  const remaining = roundMoney(watchedAmount - assigned)
-
-  const watchedCategory = watch('category')
-  const watchedTags = watch('tags')
-  const enableSplitMode = () => {
-    setSplitMode(true)
-    if (fields.length === 0) {
-      append({ category: watchedCategory || '', amount: watchedAmount || '', tags: watchedTags || [] })
-      append({ category: '', amount: '', tags: [] })
-      setValue('tags', [])
-    }
-  }
-
-  const disableSplitMode = () => {
-    setSplitMode(false)
-    const firstLineTags = watchedSplits?.[0]?.tags
-    if (firstLineTags?.length) setValue('tags', firstLineTags)
-    setValue('splits', [])
-  }
-
-  const assignRemaining = () => {
-    if (fields.length === 0) return
-    const lastIndex = fields.length - 1
-    const others = roundMoney((watchedSplits || [])
-      .filter((_, index) => index !== lastIndex)
-      .reduce((sum, split) => sum + (Number(split.amount) || 0), 0))
-    setValue(`splits.${lastIndex}.amount`, roundMoney(watchedAmount - others))
-  }
+  const {
+    splitMode, fields, append, remove, remaining,
+    enableSplitMode, disableSplitMode, assignRemaining
+  } = useSplitLines({
+    control: control as unknown as Control<any>,
+    watch,
+    setValue,
+    categoryFieldName: 'category',
+    initialSplitMode: existingSplits.length >= 2
+  })
 
   const onSubmit = handleSubmit(async (params) => {
     const hasSplits = splitMode && params.splits.length >= 2
@@ -226,67 +200,22 @@ const TransactionEdit = ({
               </Button>
               )
             : (
-              <Stack spacing={2}>
-                <Stack direction='row' spacing={2} sx={{ alignItems: 'center', justifyContent: 'space-between' }}>
-                  <Typography variant='subtitle2'>Desglose</Typography>
-                  <Button variant='text' color='inherit' onClick={disableSplitMode}>Quitar división</Button>
-                </Stack>
-                {fields.map((field, index) => (
-                  <Grid container spacing={2} key={field.id} sx={{ alignItems: 'center' }}>
-                    <SelectGroupForm
-                      id={`splits.${index}.category`} label='Categoria'
-                      options={categories}
-                      optionValue='_id'
-                      optionLabel='name'
-                      error={!!errors.splits?.[index]?.category}
-                      {...register(`splits.${index}.category`, { required: true })}
-                      errorText='Introduce una categoria válida'
-                      size={3}
-                    />
-                    <InputForm
-                      id={`splits.${index}.amount`} label='Importe' placeholder='0'
-                      error={!!errors.splits?.[index]?.amount}
-                      {...register(`splits.${index}.amount`, { required: true, valueAsNumber: true })}
-                      errorText='Introduce un importe'
-                      type='number' inputProps={{ step: 'any' }}
-                      size={3}
-                    />
-                    <TagsInput
-                      name={`splits.${index}.tags`}
-                      control={control as unknown as Control<any>}
-                      availableTags={availableTags}
-                      label='Etiquetas'
-                      size={5}
-                    />
-                    <Grid size={{ xs: 12, md: 1 }}>
-                      <IconButton
-                        aria-label='Eliminar línea'
-                        color='error'
-                        disabled={fields.length <= 2}
-                        onClick={() => remove(index)}
-                      >
-                        <DeleteOutlined />
-                      </IconButton>
-                    </Grid>
-                  </Grid>
-                ))}
-                <Stack direction='row' spacing={2} sx={{ alignItems: 'center' }}>
-                  <Button
-                    variant='outlined'
-                    startIcon={<PlusOutlined />}
-                    onClick={() => append({ category: '', amount: '', tags: [] })}
-                  >
-                    Añadir categoría
-                  </Button>
-                  <Button variant='text' onClick={assignRemaining}>Asignar resto</Button>
-                  <Typography
-                    variant='body2'
-                    color={remaining === 0 ? 'success.main' : 'error.main'}
-                  >
-                    Restante: {remaining.toFixed(2)} €
-                  </Typography>
-                </Stack>
-              </Stack>
+              <SplitLinesEditor
+                fields={fields}
+                categories={categories}
+                availableTags={availableTags}
+                control={control as unknown as Control<any>}
+                register={register as any}
+                errors={errors}
+                remaining={remaining}
+                onAdd={() => append({ category: '', amount: '', tags: [] })}
+                onRemove={remove}
+                onAssignRemaining={assignRemaining}
+                onDisableSplitMode={disableSplitMode}
+                categorySize={3}
+                amountSize={3}
+                tagsSize={5}
+              />
               )}
         </Grid>
 

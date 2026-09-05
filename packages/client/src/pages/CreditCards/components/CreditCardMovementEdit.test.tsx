@@ -6,13 +6,17 @@ import { render } from '../../../test/testUtils'
 import { CreditCardMovementEdit } from './CreditCardMovementEdit'
 import type { CreditCardMovement } from 'types'
 
-vi.mock('hooks', () => ({
-  useGroupedCategories: () => ({
-    categories: [{ _id: 'parent', name: 'Casa', children: [{ _id: 'cat1', name: 'Comida' }, { _id: 'cat2', name: 'Hogar' }] }]
-  }),
-  useStores: () => ({ stores: [] }),
-  useAvailableTags: () => ({ tags: [] })
-}))
+vi.mock('hooks', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('hooks')>()
+  return {
+    ...actual,
+    useGroupedCategories: () => ({
+      categories: [{ _id: 'parent', name: 'Casa', children: [{ _id: 'cat1', name: 'Comida' }, { _id: 'cat2', name: 'Hogar' }] }]
+    }),
+    useStores: () => ({ stores: [] }),
+    useAvailableTags: () => ({ tags: [] })
+  }
+})
 
 vi.mock('../hooks/useCreditCards', () => ({
   useCreditCardMutate: () => () => {}
@@ -76,7 +80,7 @@ describe('CreditCardMovementEdit splits', () => {
     const { getByText, container } = renderForm()
     fireEvent.click(getByText('Dividir movimiento'))
     const amountInputs = Array.from(document.querySelectorAll<HTMLInputElement>('input[id^="splits."][id$=".amount"]'))
-    const categoryInputs = Array.from(document.querySelectorAll<HTMLSelectElement>('select[id^="splits."][id$=".categoryId"]'))
+    const categoryInputs = Array.from(document.querySelectorAll<HTMLSelectElement>('select[id^="splits."][id$=".category"]'))
     fireEvent.change(categoryInputs[0], { target: { value: 'cat1' } })
     fireEvent.change(categoryInputs[1], { target: { value: 'cat2' } })
     fireEvent.change(amountInputs[0], { target: { value: '65' } })
