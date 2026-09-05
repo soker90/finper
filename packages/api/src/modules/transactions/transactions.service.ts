@@ -1,7 +1,7 @@
 import Boom from '@hapi/boom'
 import { sql, eq } from 'drizzle-orm'
 import { db as sqliteDb } from '../../db'
-import { schema, generateId } from '@soker90/finper-db'
+import { schema, generateId, roundMoney } from '@soker90/finper-db'
 import { getTransactionAmount, sanitizeTags } from '../../utils'
 import { ERROR_MESSAGE } from '../../i18n'
 import { serializeTransaction, serializeTransactionPopulated } from './transactions.serializer'
@@ -30,7 +30,7 @@ const persistSplits = (tx: { delete: typeof sqliteDb.delete, insert: typeof sqli
       id: generateId(),
       transactionId: params.transactionId,
       categoryId: split.category,
-      amount: split.amount,
+      amount: roundMoney(split.amount),
       tags: sanitizeTags(split.tags),
       user: params.user
     }).run()

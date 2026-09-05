@@ -115,10 +115,10 @@ export const createYieldsRepository = (db: DB) => ({
       .all() as YieldTransactionRow[]
   },
 
-  hasSplits: (transactionIds: string[]): boolean => {
+  hasSplits: (transactionIds: string[], user: string): boolean => {
     if (transactionIds.length === 0) return false
     const row = db.select({ id: transactionSplits.id }).from(transactionSplits)
-      .where(inArray(transactionSplits.transactionId, transactionIds))
+      .where(and(inArray(transactionSplits.transactionId, transactionIds), eq(transactionSplits.user, user)))
       .get()
     return Boolean(row)
   },

@@ -16,7 +16,8 @@ export const ERROR_MESSAGE = {
     SPLIT_MIN: 'Una transacción dividida debe tener al menos dos líneas',
     SPLIT_SUM_MISMATCH: 'La suma de los desgloses debe coincidir con el importe total',
     SPLIT_TYPE_MISMATCH: 'Todas las categorías del desglose deben ser del mismo tipo que el movimiento',
-    SPLIT_YIELD: 'No se puede dividir un movimiento enlazado a un rendimiento'
+    SPLIT_YIELD: 'No se puede dividir un movimiento enlazado a un rendimiento',
+    SPLIT_FIELDS_REQUIRE_SPLITS: 'Para cambiar el tipo o la categoría de un movimiento dividido, envía también las líneas (splits)'
   },
   YIELD: {
     NOT_FOUND: 'El rendimiento no existe',

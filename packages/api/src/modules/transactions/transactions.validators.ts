@@ -57,7 +57,7 @@ const validateSplits = (params: { splits?: Array<{ category: string, amount: num
   if (params.splits.length === 1) throw Boom.badData(ERROR_MESSAGE.TRANSACTION.SPLIT_MIN).output
   if (params.splits.length < 2) return
 
-  const total = roundMoney(params.splits.reduce((sum, split) => sum + split.amount, 0))
+  const total = roundMoney(params.splits.reduce((sum, split) => sum + roundMoney(split.amount), 0))
   if (total !== roundMoney(params.amount)) throw Boom.badData(ERROR_MESSAGE.TRANSACTION.SPLIT_SUM_MISMATCH).output
 
   for (const split of params.splits) {

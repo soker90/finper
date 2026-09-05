@@ -425,6 +425,20 @@ describe('Transactions Controller', () => {
         })).expect(422)
     })
 
+    test('rejects splits whose rounded amounts do not add up to the total (sub-cent precision)', async () => {
+      // Each line rounds to 0.00 individually (0.004 -> 0), but their raw sum
+      // (0.008) rounds to 0.01, matching `amount`. The persisted rows would
+      // sum to 0 instead of 0.01 if the validator summed unrounded amounts.
+      await supertest(server.app).post(path).set('Authorization', `Bearer ${token}`)
+        .send(validBody({
+          amount: 0.01,
+          splits: [
+            { category: categoryId, amount: 0.004 },
+            { category: categoryId, amount: 0.004 }
+          ]
+        })).expect(422)
+    })
+
     test('rejects splits whose category type differs from the transaction type', async () => {
       const incomeId = generateId()
       sqliteDb.insert(categories).values({ id: incomeId, name: 'Nómina', type: 'income', user: username }).run()

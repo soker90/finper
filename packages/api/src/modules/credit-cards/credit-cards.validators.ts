@@ -86,7 +86,7 @@ const validateSplits = (params: { splits?: Array<{ categoryId: string, amount: n
   if (params.splits.length < 2) return
   if (params.amount === undefined) throw Boom.badData(ERROR_MESSAGE.TRANSACTION.SPLIT_SUM_MISMATCH).output
 
-  const total = roundMoney(params.splits.reduce((sum, split) => sum + split.amount, 0))
+  const total = roundMoney(params.splits.reduce((sum, split) => sum + roundMoney(split.amount), 0))
   if (total !== roundMoney(params.amount)) throw Boom.badData(ERROR_MESSAGE.TRANSACTION.SPLIT_SUM_MISMATCH).output
 
   const movementType = params.type ?? 'expense'

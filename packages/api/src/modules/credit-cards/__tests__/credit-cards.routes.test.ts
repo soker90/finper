@@ -789,5 +789,163 @@ describe('Credit Cards Routes', () => {
         .send({ date: Date.now(), amount: 10, categoryId, splits: [{ categoryId, amount: 10 }] })
         .expect(422)
     })
+
+    test('rejects splits whose rounded amounts do not add up to the total (sub-cent precision)', async () => {
+      const cardRes = await supertest(server.app)
+        .post(path)
+        .set('Authorization', `Bearer ${token}`)
+        .send({ name: 'Precision Card', accountId })
+        .expect(201)
+
+      // Each line rounds to 0.00 individually (0.004 -> 0), but their raw sum
+      // (0.008) rounds to 0.01, matching `amount`. The persisted rows would
+      // sum to 0 instead of 0.01 if the validator summed unrounded amounts.
+      await supertest(server.app)
+        .post(`${path}/${cardRes.body.id}/movements`)
+        .set('Authorization', `Bearer ${token}`)
+        .send({
+          date: Date.now(),
+          amount: 0.01,
+          categoryId,
+          splits: [
+            { categoryId, amount: 0.004 },
+            { categoryId, amount: 0.004 }
+          ]
+        })
+        .expect(422)
+    })
+
+    test('PATCH amount only (no splits) on a split movement rejects an amount inconsistent with the existing lines', async () => {
+      const hogarId = generateId()
+      sqliteDb.insert(categories).values({ id: hogarId, name: 'Hogar Patch', type: 'expense', user: username }).run()
+
+      const cardRes = await supertest(server.app)
+        .post(path)
+        .set('Authorization', `Bearer ${token}`)
+        .send({ name: 'Patch Amount Split Card', accountId })
+        .expect(201)
+      const cardId = cardRes.body.id
+
+      const movementRes = await supertest(server.app)
+        .post(`${path}/${cardId}/movements`)
+        .set('Authorization', `Bearer ${token}`)
+        .send({
+          date: Date.now(),
+          amount: 100,
+          categoryId,
+          splits: [
+            { categoryId, amount: 60 },
+            { categoryId: hogarId, amount: 40 }
+          ]
+        })
+        .expect(201)
+
+      await supertest(server.app)
+        .patch(`${path}/${cardId}/movements/${movementRes.body.id}`)
+        .set('Authorization', `Bearer ${token}`)
+        .send({ amount: 110 })
+        .expect(422)
+    })
+
+    test('PATCH date only (no splits) on a split movement succeeds and keeps the lines untouched', async () => {
+      const hogarId = generateId()
+      sqliteDb.insert(categories).values({ id: hogarId, name: 'Hogar Patch Date', type: 'expense', user: username }).run()
+
+      const cardRes = await supertest(server.app)
+        .post(path)
+        .set('Authorization', `Bearer ${token}`)
+        .send({ name: 'Patch Date Split Card', accountId })
+        .expect(201)
+      const cardId = cardRes.body.id
+
+      const movementRes = await supertest(server.app)
+        .post(`${path}/${cardId}/movements`)
+        .set('Authorization', `Bearer ${token}`)
+        .send({
+          date: Date.now(),
+          amount: 100,
+          categoryId,
+          splits: [
+            { categoryId, amount: 60 },
+            { categoryId: hogarId, amount: 40 }
+          ]
+        })
+        .expect(201)
+
+      const newDate = Date.now() - 1000
+      const edited = await supertest(server.app)
+        .patch(`${path}/${cardId}/movements/${movementRes.body.id}`)
+        .set('Authorization', `Bearer ${token}`)
+        .send({ date: newDate })
+        .expect(200)
+
+      expect(edited.body.date).toBe(newDate)
+      expect(edited.body.splits).toHaveLength(2)
+      expect(edited.body.splits.map((split: { amount: number }) => split.amount).sort()).toEqual([40, 60])
+    })
+
+    test('PATCH type only (no splits) on a split movement is rejected', async () => {
+      const hogarId = generateId()
+      sqliteDb.insert(categories).values({ id: hogarId, name: 'Hogar Patch Type', type: 'expense', user: username }).run()
+
+      const cardRes = await supertest(server.app)
+        .post(path)
+        .set('Authorization', `Bearer ${token}`)
+        .send({ name: 'Patch Type Split Card', accountId })
+        .expect(201)
+      const cardId = cardRes.body.id
+
+      const movementRes = await supertest(server.app)
+        .post(`${path}/${cardId}/movements`)
+        .set('Authorization', `Bearer ${token}`)
+        .send({
+          date: Date.now(),
+          amount: 100,
+          categoryId,
+          splits: [
+            { categoryId, amount: 60 },
+            { categoryId: hogarId, amount: 40 }
+          ]
+        })
+        .expect(201)
+
+      await supertest(server.app)
+        .patch(`${path}/${cardId}/movements/${movementRes.body.id}`)
+        .set('Authorization', `Bearer ${token}`)
+        .send({ type: 'income' })
+        .expect(422)
+    })
+
+    test('PATCH categoryId only (no splits) on a split movement is rejected', async () => {
+      const hogarId = generateId()
+      sqliteDb.insert(categories).values({ id: hogarId, name: 'Hogar Patch Category', type: 'expense', user: username }).run()
+
+      const cardRes = await supertest(server.app)
+        .post(path)
+        .set('Authorization', `Bearer ${token}`)
+        .send({ name: 'Patch Category Split Card', accountId })
+        .expect(201)
+      const cardId = cardRes.body.id
+
+      const movementRes = await supertest(server.app)
+        .post(`${path}/${cardId}/movements`)
+        .set('Authorization', `Bearer ${token}`)
+        .send({
+          date: Date.now(),
+          amount: 100,
+          categoryId,
+          splits: [
+            { categoryId, amount: 60 },
+            { categoryId: hogarId, amount: 40 }
+          ]
+        })
+        .expect(201)
+
+      await supertest(server.app)
+        .patch(`${path}/${cardId}/movements/${movementRes.body.id}`)
+        .set('Authorization', `Bearer ${token}`)
+        .send({ categoryId: hogarId })
+        .expect(422)
+    })
   })
 })

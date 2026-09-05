@@ -496,6 +496,29 @@ describe('Yields Controller', () => {
         .send({ transactionIds: [txId] })
         .expect(422)
     })
+
+    test('does not treat a transaction as split when the split lines belong to another user', async () => {
+      const yieldId = insertYield('interest')
+      const txId = insertTransaction({ type: TRANSACTION.Income, amount: 100 })
+      const otherUser = generateUsername()
+      sqliteDb.insert(users).values({ id: generateId(), username: otherUser, password: 'x', createdAt: new Date() }).run()
+      const otherCat = generateId()
+      sqliteDb.insert(categories).values({ id: otherCat, name: 'Otro', type: TRANSACTION.Income, user: otherUser }).run()
+      // Split lines that happen to reference this transaction id but belong to
+      // a different user must not make `hasSplits` treat it as split.
+      sqliteDb.insert(transactionSplits).values([
+        { id: generateId(), transactionId: txId, categoryId: otherCat, amount: 60, user: otherUser },
+        { id: generateId(), transactionId: txId, categoryId: otherCat, amount: 40, user: otherUser }
+      ]).run()
+
+      await supertest(server.app).post(`${path}/${yieldId}/link-transactions`).auth(token, { type: 'bearer' })
+        .send({ transactionIds: [txId] })
+        .expect(204)
+
+      sqliteDb.delete(transactionSplits).where(eq(transactionSplits.transactionId, txId)).run()
+      sqliteDb.delete(categories).where(eq(categories.user, otherUser)).run()
+      sqliteDb.delete(users).where(eq(users.username, otherUser)).run()
+    })
   })
 
   describe('PUT /:id/settlements/:settlementId', () => {
