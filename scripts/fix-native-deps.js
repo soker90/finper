@@ -4,15 +4,13 @@
  * uses N-API and is ABI-stable across Node versions). If the active Node
  * version changes after `pnpm install` (e.g. via fnm/nvm), the previously
  * built/fetched binary stops matching and the process crashes at startup
- * with a native assertion instead of a clear JS error. Plain `pnpm install`
- * does NOT re-run a dependency's build script when nothing in the lockfile
- * changed, so this can't self-heal on its own — hence this script, wired as
- * the root `postinstall` hook so it runs on every `pnpm i`.
+ * with a native assertion instead of a clear JS error.
  *
- * Re-fetches the official prebuilt binary for the currently active Node ABI
- * via `prebuild-install` (the same tool better-sqlite3's own `install`
- * script uses), without needing to recompile with node-gyp. Safe to run
- * anytime; it's a fast no-op if the binary already matches.
+ * Run via `make fix-native` to re-fetch the official prebuilt binary for
+ * the currently active Node ABI via `prebuild-install` (the same tool
+ * better-sqlite3's own `install` script uses), without needing to recompile
+ * with node-gyp. Safe to run anytime; it's a fast no-op if the binary
+ * already matches.
  */
 const path = require('path')
 
@@ -34,9 +32,7 @@ const run = () => {
 try {
   run()
 } catch (error) {
-  // Non-fatal: never block `pnpm install` over this. Worst case, the app
-  // crashes at startup with the native assertion and `make fix-native` (or
-  // re-running this script) needs to be run manually.
   console.warn('[fix-native-deps] Could not verify/refresh better-sqlite3\'s native binary:', error.message)
+  process.exitCode = 1
 }
 

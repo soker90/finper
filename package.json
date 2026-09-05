@@ -4,7 +4,6 @@
   "packageManager": "pnpm@10.29.3",
   "scripts": {
     "preinstall": "npx only-allow pnpm",
-    "postinstall": "node scripts/fix-native-deps.js",
     "prepare": "husky"
   },
   "devDependencies": {
