@@ -4,6 +4,22 @@ import { roundMoney } from 'utils'
 
 export type SplitFormValue = { category: string, amount: number | '', tags: string[] }
 
+/** Compartido por TransactionEdit, CreditCardMovementEdit y ModalMovement: cada
+ * dominio guarda la categoría de la línea con un campo distinto (`category._id`
+ * en transacciones, `categoryId` en movimientos de tarjeta), así que
+ * `getCategory` extrae ese valor de forma agnóstica al dominio. */
+export const mapExistingSplits = <T extends { amount: number, tags?: string[] | null }>(
+  splits: T[] | undefined,
+  getCategory: (split: T) => string
+): SplitFormValue[] =>
+    splits && splits.length >= 2
+      ? splits.map(split => ({
+        category: getCategory(split),
+        amount: split.amount as number | '',
+        tags: split.tags || []
+      }))
+      : []
+
 interface UseSplitLinesParams {
   control: Control<any>
   watch: UseFormWatch<any>
@@ -25,6 +41,8 @@ export const useSplitLines = ({ control, watch, setValue, categoryFieldName, ini
 
   const assigned = roundMoney(watchedSplits.reduce((sum, split) => sum + (Number(split.amount) || 0), 0))
   const remaining = roundMoney(watchedAmount - assigned)
+  const hasSplits = splitMode && watchedSplits.length >= 2
+  const isAmountMismatch = hasSplits && remaining !== 0
 
   const enableSplitMode = () => {
     setSplitMode(true)
@@ -51,5 +69,17 @@ export const useSplitLines = ({ control, watch, setValue, categoryFieldName, ini
     setValue(`splits.${lastIndex}.amount`, roundMoney(watchedAmount - others))
   }
 
-  return { splitMode, setSplitMode, fields, append, remove, remaining, enableSplitMode, disableSplitMode, assignRemaining }
+  return {
+    splitMode,
+    setSplitMode,
+    fields,
+    append,
+    remove,
+    remaining,
+    hasSplits,
+    isAmountMismatch,
+    enableSplitMode,
+    disableSplitMode,
+    assignRemaining
+  }
 }

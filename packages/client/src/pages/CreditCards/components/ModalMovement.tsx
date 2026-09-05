@@ -1,7 +1,6 @@
 import { useEffect } from 'react'
 import { useForm, Controller, type Control } from 'react-hook-form'
-import { Alert, Box, Button, Grid } from '@mui/material'
-import { PlusOutlined } from '@ant-design/icons'
+import { Alert, Box, Grid } from '@mui/material'
 import ModalGrid from 'components/modals/ModalGrid'
 import DateForm from 'components/forms/DateForm'
 import InputForm from 'components/forms/InputForm'
@@ -9,19 +8,16 @@ import SelectForm from 'components/forms/SelectForm'
 import SelectGroupForm from 'components/forms/SelectGroupForm'
 import AutocompleteForm from 'components/forms/AutocompleteForm'
 import TagsInput from 'components/forms/TagsInput'
-import SplitLinesEditor from 'components/forms/SplitLinesEditor'
-import { useGroupedCategories, useStores, useAvailableTags, useSplitLines } from 'hooks'
+import SplitModeSection from 'components/forms/SplitModeSection'
+import { useGroupedCategories, useStores, useAvailableTags, useSplitLines, useSubmitError, mapExistingSplits, type SplitFormValue } from 'hooks'
 import { addCreditCardMovement, editCreditCardMovement } from 'services/apiService'
 import { getId } from 'utils'
-import { useSubmitError } from '../hooks/useSubmitError'
 import type { CreditCardMovement } from 'types'
 
 const MOVEMENT_TYPE_OPTIONS = [
   { value: 'expense', label: 'Gasto (Aumenta deuda)' },
   { value: 'income', label: 'Devolución / Abono (Reduce deuda)' }
 ]
-
-type SplitFormValue = { category: string, amount: number | '', tags: string[] }
 
 interface MovementFormValues {
   date: number | null
@@ -43,13 +39,7 @@ interface ModalMovementProps {
 }
 
 const existingSplitsOf = (movement?: CreditCardMovement | null): SplitFormValue[] =>
-  movement?.splits && movement.splits.length >= 2
-    ? movement.splits.map(split => ({
-      category: split.categoryId,
-      amount: split.amount,
-      tags: split.tags || []
-    }))
-    : []
+  mapExistingSplits(movement?.splits, split => split.categoryId)
 
 const buildDefaultValues = (movement?: CreditCardMovement | null): MovementFormValues => movement
   ? {
@@ -83,7 +73,7 @@ export const ModalMovement = ({ open, onClose, creditCardId, movement, onSuccess
     defaultValues: buildDefaultValues(movement)
   })
   const {
-    splitMode, setSplitMode, fields, append, remove, remaining,
+    splitMode, setSplitMode, fields, append, remove, remaining, hasSplits, isAmountMismatch,
     enableSplitMode, disableSplitMode, assignRemaining
   } = useSplitLines({
     control: control as unknown as Control<any>,
@@ -104,8 +94,7 @@ export const ModalMovement = ({ open, onClose, creditCardId, movement, onSuccess
   const { error: submitError, runSubmit } = useSubmitError()
 
   const handleFormSubmit = handleSubmit((data) => runSubmit(async () => {
-    const hasSplits = splitMode && data.splits.length >= 2
-    if (hasSplits && remaining !== 0) {
+    if (isAmountMismatch) {
       return { error: 'La suma de los desgloses debe coincidir con el importe total' }
     }
     const payload = {
@@ -143,7 +132,7 @@ export const ModalMovement = ({ open, onClose, creditCardId, movement, onSuccess
       title={movement ? 'Editar movimiento de tarjeta' : 'Nuevo movimiento con tarjeta'}
       onClose={onClose}
       action={handleFormSubmit}
-      actionDisabled={isSubmitting || (splitMode && remaining !== 0)}
+      actionDisabled={isSubmitting || isAmountMismatch}
     >
       <DateForm
         placeholder='Introduce una fecha'
@@ -235,27 +224,21 @@ export const ModalMovement = ({ open, onClose, creditCardId, movement, onSuccess
       />
 
       <Grid size={12}>
-        {!splitMode
-          ? (
-            <Button variant='outlined' startIcon={<PlusOutlined />} onClick={enableSplitMode}>
-              Dividir movimiento
-            </Button>
-            )
-          : (
-            <SplitLinesEditor
-              fields={fields}
-              categories={categories}
-              availableTags={availableTags}
-              control={control as unknown as Control<any>}
-              register={register as any}
-              errors={errors}
-              remaining={remaining}
-              onAdd={() => append({ category: '', amount: '', tags: [] })}
-              onRemove={remove}
-              onAssignRemaining={assignRemaining}
-              onDisableSplitMode={disableSplitMode}
-            />
-            )}
+        <SplitModeSection
+          splitMode={splitMode}
+          fields={fields}
+          categories={categories}
+          availableTags={availableTags}
+          control={control as unknown as Control<any>}
+          register={register as any}
+          errors={errors}
+          remaining={remaining}
+          onAdd={() => append({ category: '', amount: '', tags: [] })}
+          onRemove={remove}
+          onAssignRemaining={assignRemaining}
+          onEnableSplitMode={enableSplitMode}
+          onDisableSplitMode={disableSplitMode}
+        />
       </Grid>
 
       {submitError && (

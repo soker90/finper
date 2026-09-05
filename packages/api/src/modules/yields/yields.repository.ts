@@ -124,12 +124,17 @@ export const createYieldsRepository = (db: DB) => ({
   },
 
   linkTransactions: (yieldId: string, yieldSettlementId: string, transactionIds: string[], user: string): void => {
+    // Defense in depth: even if the app-level `hasSplits` pre-check were ever
+    // bypassed or raced, the update itself cannot link a split transaction.
+    const splitIds = db.select({ id: transactionSplits.transactionId }).from(transactionSplits)
+      .where(eq(transactionSplits.user, user))
     db.update(transactions)
       .set({ yieldId, yieldSettlementId })
       .where(and(
         inArray(transactions.id, transactionIds),
         eq(transactions.user, user),
-        isNull(transactions.yieldId)
+        isNull(transactions.yieldId),
+        notInArray(transactions.id, splitIds)
       ))
       .run()
   },
