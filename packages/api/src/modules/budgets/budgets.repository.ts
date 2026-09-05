@@ -1,8 +1,9 @@
-import { eq, and, gte, lt, isNotNull } from 'drizzle-orm'
+import { eq, and, isNotNull } from 'drizzle-orm'
 import { alias } from 'drizzle-orm/sqlite-core'
 import { type DB, schema, generateId } from '@soker90/finper-db'
+import { findEffectiveCategoryRows } from '../transactions/effective-category-rows'
 
-const { budgets, categories, transactions } = schema
+const { budgets, categories } = schema
 
 export type BudgetRow = typeof budgets.$inferSelect
 
@@ -56,12 +57,12 @@ export const createBudgetsRepository = (db: DB) => ({
     }).from(budgets).where(and(...conditions)).all()
   },
 
-  // Transacciones en [from, to) del user (todas; el tipo se resuelve luego por categoría).
   findTransactionsInRange: (user: string, from: number, to: number): TxSumRow[] =>
-    db.select({ date: transactions.date, categoryId: transactions.categoryId, amount: transactions.amount })
-      .from(transactions)
-      .where(and(eq(transactions.user, user), gte(transactions.date, from), lt(transactions.date, to)))
-      .all(),
+    findEffectiveCategoryRows(db, { user, from, to }).map(row => ({
+      date: row.date,
+      categoryId: row.categoryId,
+      amount: row.amount
+    })),
 
   findBudget: (categoryId: string, year: number, month: number, user: string): BudgetRow | undefined =>
     db.select().from(budgets)

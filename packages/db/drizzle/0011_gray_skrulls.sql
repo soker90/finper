@@ -1,0 +1,1 @@
+ALTER TABLE `transaction_splits` DROP COLUMN `note`;

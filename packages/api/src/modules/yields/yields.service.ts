@@ -75,6 +75,9 @@ export class YieldsService {
   }
 
   public linkTransactions ({ id, transactionIds, settlementId, tae, averageBalance, user }: { id: string, transactionIds: string[], settlementId?: string | null, tae?: number | null, averageBalance?: number | null, user: string }): void {
+    if (this.repository.hasSplits(transactionIds, user)) {
+      throw Boom.badData(ERROR_MESSAGE.TRANSACTION.SPLIT_YIELD).output
+    }
     let targetSettlementId = settlementId
     if (!targetSettlementId) {
       // Create a new settlement

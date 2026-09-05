@@ -1,6 +1,6 @@
 import { eq, and, gte, lte, desc } from 'drizzle-orm'
-import { type DB, schema } from '@soker90/finper-db'
-import { TRANSACTION } from '@soker90/finper-db'
+import { type DB, schema, TRANSACTION } from '@soker90/finper-db'
+import { findEffectiveCategoryRows, loadSplitsByTransactionIds } from '../transactions/effective-category-rows'
 
 const { transactions, categories, accounts, stores } = schema
 
@@ -25,24 +25,25 @@ export interface ExpenseDetailRow extends ExpenseRow {
 
 export const createStatsRepository = (db: DB) => ({
   findExpenses: (user: string, range?: { from: number, to: number }): ExpenseRow[] => {
-    const conditions = [eq(transactions.user, user), eq(transactions.type, TRANSACTION.Expense)]
-    if (range) conditions.push(gte(transactions.date, range.from), lte(transactions.date, range.to))
-    return db.select({
-      id: transactions.id,
-      date: transactions.date,
-      amount: transactions.amount,
-      tags: transactions.tags,
-      categoryId: transactions.categoryId,
-      categoryName: categories.name
+    const rows = findEffectiveCategoryRows(db, {
+      user,
+      type: TRANSACTION.Expense,
+      from: range?.from,
+      to: range?.to,
+      toInclusive: true
     })
-      .from(transactions)
-      .leftJoin(categories, eq(transactions.categoryId, categories.id))
-      .where(and(...conditions))
-      .all() as ExpenseRow[]
+    return rows.map(row => ({
+      id: row.transactionId,
+      date: row.date,
+      amount: row.amount,
+      tags: row.tags ?? [],
+      categoryId: row.categoryId,
+      categoryName: row.categoryName ?? null
+    }))
   },
 
-  findExpenseDetails: (user: string, from: number, to: number): ExpenseDetailRow[] =>
-    db.select({
+  findExpenseDetails: (user: string, from: number, to: number): ExpenseDetailRow[] => {
+    const parents = db.select({
       id: transactions.id,
       date: transactions.date,
       amount: transactions.amount,
@@ -69,4 +70,27 @@ export const createStatsRepository = (db: DB) => ({
       ))
       .orderBy(desc(transactions.date))
       .all() as ExpenseDetailRow[]
+
+    const splitsByTransaction = loadSplitsByTransactionIds(db, parents.map(parent => parent.id))
+    const rows: ExpenseDetailRow[] = []
+
+    for (const parent of parents) {
+      const splits = splitsByTransaction.get(parent.id)
+      if (splits && splits.length > 0) {
+        for (const split of splits) {
+          rows.push({
+            ...parent,
+            amount: split.amount,
+            categoryId: split.categoryId,
+            categoryName: split.categoryName,
+            tags: split.tags ?? []
+          })
+        }
+      } else {
+        rows.push(parent)
+      }
+    }
+
+    return rows
+  }
 })

@@ -101,4 +101,35 @@ describe('Budgets Service (Part B - getBudgets)', () => {
     expect(totalBudgeted).toBe(350) // 100 + 250 acumulados entre las dos categorías
     expect(totalReal).toBe(100) // 40 + 60
   })
+
+  it('attributes split amounts to each category without double-counting the parent', () => {
+    const splitUser = generateUsername()
+    db.insert(users).values({ id: generateId(), username: splitUser, password: 'pwd', createdAt: new Date() }).run()
+    const acc = generateId()
+    db.insert(accounts).values({ id: acc, name: 'C', bank: 'B', balance: 0, user: splitUser }).run()
+
+    const parent = generateId()
+    db.insert(categories).values({ id: parent, name: 'Casa', type: 'expense', budgetRuleClass: 'needs', user: splitUser }).run()
+    const comida = generateId()
+    db.insert(categories).values({ id: comida, name: 'Comida', type: 'expense', parentId: parent, budgetRuleClass: 'none', user: splitUser }).run()
+    const hogar = generateId()
+    db.insert(categories).values({ id: hogar, name: 'Hogar', type: 'expense', parentId: parent, budgetRuleClass: 'none', user: splitUser }).run()
+
+    service.editBudget({ category: comida, year: 2025, month: 3, user: splitUser, amount: 100 })
+    service.editBudget({ category: hogar, year: 2025, month: 3, user: splitUser, amount: 100 })
+
+    const march = Date.UTC(2025, 2, 15, 12, 0, 0)
+    const txId = generateId()
+    db.insert(transactions).values({
+      id: txId, date: march, categoryId: comida, amount: 100, type: 'expense', accountId: acc, note: null, storeId: null, subscriptionId: null, tags: [], user: splitUser
+    }).run()
+    db.insert(schema.transactionSplits).values([
+      { id: generateId(), transactionId: txId, categoryId: comida, amount: 65, user: splitUser },
+      { id: generateId(), transactionId: txId, categoryId: hogar, amount: 35, user: splitUser }
+    ]).run()
+
+    const result = service.getBudgets({ user: splitUser, year: 2025, month: NaN })
+    expect(result.expenses.find((row: any) => row.id === comida).budgets[2].real).toBe(65)
+    expect(result.expenses.find((row: any) => row.id === hogar).budgets[2].real).toBe(35)
+  })
 })

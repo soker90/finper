@@ -1,7 +1,7 @@
-import { eq, and, desc, isNull, inArray, count, gte, lte } from 'drizzle-orm'
+import { eq, and, desc, isNull, inArray, notInArray, count, gte, lte } from 'drizzle-orm'
 import { type DB, schema, generateId } from '@soker90/finper-db'
 
-const { yields, yieldSettlements, transactions, categories, accounts } = schema
+const { yields, yieldSettlements, transactions, categories, accounts, transactionSplits } = schema
 
 type Yield = typeof yields.$inferSelect
 export type YieldSettlement = typeof yieldSettlements.$inferSelect
@@ -94,33 +94,47 @@ export const createYieldsRepository = (db: DB) => ({
     accountId: string
     categoryIds: string[]
     user: string
-    // Only the 50 most recent unlinked matches are returned; narrowing by a
-    // single category and/or a date range lets older matches (otherwise
-    // invisible past the limit) be found.
     categoryId?: string
     dateFrom?: number
     dateTo?: number
-  }): YieldTransactionRow[] =>
-    transactionsSelect(db)
+  }): YieldTransactionRow[] => {
+    const splitIds = db.select({ id: transactionSplits.transactionId }).from(transactionSplits)
+      .where(eq(transactionSplits.user, user))
+    return transactionsSelect(db)
       .where(and(
         eq(transactions.user, user),
         eq(transactions.accountId, accountId),
         categoryId ? eq(transactions.categoryId, categoryId) : inArray(transactions.categoryId, categoryIds),
         isNull(transactions.yieldId),
+        notInArray(transactions.id, splitIds),
         dateFrom ? gte(transactions.date, dateFrom) : undefined,
         dateTo ? lte(transactions.date, dateTo) : undefined
       ))
       .orderBy(desc(transactions.date))
       .limit(50)
-      .all() as YieldTransactionRow[],
+      .all() as YieldTransactionRow[]
+  },
+
+  hasSplits: (transactionIds: string[], user: string): boolean => {
+    if (transactionIds.length === 0) return false
+    const row = db.select({ id: transactionSplits.id }).from(transactionSplits)
+      .where(and(inArray(transactionSplits.transactionId, transactionIds), eq(transactionSplits.user, user)))
+      .get()
+    return Boolean(row)
+  },
 
   linkTransactions: (yieldId: string, yieldSettlementId: string, transactionIds: string[], user: string): void => {
+    // Defense in depth: even if the app-level `hasSplits` pre-check were ever
+    // bypassed or raced, the update itself cannot link a split transaction.
+    const splitIds = db.select({ id: transactionSplits.transactionId }).from(transactionSplits)
+      .where(eq(transactionSplits.user, user))
     db.update(transactions)
       .set({ yieldId, yieldSettlementId })
       .where(and(
         inArray(transactions.id, transactionIds),
         eq(transactions.user, user),
-        isNull(transactions.yieldId)
+        isNull(transactions.yieldId),
+        notInArray(transactions.id, splitIds)
       ))
       .run()
   },

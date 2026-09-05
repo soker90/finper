@@ -1,8 +1,25 @@
 import Boom from '@hapi/boom'
+import { roundMoney } from '@soker90/finper-db'
 import { ERROR_MESSAGE } from '../../i18n'
 import { sanitizeTags } from '../../utils'
-import { creditCardsRepository, type ICreditCardsRepository, type CreateCreditCardData, type UpdateCreditCardData, type CreateCreditCardMovementData, type UpdateCreditCardMovementData, type PayDebtPayload } from './credit-cards.repository'
+import { creditCardsRepository, type ICreditCardsRepository, type CreateCreditCardData, type UpdateCreditCardData, type CreateCreditCardMovementData, type UpdateCreditCardMovementData, type PayDebtPayload, type CreditCardMovementRow } from './credit-cards.repository'
 import { serializeCreditCard, serializeCreditCardMovement } from './credit-cards.serializer'
+
+const assertSplitConsistencyOnPartialUpdate = (movement: CreditCardMovementRow, value: UpdateCreditCardMovementData): void => {
+  const existingSplits = movement.splits ?? []
+  if (existingSplits.length < 2 || value.splits !== undefined) return
+
+  if (value.type !== undefined || value.categoryId !== undefined) {
+    throw Boom.badData(ERROR_MESSAGE.TRANSACTION.SPLIT_FIELDS_REQUIRE_SPLITS).output
+  }
+
+  if (value.amount !== undefined) {
+    const existingTotal = roundMoney(existingSplits.reduce((sum, split) => sum + roundMoney(split.amount), 0))
+    if (existingTotal !== roundMoney(value.amount)) {
+      throw Boom.badData(ERROR_MESSAGE.TRANSACTION.SPLIT_SUM_MISMATCH).output
+    }
+  }
+}
 
 export class CreditCardsService {
   constructor (private readonly repository: ICreditCardsRepository = creditCardsRepository) {}
@@ -49,9 +66,11 @@ export class CreditCardsService {
 
   public async addMovement ({ creditCardId, user, data }: { creditCardId: string, user: string, data: Omit<CreateCreditCardMovementData, 'creditCardId'> }) {
     await this.getCreditCardById(creditCardId, user)
+    const hasSplits = Array.isArray(data.splits) && data.splits.length >= 2
     const movement = await this.repository.createMovement(user, {
       ...data,
-      tags: sanitizeTags(data.tags),
+      tags: hasSplits ? [] : sanitizeTags(data.tags),
+      splits: data.splits?.map(split => ({ ...split, tags: sanitizeTags(split.tags) })),
       creditCardId
     })
     return serializeCreditCardMovement(movement)
@@ -65,9 +84,16 @@ export class CreditCardsService {
     if (movement.status === 'paid') {
       throw Boom.badRequest(ERROR_MESSAGE.CREDIT_CARD.ALREADY_PAID).output
     }
+    assertSplitConsistencyOnPartialUpdate(movement, value)
+    const hasSplits = Array.isArray(value.splits) && value.splits.length >= 2
     const updated = await this.repository.updateMovement(id, user, {
       ...value,
-      ...(value.tags !== undefined && { tags: sanitizeTags(value.tags) })
+      ...(hasSplits
+        ? { tags: [] }
+        : (value.tags !== undefined && { tags: sanitizeTags(value.tags) })),
+      ...(value.splits !== undefined && {
+        splits: value.splits.map(split => ({ ...split, tags: sanitizeTags(split.tags) }))
+      })
     })
     return serializeCreditCardMovement(updated)
   }
