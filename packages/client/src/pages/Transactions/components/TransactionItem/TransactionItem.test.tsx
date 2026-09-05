@@ -37,7 +37,7 @@ describe('TransactionItem', () => {
   it('shows tags from split lines in the row', async () => {
     const { getByText, queryByText } = renderItem({
       ...TRANSACTION,
-      tags: [],
+      tags: ['carrefour'],
       splits: [
         { _id: 's1', category: { _id: 'cat1', name: 'Comida' }, amount: 65, tags: ['comida'] },
         { _id: 's2', category: { _id: 'cat2', name: 'Hogar' }, amount: 35, tags: ['hogar'] }

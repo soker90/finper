@@ -28,9 +28,9 @@ export class SubscriptionCandidateService {
     const categoryIds = uniqueIds([transaction.categoryId, ...splitCategoryIds])
 
     const matching = categoryIds.flatMap(categoryId =>
-      this.repository.findMatchingSubscriptions(
-        transaction.user, transaction.accountId, categoryId, from, to
-      )
+      this.repository.findMatchingSubscriptions({
+        user: transaction.user, accountId: transaction.accountId, categoryId, from, to
+      })
     )
     const uniqueMatching = [...new Map(matching.map(sub => [sub.id, sub])).values()]
     if (uniqueMatching.length === 0) return

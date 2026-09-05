@@ -24,11 +24,11 @@ export const transactionsHandlers = [
   }),
   http.post('/transactions', async ({ request }) => {
     const body = await request.json() as Record<string, unknown>
-    return HttpResponse.json({ _id: faker.database.mongodbObjectId(), ...body })
+    return HttpResponse.json({ ...body, _id: faker.database.mongodbObjectId() })
   }),
   http.put('/transactions/:id', async ({ params, request }) => {
     const body = await request.json() as Record<string, unknown>
-    return HttpResponse.json({ _id: params.id, ...body })
+    return HttpResponse.json({ ...body, _id: params.id })
   }),
-  http.delete('/transactions/:id', () => HttpResponse.json(null, { status: 204 }))
+  http.delete('/transactions/:id', () => new HttpResponse(null, { status: 204 }))
 ]

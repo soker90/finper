@@ -146,14 +146,14 @@ export const createSubscriptionsRepository = (db: DB) => ({
   },
 
   // --- Parte C: candidates ---
-  findMatchingSubscriptions: (user: string, accountId: string, categoryId: string, from: number, to: number): Subscription[] =>
+  findMatchingSubscriptions: (params: { user: string, accountId: string, categoryId: string, from: number, to: number }): Subscription[] =>
     db.select().from(subscriptions)
       .where(and(
-        eq(subscriptions.user, user),
-        eq(subscriptions.accountId, accountId),
-        eq(subscriptions.categoryId, categoryId),
-        gte(subscriptions.nextPaymentDate, from),
-        lte(subscriptions.nextPaymentDate, to)
+        eq(subscriptions.user, params.user),
+        eq(subscriptions.accountId, params.accountId),
+        eq(subscriptions.categoryId, params.categoryId),
+        gte(subscriptions.nextPaymentDate, params.from),
+        lte(subscriptions.nextPaymentDate, params.to)
       ))
       .all(),
 

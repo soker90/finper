@@ -2,7 +2,7 @@
 
 Modelo de dominio de Finper. Mapa de entidades, relaciones y vocabulario.
 
-> Source of truth: `packages/models/src/models/`. Toda referencia `file:line` apunta a la definición canónica.
+> Source of truth: `packages/db/src/schema/`. Toda referencia `file:line` apunta a la definición canónica.
 
 ---
 
