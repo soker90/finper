@@ -40,12 +40,14 @@ help:
 
 install:
 	@pnpm install
-	@$(MAKE) fix-native
 
 # better-sqlite3's native addon is Node-ABI-locked (unlike bcrypt, which is
 # N-API and version-stable). Switching Node versions with fnm/nvm without
 # rebuilding leaves a stale binary that crashes the process at startup with a
-# native assertion instead of a clear error. Safe to re-run anytime.
+# native assertion instead of a clear error. Already wired as the root
+# `postinstall` hook (runs on every `pnpm install`/`pnpm i`); this target is
+# for manually re-running it on demand, e.g. right after switching Node
+# versions without touching package.json/pnpm-lock.yaml.
 fix-native:
 	@node scripts/fix-native-deps.js
 

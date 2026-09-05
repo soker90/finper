@@ -96,7 +96,7 @@ pnpm --filter @soker90/finper-db exec tsc --noEmit
 - **PWA**: `vite-plugin-pwa` with `registerType: 'autoUpdate'`. Service worker registers automatically; may interfere in integration test environments.
 - **Node 24** required (`.nvmrc` + `"engines": { "node": ">=24.x" }` in api).
 - **`packageManager` pinned**: root `package.json` declares `pnpm@10.29.3`; `preinstall` script blocks npm/yarn.
-- **`better-sqlite3` is Node-ABI-locked** (unlike `bcrypt`, which uses N-API and is version-stable). If you switch Node versions with `fnm`/`nvm` after `pnpm install`, the API crashes at startup with a native assertion (`RemoveEnvironmentCleanupHook` / `NODE_MODULE_VERSION` mismatch) instead of a clear JS error. Run `make fix-native` to re-fetch the correct prebuilt binary for the active Node version — do **not** fix this with `node-gyp rebuild`, which can produce a binary that compiles fine but crashes at process teardown.
+- **`better-sqlite3` is Node-ABI-locked** (unlike `bcrypt`, which uses N-API and is version-stable). If you switch Node versions with `fnm`/`nvm` and then run the app **without reinstalling**, it crashes at startup with a native assertion (`RemoveEnvironmentCleanupHook` / `NODE_MODULE_VERSION` mismatch) instead of a clear JS error. A root `postinstall` script (`scripts/fix-native-deps.js`) re-fetches the correct prebuilt binary on every `pnpm install`/`pnpm i`, so a fresh install always works; if you only switched Node versions without reinstalling, run `make fix-native` to fix it without a full reinstall. Do **not** fix this with `node-gyp rebuild`, which can produce a binary that compiles fine but crashes at process teardown.
 
 ---
 
