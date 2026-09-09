@@ -1,6 +1,6 @@
 // @vitest-environment happy-dom
 import { describe, expect, it, vi } from 'vitest'
-import { waitFor } from '@testing-library/react'
+import { waitFor, within } from '@testing-library/react'
 import { http, HttpResponse } from 'msw'
 import { SWRConfig } from 'swr'
 import { server } from '../../mock/server'
@@ -51,8 +51,9 @@ describe('Yields', () => {
   })
 
   it('KPI "Rendimientos" reflects the number of yields', async () => {
-    const { findByText } = renderFresh()
-    expect(await findByText(String(YIELDS_LIST.length))).toBeDefined()
+    const { findByTestId } = renderFresh()
+    const kpi = await findByTestId('kpi-yields-count')
+    expect(within(kpi).getByText(String(YIELDS_LIST.length))).toBeDefined()
   })
 
   it('KPI "Neto acumulado" reflects the sum of all yields', async () => {

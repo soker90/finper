@@ -10,10 +10,11 @@ interface KpiCardProps {
   icon: ReactNode
   trend?: ReactNode
   color?: string
+  testId?: string
 }
 
-const KpiCard = ({ title, value, subtitle, icon, trend, color = 'primary' }: KpiCardProps) => (
-  <MainCard contentSX={{ p: 2.25 }} sx={hoverCardSx}>
+const KpiCard = ({ title, value, subtitle, icon, trend, color = 'primary', testId }: KpiCardProps) => (
+  <MainCard contentSX={{ p: 2.25 }} sx={hoverCardSx} data-testid={testId}>
     <Stack spacing={0.5}>
       <Stack
         direction='row'

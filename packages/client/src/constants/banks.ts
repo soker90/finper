@@ -16,7 +16,8 @@ const BANK_LABELS: Record<string, string> = {
   waylet: 'Waylet',
   eci: 'El Corte Inglés',
   gourmet: 'Gourmet',
-  efectivo: 'Efectivo'
+  efectivo: 'Efectivo',
+  santander: 'Santander'
 }
 
 export const BANK_OPTIONS = BANK_KEYS.map((value) => ({ value, label: BANK_LABELS[value] ?? value }))

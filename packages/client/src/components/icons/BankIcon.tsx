@@ -14,6 +14,7 @@ const bbva = lazy(() => import('./BBVAIcon'))
 const sabadell = lazy(() => import('./SabadellIcon'))
 const paypal = lazy(() => import('./PaypalIcon'))
 const eci = lazy(() => import('./EciIcon'))
+const santander = lazy(() => import('./SantanderIcon'))
 
 type BankIconsProps = {
   name: string
@@ -36,7 +37,8 @@ const Icons: Record<string, FC<any>> = {
   bbva,
   sabadell,
   paypal,
-  eci
+  eci,
+  santander
 }
 
 export const BANK_KEYS = Object.keys(Icons)
