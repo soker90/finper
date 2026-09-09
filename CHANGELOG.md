@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.4.3] - 2026-09-09
+
+### Added
+
+- **client**: Santander bank logo. Accounts and credit cards with bank "santander" now show the official Santander icon everywhere (accounts list, cards, dashboard, transactions, loans), and it is available in the card logo selector.
+
+### Fixed
+
+- **client**: Make the Yields "Rendimientos" KPI test deterministic by querying inside the KPI card instead of matching the raw number across the page.
+
+---
+
 ## [2.4.2] - 2026-09-03
 
 ### Fixed
