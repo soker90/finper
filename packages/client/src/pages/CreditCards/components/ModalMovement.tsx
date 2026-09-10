@@ -91,7 +91,7 @@ export const ModalMovement = ({ open, onClose, creditCardId, movement, onSuccess
     if (movement) {
       const id = getId(movement)
       if (!id) return { error: 'No se pudo identificar el movimiento a editar' }
-      return editCreditCardMovement(creditCardId, id, payload)
+      return editCreditCardMovement({ creditCardId, movementId: id, params: payload })
     }
     return addCreditCardMovement(creditCardId, payload)
   }, () => {

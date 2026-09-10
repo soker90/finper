@@ -684,8 +684,8 @@ describe('Credit Cards Routes', () => {
     })
 
     test('creates a split pending movement and pay-debt copies lines to the transaction', async () => {
-      const hogarId = generateId()
-      sqliteDb.insert(categories).values({ id: hogarId, name: 'Hogar', type: 'expense', user: username }).run()
+      const homeCategoryId = generateId()
+      sqliteDb.insert(categories).values({ id: homeCategoryId, name: 'Hogar', type: 'expense', user: username }).run()
 
       const cardRes = await supertest(server.app)
         .post(path)
@@ -703,7 +703,7 @@ describe('Credit Cards Routes', () => {
           categoryId,
           splits: [
             { categoryId, amount: 65, tags: ['comida'] },
-            { categoryId: hogarId, amount: 35, tags: ['hogar'] }
+            { categoryId: homeCategoryId, amount: 35, tags: ['hogar'] }
           ]
         })
         .expect(201)
@@ -733,8 +733,8 @@ describe('Credit Cards Routes', () => {
     })
 
     test('replaces splits on a pending movement', async () => {
-      const hogarId = generateId()
-      sqliteDb.insert(categories).values({ id: hogarId, name: 'Hogar', type: 'expense', user: username }).run()
+      const homeCategoryId = generateId()
+      sqliteDb.insert(categories).values({ id: homeCategoryId, name: 'Hogar', type: 'expense', user: username }).run()
 
       const cardRes = await supertest(server.app)
         .post(path)
@@ -752,7 +752,7 @@ describe('Credit Cards Routes', () => {
           categoryId,
           splits: [
             { categoryId, amount: 50 },
-            { categoryId: hogarId, amount: 30 }
+            { categoryId: homeCategoryId, amount: 30 }
           ]
         })
         .expect(201)
@@ -762,18 +762,18 @@ describe('Credit Cards Routes', () => {
         .set('Authorization', `Bearer ${token}`)
         .send({
           amount: 90,
-          categoryId: hogarId,
+          categoryId: homeCategoryId,
           splits: [
-            { categoryId: hogarId, amount: 40, tags: ['hogar'] },
+            { categoryId: homeCategoryId, amount: 40, tags: ['hogar'] },
             { categoryId, amount: 50 }
           ]
         })
         .expect(200)
 
-      expect(edited.body.categoryId).toBe(hogarId)
+      expect(edited.body.categoryId).toBe(homeCategoryId)
       expect(edited.body.tags).toEqual([])
       expect(edited.body.splits).toHaveLength(2)
-      expect(edited.body.splits[0]).toMatchObject({ categoryId: hogarId, amount: 40, tags: ['hogar'] })
+      expect(edited.body.splits[0]).toMatchObject({ categoryId: homeCategoryId, amount: 40, tags: ['hogar'] })
     })
 
     test('rejects a movement with a single split line', async () => {
@@ -816,8 +816,8 @@ describe('Credit Cards Routes', () => {
     })
 
     test('PATCH amount only (no splits) on a split movement rejects an amount inconsistent with the existing lines', async () => {
-      const hogarId = generateId()
-      sqliteDb.insert(categories).values({ id: hogarId, name: 'Hogar Patch', type: 'expense', user: username }).run()
+      const homeCategoryId = generateId()
+      sqliteDb.insert(categories).values({ id: homeCategoryId, name: 'Hogar Patch', type: 'expense', user: username }).run()
 
       const cardRes = await supertest(server.app)
         .post(path)
@@ -835,7 +835,7 @@ describe('Credit Cards Routes', () => {
           categoryId,
           splits: [
             { categoryId, amount: 60 },
-            { categoryId: hogarId, amount: 40 }
+            { categoryId: homeCategoryId, amount: 40 }
           ]
         })
         .expect(201)
@@ -848,8 +848,8 @@ describe('Credit Cards Routes', () => {
     })
 
     test('PATCH date only (no splits) on a split movement succeeds and keeps the lines untouched', async () => {
-      const hogarId = generateId()
-      sqliteDb.insert(categories).values({ id: hogarId, name: 'Hogar Patch Date', type: 'expense', user: username }).run()
+      const homeCategoryId = generateId()
+      sqliteDb.insert(categories).values({ id: homeCategoryId, name: 'Hogar Patch Date', type: 'expense', user: username }).run()
 
       const cardRes = await supertest(server.app)
         .post(path)
@@ -867,7 +867,7 @@ describe('Credit Cards Routes', () => {
           categoryId,
           splits: [
             { categoryId, amount: 60 },
-            { categoryId: hogarId, amount: 40 }
+            { categoryId: homeCategoryId, amount: 40 }
           ]
         })
         .expect(201)
@@ -885,8 +885,8 @@ describe('Credit Cards Routes', () => {
     })
 
     test('PATCH type only (no splits) on a split movement is rejected', async () => {
-      const hogarId = generateId()
-      sqliteDb.insert(categories).values({ id: hogarId, name: 'Hogar Patch Type', type: 'expense', user: username }).run()
+      const homeCategoryId = generateId()
+      sqliteDb.insert(categories).values({ id: homeCategoryId, name: 'Hogar Patch Type', type: 'expense', user: username }).run()
 
       const cardRes = await supertest(server.app)
         .post(path)
@@ -904,7 +904,7 @@ describe('Credit Cards Routes', () => {
           categoryId,
           splits: [
             { categoryId, amount: 60 },
-            { categoryId: hogarId, amount: 40 }
+            { categoryId: homeCategoryId, amount: 40 }
           ]
         })
         .expect(201)
@@ -917,8 +917,8 @@ describe('Credit Cards Routes', () => {
     })
 
     test('PATCH categoryId only (no splits) on a split movement is rejected', async () => {
-      const hogarId = generateId()
-      sqliteDb.insert(categories).values({ id: hogarId, name: 'Hogar Patch Category', type: 'expense', user: username }).run()
+      const homeCategoryId = generateId()
+      sqliteDb.insert(categories).values({ id: homeCategoryId, name: 'Hogar Patch Category', type: 'expense', user: username }).run()
 
       const cardRes = await supertest(server.app)
         .post(path)
@@ -936,7 +936,7 @@ describe('Credit Cards Routes', () => {
           categoryId,
           splits: [
             { categoryId, amount: 60 },
-            { categoryId: hogarId, amount: 40 }
+            { categoryId: homeCategoryId, amount: 40 }
           ]
         })
         .expect(201)
@@ -944,13 +944,13 @@ describe('Credit Cards Routes', () => {
       await supertest(server.app)
         .patch(`${path}/${cardId}/movements/${movementRes.body.id}`)
         .set('Authorization', `Bearer ${token}`)
-        .send({ categoryId: hogarId })
+        .send({ categoryId: homeCategoryId })
         .expect(422)
     })
 
     test('PATCH tags only (no splits) on a split movement is rejected', async () => {
-      const hogarId = generateId()
-      sqliteDb.insert(categories).values({ id: hogarId, name: 'Hogar Patch Tags', type: 'expense', user: username }).run()
+      const homeCategoryId = generateId()
+      sqliteDb.insert(categories).values({ id: homeCategoryId, name: 'Hogar Patch Tags', type: 'expense', user: username }).run()
 
       const cardRes = await supertest(server.app)
         .post(path)
@@ -968,7 +968,7 @@ describe('Credit Cards Routes', () => {
           categoryId,
           splits: [
             { categoryId, amount: 60 },
-            { categoryId: hogarId, amount: 40 }
+            { categoryId: homeCategoryId, amount: 40 }
           ]
         })
         .expect(201)
@@ -984,8 +984,8 @@ describe('Credit Cards Routes', () => {
     })
 
     test('PATCH splits only (no amount) succeeds when the lines add up to the stored amount', async () => {
-      const hogarId = generateId()
-      sqliteDb.insert(categories).values({ id: hogarId, name: 'Hogar Patch Splits Only', type: 'expense', user: username }).run()
+      const homeCategoryId = generateId()
+      sqliteDb.insert(categories).values({ id: homeCategoryId, name: 'Hogar Patch Splits Only', type: 'expense', user: username }).run()
 
       const cardRes = await supertest(server.app)
         .post(path)
@@ -1003,7 +1003,7 @@ describe('Credit Cards Routes', () => {
           categoryId,
           splits: [
             { categoryId, amount: 60 },
-            { categoryId: hogarId, amount: 40 }
+            { categoryId: homeCategoryId, amount: 40 }
           ]
         })
         .expect(201)
@@ -1014,7 +1014,7 @@ describe('Credit Cards Routes', () => {
         .send({
           splits: [
             { categoryId, amount: 70 },
-            { categoryId: hogarId, amount: 30 }
+            { categoryId: homeCategoryId, amount: 30 }
           ]
         })
         .expect(200)
@@ -1073,8 +1073,8 @@ describe('Credit Cards Routes', () => {
     })
 
     test('PATCH splits: [] removes the split lines and applies the new categoryId/tags to the parent', async () => {
-      const hogarId = generateId()
-      sqliteDb.insert(categories).values({ id: hogarId, name: 'Hogar Remove Split', type: 'expense', user: username }).run()
+      const homeCategoryId = generateId()
+      sqliteDb.insert(categories).values({ id: homeCategoryId, name: 'Hogar Remove Split', type: 'expense', user: username }).run()
 
       const cardRes = await supertest(server.app)
         .post(path)
@@ -1092,7 +1092,7 @@ describe('Credit Cards Routes', () => {
           categoryId,
           splits: [
             { categoryId, amount: 60 },
-            { categoryId: hogarId, amount: 40 }
+            { categoryId: homeCategoryId, amount: 40 }
           ]
         })
         .expect(201)
@@ -1107,13 +1107,13 @@ describe('Credit Cards Routes', () => {
           date: movementRes.body.date,
           amount: 100,
           type: 'expense',
-          categoryId: hogarId,
+          categoryId: homeCategoryId,
           tags: ['sin-dividir'],
           splits: []
         })
         .expect(200)
 
-      expect(edited.body.categoryId).toBe(hogarId)
+      expect(edited.body.categoryId).toBe(homeCategoryId)
       expect(edited.body.tags).toEqual(['sin-dividir'])
       expect(edited.body.splits).toBeUndefined()
 

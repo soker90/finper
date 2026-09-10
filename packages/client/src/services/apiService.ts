@@ -296,7 +296,11 @@ type CreditCardMovementPayload = {
 export const addCreditCardMovement = (creditCardId: string, params: CreditCardMovementPayload & { date: number, amount: number, categoryId: string }): Promise<{ data?: any, error?: string }> =>
   axios.post(`${CREDIT_CARDS}/${creditCardId}/movements`, params).then((res: any) => ({ data: res.data })).catch((error: any) => ({ error: extractError(error) }))
 
-export const editCreditCardMovement = (creditCardId: string, movementId: string, params: CreditCardMovementPayload): Promise<{ data?: any, error?: string }> =>
+export const editCreditCardMovement = ({ creditCardId, movementId, params }: {
+  creditCardId: string
+  movementId: string
+  params: CreditCardMovementPayload
+}): Promise<{ data?: any, error?: string }> =>
   axios.patch(`${CREDIT_CARDS}/${creditCardId}/movements/${movementId}`, params).then((res: any) => ({ data: res.data })).catch((error: any) => ({ error: extractError(error) }))
 
 export const deleteCreditCardMovement = (creditCardId: string, movementId: string): Promise<{ error?: string }> =>

@@ -22,12 +22,12 @@ vi.mock('../hooks/useCreditCards', () => ({
   useCreditCardMutate: () => () => {}
 }))
 
-const editCreditCardMovement = vi.fn<(creditCardId: string, movementId: string, params: unknown) => Promise<{ data: object }>>(async () => ({ data: {} }))
+const editCreditCardMovement = vi.fn<(args: { creditCardId: string, movementId: string, params: unknown }) => Promise<{ data: object }>>(async () => ({ data: {} }))
 const deleteCreditCardMovement = vi.fn<(creditCardId: string, movementId: string) => Promise<{ data: object }>>(async () => ({ data: {} }))
 
 vi.mock('services/apiService', () => ({
-  editCreditCardMovement: (creditCardId: string, movementId: string, params: unknown) =>
-    editCreditCardMovement(creditCardId, movementId, params),
+  editCreditCardMovement: (args: { creditCardId: string, movementId: string, params: unknown }) =>
+    editCreditCardMovement(args),
   deleteCreditCardMovement: (creditCardId: string, movementId: string) =>
     deleteCreditCardMovement(creditCardId, movementId)
 }))
@@ -100,7 +100,7 @@ describe('CreditCardMovementEdit splits', () => {
     await vi.waitFor(() => {
       expect(editCreditCardMovement).toHaveBeenCalled()
     })
-    const payload = editCreditCardMovement.mock.calls[0][2] as { splits: Array<{ amount: number, categoryId: string }>, tags: string[] }
+    const payload = editCreditCardMovement.mock.calls[0][0].params as { splits: Array<{ amount: number, categoryId: string }>, tags: string[] }
     expect(payload.splits).toHaveLength(2)
     expect(payload.splits[0].categoryId).toBe('cat1')
     expect(payload.tags).toEqual([])
@@ -113,7 +113,7 @@ describe('CreditCardMovementEdit splits', () => {
     await vi.waitFor(() => {
       expect(editCreditCardMovement).toHaveBeenCalled()
     })
-    const payload = editCreditCardMovement.mock.calls[0][2] as { splits: unknown[], categoryId: string }
+    const payload = editCreditCardMovement.mock.calls[0][0].params as { splits: unknown[], categoryId: string }
     expect(payload.splits).toEqual([])
     expect(payload.categoryId).toBe('cat1')
   })

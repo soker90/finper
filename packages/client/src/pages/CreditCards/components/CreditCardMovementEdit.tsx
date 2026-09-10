@@ -65,7 +65,11 @@ export const CreditCardMovementEdit = ({ movement, hideForm }: CreditCardMovemen
     if (isAmountMismatch) {
       return { error: 'La suma de los desgloses debe coincidir con el importe total' }
     }
-    return editCreditCardMovement(movement.creditCardId, id, buildMovementPayload({ data, hasSplits, fallbackDate: movement.date }))
+    return editCreditCardMovement({
+      creditCardId: movement.creditCardId,
+      movementId: id,
+      params: buildMovementPayload({ data, hasSplits, fallbackDate: movement.date })
+    })
   }, () => {
     triggerMutate()
     hideForm()

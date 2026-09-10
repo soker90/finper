@@ -24,19 +24,19 @@ const serializeSplitPopulated = (split: SplitRow) => {
   return result
 }
 
-export const serializeTransaction = (t: Transaction, splits?: SplitRow[]) => {
+export const serializeTransaction = (transaction: Transaction, splits?: SplitRow[]) => {
   const result: Record<string, any> = {
-    _id: t.id,
-    date: t.date,
-    category: t.categoryId,
-    amount: t.amount,
-    type: t.type,
-    account: t.accountId,
-    tags: t.tags ?? []
+    _id: transaction.id,
+    date: transaction.date,
+    category: transaction.categoryId,
+    amount: transaction.amount,
+    type: transaction.type,
+    account: transaction.accountId,
+    tags: transaction.tags ?? []
   }
-  if (t.note !== null && t.note !== undefined) result.note = t.note
-  if (t.storeId) result.store = t.storeId
-  if (t.subscriptionId) result.subscriptionId = t.subscriptionId
+  if (transaction.note !== null && transaction.note !== undefined) result.note = transaction.note
+  if (transaction.storeId) result.store = transaction.storeId
+  if (transaction.subscriptionId) result.subscriptionId = transaction.subscriptionId
   if (splits && splits.length >= 2) result.splits = splits.map(serializeSplitPlain)
   return result
 }

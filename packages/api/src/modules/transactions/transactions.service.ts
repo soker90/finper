@@ -10,8 +10,8 @@ import type { TransactionFilters } from './transactions.repository'
 
 const { transactions, accounts, transactionSplits } = schema
 
-const amountOf = (t: { type: string, amount: number }): number =>
-  getTransactionAmount(t as unknown as Parameters<typeof getTransactionAmount>[0])
+const amountOf = (transaction: { type: string, amount: number }): number =>
+  getTransactionAmount(transaction as unknown as Parameters<typeof getTransactionAmount>[0])
 
 type ITransactionsRepository = ReturnType<typeof import('./transactions.repository').createTransactionsRepository>
 

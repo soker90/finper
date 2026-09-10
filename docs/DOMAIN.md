@@ -13,9 +13,9 @@ Modelo de dominio de Finper. Mapa de entidades, relaciones y vocabulario.
 | `User` | `users/index.ts:11` | — | (es el tenant) | `username` único de facto. Hook `pre('save')` encripta password. |
 | `Account` | `accounts.ts:13` | — | `user` | Cuenta bancaria. `balance` con redondeo a 2 decimales (setter). `isActive` para soft-archive. |
 | `Category` | `categories.ts:13` | `parent → Category` | `user` | Jerárquica (1 nivel típico). `type ∈ {income, expense, not_computable}`. |
-| `Transaction` | `schema/transactions.ts` | `categoryId`, `accountId`, `storeId?`, `subscriptionId?` | `user` | Núcleo del sistema. `date: Number` (timestamp ms). `type` redundante con `category.type`. Si hay splits, `categoryId` es la categoría principal (`splits[0]`). |
-| `TransactionSplit` | `schema/transaction-splits.ts` | `transactionId`, `categoryId` | `user` | Línea de desglose. Mínimo 2 por transacción. `SUM(amount) === parent.amount`. CASCADE al borrar el padre. |
-| `CreditCardMovementSplit` | `schema/credit-card-movement-splits.ts` | `movementId`, `categoryId` | `user` | Desglose de un movimiento pending de tarjeta. Mínimo 2. `payDebt` copia las líneas a `transaction_splits`. CASCADE al borrar el movimiento. |
+| `Transaction` | `transactions.ts` | `categoryId`, `accountId`, `storeId?`, `subscriptionId?` | `user` | Núcleo del sistema. `date: Number` (timestamp ms). `type` redundante con `category.type`. Si hay splits, `categoryId` es la categoría principal (`splits[0]`). |
+| `TransactionSplit` | `transaction-splits.ts` | `transactionId`, `categoryId` | `user` | Línea de desglose. Mínimo 2 por transacción. `SUM(amount) === parent.amount`. CASCADE al borrar el padre. |
+| `CreditCardMovementSplit` | `credit-card-movement-splits.ts` | `movementId`, `categoryId` | `user` | Desglose de un movimiento pending de tarjeta. Mínimo 2. `payDebt` copia las líneas a `transaction_splits`. CASCADE al borrar el movimiento. |
 | `Store` | `stores.ts:11` | — | `user` | Comercio. Collation `es` strength 2 (case+accent insensitive). |
 | `Budget` | `budgets.ts:13` | `category` | `user` | Presupuesto mensual por categoría. Índice único `(category, year, month, user)` (`budgets.ts:23`). |
 | `Debt` | `debts.ts:18` | — | `user` | Deuda informal con tercero. `from` = nombre libre del tercero. `type ∈ {from, to}` (me deben / debo). |

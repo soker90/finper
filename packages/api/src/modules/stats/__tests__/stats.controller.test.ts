@@ -125,11 +125,11 @@ describe('Stats Controller', () => {
     })
 
     test('includes split-line tags without double-counting the parent amount', async () => {
-      const hogarId = generateId()
-      sqliteDb.insert(categories).values({ id: hogarId, name: 'Hogar', type: 'expense', user: username }).run()
-      const txId = generateId()
+      const homeCategoryId = generateId()
+      sqliteDb.insert(categories).values({ id: homeCategoryId, name: 'Hogar', type: 'expense', user: username }).run()
+      const transactionId = generateId()
       sqliteDb.insert(transactions).values({
-        id: txId,
+        id: transactionId,
         date: Date.UTC(2025, 5, 15),
         categoryId,
         amount: 100,
@@ -141,8 +141,8 @@ describe('Stats Controller', () => {
         user: username
       }).run()
       sqliteDb.insert(transactionSplits).values([
-        { id: generateId(), transactionId: txId, categoryId, amount: 65, tags: ['comida'], user: username },
-        { id: generateId(), transactionId: txId, categoryId: hogarId, amount: 35, tags: ['hogar'], user: username }
+        { id: generateId(), transactionId, categoryId, amount: 65, tags: ['comida'], user: username },
+        { id: generateId(), transactionId, categoryId: homeCategoryId, amount: 35, tags: ['hogar'], user: username }
       ]).run()
 
       const res = await supertest(server.app).get(`${base}/tags?year=2025`).auth(token, { type: 'bearer' }).expect(200)
