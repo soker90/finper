@@ -815,6 +815,88 @@ describe('Credit Cards Routes', () => {
         .expect(422)
     })
 
+    test('rejects movement with more than 2 decimal places in amount', async () => {
+      const cardRes = await supertest(server.app)
+        .post(path)
+        .set('Authorization', `Bearer ${token}`)
+        .send({ name: 'Decimal Card', accountId })
+        .expect(201)
+
+      await supertest(server.app)
+        .post(`${path}/${cardRes.body.id}/movements`)
+        .set('Authorization', `Bearer ${token}`)
+        .send({
+          date: Date.now(),
+          amount: 15.555,
+          categoryId
+        })
+        .expect(422)
+    })
+
+    test('rejects movement splits with more than 2 decimal places in amount', async () => {
+      const cardRes = await supertest(server.app)
+        .post(path)
+        .set('Authorization', `Bearer ${token}`)
+        .send({ name: 'Decimal Split Card', accountId })
+        .expect(201)
+
+      await supertest(server.app)
+        .post(`${path}/${cardRes.body.id}/movements`)
+        .set('Authorization', `Bearer ${token}`)
+        .send({
+          date: Date.now(),
+          amount: 10,
+          categoryId,
+          splits: [
+            { categoryId, amount: 5.001 },
+            { categoryId, amount: 4.999 }
+          ]
+        })
+        .expect(422)
+    })
+
+    test('rejects movement splits with more than 5 categories', async () => {
+      const cardRes = await supertest(server.app)
+        .post(path)
+        .set('Authorization', `Bearer ${token}`)
+        .send({ name: 'Max Splits Card', accountId })
+        .expect(201)
+
+      const extraCategories = [
+        generateId(),
+        generateId(),
+        generateId(),
+        generateId(),
+        generateId()
+      ]
+      for (const extraCategoryId of extraCategories) {
+        sqliteDb.insert(categories).values({
+          id: extraCategoryId,
+          name: `Cat ${extraCategoryId}`,
+          type: 'expense',
+          user: username
+        }).run()
+      }
+
+      await supertest(server.app)
+        .post(`${path}/${cardRes.body.id}/movements`)
+        .set('Authorization', `Bearer ${token}`)
+        .send({
+          date: Date.now(),
+          amount: 60,
+          categoryId,
+          splits: [
+            { categoryId, amount: 10 },
+            { categoryId: extraCategories[0], amount: 10 },
+            { categoryId: extraCategories[1], amount: 10 },
+            { categoryId: extraCategories[2], amount: 10 },
+            { categoryId: extraCategories[3], amount: 10 },
+            { categoryId: extraCategories[4], amount: 10 }
+          ]
+        })
+        .expect(422)
+    })
+
     test('PATCH amount only (no splits) on a split movement rejects an amount inconsistent with the existing lines', async () => {
       const homeCategoryId = generateId()
       sqliteDb.insert(categories).values({ id: homeCategoryId, name: 'Hogar Patch', type: 'expense', user: username }).run()

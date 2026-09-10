@@ -41,6 +41,7 @@ export const assertSplitLines = (params: {
   const { lines, amount, type, categoriesById } = params
   if (!lines) return
   if (lines.length === 1) throw Boom.badData(ERROR_MESSAGE.TRANSACTION.SPLIT_MIN).output
+  if (lines.length > 5) throw Boom.badData(ERROR_MESSAGE.TRANSACTION.SPLIT_MAX).output
   if (lines.length < 2) return
 
   const total = roundMoney(lines.reduce((sum, line) => sum + roundMoney(line.amount), 0))

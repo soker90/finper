@@ -59,7 +59,7 @@ export class TransactionsService {
         id: generateId(),
         date: params.date,
         categoryId,
-        amount: params.amount,
+        amount: roundMoney(params.amount),
         type: params.type,
         accountId: params.account,
         note: params.note ?? null,
@@ -103,7 +103,7 @@ export class TransactionsService {
         .set({
           date: value.date,
           categoryId,
-          amount: value.amount,
+          amount: roundMoney(value.amount),
           type: value.type,
           accountId: value.account,
           note: value.note ?? null,

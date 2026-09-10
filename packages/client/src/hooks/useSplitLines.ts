@@ -69,11 +69,18 @@ export const useSplitLines = ({ control, watch, setValue, categoryFieldName, ini
     setValue(`splits.${lastIndex}.amount`, roundMoney(watchedAmount - others))
   }
 
+  const addLine = () => {
+    if (fields.length < 5) {
+      append({ category: '', amount: '', tags: [] })
+    }
+  }
+
   return {
     splitMode,
     setSplitMode,
     fields,
     append,
+    addLine,
     remove,
     remaining,
     hasSplits,

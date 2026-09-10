@@ -439,6 +439,54 @@ describe('Transactions Controller', () => {
         })).expect(422)
     })
 
+    test('rejects transactions with more than 2 decimal places in amount', async () => {
+      await supertest(server.app).post(path).set('Authorization', `Bearer ${token}`)
+        .send(validBody({ amount: 10.555 }))
+        .expect(422)
+    })
+
+    test('rejects splits with more than 2 decimal places in amount', async () => {
+      await supertest(server.app).post(path).set('Authorization', `Bearer ${token}`)
+        .send(validBody({
+          amount: 10,
+          splits: [
+            { category: categoryId, amount: 5.001 },
+            { category: categoryId, amount: 4.999 }
+          ]
+        })).expect(422)
+    })
+
+    test('rejects splits with more than 5 categories', async () => {
+      const extraCategories = [
+        generateId(),
+        generateId(),
+        generateId(),
+        generateId(),
+        generateId()
+      ]
+      for (const extraCategoryId of extraCategories) {
+        sqliteDb.insert(categories).values({
+          id: extraCategoryId,
+          name: `Cat ${extraCategoryId}`,
+          type: 'expense',
+          user: username
+        }).run()
+      }
+
+      await supertest(server.app).post(path).set('Authorization', `Bearer ${token}`)
+        .send(validBody({
+          amount: 60,
+          splits: [
+            { category: categoryId, amount: 10 },
+            { category: extraCategories[0], amount: 10 },
+            { category: extraCategories[1], amount: 10 },
+            { category: extraCategories[2], amount: 10 },
+            { category: extraCategories[3], amount: 10 },
+            { category: extraCategories[4], amount: 10 }
+          ]
+        })).expect(422)
+    })
+
     test('rejects splits whose category type differs from the transaction type', async () => {
       const incomeId = generateId()
       sqliteDb.insert(categories).values({ id: incomeId, name: 'Nómina', type: 'income', user: username }).run()

@@ -63,7 +63,7 @@ export const ModalMovement = ({ open, onClose, creditCardId, movement, onSuccess
     defaultValues: buildDefaultValues(movement)
   })
   const {
-    splitMode, setSplitMode, fields, append, remove, remaining, hasSplits, isAmountMismatch,
+    splitMode, setSplitMode, fields, addLine, remove, remaining, hasSplits, isAmountMismatch,
     enableSplitMode, disableSplitMode, assignRemaining
   } = useSplitLines({
     control: control as unknown as Control<any>,
@@ -208,7 +208,7 @@ export const ModalMovement = ({ open, onClose, creditCardId, movement, onSuccess
           register={register as any}
           errors={errors}
           remaining={remaining}
-          onAdd={() => append({ category: '', amount: '', tags: [] })}
+          onAdd={addLine}
           onRemove={remove}
           onAssignRemaining={assignRemaining}
           onEnableSplitMode={enableSplitMode}

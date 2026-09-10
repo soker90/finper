@@ -84,7 +84,12 @@ const SplitLinesEditor = ({
       </Grid>
     ))}
     <Stack direction='row' spacing={2} sx={{ alignItems: 'center' }}>
-      <Button variant='outlined' startIcon={<PlusOutlined />} onClick={onAdd}>
+      <Button
+        variant='outlined'
+        startIcon={<PlusOutlined />}
+        onClick={onAdd}
+        disabled={fields.length >= 5}
+      >
         Añadir categoría
       </Button>
       <Button variant='text' onClick={onAssignRemaining}>Asignar resto</Button>

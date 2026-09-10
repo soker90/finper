@@ -1,29 +1,36 @@
 import Joi from 'joi'
 import Boom from '@hapi/boom'
 import { eq, and } from 'drizzle-orm'
-import { TRANSACTION, schema } from '@soker90/finper-db'
+import { TRANSACTION, schema, roundMoney } from '@soker90/finper-db'
 import { db as sqliteDb } from '../../db'
 import { isValidId, assertSplitLines, loadCategoriesById } from '../../utils'
 import { ERROR_MESSAGE } from '../../i18n'
 
 const { transactions, categories, accounts } = schema
 
+const validateTwoDecimals = (value: number, helpers: Joi.CustomHelpers) => {
+  if (roundMoney(value) !== value) {
+    return helpers.error('number.precision', { limit: 2 })
+  }
+  return value
+}
+
 const splitSchema = Joi.object({
   category: Joi.string().required(),
-  amount: Joi.number().positive().required(),
+  amount: Joi.number().positive().custom(validateTwoDecimals).required(),
   tags: Joi.array().items(Joi.string().max(30)).max(10).optional()
 })
 
 const bodySchema = {
   date: Joi.number().required(),
   category: Joi.string().required(),
-  amount: Joi.number().required(),
+  amount: Joi.number().custom(validateTwoDecimals).required(),
   type: Joi.string().valid(TRANSACTION.Income, TRANSACTION.Expense, TRANSACTION.NotComputable).required(),
   account: Joi.string().required(),
   note: Joi.string(),
   store: Joi.string(),
   tags: Joi.array().items(Joi.string().max(30)).max(10).optional(),
-  splits: Joi.array().items(splitSchema).optional()
+  splits: Joi.array().items(splitSchema).max(5).optional()
 }
 
 const createSchema = Joi.object({ ...bodySchema, user: Joi.string() })

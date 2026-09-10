@@ -14,6 +14,7 @@ export const ERROR_MESSAGE = {
   TRANSACTION: {
     NOT_FOUND: 'No existe el movimiento',
     SPLIT_MIN: 'Una transacción dividida debe tener al menos dos líneas',
+    SPLIT_MAX: 'Una transacción dividida no puede tener más de 5 líneas',
     SPLIT_SUM_MISMATCH: 'La suma de los desgloses debe coincidir con el importe total',
     SPLIT_TYPE_MISMATCH: 'Todas las categorías del desglose deben ser del mismo tipo que el movimiento',
     SPLIT_YIELD: 'No se puede dividir un movimiento enlazado a un rendimiento',

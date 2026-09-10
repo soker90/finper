@@ -73,7 +73,7 @@ const TransactionEdit = ({
   const { stores } = useStores()
   const { tags: availableTags } = useAvailableTags()
   const {
-    splitMode, fields, append, remove, remaining, hasSplits, isAmountMismatch,
+    splitMode, fields, addLine, remove, remaining, hasSplits, isAmountMismatch,
     enableSplitMode, disableSplitMode, assignRemaining
   } = useSplitLines({
     control: control as unknown as Control<any>,
@@ -192,7 +192,7 @@ const TransactionEdit = ({
             register={register as any}
             errors={errors}
             remaining={remaining}
-            onAdd={() => append({ category: '', amount: '', tags: [] })}
+            onAdd={addLine}
             onRemove={remove}
             onAssignRemaining={assignRemaining}
             onEnableSplitMode={enableSplitMode}

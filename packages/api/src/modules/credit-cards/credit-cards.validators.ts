@@ -1,7 +1,7 @@
 import Joi from 'joi'
 import Boom from '@hapi/boom'
 import { eq, and } from 'drizzle-orm'
-import { schema } from '@soker90/finper-db'
+import { schema, roundMoney } from '@soker90/finper-db'
 import { db as sqliteDb } from '../../db'
 import { isValidId, assertSplitLines, loadCategoriesById } from '../../utils'
 import { ERROR_MESSAGE } from '../../i18n'
@@ -10,9 +10,16 @@ import type { CreateCreditCardData, UpdateCreditCardData, CreateCreditCardMoveme
 
 const { accounts, categories } = schema
 
+const validateTwoDecimals = (value: number, helpers: Joi.CustomHelpers) => {
+  if (roundMoney(value) !== value) {
+    return helpers.error('number.precision', { limit: 2 })
+  }
+  return value
+}
+
 const splitSchema = Joi.object({
   categoryId: Joi.string().required(),
-  amount: Joi.number().positive().required(),
+  amount: Joi.number().positive().custom(validateTwoDecimals).required(),
   tags: Joi.array().items(Joi.string().max(30)).max(10).optional()
 })
 
@@ -32,7 +39,7 @@ const editCardSchema = Joi.object({
 
 const createMovementSchema = Joi.object({
   date: Joi.number().required(),
-  amount: Joi.number().positive().required(),
+  amount: Joi.number().positive().custom(validateTwoDecimals).required(),
   type: Joi.string().valid('expense', 'income').default('expense'),
   categoryId: Joi.string().required(),
   // storeId accepts a free-text store name (like transactions' `store` field);
@@ -41,23 +48,23 @@ const createMovementSchema = Joi.object({
   storeId: Joi.string().allow(null, ''),
   note: Joi.string().allow(null, ''),
   tags: Joi.array().items(Joi.string().max(30)).max(10).optional(),
-  splits: Joi.array().items(splitSchema).optional()
+  splits: Joi.array().items(splitSchema).max(5).optional()
 })
 
 const editMovementSchema = Joi.object({
   date: Joi.number(),
-  amount: Joi.number().positive(),
+  amount: Joi.number().positive().custom(validateTwoDecimals),
   type: Joi.string().valid('expense', 'income'),
   categoryId: Joi.string(),
   storeId: Joi.string().allow(null, ''),
   note: Joi.string().allow(null, ''),
   tags: Joi.array().items(Joi.string().max(30)).max(10).optional(),
-  splits: Joi.array().items(splitSchema).optional()
+  splits: Joi.array().items(splitSchema).max(5).optional()
 }).min(1)
 
 const payDebtSchema = Joi.object({
   movementIds: Joi.array().items(Joi.string()).min(1),
-  amount: Joi.number().positive(),
+  amount: Joi.number().positive().custom(validateTwoDecimals),
   all: Joi.boolean()
 }).xor('movementIds', 'amount', 'all')
 

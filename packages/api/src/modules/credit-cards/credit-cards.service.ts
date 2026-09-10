@@ -88,8 +88,9 @@ export class CreditCardsService {
     const hasSplits = Array.isArray(data.splits) && data.splits.length >= 2
     const movement = await this.repository.createMovement(user, {
       ...data,
+      amount: roundMoney(data.amount),
       tags: hasSplits ? [] : sanitizeTags(data.tags),
-      splits: data.splits?.map(split => ({ ...split, tags: sanitizeTags(split.tags) })),
+      splits: data.splits?.map(split => ({ ...split, amount: roundMoney(split.amount), tags: sanitizeTags(split.tags) })),
       creditCardId
     })
     return serializeCreditCardMovement(movement)
@@ -107,11 +108,12 @@ export class CreditCardsService {
     const hasSplits = Array.isArray(value.splits) && value.splits.length >= 2
     const updated = await this.repository.updateMovement(id, user, {
       ...value,
+      ...(value.amount !== undefined && { amount: roundMoney(value.amount) }),
       ...(hasSplits
         ? { tags: [] }
         : (value.tags !== undefined && { tags: sanitizeTags(value.tags) })),
       ...(value.splits !== undefined && {
-        splits: value.splits.map(split => ({ ...split, tags: sanitizeTags(split.tags) }))
+        splits: value.splits.map(split => ({ ...split, amount: roundMoney(split.amount), tags: sanitizeTags(split.tags) }))
       })
     })
     return serializeCreditCardMovement(updated)
