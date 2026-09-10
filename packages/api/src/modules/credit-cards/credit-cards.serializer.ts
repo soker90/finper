@@ -57,6 +57,15 @@ export const serializeCreditCardMovement = (movement: CreditCardMovementRow | un
     paidAt: movement.paidAt ?? null,
     transactionId: movement.transactionId ?? null,
     tags: movement.tags ?? [],
-    user: movement.user
+    user: movement.user,
+    ...(movement.splits && movement.splits.length >= 2 && {
+      splits: movement.splits.map(split => ({
+        _id: split.id,
+        categoryId: split.categoryId,
+        category: { _id: split.categoryId, name: split.categoryName },
+        amount: split.amount,
+        tags: split.tags ?? []
+      }))
+    })
   }
 }

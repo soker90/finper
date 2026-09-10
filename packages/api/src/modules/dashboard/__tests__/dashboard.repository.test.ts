@@ -4,7 +4,7 @@ import { generateUsername } from '../../../../test/generate-values'
 import type { DB } from '@soker90/finper-db'
 import { schema, generateId } from '@soker90/finper-db'
 
-const { users, accounts, loans, categories, stores, transactions, budgets } = schema
+const { users, accounts, loans, categories, stores, transactions, budgets, transactionSplits } = schema
 
 describe('Dashboard Repository (Part A - aggregations)', () => {
   let db: DB
@@ -110,5 +110,35 @@ describe('Dashboard Repository (Part A - aggregations)', () => {
 
   it('dailyExpenses: grouped by day of month', () => {
     expect(repo.dailyExpenses(user, marchStart, marchEnd)).toEqual([{ _id: 15, amount: 150 }])
+  })
+
+  it('topExpenseCategories uses split amounts without double-counting the parent', () => {
+    const splitUser = generateUsername()
+    db.insert(users).values({ id: generateId(), username: splitUser, password: 'pwd', createdAt: new Date() }).run()
+    const accountId = generateId()
+    db.insert(accounts).values({ id: accountId, name: 'A', bank: 'B', balance: 0, isActive: true, user: splitUser }).run()
+    const parent = generateId()
+    db.insert(categories).values({ id: parent, name: 'Casa', type: 'expense', user: splitUser }).run()
+    const foodCategoryId = generateId()
+    const homeCategoryId = generateId()
+    db.insert(categories).values({ id: foodCategoryId, name: 'Comida', type: 'expense', parentId: parent, user: splitUser }).run()
+    db.insert(categories).values({ id: homeCategoryId, name: 'Hogar', type: 'expense', parentId: parent, user: splitUser }).run()
+    const transactionId = generateId()
+    db.insert(transactions).values({
+      id: transactionId, date: march, categoryId: foodCategoryId, amount: 100, type: 'expense', accountId, note: null, storeId: null, tags: [], user: splitUser
+    }).run()
+    db.insert(transactionSplits).values([
+      { id: generateId(), transactionId, categoryId: foodCategoryId, amount: 65, user: splitUser },
+      { id: generateId(), transactionId, categoryId: homeCategoryId, amount: 35, user: splitUser }
+    ]).run()
+
+    expect(repo.monthIncomeExpenses(splitUser, marchStart, marchEnd)).toEqual({ income: 0, expenses: 100 })
+    expect(repo.topExpenseCategories(splitUser, marchStart, marchEnd)).toEqual([
+      { name: 'Comida', parentName: 'Casa', amount: 65 },
+      { name: 'Hogar', parentName: 'Casa', amount: 35 }
+    ])
+    const byCategory = repo.currentMonthByCategory(splitUser, marchStart, marchEnd)
+    expect(byCategory.find(row => row.categoryId === foodCategoryId)).toMatchObject({ total: 65, count: 1 })
+    expect(byCategory.find(row => row.categoryId === homeCategoryId)).toMatchObject({ total: 35, count: 1 })
   })
 })

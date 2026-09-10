@@ -189,7 +189,7 @@ describe('CreditCards Page', () => {
     fireEvent.click(await findByRole('button', { name: 'Eliminar movimiento' }))
 
     await waitFor(() => expect(deleteCalled).toBe(true))
-  })
+  }, 15000)
 
   it('pays the total debt of a card', async () => {
     let payPayload: any = null

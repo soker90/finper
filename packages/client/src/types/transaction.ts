@@ -1,5 +1,15 @@
 import type { TransactionType } from '@soker90/finper-types'
 
+export interface TransactionSplit {
+  _id: string,
+  category: {
+    _id: string,
+    name: string,
+  },
+  amount: number,
+  tags?: string[],
+}
+
 export interface Transaction {
   _id?: string,
   date: number,
@@ -23,6 +33,7 @@ export interface Transaction {
     name: string,
   } | null,
   tags?: string[],
+  splits?: TransactionSplit[],
 }
 
 // Filters accepted by GET /transactions (see TransactionFilters in

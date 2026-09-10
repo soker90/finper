@@ -48,10 +48,21 @@ const TransactionItem: FC<TransactionItemProps> = ({ transaction, forceExpand, c
               )}
               <span>{format.dateShort(transaction.date)}</span>
             </div>
-            <Stack spacing={1} direction='row' sx={{ alignItems: 'center', pr: isDesktop ? '50%' : undefined }}>
+            <Stack spacing={1} direction='row' sx={{ alignItems: 'center', pr: isDesktop ? '50%' : undefined, flexWrap: 'wrap' }}>
               <Typography variant='body1'>{transaction.category?.name}</Typography>
+              {transaction.splits && transaction.splits.length >= 2 && (
+                <Chip
+                  label={`Dividida (${transaction.splits.length} categorías)`}
+                  size='small'
+                  color='info'
+                  variant='outlined'
+                />
+              )}
               {transaction.store && <Typography variant='body1'>({transaction.store?.name})</Typography>}
-              {transaction.tags?.map((tag) => (
+              {(transaction.splits && transaction.splits.length >= 2
+                ? [...new Set(transaction.splits.flatMap(split => split.tags ?? []))]
+                : (transaction.tags ?? [])
+              ).map((tag) => (
                 <Chip key={tag} label={tag} size='small' variant='outlined' />
               ))}
             </Stack>

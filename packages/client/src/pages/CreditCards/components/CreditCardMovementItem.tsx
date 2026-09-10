@@ -38,8 +38,19 @@ export const CreditCardMovementItem: FC<CreditCardMovementItemProps> = ({ moveme
           sx={{ alignItems: 'center', flexWrap: 'wrap', pr: { xs: 0, md: '50%' } }}
         >
           <Typography variant='body1'>{movement.category?.name}</Typography>
+          {movement.splits && movement.splits.length >= 2 && (
+            <Chip
+              label={`Dividida (${movement.splits.length} categorías)`}
+              size='small'
+              color='info'
+              variant='outlined'
+            />
+          )}
           {movement.store?.name && <Typography variant='body1'>({movement.store.name})</Typography>}
-          {movement.tags?.map((tag) => (
+          {(movement.splits && movement.splits.length >= 2
+            ? [...new Set(movement.splits.flatMap(split => split.tags ?? []))]
+            : (movement.tags ?? [])
+          ).map((tag) => (
             <Chip key={tag} label={tag} size='small' variant='outlined' />
           ))}
         </Stack>

@@ -35,18 +35,18 @@ export class StatsService {
   public getTagsSummary (user: string, year: number): TagSummary[] {
     const rows = this.repository.findExpenses(user, yearRange(year))
 
-    const byTag = new Map<string, { totalAmount: number, transactionCount: number, categories: Map<string, TagCategoryBreakdown> }>()
+    const byTag = new Map<string, { totalAmount: number, countedIds: Set<string>, categories: Map<string, TagCategoryBreakdown> }>()
 
     for (const row of rows) {
       if (!row.tags || row.tags.length === 0) continue
       for (const tag of row.tags) {
         let entry = byTag.get(tag)
         if (!entry) {
-          entry = { totalAmount: 0, transactionCount: 0, categories: new Map() }
+          entry = { totalAmount: 0, countedIds: new Set(), categories: new Map() }
           byTag.set(tag, entry)
         }
         entry.totalAmount += row.amount
-        entry.transactionCount += 1
+        entry.countedIds.add(row.id)
 
         let cat = entry.categories.get(row.categoryId)
         if (!cat) {
@@ -61,28 +61,28 @@ export class StatsService {
     return Array.from(byTag, ([tag, entry]) => ({
       tag,
       totalAmount: roundMoney(entry.totalAmount),
-      transactionCount: entry.transactionCount,
+      transactionCount: entry.countedIds.size,
       byCategory: toCategoryBreakdown(entry.categories)
     })).toSorted((first, second) => second.totalAmount - first.totalAmount)
   }
 
   public getTagHistoric (user: string, tagName: string): TagHistoric {
-    const byYear = new Map<number, { totalAmount: number, transactionCount: number }>()
+    const byYear = new Map<number, { totalAmount: number, countedIds: Set<string> }>()
 
     for (const row of this.repository.findExpenses(user)) {
       if (!row.tags?.includes(tagName)) continue
       const year = yearOf(row.date)
       let entry = byYear.get(year)
       if (!entry) {
-        entry = { totalAmount: 0, transactionCount: 0 }
+        entry = { totalAmount: 0, countedIds: new Set() }
         byYear.set(year, entry)
       }
       entry.totalAmount += row.amount
-      entry.transactionCount += 1
+      entry.countedIds.add(row.id)
     }
 
     const years = [...byYear.entries()]
-      .map(([year, e]) => ({ year, totalAmount: roundMoney(e.totalAmount), transactionCount: e.transactionCount }))
+      .map(([year, e]) => ({ year, totalAmount: roundMoney(e.totalAmount), transactionCount: e.countedIds.size }))
       .sort((a, b) => b.year - a.year)
 
     const totalAmount = roundMoney(years.reduce((sum, y) => sum + y.totalAmount, 0))
@@ -113,7 +113,7 @@ export class StatsService {
       tag: tagName,
       year,
       totalAmount,
-      transactionCount: tagged.length,
+      transactionCount: new Set(tagged.map(row => row.id)).size,
       byCategory,
       transactions: tagged.map(serializeStatsTransaction)
     }

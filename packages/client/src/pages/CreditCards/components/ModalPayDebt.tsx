@@ -24,7 +24,7 @@ import InputForm from 'components/forms/InputForm'
 import { format, getId } from 'utils'
 
 import { useCreditCardMovements } from '../hooks/useCreditCards'
-import { useSubmitError } from '../hooks/useSubmitError'
+import { useSubmitError } from 'hooks'
 import { payCreditCardDebt } from 'services/apiService'
 import { netAmount } from '../utils'
 import type { CreditCard } from 'types'

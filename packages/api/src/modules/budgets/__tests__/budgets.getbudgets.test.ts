@@ -101,4 +101,35 @@ describe('Budgets Service (Part B - getBudgets)', () => {
     expect(totalBudgeted).toBe(350) // 100 + 250 acumulados entre las dos categorías
     expect(totalReal).toBe(100) // 40 + 60
   })
+
+  it('attributes split amounts to each category without double-counting the parent', () => {
+    const splitUser = generateUsername()
+    db.insert(users).values({ id: generateId(), username: splitUser, password: 'pwd', createdAt: new Date() }).run()
+    const accountId = generateId()
+    db.insert(accounts).values({ id: accountId, name: 'C', bank: 'B', balance: 0, user: splitUser }).run()
+
+    const parent = generateId()
+    db.insert(categories).values({ id: parent, name: 'Casa', type: 'expense', budgetRuleClass: 'needs', user: splitUser }).run()
+    const foodCategoryId = generateId()
+    db.insert(categories).values({ id: foodCategoryId, name: 'Comida', type: 'expense', parentId: parent, budgetRuleClass: 'none', user: splitUser }).run()
+    const homeCategoryId = generateId()
+    db.insert(categories).values({ id: homeCategoryId, name: 'Hogar', type: 'expense', parentId: parent, budgetRuleClass: 'none', user: splitUser }).run()
+
+    service.editBudget({ category: foodCategoryId, year: 2025, month: 3, user: splitUser, amount: 100 })
+    service.editBudget({ category: homeCategoryId, year: 2025, month: 3, user: splitUser, amount: 100 })
+
+    const march = Date.UTC(2025, 2, 15, 12, 0, 0)
+    const transactionId = generateId()
+    db.insert(transactions).values({
+      id: transactionId, date: march, categoryId: foodCategoryId, amount: 100, type: 'expense', accountId, note: null, storeId: null, subscriptionId: null, tags: [], user: splitUser
+    }).run()
+    db.insert(schema.transactionSplits).values([
+      { id: generateId(), transactionId, categoryId: foodCategoryId, amount: 65, user: splitUser },
+      { id: generateId(), transactionId, categoryId: homeCategoryId, amount: 35, user: splitUser }
+    ]).run()
+
+    const result = service.getBudgets({ user: splitUser, year: 2025, month: NaN })
+    expect(result.expenses.find((row: any) => row.id === foodCategoryId).budgets[2].real).toBe(65)
+    expect(result.expenses.find((row: any) => row.id === homeCategoryId).budgets[2].real).toBe(35)
+  })
 })

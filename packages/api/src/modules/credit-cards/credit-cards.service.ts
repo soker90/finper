@@ -1,8 +1,44 @@
 import Boom from '@hapi/boom'
+import { roundMoney } from '@soker90/finper-db'
 import { ERROR_MESSAGE } from '../../i18n'
-import { sanitizeTags } from '../../utils'
-import { creditCardsRepository, type ICreditCardsRepository, type CreateCreditCardData, type UpdateCreditCardData, type CreateCreditCardMovementData, type UpdateCreditCardMovementData, type PayDebtPayload } from './credit-cards.repository'
+import { sanitizeTags, assertSplitLines, loadCategoriesById } from '../../utils'
+import { db as sqliteDb } from '../../db'
+import { creditCardsRepository, type ICreditCardsRepository, type CreateCreditCardData, type UpdateCreditCardData, type CreateCreditCardMovementData, type UpdateCreditCardMovementData, type PayDebtPayload, type CreditCardMovementRow } from './credit-cards.repository'
 import { serializeCreditCard, serializeCreditCardMovement } from './credit-cards.serializer'
+
+/** Validates the split-lines invariant for a PATCH against the movement it
+ * would result in (existing movement merged with the request body), since
+ * the request body alone may be missing `amount`/`type`/etc on a partial
+ * update. This is the single place that enforces the invariant for edits —
+ * the Joi schema in credit-cards.validators.ts only checks shape. */
+const assertSplitInvariant = (params: { movement: CreditCardMovementRow, value: UpdateCreditCardMovementData, user: string }): void => {
+  const { movement, value, user } = params
+  const existingSplits = movement.splits ?? []
+
+  if (value.splits === undefined) {
+    if (existingSplits.length < 2) return
+
+    if (value.type !== undefined || value.categoryId !== undefined || value.tags !== undefined) {
+      throw Boom.badData(ERROR_MESSAGE.TRANSACTION.SPLIT_FIELDS_REQUIRE_SPLITS).output
+    }
+
+    if (value.amount !== undefined) {
+      const existingTotal = roundMoney(existingSplits.reduce((sum, split) => sum + roundMoney(split.amount), 0))
+      if (existingTotal !== roundMoney(value.amount)) {
+        throw Boom.badData(ERROR_MESSAGE.TRANSACTION.SPLIT_SUM_MISMATCH).output
+      }
+    }
+    return
+  }
+
+  const categoriesById = loadCategoriesById(sqliteDb, value.splits.map(split => split.categoryId), user)
+  assertSplitLines({
+    lines: value.splits,
+    amount: value.amount ?? movement.amount,
+    type: value.type ?? movement.type,
+    categoriesById
+  })
+}
 
 export class CreditCardsService {
   constructor (private readonly repository: ICreditCardsRepository = creditCardsRepository) {}
@@ -49,9 +85,12 @@ export class CreditCardsService {
 
   public async addMovement ({ creditCardId, user, data }: { creditCardId: string, user: string, data: Omit<CreateCreditCardMovementData, 'creditCardId'> }) {
     await this.getCreditCardById(creditCardId, user)
+    const hasSplits = Array.isArray(data.splits) && data.splits.length >= 2
     const movement = await this.repository.createMovement(user, {
       ...data,
-      tags: sanitizeTags(data.tags),
+      amount: roundMoney(data.amount),
+      tags: hasSplits ? [] : sanitizeTags(data.tags),
+      splits: data.splits?.map(split => ({ ...split, amount: roundMoney(split.amount), tags: sanitizeTags(split.tags) })),
       creditCardId
     })
     return serializeCreditCardMovement(movement)
@@ -65,9 +104,17 @@ export class CreditCardsService {
     if (movement.status === 'paid') {
       throw Boom.badRequest(ERROR_MESSAGE.CREDIT_CARD.ALREADY_PAID).output
     }
+    assertSplitInvariant({ movement, value, user })
+    const hasSplits = Array.isArray(value.splits) && value.splits.length >= 2
     const updated = await this.repository.updateMovement(id, user, {
       ...value,
-      ...(value.tags !== undefined && { tags: sanitizeTags(value.tags) })
+      ...(value.amount !== undefined && { amount: roundMoney(value.amount) }),
+      ...(hasSplits
+        ? { tags: [] }
+        : (value.tags !== undefined && { tags: sanitizeTags(value.tags) })),
+      ...(value.splits !== undefined && {
+        splits: value.splits.map(split => ({ ...split, amount: roundMoney(split.amount), tags: sanitizeTags(split.tags) }))
+      })
     })
     return serializeCreditCardMovement(updated)
   }

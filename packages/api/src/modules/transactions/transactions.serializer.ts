@@ -1,27 +1,47 @@
 import { schema } from '@soker90/finper-db'
 import type { TransactionRow } from './transactions.repository'
+import type { SplitRow } from './effective-category-rows'
 
 type Transaction = typeof schema.transactions.$inferSelect
 
-// POST/PUT: doc sin populate (ids planos), 1:1 con el viejo.
-export const serializeTransaction = (t: Transaction) => {
+const serializeSplitPlain = (split: SplitRow) => {
   const result: Record<string, any> = {
-    _id: t.id,
-    date: t.date,
-    category: t.categoryId,
-    amount: t.amount,
-    type: t.type,
-    account: t.accountId,
-    tags: t.tags ?? []
+    _id: split.id,
+    category: split.categoryId,
+    amount: split.amount,
+    tags: split.tags ?? []
   }
-  if (t.note !== null && t.note !== undefined) result.note = t.note
-  if (t.storeId) result.store = t.storeId
-  if (t.subscriptionId) result.subscriptionId = t.subscriptionId
   return result
 }
 
-// GET: con populate (objetos anidados).
-export const serializeTransactionPopulated = (row: TransactionRow) => {
+const serializeSplitPopulated = (split: SplitRow) => {
+  const result: Record<string, any> = {
+    _id: split.id,
+    category: { _id: split.categoryId, name: split.categoryName },
+    amount: split.amount,
+    tags: split.tags ?? []
+  }
+  return result
+}
+
+export const serializeTransaction = (transaction: Transaction, splits?: SplitRow[]) => {
+  const result: Record<string, any> = {
+    _id: transaction.id,
+    date: transaction.date,
+    category: transaction.categoryId,
+    amount: transaction.amount,
+    type: transaction.type,
+    account: transaction.accountId,
+    tags: transaction.tags ?? []
+  }
+  if (transaction.note !== null && transaction.note !== undefined) result.note = transaction.note
+  if (transaction.storeId) result.store = transaction.storeId
+  if (transaction.subscriptionId) result.subscriptionId = transaction.subscriptionId
+  if (splits && splits.length >= 2) result.splits = splits.map(serializeSplitPlain)
+  return result
+}
+
+export const serializeTransactionPopulated = (row: TransactionRow, splits?: SplitRow[]) => {
   const result: Record<string, any> = {
     _id: row.id,
     date: row.date,
@@ -35,5 +55,6 @@ export const serializeTransactionPopulated = (row: TransactionRow) => {
   if (row.storeId) result.store = { _id: row.storeId, name: row.storeName }
   if (row.subscriptionId) result.subscriptionId = row.subscriptionId
   if (row.creditCardId) result.creditCard = { id: row.creditCardId, name: row.creditCardName }
+  if (splits && splits.length >= 2) result.splits = splits.map(serializeSplitPopulated)
   return result
 }

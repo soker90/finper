@@ -7,7 +7,7 @@ import { schema, generateId, TRANSACTION } from '@soker90/finper-db'
 import { eq } from 'drizzle-orm'
 import { statsRoutes } from '../stats.routes'
 
-const { transactions, categories, accounts, users } = schema
+const { transactions, categories, accounts, users, transactionSplits } = schema
 
 describe('Stats Controller', () => {
   let token: string
@@ -51,6 +51,7 @@ describe('Stats Controller', () => {
   })
 
   afterEach(() => {
+    sqliteDb.delete(transactionSplits).where(eq(transactionSplits.user, username)).run()
     sqliteDb.delete(transactions).where(eq(transactions.user, username)).run()
   })
 
@@ -123,6 +124,35 @@ describe('Stats Controller', () => {
       expect(res.body).toHaveLength(0)
     })
 
+    test('includes split-line tags without double-counting the parent amount', async () => {
+      const homeCategoryId = generateId()
+      sqliteDb.insert(categories).values({ id: homeCategoryId, name: 'Hogar', type: 'expense', user: username }).run()
+      const transactionId = generateId()
+      sqliteDb.insert(transactions).values({
+        id: transactionId,
+        date: Date.UTC(2025, 5, 15),
+        categoryId,
+        amount: 100,
+        type: TRANSACTION.Expense,
+        accountId,
+        note: null,
+        storeId: null,
+        tags: [],
+        user: username
+      }).run()
+      sqliteDb.insert(transactionSplits).values([
+        { id: generateId(), transactionId, categoryId, amount: 65, tags: ['comida'], user: username },
+        { id: generateId(), transactionId, categoryId: homeCategoryId, amount: 35, tags: ['hogar'], user: username }
+      ]).run()
+
+      const res = await supertest(server.app).get(`${base}/tags?year=2025`).auth(token, { type: 'bearer' }).expect(200)
+      const byTag = Object.fromEntries(res.body.map((row: any) => [row.tag, row]))
+      expect(byTag.carrefour).toBeUndefined()
+      expect(byTag.comida.totalAmount).toBe(65)
+      expect(byTag.comida.transactionCount).toBe(1)
+      expect(byTag.hogar.totalAmount).toBe(35)
+    })
+
     test('sorts tags by totalAmount desc', async () => {
       insertTx({ amount: 50, tags: ['small'], date: Date.UTC(2025, 1, 1) })
       insertTx({ amount: 500, tags: ['big'], date: Date.UTC(2025, 1, 1) })
@@ -162,6 +192,40 @@ describe('Stats Controller', () => {
 
     test('year below 1900 responds 422', async () => {
       await supertest(server.app).get(`${base}/tags/juan/1899`).auth(token, { type: 'bearer' }).expect(422)
+    })
+
+    test('a split transaction with two lines sharing the tag appears as two entries with distinct ids', async () => {
+      const hogarId = generateId()
+      sqliteDb.insert(categories).values({ id: hogarId, name: 'Hogar Split Detail', type: 'expense', user: username }).run()
+      const txId = generateId()
+      sqliteDb.insert(transactions).values({
+        id: txId,
+        date: Date.UTC(2025, 5, 15),
+        categoryId,
+        amount: 100,
+        type: TRANSACTION.Expense,
+        accountId,
+        note: null,
+        storeId: null,
+        tags: [],
+        user: username
+      }).run()
+      sqliteDb.insert(transactionSplits).values([
+        { id: generateId(), transactionId: txId, categoryId, amount: 60, tags: ['viaje'], user: username },
+        { id: generateId(), transactionId: txId, categoryId: hogarId, amount: 40, tags: ['viaje'], user: username }
+      ]).run()
+
+      const res = await supertest(server.app).get(`${base}/tags/viaje/2025`).auth(token, { type: 'bearer' }).expect(200)
+
+      // One real transaction, but two split lines both carry the tag: the
+      // count reflects the transaction, the list shows both lines (they
+      // usually differ in category/amount) with unique ids.
+      expect(res.body.transactionCount).toBe(1)
+      expect(res.body.totalAmount).toBe(100)
+      expect(res.body.transactions).toHaveLength(2)
+      const ids = res.body.transactions.map((transaction: any) => transaction._id)
+      expect(new Set(ids).size).toBe(2)
+      expect(res.body.transactions.map((transaction: any) => transaction.amount).sort()).toEqual([40, 60])
     })
   })
 })

@@ -2,34 +2,24 @@ import { useState } from 'react'
 import { useForm, Controller, type Control } from 'react-hook-form'
 import { Button, FormHelperText, Grid } from '@mui/material'
 
-import { ConfirmModal } from 'components'
+import { ConfirmModal, SplitModeSection } from 'components'
 import DateForm from 'components/forms/DateForm'
 import InputForm from 'components/forms/InputForm'
 import SelectForm from 'components/forms/SelectForm'
 import SelectGroupForm from 'components/forms/SelectGroupForm'
 import AutocompleteForm from 'components/forms/AutocompleteForm'
 import TagsInput from 'components/forms/TagsInput'
-import { useGroupedCategories, useStores, useAvailableTags } from 'hooks'
+import { useGroupedCategories, useStores, useAvailableTags, useSplitLines, useSubmitError, mapExistingSplits } from 'hooks'
 import { editCreditCardMovement, deleteCreditCardMovement } from 'services/apiService'
 import { getId } from 'utils'
 import { useCreditCardMutate } from '../hooks/useCreditCards'
-import { useSubmitError } from '../hooks/useSubmitError'
+import { buildMovementPayload, type MovementFormValues } from '../utils'
 import type { CreditCardMovement } from 'types'
 
 const MOVEMENT_TYPE_OPTIONS = [
   { value: 'expense', label: 'Gasto (Aumenta deuda)' },
   { value: 'income', label: 'Devolución / Abono (Reduce deuda)' }
 ]
-
-interface MovementFormValues {
-  date: number | null
-  amount: string
-  type: 'expense' | 'income'
-  categoryId: string
-  storeId: string
-  note: string
-  tags: string[]
-}
 
 interface CreditCardMovementEditProps {
   movement: CreditCardMovement
@@ -43,7 +33,8 @@ export const CreditCardMovementEdit = ({ movement, hideForm }: CreditCardMovemen
   const triggerMutate = useCreditCardMutate(movement.creditCardId)
   const [confirmingDelete, setConfirmingDelete] = useState(false)
 
-  const { register, handleSubmit, formState: { errors, isSubmitting }, control } = useForm<MovementFormValues>({
+  const existingSplits = mapExistingSplits(movement.splits, split => split.categoryId)
+  const { register, handleSubmit, formState: { errors, isSubmitting }, control, watch, setValue } = useForm<MovementFormValues>({
     defaultValues: {
       date: movement.date,
       amount: String(movement.amount),
@@ -51,8 +42,19 @@ export const CreditCardMovementEdit = ({ movement, hideForm }: CreditCardMovemen
       categoryId: movement.categoryId || '',
       storeId: movement.store?.name || '',
       note: movement.note || '',
-      tags: movement.tags || []
+      tags: movement.tags || [],
+      splits: existingSplits
     }
+  })
+  const {
+    splitMode, fields, addLine, remove, remaining, hasSplits, isAmountMismatch,
+    enableSplitMode, disableSplitMode, assignRemaining
+  } = useSplitLines({
+    control: control as unknown as Control<any>,
+    watch,
+    setValue,
+    categoryFieldName: 'categoryId',
+    initialSplitMode: existingSplits.length >= 2
   })
 
   const { error: submitError, runSubmit } = useSubmitError()
@@ -60,14 +62,13 @@ export const CreditCardMovementEdit = ({ movement, hideForm }: CreditCardMovemen
   const onSubmit = handleSubmit((data) => runSubmit(async () => {
     const id = getId(movement)
     if (!id) return { error: 'No se pudo identificar el movimiento a editar' }
-    return editCreditCardMovement(movement.creditCardId, id, {
-      date: data.date ? new Date(data.date).getTime() : movement.date,
-      amount: parseFloat(data.amount),
-      type: data.type,
-      categoryId: data.categoryId,
-      storeId: data.storeId || null,
-      note: data.note.trim() || null,
-      tags: data.tags
+    if (isAmountMismatch) {
+      return { error: 'La suma de los desgloses debe coincidir con el importe total' }
+    }
+    return editCreditCardMovement({
+      creditCardId: movement.creditCardId,
+      movementId: id,
+      params: buildMovementPayload({ data, hasSplits, fallbackDate: movement.date })
     })
   }, () => {
     triggerMutate()
@@ -102,26 +103,28 @@ export const CreditCardMovementEdit = ({ movement, hideForm }: CreditCardMovemen
             error={!!errors.type} {...register('type', { required: true })}
           />
 
-          <Controller
-            name='categoryId'
-            control={control}
-            rules={{ required: true }}
-            render={({ field }) => (
-              <SelectGroupForm
-                id='categoryId' label='Categoría'
-                options={categories}
-                optionValue='_id'
-                optionLabel='name'
-                voidOption
-                error={Boolean(errors.categoryId)}
-                errorText='Selecciona una categoría'
-                value={field.value}
-                onChange={(event) => field.onChange(event.target.value)}
-                inputRef={field.ref}
-                size={3}
-              />
-            )}
-          />
+          {!splitMode && (
+            <Controller
+              name='categoryId'
+              control={control}
+              rules={{ required: !splitMode }}
+              render={({ field }) => (
+                <SelectGroupForm
+                  id='categoryId' label='Categoría'
+                  options={categories}
+                  optionValue='_id'
+                  optionLabel='name'
+                  voidOption
+                  error={Boolean(errors.categoryId)}
+                  errorText='Selecciona una categoría'
+                  value={field.value}
+                  onChange={(event) => field.onChange(event.target.value)}
+                  inputRef={field.ref}
+                  size={3}
+                />
+              )}
+            />
+          )}
 
           <InputForm
             id='amount' label='Importe (€)' placeholder='Introduce el importe'
@@ -142,20 +145,40 @@ export const CreditCardMovementEdit = ({ movement, hideForm }: CreditCardMovemen
             {...(movement.store && { defaultValue: movement.store })}
           />
 
-          <TagsInput
-            name='tags'
-            control={control as unknown as Control<any>}
-            availableTags={availableTags}
-            label='Etiquetas'
-            size={2}
-          />
+          {!splitMode && (
+            <TagsInput
+              name='tags'
+              control={control as unknown as Control<any>}
+              availableTags={availableTags}
+              label='Etiquetas'
+              size={2}
+            />
+          )}
 
           <InputForm
             id='note' label='Nota' placeholder='Nota'
             error={false} {...register('note')}
             errorText=''
-            size={10}
+            size={splitMode ? 12 : 10}
           />
+
+          <Grid size={12}>
+            <SplitModeSection
+              splitMode={splitMode}
+              fields={fields}
+              categories={categories}
+              availableTags={availableTags}
+              control={control as unknown as Control<any>}
+              register={register as any}
+              errors={errors}
+              remaining={remaining}
+              onAdd={addLine}
+              onRemove={remove}
+              onAssignRemaining={assignRemaining}
+              onEnableSplitMode={enableSplitMode}
+              onDisableSplitMode={disableSplitMode}
+            />
+          </Grid>
 
           {submitError && (
             <Grid size={12}>
@@ -183,7 +206,7 @@ export const CreditCardMovementEdit = ({ movement, hideForm }: CreditCardMovemen
               type='submit'
               variant='contained'
               color='primary'
-              disabled={isSubmitting}
+              disabled={isSubmitting || isAmountMismatch}
             >
               Guardar
             </Button>

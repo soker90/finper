@@ -8,7 +8,7 @@ import { useAccounts } from 'hooks/useAccounts'
 import { addCreditCard, editCreditCard } from 'services/apiService'
 import { BANK_OPTIONS } from 'constants/banks'
 import { getId } from 'utils'
-import { useSubmitError } from '../hooks/useSubmitError'
+import { useSubmitError } from 'hooks'
 import type { CreditCard } from 'types'
 
 interface CreditCardFormValues {
