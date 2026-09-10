@@ -11,7 +11,6 @@ define help
     build-types:               build the shared types
     build-db:                  build the database package
     install:                   install all dependencies.
-    fix-native:                re-fetch better-sqlite3's native binary for the active Node version.
     lint-api:                  lint the API
     lint-bot:                  lint the bot
     lint-client:               lint the client
@@ -40,16 +39,6 @@ help:
 
 install:
 	@pnpm install
-
-# better-sqlite3's native addon is Node-ABI-locked (unlike bcrypt, which is
-# N-API and version-stable). Switching Node versions with fnm/nvm without
-# rebuilding leaves a stale binary that crashes the process at startup with a
-# native assertion instead of a clear error. Already wired as the root
-# `postinstall` hook (runs on every `pnpm install`/`pnpm i`); this target is
-# for manually re-running it on demand, e.g. right after switching Node
-# versions without touching package.json/pnpm-lock.yaml.
-fix-native:
-	@node scripts/fix-native-deps.js
 
 test:
 	@pnpm -r --parallel test
@@ -136,6 +125,6 @@ build-image-client-latest:
 	@docker build . -t soker90/finper-client:latest -f ./packages/client/Dockerfile
 	@docker push soker90/finper-client:latest
 
-.PHONY: clean fix-native
+.PHONY: clean
 clean:
 	rm -rf packages/*/dist packages/*/coverage packages/*/node_modules

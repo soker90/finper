@@ -136,12 +136,12 @@ const TransactionEdit = ({
 
         {!splitMode && (
           <SelectGroupForm
-            id='category' label='Categoria'
+            id='category' label='Categoría'
             options={categories}
             optionValue='_id'
             optionLabel='name'
             error={!!errors.category} {...register('category', { required: true })}
-            errorText='Introduce una categoria válida'
+            errorText='Introduce una categoría válida'
             size={2}
           />
         )}

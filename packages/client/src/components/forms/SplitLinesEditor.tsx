@@ -47,13 +47,13 @@ const SplitLinesEditor = ({
     {fields.map((field, index) => (
       <Grid container spacing={2} key={field.id} sx={{ alignItems: 'center' }}>
         <SelectGroupForm
-          id={`splits.${index}.category`} label='Categoria'
+          id={`splits.${index}.category`} label='Categoría'
           options={categories}
           optionValue='_id'
           optionLabel='name'
           error={!!(errors.splits as any)?.[index]?.category}
           {...register(`splits.${index}.category`, { required: true })}
-          errorText='Introduce una categoria válida'
+          errorText='Introduce una categoría válida'
           size={categorySize}
         />
         <InputForm
