@@ -52,8 +52,8 @@ const SPLIT_MOVEMENT: CreditCardMovement = {
   id: 'm2',
   tags: [],
   splits: [
-    { categoryId: 'cat1', amount: 60, tags: [] },
-    { categoryId: 'cat2', amount: 40, tags: [] }
+    { _id: 's1', categoryId: 'cat1', amount: 60, tags: [] },
+    { _id: 's2', categoryId: 'cat2', amount: 40, tags: [] }
   ]
 }
 
