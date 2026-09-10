@@ -2,7 +2,11 @@ import type { ExpenseDetailRow } from './stats.repository'
 
 export const serializeStatsTransaction = (row: ExpenseDetailRow) => {
   const result: Record<string, any> = {
-    _id: row.id,
+    // Split lines use their own line id so that two lines of the same
+    // transaction that both carry the requested tag don't collide on _id
+    // (they usually have different categories/amounts, so they are shown
+    // as separate entries rather than merged).
+    _id: row.splitId ?? row.id,
     date: row.date,
     amount: row.amount,
     type: row.type,

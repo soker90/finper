@@ -12,23 +12,13 @@ import SplitModeSection from 'components/forms/SplitModeSection'
 import { useGroupedCategories, useStores, useAvailableTags, useSplitLines, useSubmitError, mapExistingSplits, type SplitFormValue } from 'hooks'
 import { addCreditCardMovement, editCreditCardMovement } from 'services/apiService'
 import { getId } from 'utils'
+import { buildMovementPayload, type MovementFormValues } from '../utils'
 import type { CreditCardMovement } from 'types'
 
 const MOVEMENT_TYPE_OPTIONS = [
   { value: 'expense', label: 'Gasto (Aumenta deuda)' },
   { value: 'income', label: 'Devolución / Abono (Reduce deuda)' }
 ]
-
-interface MovementFormValues {
-  date: number | null
-  amount: string
-  type: 'expense' | 'income'
-  categoryId: string
-  storeId: string
-  note: string
-  tags: string[]
-  splits: SplitFormValue[]
-}
 
 interface ModalMovementProps {
   open: boolean
@@ -97,22 +87,7 @@ export const ModalMovement = ({ open, onClose, creditCardId, movement, onSuccess
     if (isAmountMismatch) {
       return { error: 'La suma de los desgloses debe coincidir con el importe total' }
     }
-    const payload = {
-      date: new Date(data.date!).getTime(),
-      amount: parseFloat(data.amount),
-      type: data.type,
-      categoryId: hasSplits ? data.splits[0].category : data.categoryId,
-      storeId: data.storeId || null,
-      note: data.note.trim() || null,
-      tags: hasSplits ? [] : data.tags,
-      ...(hasSplits && {
-        splits: data.splits.map(split => ({
-          categoryId: split.category,
-          amount: Number(split.amount),
-          ...(split.tags?.length && { tags: split.tags })
-        }))
-      })
-    }
+    const payload = buildMovementPayload({ data, hasSplits })
     if (movement) {
       const id = getId(movement)
       if (!id) return { error: 'No se pudo identificar el movimiento a editar' }

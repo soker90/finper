@@ -23,9 +23,9 @@ interface SplitModeSectionProps {
   tagsSize?: number
 }
 
-/** Bloque compartido por TransactionEdit, CreditCardMovementEdit y
- * ModalMovement: alterna entre el botón "Dividir movimiento" y el editor de
- * líneas de desglose. */
+/** Block shared by TransactionEdit, CreditCardMovementEdit and
+ * ModalMovement: toggles between the "Split movement" button and the
+ * split-lines editor. */
 const SplitModeSection = ({
   splitMode,
   fields,

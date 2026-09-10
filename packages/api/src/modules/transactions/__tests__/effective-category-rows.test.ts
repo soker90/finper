@@ -1,6 +1,6 @@
 import { eq } from 'drizzle-orm'
 import { createTestDb, closeTestDb } from '../../../../test/helpers/db'
-import { findEffectiveCategoryRows } from '../effective-category-rows'
+import { findEffectiveCategoryRows, loadSplitsByTransactionIds } from '../effective-category-rows'
 import { generateUsername } from '../../../../test/generate-values'
 import type { DB } from '@soker90/finper-db'
 import { schema, generateId } from '@soker90/finper-db'
@@ -65,5 +65,40 @@ describe('findEffectiveCategoryRows', () => {
       { categoryId: homeId, amount: 35 }
     ])
     expect(rows.reduce((sum, row) => sum + row.amount, 0)).toBe(100)
+    expect(new Set(rows.map(row => row.splitId)).size).toBe(2)
+  })
+
+  it('treats a single orphan split row as a non-split transaction', () => {
+    const parentId = insertParent(foodId, 100)
+    db.insert(transactionSplits).values([
+      { id: generateId(), transactionId: parentId, categoryId: homeId, amount: 100, user }
+    ]).run()
+
+    const rows = findEffectiveCategoryRows(db, { user, from, to })
+    expect(rows).toHaveLength(1)
+    expect(rows[0]).toMatchObject({ categoryId: foodId, amount: 100 })
+    expect(rows[0].splitId).toBeUndefined()
+  })
+
+  it('loads splits for more transactions than the SQLite IN-clause chunk size', () => {
+    const parentIds: string[] = []
+    const rows: Array<{ id: string, transactionId: string, categoryId: string, amount: number, user: string }> = []
+    for (let index = 0; index < 501; index++) {
+      const parentId = insertParent(foodId, 100)
+      parentIds.push(parentId)
+      rows.push(
+        { id: generateId(), transactionId: parentId, categoryId: foodId, amount: 60, user },
+        { id: generateId(), transactionId: parentId, categoryId: homeId, amount: 40, user }
+      )
+    }
+    db.insert(transactionSplits).values(rows).run()
+
+    const grouped = loadSplitsByTransactionIds(db, parentIds)
+
+    expect(grouped.size).toBe(501)
+    // First and last ids land in different chunks (chunk size 500): both
+    // must be present, proving no id list gets silently dropped.
+    expect(grouped.get(parentIds[0])).toHaveLength(2)
+    expect(grouped.get(parentIds[500])).toHaveLength(2)
   })
 })

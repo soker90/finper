@@ -46,6 +46,17 @@ const MOVEMENT: CreditCardMovement = {
   user: 'testuser'
 }
 
+const SPLIT_MOVEMENT: CreditCardMovement = {
+  ...MOVEMENT,
+  _id: 'm2',
+  id: 'm2',
+  tags: [],
+  splits: [
+    { categoryId: 'cat1', amount: 60, tags: [] },
+    { categoryId: 'cat2', amount: 40, tags: [] }
+  ]
+}
+
 const renderForm = (movement: CreditCardMovement = MOVEMENT) =>
   render(
     <SWRConfig value={{ provider: () => new Map(), dedupingInterval: 0 }}>
@@ -93,5 +104,17 @@ describe('CreditCardMovementEdit splits', () => {
     expect(payload.splits).toHaveLength(2)
     expect(payload.splits[0].categoryId).toBe('cat1')
     expect(payload.tags).toEqual([])
+  })
+
+  it('sends an empty splits array when disabling split mode on an existing split movement', async () => {
+    const { getByText, container } = renderForm(SPLIT_MOVEMENT)
+    fireEvent.click(getByText('Quitar división'))
+    fireEvent.submit(container.querySelector('form')!)
+    await vi.waitFor(() => {
+      expect(editCreditCardMovement).toHaveBeenCalled()
+    })
+    const payload = editCreditCardMovement.mock.calls[0][2] as { splits: unknown[], categoryId: string }
+    expect(payload.splits).toEqual([])
+    expect(payload.categoryId).toBe('cat1')
   })
 })

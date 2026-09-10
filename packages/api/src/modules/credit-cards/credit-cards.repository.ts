@@ -3,6 +3,7 @@ import { type DB, schema, generateId, roundMoney } from '@soker90/finper-db'
 import { eq, and, sql, desc, inArray } from 'drizzle-orm'
 import { db as sqliteDb } from '../../db'
 import { ERROR_MESSAGE } from '../../i18n'
+import { chunk } from '../../utils'
 
 const { creditCards, creditCardMovements, creditCardMovementSplits, accounts, categories, stores, transactions, transactionSplits } = schema
 
@@ -147,32 +148,39 @@ const persistMovementSplits = (tx: { delete: typeof sqliteDb.delete, insert: typ
   }
 }
 
+// SQLite caps the number of bound parameters per statement, so ids are
+// queried in chunks instead of a single unbounded `IN (...)` list.
+const ID_CHUNK_SIZE = 500
+
 const loadSplitsByMovementIds = (db: DB, movementIds: string[]): Map<string, CreditCardMovementSplitRow[]> => {
   const grouped = new Map<string, CreditCardMovementSplitRow[]>()
   if (movementIds.length === 0) return grouped
-  const rows = db.select({
-    id: creditCardMovementSplits.id,
-    movementId: creditCardMovementSplits.movementId,
-    categoryId: creditCardMovementSplits.categoryId,
-    amount: creditCardMovementSplits.amount,
-    tags: creditCardMovementSplits.tags,
-    categoryName: categories.name
-  })
-    .from(creditCardMovementSplits)
-    .leftJoin(categories, eq(creditCardMovementSplits.categoryId, categories.id))
-    .where(inArray(creditCardMovementSplits.movementId, movementIds))
-    .all()
 
-  for (const row of rows) {
-    const list = grouped.get(row.movementId) ?? []
-    list.push({
-      id: row.id,
-      categoryId: row.categoryId,
-      amount: row.amount,
-      tags: row.tags ?? [],
-      categoryName: row.categoryName
+  for (const idsChunk of chunk(movementIds, ID_CHUNK_SIZE)) {
+    const rows = db.select({
+      id: creditCardMovementSplits.id,
+      movementId: creditCardMovementSplits.movementId,
+      categoryId: creditCardMovementSplits.categoryId,
+      amount: creditCardMovementSplits.amount,
+      tags: creditCardMovementSplits.tags,
+      categoryName: categories.name
     })
-    grouped.set(row.movementId, list)
+      .from(creditCardMovementSplits)
+      .leftJoin(categories, eq(creditCardMovementSplits.categoryId, categories.id))
+      .where(inArray(creditCardMovementSplits.movementId, idsChunk))
+      .all()
+
+    for (const row of rows) {
+      const list = grouped.get(row.movementId) ?? []
+      list.push({
+        id: row.id,
+        categoryId: row.categoryId,
+        amount: row.amount,
+        tags: row.tags ?? [],
+        categoryName: row.categoryName
+      })
+      grouped.set(row.movementId, list)
+    }
   }
   return grouped
 }

@@ -8,7 +8,7 @@ import { eq } from 'drizzle-orm'
 import { creditCardsRoutes } from '../credit-cards.routes'
 import { accountsRepository } from '../../accounts/accounts.repository'
 
-const { creditCards, creditCardMovements, accounts, categories, transactions, transactionSplits, users, stores } = schema
+const { creditCards, creditCardMovements, creditCardMovementSplits, accounts, categories, transactions, transactionSplits, users, stores } = schema
 
 describe('Credit Cards Routes', () => {
   let token: string
@@ -946,6 +946,180 @@ describe('Credit Cards Routes', () => {
         .set('Authorization', `Bearer ${token}`)
         .send({ categoryId: hogarId })
         .expect(422)
+    })
+
+    test('PATCH tags only (no splits) on a split movement is rejected', async () => {
+      const hogarId = generateId()
+      sqliteDb.insert(categories).values({ id: hogarId, name: 'Hogar Patch Tags', type: 'expense', user: username }).run()
+
+      const cardRes = await supertest(server.app)
+        .post(path)
+        .set('Authorization', `Bearer ${token}`)
+        .send({ name: 'Patch Tags Split Card', accountId })
+        .expect(201)
+      const cardId = cardRes.body.id
+
+      const movementRes = await supertest(server.app)
+        .post(`${path}/${cardId}/movements`)
+        .set('Authorization', `Bearer ${token}`)
+        .send({
+          date: Date.now(),
+          amount: 100,
+          categoryId,
+          splits: [
+            { categoryId, amount: 60 },
+            { categoryId: hogarId, amount: 40 }
+          ]
+        })
+        .expect(201)
+
+      // Tags on the parent of a split movement are invisible in the UI and
+      // discarded by pay-debt, so a tags-only PATCH must be rejected just
+      // like type/categoryId, instead of silently persisting hidden tags.
+      await supertest(server.app)
+        .patch(`${path}/${cardId}/movements/${movementRes.body.id}`)
+        .set('Authorization', `Bearer ${token}`)
+        .send({ tags: ['solo-tag'] })
+        .expect(422)
+    })
+
+    test('PATCH splits only (no amount) succeeds when the lines add up to the stored amount', async () => {
+      const hogarId = generateId()
+      sqliteDb.insert(categories).values({ id: hogarId, name: 'Hogar Patch Splits Only', type: 'expense', user: username }).run()
+
+      const cardRes = await supertest(server.app)
+        .post(path)
+        .set('Authorization', `Bearer ${token}`)
+        .send({ name: 'Patch Splits Only Card', accountId })
+        .expect(201)
+      const cardId = cardRes.body.id
+
+      const movementRes = await supertest(server.app)
+        .post(`${path}/${cardId}/movements`)
+        .set('Authorization', `Bearer ${token}`)
+        .send({
+          date: Date.now(),
+          amount: 100,
+          categoryId,
+          splits: [
+            { categoryId, amount: 60 },
+            { categoryId: hogarId, amount: 40 }
+          ]
+        })
+        .expect(201)
+
+      const edited = await supertest(server.app)
+        .patch(`${path}/${cardId}/movements/${movementRes.body.id}`)
+        .set('Authorization', `Bearer ${token}`)
+        .send({
+          splits: [
+            { categoryId, amount: 70 },
+            { categoryId: hogarId, amount: 30 }
+          ]
+        })
+        .expect(200)
+
+      expect(edited.body.amount).toBe(100)
+      expect(edited.body.splits.map((split: { amount: number }) => split.amount).sort()).toEqual([30, 70])
+    })
+
+    test('PATCH splits without type on an income movement validates against the movement type, not "expense"', async () => {
+      const incomeCategoryId = generateId()
+      const incomeCategoryId2 = generateId()
+      sqliteDb.insert(categories).values([
+        { id: incomeCategoryId, name: 'Refund 1', type: 'income', user: username },
+        { id: incomeCategoryId2, name: 'Refund 2', type: 'income', user: username }
+      ]).run()
+
+      const cardRes = await supertest(server.app)
+        .post(path)
+        .set('Authorization', `Bearer ${token}`)
+        .send({ name: 'Patch Income Split Card', accountId })
+        .expect(201)
+      const cardId = cardRes.body.id
+
+      const movementRes = await supertest(server.app)
+        .post(`${path}/${cardId}/movements`)
+        .set('Authorization', `Bearer ${token}`)
+        .send({ date: Date.now(), amount: 50, type: 'income', categoryId: incomeCategoryId })
+        .expect(201)
+
+      // Income-typed lines on an income movement must be accepted even
+      // though `type` is not part of this PATCH.
+      const edited = await supertest(server.app)
+        .patch(`${path}/${cardId}/movements/${movementRes.body.id}`)
+        .set('Authorization', `Bearer ${token}`)
+        .send({
+          splits: [
+            { categoryId: incomeCategoryId, amount: 20 },
+            { categoryId: incomeCategoryId2, amount: 30 }
+          ]
+        })
+        .expect(200)
+      expect(edited.body.splits).toHaveLength(2)
+
+      // Expense-typed lines on that same income movement must be rejected
+      // instead of assumed valid because `type` defaults to "expense".
+      await supertest(server.app)
+        .patch(`${path}/${cardId}/movements/${movementRes.body.id}`)
+        .set('Authorization', `Bearer ${token}`)
+        .send({
+          splits: [
+            { categoryId, amount: 20 },
+            { categoryId: incomeCategoryId2, amount: 30 }
+          ]
+        })
+        .expect(422)
+    })
+
+    test('PATCH splits: [] removes the split lines and applies the new categoryId/tags to the parent', async () => {
+      const hogarId = generateId()
+      sqliteDb.insert(categories).values({ id: hogarId, name: 'Hogar Remove Split', type: 'expense', user: username }).run()
+
+      const cardRes = await supertest(server.app)
+        .post(path)
+        .set('Authorization', `Bearer ${token}`)
+        .send({ name: 'Remove Split Card', accountId })
+        .expect(201)
+      const cardId = cardRes.body.id
+
+      const movementRes = await supertest(server.app)
+        .post(`${path}/${cardId}/movements`)
+        .set('Authorization', `Bearer ${token}`)
+        .send({
+          date: Date.now(),
+          amount: 100,
+          categoryId,
+          splits: [
+            { categoryId, amount: 60 },
+            { categoryId: hogarId, amount: 40 }
+          ]
+        })
+        .expect(201)
+
+      // This is the payload the client now sends when the user disables
+      // split mode ("Quitar división"): the full body plus an empty
+      // `splits` array, instead of omitting the key entirely.
+      const edited = await supertest(server.app)
+        .patch(`${path}/${cardId}/movements/${movementRes.body.id}`)
+        .set('Authorization', `Bearer ${token}`)
+        .send({
+          date: movementRes.body.date,
+          amount: 100,
+          type: 'expense',
+          categoryId: hogarId,
+          tags: ['sin-dividir'],
+          splits: []
+        })
+        .expect(200)
+
+      expect(edited.body.categoryId).toBe(hogarId)
+      expect(edited.body.tags).toEqual(['sin-dividir'])
+      expect(edited.body.splits).toBeUndefined()
+
+      const remainingSplits = sqliteDb.select().from(creditCardMovementSplits)
+        .where(eq(creditCardMovementSplits.movementId, movementRes.body.id)).all()
+      expect(remainingSplits).toHaveLength(0)
     })
   })
 })

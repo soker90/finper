@@ -1,9 +1,9 @@
 import Joi from 'joi'
 import Boom from '@hapi/boom'
 import { eq, and } from 'drizzle-orm'
-import { schema, roundMoney } from '@soker90/finper-db'
+import { schema } from '@soker90/finper-db'
 import { db as sqliteDb } from '../../db'
-import { isValidId } from '../../utils'
+import { isValidId, assertSplitLines, loadCategoriesById } from '../../utils'
 import { ERROR_MESSAGE } from '../../i18n'
 import { creditCardsRepository } from './credit-cards.repository'
 import type { CreateCreditCardData, UpdateCreditCardData, CreateCreditCardMovementData, UpdateCreditCardMovementData, PayDebtPayload, CreditCardRow } from './credit-cards.repository'
@@ -80,20 +80,15 @@ const assertCategoryExists = (id: string, user: string): void => {
   getCategory(id, user)
 }
 
-const validateSplits = (params: { splits?: Array<{ categoryId: string, amount: number }>, amount?: number, type?: string, user: string }) => {
+const validateCreateSplits = (params: { splits?: Array<{ categoryId: string, amount: number }>, amount: number, type: string, user: string }) => {
   if (!params.splits) return
-  if (params.splits.length === 1) throw Boom.badData(ERROR_MESSAGE.TRANSACTION.SPLIT_MIN).output
-  if (params.splits.length < 2) return
-  if (params.amount === undefined) throw Boom.badData(ERROR_MESSAGE.TRANSACTION.SPLIT_SUM_MISMATCH).output
-
-  const total = roundMoney(params.splits.reduce((sum, split) => sum + roundMoney(split.amount), 0))
-  if (total !== roundMoney(params.amount)) throw Boom.badData(ERROR_MESSAGE.TRANSACTION.SPLIT_SUM_MISMATCH).output
-
-  const movementType = params.type ?? 'expense'
-  for (const split of params.splits) {
-    const category = getCategory(split.categoryId, params.user)
-    if (category.type !== movementType) throw Boom.badData(ERROR_MESSAGE.TRANSACTION.SPLIT_TYPE_MISMATCH).output
-  }
+  const categoriesById = loadCategoriesById(sqliteDb, params.splits.map(split => split.categoryId), params.user)
+  assertSplitLines({
+    lines: params.splits,
+    amount: params.amount,
+    type: params.type,
+    categoriesById
+  })
 }
 
 export const validateCreditCardCreateParams = (body: Record<string, any>, user: string): CreateCreditCardData => {
@@ -124,15 +119,18 @@ export const validateCreditCardMovementCreateParams = (body: Record<string, any>
   const { error, value } = createMovementSchema.validate(body)
   if (error) throw Boom.badData(error.message).output
   assertCategoryExists(value.categoryId, user)
-  validateSplits({ ...value, user })
+  validateCreateSplits({ ...value, user })
   return value
 }
 
+// Note: split-lines invariant for edits is validated in
+// creditCardsService.editMovement, against the movement merged with this
+// body — the Joi schema only checks shape here (see
+// assertSplitInvariant in credit-cards.service.ts).
 export const validateCreditCardMovementEditParams = (body: Record<string, any>, user: string): UpdateCreditCardMovementData => {
   const { error, value } = editMovementSchema.validate(body)
   if (error) throw Boom.badData(error.message).output
   if (value.categoryId !== undefined) assertCategoryExists(value.categoryId, user)
-  validateSplits({ ...value, user })
   return value
 }
 

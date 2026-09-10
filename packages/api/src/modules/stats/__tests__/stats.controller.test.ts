@@ -193,5 +193,39 @@ describe('Stats Controller', () => {
     test('year below 1900 responds 422', async () => {
       await supertest(server.app).get(`${base}/tags/juan/1899`).auth(token, { type: 'bearer' }).expect(422)
     })
+
+    test('a split transaction with two lines sharing the tag appears as two entries with distinct ids', async () => {
+      const hogarId = generateId()
+      sqliteDb.insert(categories).values({ id: hogarId, name: 'Hogar Split Detail', type: 'expense', user: username }).run()
+      const txId = generateId()
+      sqliteDb.insert(transactions).values({
+        id: txId,
+        date: Date.UTC(2025, 5, 15),
+        categoryId,
+        amount: 100,
+        type: TRANSACTION.Expense,
+        accountId,
+        note: null,
+        storeId: null,
+        tags: [],
+        user: username
+      }).run()
+      sqliteDb.insert(transactionSplits).values([
+        { id: generateId(), transactionId: txId, categoryId, amount: 60, tags: ['viaje'], user: username },
+        { id: generateId(), transactionId: txId, categoryId: hogarId, amount: 40, tags: ['viaje'], user: username }
+      ]).run()
+
+      const res = await supertest(server.app).get(`${base}/tags/viaje/2025`).auth(token, { type: 'bearer' }).expect(200)
+
+      // One real transaction, but two split lines both carry the tag: the
+      // count reflects the transaction, the list shows both lines (they
+      // usually differ in category/amount) with unique ids.
+      expect(res.body.transactionCount).toBe(1)
+      expect(res.body.totalAmount).toBe(100)
+      expect(res.body.transactions).toHaveLength(2)
+      const ids = res.body.transactions.map((transaction: any) => transaction._id)
+      expect(new Set(ids).size).toBe(2)
+      expect(res.body.transactions.map((transaction: any) => transaction.amount).sort()).toEqual([40, 60])
+    })
   })
 })

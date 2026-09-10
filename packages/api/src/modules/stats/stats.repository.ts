@@ -21,6 +21,9 @@ export interface ExpenseDetailRow extends ExpenseRow {
   accountBank: string | null
   storeId: string | null
   storeName: string | null
+  /** Id of the split line this row comes from, when the transaction is
+   * divided. Undefined for non-split rows. See EffectiveCategoryRow. */
+  splitId?: string
 }
 
 export const createStatsRepository = (db: DB) => ({
@@ -76,14 +79,15 @@ export const createStatsRepository = (db: DB) => ({
 
     for (const parent of parents) {
       const splits = splitsByTransaction.get(parent.id)
-      if (splits && splits.length > 0) {
+      if (splits && splits.length >= 2) {
         for (const split of splits) {
           rows.push({
             ...parent,
             amount: split.amount,
             categoryId: split.categoryId,
             categoryName: split.categoryName,
-            tags: split.tags ?? []
+            tags: split.tags ?? [],
+            splitId: split.id
           })
         }
       } else {

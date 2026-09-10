@@ -1,9 +1,9 @@
 import Joi from 'joi'
 import Boom from '@hapi/boom'
 import { eq, and } from 'drizzle-orm'
-import { TRANSACTION, schema, roundMoney } from '@soker90/finper-db'
+import { TRANSACTION, schema } from '@soker90/finper-db'
 import { db as sqliteDb } from '../../db'
-import { isValidId } from '../../utils'
+import { isValidId, assertSplitLines, loadCategoriesById } from '../../utils'
 import { ERROR_MESSAGE } from '../../i18n'
 
 const { transactions, categories, accounts } = schema
@@ -54,16 +54,13 @@ const assertAccountExists = (id: string, user: string) => {
 
 const validateSplits = (params: { splits?: Array<{ category: string, amount: number }>, amount: number, type: string, user: string }) => {
   if (!params.splits) return
-  if (params.splits.length === 1) throw Boom.badData(ERROR_MESSAGE.TRANSACTION.SPLIT_MIN).output
-  if (params.splits.length < 2) return
-
-  const total = roundMoney(params.splits.reduce((sum, split) => sum + roundMoney(split.amount), 0))
-  if (total !== roundMoney(params.amount)) throw Boom.badData(ERROR_MESSAGE.TRANSACTION.SPLIT_SUM_MISMATCH).output
-
-  for (const split of params.splits) {
-    const category = getCategory(split.category, params.user)
-    if (category.type !== params.type) throw Boom.badData(ERROR_MESSAGE.TRANSACTION.SPLIT_TYPE_MISMATCH).output
-  }
+  const categoriesById = loadCategoriesById(sqliteDb, params.splits.map(split => split.category), params.user)
+  assertSplitLines({
+    lines: params.splits.map(split => ({ categoryId: split.category, amount: split.amount })),
+    amount: params.amount,
+    type: params.type,
+    categoriesById
+  })
 }
 
 export const validateTransactionCreateParams = (params: Record<string, any>) => {

@@ -9,10 +9,11 @@ import SelectForm from 'components/forms/SelectForm'
 import SelectGroupForm from 'components/forms/SelectGroupForm'
 import AutocompleteForm from 'components/forms/AutocompleteForm'
 import TagsInput from 'components/forms/TagsInput'
-import { useGroupedCategories, useStores, useAvailableTags, useSplitLines, useSubmitError, mapExistingSplits, type SplitFormValue } from 'hooks'
+import { useGroupedCategories, useStores, useAvailableTags, useSplitLines, useSubmitError, mapExistingSplits } from 'hooks'
 import { editCreditCardMovement, deleteCreditCardMovement } from 'services/apiService'
 import { getId } from 'utils'
 import { useCreditCardMutate } from '../hooks/useCreditCards'
+import { buildMovementPayload, type MovementFormValues } from '../utils'
 import type { CreditCardMovement } from 'types'
 
 const MOVEMENT_TYPE_OPTIONS = [
@@ -20,40 +21,10 @@ const MOVEMENT_TYPE_OPTIONS = [
   { value: 'income', label: 'Devolución / Abono (Reduce deuda)' }
 ]
 
-interface MovementFormValues {
-  date: number | null
-  amount: string
-  type: 'expense' | 'income'
-  categoryId: string
-  storeId: string
-  note: string
-  tags: string[]
-  splits: SplitFormValue[]
-}
-
 interface CreditCardMovementEditProps {
   movement: CreditCardMovement
   hideForm: () => void
 }
-
-/** Builds the API payload for editing a movement, resolving the split-mode
- * fields (categoryId/tags/splits) into their final shape. */
-const buildMovementPayload = (data: MovementFormValues, hasSplits: boolean, movement: CreditCardMovement) => ({
-  date: data.date ? new Date(data.date).getTime() : movement.date,
-  amount: parseFloat(data.amount),
-  type: data.type,
-  categoryId: hasSplits ? data.splits[0].category : data.categoryId,
-  storeId: data.storeId || null,
-  note: data.note.trim() || null,
-  tags: hasSplits ? [] : data.tags,
-  ...(hasSplits && {
-    splits: data.splits.map(split => ({
-      categoryId: split.category,
-      amount: Number(split.amount),
-      ...(split.tags?.length && { tags: split.tags })
-    }))
-  })
-})
 
 export const CreditCardMovementEdit = ({ movement, hideForm }: CreditCardMovementEditProps) => {
   const { categories } = useGroupedCategories()
@@ -94,7 +65,7 @@ export const CreditCardMovementEdit = ({ movement, hideForm }: CreditCardMovemen
     if (isAmountMismatch) {
       return { error: 'La suma de los desgloses debe coincidir con el importe total' }
     }
-    return editCreditCardMovement(movement.creditCardId, id, buildMovementPayload(data, hasSplits, movement))
+    return editCreditCardMovement(movement.creditCardId, id, buildMovementPayload({ data, hasSplits, fallbackDate: movement.date }))
   }, () => {
     triggerMutate()
     hideForm()

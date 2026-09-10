@@ -1,5 +1,6 @@
 import { eq, and, gte, lt, lte, inArray } from 'drizzle-orm'
 import { type DB, schema } from '@soker90/finper-db'
+import { chunk } from '../../utils'
 
 const { transactions, transactionSplits, categories } = schema
 
@@ -13,6 +14,12 @@ export interface EffectiveCategoryRow {
   storeId?: string | null
   tags?: string[]
   note?: string | null
+  /** Id of the split line this row comes from, when the parent transaction is
+   * divided. Undefined for non-split (parent) rows. Lets consumers that
+   * expand transactions into per-line rows (e.g. stats tag detail) tell
+   * apart two lines of the same transaction instead of colliding on
+   * `transactionId`. */
+  splitId?: string
 }
 
 export interface EffectiveCategoryQuery {
@@ -31,33 +38,41 @@ export interface SplitRow {
   categoryName: string | null
 }
 
+// SQLite caps the number of bound parameters per statement (32766 on modern
+// builds, 999 on older ones). A user with many expenses could exceed that if
+// all their transaction ids were passed to a single `IN (...)`, so the ids
+// are queried in chunks instead of one unbounded list.
+const ID_CHUNK_SIZE = 500
+
 export const loadSplitsByTransactionIds = (db: DB, transactionIds: string[]): Map<string, SplitRow[]> => {
   const grouped = new Map<string, SplitRow[]>()
   if (transactionIds.length === 0) return grouped
 
-  const rows = db.select({
-    id: transactionSplits.id,
-    transactionId: transactionSplits.transactionId,
-    categoryId: transactionSplits.categoryId,
-    amount: transactionSplits.amount,
-    tags: transactionSplits.tags,
-    categoryName: categories.name
-  })
-    .from(transactionSplits)
-    .leftJoin(categories, eq(transactionSplits.categoryId, categories.id))
-    .where(inArray(transactionSplits.transactionId, transactionIds))
-    .all()
-
-  for (const row of rows) {
-    const list = grouped.get(row.transactionId) ?? []
-    list.push({
-      id: row.id,
-      categoryId: row.categoryId,
-      amount: row.amount,
-      tags: row.tags ?? [],
-      categoryName: row.categoryName
+  for (const idsChunk of chunk(transactionIds, ID_CHUNK_SIZE)) {
+    const rows = db.select({
+      id: transactionSplits.id,
+      transactionId: transactionSplits.transactionId,
+      categoryId: transactionSplits.categoryId,
+      amount: transactionSplits.amount,
+      tags: transactionSplits.tags,
+      categoryName: categories.name
     })
-    grouped.set(row.transactionId, list)
+      .from(transactionSplits)
+      .leftJoin(categories, eq(transactionSplits.categoryId, categories.id))
+      .where(inArray(transactionSplits.transactionId, idsChunk))
+      .all()
+
+    for (const row of rows) {
+      const list = grouped.get(row.transactionId) ?? []
+      list.push({
+        id: row.id,
+        categoryId: row.categoryId,
+        amount: row.amount,
+        tags: row.tags ?? [],
+        categoryName: row.categoryName
+      })
+      grouped.set(row.transactionId, list)
+    }
   }
   return grouped
 }
@@ -89,7 +104,7 @@ export const findEffectiveCategoryRows = (db: DB, query: EffectiveCategoryQuery)
 
   for (const parent of parents) {
     const splits = splitsByTransaction.get(parent.id)
-    if (splits && splits.length > 0) {
+    if (splits && splits.length >= 2) {
       for (const split of splits) {
         rows.push({
           transactionId: parent.id,
@@ -100,7 +115,8 @@ export const findEffectiveCategoryRows = (db: DB, query: EffectiveCategoryQuery)
           type: parent.type,
           storeId: parent.storeId,
           tags: split.tags ?? [],
-          note: parent.note
+          note: parent.note,
+          splitId: split.id
         })
       }
     } else {

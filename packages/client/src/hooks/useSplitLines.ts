@@ -4,10 +4,10 @@ import { roundMoney } from 'utils'
 
 export type SplitFormValue = { category: string, amount: number | '', tags: string[] }
 
-/** Compartido por TransactionEdit, CreditCardMovementEdit y ModalMovement: cada
- * dominio guarda la categoría de la línea con un campo distinto (`category._id`
- * en transacciones, `categoryId` en movimientos de tarjeta), así que
- * `getCategory` extrae ese valor de forma agnóstica al dominio. */
+/** Shared by TransactionEdit, CreditCardMovementEdit and ModalMovement: each
+ * domain stores a split line's category under a different field (`category._id`
+ * in transactions, `categoryId` in credit card movements), so `getCategory`
+ * extracts that value in a domain-agnostic way. */
 export const mapExistingSplits = <T extends { amount: number, tags?: string[] | null }>(
   splits: T[] | undefined,
   getCategory: (split: T) => string
@@ -28,8 +28,8 @@ interface UseSplitLinesParams {
   initialSplitMode: boolean
 }
 
-// Compartido por TransactionEdit, CreditCardMovementEdit y ModalMovement: mismo
-// formulario de "dividir movimiento" con distinto nombre de campo de categoría.
+// Shared by TransactionEdit, CreditCardMovementEdit and ModalMovement: same
+// "split movement" form, with a different category field name per domain.
 export const useSplitLines = ({ control, watch, setValue, categoryFieldName, initialSplitMode }: UseSplitLinesParams) => {
   const [splitMode, setSplitMode] = useState(initialSplitMode)
   const { fields, append, remove } = useFieldArray({ control, name: 'splits' })
