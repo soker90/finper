@@ -46,6 +46,7 @@ export const YieldsSummary = ({ items, selectedYear = 'all' }: SummaryProps) => 
           subtitle='En seguimiento'
           icon={<RiseOutlined />}
           color='primary'
+          testId='kpi-yields-count'
         />
       </Grid>
       <Grid size={{ xs: 12, sm: 4 }}>
