@@ -41,4 +41,5 @@ const transactionsController = new TransactionsController({
 transactionsRoutes.post('/', authMiddleware, transactionsController.create.bind(transactionsController))
 transactionsRoutes.get('/', authMiddleware, transactionsController.transactions.bind(transactionsController))
 transactionsRoutes.put('/:id', authMiddleware, transactionsController.edit.bind(transactionsController))
+transactionsRoutes.patch('/:id', authMiddleware, transactionsController.patch.bind(transactionsController))
 transactionsRoutes.delete('/:id', authMiddleware, transactionsController.delete.bind(transactionsController))

@@ -34,6 +34,9 @@ export interface Transaction {
   } | null,
   tags?: string[],
   splits?: TransactionSplit[],
+  /** Present when the transaction is linked to a yield settlement; such
+   * transactions cannot be split (the API rejects it). */
+  yieldId?: string | null,
 }
 
 // Filters accepted by GET /transactions (see TransactionFilters in

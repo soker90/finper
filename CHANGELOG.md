@@ -14,6 +14,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **api**: `POST`/`PUT /api/transactions` accept optional `splits[]` (`{ category, amount, tags? }`, min 2). Category filter also matches split lines. Yield matching excludes split transactions; subscription matching includes split categories.
 - **client**: «Dividir movimiento» in transaction create/edit with remaining amount, «Asignar resto», and a split badge on list items. Parent tags are hidden in split mode and copied onto the first line when enabling.
 - **client/api/db**: Credit card pending movements can also be split. New `credit_card_movement_splits` table; `payDebt` copies the lines onto the generated transaction so stats stay correct after settlement.
+- **api/client**: Missing split category returns `404` instead of a type-mismatch error. `GET /api/transactions` exposes `yieldId` so the client hides «Dividir movimiento» on yield-linked transactions. Splits limit to max 5 lines.
+
+### Fixed
+
+- **api**: `DELETE /api/categories/:id` returns `409` when the category is still referenced (transactions, split lines, credit card movements...) instead of an unhandled SQLite foreign key error.
 
 ---
 

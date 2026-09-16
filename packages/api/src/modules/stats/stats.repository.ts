@@ -74,7 +74,7 @@ export const createStatsRepository = (db: DB) => ({
       .orderBy(desc(transactions.date))
       .all() as ExpenseDetailRow[]
 
-    const splitsByTransaction = loadSplitsByTransactionIds(db, parents.map(parent => parent.id))
+    const splitsByTransaction = loadSplitsByTransactionIds(db, parents.map(parent => parent.id), user)
     const rows: ExpenseDetailRow[] = []
 
     for (const parent of parents) {

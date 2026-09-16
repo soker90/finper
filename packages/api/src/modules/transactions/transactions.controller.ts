@@ -4,6 +4,7 @@ import { StoresService } from '../stores/stores.service'
 import {
   validateTransactionCreateParams,
   validateTransactionEditParams,
+  validateTransactionPatchParams,
   validateTransactionGetParams,
   validateTransactionExist
 } from './transactions.validators'
@@ -47,6 +48,17 @@ export class TransactionsController {
     const response = this.transactionsService.editTransaction(withStore)
 
     this.logger.logInfo(`Transaction ${response._id} has been succesfully edited`)
+    res.send(response)
+  }
+
+  public patch (req: Request, res: Response): void {
+    this.logger.logInfo(`/patch - transaction: ${req.params.id}`)
+
+    const params = validateTransactionPatchParams({ params: req.params, body: req.body, user: req.user })
+    const withStore = this.storesService.replaceShopValue(params)
+    const response = this.transactionsService.editTransaction(withStore)
+
+    this.logger.logInfo(`Transaction ${response._id} has been succesfully patched`)
     res.send(response)
   }
 

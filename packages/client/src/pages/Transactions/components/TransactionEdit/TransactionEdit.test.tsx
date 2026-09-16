@@ -59,6 +59,31 @@ describe('TransactionEdit splits', () => {
     expect(getByText('Asignar resto')).toBeDefined()
   })
 
+  it('hides the divide button for a transaction linked to a yield', () => {
+    const { queryByText } = renderForm({ ...TRANSACTION, yieldId: 'yield1' })
+    expect(queryByText('Dividir movimiento')).toBeNull()
+  })
+
+  it('allows saving when two lines share the same category', async () => {
+    const { getByText } = renderForm()
+    fireEvent.click(getByText('Dividir movimiento'))
+    const amountInputs = Array.from(document.querySelectorAll<HTMLInputElement>('input[id^="splits."][id$=".amount"]'))
+    const categoryInputs = Array.from(document.querySelectorAll<HTMLSelectElement>('select[id^="splits."][id$=".category"]'))
+    fireEvent.change(categoryInputs[0], { target: { value: 'cat1' } })
+    fireEvent.change(categoryInputs[1], { target: { value: 'cat1' } })
+    fireEvent.change(amountInputs[0], { target: { value: '65' } })
+    fireEvent.change(amountInputs[1], { target: { value: '35' } })
+    expect((getByText('Guardar').closest('button') as HTMLButtonElement).disabled).toBe(false)
+    fireEvent.click(getByText('Guardar'))
+    await vi.waitFor(() => {
+      expect(editTransaction).toHaveBeenCalled()
+    })
+    const payload = editTransaction.mock.calls[0][1] as { splits: Array<{ category: string, amount: number }> }
+    expect(payload.splits).toHaveLength(2)
+    expect(payload.splits[0].category).toBe('cat1')
+    expect(payload.splits[1].category).toBe('cat1')
+  })
+
   it('assigns the remaining amount to the last split row', () => {
     const { getByText } = renderForm()
     fireEvent.click(getByText('Dividir movimiento'))
@@ -84,5 +109,34 @@ describe('TransactionEdit splits', () => {
     })
     const payload = editTransaction.mock.calls[0][1] as { splits: Array<{ amount: number }> }
     expect(payload.splits).toHaveLength(2)
+  })
+
+  it('omits splits in payload when saving a normal transaction that was never split', async () => {
+    const { getByText } = renderForm()
+    fireEvent.click(getByText('Guardar'))
+    await vi.waitFor(() => {
+      expect(editTransaction).toHaveBeenCalled()
+    })
+    const payload = editTransaction.mock.calls[0][1] as { splits?: unknown }
+    expect(payload.splits).toBeUndefined()
+  })
+
+  it('sends splits: [] when disabling split mode on a previously split transaction', async () => {
+    const splitTransaction: Transaction = {
+      ...TRANSACTION,
+      splits: [
+        { _id: 's1', category: { _id: 'cat1', name: 'Comida' }, amount: 60, tags: [] },
+        { _id: 's2', category: { _id: 'cat2', name: 'Hogar' }, amount: 40, tags: [] }
+      ]
+    }
+    const { getByText } = renderForm(splitTransaction)
+    expect(getByText('Quitar división')).toBeDefined()
+    fireEvent.click(getByText('Quitar división'))
+    fireEvent.click(getByText('Guardar'))
+    await vi.waitFor(() => {
+      expect(editTransaction).toHaveBeenCalled()
+    })
+    const payload = editTransaction.mock.calls[0][1] as { splits: unknown[] }
+    expect(payload.splits).toEqual([])
   })
 })

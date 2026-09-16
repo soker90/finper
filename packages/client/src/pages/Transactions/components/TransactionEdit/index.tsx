@@ -30,8 +30,18 @@ type FormValues = {
 }
 
 /** Builds the API payload for creating/editing a transaction, resolving the
- * split-mode fields (category/tags/splits) into their final shape. */
-const buildTransactionPayload = (params: FormValues, hasSplits: boolean) => ({
+ * split-mode fields (category/tags/splits) into their final shape. When an
+ * already-split transaction disables split mode, splits: [] is sent to tell
+ * the API to remove the split lines. */
+export const buildTransactionPayload = ({
+  params,
+  hasSplits,
+  wasSplit = false
+}: {
+  params: FormValues
+  hasSplits: boolean
+  wasSplit?: boolean
+}) => ({
   date: params.date ? new Date(params.date).getTime() : null,
   account: params.account as string,
   category: hasSplits ? params.splits[0].category : params.category,
@@ -40,13 +50,17 @@ const buildTransactionPayload = (params: FormValues, hasSplits: boolean) => ({
   ...(params.note && { note: params.note }),
   ...(params.store && { store: params.store }),
   ...(hasSplits ? { tags: [] } : (params.tags?.length && { tags: params.tags })),
-  ...(hasSplits && {
-    splits: params.splits.map(split => ({
-      category: split.category,
-      amount: Number(split.amount),
-      ...(split.tags?.length && { tags: split.tags })
-    }))
-  })
+  ...(hasSplits
+    ? {
+        splits: params.splits.map(split => ({
+          category: split.category,
+          amount: Number(split.amount),
+          ...(split.tags?.length && { tags: split.tags })
+        }))
+      }
+    : wasSplit
+      ? { splits: [] }
+      : {})
 })
 
 const TransactionEdit = ({
@@ -55,6 +69,7 @@ const TransactionEdit = ({
   isNew
 }: { transaction?: Transaction, hideForm: () => void, isNew?: boolean, query: string }) => {
   const existingSplits = mapExistingSplits(transaction?.splits, split => split.category._id)
+  const wasSplit = existingSplits.length >= 2
   const { register, handleSubmit, formState: { errors }, control, watch, setValue } = useForm<FormValues>({
     defaultValues: {
       note: transaction?.note || '',
@@ -73,22 +88,23 @@ const TransactionEdit = ({
   const { stores } = useStores()
   const { tags: availableTags } = useAvailableTags()
   const {
-    splitMode, fields, addLine, remove, remaining, hasSplits, isAmountMismatch,
+    splitMode, fields, addLine, remove, remaining, hasSplits, splitError,
     enableSplitMode, disableSplitMode, assignRemaining
   } = useSplitLines({
     control: control as unknown as Control<any>,
     watch,
     setValue,
     categoryFieldName: 'category',
-    initialSplitMode: existingSplits.length >= 2
+    initialSplitMode: wasSplit
   })
   const { error, runSubmit } = useSubmitError()
+  // The API refuses to split a transaction linked to a yield settlement, so
+  // the whole split section is hidden instead of failing on submit.
+  const canSplit = !transaction?.yieldId
 
   const onSubmit = handleSubmit((params) => runSubmit(async () => {
-    if (isAmountMismatch) {
-      return { error: 'La suma de los desgloses debe coincidir con el importe total' }
-    }
-    const formattedParams = buildTransactionPayload(params, hasSplits)
+    if (splitError) return { error: splitError }
+    const formattedParams = buildTransactionPayload({ params, hasSplits, wasSplit })
     return transaction?._id
       ? await editTransaction(transaction._id, formattedParams as any)
       : await addTransaction(formattedParams as any)
@@ -182,26 +198,29 @@ const TransactionEdit = ({
           size={splitMode ? 12 : 10}
         />
 
-        <Grid size={12}>
-          <SplitModeSection
-            splitMode={splitMode}
-            fields={fields}
-            categories={categories}
-            availableTags={availableTags}
-            control={control as unknown as Control<any>}
-            register={register as any}
-            errors={errors}
-            remaining={remaining}
-            onAdd={addLine}
-            onRemove={remove}
-            onAssignRemaining={assignRemaining}
-            onEnableSplitMode={enableSplitMode}
-            onDisableSplitMode={disableSplitMode}
-            categorySize={3}
-            amountSize={3}
-            tagsSize={5}
-          />
-        </Grid>
+        {canSplit && (
+          <Grid size={12}>
+            <SplitModeSection
+              splitMode={splitMode}
+              fields={fields}
+              categories={categories}
+              availableTags={availableTags}
+              control={control as unknown as Control<any>}
+              register={register as any}
+              errors={errors}
+              remaining={remaining}
+              onAdd={addLine}
+              onRemove={remove}
+              onAssignRemaining={assignRemaining}
+              onEnableSplitMode={enableSplitMode}
+              onDisableSplitMode={disableSplitMode}
+              splitError={splitError}
+              categorySize={3}
+              amountSize={3}
+              tagsSize={5}
+            />
+          </Grid>
+        )}
 
         {error && (
           <Grid size={12}>
@@ -230,7 +249,7 @@ const TransactionEdit = ({
             type='submit'
             variant='contained'
             color='primary'
-            disabled={isAmountMismatch}
+            disabled={Boolean(splitError)}
           >
             Guardar
           </Button>

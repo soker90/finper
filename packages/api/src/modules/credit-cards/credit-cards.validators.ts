@@ -133,7 +133,7 @@ export const validateCreditCardMovementCreateParams = (body: Record<string, any>
 // Note: split-lines invariant for edits is validated in
 // creditCardsService.editMovement, against the movement merged with this
 // body — the Joi schema only checks shape here (see
-// assertSplitInvariant in credit-cards.service.ts).
+// assertSplitEditInvariant in utils/split-lines.ts).
 export const validateCreditCardMovementEditParams = (body: Record<string, any>, user: string): UpdateCreditCardMovementData => {
   const { error, value } = editMovementSchema.validate(body)
   if (error) throw Boom.badData(error.message).output

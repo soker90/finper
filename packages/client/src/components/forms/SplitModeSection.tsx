@@ -18,6 +18,7 @@ interface SplitModeSectionProps {
   onAssignRemaining: () => void
   onEnableSplitMode: () => void
   onDisableSplitMode: () => void
+  splitError?: string | null
   categorySize?: number
   amountSize?: number
   tagsSize?: number
@@ -40,6 +41,7 @@ const SplitModeSection = ({
   onAssignRemaining,
   onEnableSplitMode,
   onDisableSplitMode,
+  splitError,
   categorySize,
   amountSize,
   tagsSize
@@ -63,6 +65,7 @@ const SplitModeSection = ({
         onRemove={onRemove}
         onAssignRemaining={onAssignRemaining}
         onDisableSplitMode={onDisableSplitMode}
+        splitError={splitError}
         categorySize={categorySize}
         amountSize={amountSize}
         tagsSize={tagsSize}

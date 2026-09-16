@@ -8,9 +8,20 @@ const NO_CATEGORY = 'Sin categoría'
 const yearOf = (date: number): number => new Date(date).getUTCFullYear()
 const yearRange = (year: number) => ({ from: Date.UTC(year, 0, 1), to: Date.UTC(year + 1, 0, 1) - 1 })
 
-const toCategoryBreakdown = (categories: Map<string, TagCategoryBreakdown>): TagCategoryBreakdown[] =>
-  Array.from(categories.values(), category => ({ ...category, amount: roundMoney(category.amount) }))
-    .toSorted((first, second) => second.amount - first.amount)
+interface CategoryAccumulator {
+  categoryId: string
+  categoryName: string
+  amount: number
+  countedIds: Set<string>
+}
+
+const toCategoryBreakdown = (categories: Map<string, CategoryAccumulator>): TagCategoryBreakdown[] =>
+  Array.from(categories.values(), category => ({
+    categoryId: category.categoryId,
+    categoryName: category.categoryName,
+    amount: roundMoney(category.amount),
+    count: category.countedIds.size
+  })).toSorted((first, second) => second.amount - first.amount)
 
 export class StatsService {
   constructor (private repository: IStatsRepository) {}
@@ -29,13 +40,13 @@ export class StatsService {
       if (!row.tags || row.tags.length === 0) continue
       years.add(yearOf(row.date))
     }
-    return [...years].sort((a, b) => b - a)
+    return [...years].sort((firstYear, secondYear) => secondYear - firstYear)
   }
 
   public getTagsSummary (user: string, year: number): TagSummary[] {
     const rows = this.repository.findExpenses(user, yearRange(year))
 
-    const byTag = new Map<string, { totalAmount: number, countedIds: Set<string>, categories: Map<string, TagCategoryBreakdown> }>()
+    const byTag = new Map<string, { totalAmount: number, countedIds: Set<string>, categories: Map<string, CategoryAccumulator> }>()
 
     for (const row of rows) {
       if (!row.tags || row.tags.length === 0) continue
@@ -48,13 +59,13 @@ export class StatsService {
         entry.totalAmount += row.amount
         entry.countedIds.add(row.id)
 
-        let cat = entry.categories.get(row.categoryId)
-        if (!cat) {
-          cat = { categoryId: row.categoryId, categoryName: row.categoryName ?? NO_CATEGORY, amount: 0, count: 0 }
-          entry.categories.set(row.categoryId, cat)
+        let categoryEntry = entry.categories.get(row.categoryId)
+        if (!categoryEntry) {
+          categoryEntry = { categoryId: row.categoryId, categoryName: row.categoryName ?? NO_CATEGORY, amount: 0, countedIds: new Set() }
+          entry.categories.set(row.categoryId, categoryEntry)
         }
-        cat.amount += row.amount
-        cat.count += 1
+        categoryEntry.amount += row.amount
+        categoryEntry.countedIds.add(row.id)
       }
     }
 
@@ -82,10 +93,10 @@ export class StatsService {
     }
 
     const years = [...byYear.entries()]
-      .map(([year, e]) => ({ year, totalAmount: roundMoney(e.totalAmount), transactionCount: e.countedIds.size }))
-      .sort((a, b) => b.year - a.year)
+      .map(([year, entry]) => ({ year, totalAmount: roundMoney(entry.totalAmount), transactionCount: entry.countedIds.size }))
+      .sort((firstItem, secondItem) => secondItem.year - firstItem.year)
 
-    const totalAmount = roundMoney(years.reduce((sum, y) => sum + y.totalAmount, 0))
+    const totalAmount = roundMoney(years.reduce((sum, yearItem) => sum + yearItem.totalAmount, 0))
     return { tag: tagName, totalAmount, years }
   }
 
@@ -94,20 +105,20 @@ export class StatsService {
     const rows = this.repository.findExpenseDetails(user, from, to)
     const tagged = rows.filter(row => row.tags?.includes(tagName))
 
-    const byCat = new Map<string, TagCategoryBreakdown>()
+    const byCat = new Map<string, CategoryAccumulator>()
     for (const row of tagged) {
-      let cat = byCat.get(row.categoryId)
-      if (!cat) {
-        cat = { categoryId: row.categoryId, categoryName: row.categoryName ?? NO_CATEGORY, amount: 0, count: 0 }
-        byCat.set(row.categoryId, cat)
+      let categoryEntry = byCat.get(row.categoryId)
+      if (!categoryEntry) {
+        categoryEntry = { categoryId: row.categoryId, categoryName: row.categoryName ?? NO_CATEGORY, amount: 0, countedIds: new Set() }
+        byCat.set(row.categoryId, categoryEntry)
       }
-      cat.amount += row.amount
-      cat.count += 1
+      categoryEntry.amount += row.amount
+      categoryEntry.countedIds.add(row.id)
     }
 
     const byCategory = toCategoryBreakdown(byCat)
 
-    const totalAmount = roundMoney(byCategory.reduce((sum, c) => sum + c.amount, 0))
+    const totalAmount = roundMoney(byCategory.reduce((sum, categoryItem) => sum + categoryItem.amount, 0))
 
     return {
       tag: tagName,

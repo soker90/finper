@@ -227,5 +227,113 @@ describe('Stats Controller', () => {
       expect(new Set(ids).size).toBe(2)
       expect(res.body.transactions.map((transaction: any) => transaction.amount).sort()).toEqual([40, 60])
     })
+
+    test('split transaction with same tag across lines does not inflate transactionCount in summary or category breakdown', async () => {
+      const homeCategoryId = generateId()
+      sqliteDb.insert(categories).values({ id: homeCategoryId, name: 'Hogar Super', type: 'expense', user: username }).run()
+      const transactionId = generateId()
+      sqliteDb.insert(transactions).values({
+        id: transactionId,
+        date: Date.UTC(2025, 5, 15),
+        categoryId,
+        amount: 100,
+        type: TRANSACTION.Expense,
+        accountId,
+        note: null,
+        storeId: null,
+        tags: [],
+        user: username
+      }).run()
+      sqliteDb.insert(transactionSplits).values([
+        { id: generateId(), transactionId, categoryId, amount: 60, tags: ['supermercado'], user: username },
+        { id: generateId(), transactionId, categoryId: homeCategoryId, amount: 40, tags: ['supermercado'], user: username }
+      ]).run()
+
+      const summaryResponse = await supertest(server.app).get(`${base}/tags?year=2025`).auth(token, { type: 'bearer' }).expect(200)
+      const targetSummary = summaryResponse.body.find((item: any) => item.tag === 'supermercado')
+      expect(targetSummary).toBeDefined()
+      expect(targetSummary.totalAmount).toBe(100)
+      expect(targetSummary.transactionCount).toBe(1)
+      expect(targetSummary.byCategory).toHaveLength(2)
+      expect(targetSummary.byCategory.every((categoryItem: any) => categoryItem.count === 1)).toBe(true)
+
+      const detailResponse = await supertest(server.app).get(`${base}/tags/supermercado/2025`).auth(token, { type: 'bearer' }).expect(200)
+      expect(detailResponse.body.totalAmount).toBe(100)
+      expect(detailResponse.body.transactionCount).toBe(1)
+      expect(detailResponse.body.byCategory.every((categoryItem: any) => categoryItem.count === 1)).toBe(true)
+      expect(detailResponse.body.transactions).toHaveLength(2)
+    })
+
+    test('split transaction with different tags isolates amounts and counts per tag', async () => {
+      const pharmacyCategoryId = generateId()
+      sqliteDb.insert(categories).values({ id: pharmacyCategoryId, name: 'Farmacia', type: 'expense', user: username }).run()
+      const transactionId = generateId()
+      sqliteDb.insert(transactions).values({
+        id: transactionId,
+        date: Date.UTC(2025, 5, 20),
+        categoryId,
+        amount: 100,
+        type: TRANSACTION.Expense,
+        accountId,
+        note: null,
+        storeId: null,
+        tags: [],
+        user: username
+      }).run()
+      sqliteDb.insert(transactionSplits).values([
+        { id: generateId(), transactionId, categoryId, amount: 70, tags: ['comida-rapida'], user: username },
+        { id: generateId(), transactionId, categoryId: pharmacyCategoryId, amount: 30, tags: ['salud'], user: username }
+      ]).run()
+
+      const summaryResponse = await supertest(server.app).get(`${base}/tags?year=2025`).auth(token, { type: 'bearer' }).expect(200)
+      const summaryByTag = Object.fromEntries(summaryResponse.body.map((item: any) => [item.tag, item]))
+
+      expect(summaryByTag['comida-rapida'].totalAmount).toBe(70)
+      expect(summaryByTag['comida-rapida'].transactionCount).toBe(1)
+      expect(summaryByTag['comida-rapida'].byCategory[0].categoryName).toBe('Comida')
+
+      expect(summaryByTag.salud.totalAmount).toBe(30)
+      expect(summaryByTag.salud.transactionCount).toBe(1)
+      expect(summaryByTag.salud.byCategory[0].categoryName).toBe('Farmacia')
+    })
+
+    test('split transaction with same category across lines sums amounts correctly in category breakdown', async () => {
+      const transactionId = generateId()
+      sqliteDb.insert(transactions).values({
+        id: transactionId,
+        date: Date.UTC(2025, 5, 25),
+        categoryId,
+        amount: 100,
+        type: TRANSACTION.Expense,
+        accountId,
+        note: null,
+        storeId: null,
+        tags: [],
+        user: username
+      }).run()
+      sqliteDb.insert(transactionSplits).values([
+        { id: generateId(), transactionId, categoryId, amount: 60, tags: ['finde'], user: username },
+        { id: generateId(), transactionId, categoryId, amount: 40, tags: ['finde'], user: username }
+      ]).run()
+
+      const summaryResponse = await supertest(server.app).get(`${base}/tags?year=2025`).auth(token, { type: 'bearer' }).expect(200)
+      const targetSummary = summaryResponse.body.find((item: any) => item.tag === 'finde')
+      expect(targetSummary).toBeDefined()
+      expect(targetSummary.totalAmount).toBe(100)
+      expect(targetSummary.transactionCount).toBe(1)
+      expect(targetSummary.byCategory).toHaveLength(1)
+      expect(targetSummary.byCategory[0].categoryName).toBe('Comida')
+      expect(targetSummary.byCategory[0].amount).toBe(100)
+      expect(targetSummary.byCategory[0].count).toBe(1)
+
+      const detailResponse = await supertest(server.app).get(`${base}/tags/finde/2025`).auth(token, { type: 'bearer' }).expect(200)
+      expect(detailResponse.body.totalAmount).toBe(100)
+      expect(detailResponse.body.transactionCount).toBe(1)
+      expect(detailResponse.body.byCategory).toHaveLength(1)
+      expect(detailResponse.body.byCategory[0].amount).toBe(100)
+      expect(detailResponse.body.byCategory[0].count).toBe(1)
+      expect(detailResponse.body.transactions).toHaveLength(2)
+      expect(new Set(detailResponse.body.transactions.map((transaction: any) => transaction._id)).size).toBe(2)
+    })
   })
 })

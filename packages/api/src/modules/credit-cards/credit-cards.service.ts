@@ -1,44 +1,10 @@
 import Boom from '@hapi/boom'
 import { roundMoney } from '@soker90/finper-db'
 import { ERROR_MESSAGE } from '../../i18n'
-import { sanitizeTags, assertSplitLines, loadCategoriesById } from '../../utils'
+import { sanitizeTags, assertSplitEditInvariant } from '../../utils'
 import { db as sqliteDb } from '../../db'
-import { creditCardsRepository, type ICreditCardsRepository, type CreateCreditCardData, type UpdateCreditCardData, type CreateCreditCardMovementData, type UpdateCreditCardMovementData, type PayDebtPayload, type CreditCardMovementRow } from './credit-cards.repository'
+import { creditCardsRepository, type ICreditCardsRepository, type CreateCreditCardData, type UpdateCreditCardData, type CreateCreditCardMovementData, type UpdateCreditCardMovementData, type PayDebtPayload } from './credit-cards.repository'
 import { serializeCreditCard, serializeCreditCardMovement } from './credit-cards.serializer'
-
-/** Validates the split-lines invariant for a PATCH against the movement it
- * would result in (existing movement merged with the request body), since
- * the request body alone may be missing `amount`/`type`/etc on a partial
- * update. This is the single place that enforces the invariant for edits —
- * the Joi schema in credit-cards.validators.ts only checks shape. */
-const assertSplitInvariant = (params: { movement: CreditCardMovementRow, value: UpdateCreditCardMovementData, user: string }): void => {
-  const { movement, value, user } = params
-  const existingSplits = movement.splits ?? []
-
-  if (value.splits === undefined) {
-    if (existingSplits.length < 2) return
-
-    if (value.type !== undefined || value.categoryId !== undefined || value.tags !== undefined) {
-      throw Boom.badData(ERROR_MESSAGE.TRANSACTION.SPLIT_FIELDS_REQUIRE_SPLITS).output
-    }
-
-    if (value.amount !== undefined) {
-      const existingTotal = roundMoney(existingSplits.reduce((sum, split) => sum + roundMoney(split.amount), 0))
-      if (existingTotal !== roundMoney(value.amount)) {
-        throw Boom.badData(ERROR_MESSAGE.TRANSACTION.SPLIT_SUM_MISMATCH).output
-      }
-    }
-    return
-  }
-
-  const categoriesById = loadCategoriesById(sqliteDb, value.splits.map(split => split.categoryId), user)
-  assertSplitLines({
-    lines: value.splits,
-    amount: value.amount ?? movement.amount,
-    type: value.type ?? movement.type,
-    categoriesById
-  })
-}
 
 export class CreditCardsService {
   constructor (private readonly repository: ICreditCardsRepository = creditCardsRepository) {}
@@ -104,7 +70,17 @@ export class CreditCardsService {
     if (movement.status === 'paid') {
       throw Boom.badRequest(ERROR_MESSAGE.CREDIT_CARD.ALREADY_PAID).output
     }
-    assertSplitInvariant({ movement, value, user })
+    assertSplitEditInvariant({
+      existingSplits: (movement.splits ?? []).map(split => ({ categoryId: split.categoryId, amount: split.amount })),
+      currentAmount: movement.amount,
+      currentType: movement.type,
+      newSplits: value.splits?.map(split => ({ categoryId: split.categoryId, amount: split.amount, tags: split.tags })),
+      newAmount: value.amount,
+      newType: value.type,
+      hasNewCategoryOrTags: value.categoryId !== undefined || value.tags !== undefined,
+      user,
+      db: sqliteDb
+    })
     const hasSplits = Array.isArray(value.splits) && value.splits.length >= 2
     const updated = await this.repository.updateMovement(id, user, {
       ...value,

@@ -35,6 +35,18 @@ const bodySchema = {
 
 const createSchema = Joi.object({ ...bodySchema, user: Joi.string() })
 const editSchema = Joi.object(bodySchema)
+const patchSchema = Joi.object({
+  date: Joi.number(),
+  category: Joi.string(),
+  amount: Joi.number().custom(validateTwoDecimals),
+  type: Joi.string().valid(TRANSACTION.Income, TRANSACTION.Expense, TRANSACTION.NotComputable),
+  account: Joi.string(),
+  note: Joi.string().allow(null, ''),
+  store: Joi.string().allow(null, ''),
+  tags: Joi.array().items(Joi.string().max(30)).max(10).optional(),
+  splits: Joi.array().items(splitSchema).max(5).optional()
+}).min(1)
+
 const getSchema = Joi.object({
   date: Joi.number(),
   category: Joi.string(),
@@ -90,7 +102,18 @@ export const validateTransactionEditParams = ({ params, body, user }: { params: 
   validateTransactionExist(params.id, user)
   const { error, value } = editSchema.validate(body)
   if (error) throw Boom.badData(error.message).output
+  if (value.category) getCategory(value.category, user)
+  assertAccountExists(value.account, user)
   validateSplits({ ...value, user })
+  return { id: params.id, value: { ...value, user } }
+}
+
+export const validateTransactionPatchParams = ({ params, body, user }: { params: Record<string, any>, body: Record<string, any>, user: string }) => {
+  validateTransactionExist(params.id, user)
+  const { error, value } = patchSchema.validate(body)
+  if (error) throw Boom.badData(error.message).output
+  if (value.category !== undefined) getCategory(value.category, user)
+  if (value.account !== undefined) assertAccountExists(value.account, user)
   return { id: params.id, value: { ...value, user } }
 }
 

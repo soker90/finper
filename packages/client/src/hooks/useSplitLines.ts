@@ -4,6 +4,10 @@ import { roundMoney } from 'utils'
 
 export type SplitFormValue = { category: string, amount: number | '', tags: string[] }
 
+export const SPLIT_ERROR = {
+  AMOUNT_MISMATCH: 'La suma de los desgloses debe coincidir con el importe total'
+} as const
+
 /** Shared by TransactionEdit, CreditCardMovementEdit and ModalMovement: each
  * domain stores a split line's category under a different field (`category._id`
  * in transactions, `categoryId` in credit card movements), so `getCategory`
@@ -43,6 +47,7 @@ export const useSplitLines = ({ control, watch, setValue, categoryFieldName, ini
   const remaining = roundMoney(watchedAmount - assigned)
   const hasSplits = splitMode && watchedSplits.length >= 2
   const isAmountMismatch = hasSplits && remaining !== 0
+  const splitError = isAmountMismatch ? SPLIT_ERROR.AMOUNT_MISMATCH : null
 
   const enableSplitMode = () => {
     setSplitMode(true)
@@ -85,6 +90,7 @@ export const useSplitLines = ({ control, watch, setValue, categoryFieldName, ini
     remaining,
     hasSplits,
     isAmountMismatch,
+    splitError,
     enableSplitMode,
     disableSplitMode,
     assignRemaining

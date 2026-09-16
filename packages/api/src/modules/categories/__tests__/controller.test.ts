@@ -9,7 +9,7 @@ import { and, eq, isNull, isNotNull } from 'drizzle-orm'
 import { ERROR_MESSAGE } from '../../../i18n'
 import { categoriesRoutes } from '../categories.routes'
 
-const { categories, users } = schema
+const { categories, users, accounts, transactions } = schema
 
 describe('Categories Controller', () => {
   let token: string
@@ -198,6 +198,27 @@ describe('Categories Controller', () => {
     test('when exist the category, but belongs to another user it should response with status code 404', async () => {
       const category = insertCategory({ user: otherUsername })
       await supertest(server.app).delete(deletePath(category._id)).set('Authorization', `Bearer ${token}`).expect(404)
+    })
+
+    test('when the category is referenced by a transaction, it should respond 409', async () => {
+      const category = insertCategory({ user: username })
+      const accountId = generateId()
+      const transactionId = generateId()
+      sqliteDb.insert(accounts).values({ id: accountId, name: 'Cuenta', bank: 'BBVA', balance: 0, user: username }).run()
+      sqliteDb.insert(transactions).values({
+        id: transactionId, date: Date.now(), categoryId: category._id, amount: 10, type: TRANSACTION.Expense, accountId, user: username
+      }).run()
+
+      try {
+        await supertest(server.app).delete(deletePath(category._id)).set('Authorization', `Bearer ${token}`)
+          .expect(409)
+          .expect((res) => {
+            expect(res.body.message).toBe(ERROR_MESSAGE.CATEGORY.IN_USE)
+          })
+      } finally {
+        sqliteDb.delete(transactions).where(eq(transactions.id, transactionId)).run()
+        sqliteDb.delete(accounts).where(eq(accounts.id, accountId)).run()
+      }
     })
 
     // CASO NUEVO (opción C): borrar un padre con hijas -> 409.

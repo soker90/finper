@@ -9,7 +9,8 @@ export const ERROR_MESSAGE = {
   CATEGORY: {
     NOT_FOUND: 'La categoría no existe',
     PARENT_NOT_FOUND: 'La categoría padre no existe',
-    HAS_CHILDREN: 'No se puede eliminar una categoría que tiene subcategorías'
+    HAS_CHILDREN: 'No se puede eliminar una categoría que tiene subcategorías',
+    IN_USE: 'No se puede eliminar una categoría que está en uso por movimientos, presupuestos u otros registros'
   },
   TRANSACTION: {
     NOT_FOUND: 'No existe el movimiento',

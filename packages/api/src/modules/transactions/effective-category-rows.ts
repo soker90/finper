@@ -1,4 +1,4 @@
-import { eq, and, gte, lt, lte, inArray } from 'drizzle-orm'
+import { eq, and, gte, lt, lte, inArray, sql } from 'drizzle-orm'
 import { type DB, schema } from '@soker90/finper-db'
 import { chunk } from '../../utils'
 
@@ -44,11 +44,14 @@ export interface SplitRow {
 // are queried in chunks instead of one unbounded list.
 const ID_CHUNK_SIZE = 500
 
-export const loadSplitsByTransactionIds = (db: DB, transactionIds: string[]): Map<string, SplitRow[]> => {
+export const loadSplitsByTransactionIds = (db: DB, transactionIds: string[], user?: string): Map<string, SplitRow[]> => {
   const grouped = new Map<string, SplitRow[]>()
   if (transactionIds.length === 0) return grouped
 
   for (const idsChunk of chunk(transactionIds, ID_CHUNK_SIZE)) {
+    const conditions = [inArray(transactionSplits.transactionId, idsChunk)]
+    if (user) conditions.push(eq(transactionSplits.user, user))
+
     const rows = db.select({
       id: transactionSplits.id,
       transactionId: transactionSplits.transactionId,
@@ -59,7 +62,8 @@ export const loadSplitsByTransactionIds = (db: DB, transactionIds: string[]): Ma
     })
       .from(transactionSplits)
       .leftJoin(categories, eq(transactionSplits.categoryId, categories.id))
-      .where(inArray(transactionSplits.transactionId, idsChunk))
+      .where(and(...conditions))
+      .orderBy(sql`transaction_splits.rowid`)
       .all()
 
     for (const row of rows) {
@@ -99,7 +103,7 @@ export const findEffectiveCategoryRows = (db: DB, query: EffectiveCategoryQuery)
     .leftJoin(categories, eq(transactions.categoryId, categories.id))
     .where(and(...conditions)).all()
 
-  const splitsByTransaction = loadSplitsByTransactionIds(db, parents.map(parent => parent.id))
+  const splitsByTransaction = loadSplitsByTransactionIds(db, parents.map(parent => parent.id), query.user)
   const rows: EffectiveCategoryRow[] = []
 
   for (const parent of parents) {

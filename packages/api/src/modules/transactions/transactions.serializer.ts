@@ -55,6 +55,9 @@ export const serializeTransactionPopulated = (row: TransactionRow, splits?: Spli
   if (row.storeId) result.store = { _id: row.storeId, name: row.storeName }
   if (row.subscriptionId) result.subscriptionId = row.subscriptionId
   if (row.creditCardId) result.creditCard = { id: row.creditCardId, name: row.creditCardName }
+  // Exposed so the client can hide "split" for yield-linked transactions
+  // (the API rejects splitting them, see TransactionsService.editTransaction).
+  if (row.yieldId) result.yieldId = row.yieldId
   if (splits && splits.length >= 2) result.splits = splits.map(serializeSplitPopulated)
   return result
 }

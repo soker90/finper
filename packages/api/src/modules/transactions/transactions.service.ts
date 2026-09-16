@@ -1,8 +1,8 @@
 import Boom from '@hapi/boom'
-import { sql, eq } from 'drizzle-orm'
+import { sql, eq, and } from 'drizzle-orm'
 import { db as sqliteDb } from '../../db'
 import { schema, generateId, roundMoney } from '@soker90/finper-db'
-import { getTransactionAmount, sanitizeTags } from '../../utils'
+import { getTransactionAmount, sanitizeTags, assertSplitEditInvariant } from '../../utils'
 import { ERROR_MESSAGE } from '../../i18n'
 import { serializeTransaction, serializeTransactionPopulated } from './transactions.serializer'
 import { loadSplitsByTransactionIds } from './effective-category-rows'
@@ -23,8 +23,11 @@ export interface TransactionHooks {
 type SplitInput = { category: string, amount: number, tags?: string[] }
 
 const persistSplits = (tx: { delete: typeof sqliteDb.delete, insert: typeof sqliteDb.insert }, params: { transactionId: string, user: string, splits?: SplitInput[] }) => {
-  tx.delete(transactionSplits).where(eq(transactionSplits.transactionId, params.transactionId)).run()
-  if (!params.splits || params.splits.length < 2) return
+  if (params.splits === undefined) return
+  tx.delete(transactionSplits)
+    .where(and(eq(transactionSplits.transactionId, params.transactionId), eq(transactionSplits.user, params.user)))
+    .run()
+  if (params.splits.length < 2) return
   for (const split of params.splits) {
     tx.insert(transactionSplits).values({
       id: generateId(),
@@ -37,8 +40,8 @@ const persistSplits = (tx: { delete: typeof sqliteDb.delete, insert: typeof sqli
   }
 }
 
-const serializedWithSplits = (row: typeof schema.transactions.$inferSelect) => {
-  const splits = loadSplitsByTransactionIds(sqliteDb, [row.id]).get(row.id)
+const serializedWithSplits = (row: typeof schema.transactions.$inferSelect, user: string) => {
+  const splits = loadSplitsByTransactionIds(sqliteDb, [row.id], user).get(row.id)
   return serializeTransaction(row, splits)
 }
 
@@ -74,14 +77,14 @@ export class TransactionsService {
       if (amount !== 0) {
         tx.update(accounts)
           .set({ balance: sql`ROUND(${accounts.balance} + ${amount}, 2)` })
-          .where(eq(accounts.id, params.account))
+          .where(and(eq(accounts.id, params.account), eq(accounts.user, params.user)))
           .run()
       }
       return row
     })
 
     this.hooks.onTransactionCreated?.(created)
-    return serializedWithSplits(created)
+    return serializedWithSplits(created, params.user)
   }
 
   public editTransaction ({ id, value }: { id: string, value: any }): any {
@@ -89,45 +92,107 @@ export class TransactionsService {
     /* v8 ignore next — validateTransactionExist runs before via route */
     if (!oldTransaction) throw Boom.notFound(ERROR_MESSAGE.TRANSACTION.NOT_FOUND).output
 
-    const hasSplits = Array.isArray(value.splits) && value.splits.length >= 2
-    if (hasSplits && oldTransaction.yieldId) {
+    const existingSplits = loadSplitsByTransactionIds(sqliteDb, [id], value.user).get(id) ?? []
+
+    const isYield = Boolean(oldTransaction.yieldId)
+    const willHaveSplits = value.splits !== undefined
+      ? (value.splits.length >= 2)
+      : (existingSplits.length >= 2)
+
+    if (willHaveSplits && isYield) {
       throw Boom.badData(ERROR_MESSAGE.TRANSACTION.SPLIT_YIELD).output
     }
 
-    const oldAmount = amountOf(oldTransaction)
-    const sanitizedTags = hasSplits ? [] : sanitizeTags(value.tags)
-    const categoryId = hasSplits ? value.splits[0].category : value.category
+    assertSplitEditInvariant({
+      existingSplits: existingSplits.map(split => ({ categoryId: split.categoryId, amount: split.amount })),
+      currentAmount: oldTransaction.amount,
+      currentType: oldTransaction.type,
+      newSplits: value.splits?.map((split: any) => ({ categoryId: split.category, amount: split.amount, tags: split.tags })),
+      newAmount: value.amount,
+      newType: value.type,
+      hasNewCategoryOrTags: value.category !== undefined || value.tags !== undefined,
+      user: value.user,
+      db: sqliteDb
+    })
+
+    const finalAmount = value.amount !== undefined ? roundMoney(value.amount) : oldTransaction.amount
+    const finalType = value.type ?? oldTransaction.type
+    const finalAccountId = value.account ?? oldTransaction.accountId
+    const finalDate = value.date ?? oldTransaction.date
+    const finalNote = value.note !== undefined ? (value.note ?? null) : oldTransaction.note
+    const finalStoreId = value.store !== undefined ? (value.store ?? null) : oldTransaction.storeId
+
+    let finalCategoryId = oldTransaction.categoryId
+    let finalTags = oldTransaction.tags
+
+    if (value.splits !== undefined) {
+      if (value.splits.length >= 2) {
+        finalCategoryId = value.splits[0].category
+        finalTags = []
+      } else {
+        // value.splits === [] -> explicitly converted to normal transaction
+        finalCategoryId = value.category ?? oldTransaction.categoryId
+        finalTags = value.tags !== undefined ? sanitizeTags(value.tags) : oldTransaction.tags
+      }
+    } else {
+      if (existingSplits.length >= 2) {
+        finalCategoryId = existingSplits[0].categoryId
+        finalTags = []
+      } else {
+        if (value.category !== undefined) finalCategoryId = value.category
+        if (value.tags !== undefined) finalTags = sanitizeTags(value.tags)
+      }
+    }
+
+    const oldSignedAmount = amountOf(oldTransaction)
 
     const updated = sqliteDb.transaction((tx) => {
       const row = tx.update(transactions)
         .set({
-          date: value.date,
-          categoryId,
-          amount: roundMoney(value.amount),
-          type: value.type,
-          accountId: value.account,
-          note: value.note ?? null,
-          storeId: value.store ?? null,
-          tags: sanitizedTags
+          date: finalDate,
+          categoryId: finalCategoryId,
+          amount: finalAmount,
+          type: finalType,
+          accountId: finalAccountId,
+          note: finalNote,
+          storeId: finalStoreId,
+          tags: finalTags
         })
-        .where(eq(transactions.id, id))
+        .where(and(eq(transactions.id, id), eq(transactions.user, value.user)))
         .returning()
         .get()
 
-      persistSplits(tx, { transactionId: id, user: value.user, splits: value.splits })
+      if (value.splits !== undefined) {
+        persistSplits(tx, { transactionId: id, user: value.user, splits: value.splits })
+      }
 
-      const newAmount = amountOf(row)
-      const delta = newAmount - oldAmount
-      if (delta !== 0) {
-        tx.update(accounts)
-          .set({ balance: sql`ROUND(${accounts.balance} + ${delta}, 2)` })
-          .where(eq(accounts.id, row.accountId))
-          .run()
+      const newSignedAmount = amountOf(row)
+      if (oldTransaction.accountId === row.accountId) {
+        const delta = roundMoney(newSignedAmount - oldSignedAmount)
+        if (delta !== 0) {
+          tx.update(accounts)
+            .set({ balance: sql`ROUND(${accounts.balance} + ${delta}, 2)` })
+            .where(and(eq(accounts.id, row.accountId), eq(accounts.user, value.user)))
+            .run()
+        }
+      } else {
+        if (oldSignedAmount !== 0) {
+          tx.update(accounts)
+            .set({ balance: sql`ROUND(${accounts.balance} - ${oldSignedAmount}, 2)` })
+            .where(and(eq(accounts.id, oldTransaction.accountId), eq(accounts.user, value.user)))
+            .run()
+        }
+        if (newSignedAmount !== 0) {
+          tx.update(accounts)
+            .set({ balance: sql`ROUND(${accounts.balance} + ${newSignedAmount}, 2)` })
+            .where(and(eq(accounts.id, row.accountId), eq(accounts.user, value.user)))
+            .run()
+        }
       }
       return row
     })
 
-    return serializedWithSplits(updated)
+    return serializedWithSplits(updated, value.user)
   }
 
   public deleteTransaction (id: string, user: string): void {
@@ -138,11 +203,11 @@ export class TransactionsService {
     const amount = amountOf(transaction)
 
     sqliteDb.transaction((tx) => {
-      tx.delete(transactions).where(eq(transactions.id, id)).run()
+      tx.delete(transactions).where(and(eq(transactions.id, id), eq(transactions.user, user))).run()
       if (amount !== 0) {
         tx.update(accounts)
           .set({ balance: sql`ROUND(${accounts.balance} + ${-amount}, 2)` })
-          .where(eq(accounts.id, transaction.accountId))
+          .where(and(eq(accounts.id, transaction.accountId), eq(accounts.user, user)))
           .run()
       }
     })
@@ -152,7 +217,7 @@ export class TransactionsService {
 
   public getTransactions (params: TransactionFilters): any[] {
     const rows = this.repository.findMany(params)
-    const splitsByTransaction = loadSplitsByTransactionIds(sqliteDb, rows.map(row => row.id))
+    const splitsByTransaction = loadSplitsByTransactionIds(sqliteDb, rows.map(row => row.id), params.user)
     return rows.map(row => serializeTransactionPopulated(row, splitsByTransaction.get(row.id)))
   }
 }

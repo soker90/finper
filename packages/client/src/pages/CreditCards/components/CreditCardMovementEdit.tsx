@@ -47,7 +47,7 @@ export const CreditCardMovementEdit = ({ movement, hideForm }: CreditCardMovemen
     }
   })
   const {
-    splitMode, fields, addLine, remove, remaining, hasSplits, isAmountMismatch,
+    splitMode, fields, addLine, remove, remaining, hasSplits, splitError,
     enableSplitMode, disableSplitMode, assignRemaining
   } = useSplitLines({
     control: control as unknown as Control<any>,
@@ -62,9 +62,7 @@ export const CreditCardMovementEdit = ({ movement, hideForm }: CreditCardMovemen
   const onSubmit = handleSubmit((data) => runSubmit(async () => {
     const id = getId(movement)
     if (!id) return { error: 'No se pudo identificar el movimiento a editar' }
-    if (isAmountMismatch) {
-      return { error: 'La suma de los desgloses debe coincidir con el importe total' }
-    }
+    if (splitError) return { error: splitError }
     return editCreditCardMovement({
       creditCardId: movement.creditCardId,
       movementId: id,
@@ -177,6 +175,7 @@ export const CreditCardMovementEdit = ({ movement, hideForm }: CreditCardMovemen
               onAssignRemaining={assignRemaining}
               onEnableSplitMode={enableSplitMode}
               onDisableSplitMode={disableSplitMode}
+              splitError={splitError}
             />
           </Grid>
 
@@ -206,7 +205,7 @@ export const CreditCardMovementEdit = ({ movement, hideForm }: CreditCardMovemen
               type='submit'
               variant='contained'
               color='primary'
-              disabled={isSubmitting || isAmountMismatch}
+              disabled={isSubmitting || Boolean(splitError)}
             >
               Guardar
             </Button>

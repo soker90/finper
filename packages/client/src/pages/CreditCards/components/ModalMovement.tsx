@@ -63,7 +63,7 @@ export const ModalMovement = ({ open, onClose, creditCardId, movement, onSuccess
     defaultValues: buildDefaultValues(movement)
   })
   const {
-    splitMode, setSplitMode, fields, addLine, remove, remaining, hasSplits, isAmountMismatch,
+    splitMode, setSplitMode, fields, addLine, remove, remaining, hasSplits, splitError,
     enableSplitMode, disableSplitMode, assignRemaining
   } = useSplitLines({
     control: control as unknown as Control<any>,
@@ -84,9 +84,7 @@ export const ModalMovement = ({ open, onClose, creditCardId, movement, onSuccess
   const { error: submitError, runSubmit } = useSubmitError()
 
   const handleFormSubmit = handleSubmit((data) => runSubmit(async () => {
-    if (isAmountMismatch) {
-      return { error: 'La suma de los desgloses debe coincidir con el importe total' }
-    }
+    if (splitError) return { error: splitError }
     const payload = buildMovementPayload({ data, hasSplits })
     if (movement) {
       const id = getId(movement)
@@ -107,7 +105,7 @@ export const ModalMovement = ({ open, onClose, creditCardId, movement, onSuccess
       title={movement ? 'Editar movimiento de tarjeta' : 'Nuevo movimiento con tarjeta'}
       onClose={onClose}
       action={handleFormSubmit}
-      actionDisabled={isSubmitting || isAmountMismatch}
+      actionDisabled={isSubmitting || Boolean(splitError)}
     >
       <DateForm
         placeholder='Introduce una fecha'
@@ -213,6 +211,7 @@ export const ModalMovement = ({ open, onClose, creditCardId, movement, onSuccess
           onAssignRemaining={assignRemaining}
           onEnableSplitMode={enableSplitMode}
           onDisableSplitMode={disableSplitMode}
+          splitError={splitError}
         />
       </Grid>
 

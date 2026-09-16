@@ -4,9 +4,11 @@ import { requestLogin } from '../../../../test/request-login'
 import { generateUsername } from '../../../../test/generate-values'
 import { db as sqliteDb } from '../../../db'
 import { schema, generateId } from '@soker90/finper-db'
-import { eq } from 'drizzle-orm'
+import { eq, sql } from 'drizzle-orm'
 import { creditCardsRoutes } from '../credit-cards.routes'
 import { accountsRepository } from '../../accounts/accounts.repository'
+
+import { ERROR_MESSAGE } from '../../../i18n'
 
 const { creditCards, creditCardMovements, creditCardMovementSplits, accounts, categories, transactions, transactionSplits, users, stores } = schema
 
@@ -1202,6 +1204,463 @@ describe('Credit Cards Routes', () => {
       const remainingSplits = sqliteDb.select().from(creditCardMovementSplits)
         .where(eq(creditCardMovementSplits.movementId, movementRes.body.id)).all()
       expect(remainingSplits).toHaveLength(0)
+    })
+
+    test('PATCH Scenario A: changing amount without splits on a split movement returns 422', async () => {
+      const homeCategoryId = generateId()
+      sqliteDb.insert(categories).values({ id: homeCategoryId, name: 'Home A', type: 'expense', user: username }).run()
+
+      const cardResponse = await supertest(server.app)
+        .post(path)
+        .set('Authorization', `Bearer ${token}`)
+        .send({ name: 'Scenario A Card', accountId })
+        .expect(201)
+      const cardId = cardResponse.body.id
+
+      const movementResponse = await supertest(server.app)
+        .post(`${path}/${cardId}/movements`)
+        .set('Authorization', `Bearer ${token}`)
+        .send({
+          date: Date.now(),
+          amount: 100,
+          categoryId,
+          splits: [
+            { categoryId, amount: 60 },
+            { categoryId: homeCategoryId, amount: 40 }
+          ]
+        })
+        .expect(201)
+
+      const patchResponse = await supertest(server.app)
+        .patch(`${path}/${cardId}/movements/${movementResponse.body.id}`)
+        .set('Authorization', `Bearer ${token}`)
+        .send({ amount: 120 })
+        .expect(422)
+
+      expect(patchResponse.body.message).toBe(ERROR_MESSAGE.TRANSACTION.SPLIT_SUM_MISMATCH)
+    })
+
+    test('PATCH Scenario B: changing categoryId or type on a split movement without splits returns 422, but works on normal movement', async () => {
+      const homeCategoryId = generateId()
+      sqliteDb.insert(categories).values({ id: homeCategoryId, name: 'Home B', type: 'expense', user: username }).run()
+
+      const cardResponse = await supertest(server.app)
+        .post(path)
+        .set('Authorization', `Bearer ${token}`)
+        .send({ name: 'Scenario B Card', accountId })
+        .expect(201)
+      const cardId = cardResponse.body.id
+
+      // Split movement: changing categoryId without splits is rejected
+      const splitMovement = await supertest(server.app)
+        .post(`${path}/${cardId}/movements`)
+        .set('Authorization', `Bearer ${token}`)
+        .send({
+          date: Date.now(),
+          amount: 100,
+          categoryId,
+          splits: [
+            { categoryId, amount: 60 },
+            { categoryId: homeCategoryId, amount: 40 }
+          ]
+        })
+        .expect(201)
+
+      const categoryReject = await supertest(server.app)
+        .patch(`${path}/${cardId}/movements/${splitMovement.body.id}`)
+        .set('Authorization', `Bearer ${token}`)
+        .send({ categoryId: homeCategoryId })
+        .expect(422)
+      expect(categoryReject.body.message).toBe(ERROR_MESSAGE.TRANSACTION.SPLIT_FIELDS_REQUIRE_SPLITS)
+
+      // Normal movement: changing categoryId succeeds
+      const normalMovement = await supertest(server.app)
+        .post(`${path}/${cardId}/movements`)
+        .set('Authorization', `Bearer ${token}`)
+        .send({
+          date: Date.now(),
+          amount: 80,
+          categoryId
+        })
+        .expect(201)
+
+      const normalUpdate = await supertest(server.app)
+        .patch(`${path}/${cardId}/movements/${normalMovement.body.id}`)
+        .set('Authorization', `Bearer ${token}`)
+        .send({ categoryId: homeCategoryId })
+        .expect(200)
+      expect(normalUpdate.body.categoryId).toBe(homeCategoryId)
+    })
+
+    test('PATCH Scenario C: changing amount and providing matching splits updates both', async () => {
+      const homeCategoryId = generateId()
+      sqliteDb.insert(categories).values({ id: homeCategoryId, name: 'Home C', type: 'expense', user: username }).run()
+
+      const cardResponse = await supertest(server.app)
+        .post(path)
+        .set('Authorization', `Bearer ${token}`)
+        .send({ name: 'Scenario C Card', accountId })
+        .expect(201)
+      const cardId = cardResponse.body.id
+
+      const movementResponse = await supertest(server.app)
+        .post(`${path}/${cardId}/movements`)
+        .set('Authorization', `Bearer ${token}`)
+        .send({
+          date: Date.now(),
+          amount: 100,
+          categoryId,
+          splits: [
+            { categoryId, amount: 60 },
+            { categoryId: homeCategoryId, amount: 40 }
+          ]
+        })
+        .expect(201)
+
+      const patchResponse = await supertest(server.app)
+        .patch(`${path}/${cardId}/movements/${movementResponse.body.id}`)
+        .set('Authorization', `Bearer ${token}`)
+        .send({
+          amount: 150,
+          splits: [
+            { categoryId, amount: 90 },
+            { categoryId: homeCategoryId, amount: 60 }
+          ]
+        })
+        .expect(200)
+
+      expect(patchResponse.body.amount).toBe(150)
+      expect(patchResponse.body.splits).toHaveLength(2)
+      expect(patchResponse.body.splits.map((split: { amount: number }) => split.amount).sort()).toEqual([60, 90])
+    })
+
+    test('PATCH Scenario E: providing exactly 1 split is rejected with 422', async () => {
+      const cardResponse = await supertest(server.app)
+        .post(path)
+        .set('Authorization', `Bearer ${token}`)
+        .send({ name: 'Scenario E Card', accountId })
+        .expect(201)
+      const cardId = cardResponse.body.id
+
+      const movementResponse = await supertest(server.app)
+        .post(`${path}/${cardId}/movements`)
+        .set('Authorization', `Bearer ${token}`)
+        .send({
+          date: Date.now(),
+          amount: 100,
+          categoryId
+        })
+        .expect(201)
+
+      const patchResponse = await supertest(server.app)
+        .patch(`${path}/${cardId}/movements/${movementResponse.body.id}`)
+        .set('Authorization', `Bearer ${token}`)
+        .send({
+          splits: [
+            { categoryId, amount: 100 }
+          ]
+        })
+        .expect(422)
+
+      expect(patchResponse.body.message).toBe(ERROR_MESSAGE.TRANSACTION.SPLIT_MIN)
+    })
+
+    test('PATCH with repeated categories across splits is accepted with 200', async () => {
+      const cardResponse = await supertest(server.app)
+        .post(path)
+        .set('Authorization', `Bearer ${token}`)
+        .send({ name: 'Repeated Cat Card', accountId })
+        .expect(201)
+      const cardId = cardResponse.body.id
+
+      const movementResponse = await supertest(server.app)
+        .post(`${path}/${cardId}/movements`)
+        .set('Authorization', `Bearer ${token}`)
+        .send({
+          date: Date.now(),
+          amount: 100,
+          categoryId
+        })
+        .expect(201)
+
+      const patchResponse = await supertest(server.app)
+        .patch(`${path}/${cardId}/movements/${movementResponse.body.id}`)
+        .set('Authorization', `Bearer ${token}`)
+        .send({
+          splits: [
+            { categoryId, amount: 60, tags: ['tag1'] },
+            { categoryId, amount: 40, tags: ['tag2'] }
+          ]
+        })
+        .expect(200)
+
+      expect(patchResponse.body.splits).toHaveLength(2)
+      expect(patchResponse.body.splits[0].categoryId).toBe(categoryId)
+      expect(patchResponse.body.splits[1].categoryId).toBe(categoryId)
+    })
+
+    test('PATCH note on split movement preserves splits untouched', async () => {
+      const homeCategoryId = generateId()
+      sqliteDb.insert(categories).values({ id: homeCategoryId, name: 'Home Note', type: 'expense', user: username }).run()
+
+      const cardResponse = await supertest(server.app)
+        .post(path)
+        .set('Authorization', `Bearer ${token}`)
+        .send({ name: 'Note Preservation Card', accountId })
+        .expect(201)
+      const cardId = cardResponse.body.id
+
+      const movementResponse = await supertest(server.app)
+        .post(`${path}/${cardId}/movements`)
+        .set('Authorization', `Bearer ${token}`)
+        .send({
+          date: Date.now(),
+          amount: 100,
+          categoryId,
+          note: 'Original note',
+          splits: [
+            { categoryId, amount: 60, tags: ['line1'] },
+            { categoryId: homeCategoryId, amount: 40, tags: ['line2'] }
+          ]
+        })
+        .expect(201)
+
+      const patchResponse = await supertest(server.app)
+        .patch(`${path}/${cardId}/movements/${movementResponse.body.id}`)
+        .set('Authorization', `Bearer ${token}`)
+        .send({ note: 'Updated note' })
+        .expect(200)
+
+      expect(patchResponse.body.note).toBe('Updated note')
+      expect(patchResponse.body.splits).toHaveLength(2)
+      expect(patchResponse.body.splits[0].tags).toEqual(['line1'])
+      expect(patchResponse.body.splits[1].tags).toEqual(['line2'])
+    })
+
+    test('payDebt rejects already paid movement with ALREADY_PAID', async () => {
+      const cardResponse = await supertest(server.app)
+        .post(path)
+        .set('Authorization', `Bearer ${token}`)
+        .send({ name: 'Already Paid Card', accountId })
+        .expect(201)
+      const cardId = cardResponse.body.id
+
+      const movementResponse = await supertest(server.app)
+        .post(`${path}/${cardId}/movements`)
+        .set('Authorization', `Bearer ${token}`)
+        .send({ date: Date.now(), amount: 50, categoryId })
+        .expect(201)
+
+      // First pay-debt succeeds
+      await supertest(server.app)
+        .post(`${path}/${cardId}/pay-debt`)
+        .set('Authorization', `Bearer ${token}`)
+        .send({ movementIds: [movementResponse.body.id] })
+        .expect(200)
+
+      // Second pay-debt fails with 400 ALREADY_PAID
+      const secondAttempt = await supertest(server.app)
+        .post(`${path}/${cardId}/pay-debt`)
+        .set('Authorization', `Bearer ${token}`)
+        .send({ movementIds: [movementResponse.body.id] })
+        .expect(400)
+
+      expect(secondAttempt.body.message).toBe(ERROR_MESSAGE.CREDIT_CARD.ALREADY_PAID)
+    })
+
+    test('payDebt rejects movement of another user with INVALID_PAYMENT', async () => {
+      const otherUsername = generateUsername()
+      const otherToken = await requestLogin(server.app, { username: otherUsername })
+      const otherAccount = await accountsRepository.create(otherUsername, { name: 'Other Checking', bank: 'Santander', balance: 500 })
+
+      const cardResponse = await supertest(server.app)
+        .post(path)
+        .set('Authorization', `Bearer ${token}`)
+        .send({ name: 'User Card', accountId })
+        .expect(201)
+      const cardId = cardResponse.body.id
+
+      // Other user card and movement
+      const otherCardResponse = await supertest(server.app)
+        .post(path)
+        .set('Authorization', `Bearer ${otherToken}`)
+        .send({ name: 'Other Card', accountId: otherAccount.id })
+        .expect(201)
+
+      const otherCategory = generateId()
+      sqliteDb.insert(categories).values({ id: otherCategory, name: 'Other Cat', type: 'expense', user: otherUsername }).run()
+
+      const otherMovementResponse = await supertest(server.app)
+        .post(`${path}/${otherCardResponse.body.id}/movements`)
+        .set('Authorization', `Bearer ${otherToken}`)
+        .send({ date: Date.now(), amount: 30, categoryId: otherCategory })
+        .expect(201)
+
+      // First user attempts to pay other user's movement
+      const unauthorizedPay = await supertest(server.app)
+        .post(`${path}/${cardId}/pay-debt`)
+        .set('Authorization', `Bearer ${token}`)
+        .send({ movementIds: [otherMovementResponse.body.id] })
+        .expect(400)
+
+      expect(unauthorizedPay.body.message).toBe(ERROR_MESSAGE.CREDIT_CARD.INVALID_PAYMENT)
+
+      // Clean up other user
+      sqliteDb.delete(creditCardMovements).where(eq(creditCardMovements.user, otherUsername)).run()
+      sqliteDb.delete(creditCards).where(eq(creditCards.user, otherUsername)).run()
+      sqliteDb.delete(accounts).where(eq(accounts.user, otherUsername)).run()
+      sqliteDb.delete(categories).where(eq(categories.user, otherUsername)).run()
+      sqliteDb.delete(users).where(eq(users.username, otherUsername)).run()
+    })
+
+    test('payDebt rolls back completely when split category is missing', async () => {
+      const deletedCategoryId = generateId()
+      sqliteDb.insert(categories).values({ id: deletedCategoryId, name: 'To Be Deleted', type: 'expense', user: username }).run()
+
+      const cardResponse = await supertest(server.app)
+        .post(path)
+        .set('Authorization', `Bearer ${token}`)
+        .send({ name: 'Rollback Card', accountId })
+        .expect(201)
+      const cardId = cardResponse.body.id
+
+      const movementResponse = await supertest(server.app)
+        .post(`${path}/${cardId}/movements`)
+        .set('Authorization', `Bearer ${token}`)
+        .send({
+          date: Date.now(),
+          amount: 100,
+          categoryId,
+          splits: [
+            { categoryId, amount: 60 },
+            { categoryId: deletedCategoryId, amount: 40 }
+          ]
+        })
+        .expect(201)
+
+      const initialAccount = sqliteDb.select().from(accounts).where(eq(accounts.id, accountId)).get()!
+
+      // Temporarily disable foreign keys to delete the category and simulate category loss
+      sqliteDb.run(sql`PRAGMA foreign_keys = OFF`)
+      sqliteDb.delete(categories).where(eq(categories.id, deletedCategoryId)).run()
+      sqliteDb.run(sql`PRAGMA foreign_keys = ON`)
+
+      await supertest(server.app)
+        .post(`${path}/${cardId}/pay-debt`)
+        .set('Authorization', `Bearer ${token}`)
+        .send({ movementIds: [movementResponse.body.id] })
+        .expect(404)
+
+      // Verify complete rollback: movement still pending, no transaction, balance unchanged
+      const movementAfter = sqliteDb.select().from(creditCardMovements).where(eq(creditCardMovements.id, movementResponse.body.id)).get()!
+      expect(movementAfter.status).toBe('pending')
+      expect(movementAfter.transactionId).toBeNull()
+
+      const createdTxs = sqliteDb.select().from(transactions).where(eq(transactions.creditCardId, cardId)).all()
+      expect(createdTxs).toHaveLength(0)
+
+      const accountAfter = sqliteDb.select().from(accounts).where(eq(accounts.id, accountId)).get()!
+      expect(accountAfter.balance).toBe(initialAccount.balance)
+    })
+
+    test('concurrent payDebt requests on the same movement result in exactly one payment transaction', async () => {
+      const cardResponse = await supertest(server.app)
+        .post(path)
+        .set('Authorization', `Bearer ${token}`)
+        .send({ name: 'Concurrent Pay Card', accountId })
+        .expect(201)
+      const cardId = cardResponse.body.id
+
+      const movementResponse = await supertest(server.app)
+        .post(`${path}/${cardId}/movements`)
+        .set('Authorization', `Bearer ${token}`)
+        .send({ date: Date.now(), amount: 75, categoryId })
+        .expect(201)
+
+      // First pay-debt succeeds
+      await supertest(server.app)
+        .post(`${path}/${cardId}/pay-debt`)
+        .set('Authorization', `Bearer ${token}`)
+        .send({ movementIds: [movementResponse.body.id] })
+        .expect(200)
+
+      // Second pay-debt fails with ALREADY_PAID
+      const secondAttempt = await supertest(server.app)
+        .post(`${path}/${cardId}/pay-debt`)
+        .set('Authorization', `Bearer ${token}`)
+        .send({ movementIds: [movementResponse.body.id] })
+        .expect(400)
+
+      expect(secondAttempt.body.message).toBe(ERROR_MESSAGE.CREDIT_CARD.ALREADY_PAID)
+
+      // Exactly 1 transaction exists
+      const createdTxs = sqliteDb.select().from(transactions).where(eq(transactions.creditCardId, cardId)).all()
+      expect(createdTxs).toHaveLength(1)
+    })
+
+    test('payDebt preserves splits with repeated categories and distinct tags without data loss', async () => {
+      const foodCategoryId = generateId()
+      const transportCategoryId = generateId()
+      sqliteDb.insert(categories).values([
+        { id: foodCategoryId, name: 'Comida Pay Debt', type: 'expense', user: username },
+        { id: transportCategoryId, name: 'Transporte Pay Debt', type: 'expense', user: username }
+      ]).run()
+
+      const cardResponse = await supertest(server.app)
+        .post(path)
+        .set('Authorization', `Bearer ${token}`)
+        .send({ name: 'Preserve Splits Pay Card', accountId })
+        .expect(201)
+      const testCardId = cardResponse.body.id
+
+      const movementResponse = await supertest(server.app)
+        .post(`${path}/${testCardId}/movements`)
+        .set('Authorization', `Bearer ${token}`)
+        .send({
+          date: Date.now(),
+          amount: 100,
+          categoryId: foodCategoryId,
+          splits: [
+            { categoryId: foodCategoryId, amount: 30, tags: ['supermarket'] },
+            { categoryId: foodCategoryId, amount: 20, tags: ['restaurant'] },
+            { categoryId: transportCategoryId, amount: 50, tags: ['taxi'] }
+          ]
+        })
+        .expect(201)
+
+      await supertest(server.app)
+        .post(`${path}/${testCardId}/pay-debt`)
+        .set('Authorization', `Bearer ${token}`)
+        .send({ movementIds: [movementResponse.body.id] })
+        .expect(200)
+
+      const paidMovement = sqliteDb.select().from(creditCardMovements)
+        .where(eq(creditCardMovements.id, movementResponse.body.id)).get()!
+      expect(paidMovement.status).toBe('paid')
+
+      const createdTx = sqliteDb.select().from(transactions)
+        .where(eq(transactions.id, paidMovement.transactionId!)).get()!
+      expect(createdTx.amount).toBe(100)
+      expect(createdTx.categoryId).toBe(foodCategoryId)
+      expect(createdTx.tags).toEqual([])
+
+      const createdSplits = sqliteDb.select().from(transactionSplits)
+        .where(eq(transactionSplits.transactionId, createdTx.id)).all()
+      expect(createdSplits).toHaveLength(3)
+
+      const foodSplits = createdSplits.filter(split => split.categoryId === foodCategoryId)
+      expect(foodSplits).toHaveLength(2)
+      expect(foodSplits.map(split => ({ amount: split.amount, tags: split.tags }))).toEqual(
+        expect.arrayContaining([
+          { amount: 30, tags: ['supermarket'] },
+          { amount: 20, tags: ['restaurant'] }
+        ])
+      )
+
+      const transportSplits = createdSplits.filter(split => split.categoryId === transportCategoryId)
+      expect(transportSplits).toHaveLength(1)
+      expect(transportSplits[0].amount).toBe(50)
+      expect(transportSplits[0].tags).toEqual(['taxi'])
     })
   })
 })

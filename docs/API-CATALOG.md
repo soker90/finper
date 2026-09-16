@@ -55,7 +55,7 @@ Routes: `account.routes.ts`. Modelo: `Account`.
 | GET | `/` | Listar plano. |
 | GET | `/grouped` | Listar agrupado por padre. |
 | PATCH | `/:id` | Editar. |
-| DELETE | `/:id` | Eliminar. |
+| DELETE | `/:id` | Eliminar. `409` si tiene subcategorías o si sigue referenciada (transacciones, splits, movimientos de tarjeta, presupuestos...). |
 
 Routes: `category.routes.ts`. Modelo: `Category`.
 
@@ -70,7 +70,7 @@ Routes: `category.routes.ts`. Modelo: `Category`.
 | PUT | `/:id` | Editar (reemplazo). `splits` sustituye el desglose; omitirlos lo elimina. |
 | DELETE | `/:id` | Eliminar (CASCADE de splits). |
 
-`splits`: `{ category, amount, tags? }[]` (mínimo 2). La suma debe coincidir con `amount`. Todas las categorías del mismo `type` que el padre. No se puede dividir un movimiento con `yieldId`. Nota solo en el padre. Con splits, las tags viven en las líneas (el padre se guarda con `tags: []`).
+`splits`: `{ category, amount, tags? }[]` (mínimo 2, máximo 5). La suma debe coincidir con `amount`. Todas las categorías del mismo `type` que el padre (se permiten categorías repetidas con distintos o mismos tags); una categoría inexistente devuelve `404`. No se puede dividir un movimiento con `yieldId` (el GET expone `yieldId` para que el cliente oculte la opción). Nota solo en el padre. Con splits, las tags viven en las líneas (el padre se guarda con `tags: []`).
 
 Routes: `transactions.routes.ts`. Schema: `transactions` + `transaction_splits`.
 
@@ -260,7 +260,7 @@ Routes: `ticket.routes.ts`. Sin modelo Mongoose propio (datos vienen del bot).
 | DELETE | `/:id/movements/:movementId` | Eliminar movimiento. Falla si el movimiento ya está `paid`. CASCADE de splits. |
 | POST | `/:id/pay-debt` | Liquidar deuda (total, por importe parcial o por lista de `movementIds`). Marca los movimientos afectados como `paid` y crea una transacción real en la cuenta asociada (`accountId` de la tarjeta), enlazada vía `transactionId`. Si el movimiento tenía splits, la tx nace ya spliteada. |
 
-`splits` de movimiento: `{ categoryId, amount, tags? }[]` (mínimo 2). Misma validación que transacciones. Nota solo en el padre. Con splits, `categoryId` del padre = primera línea y `tags: []`.
+`splits` de movimiento: `{ categoryId, amount, tags? }[]` (mínimo 2, máximo 5). Misma validación que transacciones (suma, tipo, categorías existentes). Nota solo en el padre. Con splits, `categoryId` del padre = primera línea y `tags: []`.
 
 Routes: `credit-cards.routes.ts`. Schema Drizzle: `creditCards`, `creditCardMovements`, `creditCardMovementSplits`.
 

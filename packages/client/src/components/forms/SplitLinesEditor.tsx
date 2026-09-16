@@ -18,6 +18,9 @@ interface SplitLinesEditorProps {
   onRemove: (index: number) => void
   onAssignRemaining: () => void
   onDisableSplitMode: () => void
+  /** Validation message for the whole split (sum mismatch, duplicate
+   * category...). Shown under the lines while the form is blocked. */
+  splitError?: string | null
   categorySize?: number
   amountSize?: number
   tagsSize?: number
@@ -35,6 +38,7 @@ const SplitLinesEditor = ({
   onRemove,
   onAssignRemaining,
   onDisableSplitMode,
+  splitError = null,
   categorySize = 4,
   amountSize = 3,
   tagsSize = 4
@@ -97,6 +101,9 @@ const SplitLinesEditor = ({
         Restante: {remaining.toFixed(2)} €
       </Typography>
     </Stack>
+    {splitError && (
+      <Typography variant='body2' color='error.main' role='alert'>{splitError}</Typography>
+    )}
   </Stack>
 )
 
