@@ -17,7 +17,17 @@ interface Props {
   size?: number
 }
 
-const DateForm = ({ id, label, control, error, errorText, size = 4, ...others }: Props) => (
+const DateForm = ({
+  id,
+  label,
+  control,
+  error,
+  errorText,
+  size = 4,
+  value: _unusedValue,
+  onChange: _unusedOnChange,
+  ...others
+}: Props) => (
   <Grid size={{ md: size, xs: 12 }}>
     <Stack spacing={1}>
       <InputLabel htmlFor={id}>{label}</InputLabel>
@@ -26,15 +36,14 @@ const DateForm = ({ id, label, control, error, errorText, size = 4, ...others }:
         control={control}
         rules={{ required: true }}
         render={({ field }) => {
-          const { onChange } = field
+          const { onChange, value } = field
+          const resolvedValue = value ? (dayjs.isDayjs(value) ? value : dayjs(value)) : null
           return (
             <DatePicker
               slotProps={{
                 textField: {
                   variant: 'outlined',
-                  error
-                },
-                field: {
+                  error,
                   sx: {
                     '& .MuiPickersSectionList-root': {
                       padding: '10.5px 14px'
@@ -42,9 +51,9 @@ const DateForm = ({ id, label, control, error, errorText, size = 4, ...others }:
                   }
                 }
               }}
+              value={resolvedValue}
               onChange={onChange}
               format='DD/MM/YYYY'
-              {...(field.value && { value: dayjs(field.value) })}
               {...others}
             />
           )
