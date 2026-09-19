@@ -3,7 +3,7 @@ import Boom from '@hapi/boom'
 import { eq, and } from 'drizzle-orm'
 import { TRANSACTION, schema, roundMoney } from '@soker90/finper-db'
 import { db as sqliteDb } from '../../db'
-import { isValidId, assertSplitLines, loadCategoriesById } from '../../utils'
+import { isValidId, assertSplitLines, loadCategoriesById, normalizeSplitLineAmounts } from '../../utils'
 import { ERROR_MESSAGE } from '../../i18n'
 
 const { transactions, categories, accounts } = schema
@@ -85,10 +85,11 @@ const validateSplits = (params: { splits?: Array<{ category: string, amount: num
 export const validateTransactionCreateParams = (params: Record<string, any>) => {
   const { error, value } = createSchema.validate(params)
   if (error) throw Boom.badData(error.message).output
-  if (value.category) getCategory(value.category, params.user)
-  assertAccountExists(params.account, params.user)
-  validateSplits({ ...value, user: params.user })
-  return value
+  const normalizedValue = { ...value, amount: roundMoney(value.amount), splits: normalizeSplitLineAmounts(value.splits) }
+  if (normalizedValue.category) getCategory(normalizedValue.category, params.user)
+  assertAccountExists(normalizedValue.account, params.user)
+  validateSplits({ ...normalizedValue, user: params.user })
+  return normalizedValue
 }
 
 export const validateTransactionExist = (id: string, user: string) => {
@@ -102,19 +103,25 @@ export const validateTransactionEditParams = ({ params, body, user }: { params: 
   validateTransactionExist(params.id, user)
   const { error, value } = editSchema.validate(body)
   if (error) throw Boom.badData(error.message).output
-  if (value.category) getCategory(value.category, user)
-  assertAccountExists(value.account, user)
-  validateSplits({ ...value, user })
-  return { id: params.id, value: { ...value, user } }
+  const normalizedValue = { ...value, amount: roundMoney(value.amount), splits: normalizeSplitLineAmounts(value.splits) }
+  if (normalizedValue.category) getCategory(normalizedValue.category, user)
+  assertAccountExists(normalizedValue.account, user)
+  validateSplits({ ...normalizedValue, user })
+  return { id: params.id, value: { ...normalizedValue, user } }
 }
 
 export const validateTransactionPatchParams = ({ params, body, user }: { params: Record<string, any>, body: Record<string, any>, user: string }) => {
   validateTransactionExist(params.id, user)
   const { error, value } = patchSchema.validate(body)
   if (error) throw Boom.badData(error.message).output
-  if (value.category !== undefined) getCategory(value.category, user)
-  if (value.account !== undefined) assertAccountExists(value.account, user)
-  return { id: params.id, value: { ...value, user } }
+  const normalizedValue = {
+    ...value,
+    ...(value.amount !== undefined && { amount: roundMoney(value.amount) }),
+    ...(value.splits !== undefined && { splits: normalizeSplitLineAmounts(value.splits) })
+  }
+  if (normalizedValue.category !== undefined) getCategory(normalizedValue.category, user)
+  if (normalizedValue.account !== undefined) assertAccountExists(normalizedValue.account, user)
+  return { id: params.id, value: { ...normalizedValue, user } }
 }
 
 export const validateTransactionGetParams = (query?: Record<string, any>) => {

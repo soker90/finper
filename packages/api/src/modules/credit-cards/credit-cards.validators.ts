@@ -3,7 +3,7 @@ import Boom from '@hapi/boom'
 import { eq, and } from 'drizzle-orm'
 import { schema, roundMoney } from '@soker90/finper-db'
 import { db as sqliteDb } from '../../db'
-import { isValidId, assertSplitLines, loadCategoriesById } from '../../utils'
+import { isValidId, assertSplitLines, loadCategoriesById, normalizeSplitLineAmounts } from '../../utils'
 import { ERROR_MESSAGE } from '../../i18n'
 import { creditCardsRepository } from './credit-cards.repository'
 import type { CreateCreditCardData, UpdateCreditCardData, CreateCreditCardMovementData, UpdateCreditCardMovementData, PayDebtPayload, CreditCardRow } from './credit-cards.repository'
@@ -125,9 +125,10 @@ export const validateCreditCardEditParams = async ({ params, body, user }: {
 export const validateCreditCardMovementCreateParams = (body: Record<string, any>, user: string): Omit<CreateCreditCardMovementData, 'creditCardId'> => {
   const { error, value } = createMovementSchema.validate(body)
   if (error) throw Boom.badData(error.message).output
-  assertCategoryExists(value.categoryId, user)
-  validateCreateSplits({ ...value, user })
-  return value
+  const normalizedValue = { ...value, amount: roundMoney(value.amount), splits: normalizeSplitLineAmounts(value.splits) }
+  assertCategoryExists(normalizedValue.categoryId, user)
+  validateCreateSplits({ ...normalizedValue, user })
+  return normalizedValue
 }
 
 // Note: split-lines invariant for edits is validated in
@@ -137,8 +138,13 @@ export const validateCreditCardMovementCreateParams = (body: Record<string, any>
 export const validateCreditCardMovementEditParams = (body: Record<string, any>, user: string): UpdateCreditCardMovementData => {
   const { error, value } = editMovementSchema.validate(body)
   if (error) throw Boom.badData(error.message).output
-  if (value.categoryId !== undefined) assertCategoryExists(value.categoryId, user)
-  return value
+  const normalizedValue = {
+    ...value,
+    ...(value.amount !== undefined && { amount: roundMoney(value.amount) }),
+    ...(value.splits !== undefined && { splits: normalizeSplitLineAmounts(value.splits) })
+  }
+  if (normalizedValue.categoryId !== undefined) assertCategoryExists(normalizedValue.categoryId, user)
+  return normalizedValue
 }
 
 export const validateCreditCardPayDebtParams = (body: Record<string, any>): PayDebtPayload => {

@@ -15,6 +15,9 @@ export interface SplitLineCategory {
   type: string
 }
 
+export const normalizeSplitLineAmounts = <Line extends { amount: number }>(lines: Line[] | undefined): Line[] | undefined =>
+  lines?.map(line => ({ ...line, amount: roundMoney(line.amount) }))
+
 /** Batch-loads the categories referenced by a set of split lines, scoped to
  * the user, so `assertSplitLines` can check each line's type with a single
  * query instead of one SELECT per line. Uses chunking to stay well under
@@ -33,8 +36,9 @@ export const loadCategoriesById = (db: DB, ids: string[], user: string): Map<str
 }
 
 /** Shared invariant for split lines (transactions and credit card movements):
- * either zero lines (no split) or between two and five, the rounded amounts must add
- * up to the total, every line's category must exist (for this user),
+ * either zero lines (no split) or between two and five. Its inputs must already be
+ * normalized to two decimals, so the sum can be checked against the persisted values.
+ * Every line's category must exist (for this user),
  * and match the movement type (repeated categories across lines are allowed).
  * Storage and loading stay domain-specific (different tables/fields); only
  * this validation is shared to avoid the rules drifting apart per domain. */
@@ -50,8 +54,8 @@ export const assertSplitLines = (params: {
   if (lines.length > 5) throw Boom.badData(ERROR_MESSAGE.TRANSACTION.SPLIT_MAX).output
   if (lines.length < 2) return
 
-  const total = roundMoney(lines.reduce((sum, line) => sum + roundMoney(line.amount), 0))
-  if (total !== roundMoney(amount)) throw Boom.badData(ERROR_MESSAGE.TRANSACTION.SPLIT_SUM_MISMATCH).output
+  const total = roundMoney(lines.reduce((sum, line) => sum + line.amount, 0))
+  if (total !== amount) throw Boom.badData(ERROR_MESSAGE.TRANSACTION.SPLIT_SUM_MISMATCH).output
 
   for (const line of lines) {
     const category = categoriesById.get(line.categoryId)
@@ -101,8 +105,8 @@ export const assertSplitEditInvariant = (params: SplitEditInvariantParams): void
     }
 
     if (newAmount !== undefined) {
-      const existingTotal = roundMoney(existingSplits.reduce((sum, split) => sum + roundMoney(split.amount), 0))
-      if (existingTotal !== roundMoney(newAmount)) {
+      const existingTotal = roundMoney(existingSplits.reduce((sum, split) => sum + split.amount, 0))
+      if (existingTotal !== newAmount) {
         throw Boom.badData(ERROR_MESSAGE.TRANSACTION.SPLIT_SUM_MISMATCH).output
       }
     }

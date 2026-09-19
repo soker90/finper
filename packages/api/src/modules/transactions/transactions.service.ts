@@ -2,7 +2,7 @@ import Boom from '@hapi/boom'
 import { sql, eq, and } from 'drizzle-orm'
 import { db as sqliteDb } from '../../db'
 import { schema, generateId, roundMoney } from '@soker90/finper-db'
-import { getTransactionAmount, sanitizeTags, assertSplitEditInvariant } from '../../utils'
+import { getTransactionAmount, sanitizeTags, assertSplitEditInvariant, normalizeSplitLineAmounts } from '../../utils'
 import { ERROR_MESSAGE } from '../../i18n'
 import { serializeTransaction, serializeTransactionPopulated } from './transactions.serializer'
 import { loadSplitsByTransactionIds } from './effective-category-rows'
@@ -33,7 +33,7 @@ const persistSplits = (tx: { delete: typeof sqliteDb.delete, insert: typeof sqli
       id: generateId(),
       transactionId: params.transactionId,
       categoryId: split.category,
-      amount: roundMoney(split.amount),
+      amount: split.amount,
       tags: sanitizeTags(split.tags),
       user: params.user
     }).run()
@@ -52,17 +52,19 @@ export class TransactionsService {
   ) {}
 
   public addTransaction (params: any): any {
-    const hasSplits = Array.isArray(params.splits) && params.splits.length >= 2
+    const normalizedAmount = roundMoney(params.amount)
+    const normalizedSplits = normalizeSplitLineAmounts<SplitInput>(params.splits)
+    const hasSplits = Array.isArray(normalizedSplits) && normalizedSplits.length >= 2
     const sanitizedTags = hasSplits ? [] : sanitizeTags(params.tags)
-    const amount = amountOf(params)
-    const categoryId = hasSplits ? params.splits[0].category : params.category
+    const amount = amountOf({ ...params, amount: normalizedAmount })
+    const categoryId = hasSplits ? normalizedSplits[0].category : params.category
 
     const created = sqliteDb.transaction((tx) => {
       const row = tx.insert(transactions).values({
         id: generateId(),
         date: params.date,
         categoryId,
-        amount: roundMoney(params.amount),
+        amount: normalizedAmount,
         type: params.type,
         accountId: params.account,
         note: params.note ?? null,
@@ -72,7 +74,7 @@ export class TransactionsService {
         user: params.user
       }).returning().get()
 
-      persistSplits(tx, { transactionId: row.id, user: params.user, splits: params.splits })
+      persistSplits(tx, { transactionId: row.id, user: params.user, splits: normalizedSplits })
 
       if (amount !== 0) {
         tx.update(accounts)
@@ -93,10 +95,15 @@ export class TransactionsService {
     if (!oldTransaction) throw Boom.notFound(ERROR_MESSAGE.TRANSACTION.NOT_FOUND).output
 
     const existingSplits = loadSplitsByTransactionIds(sqliteDb, [id], value.user).get(id) ?? []
+    const normalizedValue = {
+      ...value,
+      ...(value.amount !== undefined && { amount: roundMoney(value.amount) }),
+      ...(value.splits !== undefined && { splits: normalizeSplitLineAmounts<SplitInput>(value.splits) })
+    }
 
     const isYield = Boolean(oldTransaction.yieldId)
-    const willHaveSplits = value.splits !== undefined
-      ? (value.splits.length >= 2)
+    const willHaveSplits = normalizedValue.splits !== undefined
+      ? (normalizedValue.splits.length >= 2)
       : (existingSplits.length >= 2)
 
     if (willHaveSplits && isYield) {
@@ -104,43 +111,43 @@ export class TransactionsService {
     }
 
     assertSplitEditInvariant({
-      existingSplits: existingSplits.map(split => ({ categoryId: split.categoryId, amount: split.amount })),
-      currentAmount: oldTransaction.amount,
+      existingSplits: existingSplits.map(split => ({ categoryId: split.categoryId, amount: roundMoney(split.amount) })),
+      currentAmount: roundMoney(oldTransaction.amount),
       currentType: oldTransaction.type,
-      newSplits: value.splits?.map((split: any) => ({ categoryId: split.category, amount: split.amount, tags: split.tags })),
-      newAmount: value.amount,
-      newType: value.type,
-      hasNewCategoryOrTags: value.category !== undefined || value.tags !== undefined,
-      user: value.user,
+      newSplits: normalizedValue.splits?.map((split: any) => ({ categoryId: split.category, amount: split.amount, tags: split.tags })),
+      newAmount: normalizedValue.amount,
+      newType: normalizedValue.type,
+      hasNewCategoryOrTags: normalizedValue.category !== undefined || normalizedValue.tags !== undefined,
+      user: normalizedValue.user,
       db: sqliteDb
     })
 
-    const finalAmount = value.amount !== undefined ? roundMoney(value.amount) : oldTransaction.amount
-    const finalType = value.type ?? oldTransaction.type
-    const finalAccountId = value.account ?? oldTransaction.accountId
-    const finalDate = value.date ?? oldTransaction.date
-    const finalNote = value.note !== undefined ? (value.note ?? null) : oldTransaction.note
-    const finalStoreId = value.store !== undefined ? (value.store ?? null) : oldTransaction.storeId
+    const finalAmount = normalizedValue.amount ?? oldTransaction.amount
+    const finalType = normalizedValue.type ?? oldTransaction.type
+    const finalAccountId = normalizedValue.account ?? oldTransaction.accountId
+    const finalDate = normalizedValue.date ?? oldTransaction.date
+    const finalNote = normalizedValue.note !== undefined ? (normalizedValue.note ?? null) : oldTransaction.note
+    const finalStoreId = normalizedValue.store !== undefined ? (normalizedValue.store ?? null) : oldTransaction.storeId
 
     let finalCategoryId = oldTransaction.categoryId
     let finalTags = oldTransaction.tags
 
-    if (value.splits !== undefined) {
-      if (value.splits.length >= 2) {
-        finalCategoryId = value.splits[0].category
+    if (normalizedValue.splits !== undefined) {
+      if (normalizedValue.splits.length >= 2) {
+        finalCategoryId = normalizedValue.splits[0].category
         finalTags = []
       } else {
         // value.splits === [] -> explicitly converted to normal transaction
-        finalCategoryId = value.category ?? oldTransaction.categoryId
-        finalTags = value.tags !== undefined ? sanitizeTags(value.tags) : oldTransaction.tags
+        finalCategoryId = normalizedValue.category ?? oldTransaction.categoryId
+        finalTags = normalizedValue.tags !== undefined ? sanitizeTags(normalizedValue.tags) : oldTransaction.tags
       }
     } else {
       if (existingSplits.length >= 2) {
         finalCategoryId = existingSplits[0].categoryId
         finalTags = []
       } else {
-        if (value.category !== undefined) finalCategoryId = value.category
-        if (value.tags !== undefined) finalTags = sanitizeTags(value.tags)
+        if (normalizedValue.category !== undefined) finalCategoryId = normalizedValue.category
+        if (normalizedValue.tags !== undefined) finalTags = sanitizeTags(normalizedValue.tags)
       }
     }
 
@@ -158,12 +165,12 @@ export class TransactionsService {
           storeId: finalStoreId,
           tags: finalTags
         })
-        .where(and(eq(transactions.id, id), eq(transactions.user, value.user)))
+        .where(and(eq(transactions.id, id), eq(transactions.user, normalizedValue.user)))
         .returning()
         .get()
 
-      if (value.splits !== undefined) {
-        persistSplits(tx, { transactionId: id, user: value.user, splits: value.splits })
+      if (normalizedValue.splits !== undefined) {
+        persistSplits(tx, { transactionId: id, user: normalizedValue.user, splits: normalizedValue.splits })
       }
 
       const newSignedAmount = amountOf(row)
@@ -172,27 +179,27 @@ export class TransactionsService {
         if (delta !== 0) {
           tx.update(accounts)
             .set({ balance: sql`ROUND(${accounts.balance} + ${delta}, 2)` })
-            .where(and(eq(accounts.id, row.accountId), eq(accounts.user, value.user)))
+            .where(and(eq(accounts.id, row.accountId), eq(accounts.user, normalizedValue.user)))
             .run()
         }
       } else {
         if (oldSignedAmount !== 0) {
           tx.update(accounts)
             .set({ balance: sql`ROUND(${accounts.balance} - ${oldSignedAmount}, 2)` })
-            .where(and(eq(accounts.id, oldTransaction.accountId), eq(accounts.user, value.user)))
+            .where(and(eq(accounts.id, oldTransaction.accountId), eq(accounts.user, normalizedValue.user)))
             .run()
         }
         if (newSignedAmount !== 0) {
           tx.update(accounts)
             .set({ balance: sql`ROUND(${accounts.balance} + ${newSignedAmount}, 2)` })
-            .where(and(eq(accounts.id, row.accountId), eq(accounts.user, value.user)))
+            .where(and(eq(accounts.id, row.accountId), eq(accounts.user, normalizedValue.user)))
             .run()
         }
       }
       return row
     })
 
-    return serializedWithSplits(updated, value.user)
+    return serializedWithSplits(updated, normalizedValue.user)
   }
 
   public deleteTransaction (id: string, user: string): void {

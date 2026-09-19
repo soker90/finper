@@ -1,8 +1,8 @@
 import { createTestDb, closeTestDb } from '../../../test/helpers/db'
 import { generateUsername } from '../../../test/generate-values'
-import { assertSplitLines, assertSplitEditInvariant, loadCategoriesById } from '../split-lines'
+import { assertSplitLines, assertSplitEditInvariant, loadCategoriesById, normalizeSplitLineAmounts } from '../split-lines'
 import type { DB } from '@soker90/finper-db'
-import { schema, generateId } from '@soker90/finper-db'
+import { schema, generateId, roundMoney } from '@soker90/finper-db'
 import { ERROR_MESSAGE } from '../../i18n'
 
 const { users, categories } = schema
@@ -100,6 +100,36 @@ describe('assertSplitLines', () => {
       categoriesById
     })).not.toThrow()
   })
+
+  it('compares the split sum after normalizing all amounts', () => {
+    const normalizedAmount = roundMoney(0.008)
+    const normalizedLines = normalizeSplitLineAmounts([
+      { categoryId: 'cat-expense', amount: 0.004 },
+      { categoryId: 'cat-expense-2', amount: 0.004 }
+    ])
+
+    expect(() => assertSplitLines({
+      lines: normalizedLines,
+      amount: normalizedAmount,
+      type: 'expense',
+      categoriesById
+    })).toThrow(expect.objectContaining({
+      statusCode: 422,
+      payload: expect.objectContaining({ message: ERROR_MESSAGE.TRANSACTION.SPLIT_SUM_MISMATCH })
+    }))
+  })
+})
+
+describe('normalizeSplitLineAmounts', () => {
+  it('rounds every line once while preserving the remaining fields', () => {
+    expect(normalizeSplitLineAmounts([
+      { categoryId: 'cat-1', amount: 12.345, tags: ['groceries'] },
+      { categoryId: 'cat-2', amount: 7.654, tags: ['home'] }
+    ])).toEqual([
+      { categoryId: 'cat-1', amount: 12.35, tags: ['groceries'] },
+      { categoryId: 'cat-2', amount: 7.65, tags: ['home'] }
+    ])
+  })
 })
 
 describe('loadCategoriesById', () => {
@@ -122,7 +152,7 @@ describe('loadCategoriesById', () => {
   })
 
   it('loads categories scoped to the user, ignoring unknown ids', () => {
-    const result = loadCategoriesById(db, [categoryId, 'unknown-id'], user)
+    const result = loadCategoriesById(db, [categoryId, categoryId, 'unknown-id'], user)
     expect(result.size).toBe(1)
     expect(result.get(categoryId)).toEqual({ type: 'expense' })
   })

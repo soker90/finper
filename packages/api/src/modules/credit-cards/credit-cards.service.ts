@@ -1,7 +1,7 @@
 import Boom from '@hapi/boom'
 import { roundMoney } from '@soker90/finper-db'
 import { ERROR_MESSAGE } from '../../i18n'
-import { sanitizeTags, assertSplitEditInvariant } from '../../utils'
+import { sanitizeTags, assertSplitEditInvariant, normalizeSplitLineAmounts } from '../../utils'
 import { db as sqliteDb } from '../../db'
 import { creditCardsRepository, type ICreditCardsRepository, type CreateCreditCardData, type UpdateCreditCardData, type CreateCreditCardMovementData, type UpdateCreditCardMovementData, type PayDebtPayload } from './credit-cards.repository'
 import { serializeCreditCard, serializeCreditCardMovement } from './credit-cards.serializer'
@@ -51,12 +51,14 @@ export class CreditCardsService {
 
   public async addMovement ({ creditCardId, user, data }: { creditCardId: string, user: string, data: Omit<CreateCreditCardMovementData, 'creditCardId'> }) {
     await this.getCreditCardById(creditCardId, user)
-    const hasSplits = Array.isArray(data.splits) && data.splits.length >= 2
+    const normalizedAmount = roundMoney(data.amount)
+    const normalizedSplits = normalizeSplitLineAmounts(data.splits)
+    const hasSplits = Array.isArray(normalizedSplits) && normalizedSplits.length >= 2
     const movement = await this.repository.createMovement(user, {
       ...data,
-      amount: roundMoney(data.amount),
+      amount: normalizedAmount,
       tags: hasSplits ? [] : sanitizeTags(data.tags),
-      splits: data.splits?.map(split => ({ ...split, amount: roundMoney(split.amount), tags: sanitizeTags(split.tags) })),
+      splits: normalizedSplits?.map(split => ({ ...split, tags: sanitizeTags(split.tags) })),
       creditCardId
     })
     return serializeCreditCardMovement(movement)
@@ -70,26 +72,30 @@ export class CreditCardsService {
     if (movement.status === 'paid') {
       throw Boom.badRequest(ERROR_MESSAGE.CREDIT_CARD.ALREADY_PAID).output
     }
+    const normalizedValue = {
+      ...value,
+      ...(value.amount !== undefined && { amount: roundMoney(value.amount) }),
+      ...(value.splits !== undefined && { splits: normalizeSplitLineAmounts(value.splits) })
+    }
     assertSplitEditInvariant({
-      existingSplits: (movement.splits ?? []).map(split => ({ categoryId: split.categoryId, amount: split.amount })),
-      currentAmount: movement.amount,
+      existingSplits: (movement.splits ?? []).map(split => ({ categoryId: split.categoryId, amount: roundMoney(split.amount) })),
+      currentAmount: roundMoney(movement.amount),
       currentType: movement.type,
-      newSplits: value.splits?.map(split => ({ categoryId: split.categoryId, amount: split.amount, tags: split.tags })),
-      newAmount: value.amount,
-      newType: value.type,
-      hasNewCategoryOrTags: value.categoryId !== undefined || value.tags !== undefined,
+      newSplits: normalizedValue.splits?.map(split => ({ categoryId: split.categoryId, amount: split.amount, tags: split.tags })),
+      newAmount: normalizedValue.amount,
+      newType: normalizedValue.type,
+      hasNewCategoryOrTags: normalizedValue.categoryId !== undefined || normalizedValue.tags !== undefined,
       user,
       db: sqliteDb
     })
-    const hasSplits = Array.isArray(value.splits) && value.splits.length >= 2
+    const hasSplits = Array.isArray(normalizedValue.splits) && normalizedValue.splits.length >= 2
     const updated = await this.repository.updateMovement(id, user, {
-      ...value,
-      ...(value.amount !== undefined && { amount: roundMoney(value.amount) }),
+      ...normalizedValue,
       ...(hasSplits
         ? { tags: [] }
-        : (value.tags !== undefined && { tags: sanitizeTags(value.tags) })),
-      ...(value.splits !== undefined && {
-        splits: value.splits.map(split => ({ ...split, amount: roundMoney(split.amount), tags: sanitizeTags(split.tags) }))
+        : (normalizedValue.tags !== undefined && { tags: sanitizeTags(normalizedValue.tags) })),
+      ...(normalizedValue.splits !== undefined && {
+        splits: normalizedValue.splits.map(split => ({ ...split, tags: sanitizeTags(split.tags) }))
       })
     })
     return serializeCreditCardMovement(updated)
