@@ -5,10 +5,11 @@ import { requestLogin } from '../../../../test/request-login'
 import { generateUsername } from '../../../../test/generate-values'
 import { db as sqliteDb } from '../../../db'
 import { schema, generateId, TRANSACTION } from '@soker90/finper-db'
-import { eq } from 'drizzle-orm'
+import { eq, and } from 'drizzle-orm'
+import { ERROR_MESSAGE } from '../../../i18n'
 import { transactionsRoutes } from '../transactions.routes'
 
-const { transactions, accounts, categories, stores, users } = schema
+const { transactions, accounts, categories, stores, users, transactionSplits } = schema
 
 describe('Transactions Controller', () => {
   let token: string
@@ -43,6 +44,7 @@ describe('Transactions Controller', () => {
     sqliteDb.delete(transactions).where(eq(transactions.user, username)).run()
     sqliteDb.delete(stores).where(eq(stores.user, username)).run()
     sqliteDb.delete(categories).where(eq(categories.user, username)).run()
+    sqliteDb.delete(categories).where(eq(categories.user, otherUsername)).run()
     sqliteDb.delete(accounts).where(eq(accounts.user, username)).run()
     sqliteDb.delete(accounts).where(eq(accounts.user, otherUsername)).run()
     sqliteDb.delete(users).where(eq(users.username, otherUsername)).run()
@@ -222,6 +224,24 @@ describe('Transactions Controller', () => {
       // limpia en el afterAll (que borra transactions antes que categories).
     })
 
+    test('filters by a secondary split category and returns the parent with splits', async () => {
+      const homeId = generateId()
+      sqliteDb.insert(categories).values({ id: homeId, name: 'Hogar', type: 'expense', user: username }).run()
+      await supertest(server.app).post(path).set('Authorization', `Bearer ${token}`).send(validBody({
+        amount: 100,
+        splits: [
+          { category: categoryId, amount: 65 },
+          { category: homeId, amount: 35 }
+        ]
+      })).expect(200)
+
+      const response = await supertest(server.app).get(`${path}?category=${homeId}`).auth(token, { type: 'bearer' }).expect(200)
+      expect(response.body).toHaveLength(1)
+      expect(response.body[0].amount).toBe(100)
+      expect(response.body[0].splits).toHaveLength(2)
+      expect(response.body[0].splits[1].category._id).toBe(homeId)
+    })
+
     test('combines store and type filters with AND semantics', async () => {
       await supertest(server.app).post(path).set('Authorization', `Bearer ${token}`)
         .send(validBody({ store: 'Combo Store', type: TRANSACTION.Expense }))
@@ -354,5 +374,446 @@ describe('Transactions Controller', () => {
         await supertest(server.app).delete(idPath(created.body._id)).set('Authorization', `Bearer ${token}`).expect(204)
         expect(balanceOf(accountId)).toBeCloseTo(1000, 2)
       })
+  })
+
+  describe('splits', () => {
+    let homeId: string
+
+    beforeAll(() => {
+      homeId = generateId()
+      sqliteDb.insert(categories).values({ id: homeId, name: 'Hogar', type: 'expense', user: username }).run()
+    })
+
+    const splitBody = (overrides: Record<string, any> = {}) => validBody({
+      amount: 100,
+      splits: [
+        { category: categoryId, amount: 65 },
+        { category: homeId, amount: 35 }
+      ],
+      ...overrides
+    })
+
+    test('creates a split transaction and stores lines with tags', async () => {
+      const response = await supertest(server.app).post(path).set('Authorization', `Bearer ${token}`)
+        .send(splitBody({
+          splits: [
+            { category: categoryId, amount: 65, tags: ['comida'] },
+            { category: homeId, amount: 35, tags: ['hogar'] }
+          ]
+        })).expect(200)
+      expect(response.body.category).toBe(categoryId)
+      expect(response.body.splits).toHaveLength(2)
+      expect(response.body.splits[0]).toMatchObject({ category: categoryId, amount: 65, tags: ['comida'] })
+      expect(response.body.splits[1]).toMatchObject({ category: homeId, amount: 35, tags: ['hogar'] })
+      expect(balanceOf(accountId)).toBeCloseTo(900, 2)
+
+      const rows = sqliteDb.select().from(transactionSplits).where(eq(transactionSplits.transactionId, response.body._id)).all()
+      expect(rows).toHaveLength(2)
+    })
+
+    test('rejects a single split line', async () => {
+      await supertest(server.app).post(path).set('Authorization', `Bearer ${token}`)
+        .send(validBody({ splits: [{ category: categoryId, amount: 10 }] })).expect(422)
+    })
+
+    test('allows the same category twice in the split with different tags', async () => {
+      const response = await supertest(server.app).post(path).set('Authorization', `Bearer ${token}`)
+        .send(validBody({
+          amount: 100,
+          splits: [
+            { category: categoryId, amount: 60, tags: ['tagA'] },
+            { category: categoryId, amount: 40, tags: ['tagB'] }
+          ]
+        }))
+        .expect(200)
+
+      expect(response.body.splits).toHaveLength(2)
+      expect(response.body.splits[0].category).toBe(categoryId)
+      expect(response.body.splits[1].category).toBe(categoryId)
+    })
+
+    test('allows the same category twice in the split with same tags', async () => {
+      const response = await supertest(server.app).post(path).set('Authorization', `Bearer ${token}`)
+        .send(validBody({
+          amount: 100,
+          splits: [
+            { category: categoryId, amount: 55, tags: ['shared'] },
+            { category: categoryId, amount: 45, tags: ['shared'] }
+          ]
+        }))
+        .expect(200)
+
+      expect(response.body.splits).toHaveLength(2)
+      expect(response.body.splits[0].category).toBe(categoryId)
+      expect(response.body.splits[1].category).toBe(categoryId)
+    })
+
+    test('responds 404 when a split category does not exist', async () => {
+      await supertest(server.app).post(path).set('Authorization', `Bearer ${token}`)
+        .send(validBody({
+          amount: 100,
+          splits: [
+            { category: categoryId, amount: 60 },
+            { category: generateId(), amount: 40 }
+          ]
+        }))
+        .expect(404)
+        .expect((res) => {
+          expect(res.body.message).toBe(ERROR_MESSAGE.CATEGORY.NOT_FOUND)
+        })
+    })
+
+    test('rejects when split amounts do not sum to the total', async () => {
+      await supertest(server.app).post(path).set('Authorization', `Bearer ${token}`)
+        .send(validBody({
+          amount: 100,
+          splits: [
+            { category: categoryId, amount: 60 },
+            { category: homeId, amount: 30 }
+          ]
+        })).expect(422)
+    })
+
+    test('rejects splits whose rounded amounts do not add up to the total (sub-cent precision)', async () => {
+      // Each line rounds to 0.00 individually (0.004 -> 0), but their raw sum
+      // (0.008) rounds to 0.01, matching `amount`. The persisted rows would
+      // sum to 0 instead of 0.01 if the validator summed unrounded amounts.
+      await supertest(server.app).post(path).set('Authorization', `Bearer ${token}`)
+        .send(validBody({
+          amount: 0.01,
+          splits: [
+            { category: categoryId, amount: 0.004 },
+            { category: categoryId, amount: 0.004 }
+          ]
+        })).expect(422)
+    })
+
+    test('rejects transactions with more than 2 decimal places in amount', async () => {
+      await supertest(server.app).post(path).set('Authorization', `Bearer ${token}`)
+        .send(validBody({ amount: 10.555 }))
+        .expect(422)
+    })
+
+    test('rejects splits with more than 2 decimal places in amount', async () => {
+      await supertest(server.app).post(path).set('Authorization', `Bearer ${token}`)
+        .send(validBody({
+          amount: 10,
+          splits: [
+            { category: categoryId, amount: 5.001 },
+            { category: categoryId, amount: 4.999 }
+          ]
+        })).expect(422)
+    })
+
+    test('rejects splits with more than 5 categories', async () => {
+      const extraCategories = [
+        generateId(),
+        generateId(),
+        generateId(),
+        generateId(),
+        generateId()
+      ]
+      for (const extraCategoryId of extraCategories) {
+        sqliteDb.insert(categories).values({
+          id: extraCategoryId,
+          name: `Cat ${extraCategoryId}`,
+          type: 'expense',
+          user: username
+        }).run()
+      }
+
+      await supertest(server.app).post(path).set('Authorization', `Bearer ${token}`)
+        .send(validBody({
+          amount: 60,
+          splits: [
+            { category: categoryId, amount: 10 },
+            { category: extraCategories[0], amount: 10 },
+            { category: extraCategories[1], amount: 10 },
+            { category: extraCategories[2], amount: 10 },
+            { category: extraCategories[3], amount: 10 },
+            { category: extraCategories[4], amount: 10 }
+          ]
+        })).expect(422)
+    })
+
+    test('rejects splits whose category type differs from the transaction type', async () => {
+      const incomeId = generateId()
+      sqliteDb.insert(categories).values({ id: incomeId, name: 'Nómina', type: 'income', user: username }).run()
+      await supertest(server.app).post(path).set('Authorization', `Bearer ${token}`)
+        .send(validBody({
+          amount: 100,
+          splits: [
+            { category: categoryId, amount: 50 },
+            { category: incomeId, amount: 50 }
+          ]
+        })).expect(422)
+    })
+
+    test('edit with splits: [] removes splits and converts to normal transaction', async () => {
+      const created = await supertest(server.app).post(path).set('Authorization', `Bearer ${token}`)
+        .send(splitBody()).expect(200)
+      await supertest(server.app).put(idPath(created.body._id)).set('Authorization', `Bearer ${token}`)
+        .send(validBody({ amount: 80, category: categoryId, splits: [] })).expect(200)
+      const rows = sqliteDb.select().from(transactionSplits).where(eq(transactionSplits.transactionId, created.body._id)).all()
+      expect(rows).toHaveLength(0)
+    })
+
+    test('deleting the parent removes splits', async () => {
+      const created = await supertest(server.app).post(path).set('Authorization', `Bearer ${token}`)
+        .send(splitBody()).expect(200)
+      await supertest(server.app).delete(idPath(created.body._id)).set('Authorization', `Bearer ${token}`).expect(204)
+      const rows = sqliteDb.select().from(transactionSplits).where(eq(transactionSplits.transactionId, created.body._id)).all()
+      expect(rows).toHaveLength(0)
+    })
+
+    describe('PATCH and transitions', () => {
+      let catA: string
+      let catB: string
+      let catC: string
+
+      beforeEach(() => {
+        catA = generateId()
+        catB = generateId()
+        catC = generateId()
+        sqliteDb.insert(categories).values([
+          { id: catA, name: 'Cat A', type: 'expense', user: username },
+          { id: catB, name: 'Cat B', type: 'expense', user: username },
+          { id: catC, name: 'Cat C', type: 'expense', user: username }
+        ]).run()
+      })
+
+      test('Scenario A: PATCH amount on a split transaction without splits is rejected when sum mismatches', async () => {
+        const created = await supertest(server.app).post(path).set('Authorization', `Bearer ${token}`)
+          .send(validBody({
+            amount: 100,
+            splits: [{ category: catA, amount: 60 }, { category: catB, amount: 40 }]
+          })).expect(200)
+
+        const res = await supertest(server.app).patch(idPath(created.body._id)).set('Authorization', `Bearer ${token}`)
+          .send({ amount: 110 }).expect(422)
+        expect(res.body.message).toBe(ERROR_MESSAGE.TRANSACTION.SPLIT_SUM_MISMATCH)
+      })
+
+      test('Scenario A: PATCH amount on a split transaction without splits succeeds when amount matches split sum', async () => {
+        const created = await supertest(server.app).post(path).set('Authorization', `Bearer ${token}`)
+          .send(validBody({
+            amount: 100,
+            splits: [{ category: catA, amount: 60 }, { category: catB, amount: 40 }]
+          })).expect(200)
+
+        const res = await supertest(server.app).patch(idPath(created.body._id)).set('Authorization', `Bearer ${token}`)
+          .send({ amount: 100 }).expect(200)
+        expect(res.body.splits).toHaveLength(2)
+      })
+
+      test('Scenario B: PATCH category on a split transaction without splits is rejected', async () => {
+        const created = await supertest(server.app).post(path).set('Authorization', `Bearer ${token}`)
+          .send(validBody({
+            amount: 100,
+            splits: [{ category: catA, amount: 60 }, { category: catB, amount: 40 }]
+          })).expect(200)
+
+        const res = await supertest(server.app).patch(idPath(created.body._id)).set('Authorization', `Bearer ${token}`)
+          .send({ category: catC }).expect(422)
+        expect(res.body.message).toBe(ERROR_MESSAGE.TRANSACTION.SPLIT_FIELDS_REQUIRE_SPLITS)
+      })
+
+      test('Scenario B: PATCH category on a normal transaction without splits is allowed', async () => {
+        const created = await supertest(server.app).post(path).set('Authorization', `Bearer ${token}`)
+          .send(validBody({ amount: 100, category: catA })).expect(200)
+
+        const res = await supertest(server.app).patch(idPath(created.body._id)).set('Authorization', `Bearer ${token}`)
+          .send({ category: catC }).expect(200)
+        expect(res.body.category).toBe(catC)
+      })
+
+      test('Scenario C: PATCH amount and new splits succeeds and replaces splits atomically', async () => {
+        const created = await supertest(server.app).post(path).set('Authorization', `Bearer ${token}`)
+          .send(validBody({
+            amount: 100,
+            splits: [{ category: catA, amount: 60 }, { category: catB, amount: 40 }]
+          })).expect(200)
+
+        const res = await supertest(server.app).patch(idPath(created.body._id)).set('Authorization', `Bearer ${token}`)
+          .send({
+            amount: 110,
+            splits: [{ category: catA, amount: 70 }, { category: catB, amount: 40 }]
+          }).expect(200)
+
+        expect(res.body.amount).toBe(110)
+        expect(res.body.splits).toHaveLength(2)
+        expect(res.body.splits[0].amount).toBe(70)
+        expect(res.body.splits[1].amount).toBe(40)
+      })
+
+      test('Scenario D: PATCH with splits: [] converts a split transaction to a normal transaction', async () => {
+        const created = await supertest(server.app).post(path).set('Authorization', `Bearer ${token}`)
+          .send(validBody({
+            amount: 100,
+            splits: [{ category: catA, amount: 60 }, { category: catB, amount: 40 }]
+          })).expect(200)
+
+        const res = await supertest(server.app).patch(idPath(created.body._id)).set('Authorization', `Bearer ${token}`)
+          .send({ splits: [] }).expect(200)
+
+        expect(res.body.splits).toBeUndefined()
+        const splitsInDb = sqliteDb.select().from(transactionSplits).where(eq(transactionSplits.transactionId, created.body._id)).all()
+        expect(splitsInDb).toHaveLength(0)
+      })
+
+      test('Scenario E: PATCH with exactly 1 split is rejected', async () => {
+        const created = await supertest(server.app).post(path).set('Authorization', `Bearer ${token}`)
+          .send(validBody({ amount: 100, category: catA })).expect(200)
+
+        const res = await supertest(server.app).patch(idPath(created.body._id)).set('Authorization', `Bearer ${token}`)
+          .send({ splits: [{ category: catA, amount: 100 }] }).expect(422)
+        expect(res.body.message).toBe(ERROR_MESSAGE.TRANSACTION.SPLIT_MIN)
+      })
+
+      test('PATCH note on a split transaction preserves splits intact', async () => {
+        const created = await supertest(server.app).post(path).set('Authorization', `Bearer ${token}`)
+          .send(validBody({
+            amount: 100,
+            splits: [{ category: catA, amount: 60 }, { category: catB, amount: 40 }]
+          })).expect(200)
+
+        const res = await supertest(server.app).patch(idPath(created.body._id)).set('Authorization', `Bearer ${token}`)
+          .send({ note: 'Updated note' }).expect(200)
+
+        expect(res.body.note).toBe('Updated note')
+        expect(res.body.splits).toHaveLength(2)
+      })
+
+      test('Normal to split transition via PATCH works correctly', async () => {
+        const created = await supertest(server.app).post(path).set('Authorization', `Bearer ${token}`)
+          .send(validBody({ amount: 100, category: catA })).expect(200)
+
+        const res = await supertest(server.app).patch(idPath(created.body._id)).set('Authorization', `Bearer ${token}`)
+          .send({
+            splits: [{ category: catA, amount: 60 }, { category: catB, amount: 40 }]
+          }).expect(200)
+
+        expect(res.body.splits).toHaveLength(2)
+      })
+
+      test('Rejects editing a transaction with another user category in edit', async () => {
+        const otherCatId = generateId()
+        sqliteDb.insert(categories).values({ id: otherCatId, name: 'Other User Cat', type: 'expense', user: otherUsername }).run()
+
+        const created = await supertest(server.app).post(path).set('Authorization', `Bearer ${token}`)
+          .send(validBody({ amount: 100, category: catA })).expect(200)
+
+        await supertest(server.app).patch(idPath(created.body._id)).set('Authorization', `Bearer ${token}`)
+          .send({ category: otherCatId }).expect(404)
+      })
+
+      test('Rejects editing a transaction with another user account in edit', async () => {
+        const otherAccId = insertAccount(500, otherUsername)
+
+        const created = await supertest(server.app).post(path).set('Authorization', `Bearer ${token}`)
+          .send(validBody({ amount: 100, category: catA })).expect(200)
+
+        await supertest(server.app).patch(idPath(created.body._id)).set('Authorization', `Bearer ${token}`)
+          .send({ account: otherAccId }).expect(404)
+      })
+
+      test('Rejects editing another user transaction', async () => {
+        const otherTxId = generateId()
+        const otherAccId = insertAccount(500, otherUsername)
+        const otherCatId = generateId()
+        sqliteDb.insert(categories).values({ id: otherCatId, name: 'Other User Cat', type: 'expense', user: otherUsername }).run()
+        sqliteDb.insert(transactions).values({
+          id: otherTxId,
+          date: Date.now(),
+          categoryId: otherCatId,
+          amount: 50,
+          type: 'expense',
+          accountId: otherAccId,
+          user: otherUsername
+        }).run()
+
+        await supertest(server.app).patch(idPath(otherTxId)).set('Authorization', `Bearer ${token}`)
+          .send({ note: 'Hacked' }).expect(404)
+      })
+
+      test('PATCH date on a split transaction preserves splits intact', async () => {
+        const created = await supertest(server.app).post(path).set('Authorization', `Bearer ${token}`)
+          .send(validBody({
+            amount: 100,
+            splits: [{ category: catA, amount: 60 }, { category: catB, amount: 40 }]
+          })).expect(200)
+
+        const newDate = Date.UTC(2025, 8, 20)
+        const res = await supertest(server.app).patch(idPath(created.body._id)).set('Authorization', `Bearer ${token}`)
+          .send({ date: newDate }).expect(200)
+
+        expect(res.body.date).toBe(newDate)
+        expect(res.body.splits).toHaveLength(2)
+        expect(res.body.splits[0].amount).toBe(60)
+        expect(res.body.splits[1].amount).toBe(40)
+      })
+
+      test('Scenario B: PATCH type on a split transaction without splits is rejected', async () => {
+        const created = await supertest(server.app).post(path).set('Authorization', `Bearer ${token}`)
+          .send(validBody({
+            amount: 100,
+            splits: [{ category: catA, amount: 60 }, { category: catB, amount: 40 }]
+          })).expect(200)
+
+        const res = await supertest(server.app).patch(idPath(created.body._id)).set('Authorization', `Bearer ${token}`)
+          .send({ type: 'income' }).expect(422)
+
+        expect(res.body.message).toBe(ERROR_MESSAGE.TRANSACTION.SPLIT_FIELDS_REQUIRE_SPLITS)
+      })
+
+      test('PATCH with 6 splits is rejected with 422', async () => {
+        const created = await supertest(server.app).post(path).set('Authorization', `Bearer ${token}`)
+          .send(validBody({ amount: 100, category: catA })).expect(200)
+
+        await supertest(server.app).patch(idPath(created.body._id)).set('Authorization', `Bearer ${token}`)
+          .send({
+            splits: [
+              { category: catA, amount: 20 },
+              { category: catB, amount: 20 },
+              { category: catA, amount: 20 },
+              { category: catB, amount: 20 },
+              { category: catA, amount: 10 },
+              { category: catB, amount: 10 }
+            ]
+          }).expect(422)
+      })
+
+      test('User cannot query or modify splits belonging to another user', async () => {
+        const otherTxId = generateId()
+        const otherAccId = insertAccount(500, otherUsername)
+        const otherCatId = generateId()
+        sqliteDb.insert(categories).values({ id: otherCatId, name: 'Other User Cat', type: 'expense', user: otherUsername }).run()
+        sqliteDb.insert(transactions).values({
+          id: otherTxId,
+          date: Date.now(),
+          categoryId: otherCatId,
+          amount: 100,
+          type: 'expense',
+          accountId: otherAccId,
+          user: otherUsername
+        }).run()
+        sqliteDb.insert(transactionSplits).values([
+          { id: generateId(), transactionId: otherTxId, categoryId: otherCatId, amount: 60, tags: ['secret'], user: otherUsername },
+          { id: generateId(), transactionId: otherTxId, categoryId: otherCatId, amount: 40, tags: ['secret'], user: otherUsername }
+        ]).run()
+
+        // User cannot access or see other user's transaction or its splits
+        await supertest(server.app).get(idPath(otherTxId)).set('Authorization', `Bearer ${token}`).expect(404)
+
+        // User cannot patch other user's splits
+        await supertest(server.app).patch(idPath(otherTxId)).set('Authorization', `Bearer ${token}`)
+          .send({ splits: [] }).expect(404)
+
+        // Other user's splits remain intact
+        const splits = sqliteDb.select().from(transactionSplits)
+          .where(and(eq(transactionSplits.transactionId, otherTxId), eq(transactionSplits.user, otherUsername))).all()
+        expect(splits).toHaveLength(2)
+      })
+    })
   })
 })

@@ -42,7 +42,7 @@ const TransactionFilters = ({
         <Stack spacing={1}>
           <InputLabel htmlFor='dateFrom'>Desde</InputLabel>
           <DatePicker
-            value={dateFrom}
+            value={dateFrom ?? null}
             onChange={onDateFromChange}
             format='DD/MM/YYYY'
             slotProps={{ textField: { id: 'dateFrom', size: 'small', fullWidth: true } }}
@@ -53,7 +53,7 @@ const TransactionFilters = ({
         <Stack spacing={1}>
           <InputLabel htmlFor='dateTo'>Hasta</InputLabel>
           <DatePicker
-            value={dateTo}
+            value={dateTo ?? null}
             onChange={onDateToChange}
             format='DD/MM/YYYY'
             slotProps={{ textField: { id: 'dateTo', size: 'small', fullWidth: true } }}

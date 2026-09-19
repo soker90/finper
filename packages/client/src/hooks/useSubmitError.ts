@@ -1,7 +1,8 @@
 import { useState } from 'react'
 
-/** Shared submit flow for the credit-cards forms/modals: runs an action that
- * resolves to `{ error? }`, capturing the failed result or calling onSuccess. */
+/** Shared submit flow for forms/modals whose action resolves to `{ error? }`:
+ * captures the failed result or calls onSuccess. Used by TransactionEdit,
+ * CreditCardMovementEdit, ModalMovement and other domain forms. */
 export const useSubmitError = <T extends { error?: string } = { error?: string }>() => {
   const [result, setResult] = useState<T | null>(null)
 

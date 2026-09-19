@@ -16,6 +16,14 @@ export interface CreditCard {
   user: string
 }
 
+export interface CreditCardMovementSplit {
+  _id: string
+  categoryId: string
+  category?: { _id: string, name: string | null }
+  amount: number
+  tags?: string[]
+}
+
 export interface CreditCardMovement {
   _id: string
   id: string
@@ -32,5 +40,6 @@ export interface CreditCardMovement {
   paidAt?: number | null
   transactionId?: string | null
   tags?: string[]
+  splits?: CreditCardMovementSplit[]
   user: string
 }

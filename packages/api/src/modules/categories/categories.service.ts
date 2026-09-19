@@ -5,6 +5,9 @@ import { serializeCategory } from './categories.serializer'
 
 type ICategoriesRepository = ReturnType<typeof import('./categories.repository').createCategoriesRepository>
 
+const isForeignKeyError = (error: unknown): boolean =>
+  typeof error === 'object' && error !== null && (error as { code?: string }).code === 'SQLITE_CONSTRAINT_FOREIGNKEY'
+
 // El service asume que la existencia/parent/params han sido validados en los
 // validators (igual que el viejo). Solo conserva los `if (!x) 404` de seguridad
 // y la mejora `hasChildren` (409) del borrado (opción C, no estaba en el viejo).
@@ -48,7 +51,16 @@ export class CategoriesService {
     if (this.repository.hasChildren(id)) {
       throw Boom.conflict(ERROR_MESSAGE.CATEGORY.HAS_CHILDREN).output
     }
-    const deleted = this.repository.delete(id, user)
+    let deleted
+    try {
+      deleted = this.repository.delete(id, user)
+    } catch (error) {
+      // The category is referenced (transactions, split lines, credit card
+      // movements, budgets...) by a FK without cascade: translate the SQLite
+      // constraint error into a 409 instead of a generic 500.
+      if (isForeignKeyError(error)) throw Boom.conflict(ERROR_MESSAGE.CATEGORY.IN_USE).output
+      throw error
+    }
     if (!deleted) {
       throw Boom.notFound(ERROR_MESSAGE.CATEGORY.NOT_FOUND).output
     }

@@ -1,6 +1,6 @@
-import { eq, and, desc, type SQL } from 'drizzle-orm'
+import { eq, and, desc, or, inArray, type SQL } from 'drizzle-orm'
 import { type DB, schema } from '@soker90/finper-db'
-const { transactions, categories, accounts, stores, creditCards } = schema
+const { transactions, categories, accounts, stores, creditCards, transactionSplits } = schema
 
 type Transaction = typeof transactions.$inferSelect
 
@@ -31,9 +31,17 @@ export const createTransactionsRepository = (db: DB) => ({
   findMany: ({ user, account, category, type, store, page = 0, limit = 50 }: TransactionFilters): TransactionRow[] => {
     const conditions: SQL[] = [eq(transactions.user, user)]
     if (account) conditions.push(eq(transactions.accountId, account))
-    if (category) conditions.push(eq(transactions.categoryId, category))
     if (type) conditions.push(eq(transactions.type, type))
     if (store) conditions.push(eq(transactions.storeId, store))
+    if (category) {
+      const splitMatches = db.select({ id: transactionSplits.transactionId })
+        .from(transactionSplits)
+        .where(and(eq(transactionSplits.categoryId, category), eq(transactionSplits.user, user)))
+      conditions.push(or(
+        eq(transactions.categoryId, category),
+        inArray(transactions.id, splitMatches)
+      )!)
+    }
 
     return db.select({
       id: transactions.id,
@@ -52,7 +60,9 @@ export const createTransactionsRepository = (db: DB) => ({
       accountBank: accounts.bank,
       storeName: stores.name,
       creditCardId: transactions.creditCardId,
-      creditCardName: creditCards.name
+      creditCardName: creditCards.name,
+      yieldId: transactions.yieldId,
+      yieldSettlementId: transactions.yieldSettlementId
     })
       .from(transactions)
       .leftJoin(categories, eq(transactions.categoryId, categories.id))

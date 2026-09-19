@@ -69,7 +69,9 @@ const MainCard = (
     >
       {!darkTitle && title && (
         <CardHeader
-          sx={headerSX} titleTypographyProps={{ variant: 'subtitle1' }} title={title}
+          sx={headerSX}
+          slotProps={{ title: { variant: 'subtitle1' } }}
+          title={title}
           action={secondary}
         />
       )}

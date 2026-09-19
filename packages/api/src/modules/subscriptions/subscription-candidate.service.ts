@@ -13,6 +13,8 @@ interface TransactionForDetect {
   user: string
 }
 
+const uniqueIds = (ids: string[]): string[] => [...new Set(ids)]
+
 export class SubscriptionCandidateService {
   constructor (
     private repository: ISubscriptionsRepository,
@@ -22,15 +24,20 @@ export class SubscriptionCandidateService {
   public detectCandidates (transaction: TransactionForDetect): void {
     const from = transaction.date - ONE_WEEK_MS
     const to = transaction.date + ONE_WEEK_MS
+    const splitCategoryIds = this.repository.findSplitCategoryIds(transaction.id)
+    const categoryIds = uniqueIds([transaction.categoryId, ...splitCategoryIds])
 
-    const matching = this.repository.findMatchingSubscriptions(
-      transaction.user, transaction.accountId, transaction.categoryId, from, to
+    const matching = categoryIds.flatMap(categoryId =>
+      this.repository.findMatchingSubscriptions({
+        user: transaction.user, accountId: transaction.accountId, categoryId, from, to
+      })
     )
-    if (matching.length === 0) return
+    const uniqueMatching = [...new Map(matching.map(sub => [sub.id, sub])).values()]
+    if (uniqueMatching.length === 0) return
 
     this.repository.createCandidate({
       transactionId: transaction.id,
-      subscriptionIds: matching.map(s => s.id),
+      subscriptionIds: uniqueMatching.map(sub => sub.id),
       user: transaction.user
     })
   }

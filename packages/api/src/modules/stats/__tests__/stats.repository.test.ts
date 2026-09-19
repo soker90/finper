@@ -5,7 +5,7 @@ import type { DB } from '@soker90/finper-db'
 import { schema, generateId, TRANSACTION } from '@soker90/finper-db'
 import { eq } from 'drizzle-orm'
 
-const { transactions, categories, accounts, stores, users } = schema
+const { transactions, categories, accounts, stores, users, transactionSplits } = schema
 
 describe('Stats Repository', () => {
   let db: DB
@@ -81,6 +81,65 @@ describe('Stats Repository', () => {
       expect(rows.map(r => r.date)).toEqual([300, 100])
       expect(rows[0].accountBank).toBe('BankA')
       expect(rows[0].storeName).toBe('Mercadona')
+    })
+
+    it('expands split transactions into one row per line, each with its own splitId', () => {
+      const txId = generateId()
+      db.insert(transactions).values({
+        id: txId,
+        date: 200,
+        categoryId,
+        amount: 100,
+        type: TRANSACTION.Expense,
+        accountId,
+        note: null,
+        storeId: null,
+        subscriptionId: null,
+        tags: [],
+        user
+      }).run()
+      const splitIds = [generateId(), generateId()]
+      db.insert(transactionSplits).values([
+        { id: splitIds[0], transactionId: txId, categoryId, amount: 60, tags: [], user },
+        { id: splitIds[1], transactionId: txId, categoryId, amount: 40, tags: [], user }
+      ]).run()
+
+      const rows = repository.findExpenseDetails(user, 0, 1000)
+
+      expect(rows).toHaveLength(2)
+      expect(rows.every(row => row.id === txId)).toBe(true)
+      expect(rows.map(row => row.splitId).sort()).toEqual([...splitIds].sort())
+      expect(new Set(rows.map(row => row.splitId)).size).toBe(2)
+
+      db.delete(transactionSplits).where(eq(transactionSplits.transactionId, txId)).run()
+    })
+
+    it('treats a single orphan split row as a non-split transaction (falls back to the parent row)', () => {
+      const txId = generateId()
+      db.insert(transactions).values({
+        id: txId,
+        date: 400,
+        categoryId,
+        amount: 100,
+        type: TRANSACTION.Expense,
+        accountId,
+        note: null,
+        storeId: null,
+        subscriptionId: null,
+        tags: ['solo'],
+        user
+      }).run()
+      const orphanSplitId = generateId()
+      db.insert(transactionSplits).values({ id: orphanSplitId, transactionId: txId, categoryId, amount: 100, tags: [], user }).run()
+
+      const rows = repository.findExpenseDetails(user, 0, 1000)
+
+      expect(rows).toHaveLength(1)
+      expect(rows[0].id).toBe(txId)
+      expect(rows[0].splitId).toBeUndefined()
+      expect(rows[0].tags).toEqual(['solo'])
+
+      db.delete(transactionSplits).where(eq(transactionSplits.transactionId, txId)).run()
     })
   })
 })

@@ -1,6 +1,8 @@
 import Boom from '@hapi/boom'
+import { roundMoney } from '@soker90/finper-db'
 import { ERROR_MESSAGE } from '../../i18n'
-import { sanitizeTags } from '../../utils'
+import { sanitizeTags, assertSplitEditInvariant, normalizeSplitLineAmounts } from '../../utils'
+import { db as sqliteDb } from '../../db'
 import { creditCardsRepository, type ICreditCardsRepository, type CreateCreditCardData, type UpdateCreditCardData, type CreateCreditCardMovementData, type UpdateCreditCardMovementData, type PayDebtPayload } from './credit-cards.repository'
 import { serializeCreditCard, serializeCreditCardMovement } from './credit-cards.serializer'
 
@@ -49,9 +51,14 @@ export class CreditCardsService {
 
   public async addMovement ({ creditCardId, user, data }: { creditCardId: string, user: string, data: Omit<CreateCreditCardMovementData, 'creditCardId'> }) {
     await this.getCreditCardById(creditCardId, user)
+    const normalizedAmount = roundMoney(data.amount)
+    const normalizedSplits = normalizeSplitLineAmounts(data.splits)
+    const hasSplits = Array.isArray(normalizedSplits) && normalizedSplits.length >= 2
     const movement = await this.repository.createMovement(user, {
       ...data,
-      tags: sanitizeTags(data.tags),
+      amount: normalizedAmount,
+      tags: hasSplits ? [] : sanitizeTags(data.tags),
+      splits: normalizedSplits?.map(split => ({ ...split, tags: sanitizeTags(split.tags) })),
       creditCardId
     })
     return serializeCreditCardMovement(movement)
@@ -65,9 +72,31 @@ export class CreditCardsService {
     if (movement.status === 'paid') {
       throw Boom.badRequest(ERROR_MESSAGE.CREDIT_CARD.ALREADY_PAID).output
     }
-    const updated = await this.repository.updateMovement(id, user, {
+    const normalizedValue = {
       ...value,
-      ...(value.tags !== undefined && { tags: sanitizeTags(value.tags) })
+      ...(value.amount !== undefined && { amount: roundMoney(value.amount) }),
+      ...(value.splits !== undefined && { splits: normalizeSplitLineAmounts(value.splits) })
+    }
+    assertSplitEditInvariant({
+      existingSplits: (movement.splits ?? []).map(split => ({ categoryId: split.categoryId, amount: roundMoney(split.amount) })),
+      currentAmount: roundMoney(movement.amount),
+      currentType: movement.type,
+      newSplits: normalizedValue.splits?.map(split => ({ categoryId: split.categoryId, amount: split.amount, tags: split.tags })),
+      newAmount: normalizedValue.amount,
+      newType: normalizedValue.type,
+      hasNewCategoryOrTags: normalizedValue.categoryId !== undefined || normalizedValue.tags !== undefined,
+      user,
+      db: sqliteDb
+    })
+    const hasSplits = Array.isArray(normalizedValue.splits) && normalizedValue.splits.length >= 2
+    const updated = await this.repository.updateMovement(id, user, {
+      ...normalizedValue,
+      ...(hasSplits
+        ? { tags: [] }
+        : (normalizedValue.tags !== undefined && { tags: sanitizeTags(normalizedValue.tags) })),
+      ...(normalizedValue.splits !== undefined && {
+        splits: normalizedValue.splits.map(split => ({ ...split, tags: sanitizeTags(split.tags) }))
+      })
     })
     return serializeCreditCardMovement(updated)
   }

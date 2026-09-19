@@ -176,6 +176,37 @@ describe('CreditCardsService', () => {
       expect(repository.createMovement).toHaveBeenCalledWith('user1', { creditCardId: 'card-1', ...data, tags: [] })
       expect(result?.id).toBe('mov-1')
     })
+
+    it('normalizes the parent and split amounts before persisting them', async () => {
+      const repository = buildRepository({
+        findById: jest.fn().mockResolvedValue(buildCard()),
+        createMovement: jest.fn().mockResolvedValue(buildMovement())
+      })
+      const service = new CreditCardsService(repository)
+
+      await service.addMovement({
+        creditCardId: 'card-1',
+        user: 'user1',
+        data: {
+          date: 1000,
+          amount: 100.004,
+          type: 'expense',
+          categoryId: 'cat-1',
+          splits: [
+            { categoryId: 'cat-1', amount: 60.004 },
+            { categoryId: 'cat-2', amount: 40.004 }
+          ]
+        }
+      })
+
+      expect(repository.createMovement).toHaveBeenCalledWith('user1', expect.objectContaining({
+        amount: 100,
+        splits: [
+          { categoryId: 'cat-1', amount: 60, tags: [] },
+          { categoryId: 'cat-2', amount: 40, tags: [] }
+        ]
+      }))
+    })
   })
 
   describe('editMovement', () => {

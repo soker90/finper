@@ -55,7 +55,7 @@ Routes: `account.routes.ts`. Modelo: `Account`.
 | GET | `/` | Listar plano. |
 | GET | `/grouped` | Listar agrupado por padre. |
 | PATCH | `/:id` | Editar. |
-| DELETE | `/:id` | Eliminar. |
+| DELETE | `/:id` | Eliminar. `409` si tiene subcategorías o si sigue referenciada (transacciones, splits, movimientos de tarjeta, presupuestos...). |
 
 Routes: `category.routes.ts`. Modelo: `Category`.
 
@@ -65,12 +65,14 @@ Routes: `category.routes.ts`. Modelo: `Category`.
 
 | Método | Ruta | Descripción |
 |---|---|---|
-| POST | `/` | Crear (auto-crea `Store` si no existe). |
-| GET | `/` | Listar con filtros (query params). |
-| PUT | `/:id` | Editar (reemplazo). |
-| DELETE | `/:id` | Eliminar. |
+| POST | `/` | Crear (auto-crea `Store` si no existe). Acepta `splits[]` opcional. |
+| GET | `/` | Listar con filtros (query params). El filtro `category` también busca en splits. |
+| PUT | `/:id` | Editar (reemplazo). `splits` sustituye el desglose; omitirlos lo elimina. |
+| DELETE | `/:id` | Eliminar (CASCADE de splits). |
 
-Routes: `transaction.routes.ts`. Modelo: `Transaction`. Usa `transactionService` + `storeService`.
+`splits`: `{ category, amount, tags? }[]` (mínimo 2, máximo 5). La suma debe coincidir con `amount`. Todas las categorías del mismo `type` que el padre (se permiten categorías repetidas con distintos o mismos tags); una categoría inexistente devuelve `404`. No se puede dividir un movimiento con `yieldId` (el GET expone `yieldId` para que el cliente oculte la opción). Nota solo en el padre. Con splits, las tags viven en las líneas (el padre se guarda con `tags: []`).
+
+Routes: `transactions.routes.ts`. Schema: `transactions` + `transaction_splits`.
 
 ---
 
@@ -253,12 +255,14 @@ Routes: `ticket.routes.ts`. Sin modelo Mongoose propio (datos vienen del bot).
 | PATCH | `/:id` | Editar tarjeta. |
 | DELETE | `/:id` | Eliminar tarjeta. Falla con `409` si tiene movimientos `paid` (ya materializados como `transactions`); si solo tiene movimientos `pending`, se eliminan en cascada junto con la tarjeta. |
 | GET | `/:id/movements` | Listar movimientos de la tarjeta (filtro opcional `status=pending\|paid`). |
-| POST | `/:id/movements` | Registrar movimiento (queda en estado `pending`). |
-| PATCH | `/:id/movements/:movementId` | Editar movimiento. Falla si el movimiento ya está `paid`. |
-| DELETE | `/:id/movements/:movementId` | Eliminar movimiento. Falla si el movimiento ya está `paid`. |
-| POST | `/:id/pay-debt` | Liquidar deuda (total, por importe parcial o por lista de `movementIds`). Marca los movimientos afectados como `paid` y crea una transacción real en la cuenta asociada (`accountId` de la tarjeta), enlazada vía `transactionId`. |
+| POST | `/:id/movements` | Registrar movimiento (queda en estado `pending`). Acepta `splits[]` opcional. |
+| PATCH | `/:id/movements/:movementId` | Editar movimiento. Falla si el movimiento ya está `paid`. `splits` sustituye el desglose. |
+| DELETE | `/:id/movements/:movementId` | Eliminar movimiento. Falla si el movimiento ya está `paid`. CASCADE de splits. |
+| POST | `/:id/pay-debt` | Liquidar deuda (total, por importe parcial o por lista de `movementIds`). Marca los movimientos afectados como `paid` y crea una transacción real en la cuenta asociada (`accountId` de la tarjeta), enlazada vía `transactionId`. Si el movimiento tenía splits, la tx nace ya spliteada. |
 
-Routes: `credit-cards.routes.ts`. Schema Drizzle: `creditCards`, `creditCardMovements` (`packages/db/src/schema/`). Ver comentarios de diseño en el schema sobre el ciclo de vida `pending → paid → transacción real`.
+`splits` de movimiento: `{ categoryId, amount, tags? }[]` (mínimo 2, máximo 5). Misma validación que transacciones (suma, tipo, categorías existentes). Nota solo en el padre. Con splits, `categoryId` del padre = primera línea y `tags: []`.
+
+Routes: `credit-cards.routes.ts`. Schema Drizzle: `creditCards`, `creditCardMovements`, `creditCardMovementSplits`.
 
 ---
 

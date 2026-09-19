@@ -56,7 +56,6 @@ const SelectGroupForm = ({
       <NativeSelect
         id={id}
         fullWidth
-        defaultValue=''
         input={<OutlinedInput />}
         inputRef={ref}
         {...others}
