@@ -50,10 +50,10 @@ describe('Transactions hooks wiring (T1b)', () => {
     sqliteDb.delete(users).where(eq(users.username, username)).run()
   })
 
-  const insertSubscription = (catId: string, nextPaymentDate: number): string => {
+  const insertSubscription = (catId: string, nextPaymentDate: number, amount = 10): string => {
     const id = generateId()
     sqliteDb.insert(subscriptions).values({
-      id, name: 'Netflix', amount: 10, cycle: 30, nextPaymentDate, categoryId: catId, accountId, user: username
+      id, name: 'Netflix', amount, cycle: 30, nextPaymentDate, categoryId: catId, accountId, user: username
     }).run()
     return id
   }
@@ -68,6 +68,20 @@ describe('Transactions hooks wiring (T1b)', () => {
     const candidates = sqliteDb.select().from(subscriptionCandidates).where(eq(subscriptionCandidates.user, username)).all()
     expect(candidates).toHaveLength(1)
     expect(candidates[0].subscriptionIds).toContain(subId)
+  })
+
+  it('orders multiple matching subscriptions by closest amount', async () => {
+    const farther = insertSubscription(categoryId, txDate, 12)
+    const closest = insertSubscription(categoryId, txDate, 10.5)
+    const other = insertSubscription(categoryId, txDate, 8)
+
+    await supertest(server.app).post(path).set('Authorization', `Bearer ${token}`)
+      .send({ date: txDate, category: categoryId, amount: 10, type: TRANSACTION.Expense, account: accountId })
+      .expect(200)
+
+    const candidates = sqliteDb.select().from(subscriptionCandidates).where(eq(subscriptionCandidates.user, username)).all()
+    expect(candidates).toHaveLength(1)
+    expect(candidates[0].subscriptionIds).toEqual([closest, farther, other])
   })
 
   it('onTransactionCreated only matches subscriptions whose nextPaymentDate is within ±7 days', async () => {
