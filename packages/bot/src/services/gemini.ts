@@ -41,7 +41,7 @@ interface GeminiRawExtraction {
 function parseDateString (dateRaw: string | null, dateFallback: string | null = null): number | null {
   const normalizedRawDate = dateRaw?.trim() ?? ''
 
-  const numericMatch = normalizedRawDate.match(/^(\\d{1,2})[\\/. -](\\d{1,2})[\\/. -](\\d{2}|\\d{4})$/)
+  const numericMatch = normalizedRawDate.match(/^(\d{1,2})[\\/. -](\d{1,2})[\\/. -](\d{2}|\d{4})$/)
   if (numericMatch) {
     const [, dayText, monthText, yearText] = numericMatch
     const day = Number(dayText)
@@ -50,14 +50,14 @@ function parseDateString (dateRaw: string | null, dateFallback: string | null = 
     return createValidatedTimestamp(year, month, day)
   }
 
-  const isoMatch = normalizedRawDate.match(/^(\\d{4})-(\\d{2})-(\\d{2})$/)
+  const isoMatch = normalizedRawDate.match(/^(\d{4})-(\d{2})-(\d{2})$/)
   if (isoMatch) {
     const [, yearText, monthText, dayText] = isoMatch
     return createValidatedTimestamp(Number(yearText), Number(monthText), Number(dayText))
   }
 
   if (dateFallback) {
-    const fallbackMatch = dateFallback.trim().match(/^(\\d{4})-(\\d{2})-(\\d{2})$/)
+    const fallbackMatch = dateFallback.trim().match(/^(\d{4})-(\d{2})-(\d{2})$/)
     if (fallbackMatch) {
       const [, yearText, monthText, dayText] = fallbackMatch
       return createValidatedTimestamp(Number(yearText), Number(monthText), Number(dayText))
@@ -116,7 +116,7 @@ export async function extractReceiptData (
   const text = await callGemini(requestBody, apiKey)
 
   try {
-    const cleaned = text.trim().replace(/^\`\`\`(?:json)?\\s*/i, '').replace(/\\s*\`\`\`$/, '')
+    const cleaned = text.trim().replace(/^\`\`\`(?:json)?\s*/i, '').replace(/\s*\`\`\`$/, '')
     const parsed = JSON.parse(cleaned) as GeminiRawExtraction
     return {
       date: parseDateString(parsed.date_raw ?? null, parsed.date),
@@ -157,7 +157,7 @@ export async function extractExpenseFromText (
   const text = await callGemini(requestBody, apiKey)
 
   try {
-    const cleaned = text.trim().replace(/^\`\`\`(?:json)?\\s*/i, '').replace(/\\s*\`\`\`$/, '')
+    const cleaned = text.trim().replace(/^\`\`\`(?:json)?\s*/i, '').replace(/\s*\`\`\`$/, '')
     const parsed = JSON.parse(cleaned) as GeminiRawExtraction
     return {
       date: parseDateString(parsed.date_raw ?? null, parsed.date),
