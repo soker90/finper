@@ -3,10 +3,13 @@ import type { GeminiExtraction } from '../types'
 const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent'
 
 const SYSTEM_SCHEMA = `Devuelve un objeto JSON con los siguientes campos:
-- "date": Fecha en formato "YYYY-MM-DD" (ejemplo: "2026-04-02") o null si no hay.
+- "date_raw": Fecha exactamente como aparece en el texto o imagen, por ejemplo "04/10/2026", o null si no hay.
+- "date": Fecha normalizada en formato "YYYY-MM-DD" o null si no hay. En tickets españoles, las fechas numéricas usan siempre el formato DD/MM/YYYY (día/mes/año). Por ejemplo, "04/10/2026" significa "2026-10-04", nunca "2026-04-10".
 - "store": Nombre del comercio o null.
 - "amount": Importe total como decimal o null.
-- "payment_method": Método de pago ("efectivo", "tarjeta", etc.) o null.`
+- "payment_method": Método de pago ("efectivo", "tarjeta", etc.) o null.
+
+Para imágenes de tickets, identifica preferentemente la fecha asociada a etiquetas como "FECHA", "FECHA FACTURA", "FECHA COMPRA" o equivalentes. Conserva en "date_raw" exactamente el orden día/mes/año que aparece en el ticket. La aplicación validará y normalizará las fechas numéricas por separado.`
 
 const IMAGE_EXTRACTION_PROMPT = `Analiza esta imagen de un ticket/recibo e identifica los datos. ${SYSTEM_SCHEMA}`
 
@@ -22,23 +25,62 @@ interface GeminiResponse {
 
 interface GeminiRawExtraction {
   date: string | null
+  date_raw?: string | null
   store: string | null
   amount: number | null
   payment_method: string | null
 }
 
 /**
- * Converts a "YYYY-MM-DD" date string to a Unix timestamp in milliseconds.
- * Uses 12:00 UTC to avoid any timezone-related date shifts.
+ * Converts a receipt date to a Unix timestamp in milliseconds.
+ *
+ * Numeric dates from Spanish receipts are interpreted as DD/MM/YYYY,
+ * while ISO dates are accepted as a fallback for Gemini's normalized value.
+ * Uses 12:00 UTC to avoid timezone-related date shifts.
  */
-function parseDateString (dateStr: string | null): number | null {
-  if (!dateStr) return null
-  const match = dateStr.match(/^(\d{4})-(\d{2})-(\d{2})$/)
-  if (!match) return null
-  const [, year, month, day] = match
-  // Use noon UTC to prevent day boundary issues across timezones
-  const ts = Date.UTC(Number(year), Number(month) - 1, Number(day), 12, 0, 0)
-  return isNaN(ts) ? null : ts
+function parseDateString (dateRaw: string | null, dateFallback: string | null = null): number | null {
+  const normalizedRawDate = dateRaw?.trim() ?? ''
+
+  const numericMatch = normalizedRawDate.match(/^(\\d{1,2})[\\/. -](\\d{1,2})[\\/. -](\\d{2}|\\d{4})$/)
+  if (numericMatch) {
+    const [, dayText, monthText, yearText] = numericMatch
+    const day = Number(dayText)
+    const month = Number(monthText)
+    const year = yearText.length === 2 ? 2000 + Number(yearText) : Number(yearText)
+    return createValidatedTimestamp(year, month, day)
+  }
+
+  const isoMatch = normalizedRawDate.match(/^(\\d{4})-(\\d{2})-(\\d{2})$/)
+  if (isoMatch) {
+    const [, yearText, monthText, dayText] = isoMatch
+    return createValidatedTimestamp(Number(yearText), Number(monthText), Number(dayText))
+  }
+
+  if (dateFallback) {
+    const fallbackMatch = dateFallback.trim().match(/^(\\d{4})-(\\d{2})-(\\d{2})$/)
+    if (fallbackMatch) {
+      const [, yearText, monthText, dayText] = fallbackMatch
+      return createValidatedTimestamp(Number(yearText), Number(monthText), Number(dayText))
+    }
+  }
+
+  return null
+}
+
+function createValidatedTimestamp (year: number, month: number, day: number): number | null {
+  const timestamp = Date.UTC(year, month - 1, day, 12, 0, 0)
+  const parsedDate = new Date(timestamp)
+
+  if (
+    isNaN(timestamp) ||
+    parsedDate.getUTCFullYear() !== year ||
+    parsedDate.getUTCMonth() !== month - 1 ||
+    parsedDate.getUTCDate() !== day
+  ) {
+    return null
+  }
+
+  return timestamp
 }
 
 /**
@@ -74,10 +116,10 @@ export async function extractReceiptData (
   const text = await callGemini(requestBody, apiKey)
 
   try {
-    const cleaned = text.trim().replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '')
+    const cleaned = text.trim().replace(/^\`\`\`(?:json)?\\s*/i, '').replace(/\\s*\`\`\`$/, '')
     const parsed = JSON.parse(cleaned) as GeminiRawExtraction
     return {
-      date: parseDateString(parsed.date),
+      date: parseDateString(parsed.date_raw ?? null, parsed.date),
       store: parsed.store ?? null,
       amount: parsed.amount ?? null,
       raw_text: '',
@@ -115,10 +157,10 @@ export async function extractExpenseFromText (
   const text = await callGemini(requestBody, apiKey)
 
   try {
-    const cleaned = text.trim().replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '')
+    const cleaned = text.trim().replace(/^\`\`\`(?:json)?\\s*/i, '').replace(/\\s*\`\`\`$/, '')
     const parsed = JSON.parse(cleaned) as GeminiRawExtraction
     return {
-      date: parseDateString(parsed.date),
+      date: parseDateString(parsed.date_raw ?? null, parsed.date),
       store: parsed.store ?? null,
       amount: parsed.amount ?? null,
       raw_text: userText,
