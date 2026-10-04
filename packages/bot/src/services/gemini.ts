@@ -44,6 +44,7 @@ function parseDateString (dateRaw: string | null, dateFallback: string | null = 
   const numericMatch = normalizedRawDate.match(/^(\d{1,2})[\\/. -](\d{1,2})[\\/. -](\d{2}|\d{4})$/)
   if (numericMatch) {
     const [, dayText, monthText, yearText] = numericMatch
+    if (!dayText || !monthText || !yearText) return null
     const day = Number(dayText)
     const month = Number(monthText)
     const year = yearText.length === 2 ? 2000 + Number(yearText) : Number(yearText)
