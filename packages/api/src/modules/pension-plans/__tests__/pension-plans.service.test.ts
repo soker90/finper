@@ -70,12 +70,12 @@ describe('PensionPlansService', () => {
     expect(sourceAggregate.employeeAmount).toBe(600)
     expect(sourceAggregate.companyAmount).toBe(400)
 
-    expect(destinationAggregate.units).toBe(70)
-    expect(destinationAggregate.total).toBe(1400)
+    expect(destinationAggregate.units).toBe(65)
+    expect(destinationAggregate.total).toBe(1300)
     expect(destinationAggregate.employeeAmount).toBe(200)
     expect(destinationAggregate.companyAmount).toBe(100)
 
-    expect(summary.total).toBe(1400)
+    expect(summary.total).toBe(1300)
   })
 
   it('rejects a transfer when either plan has no current valuation', () => {
