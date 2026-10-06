@@ -7,7 +7,8 @@ import {
   validatePlanEditParams,
   validatePlanExist,
   validateMovementCreateParams,
-  validateMovementEditParams
+  validateMovementEditParams,
+  validatePensionTransferParams
 } from './pension-plans.validators'
 import loggerHandler from '../../utils/logger'
 
