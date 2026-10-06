@@ -107,5 +107,57 @@ export const createPensionPlansRepository = (db: DB) => ({
       .where(and(eq(pensions.id, id), eq(pensions.user, user)))
       .run()
     return (result.changes ?? 0) > 0
+  },
+
+  transferAssets: ({
+    sourcePlanId,
+    destinationPlanId,
+    user,
+    date,
+    sourceEmployeeUnits,
+    sourceCompanyUnits,
+    destinationEmployeeUnits,
+    destinationCompanyUnits,
+    sourceValue,
+    destinationValue
+  }: {
+    sourcePlanId: string
+    destinationPlanId: string
+    user: string
+    date: number
+    sourceEmployeeUnits: number
+    sourceCompanyUnits: number
+    destinationEmployeeUnits: number
+    destinationCompanyUnits: number
+    sourceValue: number
+    destinationValue: number
+  }): [Movement, Movement] => {
+    return db.transaction((tx) => {
+      const sourceMovement = tx.insert(pensions).values({
+        id: generateId(),
+        planId: sourcePlanId,
+        date,
+        employeeAmount: 0,
+        employeeUnits: -sourceEmployeeUnits,
+        companyAmount: 0,
+        companyUnits: -sourceCompanyUnits,
+        value: sourceValue,
+        user
+      }).returning().get()
+
+      const destinationMovement = tx.insert(pensions).values({
+        id: generateId(),
+        planId: destinationPlanId,
+        date,
+        employeeAmount: 0,
+        employeeUnits: destinationEmployeeUnits,
+        companyAmount: 0,
+        companyUnits: destinationCompanyUnits,
+        value: destinationValue,
+        user
+      }).returning().get()
+
+      return [sourceMovement, destinationMovement]
+    })
   }
 })
