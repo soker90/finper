@@ -152,7 +152,9 @@ export class PensionPlansService {
       throw Boom.badData(ERROR_MESSAGE.PENSION_PLAN.TRANSFER_REQUIRES_VALUATION).output
     }
 
-    const sourceUnits = sourceLatest.employeeUnits + sourceLatest.companyUnits
+    const sourceEmployeeUnits = sourceMovements.reduce((sum, movement) => sum + movement.employeeUnits, 0)
+    const sourceCompanyUnits = sourceMovements.reduce((sum, movement) => sum + movement.companyUnits, 0)
+    const sourceUnits = sourceEmployeeUnits + sourceCompanyUnits
     const sourceValue = sourceUnits * sourceLatest.value
 
     if (sourceUnits <= 0 || sourceValue <= 0 || destinationLatest.value <= 0) {
@@ -160,15 +162,15 @@ export class PensionPlansService {
     }
 
     const destinationUnits = sourceValue / destinationLatest.value
-    const employeeShare = sourceUnits === 0 ? 0 : sourceLatest.employeeUnits / sourceUnits
+    const employeeShare = sourceUnits === 0 ? 0 : sourceEmployeeUnits / sourceUnits
 
     const [sourceMovement, destinationMovement] = this.repository.transferAssets({
       sourcePlanId,
       destinationPlanId,
       user,
       date: Date.now(),
-      sourceEmployeeUnits: sourceLatest.employeeUnits,
-      sourceCompanyUnits: sourceLatest.companyUnits,
+      sourceEmployeeUnits,
+      sourceCompanyUnits,
       destinationEmployeeUnits: destinationUnits * employeeShare,
       destinationCompanyUnits: destinationUnits * (1 - employeeShare),
       sourceValue: sourceLatest.value,
