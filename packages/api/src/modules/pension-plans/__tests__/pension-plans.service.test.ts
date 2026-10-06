@@ -40,6 +40,17 @@ describe('PensionPlansService', () => {
       employeeUnits: 60,
       companyAmount: 400,
       companyUnits: 40,
+      value: 9,
+      user: username
+    })
+
+    repository.createMovement({
+      planId: source.id,
+      date: 2,
+      employeeAmount: 100,
+      employeeUnits: 10,
+      companyAmount: 0,
+      companyUnits: 0,
       value: 10,
       user: username
     })
@@ -67,15 +78,15 @@ describe('PensionPlansService', () => {
 
     expect(sourceAggregate.units).toBe(0)
     expect(sourceAggregate.total).toBe(0)
-    expect(sourceAggregate.employeeAmount).toBe(600)
+    expect(sourceAggregate.employeeAmount).toBe(700)
     expect(sourceAggregate.companyAmount).toBe(400)
 
-    expect(destinationAggregate.units).toBe(65)
-    expect(destinationAggregate.total).toBe(1300)
+    expect(destinationAggregate.units).toBe(70)
+    expect(destinationAggregate.total).toBe(1400)
     expect(destinationAggregate.employeeAmount).toBe(200)
     expect(destinationAggregate.companyAmount).toBe(100)
 
-    expect(summary.total).toBe(1300)
+    expect(summary.total).toBe(1400)
   })
 
   it('rejects a transfer when either plan has no current valuation', () => {
