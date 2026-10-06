@@ -1,11 +1,11 @@
 import React, { useState } from 'react'
 import { useParams, useNavigate, Navigate } from 'react-router'
 import { Alert, Box, Button, CircularProgress, Grid, Stack, Typography } from '@mui/material'
-import { ArrowLeftOutlined, PlusOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons'
+import { ArrowLeftOutlined, PlusOutlined, EditOutlined, DeleteOutlined, SwapOutlined } from '@ant-design/icons'
 
 import { HeaderButtons } from 'components'
-import { usePensionPlanDetail, usePensionPlanMovements, usePensionPlanMutate } from '../hooks/usePensionPlans'
-import { PensionStatCard, PensionTransactionsTable, ModalPensionPlan, TransactionModal } from '../components'
+import { usePensionPlans, usePensionPlanDetail, usePensionPlanMovements, usePensionPlanMutate } from '../hooks/usePensionPlans'
+import { PensionStatCard, PensionTransactionsTable, ModalPensionPlan, TransactionModal, PensionTransferModal } from '../components'
 import { STATS } from '../constants'
 import { deletePensionPlan, deletePensionMovement } from 'services/apiService'
 import type { PensionTransaction } from 'types'
@@ -15,11 +15,13 @@ const PensionPlanDetail: React.FC = () => {
   const navigate = useNavigate()
 
   const { pensionPlan, isLoading: loadingPlan } = usePensionPlanDetail(id)
+  const { pensionPlans } = usePensionPlans()
   const { movements, isLoading: loadingMovements } = usePensionPlanMovements(id)
   const triggerMutate = usePensionPlanMutate(id)
 
   const [openPlanModal, setOpenPlanModal] = useState(false)
   const [openMovementModal, setOpenMovementModal] = useState(false)
+  const [openTransferModal, setOpenTransferModal] = useState(false)
   const [editingTransaction, setEditingTransaction] = useState<PensionTransaction | undefined>(undefined)
   const [actionError, setActionError] = useState<string | null>(null)
 
@@ -79,6 +81,7 @@ const PensionPlanDetail: React.FC = () => {
 
   const actionButtons = [
     { Icon: PlusOutlined, title: 'Movimiento', onClick: handleOpenAddMovement },
+    ...(pensionPlans.length > 1 ? [{ Icon: SwapOutlined, title: 'Traspasar activos', onClick: () => setOpenTransferModal(true) }] : []),
     { Icon: EditOutlined, title: 'Editar', onClick: () => setOpenPlanModal(true) },
     { Icon: DeleteOutlined, title: 'Eliminar', onClick: handleDeletePlan }
   ]
@@ -121,6 +124,15 @@ const PensionPlanDetail: React.FC = () => {
         pensionPlan={pensionPlan}
         onSuccess={triggerMutate}
       />
+
+      {openTransferModal && (
+        <PensionTransferModal
+          show
+          sourcePlan={pensionPlan}
+          plans={pensionPlans}
+          onClose={() => setOpenTransferModal(false)}
+        />
+      )}
 
       {openMovementModal && (
         <TransactionModal
