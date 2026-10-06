@@ -77,6 +77,19 @@ export class PensionPlansController {
     res.send(response)
   }
 
+
+  public transferAssets (req: Request, res: Response): void {
+    const { id } = req.params
+    logger.logInfo(`/pension-plans/${id}/transfer - transfer pension assets`)
+    validatePlanExist({ id, user: req.user as string })
+    const { destinationPlanId } = validatePensionTransferParams(req.body)
+    res.send(pensionPlansService.transferAssets({
+      sourcePlanId: id,
+      destinationPlanId,
+      user: req.user as string
+    }))
+  }
+
   public deleteMovement (req: Request, res: Response): void {
     const { id, movementId } = req.params
     logger.logInfo(`/pension-plans/${id}/movements/${movementId} - delete movement`)
