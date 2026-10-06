@@ -1,4 +1,3 @@
-import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { Alert, Box } from '@mui/material'
 
@@ -21,7 +20,6 @@ interface TransferForm {
 }
 
 const PensionTransferModal = ({ sourcePlan, plans, show, onClose }: Props) => {
-  const [confirmationError, setConfirmationError] = useState<string | null>(null)
   const triggerMutate = usePensionPlanMutate(sourcePlan.id)
   const { error: submitError, runSubmit } = useSubmitError()
 
@@ -35,7 +33,6 @@ const PensionTransferModal = ({ sourcePlan, plans, show, onClose }: Props) => {
     const destination = plans.find(plan => plan.id === destinationPlanId)
     if (!destination) return
 
-    setConfirmationError(null)
     const confirmed = window.confirm(
       `¿Transferir todos los activos actuales de "${sourcePlan.name}" a "${destination.name}"? El traspaso conservará el histórico y registrará el movimiento de salida y entrada con las valoraciones actuales.`
     )
@@ -79,9 +76,9 @@ const PensionTransferModal = ({ sourcePlan, plans, show, onClose }: Props) => {
         </Alert>
       </Box>
 
-      {(submitError || confirmationError) && (
+      {submitError && (
         <Box sx={{ gridColumn: '1 / -1', width: '100%', mt: 1 }}>
-          <Alert severity='error'>{submitError || confirmationError}</Alert>
+          <Alert severity='error'>{submitError}</Alert>
         </Box>
       )}
     </ModalGrid>
