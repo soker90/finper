@@ -44,7 +44,7 @@
     "@soker90/finper-types": "workspace:*",
     "bcrypt": "6.0.0",
     "better-sqlite3": "12.11.1",
-    "compression": "1.8.1",
+    "compression": "1.8.2",
     "cors": "2.8.6",
     "dotenv": "17.4.2",
     "drizzle-orm": "0.45.2",
