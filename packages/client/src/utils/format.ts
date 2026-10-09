@@ -74,6 +74,20 @@ export const date = (cell: number) => {
   })
 }
 
+/** Formats a timestamp's UTC calendar date without applying the browser timezone. */
+export const dateUTC = (cell: number) => {
+  if (!cell) {
+    return null
+  }
+
+  return new Date(cell).toLocaleDateString('es-ES', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    timeZone: 'UTC'
+  })
+}
+
 export const monthYear = (cell?: number | null) => {
   if (!cell) {
     return null
