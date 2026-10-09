@@ -97,7 +97,7 @@ const Tickets = () => {
                       }}
                     >Fecha ticket:
                     </Typography>
-                    <Typography variant='body2'>{ticket.date ? format.date(ticket.date) : '—'}</Typography>
+                    <Typography variant='body2'>{ticket.date ? format.dateUTC(ticket.date) : '—'}</Typography>
                   </Stack>
 
                   <Stack
