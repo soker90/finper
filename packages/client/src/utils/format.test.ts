@@ -1,9 +1,14 @@
 import { test, expect, describe } from 'vitest'
-import { dateShort, euro, monthToNumber, monthYear, runwayTime } from 'utils/format'
+import { dateShort, dateUTC, euro, monthToNumber, monthYear, runwayTime } from 'utils/format'
 
 test('date returned is valid', () => {
   const sDate = dateShort(new Date(2022, 0, 1).getTime())
   expect(sDate).eq('1 ene')
+})
+
+test('dateUTC preserves the UTC calendar day regardless of browser timezone', () => {
+  const timestamp = Date.UTC(2026, 9, 4, 12, 0, 0)
+  expect(dateUTC(timestamp)).eq('04/10/2026')
 })
 
 test('monthYear returned is valid', () => {
