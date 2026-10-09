@@ -51,7 +51,12 @@ export class SubscriptionCandidateService {
     return this.repository.findCandidatesByUser(user).map(candidate => {
       const transaction = this.repository.findTransactionById(candidate.transactionId)
       const subs = this.repository.findSubscriptionsByIds(candidate.subscriptionIds)
-      return serializeCandidate(candidate, transaction, subs)
+      const subscriptionsById = new Map(subs.map(subscription => [subscription.id, subscription] as const))
+      const orderedSubscriptions = candidate.subscriptionIds.flatMap(id => {
+        const subscription = subscriptionsById.get(id)
+        return subscription ? [subscription] : []
+      })
+      return serializeCandidate(candidate, transaction, orderedSubscriptions)
     })
   }
 
