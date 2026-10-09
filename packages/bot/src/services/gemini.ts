@@ -31,44 +31,17 @@ interface GeminiRawExtraction {
 
 /**
  * Converts a receipt date to a Unix timestamp in milliseconds.
- *
- * Numeric dates from Spanish receipts are interpreted as DD/MM/YYYY.
- * ISO dates are also accepted. Uses 12:00 UTC to avoid timezone-related date shifts.
+ * Numeric dates from Spanish receipts use DD/MM/YYYY; ISO dates are also accepted.
  */
-function parseDateString (dateValue: string | null, referenceTimestamp = Date.now()): number | null {
+function parseDateString (dateValue: string | null): number | null {
   const date = dateValue?.trim() ?? ''
-
   const numericMatch = date.match(/^(\d{1,2})[\\/. -](\d{1,2})[\\/. -](\d{2}|\d{4})$/)
+
   if (numericMatch) {
     const [, dayText, monthText, yearText] = numericMatch
     if (!dayText || !monthText || !yearText) return null
-    const first = Number(dayText)
-    const second = Number(monthText)
     const year = yearText.length === 2 ? 2000 + Number(yearText) : Number(yearText)
-    const dayFirst = createValidatedTimestamp(year, second, first)
-    const monthFirst = createValidatedTimestamp(year, first, second)
-
-    if (dayFirst === null) return monthFirst
-    if (monthFirst === null || first === second) return dayFirst
-
-    const referenceDate = new Date(referenceTimestamp)
-    const referenceYear = referenceDate.getUTCFullYear()
-    const candidates = [
-      createValidatedTimestamp(referenceYear, second, first),
-      createValidatedTimestamp(referenceYear, first, second)
-    ].filter((candidate): candidate is number => candidate !== null)
-    const recentCandidates = candidates.filter(candidate =>
-      Math.abs(candidate - referenceTimestamp) <= 45 * 24 * 60 * 60 * 1000
-    )
-
-    if (recentCandidates.length === 1) return recentCandidates[0]!
-    if (recentCandidates.length > 1) {
-      return recentCandidates.reduce((closest, candidate) =>
-        Math.abs(candidate - referenceTimestamp) < Math.abs(closest - referenceTimestamp) ? candidate : closest
-      )
-    }
-
-    return dayFirst
+    return createValidatedTimestamp(year, Number(monthText), Number(dayText))
   }
 
   const isoMatch = date.match(/^(\d{4})-(\d{2})-(\d{2})$/)
@@ -130,10 +103,10 @@ export async function extractReceiptData (
   const text = await callGemini(requestBody, apiKey)
 
   try {
-    const cleaned = text.trim().replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '')
+    const cleaned = text.trim().replace(/^\x60\x60\x60(?:json)?\s*/i, '').replace(/\s*\x60\x60\x60$/, '')
     const parsed = JSON.parse(cleaned) as GeminiRawExtraction
     return {
-      date: parseDateString(parsed.date, referenceTimestamp),
+      date: parseDateString(parsed.date),
       store: parsed.store ?? null,
       amount: parsed.amount ?? null,
       raw_text: '',
@@ -171,10 +144,10 @@ export async function extractExpenseFromText (
   const text = await callGemini(requestBody, apiKey)
 
   try {
-    const cleaned = text.trim().replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '')
+    const cleaned = text.trim().replace(/^\x60\x60\x60(?:json)?\s*/i, '').replace(/\s*\x60\x60\x60$/, '')
     const parsed = JSON.parse(cleaned) as GeminiRawExtraction
     return {
-      date: parseDateString(parsed.date, referenceTimestamp),
+      date: parseDateString(parsed.date),
       store: parsed.store ?? null,
       amount: parsed.amount ?? null,
       raw_text: userText,
