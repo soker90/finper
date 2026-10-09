@@ -78,7 +78,6 @@ export class PensionPlansController {
     res.send(response)
   }
 
-
   public transferAssets (req: Request, res: Response): void {
     const { id } = req.params
     logger.logInfo(`/pension-plans/${id}/transfer - transfer pension assets`)
