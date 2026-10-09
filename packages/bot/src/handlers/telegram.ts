@@ -128,7 +128,7 @@ export async function telegramWebhookHandler (c: Context<{ Bindings: Env }>): Pr
     }
 
     // Free-text expense: process with Gemini
-    const processingPromise = processTicketText(text, message.message_id, message.date * 1000, chatId, userId, isAdmin, adminUserId, c.env)
+    const processingPromise = processTicketText(text, message.message_id, chatId, userId, isAdmin, adminUserId, c.env)
     c.executionCtx.waitUntil(processingPromise)
 
     await sendTelegramMessage(chatId, '⏳ Procesando gasto...', c.env.TELEGRAM_BOT_TOKEN)
@@ -169,7 +169,7 @@ async function processTicketText (
 ): Promise<void> {
   try {
     // 1. Extract data from text with Gemini
-    const extraction = await extractExpenseFromText(userText, env.GEMINI_API_KEY, messageTimestamp)
+    const extraction = await extractExpenseFromText(userText, env.GEMINI_API_KEY)
 
     // 2. Save ticket to D1 (image_url = null, raw_text = original message)
     const ticketId = generateId()
@@ -245,7 +245,7 @@ async function processTicketPhoto (
     await uploadToR2(env.TICKET_IMAGES, buffer, r2Key)
 
     // 3. Extract data with Gemini Vision
-    const extraction = await extractReceiptData(buffer, env.GEMINI_API_KEY, messageTimestamp)
+    const extraction = await extractReceiptData(buffer, env.GEMINI_API_KEY)
 
     // 4. Save ticket to D1
     await insertTicket(env.DB, {
