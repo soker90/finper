@@ -74,7 +74,6 @@ export const date = (cell: number) => {
   })
 }
 
-
 export const monthYear = (cell?: number | null) => {
   if (!cell) {
     return null
