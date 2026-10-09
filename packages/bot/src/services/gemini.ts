@@ -107,7 +107,7 @@ export async function extractReceiptData (
   const text = await callGemini(requestBody, apiKey)
 
   try {
-    const cleaned = text.trim().replace(/^\x60\x60\x60(?:json)?\s*/i, '').replace(/\s*\x60\x60\x60$/, '')
+    const cleaned = text.trim().replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '')
     const parsed = JSON.parse(cleaned) as GeminiRawExtraction
     return {
       date: parseDateString(parsed.date),
@@ -148,7 +148,7 @@ export async function extractExpenseFromText (
   const text = await callGemini(requestBody, apiKey)
 
   try {
-    const cleaned = text.trim().replace(/^\x60\x60\x60(?:json)?\s*/i, '').replace(/\s*\x60\x60\x60$/, '')
+    const cleaned = text.trim().replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '')
     const parsed = JSON.parse(cleaned) as GeminiRawExtraction
     return {
       date: parseDateString(parsed.date),
