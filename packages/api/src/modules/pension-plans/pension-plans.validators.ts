@@ -67,7 +67,6 @@ export const validateMovementCreateParams = (body: any) => {
   return value
 }
 
-
 export const validatePensionTransferParams = (body: any) => {
   const schema = Joi.object({
     destinationPlanId: Joi.string().required()
