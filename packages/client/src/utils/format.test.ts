@@ -6,7 +6,6 @@ test('date returned is valid', () => {
   expect(sDate).eq('1 ene')
 })
 
-
 test('monthYear returned is valid', () => {
   const sMonthYear = monthYear(new Date(2022, 0, 15).getTime())
   expect(sMonthYear).eq('Ene 2022')
