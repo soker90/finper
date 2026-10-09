@@ -1,4 +1,6 @@
 import { eq, and, desc } from 'drizzle-orm'
+import Boom from '@hapi/boom'
+import { ERROR_MESSAGE } from '../../i18n'
 import { type DB, schema, generateId } from '@soker90/finper-db'
 const { pensionPlans, pensions } = schema
 
@@ -133,6 +135,19 @@ export const createPensionPlansRepository = (db: DB) => ({
     destinationValue: number
   }): [Movement, Movement] => {
     return db.transaction((tx) => {
+      const currentSourceMovements = tx.select()
+        .from(pensions)
+        .where(and(eq(pensions.planId, sourcePlanId), eq(pensions.user, user)))
+        .all()
+      const currentSourceUnits = currentSourceMovements.reduce(
+        (total, movement) => total + movement.employeeUnits + movement.companyUnits,
+        0
+      )
+
+      if (currentSourceUnits < sourceEmployeeUnits + sourceCompanyUnits) {
+        throw Boom.badData(ERROR_MESSAGE.PENSION_PLAN.TRANSFER_INVALID_ASSETS).output
+      }
+
       const sourceMovement = tx.insert(pensions).values({
         id: generateId(),
         planId: sourcePlanId,
@@ -158,6 +173,6 @@ export const createPensionPlansRepository = (db: DB) => ({
       }).returning().get()
 
       return [sourceMovement, destinationMovement]
-    })
+    }, { behavior: 'immediate' })
   }
 })
