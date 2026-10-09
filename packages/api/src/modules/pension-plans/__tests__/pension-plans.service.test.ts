@@ -104,10 +104,17 @@ describe('PensionPlansService', () => {
       user: username
     })
 
-    expect(() => service.transferAssets({
-      sourcePlanId: source.id,
-      destinationPlanId: destination.id,
-      user: username
-    })).toThrow('El plan de origen y destino deben tener al menos una valoración registrada')
+    let thrown: any
+    try {
+      service.transferAssets({
+        sourcePlanId: source.id,
+        destinationPlanId: destination.id,
+        user: username
+      })
+    } catch (error) {
+      thrown = error
+    }
+
+    expect(thrown.payload.message).toBe('El plan de origen y destino deben tener al menos una valoración registrada')
   })
 })
