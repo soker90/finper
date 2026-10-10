@@ -9,6 +9,7 @@ export const BUDGETS = 'budgets'
 export const PENSION_PLANS = 'pension-plans'
 export const PENSION_PLAN_DETAIL = (id: string) => `pension-plans/${id}`
 export const PENSION_PLAN_MOVEMENTS = (id: string) => `pension-plans/${id}/movements`
+export const PENSION_PLAN_TRANSFER = (id: string) => `pension-plans/${id}/transfer`
 export const PENSION_PLAN_ALL_MOVEMENTS = 'pension-plans/movements'
 export const TICKETS = 'tickets'
 export const LOANS = 'loans'

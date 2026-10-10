@@ -1,5 +1,5 @@
 import axios from 'axios'
-import { ACCOUNTS, BUDGETS, CATEGORIES, DEBTS, LOANS, LOAN_DETAIL, LOAN_SIMULATE, PENSION_PLANS, PENSION_PLAN_DETAIL, PENSION_PLAN_MOVEMENTS, TICKETS, TRANSACTIONS, SUBSCRIPTIONS, SUBSCRIPTION_CANDIDATES, SUPPLIES, SUPPLIES_PROPERTIES, SUPPLIES_READINGS, STOCKS, GOALS, YIELDS, YIELD_DETAIL, CREDIT_CARDS } from 'constants/api-paths'
+import { ACCOUNTS, BUDGETS, CATEGORIES, DEBTS, LOANS, LOAN_DETAIL, LOAN_SIMULATE, PENSION_PLANS, PENSION_PLAN_DETAIL, PENSION_PLAN_MOVEMENTS, PENSION_PLAN_TRANSFER, TICKETS, TRANSACTIONS, SUBSCRIPTIONS, SUBSCRIPTION_CANDIDATES, SUPPLIES, SUPPLIES_PROPERTIES, SUPPLIES_READINGS, STOCKS, GOALS, YIELDS, YIELD_DETAIL, CREDIT_CARDS } from 'constants/api-paths'
 
 import type { TransactionType } from '@soker90/finper-types'
 import type { Category, Transaction, Account, PensionTransaction, Debt, Loan, SubscriptionInput, SupplyReadingInput, StockPurchase, Goal, SimulationResult, YieldInput } from 'types'
@@ -331,3 +331,6 @@ export const editPensionMovement = ({ planId, movementId, params }: { planId: st
 
 export const deletePensionMovement = (planId: string, movementId: string): Promise<{ error?: string }> =>
   axios.delete(`${PENSION_PLAN_MOVEMENTS(planId)}/${movementId}`).then(() => ({})).catch((error: any) => ({ error: extractError(error) }))
+
+export const transferPensionAssets = (planId: string, destinationPlanId: string): Promise<{ error?: string }> =>
+  axios.post(PENSION_PLAN_TRANSFER(planId), { destinationPlanId }).then(() => ({})).catch((error: any) => ({ error: extractError(error) }))

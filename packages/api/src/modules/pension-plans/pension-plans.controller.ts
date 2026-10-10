@@ -7,7 +7,8 @@ import {
   validatePlanEditParams,
   validatePlanExist,
   validateMovementCreateParams,
-  validateMovementEditParams
+  validateMovementEditParams,
+  validatePensionTransferParams
 } from './pension-plans.validators'
 import loggerHandler from '../../utils/logger'
 
@@ -75,6 +76,18 @@ export class PensionPlansController {
     const value = validateMovementEditParams(req.body)
     const response = pensionPlansService.editMovement({ id: movementId, planId: id, user: req.user as string, value })
     res.send(response)
+  }
+
+  public transferAssets (req: Request, res: Response): void {
+    const { id } = req.params
+    logger.logInfo(`/pension-plans/${id}/transfer - transfer pension assets`)
+    validatePlanExist({ id, user: req.user as string })
+    const { destinationPlanId } = validatePensionTransferParams(req.body)
+    res.send(pensionPlansService.transferAssets({
+      sourcePlanId: id,
+      destinationPlanId,
+      user: req.user as string
+    }))
   }
 
   public deleteMovement (req: Request, res: Response): void {

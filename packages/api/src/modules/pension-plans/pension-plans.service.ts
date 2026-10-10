@@ -127,6 +127,62 @@ export class PensionPlansService {
     return this.repository.deleteMovement(id, user)
   }
 
+  public transferAssets ({ sourcePlanId, destinationPlanId, user }: {
+    sourcePlanId: string
+    destinationPlanId: string
+    user: string
+  }) {
+    if (sourcePlanId === destinationPlanId) {
+      throw Boom.badData(ERROR_MESSAGE.PENSION_PLAN.TRANSFER_SAME_PLAN).output
+    }
+
+    const sourcePlan = this.repository.findPlanById(sourcePlanId, user)
+    const destinationPlan = this.repository.findPlanById(destinationPlanId, user)
+
+    if (!sourcePlan || !destinationPlan) {
+      throw Boom.notFound(ERROR_MESSAGE.PENSION_PLAN.NOT_FOUND).output
+    }
+
+    const sourceMovements = this.repository.findMovements(sourcePlanId, user)
+    const destinationMovements = this.repository.findMovements(destinationPlanId, user)
+    const sourceLatest = sourceMovements[0]
+    const destinationLatest = destinationMovements[0]
+
+    if (!sourceLatest || !destinationLatest) {
+      throw Boom.badData(ERROR_MESSAGE.PENSION_PLAN.TRANSFER_REQUIRES_VALUATION).output
+    }
+
+    const sourceEmployeeUnits = sourceMovements.reduce((sum, movement) => sum + movement.employeeUnits, 0)
+    const sourceCompanyUnits = sourceMovements.reduce((sum, movement) => sum + movement.companyUnits, 0)
+    const sourceUnits = sourceEmployeeUnits + sourceCompanyUnits
+    const sourceValue = sourceUnits * sourceLatest.value
+
+    if (sourceUnits <= 0 || sourceValue <= 0 || destinationLatest.value <= 0) {
+      throw Boom.badData(ERROR_MESSAGE.PENSION_PLAN.TRANSFER_INVALID_ASSETS).output
+    }
+
+    const destinationUnits = sourceValue / destinationLatest.value
+    const employeeShare = sourceUnits === 0 ? 0 : sourceEmployeeUnits / sourceUnits
+
+    const [sourceMovement, destinationMovement] = this.repository.transferAssets({
+      sourcePlanId,
+      destinationPlanId,
+      user,
+      date: Date.now(),
+      sourceEmployeeUnits,
+      sourceCompanyUnits,
+      destinationEmployeeUnits: destinationUnits * employeeShare,
+      destinationCompanyUnits: destinationUnits * (1 - employeeShare),
+      sourceValue: sourceLatest.value,
+      destinationValue: destinationLatest.value
+    })
+
+    return {
+      source: serializePensionMovement(sourceMovement),
+      destination: serializePensionMovement(destinationMovement)
+    }
+  }
+
   /** Resumen agregado de TODOS los planes de un usuario, usado por el dashboard. */
   public getAggregateSummary (user: string): PensionAggregateSummary {
     const movements = this.repository.findAllMovementsByUser(user)

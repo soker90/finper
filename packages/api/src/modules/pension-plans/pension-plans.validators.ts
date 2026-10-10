@@ -67,6 +67,16 @@ export const validateMovementCreateParams = (body: any) => {
   return value
 }
 
+export const validatePensionTransferParams = (body: any) => {
+  const schema = Joi.object({
+    destinationPlanId: Joi.string().required()
+  })
+  const { error, value } = schema.validate(body)
+  if (error) throw Boom.badData(error.message).output
+  if (!isValidId(value.destinationPlanId)) throw Boom.badRequest(ERROR_MESSAGE.COMMON.INVALID_ID).output
+  return value
+}
+
 export const validateMovementEditParams = (body: any) => {
   const { error, value } = movementEditSchema.validate(body)
   if (error) throw Boom.badData(error.message).output
