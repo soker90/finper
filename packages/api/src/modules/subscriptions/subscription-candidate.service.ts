@@ -8,6 +8,7 @@ const ONE_WEEK_MS = 7 * 24 * 60 * 60 * 1000
 interface TransactionForDetect {
   id: string
   date: number
+  amount: number
   categoryId: string
   accountId: string
   user: string
@@ -35,9 +36,13 @@ export class SubscriptionCandidateService {
     const uniqueMatching = [...new Map(matching.map(sub => [sub.id, sub])).values()]
     if (uniqueMatching.length === 0) return
 
+    const orderedMatching = uniqueMatching.toSorted(
+      (a, b) => Math.abs(a.amount - transaction.amount) - Math.abs(b.amount - transaction.amount)
+    )
+
     this.repository.createCandidate({
       transactionId: transaction.id,
-      subscriptionIds: uniqueMatching.map(sub => sub.id),
+      subscriptionIds: orderedMatching.map(sub => sub.id),
       user: transaction.user
     })
   }
@@ -46,7 +51,12 @@ export class SubscriptionCandidateService {
     return this.repository.findCandidatesByUser(user).map(candidate => {
       const transaction = this.repository.findTransactionById(candidate.transactionId)
       const subs = this.repository.findSubscriptionsByIds(candidate.subscriptionIds)
-      return serializeCandidate(candidate, transaction, subs)
+      const subscriptionsById = new Map(subs.map(subscription => [subscription.id, subscription] as const))
+      const orderedSubscriptions = candidate.subscriptionIds.flatMap(id => {
+        const subscription = subscriptionsById.get(id)
+        return subscription ? [subscription] : []
+      })
+      return serializeCandidate(candidate, transaction, orderedSubscriptions)
     })
   }
 
