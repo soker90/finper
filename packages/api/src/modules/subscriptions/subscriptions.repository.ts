@@ -183,7 +183,14 @@ export const createSubscriptionsRepository = (db: DB) => ({
   findTransactionById: (id: string): SubscriptionTransactionRow | undefined =>
     transactionsSelect(db).where(eq(transactions.id, id)).get() as SubscriptionTransactionRow | undefined,
 
-  findSubscriptionsByIds: (ids: string[]): Array<{ id: string, name: string, logoUrl: string | null, amount: number, cycle: number, nextPaymentDate: number | null }> => {
+  findTransactionsByIds: (ids: string[], user: string): SubscriptionTransactionRow[] => {
+    if (ids.length === 0) return []
+    return transactionsSelect(db)
+      .where(and(eq(transactions.user, user), inArray(transactions.id, ids)))
+      .all() as SubscriptionTransactionRow[]
+  },
+
+  findSubscriptionsByIds: (ids: string[], user: string): Array<{ id: string, name: string, logoUrl: string | null, amount: number, cycle: number, nextPaymentDate: number | null }> => {
     if (ids.length === 0) return []
     return db.select({
       id: subscriptions.id,
@@ -192,6 +199,6 @@ export const createSubscriptionsRepository = (db: DB) => ({
       amount: subscriptions.amount,
       cycle: subscriptions.cycle,
       nextPaymentDate: subscriptions.nextPaymentDate
-    }).from(subscriptions).where(inArray(subscriptions.id, ids)).all()
+    }).from(subscriptions).where(and(eq(subscriptions.user, user), inArray(subscriptions.id, ids))).all()
   }
 })
