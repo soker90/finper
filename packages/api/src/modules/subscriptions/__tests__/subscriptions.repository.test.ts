@@ -49,9 +49,10 @@ describe('Subscriptions Repository', () => {
     ...overrides
   })
 
-  const insertTx = (subscriptionId: string | null, date: number) => {
+  const insertTx = (subscriptionId: string | null, date: number): string => {
+    const id = generateId()
     db.insert(transactions).values({
-      id: generateId(),
+      id,
       date,
       categoryId,
       amount: 10,
@@ -63,6 +64,7 @@ describe('Subscriptions Repository', () => {
       tags: [],
       user
     }).run()
+    return id
   }
 
   it('findByUser should populate names and order by nextPaymentDate asc (nulls first)', () => {
@@ -94,6 +96,22 @@ describe('Subscriptions Repository', () => {
   it('findLatestTransactionDate should return null when there are no linked transactions', () => {
     const sub = repository.create(baseData())
     expect(repository.findLatestTransactionDate(sub.id)).toBeNull()
+  })
+
+  it('findTransactionsByIds supports more than one SQLite bind-variable chunk', () => {
+    const transactionId = insertTx(null, 100)
+    const ids = Array.from({ length: 900 }, () => generateId())
+    ids.push(transactionId)
+
+    expect(repository.findTransactionsByIds(ids, user).map(row => row.id)).toEqual([transactionId])
+  })
+
+  it('findSubscriptionsByIds supports more than one SQLite bind-variable chunk', () => {
+    const subscription = repository.create(baseData())
+    const ids = Array.from({ length: 900 }, () => generateId())
+    ids.push(subscription.id)
+
+    expect(repository.findSubscriptionsByIds(ids, user).map(row => row.id)).toEqual([subscription.id])
   })
 
   it('unlinkAllTransactions should null out subscriptionId on linked transactions', () => {

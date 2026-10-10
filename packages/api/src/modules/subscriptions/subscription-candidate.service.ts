@@ -48,10 +48,21 @@ export class SubscriptionCandidateService {
   }
 
   public getCandidates (user: string) {
-    return this.repository.findCandidatesByUser(user).map(candidate => {
-      const transaction = this.repository.findTransactionById(candidate.transactionId)
-      const subs = this.repository.findSubscriptionsByIds(candidate.subscriptionIds)
-      const subscriptionsById = new Map(subs.map(subscription => [subscription.id, subscription] as const))
+    const candidates = this.repository.findCandidatesByUser(user)
+    if (candidates.length === 0) return []
+
+    const transactionIds = uniqueIds(candidates.map(candidate => candidate.transactionId))
+    const transactionsById = new Map(
+      this.repository.findTransactionsByIds(transactionIds, user).map(transaction => [transaction.id, transaction] as const)
+    )
+
+    const subscriptionIds = uniqueIds(candidates.flatMap(candidate => candidate.subscriptionIds))
+    const subscriptionsById = new Map(
+      this.repository.findSubscriptionsByIds(subscriptionIds, user).map(subscription => [subscription.id, subscription] as const)
+    )
+
+    return candidates.map(candidate => {
+      const transaction = transactionsById.get(candidate.transactionId)
       const orderedSubscriptions = candidate.subscriptionIds.flatMap(id => {
         const subscription = subscriptionsById.get(id)
         return subscription ? [subscription] : []
