@@ -48,7 +48,7 @@
     "@typescript-eslint/eslint-plugin": "8.67.0",
     "@typescript-eslint/parser": "8.70.1",
     "@vitejs/plugin-react": "6.0.2",
-    "@vitest/coverage-v8": "4.1.11",
+    "@vitest/coverage-v8": "5.0.3",
     "babel-plugin-react-compiler": "1.0.0",
     "eslint": "9.39.2",
     "eslint-plugin-react": "7.37.5",
