@@ -5,6 +5,9 @@ const { subscriptions, transactions, categories, accounts, stores, subscriptionC
 type Subscription = typeof subscriptions.$inferSelect
 type CandidateRow = typeof subscriptionCandidates.$inferSelect
 
+// Stay below SQLite's traditional 999 bind-variable limit, including the user filter.
+const SQLITE_IN_CLAUSE_CHUNK_SIZE = 900
+
 export interface SubscriptionTransactionRow {
   id: string
   date: number
@@ -180,25 +183,30 @@ export const createSubscriptionsRepository = (db: DB) => ({
     db.delete(subscriptionCandidates).where(eq(subscriptionCandidates.id, id)).run()
   },
 
-  findTransactionById: (id: string): SubscriptionTransactionRow | undefined =>
-    transactionsSelect(db).where(eq(transactions.id, id)).get() as SubscriptionTransactionRow | undefined,
-
   findTransactionsByIds: (ids: string[], user: string): SubscriptionTransactionRow[] => {
-    if (ids.length === 0) return []
-    return transactionsSelect(db)
-      .where(and(eq(transactions.user, user), inArray(transactions.id, ids)))
-      .all() as SubscriptionTransactionRow[]
+    const rows: SubscriptionTransactionRow[] = []
+    for (let i = 0; i < ids.length; i += SQLITE_IN_CLAUSE_CHUNK_SIZE) {
+      const chunk = ids.slice(i, i + SQLITE_IN_CLAUSE_CHUNK_SIZE)
+      rows.push(...transactionsSelect(db)
+        .where(and(eq(transactions.user, user), inArray(transactions.id, chunk)))
+        .all() as SubscriptionTransactionRow[])
+    }
+    return rows
   },
 
   findSubscriptionsByIds: (ids: string[], user: string): Array<{ id: string, name: string, logoUrl: string | null, amount: number, cycle: number, nextPaymentDate: number | null }> => {
-    if (ids.length === 0) return []
-    return db.select({
-      id: subscriptions.id,
-      name: subscriptions.name,
-      logoUrl: subscriptions.logoUrl,
-      amount: subscriptions.amount,
-      cycle: subscriptions.cycle,
-      nextPaymentDate: subscriptions.nextPaymentDate
-    }).from(subscriptions).where(and(eq(subscriptions.user, user), inArray(subscriptions.id, ids))).all()
+    const rows: Array<{ id: string, name: string, logoUrl: string | null, amount: number, cycle: number, nextPaymentDate: number | null }> = []
+    for (let i = 0; i < ids.length; i += SQLITE_IN_CLAUSE_CHUNK_SIZE) {
+      const chunk = ids.slice(i, i + SQLITE_IN_CLAUSE_CHUNK_SIZE)
+      rows.push(...db.select({
+        id: subscriptions.id,
+        name: subscriptions.name,
+        logoUrl: subscriptions.logoUrl,
+        amount: subscriptions.amount,
+        cycle: subscriptions.cycle,
+        nextPaymentDate: subscriptions.nextPaymentDate
+      }).from(subscriptions).where(and(eq(subscriptions.user, user), inArray(subscriptions.id, chunk))).all())
+    }
+    return rows
   }
 })
