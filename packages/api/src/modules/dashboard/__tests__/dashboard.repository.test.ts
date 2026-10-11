@@ -176,4 +176,58 @@ describe('Dashboard Repository (Part A - aggregations)', () => {
     expect(byCategory.find(row => row.categoryId === foodCategoryId)).toMatchObject({ total: 65, count: 1 })
     expect(byCategory.find(row => row.categoryId === homeCategoryId)).toMatchObject({ total: 35, count: 1 })
   })
+
+  it('nets split refund lines in expense categories when calculating totals', () => {
+    const splitUser = generateUsername()
+    db.insert(users).values({ id: generateId(), username: splitUser, password: 'pwd', createdAt: new Date() }).run()
+    const testAccountId = generateId()
+    db.insert(accounts).values({ id: testAccountId, name: 'A', bank: 'B', balance: 0, isActive: true, user: splitUser }).run()
+    const parentCategoryId = generateId()
+    db.insert(categories).values({ id: parentCategoryId, name: 'Casa', type: 'expense', user: splitUser }).run()
+    const foodCategoryId = generateId()
+    const salaryCategoryId = generateId()
+    db.insert(categories).values({ id: foodCategoryId, name: 'Comida', type: 'expense', parentId: parentCategoryId, user: splitUser }).run()
+    db.insert(categories).values({ id: salaryCategoryId, name: 'Salario', type: 'income', user: splitUser }).run()
+
+    const incomeTxId = generateId()
+    db.insert(transactions).values({
+      id: incomeTxId, date: march, categoryId: salaryCategoryId, amount: 100, type: 'income', accountId: testAccountId, note: null, storeId: null, tags: [], user: splitUser
+    }).run()
+    db.insert(transactionSplits).values([
+      { id: generateId(), transactionId: incomeTxId, categoryId: salaryCategoryId, amount: 80, user: splitUser },
+      { id: generateId(), transactionId: incomeTxId, categoryId: foodCategoryId, amount: 20, user: splitUser }
+    ]).run()
+
+    expect(repo.monthIncomeExpenses(splitUser, marchStart, marchEnd)).toEqual({ income: 80, expenses: -20 })
+    expect(repo.realExpenses(splitUser, marchStart, marchEnd)).toBe(-20)
+  })
+
+  it('ignores not_computable transactions in expense categories without inflating counts or averages', () => {
+    const notComputableUser = generateUsername()
+    db.insert(users).values({ id: generateId(), username: notComputableUser, password: 'pwd', createdAt: new Date() }).run()
+    const testAccountId = generateId()
+    db.insert(accounts).values({ id: testAccountId, name: 'A', bank: 'B', balance: 0, isActive: true, user: notComputableUser }).run()
+    const foodCategoryId = generateId()
+    db.insert(categories).values({ id: foodCategoryId, name: 'Comida', type: 'expense', user: notComputableUser }).run()
+
+    db.insert(transactions).values({
+      id: generateId(),
+      date: march,
+      categoryId: foodCategoryId,
+      amount: 150,
+      type: 'not_computable',
+      accountId: testAccountId,
+      note: 'Traspaso interno',
+      storeId: null,
+      tags: [],
+      user: notComputableUser
+    }).run()
+
+    expect(repo.monthIncomeExpenses(notComputableUser, marchStart, marchEnd)).toEqual({ income: 0, expenses: 0 })
+    expect(repo.realExpenses(notComputableUser, marchStart, marchEnd)).toBe(0)
+    expect(repo.currentMonthByCategory(notComputableUser, marchStart, marchEnd)).toEqual([])
+    expect(repo.dailyExpenses(notComputableUser, marchStart, marchEnd)).toEqual([])
+    expect(repo.last3MonthsAvgByCategory(notComputableUser, marchStart, marchEnd)).toEqual([])
+    expect(repo.last3MonthsTransactions(notComputableUser, marchStart, marchEnd)).toEqual([])
+  })
 })
