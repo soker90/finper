@@ -119,7 +119,7 @@ describe('Dashboard Repository (Part A - aggregations)', () => {
       type: 'income',
       accountId,
       note: 'Devolución de luz',
-      storeId: null,
+      storeId,
       subscriptionId: null,
       tags: [],
       user
@@ -127,6 +127,7 @@ describe('Dashboard Repository (Part A - aggregations)', () => {
 
     expect(repo.monthIncomeExpenses(user, marchStart, marchEnd)).toEqual({ income: 2000, expenses: 130 })
     expect(repo.realExpenses(user, marchStart, marchEnd)).toBe(130)
+    expect(repo.topExpenseStores(user, marchStart, marchEnd)).toEqual([{ name: 'Mercadona', amount: 80 }])
     expect(repo.topExpenseCategories(user, marchStart, marchEnd)).toEqual([{ name: 'Comida', parentName: 'Casa', amount: 130 }])
     expect(repo.currentMonthByCategory(user, marchStart, marchEnd)).toEqual([
       { categoryId: childFood, name: 'Comida', total: 130, count: 3 }
@@ -136,6 +137,7 @@ describe('Dashboard Repository (Part A - aggregations)', () => {
       { year: 2025, month: 3, income: 2000, expenses: 130 }
     ])
     expect(repo.dailyExpenses(user, marchStart, marchEnd)).toEqual([{ _id: 15, amount: 130 }])
+    expect(repo.last3MonthsAvgByCategory(user, febMarStart, marchEnd).find(row => row.categoryId === childFood)?.avgMonthly).toBe(105)
     expect(repo.last3MonthsTransactions(user, febMarStart, marchEnd).map(row => row.total).toSorted((a, b) => a - b)).toEqual([80, 130])
 
     db.delete(transactions).where(eq(transactions.id, refundId)).run()
