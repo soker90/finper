@@ -71,6 +71,31 @@ describe('Budgets Service (Part B - getBudgets)', () => {
     expect(savings.real).toBe(600)
   })
 
+  it('subtracts refunds from the expense budget without increasing income totals', () => {
+    const march = Date.UTC(2025, 2, 20, 12, 0, 0)
+    const refundId = generateId()
+    db.insert(transactions).values({
+      id: refundId,
+      date: march,
+      categoryId: childLuz,
+      amount: 50,
+      type: 'income',
+      accountId,
+      note: 'Devolución',
+      storeId: null,
+      subscriptionId: null,
+      tags: [],
+      user
+    }).run()
+
+    const result = service.getBudgets({ user, year: 2025, month: NaN })
+    expect(result.expenses.find((category: any) => category.id === childLuz).budgets[2].real).toBe(350)
+    expect(result.incomes.find((category: any) => category.id === childNomina).budgets[2].real).toBe(1000)
+    expect(result.rule503020.totals.incomeReal).toBe(1000)
+
+    db.delete(transactions).where(eq(transactions.id, refundId)).run()
+  })
+
   it('accumulates the totals row across multiple categories of the same type', () => {
     // Usuario aislado para no alterar las aserciones del fixture compartido.
     const u = generateUsername()

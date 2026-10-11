@@ -8,7 +8,9 @@ export const serializeStatsTransaction = (row: ExpenseDetailRow) => {
     // as separate entries rather than merged).
     _id: row.splitId ?? row.id,
     date: row.date,
-    amount: row.amount,
+    // Refunds reduce aggregate expense totals, but the transaction list should
+    // display the original positive amount alongside its type.
+    amount: Math.abs(row.amount),
     type: row.type,
     tags: row.tags,
     category: { _id: row.categoryId, name: row.categoryName },

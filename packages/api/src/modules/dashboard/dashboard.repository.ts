@@ -1,12 +1,12 @@
 import { eq, and, gte, lt } from 'drizzle-orm'
-import { type DB, schema } from '@soker90/finper-db'
-import { roundMoney } from '@soker90/finper-db'
+import { type DB, schema, roundMoney, TRANSACTION } from '@soker90/finper-db'
 import { findEffectiveCategoryRows } from '../transactions/effective-category-rows'
+import { getCategoryAccountingAmount } from '../transactions/category-accounting'
 
 const { accounts, loans, transactions, categories, stores, budgets, creditCardMovements } = schema
 
-const EXPENSE = 'expense'
-const INCOME = 'income'
+const EXPENSE = TRANSACTION.Expense
+const INCOME = TRANSACTION.Income
 
 // Año/mes/día de un timestamp en zona Europe/Madrid (1:1 con $year/$month/$dayOfMonth timezone del viejo).
 const partsInMadrid = (date: number): { year: number, month: number, day: number } => {
@@ -25,10 +25,10 @@ export interface BudgetRow { categoryId: string, name: string, amount: number }
 
 export const createDashboardRepository = (db: DB) => {
   // Mapa categoryId -> { name, parentId } para resolver nombres y jerarquía.
-  const categoryMap = (user: string): Map<string, { name: string, parentId: string | null }> => {
-    const rows = db.select({ id: categories.id, name: categories.name, parentId: categories.parentId })
+  const categoryMap = (user: string): Map<string, { name: string, parentId: string | null, type: string }> => {
+    const rows = db.select({ id: categories.id, name: categories.name, parentId: categories.parentId, type: categories.type })
       .from(categories).where(eq(categories.user, user)).all()
-    return new Map(rows.map(r => [r.id, { name: r.name, parentId: r.parentId }]))
+    return new Map(rows.map(r => [r.id, { name: r.name, parentId: r.parentId, type: r.type }]))
   }
 
   const parentTxInRange = (user: string, from: number, to: number, type?: string) => {
@@ -39,8 +39,9 @@ export const createDashboardRepository = (db: DB) => {
       categoryId: transactions.categoryId,
       amount: transactions.amount,
       type: transactions.type,
-      storeId: transactions.storeId
-    }).from(transactions).where(and(...conds)).all()
+      storeId: transactions.storeId,
+      categoryType: categories.type
+    }).from(transactions).leftJoin(categories, eq(transactions.categoryId, categories.id)).where(and(...conds)).all()
   }
 
   const effectiveTxInRange = (user: string, from: number, to: number, type?: string) =>
@@ -51,14 +52,14 @@ export const createDashboardRepository = (db: DB) => {
     sumActiveAccountsBalance: (user: string): number => {
       const rows = db.select({ balance: accounts.balance }).from(accounts)
         .where(and(eq(accounts.user, user), eq(accounts.isActive, true))).all()
-      return roundMoney(rows.reduce((s, r) => s + r.balance, 0))
+      return roundMoney(rows.reduce((totalBalance, accountRow) => totalBalance + accountRow.balance, 0))
     },
 
     // 3. Suma de capital pendiente de préstamos activos.
     sumPendingLoans: (user: string): number => {
       const rows = db.select({ pendingAmount: loans.pendingAmount }).from(loans)
         .where(eq(loans.user, user)).all()
-      return roundMoney(rows.filter(r => r.pendingAmount > 0).reduce((s, r) => s + r.pendingAmount, 0))
+      return roundMoney(rows.filter(loanRow => loanRow.pendingAmount > 0).reduce((totalPending, loanRow) => totalPending + loanRow.pendingAmount, 0))
     },
 
     // 3b. Suma de deuda pendiente de tarjetas de crédito (movimientos sin liquidar).
@@ -66,84 +67,98 @@ export const createDashboardRepository = (db: DB) => {
       const rows = db.select({ amount: creditCardMovements.amount, type: creditCardMovements.type })
         .from(creditCardMovements)
         .where(and(eq(creditCardMovements.user, user), eq(creditCardMovements.status, 'pending'))).all()
-      const debt = rows.reduce((s, r) => s + (r.type === 'expense' ? r.amount : -r.amount), 0)
+      const debt = rows.reduce((totalDebt, movementRow) => totalDebt + (movementRow.type === 'expense' ? movementRow.amount : -movementRow.amount), 0)
       return roundMoney(debt)
     },
 
     // 4/5. Ingresos y gastos en un rango.
     monthIncomeExpenses: (user: string, from: number, to: number): { income: number, expenses: number } => {
       let income = 0; let expenses = 0
-      for (const tx of parentTxInRange(user, from, to)) {
-        if (tx.type === INCOME) income += tx.amount
-        else if (tx.type === EXPENSE) expenses += tx.amount
+      for (const tx of effectiveTxInRange(user, from, to)) {
+        if (tx.type === TRANSACTION.NotComputable) continue
+        const amount = getCategoryAccountingAmount({ categoryType: tx.categoryType, type: tx.type, amount: tx.amount })
+        if (tx.categoryType === INCOME) income += amount
+        else if (tx.categoryType === EXPENSE) expenses += amount
       }
-      return { income, expenses }
+      return { income: roundMoney(income), expenses: roundMoney(expenses) }
     },
 
     // 6. Resumen mensual [{ year, month, income, expenses }] (mes Madrid, 1-indexed), ordenado.
     last6MonthsSummary: (user: string, from: number, to: number): MonthlyData[] => {
       const grouped = new Map<string, MonthlyData>()
-      for (const tx of parentTxInRange(user, from, to)) {
-        if (tx.type !== INCOME && tx.type !== EXPENSE) continue
+      for (const tx of effectiveTxInRange(user, from, to)) {
+        if (tx.type === TRANSACTION.NotComputable) continue
+        if (tx.categoryType !== INCOME && tx.categoryType !== EXPENSE) continue
         const { year, month } = partsInMadrid(tx.date)
         const key = `${year}-${month}`
         const entry = grouped.get(key) ?? { year, month, income: 0, expenses: 0 }
-        if (tx.type === INCOME) entry.income += tx.amount
-        else entry.expenses += tx.amount
+        const amount = getCategoryAccountingAmount({ categoryType: tx.categoryType, type: tx.type, amount: tx.amount })
+        if (tx.categoryType === INCOME) entry.income += amount
+        else entry.expenses += amount
         grouped.set(key, entry)
       }
-      return [...grouped.values()].sort((a, b) => a.year - b.year || a.month - b.month)
+      return [...grouped.values()]
+        .map(entry => ({ ...entry, income: roundMoney(entry.income), expenses: roundMoney(entry.expenses) }))
+        .sort((firstMonth, secondMonth) => firstMonth.year - secondMonth.year || firstMonth.month - secondMonth.month)
     },
 
     // 7/8. Gasto diario (día Madrid) -> [{ _id: day, amount }] ordenado por día.
     dailyExpenses: (user: string, from: number, to: number): Array<{ _id: number, amount: number }> => {
       const grouped = new Map<number, number>()
-      for (const tx of parentTxInRange(user, from, to, EXPENSE)) {
+      for (const tx of effectiveTxInRange(user, from, to)) {
+        if (tx.type === TRANSACTION.NotComputable || tx.categoryType !== EXPENSE) continue
         const { day } = partsInMadrid(tx.date)
-        grouped.set(day, (grouped.get(day) ?? 0) + tx.amount)
+        const amount = getCategoryAccountingAmount({ categoryType: tx.categoryType, type: tx.type, amount: tx.amount })
+        grouped.set(day, (grouped.get(day) ?? 0) + amount)
       }
-      return [...grouped.entries()].map(([day, amount]) => ({ _id: day, amount })).sort((a, b) => a._id - b._id)
+      return [...grouped.entries()]
+        .map(([day, amount]) => ({ _id: day, amount: roundMoney(amount) }))
+        .sort((firstDay, secondDay) => firstDay._id - secondDay._id)
     },
 
     // 9. Top categorías de gasto con name y parentName, ordenadas desc.
     topExpenseCategories: (user: string, from: number, to: number): Array<{ name: string, parentName?: string, amount: number }> => {
       const cats = categoryMap(user)
       const grouped = new Map<string, number>()
-      for (const tx of effectiveTxInRange(user, from, to, EXPENSE)) {
-        grouped.set(tx.categoryId, (grouped.get(tx.categoryId) ?? 0) + tx.amount)
+      for (const tx of effectiveTxInRange(user, from, to)) {
+        if (tx.type === TRANSACTION.NotComputable || tx.categoryType !== EXPENSE) continue
+        const amount = getCategoryAccountingAmount({ categoryType: tx.categoryType, type: tx.type, amount: tx.amount })
+        grouped.set(tx.categoryId, (grouped.get(tx.categoryId) ?? 0) + amount)
       }
       return [...grouped.entries()].map(([categoryId, amount]) => {
         const cat = cats.get(categoryId)
         const parentName = cat?.parentId ? (cats.get(cat.parentId)?.name ?? undefined) : undefined
         return { name: cat?.name ?? 'Sin categoría', parentName, amount: roundMoney(amount) }
-      }).sort((a, b) => b.amount - a.amount)
+      }).sort((firstCategory, secondCategory) => secondCategory.amount - firstCategory.amount)
     },
 
     // 10. Top tiendas de gasto con name, ordenadas desc.
     topExpenseStores: (user: string, from: number, to: number): Array<{ name: string, amount: number }> => {
       const storeRows = db.select({ id: stores.id, name: stores.name }).from(stores).where(eq(stores.user, user)).all()
-      const storeNames = new Map(storeRows.map(s => [s.id, s.name]))
+      const storeNames = new Map(storeRows.map(store => [store.id, store.name]))
       const grouped = new Map<string, number>()
-      for (const tx of parentTxInRange(user, from, to, EXPENSE)) {
-        if (!tx.storeId) continue
-        grouped.set(tx.storeId, (grouped.get(tx.storeId) ?? 0) + tx.amount)
+      for (const tx of effectiveTxInRange(user, from, to)) {
+        if (tx.type === TRANSACTION.NotComputable || tx.categoryType !== EXPENSE || !tx.storeId) continue
+        const amount = getCategoryAccountingAmount({ categoryType: tx.categoryType, type: tx.type, amount: tx.amount })
+        grouped.set(tx.storeId, (grouped.get(tx.storeId) ?? 0) + amount)
       }
       return [...grouped.entries()].map(([storeId, amount]) => ({
         name: storeNames.get(storeId) ?? 'Sin tienda', amount: roundMoney(amount)
-      })).sort((a, b) => b.amount - a.amount)
+      })).sort((firstStore, secondStore) => secondStore.amount - firstStore.amount)
     },
 
     // 13. Gasto real total del rango.
     realExpenses: (user: string, from: number, to: number): number =>
-      roundMoney(parentTxInRange(user, from, to, EXPENSE).reduce((s, tx) => s + tx.amount, 0)),
+      roundMoney(effectiveTxInRange(user, from, to).reduce((sum, tx) => sum + (tx.type !== TRANSACTION.NotComputable && tx.categoryType === EXPENSE ? getCategoryAccountingAmount({ categoryType: tx.categoryType, type: tx.type, amount: tx.amount }) : 0), 0)),
 
     // 14. Gasto del mes por categoría con name [{ categoryId, name, total, count }].
     currentMonthByCategory: (user: string, from: number, to: number): CategorySpendingRow[] => {
       const cats = categoryMap(user)
       const grouped = new Map<string, { total: number, count: number }>()
-      for (const tx of effectiveTxInRange(user, from, to, EXPENSE)) {
+      for (const tx of effectiveTxInRange(user, from, to)) {
+        if (tx.type === TRANSACTION.NotComputable || tx.categoryType !== EXPENSE) continue
         const entry = grouped.get(tx.categoryId) ?? { total: 0, count: 0 }
-        entry.total += tx.amount; entry.count += 1
+        entry.total += getCategoryAccountingAmount({ categoryType: tx.categoryType, type: tx.type, amount: tx.amount }); entry.count += 1
         grouped.set(tx.categoryId, entry)
       }
       const result: CategorySpendingRow[] = []
@@ -159,11 +174,12 @@ export const createDashboardRepository = (db: DB) => {
     last3MonthsAvgByCategory: (user: string, from: number, to: number): CategoryHistoryRow[] => {
       const cats = categoryMap(user)
       const monthly = new Map<string, Map<string, number>>() // categoryId -> (year-month -> total)
-      for (const tx of effectiveTxInRange(user, from, to, EXPENSE)) {
+      for (const tx of effectiveTxInRange(user, from, to)) {
+        if (tx.type === TRANSACTION.NotComputable || tx.categoryType !== EXPENSE) continue
         const { year, month } = partsInMadrid(tx.date)
         const ym = `${year}-${month}`
         const perCat = monthly.get(tx.categoryId) ?? new Map<string, number>()
-        perCat.set(ym, (perCat.get(ym) ?? 0) + tx.amount)
+        perCat.set(ym, (perCat.get(ym) ?? 0) + getCategoryAccountingAmount({ categoryType: tx.categoryType, type: tx.type, amount: tx.amount }))
         monthly.set(tx.categoryId, perCat)
       }
       const result: CategoryHistoryRow[] = []
@@ -171,7 +187,7 @@ export const createDashboardRepository = (db: DB) => {
         const cat = cats.get(categoryId)
         if (!cat) continue
         const totals = [...perCat.values()]
-        const avgMonthly = totals.reduce((s, t) => s + t, 0) / totals.length
+        const avgMonthly = roundMoney(totals.reduce((accumulator, monthTotal) => accumulator + monthTotal, 0) / totals.length)
         result.push({ categoryId, name: cat.name, avgMonthly })
       }
       return result
@@ -180,14 +196,20 @@ export const createDashboardRepository = (db: DB) => {
     // 16. Transacciones de gasto agrupadas por mes [{ transactions, total, count }].
     last3MonthsTransactions: (user: string, from: number, to: number): MonthTransactionsRow[] => {
       const grouped = new Map<string, MonthTransactionsRow>()
-      for (const tx of parentTxInRange(user, from, to, EXPENSE)) {
+      for (const tx of parentTxInRange(user, from, to)) {
+        if (tx.type === TRANSACTION.NotComputable || tx.categoryType !== EXPENSE) continue
         const { year, month } = partsInMadrid(tx.date)
         const key = `${year}-${month}`
         const entry = grouped.get(key) ?? { transactions: [], total: 0, count: 0 }
-        entry.transactions.push(tx.amount); entry.total += tx.amount; entry.count += 1
+        const amount = getCategoryAccountingAmount({ categoryType: tx.categoryType, type: tx.type, amount: tx.amount })
+        entry.transactions.push(amount); entry.total += amount; entry.count += 1
         grouped.set(key, entry)
       }
-      return [...grouped.values()]
+      return [...grouped.values()].map(entry => ({
+        ...entry,
+        total: roundMoney(entry.total),
+        transactions: entry.transactions.map(roundMoney)
+      }))
     },
 
     // 17. Budgets del mes (1-indexed) con name [{ categoryId, name, amount }].
@@ -196,10 +218,10 @@ export const createDashboardRepository = (db: DB) => {
       const rows = db.select({ categoryId: budgets.categoryId, amount: budgets.amount }).from(budgets)
         .where(and(eq(budgets.user, user), eq(budgets.year, year), eq(budgets.month, month))).all()
       const result: BudgetRow[] = []
-      for (const r of rows) {
-        const cat = cats.get(r.categoryId)
+      for (const row of rows) {
+        const cat = cats.get(row.categoryId)
         if (!cat) continue
-        result.push({ categoryId: r.categoryId, name: cat.name, amount: r.amount })
+        result.push({ categoryId: row.categoryId, name: cat.name, amount: row.amount })
       }
       return result
     }

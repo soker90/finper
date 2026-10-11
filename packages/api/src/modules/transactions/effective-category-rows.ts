@@ -9,6 +9,7 @@ export interface EffectiveCategoryRow {
   date: number
   categoryId: string
   categoryName?: string | null
+  categoryType?: string | null
   amount: number
   type: string
   storeId?: string | null
@@ -36,6 +37,7 @@ export interface SplitRow {
   amount: number
   tags: string[]
   categoryName: string | null
+  categoryType: string | null
 }
 
 // SQLite caps the number of bound parameters per statement (32766 on modern
@@ -58,7 +60,8 @@ export const loadSplitsByTransactionIds = (db: DB, transactionIds: string[], use
       categoryId: transactionSplits.categoryId,
       amount: transactionSplits.amount,
       tags: transactionSplits.tags,
-      categoryName: categories.name
+      categoryName: categories.name,
+      categoryType: categories.type
     })
       .from(transactionSplits)
       .leftJoin(categories, eq(transactionSplits.categoryId, categories.id))
@@ -73,7 +76,8 @@ export const loadSplitsByTransactionIds = (db: DB, transactionIds: string[], use
         categoryId: row.categoryId,
         amount: row.amount,
         tags: row.tags ?? [],
-        categoryName: row.categoryName
+        categoryName: row.categoryName,
+        categoryType: row.categoryType
       })
       grouped.set(row.transactionId, list)
     }
@@ -94,6 +98,7 @@ export const findEffectiveCategoryRows = (db: DB, query: EffectiveCategoryQuery)
     date: transactions.date,
     categoryId: transactions.categoryId,
     categoryName: categories.name,
+    categoryType: categories.type,
     amount: transactions.amount,
     type: transactions.type,
     storeId: transactions.storeId,
@@ -115,6 +120,7 @@ export const findEffectiveCategoryRows = (db: DB, query: EffectiveCategoryQuery)
           date: parent.date,
           categoryId: split.categoryId,
           categoryName: split.categoryName,
+          categoryType: split.categoryType,
           amount: split.amount,
           type: parent.type,
           storeId: parent.storeId,
@@ -129,6 +135,7 @@ export const findEffectiveCategoryRows = (db: DB, query: EffectiveCategoryQuery)
         date: parent.date,
         categoryId: parent.categoryId,
         categoryName: parent.categoryName,
+        categoryType: parent.categoryType,
         amount: parent.amount,
         type: parent.type,
         storeId: parent.storeId,
