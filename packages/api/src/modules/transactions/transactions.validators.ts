@@ -64,15 +64,6 @@ const getCategory = (id: string, user: string) => {
   return row
 }
 
-const assertCategoryTypeCompatible = (categoryId: string, user: string, type: string) => {
-  const category = getCategory(categoryId, user)
-  // Income transactions in expense categories are refunds; expenses in income
-  // categories would otherwise disappear from both income and expense totals.
-  if (type === TRANSACTION.Expense && category.type === TRANSACTION.Income) {
-    throw Boom.badData('Los gastos deben estar asociados a una categoría de gastos').output
-  }
-}
-
 const assertAccountExists = (id: string, user: string) => {
   if (!isValidId(id)) throw Boom.badRequest(ERROR_MESSAGE.COMMON.INVALID_ID).output
   const exists = sqliteDb.select({ id: accounts.id }).from(accounts)
@@ -95,7 +86,7 @@ export const validateTransactionCreateParams = (params: Record<string, any>) => 
   const { error, value } = createSchema.validate(params)
   if (error) throw Boom.badData(error.message).output
   const normalizedValue = { ...value, amount: roundMoney(value.amount), splits: normalizeSplitLineAmounts(value.splits) }
-  if (normalizedValue.category) assertCategoryTypeCompatible(normalizedValue.category, params.user, normalizedValue.type)
+  if (normalizedValue.category) getCategory(normalizedValue.category, params.user)
   assertAccountExists(normalizedValue.account, params.user)
   validateSplits({ ...normalizedValue, user: params.user })
   return normalizedValue
@@ -113,7 +104,7 @@ export const validateTransactionEditParams = ({ params, body, user }: { params: 
   const { error, value } = editSchema.validate(body)
   if (error) throw Boom.badData(error.message).output
   const normalizedValue = { ...value, amount: roundMoney(value.amount), splits: normalizeSplitLineAmounts(value.splits) }
-  if (normalizedValue.category) assertCategoryTypeCompatible(normalizedValue.category, user, normalizedValue.type)
+  if (normalizedValue.category) getCategory(normalizedValue.category, user)
   assertAccountExists(normalizedValue.account, user)
   validateSplits({ ...normalizedValue, user })
   return { id: params.id, value: { ...normalizedValue, user } }
@@ -128,13 +119,7 @@ export const validateTransactionPatchParams = ({ params, body, user }: { params:
     ...(value.amount !== undefined && { amount: roundMoney(value.amount) }),
     ...(value.splits !== undefined && { splits: normalizeSplitLineAmounts(value.splits) })
   }
-  const current = sqliteDb.select({ categoryId: transactions.categoryId, type: transactions.type }).from(transactions)
-    .where(and(eq(transactions.id, params.id), eq(transactions.user, user))).get()
-  if (current) {
-    const categoryId = normalizedValue.category ?? current.categoryId
-    const type = normalizedValue.type ?? current.type
-    assertCategoryTypeCompatible(categoryId, user, type)
-  }
+  if (normalizedValue.category !== undefined) getCategory(normalizedValue.category, user)
   if (normalizedValue.account !== undefined) assertAccountExists(normalizedValue.account, user)
   return { id: params.id, value: { ...normalizedValue, user } }
 }
