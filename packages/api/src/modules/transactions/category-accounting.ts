@@ -13,6 +13,10 @@ export const getCategoryAccountingAmount = ({
     if (type === TRANSACTION.Income) return -amount
   }
 
-  if (categoryType === TRANSACTION.Income && type === TRANSACTION.Income) return amount
+  if (categoryType === TRANSACTION.Income) {
+    if (type === TRANSACTION.Income) return amount
+    if (type === TRANSACTION.Expense) return -amount
+  }
+
   return 0
 }
