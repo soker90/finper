@@ -332,5 +332,19 @@ export const editPensionMovement = ({ planId, movementId, params }: { planId: st
 export const deletePensionMovement = (planId: string, movementId: string): Promise<{ error?: string }> =>
   axios.delete(`${PENSION_PLAN_MOVEMENTS(planId)}/${movementId}`).then(() => ({})).catch((error: any) => ({ error: extractError(error) }))
 
-export const transferPensionAssets = (planId: string, destinationPlanId: string): Promise<{ error?: string }> =>
-  axios.post(PENSION_PLAN_TRANSFER(planId), { destinationPlanId }).then(() => ({})).catch((error: any) => ({ error: extractError(error) }))
+export const transferPensionAssets = ({
+  planId,
+  destinationPlanId,
+  destinationValue,
+  date
+}: {
+  planId: string
+  destinationPlanId: string
+  destinationValue?: number
+  date?: number
+}): Promise<{ error?: string }> =>
+  axios.post(PENSION_PLAN_TRANSFER(planId), {
+    destinationPlanId,
+    ...(destinationValue !== undefined ? { destinationValue } : {}),
+    ...(date !== undefined ? { date } : {})
+  }).then(() => ({})).catch((error: any) => ({ error: extractError(error) }))

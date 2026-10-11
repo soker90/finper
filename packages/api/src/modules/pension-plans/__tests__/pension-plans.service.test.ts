@@ -89,7 +89,7 @@ describe('PensionPlansService', () => {
     expect(summary.total).toBe(1400)
   })
 
-  it('rejects a transfer when either plan has no current valuation', () => {
+  it('rejects a transfer when either plan has no current valuation and none is provided', () => {
     const source = repository.createPlan({ name: 'Origen', color: '#4CAF50', user: username })
     const destination = repository.createPlan({ name: 'Destino', color: '#2196F3', user: username })
 
@@ -116,5 +116,105 @@ describe('PensionPlansService', () => {
     }
 
     expect(thrown.payload.message).toBe('El plan de origen y destino deben tener al menos una valoración registrada')
+  })
+
+  it('transfers assets to a brand new plan when destinationValue is explicitly provided', () => {
+    const source = repository.createPlan({ name: 'Origen', color: '#4CAF50', user: username })
+    const destination = repository.createPlan({ name: 'Destino Nuevo', color: '#2196F3', user: username })
+
+    repository.createMovement({
+      planId: source.id,
+      date: 1,
+      employeeAmount: 300,
+      employeeUnits: 30,
+      companyAmount: 100,
+      companyUnits: 10,
+      value: 10,
+      user: username
+    })
+
+    const transferDate = 1700000000000
+    service.transferAssets({
+      sourcePlanId: source.id,
+      destinationPlanId: destination.id,
+      destinationValue: 20,
+      date: transferDate,
+      user: username
+    })
+
+    const sourceAggregate = service.getPlanById(source.id, username)
+    const destinationAggregate = service.getPlanById(destination.id, username)
+
+    expect(sourceAggregate.units).toBe(0)
+    expect(sourceAggregate.total).toBe(0)
+
+    // source had 40 units * 10€ = 400€. At 20€/unit in destination -> 20 units
+    expect(destinationAggregate.units).toBe(20)
+    expect(destinationAggregate.total).toBe(400)
+
+    const destinationMovements = repository.findMovements(destination.id, username)
+    expect(destinationMovements).toHaveLength(1)
+    expect(destinationMovements[0].date).toBe(transferDate)
+    expect(destinationMovements[0].value).toBe(20)
+    expect(destinationMovements[0].employeeUnits).toBe(15) // 75% employee
+    expect(destinationMovements[0].companyUnits).toBe(5) // 25% company
+  })
+
+  it('rejects a transfer to the exact same plan', () => {
+    const plan = repository.createPlan({ name: 'Mismo Plan', color: '#4CAF50', user: username })
+
+    expect(() => {
+      service.transferAssets({
+        sourcePlanId: plan.id,
+        destinationPlanId: plan.id,
+        user: username
+      })
+    }).toThrow()
+  })
+
+  it('rejects a transfer when source plan has no available units', () => {
+    const source = repository.createPlan({ name: 'Origen Vacío', color: '#4CAF50', user: username })
+    const destination = repository.createPlan({ name: 'Destino', color: '#2196F3', user: username })
+
+    expect(() => {
+      service.transferAssets({
+        sourcePlanId: source.id,
+        destinationPlanId: destination.id,
+        destinationValue: 10,
+        user: username
+      })
+    }).toThrow()
+  })
+
+  it('rejects a transfer when plan belongs to another user', () => {
+    db.insert(users).values({
+      id: generateId(),
+      username: 'otheruser',
+      password: 'pwd-hash',
+      createdAt: new Date()
+    }).run()
+
+    const source = repository.createPlan({ name: 'Origen', color: '#4CAF50', user: username })
+    const otherPlan = repository.createPlan({ name: 'Otro Usuario', color: '#2196F3', user: 'otheruser' })
+
+    repository.createMovement({
+      planId: source.id,
+      date: 1,
+      employeeAmount: 100,
+      employeeUnits: 10,
+      companyAmount: 0,
+      companyUnits: 0,
+      value: 10,
+      user: username
+    })
+
+    expect(() => {
+      service.transferAssets({
+        sourcePlanId: source.id,
+        destinationPlanId: otherPlan.id,
+        destinationValue: 10,
+        user: username
+      })
+    }).toThrow()
   })
 })

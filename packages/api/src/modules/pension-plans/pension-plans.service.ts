@@ -127,9 +127,17 @@ export class PensionPlansService {
     return this.repository.deleteMovement(id, user)
   }
 
-  public transferAssets ({ sourcePlanId, destinationPlanId, user }: {
+  public transferAssets ({
+    sourcePlanId,
+    destinationPlanId,
+    destinationValue: customDestinationValue,
+    date = Date.now(),
+    user
+  }: {
     sourcePlanId: string
     destinationPlanId: string
+    destinationValue?: number
+    date?: number
     user: string
   }) {
     if (sourcePlanId === destinationPlanId) {
@@ -148,7 +156,9 @@ export class PensionPlansService {
     const sourceLatest = sourceMovements[0]
     const destinationLatest = destinationMovements[0]
 
-    if (!sourceLatest || !destinationLatest) {
+    const effectiveDestinationValue = customDestinationValue ?? destinationLatest?.value
+
+    if (!sourceLatest || !effectiveDestinationValue || effectiveDestinationValue <= 0) {
       throw Boom.badData(ERROR_MESSAGE.PENSION_PLAN.TRANSFER_REQUIRES_VALUATION).output
     }
 
@@ -157,24 +167,24 @@ export class PensionPlansService {
     const sourceUnits = sourceEmployeeUnits + sourceCompanyUnits
     const sourceValue = sourceUnits * sourceLatest.value
 
-    if (sourceUnits <= 0 || sourceValue <= 0 || destinationLatest.value <= 0) {
+    if (sourceUnits <= 0 || sourceValue <= 0) {
       throw Boom.badData(ERROR_MESSAGE.PENSION_PLAN.TRANSFER_INVALID_ASSETS).output
     }
 
-    const destinationUnits = sourceValue / destinationLatest.value
-    const employeeShare = sourceUnits === 0 ? 0 : sourceEmployeeUnits / sourceUnits
+    const destinationUnits = sourceValue / effectiveDestinationValue
+    const employeeShare = sourceUnits === 0 ? 0 : Math.max(0, sourceEmployeeUnits / sourceUnits)
 
     const [sourceMovement, destinationMovement] = this.repository.transferAssets({
       sourcePlanId,
       destinationPlanId,
       user,
-      date: Date.now(),
+      date,
       sourceEmployeeUnits,
       sourceCompanyUnits,
       destinationEmployeeUnits: destinationUnits * employeeShare,
       destinationCompanyUnits: destinationUnits * (1 - employeeShare),
       sourceValue: sourceLatest.value,
-      destinationValue: destinationLatest.value
+      destinationValue: effectiveDestinationValue
     })
 
     return {

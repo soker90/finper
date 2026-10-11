@@ -69,7 +69,9 @@ export const validateMovementCreateParams = (body: any) => {
 
 export const validatePensionTransferParams = (body: any) => {
   const schema = Joi.object({
-    destinationPlanId: Joi.string().required()
+    destinationPlanId: Joi.string().required(),
+    destinationValue: Joi.number().positive().optional(),
+    date: Joi.number().optional()
   })
   const { error, value } = schema.validate(body)
   if (error) throw Boom.badData(error.message).output

@@ -81,7 +81,7 @@ const PensionPlanDetail: React.FC = () => {
 
   const actionButtons = [
     { Icon: PlusOutlined, title: 'Movimiento', onClick: handleOpenAddMovement },
-    ...(pensionPlans.length > 1 ? [{ Icon: SwapOutlined, title: 'Traspasar activos', onClick: () => setOpenTransferModal(true) }] : []),
+    ...(pensionPlans.length > 1 && (pensionPlan.units ?? 0) > 0 ? [{ Icon: SwapOutlined, title: 'Traspasar activos', onClick: () => setOpenTransferModal(true) }] : []),
     { Icon: EditOutlined, title: 'Editar', onClick: () => setOpenPlanModal(true) },
     { Icon: DeleteOutlined, title: 'Eliminar', onClick: handleDeletePlan }
   ]

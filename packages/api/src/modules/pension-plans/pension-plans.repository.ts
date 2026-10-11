@@ -144,7 +144,7 @@ export const createPensionPlansRepository = (db: DB) => ({
         0
       )
 
-      if (currentSourceUnits < sourceEmployeeUnits + sourceCompanyUnits) {
+      if (currentSourceUnits <= 0 || currentSourceUnits < (sourceEmployeeUnits + sourceCompanyUnits) - 1e-6) {
         throw Boom.badData(ERROR_MESSAGE.PENSION_PLAN.TRANSFER_INVALID_ASSETS).output
       }
 
