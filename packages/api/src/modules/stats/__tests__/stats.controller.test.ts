@@ -189,6 +189,25 @@ describe('Stats Controller', () => {
       expect(res.body.transactions[0].category).toEqual({ _id: categoryId, name: 'Comida' })
     })
 
+    test('refunds reduce tagged expense totals but keep a positive amount in transaction details', async () => {
+      insertTx({
+        amount: 50,
+        tags: ['devolucion-luz'],
+        type: TRANSACTION.Income,
+        categoryId,
+        date: Date.UTC(2025, 5, 15)
+      })
+
+      const res = await supertest(server.app)
+        .get(`${base}/tags/devolucion-luz/2025`)
+        .auth(token, { type: 'bearer' })
+        .expect(200)
+
+      expect(res.body.totalAmount).toBe(-50)
+      expect(res.body.byCategory[0].amount).toBe(-50)
+      expect(res.body.transactions[0]).toMatchObject({ amount: 50, type: TRANSACTION.Income })
+    })
+
     test('non-numeric year responds 422', async () => {
       await supertest(server.app).get(`${base}/tags/juan/notanumber`).auth(token, { type: 'bearer' }).expect(422)
     })
