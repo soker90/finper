@@ -1,6 +1,6 @@
 {
   "name": "@soker90/finper-api",
-  "version": "2.5.0",
+  "version": "2.5.2",
   "description": "Finper API that stores endpoints consumed by a Finper client",
   "main": "src/server",
   "scripts": {
@@ -44,7 +44,7 @@
     "@soker90/finper-types": "workspace:*",
     "bcrypt": "6.0.0",
     "better-sqlite3": "12.11.1",
-    "compression": "1.8.1",
+    "compression": "1.8.2",
     "cors": "2.8.6",
     "dotenv": "17.4.2",
     "drizzle-orm": "0.45.2",
@@ -60,7 +60,7 @@
     "winston": "3.19.0",
     "winston-loki": "6.1.7",
     "winston-transport": "4.9.0",
-    "yahoo-finance2": "3.15.4"
+    "yahoo-finance2": "4.0.2"
   },
   "devDependencies": {
     "@faker-js/faker": "10.6.0",
@@ -79,7 +79,7 @@
     "@types/passport": "1.0.17",
     "@types/passport-jwt": "4.0.1",
     "@types/passport-local": "1.0.38",
-    "@types/supertest": "6.0.3",
+    "@types/supertest": "7.2.1",
     "@types/uuid": "11.0.0",
     "@typescript-eslint/eslint-plugin": "8.67.0",
     "@typescript-eslint/parser": "8.70.1",
@@ -91,7 +91,7 @@
     "jest": "30.5.2",
     "neostandard": "0.13.0",
     "nock": "14.0.17",
-    "supertest": "7.2.2",
+    "supertest": "7.3.1",
     "ts-node": "10.9.2",
     "typescript": "5.9.3",
     "typescript-eslint": "8.70.0"

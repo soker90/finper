@@ -3,10 +3,12 @@ import type { GeminiExtraction } from '../types'
 const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent'
 
 const SYSTEM_SCHEMA = `Devuelve un objeto JSON con los siguientes campos:
-- "date": Fecha en formato "YYYY-MM-DD" (ejemplo: "2026-04-02") o null si no hay.
+- "date": Fecha tal como aparece en el texto o imagen, por ejemplo "04/10/2026", o null si no hay. En tickets españoles, las fechas numéricas usan el formato DD/MM/YYYY (día/mes/año). No conviertas ni intercambies el día y el mes. También se aceptan fechas ISO en formato "YYYY-MM-DD".
 - "store": Nombre del comercio o null.
 - "amount": Importe total como decimal o null.
-- "payment_method": Método de pago ("efectivo", "tarjeta", etc.) o null.`
+- "payment_method": Método de pago ("efectivo", "tarjeta", etc.) o null.
+
+Para imágenes de tickets, identifica preferentemente la fecha asociada a etiquetas como "FECHA", "FECHA FACTURA", "FECHA COMPRA" o equivalentes. Conserva la fecha exactamente como aparece en el ticket. La aplicación validará y normalizará las fechas por separado.`
 
 const IMAGE_EXTRACTION_PROMPT = `Analiza esta imagen de un ticket/recibo e identifica los datos. ${SYSTEM_SCHEMA}`
 
@@ -28,17 +30,44 @@ interface GeminiRawExtraction {
 }
 
 /**
- * Converts a "YYYY-MM-DD" date string to a Unix timestamp in milliseconds.
- * Uses 12:00 UTC to avoid any timezone-related date shifts.
+ * Converts a receipt date to a Unix timestamp in milliseconds.
+ * Numeric dates from Spanish receipts use DD/MM/YYYY; ISO dates are also accepted.
  */
-function parseDateString (dateStr: string | null): number | null {
-  if (!dateStr) return null
-  const match = dateStr.match(/^(\d{4})-(\d{2})-(\d{2})$/)
-  if (!match) return null
-  const [, year, month, day] = match
-  // Use noon UTC to prevent day boundary issues across timezones
-  const ts = Date.UTC(Number(year), Number(month) - 1, Number(day), 12, 0, 0)
-  return isNaN(ts) ? null : ts
+function parseDateString (dateValue: string | null): number | null {
+  const date = dateValue?.trim() ?? ''
+  const numericMatch = date.match(/^(\d{1,2})[\\/. -](\d{1,2})[\\/. -](\d{2}|\d{4})$/)
+
+  if (numericMatch) {
+    const [, dayText, monthText, yearText] = numericMatch
+    if (!dayText || !monthText || !yearText) return null
+    const year = yearText.length === 2 ? 2000 + Number(yearText) : Number(yearText)
+    return createValidatedTimestamp(year, Number(monthText), Number(dayText))
+  }
+
+  const isoMatch = date.match(/^(\d{4})-(\d{2})-(\d{2})$/)
+  if (isoMatch) {
+    const [, yearText, monthText, dayText] = isoMatch
+    if (!yearText || !monthText || !dayText) return null
+    return createValidatedTimestamp(Number(yearText), Number(monthText), Number(dayText))
+  }
+
+  return null
+}
+
+function createValidatedTimestamp (year: number, month: number, day: number): number | null {
+  const timestamp = Date.UTC(year, month - 1, day, 12, 0, 0)
+  const parsedDate = new Date(timestamp)
+
+  if (
+    isNaN(timestamp) ||
+    parsedDate.getUTCFullYear() !== year ||
+    parsedDate.getUTCMonth() !== month - 1 ||
+    parsedDate.getUTCDate() !== day
+  ) {
+    return null
+  }
+
+  return timestamp
 }
 
 /**

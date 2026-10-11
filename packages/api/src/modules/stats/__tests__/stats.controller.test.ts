@@ -15,13 +15,14 @@ describe('Stats Controller', () => {
   const base = '/test-api/stats'
 
   let categoryId: string
+  let incomeCategoryId: string
   let accountId: string
 
   const insertTx = (overrides: Record<string, any> = {}) => {
     sqliteDb.insert(transactions).values({
       id: generateId(),
       date: overrides.date ?? Date.UTC(2025, 5, 15),
-      categoryId,
+      categoryId: overrides.categoryId ?? ((overrides.type ?? TRANSACTION.Expense) === TRANSACTION.Income ? incomeCategoryId : categoryId),
       amount: overrides.amount ?? 100,
       type: overrides.type ?? TRANSACTION.Expense,
       accountId,
@@ -39,6 +40,8 @@ describe('Stats Controller', () => {
     token = await requestLogin(server.app, { username })
     categoryId = generateId()
     sqliteDb.insert(categories).values({ id: categoryId, name: 'Comida', type: 'expense', user: username }).run()
+    incomeCategoryId = generateId()
+    sqliteDb.insert(categories).values({ id: incomeCategoryId, name: 'Salario', type: 'income', user: username }).run()
     accountId = generateId()
     sqliteDb.insert(accounts).values({ id: accountId, name: 'Checking', bank: 'BankA', balance: 0, user: username }).run()
   })
@@ -184,6 +187,25 @@ describe('Stats Controller', () => {
       expect(res.body.byCategory[0].categoryName).toBe('Comida')
       expect(res.body.transactions).toHaveLength(1)
       expect(res.body.transactions[0].category).toEqual({ _id: categoryId, name: 'Comida' })
+    })
+
+    test('refunds reduce tagged expense totals but keep a positive amount in transaction details', async () => {
+      insertTx({
+        amount: 50,
+        tags: ['devolucion-luz'],
+        type: TRANSACTION.Income,
+        categoryId,
+        date: Date.UTC(2025, 5, 15)
+      })
+
+      const res = await supertest(server.app)
+        .get(`${base}/tags/devolucion-luz/2025`)
+        .auth(token, { type: 'bearer' })
+        .expect(200)
+
+      expect(res.body.totalAmount).toBe(-50)
+      expect(res.body.byCategory[0].amount).toBe(-50)
+      expect(res.body.transactions[0]).toMatchObject({ amount: 50, type: TRANSACTION.Income })
     })
 
     test('non-numeric year responds 422', async () => {

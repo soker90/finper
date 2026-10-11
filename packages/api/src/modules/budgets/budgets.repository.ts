@@ -2,6 +2,7 @@ import { eq, and, isNotNull } from 'drizzle-orm'
 import { alias } from 'drizzle-orm/sqlite-core'
 import { type DB, schema, generateId } from '@soker90/finper-db'
 import { findEffectiveCategoryRows } from '../transactions/effective-category-rows'
+import { getCategoryAccountingAmount } from '../transactions/category-accounting'
 
 const { budgets, categories } = schema
 
@@ -61,7 +62,7 @@ export const createBudgetsRepository = (db: DB) => ({
     findEffectiveCategoryRows(db, { user, from, to }).map(row => ({
       date: row.date,
       categoryId: row.categoryId,
-      amount: row.amount
+      amount: getCategoryAccountingAmount({ categoryType: row.categoryType, type: row.type, amount: row.amount })
     })),
 
   findBudget: (categoryId: string, year: number, month: number, user: string): BudgetRow | undefined =>

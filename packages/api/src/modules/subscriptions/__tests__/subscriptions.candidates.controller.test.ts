@@ -17,9 +17,9 @@ describe('Subscriptions Controller Part C (candidates)', () => {
   let categoryId: string
   let accountId: string
 
-  const makeSub = (nextPaymentDate: number | null = null): string => {
+  const makeSub = (nextPaymentDate: number | null = null, amount = 9.99): string => {
     const id = generateId()
-    sqliteDb.insert(subscriptions).values({ id, name: 'Netflix', amount: 9.99, cycle: 1, categoryId, accountId, user: username, nextPaymentDate }).run()
+    sqliteDb.insert(subscriptions).values({ id, name: 'Netflix', amount, cycle: 1, categoryId, accountId, user: username, nextPaymentDate }).run()
     return id
   }
 
@@ -90,6 +90,19 @@ describe('Subscriptions Controller Part C (candidates)', () => {
       expect(res.body[0].transactionId.category).toEqual({ _id: categoryId, name: 'Streaming' })
       expect(res.body[0].transactionId.account).toEqual({ _id: accountId, name: 'Checking', bank: 'BankA' })
       expect(res.body[0].subscriptionIds[0]).toMatchObject({ _id: sub, name: 'Netflix', amount: 9.99, cycle: 1 })
+    })
+
+    test('preserves the stored priority of subscriptions in the candidate response', async () => {
+      const tx = insertTx(null)
+      const farther = makeSub(null, 12)
+      const closest = makeSub(null, 10.5)
+      const other = makeSub(null, 8)
+      insertCandidate(tx, [closest, farther, other])
+
+      const res = await supertest(server.app).get(`${base}/candidates`).auth(token, { type: 'bearer' }).expect(200)
+
+      expect(res.body[0].subscriptionIds.map((subscription: { _id: string }) => subscription._id))
+        .toEqual([closest, farther, other])
     })
 
     test('orders candidates by createdAt desc', async () => {

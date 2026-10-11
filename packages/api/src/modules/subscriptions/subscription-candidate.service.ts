@@ -8,6 +8,7 @@ const ONE_WEEK_MS = 7 * 24 * 60 * 60 * 1000
 interface TransactionForDetect {
   id: string
   date: number
+  amount: number
   categoryId: string
   accountId: string
   user: string
@@ -35,18 +36,38 @@ export class SubscriptionCandidateService {
     const uniqueMatching = [...new Map(matching.map(sub => [sub.id, sub])).values()]
     if (uniqueMatching.length === 0) return
 
+    const orderedMatching = uniqueMatching.toSorted(
+      (a, b) => Math.abs(a.amount - transaction.amount) - Math.abs(b.amount - transaction.amount)
+    )
+
     this.repository.createCandidate({
       transactionId: transaction.id,
-      subscriptionIds: uniqueMatching.map(sub => sub.id),
+      subscriptionIds: orderedMatching.map(sub => sub.id),
       user: transaction.user
     })
   }
 
   public getCandidates (user: string) {
-    return this.repository.findCandidatesByUser(user).map(candidate => {
-      const transaction = this.repository.findTransactionById(candidate.transactionId)
-      const subs = this.repository.findSubscriptionsByIds(candidate.subscriptionIds)
-      return serializeCandidate(candidate, transaction, subs)
+    const candidates = this.repository.findCandidatesByUser(user)
+    if (candidates.length === 0) return []
+
+    const transactionIds = uniqueIds(candidates.map(candidate => candidate.transactionId))
+    const transactionsById = new Map(
+      this.repository.findTransactionsByIds(transactionIds, user).map(transaction => [transaction.id, transaction] as const)
+    )
+
+    const subscriptionIds = uniqueIds(candidates.flatMap(candidate => candidate.subscriptionIds))
+    const subscriptionsById = new Map(
+      this.repository.findSubscriptionsByIds(subscriptionIds, user).map(subscription => [subscription.id, subscription] as const)
+    )
+
+    return candidates.map(candidate => {
+      const transaction = transactionsById.get(candidate.transactionId)
+      const orderedSubscriptions = candidate.subscriptionIds.flatMap(id => {
+        const subscription = subscriptionsById.get(id)
+        return subscription ? [subscription] : []
+      })
+      return serializeCandidate(candidate, transaction, orderedSubscriptions)
     })
   }
 
