@@ -88,9 +88,9 @@ describe('Budgets Service (Part B - getBudgets)', () => {
       user
     }).run()
 
-    const result = service.getBudgets({ user, year: 2025, month: 2 })
-    expect(result.expenses.find((category: any) => category.id === childLuz).budgets[0].real).toBe(350)
-    expect(result.incomes.find((category: any) => category.id === childNomina).budgets[0].real).toBe(1000)
+    const result = service.getBudgets({ user, year: 2025, month: NaN })
+    expect(result.expenses.find((category: any) => category.id === childLuz).budgets[2].real).toBe(350)
+    expect(result.incomes.find((category: any) => category.id === childNomina).budgets[2].real).toBe(1000)
     expect(result.rule503020.totals.incomeReal).toBe(1000)
 
     db.delete(transactions).where(eq(transactions.id, refundId)).run()
