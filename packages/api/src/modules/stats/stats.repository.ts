@@ -1,6 +1,7 @@
 import { eq, and, gte, lte, desc } from 'drizzle-orm'
 import { type DB, schema, TRANSACTION } from '@soker90/finper-db'
 import { findEffectiveCategoryRows, loadSplitsByTransactionIds } from '../transactions/effective-category-rows'
+import { getCategoryAccountingAmount } from '../transactions/category-accounting'
 
 const { transactions, categories, accounts, stores } = schema
 
@@ -30,15 +31,14 @@ export const createStatsRepository = (db: DB) => ({
   findExpenses: (user: string, range?: { from: number, to: number }): ExpenseRow[] => {
     const rows = findEffectiveCategoryRows(db, {
       user,
-      type: TRANSACTION.Expense,
       from: range?.from,
       to: range?.to,
       toInclusive: true
     })
-    return rows.map(row => ({
+    return rows.filter(row => row.categoryType === TRANSACTION.Expense && (row.type === TRANSACTION.Expense || row.type === TRANSACTION.Income)).map(row => ({
       id: row.transactionId,
       date: row.date,
-      amount: row.amount,
+      amount: getCategoryAccountingAmount({ categoryType: row.categoryType, type: row.type, amount: row.amount }),
       tags: row.tags ?? [],
       categoryId: row.categoryId,
       categoryName: row.categoryName ?? null
@@ -55,6 +55,7 @@ export const createStatsRepository = (db: DB) => ({
       note: transactions.note,
       categoryId: transactions.categoryId,
       categoryName: categories.name,
+      categoryType: categories.type,
       accountId: transactions.accountId,
       accountName: accounts.name,
       accountBank: accounts.bank,
@@ -67,7 +68,6 @@ export const createStatsRepository = (db: DB) => ({
       .leftJoin(stores, eq(transactions.storeId, stores.id))
       .where(and(
         eq(transactions.user, user),
-        eq(transactions.type, TRANSACTION.Expense),
         gte(transactions.date, from),
         lte(transactions.date, to)
       ))
@@ -83,18 +83,19 @@ export const createStatsRepository = (db: DB) => ({
         for (const split of splits) {
           rows.push({
             ...parent,
-            amount: split.amount,
+            amount: getCategoryAccountingAmount({ categoryType: split.categoryType, type: parent.type, amount: split.amount }),
             categoryId: split.categoryId,
+            categoryType: split.categoryType,
             categoryName: split.categoryName,
             tags: split.tags ?? [],
             splitId: split.id
           })
         }
       } else {
-        rows.push(parent)
+        rows.push({ ...parent, amount: getCategoryAccountingAmount({ categoryType: parent.categoryType, type: parent.type, amount: parent.amount }) })
       }
     }
 
-    return rows
+    return rows.filter(row => row.categoryType === TRANSACTION.Expense && (row.type === TRANSACTION.Expense || row.type === TRANSACTION.Income))
   }
 })
