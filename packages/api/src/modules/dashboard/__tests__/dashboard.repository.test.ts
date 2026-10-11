@@ -108,6 +108,29 @@ describe('Dashboard Repository (Part A - aggregations)', () => {
     expect(repo.currentBudgets(user, 2025, 3)).toEqual([{ categoryId: childFood, name: 'Comida', amount: 200 }])
   })
 
+  it('subtracts income transactions in expense categories from dashboard spending, not income', () => {
+    const refundId = generateId()
+    db.insert(transactions).values({
+      id: refundId, date: march, categoryId: childFood, amount: 20, type: 'income',
+      accountId, note: 'Devolución de luz', storeId: null, subscriptionId: null, tags: [], user
+    }).run()
+
+    expect(repo.monthIncomeExpenses(user, marchStart, marchEnd)).toEqual({ income: 2000, expenses: 130 })
+    expect(repo.realExpenses(user, marchStart, marchEnd)).toBe(130)
+    expect(repo.topExpenseCategories(user, marchStart, marchEnd)).toEqual([{ name: 'Comida', parentName: 'Casa', amount: 130 }])
+    expect(repo.currentMonthByCategory(user, marchStart, marchEnd)).toEqual([
+      { categoryId: childFood, name: 'Comida', total: 130, count: 3 }
+    ])
+    expect(repo.last6MonthsSummary(user, febMarStart, marchEnd)).toEqual([
+      { year: 2025, month: 2, income: 0, expenses: 80 },
+      { year: 2025, month: 3, income: 2000, expenses: 130 }
+    ])
+    expect(repo.dailyExpenses(user, marchStart, marchEnd)).toEqual([{ _id: 15, amount: 130 }])
+    expect(repo.last3MonthsTransactions(user, febMarStart, marchEnd).map(row => row.total).toSorted((a, b) => a - b)).toEqual([80, 130])
+
+    db.delete(transactions).where(eq(transactions.id, refundId)).run()
+  })
+
   it('dailyExpenses: grouped by day of month', () => {
     expect(repo.dailyExpenses(user, marchStart, marchEnd)).toEqual([{ _id: 15, amount: 150 }])
   })
