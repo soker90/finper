@@ -15,6 +15,7 @@ export interface ExpenseRow {
 }
 
 export interface ExpenseDetailRow extends ExpenseRow {
+  categoryType: string | null
   type: string
   note: string | null
   accountId: string
