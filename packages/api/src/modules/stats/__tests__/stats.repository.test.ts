@@ -58,12 +58,13 @@ describe('Stats Repository', () => {
   }
 
   describe('findExpenses', () => {
-    it('returns only expense transactions with categoryName', () => {
+    it('includes refunds in expense categories as negative expense amounts', () => {
       insertTx({ type: TRANSACTION.Expense, tags: ['a'] })
       insertTx({ type: TRANSACTION.Income, tags: ['b'] })
       const rows = repository.findExpenses(user)
-      expect(rows).toHaveLength(1)
-      expect(rows[0].categoryName).toBe('Comida')
+      expect(rows).toHaveLength(2)
+      expect(rows.map(row => row.amount).toSorted((a, b) => a - b)).toEqual([-100, 100])
+      expect(rows.every(row => row.categoryName === 'Comida')).toBe(true)
     })
 
     it('filters by date range when provided', () => {
