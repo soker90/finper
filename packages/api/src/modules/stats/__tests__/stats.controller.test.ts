@@ -15,13 +15,14 @@ describe('Stats Controller', () => {
   const base = '/test-api/stats'
 
   let categoryId: string
+  let incomeCategoryId: string
   let accountId: string
 
   const insertTx = (overrides: Record<string, any> = {}) => {
     sqliteDb.insert(transactions).values({
       id: generateId(),
       date: overrides.date ?? Date.UTC(2025, 5, 15),
-      categoryId,
+      categoryId: overrides.categoryId ?? ((overrides.type ?? TRANSACTION.Expense) === TRANSACTION.Income ? incomeCategoryId : categoryId),
       amount: overrides.amount ?? 100,
       type: overrides.type ?? TRANSACTION.Expense,
       accountId,
@@ -39,6 +40,8 @@ describe('Stats Controller', () => {
     token = await requestLogin(server.app, { username })
     categoryId = generateId()
     sqliteDb.insert(categories).values({ id: categoryId, name: 'Comida', type: 'expense', user: username }).run()
+    incomeCategoryId = generateId()
+    sqliteDb.insert(categories).values({ id: incomeCategoryId, name: 'Salario', type: 'income', user: username }).run()
     accountId = generateId()
     sqliteDb.insert(accounts).values({ id: accountId, name: 'Checking', bank: 'BankA', balance: 0, user: username }).run()
   })
