@@ -75,8 +75,17 @@ describe('Budgets Service (Part B - getBudgets)', () => {
     const march = Date.UTC(2025, 2, 20, 12, 0, 0)
     const refundId = generateId()
     db.insert(transactions).values({
-      id: refundId, date: march, categoryId: childLuz, amount: 50, type: 'income',
-      accountId, note: 'Devolución', storeId: null, subscriptionId: null, tags: [], user
+      id: refundId,
+      date: march,
+      categoryId: childLuz,
+      amount: 50,
+      type: 'income',
+      accountId,
+      note: 'Devolución',
+      storeId: null,
+      subscriptionId: null,
+      tags: [],
+      user
     }).run()
 
     const result = service.getBudgets({ user, year: 2025, month: NaN })
