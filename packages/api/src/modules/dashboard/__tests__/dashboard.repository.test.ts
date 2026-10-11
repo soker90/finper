@@ -1,3 +1,4 @@
+import { eq } from 'drizzle-orm'
 import { createTestDb, closeTestDb } from '../../../../test/helpers/db'
 import { createDashboardRepository } from '../dashboard.repository'
 import { generateUsername } from '../../../../test/generate-values'
@@ -111,8 +112,17 @@ describe('Dashboard Repository (Part A - aggregations)', () => {
   it('subtracts income transactions in expense categories from dashboard spending, not income', () => {
     const refundId = generateId()
     db.insert(transactions).values({
-      id: refundId, date: march, categoryId: childFood, amount: 20, type: 'income',
-      accountId, note: 'Devolución de luz', storeId: null, subscriptionId: null, tags: [], user
+      id: refundId,
+      date: march,
+      categoryId: childFood,
+      amount: 20,
+      type: 'income',
+      accountId,
+      note: 'Devolución de luz',
+      storeId: null,
+      subscriptionId: null,
+      tags: [],
+      user
     }).run()
 
     expect(repo.monthIncomeExpenses(user, marchStart, marchEnd)).toEqual({ income: 2000, expenses: 130 })
