@@ -34,7 +34,7 @@ Los usuarios no autorizados son ignorados completamente — el bot no responde n
 
 Para obtener el Telegram user ID de alguien, pídele que escriba a [@userinfobot](https://t.me/userinfobot).
 
-Cuando un usuario no-admin sube un ticket exitosamente, el admin recibe una notificación con el resumen del ticket.
+Cuando un usuario no-admin sube un ticket exitosamente, recibe la notificación el administrador que lo autorizó (campo `added_by`). Si no se puede resolver ese administrador, no se envía ningún aviso global.
 
 ## Setup inicial
 
