@@ -38,7 +38,12 @@ export const ERROR_MESSAGE = {
   },
   PENSION_PLAN: {
     NOT_FOUND: 'El plan de pensiones no existe',
-    MOVEMENT_NOT_FOUND: 'El movimiento de la pensión no existe'
+    MOVEMENT_NOT_FOUND: 'El movimiento de la pensión no existe',
+
+    TRANSFER_SAME_PLAN: 'El plan de origen y destino deben ser diferentes',
+    TRANSFER_REQUIRES_VALUATION: 'El plan de origen y destino deben tener al menos una valoración registrada',
+    TRANSFER_INVALID_ASSETS: 'El plan de origen no tiene activos con un valor válido para transferir'
+
   },
   LOAN: {
     NOT_FOUND: 'El préstamo no existe',
