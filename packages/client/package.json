@@ -47,7 +47,7 @@
     "@types/react-dom": "19.2.3",
     "@typescript-eslint/eslint-plugin": "8.71.1",
     "@typescript-eslint/parser": "8.70.1",
-    "@vitejs/plugin-react": "6.0.2",
+    "@vitejs/plugin-react": "6.1.2",
     "@vitest/coverage-v8": "4.1.11",
     "babel-plugin-react-compiler": "1.0.0",
     "eslint": "9.39.2",
