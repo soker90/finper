@@ -28,13 +28,13 @@ Los usuarios no autorizados son ignorados completamente — el bot no responde n
 
 | Comando | Descripción |
 |---|---|
-| `/adduser <id>` | Permite a un usuario enviar tickets |
+| `/adduser <id_telegram> <usuario_finper> [id_admin_cuenta]` | Permite enviar tickets y asigna el administrador que recibirá sus avisos |
 | `/removeuser <id>` | Revoca el acceso de un usuario |
 | `/listusers` | Lista todos los usuarios con acceso |
 
 Para obtener el Telegram user ID de alguien, pídele que escriba a [@userinfobot](https://t.me/userinfobot).
 
-Cuando un usuario no-admin sube un ticket exitosamente, el admin recibe una notificación con el resumen del ticket.
+Cada usuario tiene asignado un administrador de cuenta mediante `added_by`. Puedes indicarlo al dar de alta con `/adduser <id_telegram> <usuario_finper> <id_admin_cuenta>`; si se omite, se usa el administrador principal del bot. Los avisos de tickets (foto o texto) se envían únicamente a ese administrador. Si no se puede resolver el destinatario, no se envía ningún aviso global.
 
 ## Setup inicial
 

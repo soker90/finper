@@ -21,6 +21,17 @@ export async function isUserAllowed (db: D1Database, userId: number): Promise<bo
 }
 
 /**
+ * Returns the access record for a Telegram user, including the admin who
+ * authorized them. Returns null when the user is not registered.
+ */
+export async function getAllowedUser (db: D1Database, userId: number): Promise<AllowedUser | null> {
+  return await db
+    .prepare('SELECT user_id, added_by, added_at, finper_username FROM allowed_users WHERE user_id = ?')
+    .bind(userId)
+    .first<AllowedUser>()
+}
+
+/**
  * Adds a user to the allowed list, linked to a Finper username. Several Telegram
  * users can be linked to the same Finper username. Returns false if the user
  * was already present.
