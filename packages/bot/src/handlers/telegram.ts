@@ -286,7 +286,7 @@ async function processTicketPhoto (
       adminLines.push(`📅 Fecha: ${extraction.date ? formatDate(extraction.date) : 'No detectada'}`)
       adminLines.push(`💶 Total: ${extraction.amount != null ? `${extraction.amount.toFixed(2)} €` : 'No detectado'}`)
       adminLines.push(`💳 Pago: ${extraction.payment_method ?? 'No detectado'}`)
-      await sendTelegramMessage(adminUserId, adminLines.join('\n'), env.TELEGRAM_BOT_TOKEN)
+      await sendTelegramMessage(notificationAdminId, adminLines.join('\n'), env.TELEGRAM_BOT_TOKEN)
     }
   } catch (err) {
     console.error('Error processing ticket:', err)
