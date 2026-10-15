@@ -75,13 +75,14 @@ export async function telegramWebhookHandler (c: Context<{ Bindings: Env }>): Pr
         const parts = text.split(/\s+/)
         const targetId = parts[1] ? parseInt(parts[1], 10) : NaN
         const finperUsername = parts[2]
-        if (isNaN(targetId) || !finperUsername) {
-          await sendTelegramMessage(chatId, '⚠️ Uso: /adduser <id_de_telegram> <usuario_finper>\n\nTambién puedes vincular tu propio ID de admin para que tus tickets se asocien a un usuario de Finper.', c.env.TELEGRAM_BOT_TOKEN)
+        const accountAdminId = parts[3] ? parseInt(parts[3], 10) : adminUserId
+        if (!Number.isSafeInteger(targetId) || !finperUsername || !Number.isSafeInteger(accountAdminId)) {
+          await sendTelegramMessage(chatId, '⚠️ Uso: /adduser <id_de_telegram> <usuario_finper> [id_admin_cuenta]\n\nSi omites id_admin_cuenta, se usará el administrador principal del bot.', c.env.TELEGRAM_BOT_TOKEN)
           return c.json({ ok: true })
         }
-        const added = await addAllowedUser(c.env.DB, targetId, adminUserId, finperUsername)
+        const added = await addAllowedUser(c.env.DB, targetId, accountAdminId, finperUsername)
         if (added) {
-          await sendTelegramMessage(chatId, `✅ Usuario <code>${targetId}</code> añadido correctamente y vinculado a <code>${finperUsername}</code>.`, c.env.TELEGRAM_BOT_TOKEN)
+          await sendTelegramMessage(chatId, `✅ Usuario <code>${targetId}</code> vinculado a <code>${finperUsername}</code>. Las notificaciones se enviarán al administrador <code>${accountAdminId}</code>.`, c.env.TELEGRAM_BOT_TOKEN)
         } else {
           await sendTelegramMessage(chatId, `ℹ️ El usuario <code>${targetId}</code> ya estaba vinculado. Usa /removeuser y vuelve a añadirlo para cambiar el usuario de Finper.`, c.env.TELEGRAM_BOT_TOKEN)
         }
@@ -119,7 +120,7 @@ export async function telegramWebhookHandler (c: Context<{ Bindings: Env }>): Pr
           for (const u of otherUsers) {
             const date = formatDate(u.added_at)
             const linkInfo = u.finper_username ? `finper: ${u.finper_username}` : 'sin vincular'
-            lines.push(`• <code>${u.user_id}</code> — añadido el ${date} — ${linkInfo}`)
+            lines.push(`• <code>${u.user_id}</code> — añadido el ${date} — ${linkInfo} — admin: <code>${u.added_by}</code>`)
           }
         }
         await sendTelegramMessage(chatId, lines.join('\n'), c.env.TELEGRAM_BOT_TOKEN)
