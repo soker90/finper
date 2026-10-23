@@ -4,7 +4,7 @@ import { downloadTelegramPhoto, sendTelegramMessage } from '../services/telegram
 import { uploadToR2, getR2Key } from '../services/r2'
 import { extractReceiptData, extractExpenseFromText } from '../services/gemini'
 import { insertTicket } from '../db/tickets'
-import { isUserAllowed, addAllowedUser, removeAllowedUser, listAllowedUsers } from '../db/users'
+import { isUserAllowed, getAllowedUser, addAllowedUser, removeAllowedUser, listAllowedUsers } from '../db/users'
 import { generateId } from '../utils'
 
 /**
@@ -75,13 +75,14 @@ export async function telegramWebhookHandler (c: Context<{ Bindings: Env }>): Pr
         const parts = text.split(/\s+/)
         const targetId = parts[1] ? parseInt(parts[1], 10) : NaN
         const finperUsername = parts[2]
-        if (isNaN(targetId) || !finperUsername) {
-          await sendTelegramMessage(chatId, '⚠️ Uso: /adduser <id_de_telegram> <usuario_finper>\n\nTambién puedes vincular tu propio ID de admin para que tus tickets se asocien a un usuario de Finper.', c.env.TELEGRAM_BOT_TOKEN)
+        const accountAdminId = parts[3] ? parseInt(parts[3], 10) : adminUserId
+        if (!Number.isSafeInteger(targetId) || !finperUsername || !Number.isSafeInteger(accountAdminId)) {
+          await sendTelegramMessage(chatId, '⚠️ Uso: /adduser <id_de_telegram> <usuario_finper> [id_admin_cuenta]\n\nSi omites id_admin_cuenta, se usará el administrador principal del bot.', c.env.TELEGRAM_BOT_TOKEN)
           return c.json({ ok: true })
         }
-        const added = await addAllowedUser(c.env.DB, targetId, adminUserId, finperUsername)
+        const added = await addAllowedUser(c.env.DB, targetId, accountAdminId, finperUsername)
         if (added) {
-          await sendTelegramMessage(chatId, `✅ Usuario <code>${targetId}</code> añadido correctamente y vinculado a <code>${finperUsername}</code>.`, c.env.TELEGRAM_BOT_TOKEN)
+          await sendTelegramMessage(chatId, `✅ Usuario <code>${targetId}</code> vinculado a <code>${finperUsername}</code>. Las notificaciones se enviarán al administrador <code>${accountAdminId}</code>.`, c.env.TELEGRAM_BOT_TOKEN)
         } else {
           await sendTelegramMessage(chatId, `ℹ️ El usuario <code>${targetId}</code> ya estaba vinculado. Usa /removeuser y vuelve a añadirlo para cambiar el usuario de Finper.`, c.env.TELEGRAM_BOT_TOKEN)
         }
@@ -119,7 +120,7 @@ export async function telegramWebhookHandler (c: Context<{ Bindings: Env }>): Pr
           for (const u of otherUsers) {
             const date = formatDate(u.added_at)
             const linkInfo = u.finper_username ? `finper: ${u.finper_username}` : 'sin vincular'
-            lines.push(`• <code>${u.user_id}</code> — añadido el ${date} — ${linkInfo}`)
+            lines.push(`• <code>${u.user_id}</code> — añadido el ${date} — ${linkInfo} — admin: <code>${u.added_by}</code>`)
           }
         }
         await sendTelegramMessage(chatId, lines.join('\n'), c.env.TELEGRAM_BOT_TOKEN)
@@ -198,14 +199,17 @@ async function processTicketText (
 
     await sendTelegramMessage(chatId, lines.join('\n'), env.TELEGRAM_BOT_TOKEN)
 
-    // 4. Notify admin if the sender is not the admin
-    if (!isAdmin) {
+    // 4. Notify only the admin who authorized this Telegram user.
+    // Never fall back to a global broadcast when the account owner is unknown.
+    const accountUser = await getAllowedUser(env.DB, userId)
+    const notificationAdminId = accountUser?.added_by
+    if (!isAdmin && notificationAdminId != null && notificationAdminId !== userId) {
       const adminLines: string[] = [`🔔 <b>Nuevo gasto de usuario <code>${userId}</code></b>`, '']
       adminLines.push(`🏪 Comercio: ${extraction.store ?? 'No detectado'}`)
       adminLines.push(`📅 Fecha: ${extraction.date ? formatDate(extraction.date) : 'No detectada'}`)
       adminLines.push(`💶 Total: ${extraction.amount != null ? `${extraction.amount.toFixed(2)} €` : 'No detectado'}`)
       adminLines.push(`💳 Pago: ${extraction.payment_method ?? 'No detectado'}`)
-      await sendTelegramMessage(adminUserId, adminLines.join('\n'), env.TELEGRAM_BOT_TOKEN)
+      await sendTelegramMessage(notificationAdminId, adminLines.join('\n'), env.TELEGRAM_BOT_TOKEN)
     }
   } catch (err) {
     console.error('Error processing text expense:', err)
@@ -273,14 +277,17 @@ async function processTicketPhoto (
 
     await sendTelegramMessage(chatId, lines.join('\n'), env.TELEGRAM_BOT_TOKEN)
 
-    // 6. Notify admin if the sender is not the admin
-    if (!isAdmin) {
+    // 6. Notify only the admin who authorized this Telegram user.
+    // Never fall back to a global broadcast when the account owner is unknown.
+    const accountUser = await getAllowedUser(env.DB, userId)
+    const notificationAdminId = accountUser?.added_by
+    if (!isAdmin && notificationAdminId != null && notificationAdminId !== userId) {
       const adminLines: string[] = [`🔔 <b>Nuevo ticket de usuario <code>${userId}</code></b>`, '']
       adminLines.push(`🏪 Comercio: ${extraction.store ?? 'No detectado'}`)
       adminLines.push(`📅 Fecha: ${extraction.date ? formatDate(extraction.date) : 'No detectada'}`)
       adminLines.push(`💶 Total: ${extraction.amount != null ? `${extraction.amount.toFixed(2)} €` : 'No detectado'}`)
       adminLines.push(`💳 Pago: ${extraction.payment_method ?? 'No detectado'}`)
-      await sendTelegramMessage(adminUserId, adminLines.join('\n'), env.TELEGRAM_BOT_TOKEN)
+      await sendTelegramMessage(notificationAdminId, adminLines.join('\n'), env.TELEGRAM_BOT_TOKEN)
     }
   } catch (err) {
     console.error('Error processing ticket:', err)
