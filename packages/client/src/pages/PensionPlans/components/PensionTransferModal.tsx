@@ -116,7 +116,7 @@ const PensionTransferModal = ({ sourcePlan, plans, show, onClose }: Props) => {
 
       <Box sx={{ gridColumn: '1 / -1', width: '100%', mt: 1 }}>
         <Alert severity='info'>
-          Se transferirá el valor actual completo del plan ({sourcePlan.total.toFixed(2)} €). El valor por unidad del destino se tomará de su última valoración; si no tiene ninguna, indica aquí el valor actual. El histórico de aportaciones se conservará en el plan de origen.
+          Se trasladará el saldo completo del plan ({sourcePlan.total.toFixed(2)} €) al destino en un único movimiento. Las unidades se calcularán con el valor por unidad del destino; si no tiene una valoración previa, indica aquí su valor actual. El histórico quedará registrado en el origen y su saldo se compensará con el traspaso.
         </Alert>
       </Box>
 
