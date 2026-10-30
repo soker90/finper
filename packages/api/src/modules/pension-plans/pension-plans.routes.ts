@@ -1,7 +1,18 @@
 import { Router } from 'express'
+import { rateLimit } from 'express-rate-limit'
 import authMiddleware from '../../middlewares/auth.middleware'
-import { pensionTransferRateLimit } from '../../middlewares/pension-transfer-rate-limit.middleware'
+import { SQLiteRateLimitStore } from '../../middlewares/pension-transfer-rate-limit.middleware'
 import { pensionPlansController } from './pension-plans.controller'
+
+const pensionTransferRateLimit = rateLimit({
+  windowMs: 60_000,
+  limit: 10,
+  keyGenerator: (req) => req.user as string,
+  standardHeaders: 'draft-8',
+  legacyHeaders: false,
+  message: { message: 'Has alcanzado el límite de traspasos. Inténtalo de nuevo dentro de un minuto.' },
+  store: new SQLiteRateLimitStore()
+})
 
 export const pensionPlansRoutes = Router()
 
