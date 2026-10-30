@@ -159,6 +159,7 @@ export const createPensionPlansRepository = (db: DB) => ({
         !sourceLatest ||
         !Number.isFinite(sourceLatest.value) ||
         sourceLatest.value <= 0 ||
+        effectiveDestinationValue === undefined ||
         !Number.isFinite(effectiveDestinationValue) ||
         effectiveDestinationValue <= 0
       ) {
@@ -175,6 +176,9 @@ export const createPensionPlansRepository = (db: DB) => ({
       const sourceUnits = sourceEmployeeUnits + sourceCompanyUnits
 
       if (
+        !Number.isFinite(sourceEmployeeUnits) ||
+        !Number.isFinite(sourceCompanyUnits) ||
+        !Number.isFinite(sourceUnits) ||
         sourceUnits <= UNIT_EPSILON ||
         sourceEmployeeUnits < 0 ||
         sourceCompanyUnits < 0
@@ -185,6 +189,10 @@ export const createPensionPlansRepository = (db: DB) => ({
       // Transfer value, not units: the destination NAV can differ from the source NAV.
       const sourceValue = sourceUnits * sourceLatest.value
       const destinationUnits = sourceValue / effectiveDestinationValue
+      if (!Number.isFinite(sourceValue) || sourceValue <= 0 || !Number.isFinite(destinationUnits) || destinationUnits <= 0) {
+        throw Boom.badData(ERROR_MESSAGE.PENSION_PLAN.TRANSFER_INVALID_ASSETS).output
+      }
+
       const employeeShare = sourceEmployeeUnits / sourceUnits
 
       const sourceMovement = tx.insert(pensions).values({
