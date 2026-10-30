@@ -335,16 +335,19 @@ export const deletePensionMovement = (planId: string, movementId: string): Promi
 export const transferPensionAssets = ({
   planId,
   destinationPlanId,
+  destinationUnits,
   destinationValue,
   date
 }: {
   planId: string
   destinationPlanId: string
-  destinationValue?: number
+  destinationUnits: number
+  destinationValue: number
   date?: number
 }): Promise<{ error?: string }> =>
   axios.post(PENSION_PLAN_TRANSFER(planId), {
     destinationPlanId,
-    ...(destinationValue !== undefined ? { destinationValue } : {}),
+    destinationUnits,
+    destinationValue,
     ...(date !== undefined ? { date } : {})
   }).then(() => ({})).catch((error: any) => ({ error: extractError(error) }))
