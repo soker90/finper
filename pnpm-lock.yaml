@@ -53,6 +53,9 @@ importers:
       express:
         specifier: 5.2.1
         version: 5.2.1
+      express-rate-limit:
+        specifier: 8.7.1
+        version: 8.7.1(express@5.2.1)
       helmet:
         specifier: 8.3.0
         version: 8.3.0
