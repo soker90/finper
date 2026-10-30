@@ -82,10 +82,11 @@ export class PensionPlansController {
     const { id } = req.params
     logger.logInfo(`/pension-plans/${id}/transfer - transfer pension assets`)
     validatePlanExist({ id, user: req.user as string })
-    const { destinationPlanId, destinationValue, date } = validatePensionTransferParams(req.body)
+    const { destinationPlanId, destinationUnits, destinationValue, date } = validatePensionTransferParams(req.body)
     res.send(pensionPlansService.transferAssets({
       sourcePlanId: id,
       destinationPlanId,
+      destinationUnits,
       destinationValue,
       date,
       user: req.user as string
