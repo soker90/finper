@@ -125,7 +125,7 @@ export const createPensionPlansRepository = (db: DB) => ({
     user: string
     date: number
     destinationValue?: number
-  }): [Movement, Movement] => {
+  }): Movement => {
     return db.transaction((tx) => {
       const sourcePlan = tx.select({ id: pensionPlans.id })
         .from(pensionPlans)
@@ -204,18 +204,9 @@ export const createPensionPlansRepository = (db: DB) => ({
 
       const employeeShare = sourceEmployeeUnits / sourceUnits
 
-      const sourceMovement = tx.insert(pensions).values({
-        id: generateId(),
-        planId: sourcePlanId,
-        date,
-        employeeAmount: -sourceEmployeeAmount,
-        employeeUnits: -sourceEmployeeUnits,
-        companyAmount: -sourceCompanyAmount,
-        companyUnits: -sourceCompanyUnits,
-        value: sourceLatest.value,
-        user
-      }).returning().get()
-
+      // Consolidate the source history into one destination movement.
+      // The contribution totals remain attributed to employee/company, while
+      // the source plan is left empty and the destination units use its own NAV.
       const destinationMovement = tx.insert(pensions).values({
         id: generateId(),
         planId: destinationPlanId,
@@ -228,7 +219,11 @@ export const createPensionPlansRepository = (db: DB) => ({
         user
       }).returning().get()
 
-      return [sourceMovement, destinationMovement]
+      tx.delete(pensions)
+        .where(and(eq(pensions.planId, sourcePlanId), eq(pensions.user, user)))
+        .run()
+
+      return destinationMovement
     }, { behavior: 'immediate' })
   }
 })
