@@ -313,7 +313,6 @@ async function processTicketPhoto (
   }
 }
 
-
 function parseTelegramId (value: string | undefined): number | null {
   if (!value || !/^\d+$/.test(value)) return null
   const id = Number(value)
