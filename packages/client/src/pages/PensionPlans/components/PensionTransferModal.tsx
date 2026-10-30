@@ -1,4 +1,4 @@
-import { useForm, useWatch } from 'react-hook-form'
+import { useForm } from 'react-hook-form'
 import { Alert, Box } from '@mui/material'
 import { mutate } from 'swr'
 
@@ -20,6 +20,7 @@ interface Props {
 interface TransferForm {
   destinationPlanId: string
   date: any
+  destinationUnits: string | number
   destinationValue: string | number
 }
 
@@ -31,28 +32,26 @@ const PensionTransferModal = ({ sourcePlan, plans, show, onClose }: Props) => {
     defaultValues: {
       destinationPlanId: '',
       date: new Date(),
+      destinationUnits: '',
       destinationValue: ''
     }
   })
 
   const destinationOptions = plans.filter(plan => plan.id !== sourcePlan.id)
-  const selectedDestinationId = useWatch({ control, name: 'destinationPlanId' })
-  const selectedDestinationPlan = plans.find(plan => plan.id === selectedDestinationId)
-  const currentNav = selectedDestinationPlan && selectedDestinationPlan.units > 0
-    ? selectedDestinationPlan.total / selectedDestinationPlan.units
-    : null
 
-  const onSubmit = handleSubmit(async ({ destinationPlanId, date, destinationValue }) => {
+  const onSubmit = handleSubmit(async ({ destinationPlanId, date, destinationUnits, destinationValue }) => {
     const destination = plans.find(plan => plan.id === destinationPlanId)
     if (!destination) return
 
     const parsedDate = date ? new Date(date).getTime() : undefined
-    const parsedValue = destinationValue ? Number(destinationValue) : undefined
+    const parsedUnits = Number(destinationUnits)
+    const parsedValue = Number(destinationValue)
 
     await runSubmit(
       () => transferPensionAssets({
         planId: sourcePlan.id,
         destinationPlanId,
+        destinationUnits: parsedUnits,
         destinationValue: parsedValue,
         date: parsedDate
       }),
@@ -100,23 +99,33 @@ const PensionTransferModal = ({ sourcePlan, plans, show, onClose }: Props) => {
 
       <InputForm
         size={6}
+        id='destinationUnits'
+        label='Unidades en destino'
+        placeholder='Número de unidades recibidas'
+        error={!!errors.destinationUnits}
+        {...register('destinationUnits', {
+          required: 'Indica las unidades que recibes',
+          validate: (val) => (Number.isFinite(Number(val)) && Number(val) > 0) || 'Introduce un número de unidades mayor que 0'
+        })}
+        errorText={errors.destinationUnits?.message || 'Introduce las unidades de destino'}
+      />
+
+      <InputForm
+        size={6}
         id='destinationValue'
-        label='Valor unidad destino (opcional)'
-        placeholder={currentNav ? currentNav.toFixed(2) : 'Introduce un valor si no hay valoración'}
+        label='Valor unidad destino'
+        placeholder='Valor de cada unidad'
         error={!!errors.destinationValue}
         {...register('destinationValue', {
-          validate: (val) => {
-            if (!val) return true
-            const num = Number(val)
-            return (!isNaN(num) && num > 0) || 'Introduce un valor mayor que 0'
-          }
+          required: 'Indica el valor de cada unidad',
+          validate: (val) => (Number.isFinite(Number(val)) && Number(val) > 0) || 'Introduce un valor mayor que 0'
         })}
-        errorText={errors.destinationValue?.message || 'Introduce un valor de unidad mayor que 0'}
+        errorText={errors.destinationValue?.message || 'Introduce el valor de cada unidad'}
       />
 
       <Box sx={{ gridColumn: '1 / -1', width: '100%', mt: 1 }}>
         <Alert severity='info'>
-          Se trasladará el saldo completo del plan ({sourcePlan.total.toFixed(2)} €) al destino en un único movimiento. Las unidades se calcularán con el valor por unidad del destino; si no tiene una valoración previa, indica aquí su valor actual. El histórico del origen se consolidará y el plan quedará vacío. Se mantendrán los importes acumulados del empleado y de la empresa.
+          Se trasladará el saldo completo del plan ({sourcePlan.total.toFixed(2)} €) al destino en un único movimiento. Indica las unidades que recibes y el valor de cada unidad en el destino; se registrarán exactamente esos datos. El histórico del origen se consolidará y el plan quedará vacío. Se mantendrán los importes acumulados del empleado y de la empresa.
         </Alert>
       </Box>
 
