@@ -1,5 +1,5 @@
 import { Router } from 'express'
-import rateLimit, { ipKeyGenerator } from 'express-rate-limit'
+import { rateLimit, ipKeyGenerator } from 'express-rate-limit'
 import authMiddleware from '../../middlewares/auth.middleware'
 import { SQLiteRateLimitStore } from '../../middlewares/pension-transfer-rate-limit.middleware'
 import { pensionPlansController } from './pension-plans.controller'
@@ -7,7 +7,7 @@ import { pensionPlansController } from './pension-plans.controller'
 const pensionTransferIpRateLimit = rateLimit({
   windowMs: 60_000,
   limit: 60,
-  keyGenerator: (req) => ipKeyGenerator(req.ip),
+  keyGenerator: (req) => ipKeyGenerator(req.ip ?? '127.0.0.1'),
   standardHeaders: 'draft-8',
   legacyHeaders: false,
   message: { message: 'Demasiadas solicitudes desde esta dirección. Inténtalo de nuevo dentro de un minuto.' },
