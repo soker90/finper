@@ -1,4 +1,4 @@
-import { eq } from 'drizzle-orm'
+import { eq, lte } from 'drizzle-orm'
 import { rateLimit, type Store } from 'express-rate-limit'
 import { schema } from '@soker90/finper-db'
 
@@ -18,21 +18,16 @@ class SQLiteRateLimitStore implements Store {
   async increment (key: string) {
     const now = Date.now()
     return db.transaction((tx) => {
+      tx.delete(apiRateLimits).where(lte(apiRateLimits.resetAt, now)).run()
+
       const current = tx.select()
         .from(apiRateLimits)
         .where(eq(apiRateLimits.key, key))
         .get()
 
-      if (!current || current.resetAt <= now) {
+      if (!current) {
         const resetAt = now + WINDOW_MS
-        tx.insert(apiRateLimits)
-          .values({ key, hits: 1, resetAt })
-          .onConflictDoUpdate({
-            target: apiRateLimits.key,
-            set: { hits: 1, resetAt }
-          })
-          .run()
-
+        tx.insert(apiRateLimits).values({ key, hits: 1, resetAt }).run()
         return { totalHits: 1, resetTime: new Date(resetAt) }
       }
 
