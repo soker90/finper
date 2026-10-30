@@ -21,7 +21,7 @@ describe('Pension Plans Routes', () => {
   afterEach(() => {
     sqliteDb.delete(pensions).where(eq(pensions.user, user)).run()
     sqliteDb.delete(pensionPlans).where(eq(pensionPlans.user, user)).run()
-    sqliteDb.delete(schema.apiRateLimits).where(eq(schema.apiRateLimits.key, user)).run()
+    sqliteDb.delete(schema.apiRateLimits).run()
   })
 
   describe('CRUD /api/pension-plans', () => {
