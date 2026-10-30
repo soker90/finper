@@ -42,7 +42,8 @@ export const ERROR_MESSAGE = {
 
     TRANSFER_SAME_PLAN: 'El plan de origen y destino deben ser diferentes',
     TRANSFER_REQUIRES_VALUATION: 'El plan de origen y destino deben tener al menos una valoración registrada',
-    TRANSFER_INVALID_ASSETS: 'El plan de origen no tiene activos con un valor válido para transferir'
+    TRANSFER_INVALID_ASSETS: 'El plan de origen no tiene activos con un valor válido para transferir',
+    TRANSFER_DATE_BEFORE_LATEST_MOVEMENT: 'La fecha del traspaso no puede ser anterior al último movimiento de los planes'
 
   },
   LOAN: {
