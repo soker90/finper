@@ -82,9 +82,9 @@ export async function telegramWebhookHandler (c: Context<{ Bindings: Env }>): Pr
         const added = await addAllowedUser(c.env.DB, targetId, adminUserId, finperUsername)
         if (added) {
           const accountAdmin = await getAccountAdminId(c.env.DB, targetId)
-          await sendTelegramMessage(chatId, \`✅ Usuario <code>\${targetId}</code> vinculado a <code>\${finperUsername}</code>. Administrador de la cuenta: <code>\${accountAdmin ?? 'sin determinar'}</code>.\`, c.env.TELEGRAM_BOT_TOKEN)
+          await sendTelegramMessage(chatId, `✅ Usuario <code>${targetId}</code> vinculado a <code>${finperUsername}</code>. Administrador de la cuenta: <code>${accountAdmin ?? 'sin determinar'}</code>.`, c.env.TELEGRAM_BOT_TOKEN)
         } else {
-          await sendTelegramMessage(chatId, \`ℹ️ El usuario <code>\${targetId}</code> ya estaba vinculado. Usa /removeuser y vuelve a añadirlo para cambiar el usuario de Finper.\`, c.env.TELEGRAM_BOT_TOKEN)
+          await sendTelegramMessage(chatId, `ℹ️ El usuario <code>${targetId}</code> ya estaba vinculado. Usa /removeuser y vuelve a añadirlo para cambiar el usuario de Finper.`, c.env.TELEGRAM_BOT_TOKEN)
         }
         return c.json({ ok: true })
       }
@@ -114,12 +114,12 @@ export async function telegramWebhookHandler (c: Context<{ Bindings: Env }>): Pr
         } else {
           for (const u of users) {
             const date = formatDate(u.added_at)
-            const linkInfo = u.finper_username ? \`finper: \${u.finper_username}\` : 'sin vincular'
-            const accountRole = u.account_admin_id === u.user_id ? ' — administrador de cuenta' : u.account_admin_id != null ? \` — usuario; admin: <code>\${u.account_admin_id}</code>\` : ''
-            lines.push(\`• <code>\${u.user_id}</code> — añadido el \${date} — \${linkInfo}\${accountRole}\`)
+            const linkInfo = u.finper_username ? `finper: ${u.finper_username}` : 'sin vincular'
+            const accountRole = u.account_admin_id === u.user_id ? ' — administrador de cuenta' : u.account_admin_id != null ? ` — usuario; admin: <code>${u.account_admin_id}</code>` : ''
+            lines.push(`• <code>${u.user_id}</code> — añadido el ${date} — ${linkInfo}${accountRole}`)
           }
         }
-        await sendTelegramMessage(chatId, lines.join('\\n'), c.env.TELEGRAM_BOT_TOKEN)
+        await sendTelegramMessage(chatId, lines.join('\n'), c.env.TELEGRAM_BOT_TOKEN)
         return c.json({ ok: true })
       }
     }
@@ -219,7 +219,6 @@ async function processTicketPhoto (
   messageId: number,
   chatId: number,
   userId: number,
-  isAdmin: boolean,
   env: Env
 ): Promise<void> {
   if (!photos) return
@@ -274,7 +273,7 @@ async function processTicketPhoto (
     await sendTelegramMessage(chatId, lines.join('\n'), env.TELEGRAM_BOT_TOKEN)
 
     // 6. Notify only the explicitly assigned account admin.
-    if (notificationAdminId !== null) {
+    if (notificationAdminId !== null && notificationAdminId !== userId) {
       const adminLines: string[] = [`🔔 <b>Nuevo ticket de usuario <code>${userId}</code></b>`, '']
       adminLines.push(`🏪 Comercio: ${extraction.store ?? 'No detectado'}`)
       adminLines.push(`📅 Fecha: ${extraction.date ? formatDate(extraction.date) : 'No detectada'}`)
