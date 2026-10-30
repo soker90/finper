@@ -39,7 +39,7 @@ describe('PensionPlansService', () => {
     closeTestDb(db)
   })
 
-  it('transfers the current value between plans without moving contribution history', () => {
+  it('moves contribution balances in one destination entry while retaining the source ledger', () => {
     const source = repository.createPlan({ name: 'Origen', color: '#4CAF50', user: username })
     const destination = repository.createPlan({ name: 'Destino', color: '#2196F3', user: username })
 
@@ -88,13 +88,13 @@ describe('PensionPlansService', () => {
 
     expect(sourceAggregate.units).toBe(0)
     expect(sourceAggregate.total).toBe(0)
-    expect(sourceAggregate.employeeAmount).toBe(700)
-    expect(sourceAggregate.companyAmount).toBe(400)
+    expect(sourceAggregate.employeeAmount).toBe(0)
+    expect(sourceAggregate.companyAmount).toBe(0)
 
     expect(destinationAggregate.units).toBe(70)
     expect(destinationAggregate.total).toBe(1400)
-    expect(destinationAggregate.employeeAmount).toBe(200)
-    expect(destinationAggregate.companyAmount).toBe(100)
+    expect(destinationAggregate.employeeAmount).toBe(900)
+    expect(destinationAggregate.companyAmount).toBe(500)
 
     expect(summary.total).toBe(1400)
   })
@@ -136,10 +136,14 @@ describe('PensionPlansService', () => {
 
     expect(sourceAggregate.units).toBe(0)
     expect(sourceAggregate.total).toBe(0)
+    expect(sourceAggregate.employeeAmount).toBe(0)
+    expect(sourceAggregate.companyAmount).toBe(0)
     expect(destinationAggregate.total).toBe(4300)
     expect(destinationAggregate.units).toBe(215)
     expect(destinationTransfer.employeeUnits).toBe(150)
     expect(destinationTransfer.companyUnits).toBe(50)
+    expect(destinationTransfer.employeeAmount).toBe(3000)
+    expect(destinationTransfer.companyAmount).toBe(1000)
     expect(destinationTransfer.value).toBe(20)
   })
 
@@ -187,6 +191,8 @@ describe('PensionPlansService', () => {
     const destinationAggregate = service.getPlanById(destination.id, username)
     expect(destinationAggregate.units).toBe(20)
     expect(destinationAggregate.total).toBe(400)
+    expect(destinationAggregate.amount).toBe(400)
+    expect(service.getPlanById(source.id, username).amount).toBe(0)
   })
 
   it('rejects a transfer dated before the latest source movement', () => {
