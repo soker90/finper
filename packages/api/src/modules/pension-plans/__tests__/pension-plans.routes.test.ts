@@ -21,6 +21,7 @@ describe('Pension Plans Routes', () => {
   afterEach(() => {
     sqliteDb.delete(pensions).where(eq(pensions.user, user)).run()
     sqliteDb.delete(pensionPlans).where(eq(pensionPlans.user, user)).run()
+    sqliteDb.delete(schema.apiRateLimits).where(eq(schema.apiRateLimits.key, user)).run()
   })
 
   describe('CRUD /api/pension-plans', () => {
@@ -137,6 +138,31 @@ describe('Pension Plans Routes', () => {
         .post(`${path}/${source.body.id}/transfer`)
         .send({ destinationPlanId: source.body.id })
         .expect(401)
+    })
+
+    test('rate limits repeated transfer requests for the authenticated user', async () => {
+      const source = await supertest(server.app)
+        .post(path)
+        .auth(token, { type: 'bearer' })
+        .send({ name: 'Origen', color: '#4CAF50' })
+      const destination = await supertest(server.app)
+        .post(path)
+        .auth(token, { type: 'bearer' })
+        .send({ name: 'Destino', color: '#2196F3' })
+
+      for (let request = 0; request < 10; request++) {
+        await supertest(server.app)
+          .post(`${path}/${source.body.id}/transfer`)
+          .auth(token, { type: 'bearer' })
+          .send({ destinationPlanId: destination.body.id })
+          .expect(422)
+      }
+
+      await supertest(server.app)
+        .post(`${path}/${source.body.id}/transfer`)
+        .auth(token, { type: 'bearer' })
+        .send({ destinationPlanId: destination.body.id })
+        .expect(429)
     })
 
     test('transfers the current monetary value using the destination plan unit value', async () => {
