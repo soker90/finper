@@ -173,7 +173,7 @@ export const createPensionPlansRepository = (db: DB) => ({
         throw Boom.badData(ERROR_MESSAGE.PENSION_PLAN.TRANSFER_REQUIRES_VALUATION).output
       }
 
-      const sumUnits = (movements: Movement[], key: 'employeeUnits' | 'companyUnits') =>
+      const sumUnits = (movements: Movement[], key: 'employeeUnits' | 'companyUnits' | 'employeeAmount' | 'companyAmount') =>
         movements.reduce((total, movement) => total + movement[key], 0)
 
       const rawEmployeeUnits = sumUnits(sourceMovements, 'employeeUnits')
