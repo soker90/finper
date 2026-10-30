@@ -1,5 +1,6 @@
 import { Router } from 'express'
 import authMiddleware from '../../middlewares/auth.middleware'
+import { pensionTransferRateLimit } from '../../middlewares/pension-transfer-rate-limit.middleware'
 import { pensionPlansController } from './pension-plans.controller'
 
 export const pensionPlansRoutes = Router()
@@ -11,7 +12,7 @@ pensionPlansRoutes.get('/:id', authMiddleware, pensionPlansController.getPlan.bi
 pensionPlansRoutes.patch('/:id', authMiddleware, pensionPlansController.editPlan.bind(pensionPlansController))
 pensionPlansRoutes.delete('/:id', authMiddleware, pensionPlansController.deletePlan.bind(pensionPlansController))
 
-pensionPlansRoutes.post('/:id/transfer', authMiddleware, pensionPlansController.transferAssets.bind(pensionPlansController))
+pensionPlansRoutes.post('/:id/transfer', authMiddleware, pensionTransferRateLimit, pensionPlansController.transferAssets.bind(pensionPlansController))
 
 pensionPlansRoutes.get('/:id/movements', authMiddleware, pensionPlansController.getMovements.bind(pensionPlansController))
 pensionPlansRoutes.post('/:id/movements', authMiddleware, pensionPlansController.addMovement.bind(pensionPlansController))
