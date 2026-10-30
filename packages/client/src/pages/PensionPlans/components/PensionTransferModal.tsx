@@ -125,7 +125,7 @@ const PensionTransferModal = ({ sourcePlan, plans, show, onClose }: Props) => {
 
       <Box sx={{ gridColumn: '1 / -1', width: '100%', mt: 1 }}>
         <Alert severity='info'>
-          Se trasladará el saldo completo del plan ({sourcePlan.total.toFixed(2)} €) al destino en un único movimiento. Indica las unidades que recibes y el valor de cada unidad en el destino; se registrarán exactamente esos datos. El histórico del origen se consolidará y el plan quedará vacío. Se mantendrán los importes acumulados del empleado y de la empresa.
+          Se consolidará todo el histórico del plan de origen en un único movimiento del destino. Indica las unidades que recibes y el valor de cada unidad; se registrarán exactamente esos datos. El origen quedará vacío y se mantendrán los importes acumulados del empleado y de la empresa.
         </Alert>
       </Box>
 
