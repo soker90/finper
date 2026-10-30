@@ -195,7 +195,7 @@ async function processTicketText (
 
     await sendTelegramMessage(chatId, lines.join('\n'), env.TELEGRAM_BOT_TOKEN)
 
-    // 4. Notify only the explicitly assigned account admin.
+    // 4. Notify the first Telegram user linked to this Finper account.
     if (notificationAdminId !== null && notificationAdminId !== userId) {
       const adminLines: string[] = [`🔔 <b>Nuevo gasto de usuario <code>${userId}</code></b>`, '']
       adminLines.push(`🏪 Comercio: ${extraction.store ?? 'No detectado'}`)
@@ -272,7 +272,7 @@ async function processTicketPhoto (
 
     await sendTelegramMessage(chatId, lines.join('\n'), env.TELEGRAM_BOT_TOKEN)
 
-    // 6. Notify only the explicitly assigned account admin.
+    // 6. Notify the first Telegram user linked to this Finper account.
     if (notificationAdminId !== null && notificationAdminId !== userId) {
       const adminLines: string[] = [`🔔 <b>Nuevo ticket de usuario <code>${userId}</code></b>`, '']
       adminLines.push(`🏪 Comercio: ${extraction.store ?? 'No detectado'}`)
