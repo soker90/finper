@@ -273,6 +273,17 @@ describe('PensionPlansService', () => {
     const source = repository.createPlan({ name: 'Origen Vacío', color: '#4CAF50', user: username })
     const destination = repository.createPlan({ name: 'Destino', color: '#2196F3', user: username })
 
+    repository.createMovement({
+      planId: source.id,
+      date: 1,
+      employeeAmount: 0,
+      employeeUnits: 0,
+      companyAmount: 0,
+      companyUnits: 0,
+      value: 10,
+      user: username
+    })
+
     const error = captureThrown(() => service.transferAssets({
       sourcePlanId: source.id,
       destinationPlanId: destination.id,
