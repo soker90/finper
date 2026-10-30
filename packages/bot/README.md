@@ -65,8 +65,11 @@ Copia el `database_id` que devuelve el comando D1 y actualízalo en `wrangler.to
 # Local (para desarrollo)
 pnpm db:migrate:local
 
-# Remoto (producción)
+# Remoto (producción, instalación nueva)
 pnpm db:migrate:remote
+
+# En una base existente, ejecutar una sola vez antes de desplegar el Worker
+wrangler d1 execute ticket-bot-db --remote --file=./migrations/0001_add_notification_admin_id.sql
 ```
 
 ### 4. Configurar secrets
