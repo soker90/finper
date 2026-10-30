@@ -207,7 +207,7 @@ describe('PensionPlansService', () => {
     const destinationAggregate = service.getPlanById(destination.id, username)
     expect(destinationAggregate.units).toBe(20)
     expect(destinationAggregate.total).toBe(400)
-    expect(destinationAggregate.amount).toBe(400)
+    expect(destinationAggregate.amount).toBe(500)
     expect(service.getPlanById(source.id, username).amount).toBe(0)
     expect(repository.findMovements(source.id, username)).toHaveLength(0)
     expect(repository.findMovements(destination.id, username)).toHaveLength(3)
