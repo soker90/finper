@@ -156,6 +156,13 @@ export const createPensionPlansRepository = (db: DB) => ({
       const effectiveDestinationValue = customDestinationValue ?? destinationLatest?.value
 
       if (
+        (sourceLatest && date < sourceLatest.date) ||
+        (destinationLatest && date < destinationLatest.date)
+      ) {
+        throw Boom.badData(ERROR_MESSAGE.PENSION_PLAN.TRANSFER_DATE_BEFORE_LATEST_MOVEMENT).output
+      }
+
+      if (
         !sourceLatest ||
         !Number.isFinite(sourceLatest.value) ||
         sourceLatest.value <= 0 ||
