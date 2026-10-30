@@ -1,5 +1,5 @@
 import { eq, lte } from 'drizzle-orm'
-import { rateLimit, type Store } from 'express-rate-limit'
+import type { Store } from 'express-rate-limit'
 import { schema } from '@soker90/finper-db'
 
 import { db } from '../db'
@@ -12,7 +12,7 @@ const MAX_REQUESTS = 10
  * SQLite-backed store keeps the transfer quota consistent across API
  * instances that share Finper's database file.
  */
-class SQLiteRateLimitStore implements Store {
+export class SQLiteRateLimitStore implements Store {
   localKeys = false
 
   async increment (key: string) {
@@ -66,12 +66,3 @@ class SQLiteRateLimitStore implements Store {
   }
 }
 
-export const pensionTransferRateLimit = rateLimit({
-  windowMs: WINDOW_MS,
-  limit: MAX_REQUESTS,
-  keyGenerator: (req) => req.user as string,
-  standardHeaders: 'draft-8',
-  legacyHeaders: false,
-  message: { message: 'Has alcanzado el límite de traspasos. Inténtalo de nuevo dentro de un minuto.' },
-  store: new SQLiteRateLimitStore()
-})
