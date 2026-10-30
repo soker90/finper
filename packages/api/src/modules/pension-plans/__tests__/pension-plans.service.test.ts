@@ -109,7 +109,7 @@ describe('PensionPlansService', () => {
     expect(repository.findMovements(destination.id, username)).toHaveLength(2)
   })
 
-  it('converts source units using the destination unit value and preserves employee/company proportions', () => {
+  it('records the explicitly supplied destination units and preserves employee/company proportions', () => {
     const source = repository.createPlan({ name: 'Origen', color: '#4CAF50', user: username })
     const destination = repository.createPlan({ name: 'Destino', color: '#2196F3', user: username })
 
@@ -161,7 +161,7 @@ describe('PensionPlansService', () => {
     expect(repository.findMovements(destination.id, username)).toHaveLength(2)
   })
 
-  it('uses the supplied destination values even when the destination has no current units', () => {
+  it('records supplied destination values even when the destination has no current units', () => {
     const source = repository.createPlan({ name: 'Origen', color: '#4CAF50', user: username })
     const destination = repository.createPlan({ name: 'Destino vacío', color: '#2196F3', user: username })
 
@@ -199,7 +199,7 @@ describe('PensionPlansService', () => {
     service.transferAssets({
       sourcePlanId: source.id,
       destinationPlanId: destination.id,
-      destinationUnits: 200,
+      destinationUnits: 20,
       destinationValue: 20,
       user: username
     })
@@ -309,8 +309,8 @@ describe('PensionPlansService', () => {
     const error = captureThrown(() => service.transferAssets({
       sourcePlanId: source.id,
       destinationPlanId: destination.id,
-      destinationUnits: 200,
-      destinationValue: 20,
+      destinationUnits: 10,
+      destinationValue: 10,
       user: username
     }))
 
@@ -337,7 +337,7 @@ describe('PensionPlansService', () => {
     service.transferAssets({
       sourcePlanId: source.id,
       destinationPlanId: destination.id,
-      destinationUnits: 200,
+      destinationUnits: 20,
       destinationValue: 20,
       date: transferDate,
       user: username
