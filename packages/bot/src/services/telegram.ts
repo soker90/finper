@@ -43,9 +43,18 @@ export async function sendTelegramMessage (
   text: string,
   botToken: string
 ): Promise<void> {
-  await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+  const response = await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ chat_id: chatId, text, parse_mode: 'HTML' })
   })
+
+  if (!response.ok) {
+    throw new Error(`Telegram sendMessage HTTP error: ${response.status}`)
+  }
+
+  const result = await response.json() as { ok: boolean; description?: string }
+  if (!result.ok) {
+    throw new Error(`Telegram sendMessage failed: ${result.description ?? 'unknown Bot API error'}`)
+  }
 }
