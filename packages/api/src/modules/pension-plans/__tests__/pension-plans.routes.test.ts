@@ -126,6 +126,85 @@ describe('Pension Plans Routes', () => {
     })
   })
 
+  describe('Asset transfers', () => {
+    test('POST /:id/transfer requires authentication', async () => {
+      const source = await supertest(server.app)
+        .post(path)
+        .auth(token, { type: 'bearer' })
+        .send({ name: 'Origen', color: '#4CAF50' })
+
+      await supertest(server.app)
+        .post(`${path}/${source.body.id}/transfer`)
+        .send({ destinationPlanId: source.body.id })
+        .expect(401)
+    })
+
+    test('transfers the current monetary value using the destination plan unit value', async () => {
+      const source = await supertest(server.app)
+        .post(path)
+        .auth(token, { type: 'bearer' })
+        .send({ name: 'Origen', color: '#4CAF50' })
+      const destination = await supertest(server.app)
+        .post(path)
+        .auth(token, { type: 'bearer' })
+        .send({ name: 'Destino', color: '#2196F3' })
+
+      await supertest(server.app)
+        .post(`${path}/${source.body.id}/movements`)
+        .auth(token, { type: 'bearer' })
+        .send({
+          date: 1000,
+          employeeAmount: 3000,
+          employeeUnits: 300,
+          companyAmount: 1000,
+          companyUnits: 100,
+          value: 10
+        })
+        .expect(201)
+
+      await supertest(server.app)
+        .post(`${path}/${destination.body.id}/movements`)
+        .auth(token, { type: 'bearer' })
+        .send({
+          date: 1000,
+          employeeAmount: 200,
+          employeeUnits: 10,
+          companyAmount: 100,
+          companyUnits: 5,
+          value: 20
+        })
+        .expect(201)
+
+      const transfer = await supertest(server.app)
+        .post(`${path}/${source.body.id}/transfer`)
+        .auth(token, { type: 'bearer' })
+        .send({ destinationPlanId: destination.body.id })
+        .expect(200)
+
+      expect(transfer.body.source.employeeUnits).toBe(-300)
+      expect(transfer.body.source.companyUnits).toBe(-100)
+      expect(transfer.body.destination.employeeUnits).toBe(150)
+      expect(transfer.body.destination.companyUnits).toBe(50)
+      expect(transfer.body.destination.value).toBe(20)
+
+      const sourceDetail = await supertest(server.app)
+        .get(`${path}/${source.body.id}`)
+        .auth(token, { type: 'bearer' })
+        .expect(200)
+      const destinationDetail = await supertest(server.app)
+        .get(`${path}/${destination.body.id}`)
+        .auth(token, { type: 'bearer' })
+        .expect(200)
+
+      expect(sourceDetail.body.units).toBe(0)
+      expect(sourceDetail.body.total).toBe(0)
+      expect(sourceDetail.body.amount).toBe(4000)
+      expect(destinationDetail.body.units).toBe(215)
+      expect(destinationDetail.body.total).toBe(4300)
+      expect(destinationDetail.body.amount).toBe(300)
+    })
+  })
+
   describe('Movements', () => {
     const movementPayload = {
       date: 1700000000000,
