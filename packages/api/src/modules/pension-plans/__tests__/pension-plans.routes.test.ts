@@ -165,7 +165,7 @@ describe('Pension Plans Routes', () => {
         .expect(429)
     })
 
-    test('transfers the current monetary value using the destination plan unit value', async () => {
+    test('records the destination units and unit value supplied by the user', async () => {
       const source = await supertest(server.app)
         .post(path)
         .auth(token, { type: 'bearer' })
@@ -204,7 +204,7 @@ describe('Pension Plans Routes', () => {
       const transfer = await supertest(server.app)
         .post(`${path}/${source.body.id}/transfer`)
         .auth(token, { type: 'bearer' })
-        .send({ destinationPlanId: destination.body.id })
+        .send({ destinationPlanId: destination.body.id, destinationUnits: 200, destinationValue: 20 })
         .expect(200)
 
       expect(transfer.body.employeeUnits).toBe(150)
