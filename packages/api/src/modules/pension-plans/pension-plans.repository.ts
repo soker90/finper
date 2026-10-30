@@ -155,7 +155,13 @@ export const createPensionPlansRepository = (db: DB) => ({
       const destinationLatest = destinationMovements[0]
       const effectiveDestinationValue = customDestinationValue ?? destinationLatest?.value
 
-      if (!sourceLatest || sourceLatest.value <= 0 || !effectiveDestinationValue || effectiveDestinationValue <= 0) {
+      if (
+        !sourceLatest ||
+        !Number.isFinite(sourceLatest.value) ||
+        sourceLatest.value <= 0 ||
+        !Number.isFinite(effectiveDestinationValue) ||
+        effectiveDestinationValue <= 0
+      ) {
         throw Boom.badData(ERROR_MESSAGE.PENSION_PLAN.TRANSFER_REQUIRES_VALUATION).output
       }
 
