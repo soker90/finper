@@ -4,7 +4,7 @@ import { downloadTelegramPhoto, sendTelegramMessage } from '../services/telegram
 import { uploadToR2, getR2Key } from '../services/r2'
 import { extractReceiptData, extractExpenseFromText } from '../services/gemini'
 import { insertTicket } from '../db/tickets'
-import { isUserAllowed, getAllowedUser, addAllowedUser, setNotificationAdmin, removeAllowedUser, listAllowedUsers } from '../db/users'
+import { isUserAllowed, getAllowedUser, addAllowedUser, removeAllowedUser, listAllowedUsers } from '../db/users'
 import { generateId } from '../utils'
 
 /**
@@ -66,7 +66,7 @@ export async function telegramWebhookHandler (c: Context<{ Bindings: Env }>): Pr
     }
 
     // Admin-only commands
-    if (text.startsWith('/adduser') || text.startsWith('/setuseradmin') || text.startsWith('/removeuser') || text.startsWith('/listusers')) {
+    if (text.startsWith('/adduser') || text.startsWith('/removeuser') || text.startsWith('/listusers')) {
       if (!isAdmin) {
         return c.json({ ok: true })
       }
@@ -75,32 +75,17 @@ export async function telegramWebhookHandler (c: Context<{ Bindings: Env }>): Pr
         const parts = text.split(/\s+/)
         const targetId = parseTelegramId(parts[1])
         const finperUsername = parts[2]
-        const accountAdminId = parts[3] === undefined ? adminUserId : parseTelegramId(parts[3])
-        if (targetId === null || !finperUsername || accountAdminId === null || (accountAdminId === targetId && targetId !== adminUserId)) {
-          await sendTelegramMessage(chatId, '⚠️ Uso: /adduser <id_de_telegram> <usuario_finper> [id_admin_cuenta]\n\nSi omites id_admin_cuenta, se usará el administrador principal del bot.', c.env.TELEGRAM_BOT_TOKEN)
+        if (targetId === null || !finperUsername || parts.length !== 3) {
+          await sendTelegramMessage(chatId, '⚠️ Uso: /adduser <id_de_telegram> <usuario_finper>', c.env.TELEGRAM_BOT_TOKEN)
           return c.json({ ok: true })
         }
-        const added = await addAllowedUser(c.env.DB, targetId, adminUserId, finperUsername, accountAdminId)
+        const added = await addAllowedUser(c.env.DB, targetId, adminUserId, finperUsername)
         if (added) {
-          await sendTelegramMessage(chatId, `✅ Usuario <code>${targetId}</code> vinculado a <code>${finperUsername}</code>. Los avisos de tickets se enviarán al administrador <code>${accountAdminId}</code>.`, c.env.TELEGRAM_BOT_TOKEN)
+          const accountAdmin = await getAccountAdminId(c.env.DB, targetId)
+          await sendTelegramMessage(chatId, \`✅ Usuario <code>\${targetId}</code> vinculado a <code>\${finperUsername}</code>. Administrador de la cuenta: <code>\${accountAdmin ?? 'sin determinar'}</code>.\`, c.env.TELEGRAM_BOT_TOKEN)
         } else {
-          await sendTelegramMessage(chatId, `ℹ️ El usuario <code>${targetId}</code> ya estaba vinculado. Usa /removeuser y vuelve a añadirlo para cambiar el usuario de Finper.`, c.env.TELEGRAM_BOT_TOKEN)
+          await sendTelegramMessage(chatId, \`ℹ️ El usuario <code>\${targetId}</code> ya estaba vinculado. Usa /removeuser y vuelve a añadirlo para cambiar el usuario de Finper.\`, c.env.TELEGRAM_BOT_TOKEN)
         }
-        return c.json({ ok: true })
-      }
-
-      if (text.startsWith('/setuseradmin')) {
-        const parts = text.split(/\s+/)
-        const targetId = parseTelegramId(parts[1])
-        const accountAdminId = parseTelegramId(parts[2])
-        if (targetId === null || accountAdminId === null || (targetId === accountAdminId && targetId !== adminUserId)) {
-          await sendTelegramMessage(chatId, '⚠️ Uso: /setuseradmin <id_usuario> <id_admin_cuenta>. El usuario y su administrador deben ser distintos.', c.env.TELEGRAM_BOT_TOKEN)
-          return c.json({ ok: true })
-        }
-        const updated = await setNotificationAdmin(c.env.DB, targetId, accountAdminId)
-        await sendTelegramMessage(chatId, updated
-          ? `✅ El usuario <code>${targetId}</code> enviará sus avisos al administrador <code>${accountAdminId}</code>.`
-          : `⚠️ No existe el usuario <code>${targetId}</code> en la lista de autorizados.`, c.env.TELEGRAM_BOT_TOKEN)
         return c.json({ ok: true })
       }
 
@@ -122,29 +107,25 @@ export async function telegramWebhookHandler (c: Context<{ Bindings: Env }>): Pr
 
       if (text.startsWith('/listusers')) {
         const users = await listAllowedUsers(c.env.DB)
-        const adminEntry = users.find(u => u.user_id === adminUserId)
-        const otherUsers = users.filter(u => u.user_id !== adminUserId)
-
         const lines = ['👥 <b>Usuarios con acceso:</b>', '']
-        const adminLinkInfo = adminEntry?.finper_username ? `finper: ${adminEntry.finper_username}` : 'sin vincular'
-        lines.push(`• <code>${adminUserId}</code> — admin (tú) — ${adminLinkInfo}`)
 
-        if (otherUsers.length === 0) {
-          lines.push('', 'ℹ️ No hay usuarios adicionales con acceso.')
+        if (users.length === 0) {
+          lines.push('ℹ️ No hay usuarios registrados.')
         } else {
-          for (const u of otherUsers) {
+          for (const u of users) {
             const date = formatDate(u.added_at)
-            const linkInfo = u.finper_username ? `finper: ${u.finper_username}` : 'sin vincular'
-            lines.push(`• <code>${u.user_id}</code> — añadido el ${date} — ${linkInfo} — admin avisos: <code>${u.notification_admin_id ?? 'sin asignar'}</code>`)
+            const linkInfo = u.finper_username ? \`finper: \${u.finper_username}\` : 'sin vincular'
+            const accountRole = u.account_admin_id === u.user_id ? ' — administrador de cuenta' : u.account_admin_id != null ? \` — usuario; admin: <code>\${u.account_admin_id}</code>\` : ''
+            lines.push(\`• <code>\${u.user_id}</code> — añadido el \${date} — \${linkInfo}\${accountRole}\`)
           }
         }
-        await sendTelegramMessage(chatId, lines.join('\n'), c.env.TELEGRAM_BOT_TOKEN)
+        await sendTelegramMessage(chatId, lines.join('\\n'), c.env.TELEGRAM_BOT_TOKEN)
         return c.json({ ok: true })
       }
     }
 
     // Free-text expense: process with Gemini
-    const processingPromise = processTicketText(text, message.message_id, chatId, userId, isAdmin, c.env)
+    const processingPromise = processTicketText(text, message.message_id, chatId, userId, c.env)
     c.executionCtx.waitUntil(processingPromise)
 
     await sendTelegramMessage(chatId, '⏳ Procesando gasto...', c.env.TELEGRAM_BOT_TOKEN)
@@ -163,7 +144,6 @@ export async function telegramWebhookHandler (c: Context<{ Bindings: Env }>): Pr
     message.message_id,
     chatId,
     userId,
-    isAdmin,
     c.env
   )
   c.executionCtx.waitUntil(processingPromise)
@@ -178,7 +158,6 @@ async function processTicketText (
   messageId: number,
   chatId: number,
   userId: number,
-  isAdmin: boolean,
   env: Env
 ): Promise<void> {
   try {
@@ -187,7 +166,7 @@ async function processTicketText (
 
     // Resolve the notification recipient before saving. A lookup failure must not
     // turn an already-saved ticket into an apparent processing failure.
-    const notificationAdminId = await resolveNotificationAdmin(env, userId, isAdmin)
+    const notificationAdminId = await resolveNotificationAdmin(env, userId)
 
     // 2. Save ticket to D1 (image_url = null, raw_text = original message)
     const ticketId = generateId()
@@ -217,7 +196,7 @@ async function processTicketText (
     await sendTelegramMessage(chatId, lines.join('\n'), env.TELEGRAM_BOT_TOKEN)
 
     // 4. Notify only the explicitly assigned account admin.
-    if (notificationAdminId !== null) {
+    if (notificationAdminId !== null && notificationAdminId !== userId) {
       const adminLines: string[] = [`🔔 <b>Nuevo gasto de usuario <code>${userId}</code></b>`, '']
       adminLines.push(`🏪 Comercio: ${extraction.store ?? 'No detectado'}`)
       adminLines.push(`📅 Fecha: ${extraction.date ? formatDate(extraction.date) : 'No detectada'}`)
@@ -319,16 +298,20 @@ function parseTelegramId (value: string | undefined): number | null {
   return Number.isSafeInteger(id) && id > 0 ? id : null
 }
 
-async function resolveNotificationAdmin (env: Env, userId: number, isAdmin: boolean): Promise<number | null> {
-  if (isAdmin) return null
+async function resolveNotificationAdmin (env: Env, userId: number): Promise<number | null> {
   try {
     const user = await getAllowedUser(env.DB, userId)
-    const adminId = user?.notification_admin_id
+    const adminId = user?.account_admin_id
     return adminId != null && adminId !== userId ? adminId : null
   } catch (err) {
     console.error('Could not resolve ticket notification admin:', err)
     return null
   }
+}
+
+async function getAccountAdminId (db: D1Database, userId: number): Promise<number | null> {
+  const user = await getAllowedUser(db, userId)
+  return user?.account_admin_id ?? null
 }
 
 async function sendAdminNotification (adminId: number, message: string, token: string): Promise<void> {
