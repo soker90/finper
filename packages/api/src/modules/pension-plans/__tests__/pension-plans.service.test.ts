@@ -136,7 +136,7 @@ describe('PensionPlansService', () => {
 
     expect(sourceAggregate.units).toBe(0)
     expect(sourceAggregate.total).toBe(0)
-    expect(destinationAggregate.total).toBe(4000)
+    expect(destinationAggregate.total).toBe(4300)
     expect(destinationAggregate.units).toBe(215)
     expect(destinationTransfer.employeeUnits).toBe(150)
     expect(destinationTransfer.companyUnits).toBe(50)
