@@ -79,6 +79,8 @@ describe('PensionPlansService', () => {
     service.transferAssets({
       sourcePlanId: source.id,
       destinationPlanId: destination.id,
+      destinationUnits: 55,
+      destinationValue: 20,
       user: username
     })
 
@@ -135,6 +137,8 @@ describe('PensionPlansService', () => {
     service.transferAssets({
       sourcePlanId: source.id,
       destinationPlanId: destination.id,
+      destinationUnits: 200,
+      destinationValue: 20,
       user: username
     })
 
@@ -157,7 +161,7 @@ describe('PensionPlansService', () => {
     expect(repository.findMovements(destination.id, username)).toHaveLength(2)
   })
 
-  it('reuses the last destination valuation even when that plan currently has no units', () => {
+  it('uses the supplied destination values even when the destination has no current units', () => {
     const source = repository.createPlan({ name: 'Origen', color: '#4CAF50', user: username })
     const destination = repository.createPlan({ name: 'Destino vacío', color: '#2196F3', user: username })
 
@@ -195,6 +199,8 @@ describe('PensionPlansService', () => {
     service.transferAssets({
       sourcePlanId: source.id,
       destinationPlanId: destination.id,
+      destinationUnits: 200,
+      destinationValue: 20,
       user: username
     })
 
@@ -235,6 +241,8 @@ describe('PensionPlansService', () => {
     const error = captureThrown(() => service.transferAssets({
       sourcePlanId: source.id,
       destinationPlanId: destination.id,
+      destinationUnits: 200,
+      destinationValue: 20,
       date: 1500,
       user: username
     }))
@@ -272,6 +280,8 @@ describe('PensionPlansService', () => {
     const error = captureThrown(() => service.transferAssets({
       sourcePlanId: source.id,
       destinationPlanId: destination.id,
+      destinationUnits: 200,
+      destinationValue: 20,
       date: 1500,
       user: username
     }))
@@ -281,7 +291,7 @@ describe('PensionPlansService', () => {
     expect(service.getPlanById(destination.id, username).units).toBe(0)
   })
 
-  it('rejects a transfer when either plan has no current valuation and none is provided', () => {
+  it('accepts explicit destination values without a previous destination valuation', () => {
     const source = repository.createPlan({ name: 'Origen', color: '#4CAF50', user: username })
     const destination = repository.createPlan({ name: 'Destino', color: '#2196F3', user: username })
 
@@ -299,14 +309,16 @@ describe('PensionPlansService', () => {
     const error = captureThrown(() => service.transferAssets({
       sourcePlanId: source.id,
       destinationPlanId: destination.id,
+      destinationUnits: 200,
+      destinationValue: 20,
       user: username
     }))
 
-    expect(error.statusCode).toBe(422)
-    expect(error.payload.message).toBe('El plan de origen y destino deben tener al menos una valoración registrada')
+    expect(service.getPlanById(source.id, username).units).toBe(0)
+    expect(service.getPlanById(destination.id, username).units).toBe(10)
   })
 
-  it('transfers assets to a brand new plan when destinationValue is explicitly provided', () => {
+  it('records the exact destination units and unit value supplied for a new plan', () => {
     const source = repository.createPlan({ name: 'Origen', color: '#4CAF50', user: username })
     const destination = repository.createPlan({ name: 'Destino Nuevo', color: '#2196F3', user: username })
 
@@ -325,6 +337,7 @@ describe('PensionPlansService', () => {
     service.transferAssets({
       sourcePlanId: source.id,
       destinationPlanId: destination.id,
+      destinationUnits: 200,
       destinationValue: 20,
       date: transferDate,
       user: username
@@ -336,7 +349,7 @@ describe('PensionPlansService', () => {
     expect(sourceAggregate.units).toBe(0)
     expect(sourceAggregate.total).toBe(0)
 
-    // The source value is 40 units * 10€ = 400€. At 20€/unit, the destination receives 20 units.
+    // The destination receives exactly the 20 units and 20€ unit value supplied.
     expect(destinationAggregate.units).toBe(20)
     expect(destinationAggregate.total).toBe(400)
 
@@ -354,6 +367,8 @@ describe('PensionPlansService', () => {
     const error = captureThrown(() => service.transferAssets({
       sourcePlanId: plan.id,
       destinationPlanId: plan.id,
+      destinationUnits: 200,
+      destinationValue: 20,
       user: username
     }))
 
@@ -379,6 +394,7 @@ describe('PensionPlansService', () => {
     const error = captureThrown(() => service.transferAssets({
       sourcePlanId: source.id,
       destinationPlanId: destination.id,
+      destinationUnits: 10,
       destinationValue: 10,
       user: username
     }))
@@ -425,6 +441,8 @@ describe('PensionPlansService', () => {
     const error = captureThrown(() => service.transferAssets({
       sourcePlanId: source.id,
       destinationPlanId: destination.id,
+      destinationUnits: 200,
+      destinationValue: 20,
       user: username
     }))
 
@@ -457,6 +475,7 @@ describe('PensionPlansService', () => {
     const error = captureThrown(() => service.transferAssets({
       sourcePlanId: source.id,
       destinationPlanId: otherPlan.id,
+      destinationUnits: 10,
       destinationValue: 10,
       user: username
     }))
