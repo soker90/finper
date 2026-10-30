@@ -1,7 +1,7 @@
 export interface AllowedUser {
   user_id: number
   added_by: number
-  notification_admin_id: number | null
+  account_admin_id: number | null
   added_at: number
   finper_username: string | null
 }
@@ -27,7 +27,7 @@ export async function isUserAllowed (db: D1Database, userId: number): Promise<bo
  */
 export async function getAllowedUser (db: D1Database, userId: number): Promise<AllowedUser | null> {
   return await db
-    .prepare('SELECT user_id, added_by, notification_admin_id, added_at, finper_username FROM allowed_users WHERE user_id = ?')
+    .prepare('SELECT user_id, added_by, added_at, finper_username, (SELECT admin.user_id FROM allowed_users admin WHERE admin.finper_username = allowed_users.finper_username ORDER BY admin.added_at ASC, admin.user_id ASC LIMIT 1) AS account_admin_id FROM allowed_users WHERE user_id = ?')
     .bind(userId)
     .first<AllowedUser>()
 }
@@ -41,35 +41,18 @@ export async function addAllowedUser (
   db: D1Database,
   userId: number,
   addedBy: number,
-  finperUsername: string,
-  notificationAdminId: number
+  finperUsername: string
 ): Promise<boolean> {
   try {
     await db
-      .prepare('INSERT INTO allowed_users (user_id, added_by, notification_admin_id, added_at, finper_username) VALUES (?, ?, ?, ?, ?)')
-      .bind(userId, addedBy, notificationAdminId, Date.now(), finperUsername)
+      .prepare('INSERT INTO allowed_users (user_id, added_by, added_at, finper_username) VALUES (?, ?, ?, ?)')
+      .bind(userId, addedBy, Date.now(), finperUsername)
       .run()
     return true
   } catch {
     // UNIQUE constraint violation — user already exists
     return false
   }
-}
-
-/**
- * Changes the account administrator that receives ticket notifications.
- * Returns false when the Telegram user is not registered.
- */
-export async function setNotificationAdmin (
-  db: D1Database,
-  userId: number,
-  notificationAdminId: number
-): Promise<boolean> {
-  const result = await db
-    .prepare('UPDATE allowed_users SET notification_admin_id = ? WHERE user_id = ?')
-    .bind(notificationAdminId, userId)
-    .run()
-  return (result.meta.changes ?? 0) > 0
 }
 
 /**
@@ -91,7 +74,7 @@ export async function removeAllowedUser (
  */
 export async function listAllowedUsers (db: D1Database): Promise<AllowedUser[]> {
   const result = await db
-    .prepare('SELECT user_id, added_by, notification_admin_id, added_at, finper_username FROM allowed_users ORDER BY added_at ASC')
+    .prepare('SELECT user_id, added_by, added_at, finper_username, (SELECT admin.user_id FROM allowed_users admin WHERE admin.finper_username = allowed_users.finper_username ORDER BY admin.added_at ASC, admin.user_id ASC LIMIT 1) AS account_admin_id FROM allowed_users ORDER BY added_at ASC, user_id ASC')
     .all<AllowedUser>()
   return result.results
 }
