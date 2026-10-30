@@ -14,17 +14,17 @@
     "setup:webhook": "tsx scripts/setup-webhook.ts"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "5.20260827.1",
-    "@typescript-eslint/eslint-plugin": "8.67.0",
+    "@cloudflare/workers-types": "5.20261008.1",
+    "@typescript-eslint/eslint-plugin": "8.71.1",
     "@typescript-eslint/parser": "8.70.1",
     "eslint": "9.39.4",
     "globals": "17.6.0",
     "neostandard": "0.13.0",
-    "tsx": "4.23.12",
+    "tsx": "4.23.15",
     "typescript": "5.9.3",
     "wrangler": "4.110.0"
   },
   "dependencies": {
-    "hono": "4.13.9"
+    "hono": "4.13.13"
   }
 }

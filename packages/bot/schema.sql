@@ -26,7 +26,7 @@ CREATE INDEX IF NOT EXISTS idx_tickets_telegram_user_id ON tickets(telegram_user
 -- Users allowed to send tickets to the bot (managed by the admin via bot commands)
 CREATE TABLE IF NOT EXISTS allowed_users (
   user_id         INTEGER PRIMARY KEY,  -- Telegram user ID
-  added_by        INTEGER NOT NULL,     -- Telegram user ID of the admin who added them
+  added_by        INTEGER NOT NULL,     -- Telegram user ID of the admin who authorized this user (audit)
   added_at        INTEGER NOT NULL,     -- Unix timestamp (ms)
   finper_username TEXT                  -- Finper username this Telegram user is linked to (several telegram_user_id can share the same finper_username)
 );

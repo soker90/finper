@@ -28,13 +28,15 @@ Los usuarios no autorizados son ignorados completamente — el bot no responde n
 
 | Comando | Descripción |
 |---|---|
-| `/adduser <id>` | Permite a un usuario enviar tickets |
+| `/adduser <id_telegram> <usuario_finper>` | Autoriza al usuario; el primero vinculado será administrador de esa cuenta |
 | `/removeuser <id>` | Revoca el acceso de un usuario |
 | `/listusers` | Lista todos los usuarios con acceso |
 
 Para obtener el Telegram user ID de alguien, pídele que escriba a [@userinfobot](https://t.me/userinfobot).
 
-Cuando un usuario no-admin sube un ticket exitosamente, el admin recibe una notificación con el resumen del ticket.
+`added_by` conserva quién autorizó el acceso como dato de auditoría. El administrador de cada cuenta se determina automáticamente: es el primer usuario de Telegram registrado para ese `usuario_finper`, según `added_at` (con el ID de Telegram como desempate). Los siguientes usuarios vinculados al mismo `usuario_finper` envían sus avisos de tickets a ese primer usuario. No se puede elegir otro administrador manualmente.
+
+Los usuarios ya registrados conservan su acceso. En sus casos, el administrador se calcula a partir de las fechas de alta existentes, sin migración ni cambios de datos. `/listusers` indica quién es el administrador de cada cuenta. Si un usuario no tiene un `usuario_finper` asociado, no se envía ningún aviso.
 
 ## Setup inicial
 
@@ -62,8 +64,11 @@ Copia el `database_id` que devuelve el comando D1 y actualízalo en `wrangler.to
 # Local (para desarrollo)
 pnpm db:migrate:local
 
-# Remoto (producción)
+# Remoto (producción, instalación nueva)
 pnpm db:migrate:remote
+
+# En una base existente, ejecutar una sola vez antes de desplegar el Worker
+wrangler d1 execute ticket-bot-db --remote --file=./migrations/0001_add_notification_admin_id.sql
 ```
 
 ### 4. Configurar secrets

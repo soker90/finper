@@ -1,6 +1,7 @@
 export interface AllowedUser {
   user_id: number
   added_by: number
+  account_admin_id: number | null
   added_at: number
   finper_username: string | null
 }
@@ -21,9 +22,19 @@ export async function isUserAllowed (db: D1Database, userId: number): Promise<bo
 }
 
 /**
- * Adds a user to the allowed list, linked to a Finper username. Several Telegram
- * users can be linked to the same Finper username. Returns false if the user
- * was already present.
+ * Returns the access record for a Telegram user, including the first linked
+ * user of the same Finper account. Returns null when the user is not registered.
+ */
+export async function getAllowedUser (db: D1Database, userId: number): Promise<AllowedUser | null> {
+  return await db
+    .prepare('SELECT user_id, added_by, added_at, finper_username, (SELECT admin.user_id FROM allowed_users admin WHERE admin.finper_username = allowed_users.finper_username ORDER BY admin.added_at ASC, admin.user_id ASC LIMIT 1) AS account_admin_id FROM allowed_users WHERE user_id = ?')
+    .bind(userId)
+    .first<AllowedUser>()
+}
+
+/**
+ * Adds a user to the allowed list, linked to a Finper username. The first user
+ * linked to each username automatically becomes that account's administrator.
  */
 export async function addAllowedUser (
   db: D1Database,
@@ -31,16 +42,11 @@ export async function addAllowedUser (
   addedBy: number,
   finperUsername: string
 ): Promise<boolean> {
-  try {
-    await db
-      .prepare('INSERT INTO allowed_users (user_id, added_by, added_at, finper_username) VALUES (?, ?, ?, ?)')
-      .bind(userId, addedBy, Date.now(), finperUsername)
-      .run()
-    return true
-  } catch {
-    // UNIQUE constraint violation — user already exists
-    return false
-  }
+  const result = await db
+    .prepare('INSERT OR IGNORE INTO allowed_users (user_id, added_by, added_at, finper_username) VALUES (?, ?, ?, ?)')
+    .bind(userId, addedBy, Date.now(), finperUsername)
+    .run()
+  return (result.meta.changes ?? 0) > 0
 }
 
 /**
@@ -62,7 +68,7 @@ export async function removeAllowedUser (
  */
 export async function listAllowedUsers (db: D1Database): Promise<AllowedUser[]> {
   const result = await db
-    .prepare('SELECT user_id, added_by, added_at, finper_username FROM allowed_users ORDER BY added_at ASC')
+    .prepare('SELECT user_id, added_by, added_at, finper_username, (SELECT admin.user_id FROM allowed_users admin WHERE admin.finper_username = allowed_users.finper_username ORDER BY admin.added_at ASC, admin.user_id ASC LIMIT 1) AS account_admin_id FROM allowed_users ORDER BY added_at ASC, user_id ASC')
     .all<AllowedUser>()
   return result.results
 }
