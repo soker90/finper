@@ -22,8 +22,8 @@ export async function isUserAllowed (db: D1Database, userId: number): Promise<bo
 }
 
 /**
- * Returns the access record for a Telegram user, including the admin who
- * authorized them. Returns null when the user is not registered.
+ * Returns the access record for a Telegram user, including the first linked
+ * user of the same Finper account. Returns null when the user is not registered.
  */
 export async function getAllowedUser (db: D1Database, userId: number): Promise<AllowedUser | null> {
   return await db
@@ -33,9 +33,8 @@ export async function getAllowedUser (db: D1Database, userId: number): Promise<A
 }
 
 /**
- * Adds a user to the allowed list, linked to a Finper username. Several Telegram
- * users can be linked to the same Finper username. Returns false if the user
- * was already present.
+ * Adds a user to the allowed list, linked to a Finper username. The first user
+ * linked to each username automatically becomes that account's administrator.
  */
 export async function addAllowedUser (
   db: D1Database,
@@ -43,16 +42,11 @@ export async function addAllowedUser (
   addedBy: number,
   finperUsername: string
 ): Promise<boolean> {
-  try {
-    await db
-      .prepare('INSERT INTO allowed_users (user_id, added_by, added_at, finper_username) VALUES (?, ?, ?, ?)')
-      .bind(userId, addedBy, Date.now(), finperUsername)
-      .run()
-    return true
-  } catch {
-    // UNIQUE constraint violation — user already exists
-    return false
-  }
+  const result = await db
+    .prepare('INSERT OR IGNORE INTO allowed_users (user_id, added_by, added_at, finper_username) VALUES (?, ?, ?, ?)')
+    .bind(userId, addedBy, Date.now(), finperUsername)
+    .run()
+  return (result.meta.changes ?? 0) > 0
 }
 
 /**
