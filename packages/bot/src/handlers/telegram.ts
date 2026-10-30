@@ -66,7 +66,7 @@ export async function telegramWebhookHandler (c: Context<{ Bindings: Env }>): Pr
     }
 
     // Admin-only commands
-    if (text.startsWith('/adduser') || text.startsWith('/removeuser') || text.startsWith('/listusers')) {
+    if (text.startsWith('/adduser') || text.startsWith('/setuseradmin') || text.startsWith('/removeuser') || text.startsWith('/listusers')) {
       if (!isAdmin) {
         return c.json({ ok: true })
       }
@@ -223,7 +223,7 @@ async function processTicketText (
       adminLines.push(`📅 Fecha: ${extraction.date ? formatDate(extraction.date) : 'No detectada'}`)
       adminLines.push(`💶 Total: ${extraction.amount != null ? `${extraction.amount.toFixed(2)} €` : 'No detectado'}`)
       adminLines.push(`💳 Pago: ${extraction.payment_method ?? 'No detectado'}`)
-      await sendTelegramMessage(notificationAdminId, adminLines.join('\n'), env.TELEGRAM_BOT_TOKEN)
+      await sendAdminNotification(notificationAdminId, adminLines.join('\n'), env.TELEGRAM_BOT_TOKEN)
     }
   } catch (err) {
     console.error('Error processing text expense:', err)
@@ -241,7 +241,6 @@ async function processTicketPhoto (
   chatId: number,
   userId: number,
   isAdmin: boolean,
-  adminUserId: number,
   env: Env
 ): Promise<void> {
   if (!photos) return
