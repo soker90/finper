@@ -1,8 +1,18 @@
 import { Router } from 'express'
-import rateLimit from 'express-rate-limit'
+import rateLimit, { ipKeyGenerator } from 'express-rate-limit'
 import authMiddleware from '../../middlewares/auth.middleware'
 import { SQLiteRateLimitStore } from '../../middlewares/pension-transfer-rate-limit.middleware'
 import { pensionPlansController } from './pension-plans.controller'
+
+const pensionTransferIpRateLimit = rateLimit({
+  windowMs: 60_000,
+  limit: 60,
+  keyGenerator: (req) => ipKeyGenerator(req.ip),
+  standardHeaders: 'draft-8',
+  legacyHeaders: false,
+  message: { message: 'Demasiadas solicitudes desde esta dirección. Inténtalo de nuevo dentro de un minuto.' },
+  store: new SQLiteRateLimitStore()
+})
 
 const pensionTransferRateLimit = rateLimit({
   windowMs: 60_000,
@@ -23,7 +33,7 @@ pensionPlansRoutes.get('/:id', authMiddleware, pensionPlansController.getPlan.bi
 pensionPlansRoutes.patch('/:id', authMiddleware, pensionPlansController.editPlan.bind(pensionPlansController))
 pensionPlansRoutes.delete('/:id', authMiddleware, pensionPlansController.deletePlan.bind(pensionPlansController))
 
-pensionPlansRoutes.post('/:id/transfer', authMiddleware, pensionTransferRateLimit, pensionPlansController.transferAssets.bind(pensionPlansController))
+pensionPlansRoutes.post('/:id/transfer', pensionTransferIpRateLimit, authMiddleware, pensionTransferRateLimit, pensionPlansController.transferAssets.bind(pensionPlansController))
 
 pensionPlansRoutes.get('/:id/movements', authMiddleware, pensionPlansController.getMovements.bind(pensionPlansController))
 pensionPlansRoutes.post('/:id/movements', authMiddleware, pensionPlansController.addMovement.bind(pensionPlansController))
