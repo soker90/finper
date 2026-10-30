@@ -9,6 +9,8 @@ type Plan = typeof pensionPlans.$inferSelect
 type NewMovement = typeof pensions.$inferInsert
 type Movement = typeof pensions.$inferSelect
 
+const UNIT_EPSILON = 1e-6
+
 export const createPensionPlansRepository = (db: DB) => ({
   findPlansByUser: (user: string): Plan[] => {
     return db.select()
@@ -116,37 +118,68 @@ export const createPensionPlansRepository = (db: DB) => ({
     destinationPlanId,
     user,
     date,
-    sourceEmployeeUnits,
-    sourceCompanyUnits,
-    destinationEmployeeUnits,
-    destinationCompanyUnits,
-    sourceValue,
-    destinationValue
+    destinationValue: customDestinationValue
   }: {
     sourcePlanId: string
     destinationPlanId: string
     user: string
     date: number
-    sourceEmployeeUnits: number
-    sourceCompanyUnits: number
-    destinationEmployeeUnits: number
-    destinationCompanyUnits: number
-    sourceValue: number
-    destinationValue: number
+    destinationValue?: number
   }): [Movement, Movement] => {
     return db.transaction((tx) => {
-      const currentSourceMovements = tx.select()
+      const sourcePlan = tx.select({ id: pensionPlans.id })
+        .from(pensionPlans)
+        .where(and(eq(pensionPlans.id, sourcePlanId), eq(pensionPlans.user, user)))
+        .get()
+      const destinationPlan = tx.select({ id: pensionPlans.id })
+        .from(pensionPlans)
+        .where(and(eq(pensionPlans.id, destinationPlanId), eq(pensionPlans.user, user)))
+        .get()
+
+      if (!sourcePlan || !destinationPlan) {
+        throw Boom.notFound(ERROR_MESSAGE.PENSION_PLAN.NOT_FOUND).output
+      }
+
+      const sourceMovements = tx.select()
         .from(pensions)
         .where(and(eq(pensions.planId, sourcePlanId), eq(pensions.user, user)))
+        .orderBy(desc(pensions.date))
         .all()
-      const currentSourceUnits = currentSourceMovements.reduce(
-        (total, movement) => total + movement.employeeUnits + movement.companyUnits,
-        0
-      )
+      const destinationMovements = tx.select()
+        .from(pensions)
+        .where(and(eq(pensions.planId, destinationPlanId), eq(pensions.user, user)))
+        .orderBy(desc(pensions.date))
+        .all()
 
-      if (currentSourceUnits <= 0 || currentSourceUnits < (sourceEmployeeUnits + sourceCompanyUnits) - 1e-6) {
+      const sourceLatest = sourceMovements[0]
+      const destinationLatest = destinationMovements[0]
+      const effectiveDestinationValue = customDestinationValue ?? destinationLatest?.value
+
+      if (!sourceLatest || sourceLatest.value <= 0 || !effectiveDestinationValue || effectiveDestinationValue <= 0) {
+        throw Boom.badData(ERROR_MESSAGE.PENSION_PLAN.TRANSFER_REQUIRES_VALUATION).output
+      }
+
+      const sumUnits = (movements: Movement[], key: 'employeeUnits' | 'companyUnits') =>
+        movements.reduce((total, movement) => total + movement[key], 0)
+
+      const rawEmployeeUnits = sumUnits(sourceMovements, 'employeeUnits')
+      const rawCompanyUnits = sumUnits(sourceMovements, 'companyUnits')
+      const sourceEmployeeUnits = Math.abs(rawEmployeeUnits) <= UNIT_EPSILON ? 0 : rawEmployeeUnits
+      const sourceCompanyUnits = Math.abs(rawCompanyUnits) <= UNIT_EPSILON ? 0 : rawCompanyUnits
+      const sourceUnits = sourceEmployeeUnits + sourceCompanyUnits
+
+      if (
+        sourceUnits <= UNIT_EPSILON ||
+        sourceEmployeeUnits < 0 ||
+        sourceCompanyUnits < 0
+      ) {
         throw Boom.badData(ERROR_MESSAGE.PENSION_PLAN.TRANSFER_INVALID_ASSETS).output
       }
+
+      // Transfer value, not units: the destination NAV can differ from the source NAV.
+      const sourceValue = sourceUnits * sourceLatest.value
+      const destinationUnits = sourceValue / effectiveDestinationValue
+      const employeeShare = sourceEmployeeUnits / sourceUnits
 
       const sourceMovement = tx.insert(pensions).values({
         id: generateId(),
@@ -156,7 +189,7 @@ export const createPensionPlansRepository = (db: DB) => ({
         employeeUnits: -sourceEmployeeUnits,
         companyAmount: 0,
         companyUnits: -sourceCompanyUnits,
-        value: sourceValue,
+        value: sourceLatest.value,
         user
       }).returning().get()
 
@@ -165,10 +198,10 @@ export const createPensionPlansRepository = (db: DB) => ({
         planId: destinationPlanId,
         date,
         employeeAmount: 0,
-        employeeUnits: destinationEmployeeUnits,
+        employeeUnits: destinationUnits * employeeShare,
         companyAmount: 0,
-        companyUnits: destinationCompanyUnits,
-        value: destinationValue,
+        companyUnits: destinationUnits * (1 - employeeShare),
+        value: effectiveDestinationValue,
         user
       }).returning().get()
 
