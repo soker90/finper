@@ -239,6 +239,8 @@ describe('Pension Plans Routes', () => {
       expect(destinationDetail.body.units).toBe(215)
       expect(destinationDetail.body.total).toBe(4300)
       expect(destinationDetail.body.amount).toBe(4300)
+      expect(sqliteDb.select().from(pensions).where(eq(pensions.planId, source.body.id)).all()).toHaveLength(0)
+      expect(sqliteDb.select().from(pensions).where(eq(pensions.planId, destination.body.id)).all()).toHaveLength(2)
     })
   })
 
