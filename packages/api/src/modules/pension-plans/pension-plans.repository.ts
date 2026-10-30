@@ -164,13 +164,12 @@ export const createPensionPlansRepository = (db: DB) => ({
       }
 
       if (
-        !sourceLatest ||
         !Number.isFinite(destinationUnits) ||
         destinationUnits <= 0 ||
         !Number.isFinite(destinationValue) ||
         destinationValue <= 0
       ) {
-        throw Boom.badData(ERROR_MESSAGE.PENSION_PLAN.TRANSFER_REQUIRES_VALUATION).output
+        throw Boom.badData(ERROR_MESSAGE.PENSION_PLAN.TRANSFER_INVALID_ASSETS).output
       }
 
       const sumUnits = (movements: Movement[], key: 'employeeUnits' | 'companyUnits' | 'employeeAmount' | 'companyAmount') =>
@@ -199,8 +198,8 @@ export const createPensionPlansRepository = (db: DB) => ({
       const employeeShare = sourceEmployeeUnits / sourceUnits
 
       // Consolidate the source history into one destination movement.
-      // The contribution totals remain attributed to employee/company, while
-      // the source plan is left empty and the destination units use its own NAV.
+      // Keep contribution totals attributed to employee/company and leave
+      // the source plan empty after recording the supplied destination units/value.
       const destinationMovement = tx.insert(pensions).values({
         id: generateId(),
         planId: destinationPlanId,
