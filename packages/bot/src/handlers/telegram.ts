@@ -90,7 +90,7 @@ export async function telegramWebhookHandler (c: Context<{ Bindings: Env }>): Pr
       }
 
       if (text.startsWith('/setuseradmin')) {
-        const parts = text.split(/\\s+/)
+        const parts = text.split(/\s+/)
         const targetId = parseTelegramId(parts[1])
         const accountAdminId = parseTelegramId(parts[2])
         if (targetId === null || accountAdminId === null || targetId === accountAdminId) {
@@ -301,7 +301,7 @@ async function processTicketPhoto (
       adminLines.push(`📅 Fecha: ${extraction.date ? formatDate(extraction.date) : 'No detectada'}`)
       adminLines.push(`💶 Total: ${extraction.amount != null ? `${extraction.amount.toFixed(2)} €` : 'No detectado'}`)
       adminLines.push(`💳 Pago: ${extraction.payment_method ?? 'No detectado'}`)
-      await sendTelegramMessage(notificationAdminId, adminLines.join('\n'), env.TELEGRAM_BOT_TOKEN)
+      await sendAdminNotification(notificationAdminId, adminLines.join('\n'), env.TELEGRAM_BOT_TOKEN)
     }
   } catch (err) {
     console.error('Error processing ticket:', err)
@@ -310,6 +310,33 @@ async function processTicketPhoto (
       '❌ Error al procesar el ticket. Inténtalo de nuevo.',
       env.TELEGRAM_BOT_TOKEN
     )
+  }
+}
+
+
+function parseTelegramId (value: string | undefined): number | null {
+  if (!value || !/^\d+$/.test(value)) return null
+  const id = Number(value)
+  return Number.isSafeInteger(id) && id > 0 ? id : null
+}
+
+async function resolveNotificationAdmin (env: Env, userId: number, isAdmin: boolean): Promise<number | null> {
+  if (isAdmin) return null
+  try {
+    const user = await getAllowedUser(env.DB, userId)
+    const adminId = user?.notification_admin_id
+    return adminId != null && adminId !== userId ? adminId : null
+  } catch (err) {
+    console.error('Could not resolve ticket notification admin:', err)
+    return null
+  }
+}
+
+async function sendAdminNotification (adminId: number, message: string, token: string): Promise<void> {
+  try {
+    await sendTelegramMessage(adminId, message, token)
+  } catch (err) {
+    console.error('Could not send ticket notification to account admin:', err)
   }
 }
 
