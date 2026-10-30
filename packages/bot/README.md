@@ -28,7 +28,7 @@ Los usuarios no autorizados son ignorados completamente — el bot no responde n
 
 | Comando | Descripción |
 |---|---|
-| `/adduser <id_telegram> <usuario_finper> [id_admin_cuenta]` | Autoriza al usuario y asigna el administrador que recibirá sus avisos |
+| `/adduser <id_telegram> <usuario_finper>` | Autoriza al usuario; el primero vinculado será administrador de esa cuenta |
 | `/setuseradmin <id_usuario> <id_admin_cuenta>` | Cambia el administrador de avisos de un usuario existente |
 | `/removeuser <id>` | Revoca el acceso de un usuario |
 | `/listusers` | Lista todos los usuarios con acceso |
