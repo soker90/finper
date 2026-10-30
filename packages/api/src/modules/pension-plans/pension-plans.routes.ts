@@ -1,5 +1,5 @@
 import { Router } from 'express'
-import { rateLimit } from 'express-rate-limit'
+import rateLimit from 'express-rate-limit'
 import authMiddleware from '../../middlewares/auth.middleware'
 import { SQLiteRateLimitStore } from '../../middlewares/pension-transfer-rate-limit.middleware'
 import { pensionPlansController } from './pension-plans.controller'
