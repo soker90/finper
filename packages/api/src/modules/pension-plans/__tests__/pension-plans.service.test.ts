@@ -306,13 +306,13 @@ describe('PensionPlansService', () => {
       user: username
     })
 
-    const error = captureThrown(() => service.transferAssets({
+    service.transferAssets({
       sourcePlanId: source.id,
       destinationPlanId: destination.id,
       destinationUnits: 10,
       destinationValue: 10,
       user: username
-    }))
+    })
 
     expect(service.getPlanById(source.id, username).units).toBe(0)
     expect(service.getPlanById(destination.id, username).units).toBe(10)
