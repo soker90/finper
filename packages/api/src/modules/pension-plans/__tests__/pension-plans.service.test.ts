@@ -103,6 +103,8 @@ describe('PensionPlansService', () => {
     expect(destinationAggregate.companyAmount).toBe(500)
 
     expect(summary.total).toBe(1400)
+    expect(repository.findMovements(source.id, username)).toHaveLength(0)
+    expect(repository.findMovements(destination.id, username)).toHaveLength(2)
   })
 
   it('converts source units using the destination unit value and preserves employee/company proportions', () => {
@@ -151,6 +153,8 @@ describe('PensionPlansService', () => {
     expect(destinationTransfer.employeeAmount).toBe(3000)
     expect(destinationTransfer.companyAmount).toBe(1000)
     expect(destinationTransfer.value).toBe(20)
+    expect(repository.findMovements(source.id, username)).toHaveLength(0)
+    expect(repository.findMovements(destination.id, username)).toHaveLength(2)
   })
 
   it('reuses the last destination valuation even when that plan currently has no units', () => {
@@ -199,6 +203,8 @@ describe('PensionPlansService', () => {
     expect(destinationAggregate.total).toBe(400)
     expect(destinationAggregate.amount).toBe(400)
     expect(service.getPlanById(source.id, username).amount).toBe(0)
+    expect(repository.findMovements(source.id, username)).toHaveLength(0)
+    expect(repository.findMovements(destination.id, username)).toHaveLength(3)
   })
 
   it('rejects a transfer dated before the latest source movement', () => {
