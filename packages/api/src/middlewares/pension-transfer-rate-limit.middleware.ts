@@ -6,7 +6,6 @@ import { db } from '../db'
 
 const { apiRateLimits } = schema
 const WINDOW_MS = 60_000
-const MAX_REQUESTS = 10
 
 /**
  * SQLite-backed store keeps the transfer quota consistent across API
@@ -65,4 +64,3 @@ export class SQLiteRateLimitStore implements Store {
     db.delete(apiRateLimits).run()
   }
 }
-
