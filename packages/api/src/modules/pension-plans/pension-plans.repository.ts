@@ -118,13 +118,15 @@ export const createPensionPlansRepository = (db: DB) => ({
     destinationPlanId,
     user,
     date,
-    destinationValue: customDestinationValue
+    destinationUnits,
+    destinationValue
   }: {
     sourcePlanId: string
     destinationPlanId: string
     user: string
     date: number
-    destinationValue?: number
+    destinationUnits: number
+    destinationValue: number
   }): Movement => {
     return db.transaction((tx) => {
       const sourcePlan = tx.select({ id: pensionPlans.id })
@@ -153,7 +155,6 @@ export const createPensionPlansRepository = (db: DB) => ({
 
       const sourceLatest = sourceMovements[0]
       const destinationLatest = destinationMovements[0]
-      const effectiveDestinationValue = customDestinationValue ?? destinationLatest?.value
 
       if (
         (sourceLatest && date < sourceLatest.date) ||
@@ -164,11 +165,10 @@ export const createPensionPlansRepository = (db: DB) => ({
 
       if (
         !sourceLatest ||
-        !Number.isFinite(sourceLatest.value) ||
-        sourceLatest.value <= 0 ||
-        effectiveDestinationValue === undefined ||
-        !Number.isFinite(effectiveDestinationValue) ||
-        effectiveDestinationValue <= 0
+        !Number.isFinite(destinationUnits) ||
+        destinationUnits <= 0 ||
+        !Number.isFinite(destinationValue) ||
+        destinationValue <= 0
       ) {
         throw Boom.badData(ERROR_MESSAGE.PENSION_PLAN.TRANSFER_REQUIRES_VALUATION).output
       }
@@ -195,13 +195,7 @@ export const createPensionPlansRepository = (db: DB) => ({
         throw Boom.badData(ERROR_MESSAGE.PENSION_PLAN.TRANSFER_INVALID_ASSETS).output
       }
 
-      // Transfer value, not units: the destination NAV can differ from the source NAV.
-      const sourceValue = sourceUnits * sourceLatest.value
-      const destinationUnits = sourceValue / effectiveDestinationValue
-      if (!Number.isFinite(sourceValue) || sourceValue <= 0 || !Number.isFinite(destinationUnits) || destinationUnits <= 0) {
-        throw Boom.badData(ERROR_MESSAGE.PENSION_PLAN.TRANSFER_INVALID_ASSETS).output
-      }
-
+      // Destination units and unit value are supplied explicitly by the user.
       const employeeShare = sourceEmployeeUnits / sourceUnits
 
       // Consolidate the source history into one destination movement.
@@ -215,7 +209,7 @@ export const createPensionPlansRepository = (db: DB) => ({
         employeeUnits: destinationUnits * employeeShare,
         companyAmount: sourceCompanyAmount,
         companyUnits: destinationUnits * (1 - employeeShare),
-        value: effectiveDestinationValue,
+        value: destinationValue,
         user
       }).returning().get()
 
