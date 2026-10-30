@@ -143,6 +143,52 @@ describe('PensionPlansService', () => {
     expect(destinationTransfer.value).toBe(20)
   })
 
+  it('reuses the last destination valuation even when that plan currently has no units', () => {
+    const source = repository.createPlan({ name: 'Origen', color: '#4CAF50', user: username })
+    const destination = repository.createPlan({ name: 'Destino vacío', color: '#2196F3', user: username })
+
+    repository.createMovement({
+      planId: source.id,
+      date: 1,
+      employeeAmount: 300,
+      employeeUnits: 30,
+      companyAmount: 100,
+      companyUnits: 10,
+      value: 10,
+      user: username
+    })
+    repository.createMovement({
+      planId: destination.id,
+      date: 1,
+      employeeAmount: 100,
+      employeeUnits: 10,
+      companyAmount: 0,
+      companyUnits: 0,
+      value: 20,
+      user: username
+    })
+    repository.createMovement({
+      planId: destination.id,
+      date: 2,
+      employeeAmount: 0,
+      employeeUnits: -10,
+      companyAmount: 0,
+      companyUnits: 0,
+      value: 20,
+      user: username
+    })
+
+    service.transferAssets({
+      sourcePlanId: source.id,
+      destinationPlanId: destination.id,
+      user: username
+    })
+
+    const destinationAggregate = service.getPlanById(destination.id, username)
+    expect(destinationAggregate.units).toBe(20)
+    expect(destinationAggregate.total).toBe(400)
+  })
+
   it('rejects a transfer when either plan has no current valuation and none is provided', () => {
     const source = repository.createPlan({ name: 'Origen', color: '#4CAF50', user: username })
     const destination = repository.createPlan({ name: 'Destino', color: '#2196F3', user: username })
