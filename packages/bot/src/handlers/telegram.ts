@@ -76,7 +76,7 @@ export async function telegramWebhookHandler (c: Context<{ Bindings: Env }>): Pr
         const targetId = parseTelegramId(parts[1])
         const finperUsername = parts[2]
         const accountAdminId = parts[3] === undefined ? adminUserId : parseTelegramId(parts[3])
-        if (targetId === null || !finperUsername || accountAdminId === null || accountAdminId === targetId) {
+        if (targetId === null || !finperUsername || accountAdminId === null || (accountAdminId === targetId && targetId !== adminUserId)) {
           await sendTelegramMessage(chatId, '⚠️ Uso: /adduser <id_de_telegram> <usuario_finper> [id_admin_cuenta]\n\nSi omites id_admin_cuenta, se usará el administrador principal del bot.', c.env.TELEGRAM_BOT_TOKEN)
           return c.json({ ok: true })
         }
@@ -93,7 +93,7 @@ export async function telegramWebhookHandler (c: Context<{ Bindings: Env }>): Pr
         const parts = text.split(/\s+/)
         const targetId = parseTelegramId(parts[1])
         const accountAdminId = parseTelegramId(parts[2])
-        if (targetId === null || accountAdminId === null || targetId === accountAdminId) {
+        if (targetId === null || accountAdminId === null || (targetId === accountAdminId && targetId !== adminUserId)) {
           await sendTelegramMessage(chatId, '⚠️ Uso: /setuseradmin <id_usuario> <id_admin_cuenta>. El usuario y su administrador deben ser distintos.', c.env.TELEGRAM_BOT_TOKEN)
           return c.json({ ok: true })
         }
@@ -106,8 +106,8 @@ export async function telegramWebhookHandler (c: Context<{ Bindings: Env }>): Pr
 
       if (text.startsWith('/removeuser')) {
         const parts = text.split(/\s+/)
-        const targetId = parts[1] ? parseInt(parts[1], 10) : NaN
-        if (isNaN(targetId)) {
+        const targetId = parseTelegramId(parts[1])
+        if (targetId === null) {
           await sendTelegramMessage(chatId, '⚠️ Uso: /removeuser <id_de_telegram>', c.env.TELEGRAM_BOT_TOKEN)
           return c.json({ ok: true })
         }
