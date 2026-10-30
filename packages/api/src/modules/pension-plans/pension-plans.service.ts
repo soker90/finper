@@ -144,7 +144,7 @@ export class PensionPlansService {
       throw Boom.badData(ERROR_MESSAGE.PENSION_PLAN.TRANSFER_SAME_PLAN).output
     }
 
-    const [sourceMovement, destinationMovement] = this.repository.transferAssets({
+    const destinationMovement = this.repository.transferAssets({
       sourcePlanId,
       destinationPlanId,
       destinationValue,
@@ -152,10 +152,7 @@ export class PensionPlansService {
       date
     })
 
-    return {
-      source: serializePensionMovement(sourceMovement),
-      destination: serializePensionMovement(destinationMovement)
-    }
+    return serializePensionMovement(destinationMovement)
   }
 
   /** Resumen agregado de TODOS los planes de un usuario, usado por el dashboard. */
