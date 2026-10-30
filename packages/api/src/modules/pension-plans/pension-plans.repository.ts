@@ -178,6 +178,8 @@ export const createPensionPlansRepository = (db: DB) => ({
 
       const rawEmployeeUnits = sumUnits(sourceMovements, 'employeeUnits')
       const rawCompanyUnits = sumUnits(sourceMovements, 'companyUnits')
+      const sourceEmployeeAmount = sumUnits(sourceMovements, 'employeeAmount')
+      const sourceCompanyAmount = sumUnits(sourceMovements, 'companyAmount')
       const sourceEmployeeUnits = Math.abs(rawEmployeeUnits) <= UNIT_EPSILON ? 0 : rawEmployeeUnits
       const sourceCompanyUnits = Math.abs(rawCompanyUnits) <= UNIT_EPSILON ? 0 : rawCompanyUnits
       const sourceUnits = sourceEmployeeUnits + sourceCompanyUnits
@@ -206,9 +208,9 @@ export const createPensionPlansRepository = (db: DB) => ({
         id: generateId(),
         planId: sourcePlanId,
         date,
-        employeeAmount: 0,
+        employeeAmount: -sourceEmployeeAmount,
         employeeUnits: -sourceEmployeeUnits,
-        companyAmount: 0,
+        companyAmount: -sourceCompanyAmount,
         companyUnits: -sourceCompanyUnits,
         value: sourceLatest.value,
         user
@@ -218,9 +220,9 @@ export const createPensionPlansRepository = (db: DB) => ({
         id: generateId(),
         planId: destinationPlanId,
         date,
-        employeeAmount: 0,
+        employeeAmount: sourceEmployeeAmount,
         employeeUnits: destinationUnits * employeeShare,
-        companyAmount: 0,
+        companyAmount: sourceCompanyAmount,
         companyUnits: destinationUnits * (1 - employeeShare),
         value: effectiveDestinationValue,
         user
