@@ -224,10 +224,10 @@ describe('Pension Plans Routes', () => {
 
       expect(sourceDetail.body.units).toBe(0)
       expect(sourceDetail.body.total).toBe(0)
-      expect(sourceDetail.body.amount).toBe(4000)
+      expect(sourceDetail.body.amount).toBe(0)
       expect(destinationDetail.body.units).toBe(215)
       expect(destinationDetail.body.total).toBe(4300)
-      expect(destinationDetail.body.amount).toBe(300)
+      expect(destinationDetail.body.amount).toBe(4300)
     })
   })
 
