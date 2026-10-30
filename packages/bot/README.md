@@ -29,15 +29,14 @@ Los usuarios no autorizados son ignorados completamente — el bot no responde n
 | Comando | Descripción |
 |---|---|
 | `/adduser <id_telegram> <usuario_finper>` | Autoriza al usuario; el primero vinculado será administrador de esa cuenta |
-| `/setuseradmin <id_usuario> <id_admin_cuenta>` | Cambia el administrador de avisos de un usuario existente |
 | `/removeuser <id>` | Revoca el acceso de un usuario |
 | `/listusers` | Lista todos los usuarios con acceso |
 
 Para obtener el Telegram user ID de alguien, pídele que escriba a [@userinfobot](https://t.me/userinfobot).
 
-El administrador que autorizó al usuario se conserva en `added_by` como dato de auditoría. El destinatario de los avisos se guarda por separado en `notification_admin_id`. Al dar de alta, puedes indicar el destinatario con `/adduser <id_telegram> <usuario_finper> <id_admin_cuenta>`; si se omite, se usa el administrador principal del bot. Para cambiarlo después, utiliza `/setuseradmin <id_usuario> <id_admin_cuenta>`. `/listusers` muestra el destinatario asignado.
+`added_by` conserva quién autorizó el acceso como dato de auditoría. El administrador de cada cuenta se determina automáticamente: es el primer usuario de Telegram registrado para ese `usuario_finper`, según `added_at` (con el ID de Telegram como desempate). Los siguientes usuarios vinculados al mismo `usuario_finper` envían sus avisos de tickets a ese primer usuario. No se puede elegir otro administrador manualmente.
 
-Los usuarios que ya existían antes de esta migración conservan su acceso, pero quedan sin destinatario hasta asignarlo explícitamente con `/setuseradmin`. Esto evita enviar avisos de varias cuentas al administrador equivocado. Si el destinatario no está asignado o falla su consulta, el ticket se guarda igualmente y no se envía ningún aviso global.
+Los usuarios ya registrados conservan su acceso. En sus casos, el administrador se calcula a partir de las fechas de alta existentes, sin migración ni cambios de datos. `/listusers` indica quién es el administrador de cada cuenta. Si un usuario no tiene un `usuario_finper` asociado, no se envía ningún aviso.
 
 ## Setup inicial
 
