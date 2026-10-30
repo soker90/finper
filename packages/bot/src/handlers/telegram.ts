@@ -230,7 +230,7 @@ async function processTicketPhoto (
   try {
     // Resolve the recipient independently from ticket processing. Failure to
     // resolve it must never cause a saved ticket to be reported as failed.
-    const notificationAdminId = await resolveNotificationAdmin(env, userId, isAdmin)
+    const notificationAdminId = await resolveNotificationAdmin(env, userId)
 
     // 1. Download photo from Telegram
     const { buffer } = await downloadTelegramPhoto(
