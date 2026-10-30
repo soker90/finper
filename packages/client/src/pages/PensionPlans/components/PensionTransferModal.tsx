@@ -38,7 +38,6 @@ const PensionTransferModal = ({ sourcePlan, plans, show, onClose }: Props) => {
   const destinationOptions = plans.filter(plan => plan.id !== sourcePlan.id)
   const selectedDestinationId = useWatch({ control, name: 'destinationPlanId' })
   const selectedDestinationPlan = plans.find(plan => plan.id === selectedDestinationId)
-  const isDestinationWithoutValuation = selectedDestinationPlan && (selectedDestinationPlan.units ?? 0) <= 0
   const currentNav = selectedDestinationPlan && selectedDestinationPlan.units > 0
     ? selectedDestinationPlan.total / selectedDestinationPlan.units
     : null
@@ -102,11 +101,11 @@ const PensionTransferModal = ({ sourcePlan, plans, show, onClose }: Props) => {
       <InputForm
         size={6}
         id='destinationValue'
-        label={isDestinationWithoutValuation ? 'Valor unidad destino (requerido)' : 'Valor unidad destino (opcional)'}
-        placeholder={currentNav ? currentNav.toFixed(2) : '0'}
+        label='Valor unidad destino (opcional)'
+        placeholder={currentNav ? currentNav.toFixed(2) : 'Introduce un valor si no hay valoración'}
         error={!!errors.destinationValue}
         {...register('destinationValue', {
-          required: Boolean(isDestinationWithoutValuation),
+          required: false,
           validate: (val) => {
             if (!val) return true
             const num = Number(val)
@@ -118,7 +117,7 @@ const PensionTransferModal = ({ sourcePlan, plans, show, onClose }: Props) => {
 
       <Box sx={{ gridColumn: '1 / -1', width: '100%', mt: 1 }}>
         <Alert severity='info'>
-          Se transferirá el valor actual completo del plan ({sourcePlan.total.toFixed(2)} €). El histórico de aportaciones se conservará en el plan de origen.
+          Se transferirá el valor actual completo del plan ({sourcePlan.total.toFixed(2)} €). El valor por unidad del destino se tomará de su última valoración; si no tiene ninguna, indica aquí el valor actual. El histórico de aportaciones se conservará en el plan de origen.
         </Alert>
       </Box>
 
