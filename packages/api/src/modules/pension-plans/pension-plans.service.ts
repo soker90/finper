@@ -130,13 +130,15 @@ export class PensionPlansService {
   public transferAssets ({
     sourcePlanId,
     destinationPlanId,
+    destinationUnits,
     destinationValue,
     date = Date.now(),
     user
   }: {
     sourcePlanId: string
     destinationPlanId: string
-    destinationValue?: number
+    destinationUnits: number
+    destinationValue: number
     date?: number
     user: string
   }) {
@@ -147,6 +149,7 @@ export class PensionPlansService {
     const destinationMovement = this.repository.transferAssets({
       sourcePlanId,
       destinationPlanId,
+      destinationUnits,
       destinationValue,
       user,
       date
