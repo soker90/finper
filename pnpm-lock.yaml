@@ -12695,6 +12695,7 @@ snapshots:
       jest-util: 30.5.1
 
   express-rate-limit@8.7.1(express@5.2.1):
+    # Direct API dependency; peer resolution is pinned to the workspace Express version.
     dependencies:
       debug: 4.4.3
       express: 5.2.1
