@@ -189,6 +189,80 @@ describe('PensionPlansService', () => {
     expect(destinationAggregate.total).toBe(400)
   })
 
+  it('rejects a transfer dated before the latest source movement', () => {
+    const source = repository.createPlan({ name: 'Origen', color: '#4CAF50', user: username })
+    const destination = repository.createPlan({ name: 'Destino', color: '#2196F3', user: username })
+
+    repository.createMovement({
+      planId: source.id,
+      date: 2000,
+      employeeAmount: 1000,
+      employeeUnits: 100,
+      companyAmount: 0,
+      companyUnits: 0,
+      value: 10,
+      user: username
+    })
+    repository.createMovement({
+      planId: destination.id,
+      date: 1000,
+      employeeAmount: 0,
+      employeeUnits: 0,
+      companyAmount: 0,
+      companyUnits: 0,
+      value: 20,
+      user: username
+    })
+
+    const error = captureThrown(() => service.transferAssets({
+      sourcePlanId: source.id,
+      destinationPlanId: destination.id,
+      date: 1500,
+      user: username
+    }))
+
+    expect(error.payload.message).toBe('La fecha del traspaso no puede ser anterior al último movimiento de los planes')
+    expect(service.getPlanById(source.id, username).units).toBe(100)
+    expect(service.getPlanById(destination.id, username).units).toBe(0)
+  })
+
+  it('rejects a transfer dated before the latest destination valuation', () => {
+    const source = repository.createPlan({ name: 'Origen', color: '#4CAF50', user: username })
+    const destination = repository.createPlan({ name: 'Destino', color: '#2196F3', user: username })
+
+    repository.createMovement({
+      planId: source.id,
+      date: 1000,
+      employeeAmount: 1000,
+      employeeUnits: 100,
+      companyAmount: 0,
+      companyUnits: 0,
+      value: 10,
+      user: username
+    })
+    repository.createMovement({
+      planId: destination.id,
+      date: 2000,
+      employeeAmount: 0,
+      employeeUnits: 0,
+      companyAmount: 0,
+      companyUnits: 0,
+      value: 20,
+      user: username
+    })
+
+    const error = captureThrown(() => service.transferAssets({
+      sourcePlanId: source.id,
+      destinationPlanId: destination.id,
+      date: 1500,
+      user: username
+    }))
+
+    expect(error.payload.message).toBe('La fecha del traspaso no puede ser anterior al último movimiento de los planes')
+    expect(service.getPlanById(source.id, username).units).toBe(100)
+    expect(service.getPlanById(destination.id, username).units).toBe(0)
+  })
+
   it('rejects a transfer when either plan has no current valuation and none is provided', () => {
     const source = repository.createPlan({ name: 'Origen', color: '#4CAF50', user: username })
     const destination = repository.createPlan({ name: 'Destino', color: '#2196F3', user: username })
