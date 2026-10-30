@@ -39,7 +39,7 @@ describe('PensionPlansService', () => {
     closeTestDb(db)
   })
 
-  it('moves contribution balances in one destination entry while retaining the source ledger', () => {
+  it('consolidates source history into one destination movement and clears the source ledger', () => {
     const source = repository.createPlan({ name: 'Origen', color: '#4CAF50', user: username })
     const destination = repository.createPlan({ name: 'Destino', color: '#2196F3', user: username })
 
@@ -90,6 +90,12 @@ describe('PensionPlansService', () => {
     expect(sourceAggregate.total).toBe(0)
     expect(sourceAggregate.employeeAmount).toBe(0)
     expect(sourceAggregate.companyAmount).toBe(0)
+    expect(repository.findMovements(source.id, username)).toHaveLength(0)
+
+    const destinationMovements = repository.findMovements(destination.id, username)
+    expect(destinationMovements).toHaveLength(2)
+    expect(destinationMovements[0].employeeAmount).toBe(700)
+    expect(destinationMovements[0].companyAmount).toBe(400)
 
     expect(destinationAggregate.units).toBe(70)
     expect(destinationAggregate.total).toBe(1400)
