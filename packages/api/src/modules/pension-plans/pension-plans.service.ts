@@ -131,7 +131,6 @@ export class PensionPlansService {
     sourcePlanId,
     destinationPlanId,
     destinationUnits,
-    destinationUnits,
     destinationValue,
     date = Date.now(),
     user
