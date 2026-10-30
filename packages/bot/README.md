@@ -28,13 +28,13 @@ Los usuarios no autorizados son ignorados completamente — el bot no responde n
 
 | Comando | Descripción |
 |---|---|
-| `/adduser <id_telegram> <usuario_finper> [id_admin_cuenta]` | Permite enviar tickets y asigna el administrador que recibirá sus avisos |
+| `/adduser <id_telegram> <usuario_finper> [id_admin_cuenta]` | Autoriza al usuario y asigna el administrador que recibirá sus avisos |\n| `/setuseradmin <id_usuario> <id_admin_cuenta>` | Cambia el administrador de avisos de un usuario existente |
 | `/removeuser <id>` | Revoca el acceso de un usuario |
 | `/listusers` | Lista todos los usuarios con acceso |
 
 Para obtener el Telegram user ID de alguien, pídele que escriba a [@userinfobot](https://t.me/userinfobot).
 
-Cada usuario tiene asignado un administrador de cuenta mediante `added_by`. Puedes indicarlo al dar de alta con `/adduser <id_telegram> <usuario_finper> <id_admin_cuenta>`; si se omite, se usa el administrador principal del bot. Los avisos de tickets (foto o texto) se envían únicamente a ese administrador. Si no se puede resolver el destinatario, no se envía ningún aviso global.
+El administrador que autorizó al usuario se conserva en `added_by` como dato de auditoría. El destinatario de los avisos se guarda por separado en `notification_admin_id`. Al dar de alta, puedes indicar el destinatario con `/adduser <id_telegram> <usuario_finper> <id_admin_cuenta>`; si se omite, se usa el administrador principal del bot. Para cambiarlo después, utiliza `/setuseradmin <id_usuario> <id_admin_cuenta>`. `/listusers` muestra el destinatario asignado.\n\nLos usuarios que ya existían antes de esta migración conservan su acceso, pero quedan sin destinatario hasta asignarlo explícitamente con `/setuseradmin`. Esto evita enviar avisos de varias cuentas al administrador equivocado. Si el destinatario no está asignado o falla su consulta, el ticket se guarda igualmente y no se envía ningún aviso global.
 
 ## Setup inicial
 
