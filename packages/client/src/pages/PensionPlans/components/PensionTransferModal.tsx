@@ -105,7 +105,6 @@ const PensionTransferModal = ({ sourcePlan, plans, show, onClose }: Props) => {
         placeholder={currentNav ? currentNav.toFixed(2) : 'Introduce un valor si no hay valoración'}
         error={!!errors.destinationValue}
         {...register('destinationValue', {
-          required: false,
           validate: (val) => {
             if (!val) return true
             const num = Number(val)
