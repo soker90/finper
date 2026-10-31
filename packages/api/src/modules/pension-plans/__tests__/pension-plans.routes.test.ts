@@ -21,6 +21,7 @@ describe('Pension Plans Routes', () => {
   afterEach(() => {
     sqliteDb.delete(pensions).where(eq(pensions.user, user)).run()
     sqliteDb.delete(pensionPlans).where(eq(pensionPlans.user, user)).run()
+    sqliteDb.delete(schema.apiRateLimits).run()
   })
 
   describe('CRUD /api/pension-plans', () => {
@@ -123,6 +124,123 @@ describe('Pension Plans Routes', () => {
         .expect(404)
 
       sqliteDb.delete(pensionPlans).where(eq(pensionPlans.user, otherUser)).run()
+    })
+  })
+
+  describe('Asset transfers', () => {
+    test('POST /:id/transfer requires authentication', async () => {
+      const source = await supertest(server.app)
+        .post(path)
+        .auth(token, { type: 'bearer' })
+        .send({ name: 'Origen', color: '#4CAF50' })
+
+      await supertest(server.app)
+        .post(`${path}/${source.body.id}/transfer`)
+        .send({ destinationPlanId: source.body.id })
+        .expect(401)
+    })
+
+    test('rate limits repeated transfer requests for the authenticated user', async () => {
+      const source = await supertest(server.app)
+        .post(path)
+        .auth(token, { type: 'bearer' })
+        .send({ name: 'Origen', color: '#4CAF50' })
+      const destination = await supertest(server.app)
+        .post(path)
+        .auth(token, { type: 'bearer' })
+        .send({ name: 'Destino', color: '#2196F3' })
+
+      for (let request = 0; request < 10; request++) {
+        await supertest(server.app)
+          .post(`${path}/${source.body.id}/transfer`)
+          .auth(token, { type: 'bearer' })
+          .send({ destinationPlanId: destination.body.id })
+          .expect(422)
+      }
+
+      await supertest(server.app)
+        .post(`${path}/${source.body.id}/transfer`)
+        .auth(token, { type: 'bearer' })
+        .send({ destinationPlanId: destination.body.id })
+        .expect(429)
+    })
+
+    test('records the destination units and unit value supplied by the user', async () => {
+      const source = await supertest(server.app)
+        .post(path)
+        .auth(token, { type: 'bearer' })
+        .send({ name: 'Origen', color: '#4CAF50' })
+      const destination = await supertest(server.app)
+        .post(path)
+        .auth(token, { type: 'bearer' })
+        .send({ name: 'Destino', color: '#2196F3' })
+
+      await supertest(server.app)
+        .post(`${path}/${source.body.id}/movements`)
+        .auth(token, { type: 'bearer' })
+        .send({
+          date: 1000,
+          employeeAmount: 3000,
+          employeeUnits: 300,
+          companyAmount: 1000,
+          companyUnits: 100,
+          value: 10
+        })
+        .expect(201)
+
+      await supertest(server.app)
+        .post(`${path}/${destination.body.id}/movements`)
+        .auth(token, { type: 'bearer' })
+        .send({
+          date: 1000,
+          employeeAmount: 200,
+          employeeUnits: 10,
+          companyAmount: 100,
+          companyUnits: 5,
+          value: 20
+        })
+        .expect(201)
+
+      const transfer = await supertest(server.app)
+        .post(`${path}/${source.body.id}/transfer`)
+        .auth(token, { type: 'bearer' })
+        .send({ destinationPlanId: destination.body.id, destinationUnits: 200, destinationValue: 20 })
+        .expect(200)
+
+      expect(transfer.body.employeeUnits).toBe(150)
+      expect(transfer.body.companyUnits).toBe(50)
+      expect(transfer.body.employeeAmount).toBe(3000)
+      expect(transfer.body.companyAmount).toBe(1000)
+      expect(transfer.body.value).toBe(20)
+
+      const sourceDetail = await supertest(server.app)
+        .get(`${path}/${source.body.id}`)
+        .auth(token, { type: 'bearer' })
+        .expect(200)
+      const destinationDetail = await supertest(server.app)
+        .get(`${path}/${destination.body.id}`)
+        .auth(token, { type: 'bearer' })
+        .expect(200)
+
+      expect(sourceDetail.body.units).toBe(0)
+      expect(sourceDetail.body.total).toBe(0)
+      expect(sourceDetail.body.amount).toBe(0)
+      const sourceMovements = await supertest(server.app)
+        .get(`${path}/${source.body.id}/movements`)
+        .auth(token, { type: 'bearer' })
+        .expect(200)
+      expect(sourceMovements.body).toHaveLength(0)
+
+      const destinationMovements = await supertest(server.app)
+        .get(`${path}/${destination.body.id}/movements`)
+        .auth(token, { type: 'bearer' })
+        .expect(200)
+      expect(destinationMovements.body).toHaveLength(2)
+      expect(destinationDetail.body.units).toBe(215)
+      expect(destinationDetail.body.total).toBe(4300)
+      expect(destinationDetail.body.amount).toBe(4300)
+      expect(sqliteDb.select().from(pensions).where(eq(pensions.planId, source.body.id)).all()).toHaveLength(0)
+      expect(sqliteDb.select().from(pensions).where(eq(pensions.planId, destination.body.id)).all()).toHaveLength(2)
     })
   })
 

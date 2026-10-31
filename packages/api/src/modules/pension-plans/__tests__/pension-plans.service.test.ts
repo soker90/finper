@@ -1,0 +1,486 @@
+import { createTestDb, closeTestDb } from '../../../../test/helpers/db'
+import { createPensionPlansRepository } from '../pension-plans.repository'
+import { PensionPlansService } from '../pension-plans.service'
+import { schema, generateId } from '@soker90/finper-db'
+import type { DB } from '@soker90/finper-db'
+
+const { users } = schema
+
+const captureThrown = (callback: () => unknown): any => {
+  try {
+    callback()
+  } catch (error) {
+    return error
+  }
+
+  throw new Error('Expected callback to throw')
+}
+
+describe('PensionPlansService', () => {
+  let db: DB
+  let repository: ReturnType<typeof createPensionPlansRepository>
+  let service: PensionPlansService
+  const username = 'testuser'
+
+  beforeEach(() => {
+    db = createTestDb()
+    repository = createPensionPlansRepository(db)
+    service = new PensionPlansService(repository)
+
+    db.insert(users).values({
+      id: generateId(),
+      username,
+      password: 'pwd-hash',
+      createdAt: new Date()
+    }).run()
+  })
+
+  afterEach(() => {
+    closeTestDb(db)
+  })
+
+  it('consolidates source history into one destination movement and clears the source ledger', () => {
+    const source = repository.createPlan({ name: 'Origen', color: '#4CAF50', user: username })
+    const destination = repository.createPlan({ name: 'Destino', color: '#2196F3', user: username })
+
+    repository.createMovement({
+      planId: source.id,
+      date: 1,
+      employeeAmount: 600,
+      employeeUnits: 60,
+      companyAmount: 400,
+      companyUnits: 40,
+      value: 9,
+      user: username
+    })
+
+    repository.createMovement({
+      planId: source.id,
+      date: 2,
+      employeeAmount: 100,
+      employeeUnits: 10,
+      companyAmount: 0,
+      companyUnits: 0,
+      value: 10,
+      user: username
+    })
+
+    repository.createMovement({
+      planId: destination.id,
+      date: 1,
+      employeeAmount: 200,
+      employeeUnits: 10,
+      companyAmount: 100,
+      companyUnits: 5,
+      value: 20,
+      user: username
+    })
+
+    service.transferAssets({
+      sourcePlanId: source.id,
+      destinationPlanId: destination.id,
+      destinationUnits: 55,
+      destinationValue: 20,
+      user: username
+    })
+
+    const sourceAggregate = service.getPlanById(source.id, username)
+    const destinationAggregate = service.getPlanById(destination.id, username)
+    const summary = service.getAggregateSummary(username)
+
+    expect(sourceAggregate.units).toBe(0)
+    expect(sourceAggregate.total).toBe(0)
+    expect(sourceAggregate.employeeAmount).toBe(0)
+    expect(sourceAggregate.companyAmount).toBe(0)
+    expect(repository.findMovements(source.id, username)).toHaveLength(0)
+
+    const destinationMovements = repository.findMovements(destination.id, username)
+    expect(destinationMovements).toHaveLength(2)
+    expect(destinationMovements[0].employeeAmount).toBe(700)
+    expect(destinationMovements[0].companyAmount).toBe(400)
+
+    expect(destinationAggregate.units).toBe(70)
+    expect(destinationAggregate.total).toBe(1400)
+    expect(destinationAggregate.employeeAmount).toBe(900)
+    expect(destinationAggregate.companyAmount).toBe(500)
+
+    expect(summary.total).toBe(1400)
+    expect(repository.findMovements(source.id, username)).toHaveLength(0)
+    expect(repository.findMovements(destination.id, username)).toHaveLength(2)
+  })
+
+  it('records the explicitly supplied destination units and preserves employee/company proportions', () => {
+    const source = repository.createPlan({ name: 'Origen', color: '#4CAF50', user: username })
+    const destination = repository.createPlan({ name: 'Destino', color: '#2196F3', user: username })
+
+    repository.createMovement({
+      planId: source.id,
+      date: 1,
+      employeeAmount: 3000,
+      employeeUnits: 300,
+      companyAmount: 1000,
+      companyUnits: 100,
+      value: 10,
+      user: username
+    })
+    repository.createMovement({
+      planId: destination.id,
+      date: 1,
+      employeeAmount: 200,
+      employeeUnits: 10,
+      companyAmount: 100,
+      companyUnits: 5,
+      value: 20,
+      user: username
+    })
+
+    service.transferAssets({
+      sourcePlanId: source.id,
+      destinationPlanId: destination.id,
+      destinationUnits: 200,
+      destinationValue: 20,
+      user: username
+    })
+
+    const sourceAggregate = service.getPlanById(source.id, username)
+    const destinationAggregate = service.getPlanById(destination.id, username)
+    const destinationTransfer = repository.findMovements(destination.id, username)[0]
+
+    expect(sourceAggregate.units).toBe(0)
+    expect(sourceAggregate.total).toBe(0)
+    expect(sourceAggregate.employeeAmount).toBe(0)
+    expect(sourceAggregate.companyAmount).toBe(0)
+    expect(destinationAggregate.total).toBe(4300)
+    expect(destinationAggregate.units).toBe(215)
+    expect(destinationTransfer.employeeUnits).toBe(150)
+    expect(destinationTransfer.companyUnits).toBe(50)
+    expect(destinationTransfer.employeeAmount).toBe(3000)
+    expect(destinationTransfer.companyAmount).toBe(1000)
+    expect(destinationTransfer.value).toBe(20)
+    expect(repository.findMovements(source.id, username)).toHaveLength(0)
+    expect(repository.findMovements(destination.id, username)).toHaveLength(2)
+  })
+
+  it('records supplied destination values even when the destination has no current units', () => {
+    const source = repository.createPlan({ name: 'Origen', color: '#4CAF50', user: username })
+    const destination = repository.createPlan({ name: 'Destino vacío', color: '#2196F3', user: username })
+
+    repository.createMovement({
+      planId: source.id,
+      date: 1,
+      employeeAmount: 300,
+      employeeUnits: 30,
+      companyAmount: 100,
+      companyUnits: 10,
+      value: 10,
+      user: username
+    })
+    repository.createMovement({
+      planId: destination.id,
+      date: 1,
+      employeeAmount: 100,
+      employeeUnits: 10,
+      companyAmount: 0,
+      companyUnits: 0,
+      value: 20,
+      user: username
+    })
+    repository.createMovement({
+      planId: destination.id,
+      date: 2,
+      employeeAmount: 0,
+      employeeUnits: -10,
+      companyAmount: 0,
+      companyUnits: 0,
+      value: 20,
+      user: username
+    })
+
+    service.transferAssets({
+      sourcePlanId: source.id,
+      destinationPlanId: destination.id,
+      destinationUnits: 20,
+      destinationValue: 20,
+      user: username
+    })
+
+    const destinationAggregate = service.getPlanById(destination.id, username)
+    expect(destinationAggregate.units).toBe(20)
+    expect(destinationAggregate.total).toBe(400)
+    expect(destinationAggregate.amount).toBe(500)
+    expect(service.getPlanById(source.id, username).amount).toBe(0)
+    expect(repository.findMovements(source.id, username)).toHaveLength(0)
+    expect(repository.findMovements(destination.id, username)).toHaveLength(3)
+  })
+
+  it('rejects a transfer dated before the latest source movement', () => {
+    const source = repository.createPlan({ name: 'Origen', color: '#4CAF50', user: username })
+    const destination = repository.createPlan({ name: 'Destino', color: '#2196F3', user: username })
+
+    repository.createMovement({
+      planId: source.id,
+      date: 2000,
+      employeeAmount: 1000,
+      employeeUnits: 100,
+      companyAmount: 0,
+      companyUnits: 0,
+      value: 10,
+      user: username
+    })
+    repository.createMovement({
+      planId: destination.id,
+      date: 1000,
+      employeeAmount: 0,
+      employeeUnits: 0,
+      companyAmount: 0,
+      companyUnits: 0,
+      value: 20,
+      user: username
+    })
+
+    const error = captureThrown(() => service.transferAssets({
+      sourcePlanId: source.id,
+      destinationPlanId: destination.id,
+      destinationUnits: 200,
+      destinationValue: 20,
+      date: 1500,
+      user: username
+    }))
+
+    expect(error.payload.message).toBe('La fecha del traspaso no puede ser anterior al último movimiento de los planes')
+    expect(service.getPlanById(source.id, username).units).toBe(100)
+    expect(service.getPlanById(destination.id, username).units).toBe(0)
+  })
+
+  it('rejects a transfer dated before the latest destination valuation', () => {
+    const source = repository.createPlan({ name: 'Origen', color: '#4CAF50', user: username })
+    const destination = repository.createPlan({ name: 'Destino', color: '#2196F3', user: username })
+
+    repository.createMovement({
+      planId: source.id,
+      date: 1000,
+      employeeAmount: 1000,
+      employeeUnits: 100,
+      companyAmount: 0,
+      companyUnits: 0,
+      value: 10,
+      user: username
+    })
+    repository.createMovement({
+      planId: destination.id,
+      date: 2000,
+      employeeAmount: 0,
+      employeeUnits: 0,
+      companyAmount: 0,
+      companyUnits: 0,
+      value: 20,
+      user: username
+    })
+
+    const error = captureThrown(() => service.transferAssets({
+      sourcePlanId: source.id,
+      destinationPlanId: destination.id,
+      destinationUnits: 200,
+      destinationValue: 20,
+      date: 1500,
+      user: username
+    }))
+
+    expect(error.payload.message).toBe('La fecha del traspaso no puede ser anterior al último movimiento de los planes')
+    expect(service.getPlanById(source.id, username).units).toBe(100)
+    expect(service.getPlanById(destination.id, username).units).toBe(0)
+  })
+
+  it('accepts explicit destination values without a previous destination valuation', () => {
+    const source = repository.createPlan({ name: 'Origen', color: '#4CAF50', user: username })
+    const destination = repository.createPlan({ name: 'Destino', color: '#2196F3', user: username })
+
+    repository.createMovement({
+      planId: source.id,
+      date: 1,
+      employeeAmount: 100,
+      employeeUnits: 10,
+      companyAmount: 0,
+      companyUnits: 0,
+      value: 10,
+      user: username
+    })
+
+    service.transferAssets({
+      sourcePlanId: source.id,
+      destinationPlanId: destination.id,
+      destinationUnits: 10,
+      destinationValue: 10,
+      user: username
+    })
+
+    expect(service.getPlanById(source.id, username).units).toBe(0)
+    expect(service.getPlanById(destination.id, username).units).toBe(10)
+  })
+
+  it('records the exact destination units and unit value supplied for a new plan', () => {
+    const source = repository.createPlan({ name: 'Origen', color: '#4CAF50', user: username })
+    const destination = repository.createPlan({ name: 'Destino Nuevo', color: '#2196F3', user: username })
+
+    repository.createMovement({
+      planId: source.id,
+      date: 1,
+      employeeAmount: 300,
+      employeeUnits: 30,
+      companyAmount: 100,
+      companyUnits: 10,
+      value: 10,
+      user: username
+    })
+
+    const transferDate = 1700000000000
+    service.transferAssets({
+      sourcePlanId: source.id,
+      destinationPlanId: destination.id,
+      destinationUnits: 20,
+      destinationValue: 20,
+      date: transferDate,
+      user: username
+    })
+
+    const sourceAggregate = service.getPlanById(source.id, username)
+    const destinationAggregate = service.getPlanById(destination.id, username)
+
+    expect(sourceAggregate.units).toBe(0)
+    expect(sourceAggregate.total).toBe(0)
+
+    // The destination receives exactly the 20 units and 20€ unit value supplied.
+    expect(destinationAggregate.units).toBe(20)
+    expect(destinationAggregate.total).toBe(400)
+
+    const destinationMovements = repository.findMovements(destination.id, username)
+    expect(destinationMovements).toHaveLength(1)
+    expect(destinationMovements[0].date).toBe(transferDate)
+    expect(destinationMovements[0].value).toBe(20)
+    expect(destinationMovements[0].employeeUnits).toBe(15)
+    expect(destinationMovements[0].companyUnits).toBe(5)
+  })
+
+  it('rejects a transfer to the exact same plan', () => {
+    const plan = repository.createPlan({ name: 'Mismo Plan', color: '#4CAF50', user: username })
+
+    const error = captureThrown(() => service.transferAssets({
+      sourcePlanId: plan.id,
+      destinationPlanId: plan.id,
+      destinationUnits: 200,
+      destinationValue: 20,
+      user: username
+    }))
+
+    expect(error.statusCode).toBe(422)
+    expect(error.payload.message).toBe('El plan de origen y destino deben ser diferentes')
+  })
+
+  it('rejects a transfer when source plan has no available units', () => {
+    const source = repository.createPlan({ name: 'Origen Vacío', color: '#4CAF50', user: username })
+    const destination = repository.createPlan({ name: 'Destino', color: '#2196F3', user: username })
+
+    repository.createMovement({
+      planId: source.id,
+      date: 1,
+      employeeAmount: 0,
+      employeeUnits: 0,
+      companyAmount: 0,
+      companyUnits: 0,
+      value: 10,
+      user: username
+    })
+
+    const error = captureThrown(() => service.transferAssets({
+      sourcePlanId: source.id,
+      destinationPlanId: destination.id,
+      destinationUnits: 10,
+      destinationValue: 10,
+      user: username
+    }))
+
+    expect(error.statusCode).toBe(422)
+    expect(error.payload.message).toBe('El plan de origen no tiene activos con un valor válido para transferir')
+  })
+
+  it('rejects a transfer if employee or company units are individually negative', () => {
+    const source = repository.createPlan({ name: 'Origen', color: '#4CAF50', user: username })
+    const destination = repository.createPlan({ name: 'Destino', color: '#2196F3', user: username })
+
+    repository.createMovement({
+      planId: source.id,
+      date: 1,
+      employeeAmount: 100,
+      employeeUnits: 10,
+      companyAmount: 0,
+      companyUnits: 0,
+      value: 10,
+      user: username
+    })
+    repository.createMovement({
+      planId: source.id,
+      date: 2,
+      employeeAmount: 0,
+      employeeUnits: -11,
+      companyAmount: 0,
+      companyUnits: 20,
+      value: 10,
+      user: username
+    })
+    repository.createMovement({
+      planId: destination.id,
+      date: 1,
+      employeeAmount: 0,
+      employeeUnits: 0,
+      companyAmount: 0,
+      companyUnits: 0,
+      value: 10,
+      user: username
+    })
+
+    const error = captureThrown(() => service.transferAssets({
+      sourcePlanId: source.id,
+      destinationPlanId: destination.id,
+      destinationUnits: 200,
+      destinationValue: 20,
+      user: username
+    }))
+
+    expect(error.statusCode).toBe(422)
+    expect(error.payload.message).toBe('El plan de origen no tiene activos con un valor válido para transferir')
+  })
+
+  it('rejects a transfer when plan belongs to another user', () => {
+    db.insert(users).values({
+      id: generateId(),
+      username: 'otheruser',
+      password: 'pwd-hash',
+      createdAt: new Date()
+    }).run()
+
+    const source = repository.createPlan({ name: 'Origen', color: '#4CAF50', user: username })
+    const otherPlan = repository.createPlan({ name: 'Otro Usuario', color: '#2196F3', user: 'otheruser' })
+
+    repository.createMovement({
+      planId: source.id,
+      date: 1,
+      employeeAmount: 100,
+      employeeUnits: 10,
+      companyAmount: 0,
+      companyUnits: 0,
+      value: 10,
+      user: username
+    })
+
+    const error = captureThrown(() => service.transferAssets({
+      sourcePlanId: source.id,
+      destinationPlanId: otherPlan.id,
+      destinationUnits: 10,
+      destinationValue: 10,
+      user: username
+    }))
+
+    expect(error.statusCode).toBe(404)
+    expect(error.payload.message).toBe('El plan de pensiones no existe')
+  })
+})

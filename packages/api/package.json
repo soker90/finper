@@ -60,7 +60,8 @@
     "winston": "3.19.0",
     "winston-loki": "6.1.7",
     "winston-transport": "4.9.0",
-    "yahoo-finance2": "4.0.2"
+    "yahoo-finance2": "4.0.2",
+    "express-rate-limit": "8.7.2"
   },
   "devDependencies": {
     "@faker-js/faker": "10.6.0",
