@@ -369,8 +369,8 @@ importers:
         specifier: 12.11.1
         version: 12.11.1
       bson:
-        specifier: 6.10.3
-        version: 6.10.3
+        specifier: 7.3.3
+        version: 7.3.3
       drizzle-orm:
         specifier: 0.45.2
         version: 0.45.2(@cloudflare/workers-types@5.20261008.1)(@types/better-sqlite3@7.6.12)(better-sqlite3@12.11.1)(gel@2.2.0)
@@ -4304,12 +4304,8 @@ packages:
   bser@2.1.1:
     resolution: {integrity: sha512-gQxTNE/GAfIIrmHLUE3oJyp5FO6HRBfhjnw4/wMmA63ZGDJnWBmgY/lyQBpnDUkGmAhbSe39tx2d/iTOAfglwQ==}
 
-  bson@6.10.3:
-    resolution: {integrity: sha512-MTxGsqgYTwfshYWTRdmZRC+M7FnG1b4y7RO7p2k3X24Wq0yv1m77Wsj0BzlPzd/IowgESfsruQCUToa7vbOpPQ==}
-    engines: {node: '>=16.20.1'}
-
-  bson@7.3.1:
-    resolution: {integrity: sha512-h/C0qe6857pQhcSJHLfsR1uYGj98Ge3wKAD3Ed9KqH3wcVh+BM4Jq4xISD7vs9OPuT07n+q3QQVjslJ286j6ag==}
+  bson@7.3.3:
+    resolution: {integrity: sha512-oz3LwE3qGEhTCSyhzQRLY3Bj1NLOsjFMf6tcmY5J8M+3R7EVcmoBfSHWvjUK3yXCLDUsGpIuB3aQL4nDZ1EV/g==}
     engines: {node: '>=20.19.0'}
 
   btoa@1.2.1:
@@ -11672,9 +11668,7 @@ snapshots:
     dependencies:
       node-int64: 0.4.0
 
-  bson@6.10.3: {}
-
-  bson@7.3.1: {}
+  bson@7.3.3: {}
 
   btoa@1.2.1: {}
 
@@ -14016,7 +14010,7 @@ snapshots:
   mongodb@7.5.0(snappy@7.3.3(@emnapi/core@1.11.2)(@emnapi/runtime@1.11.2)):
     dependencies:
       '@mongodb-js/saslprep': 1.4.12
-      bson: 7.3.1
+      bson: 7.3.3
       mongodb-connection-string-url: 7.0.2
     optionalDependencies:
       snappy: 7.3.3(@emnapi/core@1.11.2)(@emnapi/runtime@1.11.2)
