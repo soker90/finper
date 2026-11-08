@@ -1,6 +1,6 @@
 import type { GeminiExtraction } from '../types'
 
-const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent'
+const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent'
 
 const SYSTEM_SCHEMA = `Devuelve un objeto JSON con los siguientes campos:
 - "date": Fecha tal como aparece en el texto o imagen, por ejemplo "04/10/2026", o null si no hay. En tickets españoles, las fechas numéricas usan el formato DD/MM/YYYY (día/mes/año). No conviertas ni intercambies el día y el mes. También se aceptan fechas ISO en formato "YYYY-MM-DD".
