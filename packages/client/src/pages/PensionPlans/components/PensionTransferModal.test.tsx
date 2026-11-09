@@ -48,18 +48,25 @@ const renderModal = (plans = PLANS) => {
   return { ...utils, onClose }
 }
 
+const fillTransfer = (getByLabelText: (label: string) => HTMLElement, units = '200', value = '24.75') => {
+  fireEvent.change(getByLabelText('Plan destino'), { target: { value: 'destination' } })
+  fireEvent.change(getByLabelText('Unidades en destino'), { target: { value: units } })
+  fireEvent.change(getByLabelText('Valor de la unidad en destino'), { target: { value } })
+}
+
 describe('PensionTransferModal', () => {
-  it('shows the full balance and calculates the unit value from manually entered destination units', () => {
+  it('shows the full source balance and previews the manually entered destination movement', () => {
     const { getByLabelText, getByText } = renderModal()
 
-    fireEvent.change(getByLabelText('Plan destino'), { target: { value: 'destination' } })
-    fireEvent.change(getByLabelText('Unidades en destino'), { target: { value: '200' } })
+    fillTransfer(getByLabelText)
 
     expect(getByText(/5\\.000,00\\s*€/)).toBeDefined()
-    expect(getByText(/25,00\\s*€/)).toBeDefined()
+    expect(getByText(/200/)).toBeDefined()
+    expect(getByText(/24,75\\s*€/)).toBeDefined()
+    expect(getByText(/Se registrará un movimiento en el plan destino/i)).toBeDefined()
   })
 
-  it('sends the complete balance and user-entered destination units with the calculated unit value', async () => {
+  it('sends the full source balance and the exact destination units and unit value', async () => {
     let requestBody: any
     server.use(
       http.post('*/pension-plans/source/transfer', async ({ request }) => {
@@ -69,15 +76,14 @@ describe('PensionTransferModal', () => {
     )
 
     const { getByLabelText, getByRole, onClose } = renderModal()
-    fireEvent.change(getByLabelText('Plan destino'), { target: { value: 'destination' } })
-    fireEvent.change(getByLabelText('Unidades en destino'), { target: { value: '200' } })
+    fillTransfer(getByLabelText)
     fireEvent.click(getByRole('button', { name: 'Aceptar' }))
 
     await waitFor(() => expect(onClose).toHaveBeenCalledTimes(1))
     expect(requestBody).toMatchObject({
       destinationPlanId: 'destination',
       destinationUnits: 200,
-      destinationValue: 25
+      destinationValue: 24.75
     })
     expect(requestBody.date).toEqual(expect.any(Number))
   })
@@ -93,8 +99,7 @@ describe('PensionTransferModal', () => {
     const plans = [SOURCE_PLAN, { ...PLANS[1], units: 0, total: 0 }]
     const { getByLabelText, getByRole, onClose } = renderModal(plans as any)
 
-    fireEvent.change(getByLabelText('Plan destino'), { target: { value: 'destination' } })
-    fireEvent.change(getByLabelText('Unidades en destino'), { target: { value: '250' } })
+    fillTransfer(getByLabelText, '250', '20')
     fireEvent.click(getByRole('button', { name: 'Aceptar' }))
 
     await waitFor(() => expect(onClose).toHaveBeenCalledTimes(1))
@@ -109,8 +114,7 @@ describe('PensionTransferModal', () => {
     )
 
     const { getByLabelText, getByRole, findByText, onClose } = renderModal()
-    fireEvent.change(getByLabelText('Plan destino'), { target: { value: 'destination' } })
-    fireEvent.change(getByLabelText('Unidades en destino'), { target: { value: '200' } })
+    fillTransfer(getByLabelText)
     fireEvent.click(getByRole('button', { name: 'Aceptar' }))
 
     expect(await findByText('No se pudo realizar el traspaso')).toBeDefined()
