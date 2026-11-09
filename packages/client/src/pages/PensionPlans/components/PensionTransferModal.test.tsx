@@ -49,18 +49,14 @@ const renderModal = (plans = PLANS) => {
 }
 
 describe('PensionTransferModal', () => {
-  it('explains that the full source balance will be transferred and calculates destination unit value from entered units', () => {
-    const { getByLabelText, getByText, queryByLabelText } = renderModal()
-
-    expect(getByLabelText('Plan destino')).toBeDefined()
-    expect(queryByLabelText('Unidades en destino')).toBeNull()
-    expect(queryByLabelText('Valor unidad destino')).toBeNull()
+  it('shows the full balance and calculates the unit value from manually entered destination units', () => {
+    const { getByLabelText, getByText } = renderModal()
 
     fireEvent.change(getByLabelText('Plan destino'), { target: { value: 'destination' } })
+    fireEvent.change(getByLabelText('Unidades en destino'), { target: { value: '200' } })
 
-    expect(getByText(/5\.000,00\s*€/)).toBeDefined()
-    expect(getByText(/200/)).toBeDefined()
-    expect(getByText(/25,00\s*€/)).toBeDefined()
+    expect(getByText(/5\\.000,00\\s*€/)).toBeDefined()
+    expect(getByText(/25,00\\s*€/)).toBeDefined()
   })
 
   it('sends the complete balance and user-entered destination units with the calculated unit value', async () => {
@@ -114,6 +110,7 @@ describe('PensionTransferModal', () => {
 
     const { getByLabelText, getByRole, findByText, onClose } = renderModal()
     fireEvent.change(getByLabelText('Plan destino'), { target: { value: 'destination' } })
+    fireEvent.change(getByLabelText('Unidades en destino'), { target: { value: '200' } })
     fireEvent.click(getByRole('button', { name: 'Aceptar' }))
 
     expect(await findByText('No se pudo realizar el traspaso')).toBeDefined()
