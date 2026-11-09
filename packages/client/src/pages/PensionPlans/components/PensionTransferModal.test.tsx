@@ -56,14 +56,16 @@ const fillTransfer = (getByLabelText: (label: string) => HTMLElement, units = '2
 
 describe('PensionTransferModal', () => {
   it('shows the full source balance and previews the manually entered destination movement', () => {
-    const { getByLabelText, getByText } = renderModal()
+    const { getByLabelText, getByRole } = renderModal()
 
     fillTransfer(getByLabelText)
 
-    expect(getByText(/5\.000,00\s*€/)).toBeDefined()
-    expect(getByText(/200/)).toBeDefined()
-    expect(getByText(/24,75\s*€/)).toBeDefined()
-    expect(getByText(/Se registrará un movimiento en el plan destino/i)).toBeDefined()
+    const preview = getByRole('alert')
+    const previewText = preview.textContent?.replace(/\s+/g, ' ') ?? ''
+    expect(previewText).toMatch(/5\.000,00\s*€/)
+    expect(previewText).toMatch(/200/)
+    expect(previewText).toMatch(/24,75\s*€/)
+    expect(previewText).toMatch(/Se registrará un movimiento en el plan destino/i)
   })
 
   it('sends the full source balance and the exact destination units and unit value', async () => {
