@@ -76,6 +76,7 @@ const PensionPlanDetail: React.FC = () => {
         setActionError(error)
         return
       }
+      triggerMutate()
       navigate('/pensiones')
     }
   }
@@ -92,9 +93,11 @@ const PensionPlanDetail: React.FC = () => {
     <Stack spacing={3}>
       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 1 }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          <Button startIcon={<ArrowLeftOutlined />} onClick={() => navigate('/pensiones')} size='small'>
-            Volver
-          </Button>
+          {pensionPlans.length > 1 && (
+            <Button startIcon={<ArrowLeftOutlined />} onClick={() => navigate('/pensiones')} size='small'>
+              Volver
+            </Button>
+          )}
           <Typography variant='h4'>{pensionPlan.name}</Typography>
         </Box>
         <HeaderButtons buttons={actionButtons} desktopSx={{}} />
@@ -124,10 +127,7 @@ const PensionPlanDetail: React.FC = () => {
         open={openPlanModal}
         onClose={() => { setOpenPlanModal(false); setCreatingPlan(false) }}
         pensionPlan={creatingPlan ? null : pensionPlan}
-        onSuccess={() => {
-          triggerMutate()
-          if (creatingPlan) navigate('/pensiones')
-        }}
+        onSuccess={triggerMutate}
       />
 
       {openTransferModal && (
