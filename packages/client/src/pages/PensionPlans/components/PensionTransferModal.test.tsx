@@ -49,7 +49,7 @@ const renderModal = (plans = PLANS) => {
 }
 
 describe('PensionTransferModal', () => {
-  it('explains that the full source balance will be transferred and calculates destination units', () => {
+  it('explains that the full source balance will be transferred and calculates destination unit value from entered units', () => {
     const { getByLabelText, getByText, queryByLabelText } = renderModal()
 
     expect(getByLabelText('Plan destino')).toBeDefined()
@@ -63,7 +63,7 @@ describe('PensionTransferModal', () => {
     expect(getByText(/25,00\s*€/)).toBeDefined()
   })
 
-  it('sends the complete balance converted using the destination plan latest unit value', async () => {
+  it('sends the complete balance and user-entered destination units with the calculated unit value', async () => {
     let requestBody: any
     server.use(
       http.post('*/pension-plans/source/transfer', async ({ request }) => {
@@ -74,6 +74,7 @@ describe('PensionTransferModal', () => {
 
     const { getByLabelText, getByRole, onClose } = renderModal()
     fireEvent.change(getByLabelText('Plan destino'), { target: { value: 'destination' } })
+    fireEvent.change(getByLabelText('Unidades en destino'), { target: { value: '200' } })
     fireEvent.click(getByRole('button', { name: 'Aceptar' }))
 
     await waitFor(() => expect(onClose).toHaveBeenCalledTimes(1))
@@ -85,17 +86,23 @@ describe('PensionTransferModal', () => {
     expect(requestBody.date).toEqual(expect.any(Number))
   })
 
-  it('prevents transferring when the destination has no current unit valuation', () => {
-    const plans = [
-      SOURCE_PLAN,
-      { ...PLANS[1], units: 0, total: 0 }
-    ]
-    const { getByLabelText, getByRole, getByText } = renderModal(plans as any)
+  it('does not depend on a previous destination valuation', async () => {
+    let requestBody: any
+    server.use(
+      http.post('*/pension-plans/source/transfer', async ({ request }) => {
+        requestBody = await request.json()
+        return HttpResponse.json({})
+      })
+    )
+    const plans = [SOURCE_PLAN, { ...PLANS[1], units: 0, total: 0 }]
+    const { getByLabelText, getByRole, onClose } = renderModal(plans as any)
 
     fireEvent.change(getByLabelText('Plan destino'), { target: { value: 'destination' } })
+    fireEvent.change(getByLabelText('Unidades en destino'), { target: { value: '250' } })
+    fireEvent.click(getByRole('button', { name: 'Aceptar' }))
 
-    expect(getByText(/no tiene una valoración actual/i)).toBeDefined()
-    expect((getByRole('button', { name: 'Aceptar' }) as HTMLButtonElement).disabled).toBe(true)
+    await waitFor(() => expect(onClose).toHaveBeenCalledTimes(1))
+    expect(requestBody).toMatchObject({ destinationUnits: 250, destinationValue: 20 })
   })
 
   it('keeps the modal open and displays the API error when the transfer fails', async () => {
