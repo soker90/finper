@@ -20,6 +20,7 @@ const PensionPlanDetail: React.FC = () => {
   const triggerMutate = usePensionPlanMutate(id)
 
   const [openPlanModal, setOpenPlanModal] = useState(false)
+  const [creatingPlan, setCreatingPlan] = useState(false)
   const [openMovementModal, setOpenMovementModal] = useState(false)
   const [openTransferModal, setOpenTransferModal] = useState(false)
   const [editingTransaction, setEditingTransaction] = useState<PensionTransaction | undefined>(undefined)
@@ -80,9 +81,10 @@ const PensionPlanDetail: React.FC = () => {
   }
 
   const actionButtons = [
+    ...(pensionPlans.length === 1 ? [{ Icon: PlusOutlined, title: 'Nuevo plan', onClick: () => { setCreatingPlan(true); setOpenPlanModal(true) } }] : []),
     { Icon: PlusOutlined, title: 'Movimiento', onClick: handleOpenAddMovement },
     ...(pensionPlans.length > 1 && (pensionPlan.units ?? 0) > 0 ? [{ Icon: SwapOutlined, title: 'Traspasar activos', onClick: () => setOpenTransferModal(true) }] : []),
-    { Icon: EditOutlined, title: 'Editar', onClick: () => setOpenPlanModal(true) },
+    { Icon: EditOutlined, title: 'Editar', onClick: () => { setCreatingPlan(false); setOpenPlanModal(true) } },
     { Icon: DeleteOutlined, title: 'Eliminar', onClick: handleDeletePlan }
   ]
 
@@ -120,9 +122,12 @@ const PensionPlanDetail: React.FC = () => {
 
       <ModalPensionPlan
         open={openPlanModal}
-        onClose={() => setOpenPlanModal(false)}
-        pensionPlan={pensionPlan}
-        onSuccess={triggerMutate}
+        onClose={() => { setOpenPlanModal(false); setCreatingPlan(false) }}
+        pensionPlan={creatingPlan ? null : pensionPlan}
+        onSuccess={() => {
+          triggerMutate()
+          if (creatingPlan) navigate('/pensiones')
+        }}
       />
 
       {openTransferModal && (
