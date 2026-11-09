@@ -122,7 +122,7 @@ const PensionTransferModal = ({ sourcePlan, plans, show, onClose }: Props) => {
         type='number'
         error={!!errors.destinationValue}
         errorText='Introduce un valor de unidad mayor que cero'
-        inputProps={{ inputProps: { min: 0, step: 'any' } }}
+        inputProps={{ min: 0, step: 'any' }}
         {...register('destinationValue', {
           required: true,
           valueAsNumber: true,
