@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { Alert, Typography } from '@mui/material'
 import { PlusOutlined } from '@ant-design/icons'
-import { useNavigate } from 'react-router'
+import { Navigate, useNavigate } from 'react-router'
 
 import { HeaderButtons } from 'components'
 import { getId } from 'utils'
@@ -34,6 +34,11 @@ const PensionPlansPage: React.FC = () => {
   const planNameById = Object.fromEntries(pensionPlans.map((plan) => [getId(plan) ?? '', plan.name]))
 
   const triggerMutate = usePensionPlanMutate()
+
+  if (!loadingPlans && !plansError && pensionPlans.length === 1) {
+    const planId = getId(pensionPlans[0])
+    if (planId) return <Navigate to={`/pensiones/${planId}`} replace />
+  }
 
   const totalContributed = pensionPlans.reduce((acc, p) => acc + (p.amount ?? 0), 0)
   const totalValue = pensionPlans.reduce((acc, p) => acc + (p.total ?? 0), 0)
