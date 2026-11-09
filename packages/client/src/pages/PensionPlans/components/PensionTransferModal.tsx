@@ -24,10 +24,13 @@ interface TransferForm {
   date: any
 }
 
-const formatAmount = (amount: number) => new Intl.NumberFormat('es-ES', {
+const currencyFormatter = new Intl.NumberFormat('es-ES', {
   style: 'currency',
   currency: 'EUR'
-}).format(amount)
+})
+const unitsFormatter = new Intl.NumberFormat('es-ES', { maximumFractionDigits: 6 })
+
+const formatAmount = (amount: number) => currencyFormatter.format(amount)
 
 const PensionTransferModal = ({ sourcePlan, plans, show, onClose }: Props) => {
   const triggerMutate = usePensionPlanMutate(sourcePlan.id)
@@ -102,7 +105,7 @@ const PensionTransferModal = ({ sourcePlan, plans, show, onClose }: Props) => {
         type='number'
         error={!!errors.destinationUnits}
         errorText='Introduce un número de unidades mayor que cero'
-        inputProps={{ inputProps: { min: 0, step: 'any' } }}
+        inputProps={{ min: 0, step: 'any' }}
         {...register('destinationUnits', {
           required: true,
           valueAsNumber: true,
@@ -142,7 +145,7 @@ const PensionTransferModal = ({ sourcePlan, plans, show, onClose }: Props) => {
           <Alert severity='info'>
             <Typography variant='body2'>
               Se transferirá el saldo completo de <strong>{formatAmount(sourcePlan.total)}</strong>.
-              Se registrará un movimiento en el plan destino con <strong>{new Intl.NumberFormat('es-ES', { maximumFractionDigits: 6 }).format(destinationUnits)}</strong> unidades y un valor por unidad de <strong>{formatAmount(destinationValue)}</strong>.
+              Se registrará un movimiento en el plan destino con <strong>{unitsFormatter.format(destinationUnits)}</strong> unidades y un valor por unidad de <strong>{formatAmount(destinationValue)}</strong>.
             </Typography>
             <Typography variant='body2' sx={{ mt: 1 }}>
               El plan de origen quedará vacío. Se conservará el histórico de aportaciones y su distribución entre empleado y empresa.
