@@ -33,6 +33,7 @@ export function closeTestDb (db: DB): void {
 // preservando la tabla users. Las FK se desactivan durante el borrado para no
 // depender del orden (incluido el self-FK de categories.parentId).
 const DATA_TABLES = [
+  schema.apiRateLimits,
   schema.creditCardMovementSplits,
   schema.creditCardMovements,
   schema.creditCards,

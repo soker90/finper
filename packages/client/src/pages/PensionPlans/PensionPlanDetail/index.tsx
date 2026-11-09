@@ -1,11 +1,11 @@
 import React, { useState } from 'react'
 import { useParams, useNavigate, Navigate } from 'react-router'
 import { Alert, Box, Button, CircularProgress, Grid, Stack, Typography } from '@mui/material'
-import { ArrowLeftOutlined, PlusOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons'
+import { ArrowLeftOutlined, PlusOutlined, EditOutlined, DeleteOutlined, SwapOutlined } from '@ant-design/icons'
 
 import { HeaderButtons } from 'components'
-import { usePensionPlanDetail, usePensionPlanMovements, usePensionPlanMutate } from '../hooks/usePensionPlans'
-import { PensionStatCard, PensionTransactionsTable, ModalPensionPlan, TransactionModal } from '../components'
+import { usePensionPlans, usePensionPlanDetail, usePensionPlanMovements, usePensionPlanMutate } from '../hooks/usePensionPlans'
+import { PensionStatCard, PensionTransactionsTable, ModalPensionPlan, TransactionModal, PensionTransferModal } from '../components'
 import { STATS } from '../constants'
 import { deletePensionPlan, deletePensionMovement } from 'services/apiService'
 import type { PensionTransaction } from 'types'
@@ -15,11 +15,14 @@ const PensionPlanDetail: React.FC = () => {
   const navigate = useNavigate()
 
   const { pensionPlan, isLoading: loadingPlan } = usePensionPlanDetail(id)
+  const { pensionPlans } = usePensionPlans()
   const { movements, isLoading: loadingMovements } = usePensionPlanMovements(id)
   const triggerMutate = usePensionPlanMutate(id)
 
   const [openPlanModal, setOpenPlanModal] = useState(false)
+  const [creatingPlan, setCreatingPlan] = useState(false)
   const [openMovementModal, setOpenMovementModal] = useState(false)
+  const [openTransferModal, setOpenTransferModal] = useState(false)
   const [editingTransaction, setEditingTransaction] = useState<PensionTransaction | undefined>(undefined)
   const [actionError, setActionError] = useState<string | null>(null)
 
@@ -73,13 +76,16 @@ const PensionPlanDetail: React.FC = () => {
         setActionError(error)
         return
       }
+      triggerMutate()
       navigate('/pensiones')
     }
   }
 
   const actionButtons = [
+    ...(pensionPlans.length === 1 ? [{ Icon: PlusOutlined, title: 'Nuevo plan', onClick: () => { setCreatingPlan(true); setOpenPlanModal(true) } }] : []),
     { Icon: PlusOutlined, title: 'Movimiento', onClick: handleOpenAddMovement },
-    { Icon: EditOutlined, title: 'Editar', onClick: () => setOpenPlanModal(true) },
+    ...(pensionPlans.length > 1 && (pensionPlan.units ?? 0) > 0 ? [{ Icon: SwapOutlined, title: 'Traspasar activos', onClick: () => setOpenTransferModal(true) }] : []),
+    { Icon: EditOutlined, title: 'Editar', onClick: () => { setCreatingPlan(false); setOpenPlanModal(true) } },
     { Icon: DeleteOutlined, title: 'Eliminar', onClick: handleDeletePlan }
   ]
 
@@ -87,9 +93,11 @@ const PensionPlanDetail: React.FC = () => {
     <Stack spacing={3}>
       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 1 }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          <Button startIcon={<ArrowLeftOutlined />} onClick={() => navigate('/pensiones')} size='small'>
-            Volver
-          </Button>
+          {pensionPlans.length > 1 && (
+            <Button startIcon={<ArrowLeftOutlined />} onClick={() => navigate('/pensiones')} size='small'>
+              Volver
+            </Button>
+          )}
           <Typography variant='h4'>{pensionPlan.name}</Typography>
         </Box>
         <HeaderButtons buttons={actionButtons} desktopSx={{}} />
@@ -117,10 +125,19 @@ const PensionPlanDetail: React.FC = () => {
 
       <ModalPensionPlan
         open={openPlanModal}
-        onClose={() => setOpenPlanModal(false)}
-        pensionPlan={pensionPlan}
+        onClose={() => { setOpenPlanModal(false); setCreatingPlan(false) }}
+        pensionPlan={creatingPlan ? null : pensionPlan}
         onSuccess={triggerMutate}
       />
+
+      {openTransferModal && (
+        <PensionTransferModal
+          show
+          sourcePlan={pensionPlan}
+          plans={pensionPlans}
+          onClose={() => setOpenTransferModal(false)}
+        />
+      )}
 
       {openMovementModal && (
         <TransactionModal

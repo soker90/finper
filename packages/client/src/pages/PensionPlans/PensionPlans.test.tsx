@@ -25,6 +25,17 @@ const PLANS_LIST = [
     companyAmount: 300,
     total: 550,
     user: 'testuser'
+  },
+  {
+    _id: 'p2',
+    id: 'p2',
+    name: 'Segundo plan',
+    amount: 100,
+    units: 10,
+    employeeAmount: 40,
+    companyAmount: 60,
+    total: 110,
+    user: 'testuser'
   }
 ]
 
@@ -147,11 +158,12 @@ describe('PensionPlans Page', () => {
       http.get('*/pension-plans', () => HttpResponse.json(PLANS_LIST)),
       http.get('*/pension-plans/movements', () => HttpResponse.json([]))
     )
-    const { findAllByText, findByText, findByRole } = renderFresh()
+    const { findAllByText, findAllByRole, findByText } = renderFresh()
     await findAllByText('Plan de pensiones')
 
-    const movementBtn = await findByRole('button', { name: /movimiento/i })
-    fireEvent.click(movementBtn)
+    const movementButtons = await findAllByRole('button', { name: /movimiento/i })
+    expect(movementButtons).toHaveLength(PLANS_LIST.length)
+    fireEvent.click(movementButtons[0])
     expect(await findByText('Nuevo Movimiento')).toBeDefined()
   })
 

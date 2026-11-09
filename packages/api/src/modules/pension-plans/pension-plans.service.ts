@@ -127,6 +127,37 @@ export class PensionPlansService {
     return this.repository.deleteMovement(id, user)
   }
 
+  public transferAssets ({
+    sourcePlanId,
+    destinationPlanId,
+    destinationUnits,
+    destinationValue,
+    date = Date.now(),
+    user
+  }: {
+    sourcePlanId: string
+    destinationPlanId: string
+    destinationUnits: number
+    destinationValue: number
+    date?: number
+    user: string
+  }) {
+    if (sourcePlanId === destinationPlanId) {
+      throw Boom.badData(ERROR_MESSAGE.PENSION_PLAN.TRANSFER_SAME_PLAN).output
+    }
+
+    const destinationMovement = this.repository.transferAssets({
+      sourcePlanId,
+      destinationPlanId,
+      destinationUnits,
+      destinationValue,
+      user,
+      date
+    })
+
+    return serializePensionMovement(destinationMovement)
+  }
+
   /** Resumen agregado de TODOS los planes de un usuario, usado por el dashboard. */
   public getAggregateSummary (user: string): PensionAggregateSummary {
     const movements = this.repository.findAllMovementsByUser(user)

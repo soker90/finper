@@ -1,7 +1,11 @@
+import { useState } from 'react'
+import { Button } from '@mui/material'
 import { EditOutlined, DeleteOutlined } from '@ant-design/icons'
 import ScrollableTable, { Column, Action } from 'components/ScrollableTable'
 import { format } from 'utils'
 import { PensionTransaction } from 'types'
+
+const PAGE_SIZE = 20
 
 const BASE_COLUMNS: Column<PensionTransaction>[] = [
   { id: 'date', label: 'Fecha', render: (t) => format.date(t.date) },
@@ -21,6 +25,13 @@ interface Props {
 }
 
 const PensionTransactionsTable = ({ transactions, onEdit, onDelete, planNameById }: Props) => {
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE)
+  const [previousTransactions, setPreviousTransactions] = useState(transactions)
+
+  if (transactions !== previousTransactions) {
+    setPreviousTransactions(transactions)
+    setVisibleCount(PAGE_SIZE)
+  }
   const actions: Action<PensionTransaction>[] = [
     { icon: EditOutlined, tooltip: 'Editar', onClick: onEdit },
     ...(onDelete ? [{ icon: DeleteOutlined, tooltip: 'Eliminar', onClick: onDelete }] : [])
@@ -33,15 +44,30 @@ const PensionTransactionsTable = ({ transactions, onEdit, onDelete, planNameById
       ]
     : BASE_COLUMNS
 
+  const visibleTransactions = transactions.slice(0, visibleCount)
+  const hasMore = visibleCount < transactions.length
+
   return (
-    <ScrollableTable
-      title='Movimientos'
-      cardSx={{ mt: 2 }}
-      columns={columns}
-      data={transactions}
-      actions={actions}
-      keyExtractor={(t, i) => t._id ?? String(i)}
-    />
+    <>
+      <ScrollableTable
+        title='Movimientos'
+        cardSx={{ mt: 2 }}
+        columns={columns}
+        data={visibleTransactions}
+        actions={actions}
+        keyExtractor={(t, i) => t._id ?? String(i)}
+      />
+      {hasMore && (
+        <Button
+          variant='outlined'
+          fullWidth
+          sx={{ mt: 2 }}
+          onClick={() => setVisibleCount((count) => count + PAGE_SIZE)}
+        >
+          Cargar más
+        </Button>
+      )}
+    </>
   )
 }
 

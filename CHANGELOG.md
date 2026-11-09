@@ -1,5 +1,15 @@
 # Changelog
 
+## [2.6.0] - 2026-11-09
+
+### Added
+
+- **api/client/db**: Transfer all assets from one pension plan to another, entering the destination units and unit value manually. The transfer consolidates the source plan into a movement in the destination plan while preserving employee/company contribution totals.
+- **client**: Open the pension plan detail directly when the account has a single plan, and show the 20 most recent movements with a «Cargar más» action to reveal older entries.
+
+---
+
+
 All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
