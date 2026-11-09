@@ -158,7 +158,7 @@ describe('PensionPlans Page', () => {
       http.get('*/pension-plans', () => HttpResponse.json(PLANS_LIST)),
       http.get('*/pension-plans/movements', () => HttpResponse.json([]))
     )
-    const { findAllByText, findByText, findByRole } = renderFresh()
+    const { findAllByText, findAllByRole, findByText } = renderFresh()
     await findAllByText('Plan de pensiones')
 
     const movementButtons = await findAllByRole('button', { name: /movimiento/i })
