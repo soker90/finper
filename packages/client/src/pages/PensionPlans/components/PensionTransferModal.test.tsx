@@ -60,9 +60,9 @@ describe('PensionTransferModal', () => {
 
     fillTransfer(getByLabelText)
 
-    expect(getByText(/5\\.000,00\\s*€/)).toBeDefined()
+    expect(getByText(/5\.000,00\s*€/)).toBeDefined()
     expect(getByText(/200/)).toBeDefined()
-    expect(getByText(/24,75\\s*€/)).toBeDefined()
+    expect(getByText(/24,75\s*€/)).toBeDefined()
     expect(getByText(/Se registrará un movimiento en el plan destino/i)).toBeDefined()
   })
 
