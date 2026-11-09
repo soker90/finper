@@ -26,6 +26,7 @@ define help
     start-api:                 launch api
     start-bot:                 launch bot (Cloudflare Worker dev)
     start-client:              launch client
+    start-pc:                  launch local PC instance (API serving web client)
     deploy-bot:                deploy bot to Cloudflare Workers
     type-check-bot:            typecheck the bot
     type-check-api:            typecheck the API (src + tests)
@@ -69,6 +70,9 @@ seed-user:
 
 start-api:
 	@pnpm --filter @soker90/finper-api start
+
+start-pc: build-types build-db build-api build-client
+	@SERVE_CLIENT=true pnpm --filter @soker90/finper-api start:pc
 
 test-api: build-types build-db
 	@pnpm --filter @soker90/finper-api test $(SHARD)
