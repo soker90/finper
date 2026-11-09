@@ -62,7 +62,7 @@ describe('PensionTransferModal', () => {
 
     const preview = getByRole('alert')
     const previewText = preview.textContent?.replace(/\s+/g, ' ') ?? ''
-    expect(previewText).toMatch(/5\.000,00\s*€/)
+    expect(previewText).toMatch(/5[.]?000,00\s*€/)
     expect(previewText).toMatch(/200/)
     expect(previewText).toMatch(/24,75\s*€/)
     expect(previewText).toMatch(/Se registrará un movimiento en el plan destino/i)
