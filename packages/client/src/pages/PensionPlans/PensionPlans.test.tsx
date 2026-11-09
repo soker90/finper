@@ -25,6 +25,17 @@ const PLANS_LIST = [
     companyAmount: 300,
     total: 550,
     user: 'testuser'
+  },
+  {
+    _id: 'p2',
+    id: 'p2',
+    name: 'Segundo plan',
+    amount: 100,
+    units: 10,
+    employeeAmount: 40,
+    companyAmount: 60,
+    total: 110,
+    user: 'testuser'
   }
 ]
 
