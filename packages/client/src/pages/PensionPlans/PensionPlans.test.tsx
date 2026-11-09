@@ -161,8 +161,9 @@ describe('PensionPlans Page', () => {
     const { findAllByText, findByText, findByRole } = renderFresh()
     await findAllByText('Plan de pensiones')
 
-    const movementBtn = await findByRole('button', { name: /movimiento/i })
-    fireEvent.click(movementBtn)
+    const movementButtons = await findAllByRole('button', { name: /movimiento/i })
+    expect(movementButtons).toHaveLength(PLANS_LIST.length)
+    fireEvent.click(movementButtons[0])
     expect(await findByText('Nuevo Movimiento')).toBeDefined()
   })
 
