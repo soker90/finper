@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { Button } from '@mui/material'
 import { EditOutlined, DeleteOutlined } from '@ant-design/icons'
 import ScrollableTable, { Column, Action } from 'components/ScrollableTable'
@@ -26,10 +26,12 @@ interface Props {
 
 const PensionTransactionsTable = ({ transactions, onEdit, onDelete, planNameById }: Props) => {
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE)
+  const [previousTransactions, setPreviousTransactions] = useState(transactions)
 
-  useEffect(() => {
+  if (transactions !== previousTransactions) {
+    setPreviousTransactions(transactions)
     setVisibleCount(PAGE_SIZE)
-  }, [transactions])
+  }
   const actions: Action<PensionTransaction>[] = [
     { icon: EditOutlined, tooltip: 'Editar', onClick: onEdit },
     ...(onDelete ? [{ icon: DeleteOutlined, tooltip: 'Eliminar', onClick: onDelete }] : [])

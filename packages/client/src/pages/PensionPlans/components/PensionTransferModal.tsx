@@ -140,31 +140,35 @@ const PensionTransferModal = ({ sourcePlan, plans, show, onClose }: Props) => {
         control={control}
       />
 
-      {destination && destinationUnits > 0 && destinationValue > 0 ? (
-        <Box sx={{ gridColumn: '1 / -1', width: '100%', mt: 1 }}>
-          <Alert severity='info'>
-            <Typography variant='body2'>
-              Se transferirá el saldo completo de <strong>{formatAmount(sourcePlan.total)}</strong>.
-              Se registrará un movimiento en el plan destino con <strong>{unitsFormatter.format(destinationUnits)}</strong> unidades y un valor por unidad de <strong>{formatAmount(destinationValue)}</strong>.
-            </Typography>
-            <Typography variant='body2' sx={{ mt: 1 }}>
-              El plan de origen quedará vacío. Se conservará el histórico de aportaciones y su distribución entre empleado y empresa.
-            </Typography>
-          </Alert>
-        </Box>
-      ) : destination ? (
-        <Box sx={{ gridColumn: '1 / -1', width: '100%', mt: 1 }}>
-          <Alert severity='info'>
-            Se transferirá el saldo completo de {formatAmount(sourcePlan.total)}. Introduce las unidades y el valor unitario que tendrá el movimiento en el plan destino.
-          </Alert>
-        </Box>
-      ) : (
-        <Box sx={{ gridColumn: '1 / -1', width: '100%', mt: 1 }}>
-          <Alert severity='info'>
-            Se transferirá el saldo completo del plan de origen ({formatAmount(sourcePlan.total)}). Indica las unidades y el valor unitario del movimiento que se registrará en el plan destino.
-          </Alert>
-        </Box>
-      )}
+      {destination && destinationUnits > 0 && destinationValue > 0
+        ? (
+          <Box sx={{ gridColumn: '1 / -1', width: '100%', mt: 1 }}>
+            <Alert severity='info'>
+              <Typography variant='body2'>
+                Se transferirá el saldo completo de <strong>{formatAmount(sourcePlan.total)}</strong>.
+                Se registrará un movimiento en el plan destino con <strong>{unitsFormatter.format(destinationUnits)}</strong> unidades y un valor por unidad de <strong>{formatAmount(destinationValue)}</strong>.
+              </Typography>
+              <Typography variant='body2' sx={{ mt: 1 }}>
+                El plan de origen quedará vacío. Se conservará el histórico de aportaciones y su distribución entre empleado y empresa.
+              </Typography>
+            </Alert>
+          </Box>
+          )
+        : destination
+          ? (
+            <Box sx={{ gridColumn: '1 / -1', width: '100%', mt: 1 }}>
+              <Alert severity='info'>
+                Se transferirá el saldo completo de {formatAmount(sourcePlan.total)}. Introduce las unidades y el valor unitario que tendrá el movimiento en el plan destino.
+              </Alert>
+            </Box>
+            )
+          : (
+            <Box sx={{ gridColumn: '1 / -1', width: '100%', mt: 1 }}>
+              <Alert severity='info'>
+                Se transferirá el saldo completo del plan de origen ({formatAmount(sourcePlan.total)}). Indica las unidades y el valor unitario del movimiento que se registrará en el plan destino.
+              </Alert>
+            </Box>
+            )}
 
       {submitError && (
         <Box sx={{ gridColumn: '1 / -1', width: '100%', mt: 1 }}>
