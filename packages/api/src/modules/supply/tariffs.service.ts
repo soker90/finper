@@ -34,7 +34,7 @@ interface ITariffApiResponse {
       energiaPunta: number
       energiaLlana: number
       energiaValle: number
-      mantenimientoPrecio?: number
+      mantenimientoPrecio?: number | null
       incluyeBonoSocial?: boolean
       descuento?: {
         tipo: 'porcentaje' | 'fijo'
@@ -73,7 +73,7 @@ interface IDiscount {
 interface ITariffEntry {
   retailer: string
   tariffName: string
-  billingMonths: number
+  priceGuaranteeMonths: number | null
   prices: ITariffPrices
   includesSocialBonus: boolean
   discount: IDiscount | null
@@ -139,7 +139,7 @@ export default class TariffsService implements ITariffsService {
         return {
           retailer: entry.comercializadora,
           tariffName: entry.detalles.nombreTarifa,
-          billingMonths: entry.detalles.mantenimientoPrecio ?? 12,
+          priceGuaranteeMonths: entry.detalles.mantenimientoPrecio ?? null,
           prices: {
             peakPower: entry.detalles.potenciaPunta,
             offPeakPower: entry.detalles.potenciaValle,
@@ -272,7 +272,7 @@ export default class TariffsService implements ITariffsService {
         const descuentoEuros = estimatedAnnualTotal * (mesesPrimerAno / 12) * (discount.valor / 100)
         firstYearTotal = Number((estimatedAnnualTotal - descuentoEuros).toFixed(2))
       } else {
-        const numPeriodos = mesesPrimerAno / (tariff.billingMonths || 12)
+        const numPeriodos = mesesPrimerAno / (tariff.priceGuaranteeMonths || 12)
         firstYearTotal = Number((estimatedAnnualTotal - discount.valor * numPeriodos).toFixed(2))
       }
     }
@@ -280,7 +280,7 @@ export default class TariffsService implements ITariffsService {
     return {
       retailer: tariff.retailer,
       tariffName: tariff.tariffName,
-      billingMonths: tariff.billingMonths,
+      priceGuaranteeMonths: tariff.priceGuaranteeMonths,
       discount: tariff.discount,
       peakPower,
       offPeakPower,
