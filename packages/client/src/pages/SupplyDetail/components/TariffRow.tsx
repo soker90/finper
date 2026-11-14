@@ -33,19 +33,6 @@ interface Props {
   isBest: boolean
 }
 
-const BILLING_MONTHS_LABEL: Record<number, string> = {
-  1: 'Mensual',
-  2: 'Bimensual',
-  3: 'Trimestral',
-  6: 'Semestral',
-  12: 'Anual',
-}
-
-const BILLING_MONTHS_COLOR: Record<number, 'warning' | 'success' | 'default' | 'info'> = {
-  3: 'warning',
-  12: 'success',
-}
-
 const TariffRow = ({ row, isBest }: Props) => {
   const [open, setOpen] = useState(false)
   const savingsLabel = getSavingsLabel(row.estimatedAnnualSavings)
@@ -122,13 +109,13 @@ const TariffRow = ({ row, isBest }: Props) => {
               <Typography variant='body2' color='text.secondary'>
                 {row.tariffName}
               </Typography>
-              {row.billingMonths && (
+              {row.priceGuaranteeMonths !== null && (
                 <Chip
-                  label={BILLING_MONTHS_LABEL[row.billingMonths] ?? `${row.billingMonths}m`}
+                  label={`Precio fijo ${row.priceGuaranteeMonths} meses`}
                   size='small'
-                  color={BILLING_MONTHS_COLOR[row.billingMonths] ?? 'default'}
+                  color='default'
                   variant='outlined'
-                  sx={{ height: 16, fontSize: '0.65rem', fontWeight: 700 }}
+                  sx={{ height: 20, fontSize: '0.65rem', fontWeight: 700 }}
                 />
               )}
               {row.discount && (
