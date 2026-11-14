@@ -4,7 +4,7 @@ import { TARIFFS_COMPARISON } from 'constants/api-paths'
 export interface TariffComparison {
   retailer: string
   tariffName: string
-  billingMonths: number
+  priceGuaranteeMonths: number | null
   discount: {
     tipo: 'porcentaje' | 'fijo'
     valor: number
