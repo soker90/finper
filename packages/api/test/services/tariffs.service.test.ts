@@ -24,11 +24,11 @@ const BASE_TARIFF_DETALLES = {
   energiaValle: 0.08
 }
 
-const makeApiResponse = (descuento: any = null) => ({
+const makeApiResponse = (descuento: any = null, mantenimientoPrecio: number | null = 12) => ({
   datosGenerales: { iva: 0.21, impuestoElectrico: 0.0511269632, alquilerContador: 0.026557 },
   tarifas: [{
     comercializadora: 'Test',
-    detalles: { ...BASE_TARIFF_DETALLES, nombreTarifa: 'Test Tarifa', ...(descuento ? { descuento } : {}) }
+    detalles: { ...BASE_TARIFF_DETALLES, nombreTarifa: 'Test Tarifa', mantenimientoPrecio, ...(descuento ? { descuento } : {}) }
   }]
 })
 
@@ -108,6 +108,30 @@ describe('TariffsService.simulateTariff — ramas de descuento', () => {
     const results = await service.compareTariffs(supplyId, user)
 
     expect(typeof results[0].firstYearTotal).toBe('number')
+  })
+
+  test.each([10, 36])('exposes price guarantee duration of %i months', async (months) => {
+    const service = new TariffsService()
+    jest.spyOn(global, 'fetch').mockResolvedValueOnce({
+      ok: true,
+      json: async () => makeApiResponse(null, months)
+    } as Response)
+
+    const results = await service.compareTariffs(supplyId, user)
+
+    expect(results[0].priceGuaranteeMonths).toBe(months)
+  })
+
+  test('keeps price guarantee duration unknown when source value is null', async () => {
+    const service = new TariffsService()
+    jest.spyOn(global, 'fetch').mockResolvedValueOnce({
+      ok: true,
+      json: async () => makeApiResponse(null, null)
+    } as Response)
+
+    const results = await service.compareTariffs(supplyId, user)
+
+    expect(results[0].priceGuaranteeMonths).toBeNull()
   })
 
   test('no discount: firstYearTotal is null', async () => {
