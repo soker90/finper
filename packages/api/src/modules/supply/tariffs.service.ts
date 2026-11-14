@@ -97,7 +97,7 @@ interface ISimulatedInvoice {
 export interface TariffComparisonResult {
   retailer: string
   tariffName: string
-  billingMonths: number
+  priceGuaranteeMonths: number | null
   discount: {
     tipo: 'porcentaje' | 'fijo'
     valor: number
