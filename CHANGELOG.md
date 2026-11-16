@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.6.1] - 2026-11-16
+
+### Fixed
+
+- **client**: Show the electricity price-guarantee duration in months in tariff comparisons, avoiding confusion with billing frequency. ([#963](https://github.com/soker90/finper/pull/963))
+
+---
+
 ## [2.6.0] - 2026-11-09
 
 ### Added

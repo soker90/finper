@@ -47,6 +47,15 @@ const WinnerCard = ({ winner }: Props) => (
           <Typography variant='h3' sx={{ fontWeight: 800, mb: 0 }}>
             {winner.retailer}
           </Typography>
+          {winner.billingMonths !== null && (
+            <Chip
+              label={`${winner.billingMonths} meses`}
+              color='default'
+              variant='outlined'
+              size='small'
+              sx={{ fontWeight: 700 }}
+            />
+          )}
           {winner.discount && (
             <Chip
               label={`${winner.discount.tipo === 'porcentaje' ? '-' : ''}${winner.discount.valor}${winner.discount.tipo === 'porcentaje' ? '%' : '€'}${winner.discount.meses ? ` / ${winner.discount.meses}m` : ''}${winner.discount.soloNuevosClientes ? ' ★nuevos' : ''}`}
