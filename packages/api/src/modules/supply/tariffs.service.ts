@@ -232,6 +232,35 @@ export default class TariffsService implements ITariffsService {
     return totalBruto * (1 + taxes.vat)
   }
 
+  private hasFullYearCoverage (readings: ISupplyReading[], from: number, to: number): boolean {
+    const sorted = [...readings].toSorted((a, b) => a.startDate - b.startDate)
+    let coveredUntil = from
+
+    for (const reading of sorted) {
+      if (reading.endDate <= coveredUntil) continue
+      if (reading.startDate > coveredUntil) return false
+      coveredUntil = Math.max(coveredUntil, reading.endDate)
+      if (coveredUntil >= to) return true
+    }
+
+    return false
+  }
+
+  private calculateWindowTotal (
+    invoices: ISimulatedInvoice[],
+    from: number,
+    to: number,
+    amount: (invoice: ISimulatedInvoice) => number
+  ): number {
+    return invoices.reduce((total, invoice) => {
+      const invoiceDays = invoice.endDate - invoice.startDate
+      if (invoiceDays <= 0) return total
+
+      const overlap = Math.max(0, Math.min(invoice.endDate, to) - Math.max(invoice.startDate, from))
+      return total + (amount(invoice) * overlap / invoiceDays)
+    }, 0)
+  }
+
   private simulateTariff (
     tariff: ITariffEntry,
     readings: ISupplyReading[],
@@ -258,22 +287,27 @@ export default class TariffsService implements ITariffsService {
       }
     })
 
-    const estimatedAnnualTotal = Number(invoices.reduce((total, invoice) => total + invoice.newTariffSimulatedAmount, 0).toFixed(2))
-    const currentTotalSimulated = invoices.reduce((total, invoice) => total + invoice.currentTariffSimulatedAmount, 0)
+    const periodEnd = Math.max(...readings.map(reading => reading.endDate))
+    const periodStart = periodEnd - ONE_YEAR_MS
+    const hasFullYearCoverage = this.hasFullYearCoverage(readings, periodStart, periodEnd)
+    const estimatedAnnualTotal = Number(
+      this.calculateWindowTotal(invoices, periodStart, periodEnd, invoice => invoice.newTariffSimulatedAmount).toFixed(2)
+    )
+    const currentTotalSimulated = this.calculateWindowTotal(
+      invoices, periodStart, periodEnd, invoice => invoice.currentTariffSimulatedAmount
+    )
 
-    // Calcular coste del primer año con descuento:
-    // - meses === null significa descuento permanente → se aplica el año completo (12 meses)
-    // - meses > 12 → se limita a 12 para no descontar más de un año
+    // meses === null significa duración desconocida: no se puede estimar el descuento.
+    // Los descuentos fijos se expresan en euros por mes promocionado.
     let firstYearTotal: number | null = null
     const { discount } = tariff
-    if (discount) {
-      const mesesPrimerAno = discount.meses === null ? 12 : Math.min(discount.meses, 12)
+    if (discount && discount.meses !== null && hasFullYearCoverage) {
+      const mesesPrimerAno = Math.min(discount.meses, 12)
       if (discount.tipo === 'porcentaje') {
         const descuentoEuros = estimatedAnnualTotal * (mesesPrimerAno / 12) * (discount.valor / 100)
         firstYearTotal = Number((estimatedAnnualTotal - descuentoEuros).toFixed(2))
       } else {
-        const numPeriodos = mesesPrimerAno / (tariff.priceGuaranteeMonths || 12)
-        firstYearTotal = Number((estimatedAnnualTotal - discount.valor * numPeriodos).toFixed(2))
+        firstYearTotal = Number((estimatedAnnualTotal - discount.valor * mesesPrimerAno).toFixed(2))
       }
     }
 
