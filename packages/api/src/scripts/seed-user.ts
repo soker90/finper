@@ -25,8 +25,9 @@ function validate (): void {
 async function seed (): Promise<void> {
   validate()
 
+  const migrationsFolder = process.env.MIGRATIONS_FOLDER || path.resolve(__dirname, '../../../db/drizzle')
   migrate(sqliteDb as any, {
-    migrationsFolder: path.resolve(__dirname, '../../../db/drizzle')
+    migrationsFolder
   })
 
   try {

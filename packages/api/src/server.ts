@@ -10,6 +10,7 @@ import config from './config'
 import { db as sqliteDb } from './db'
 import { migrate } from 'drizzle-orm/better-sqlite3/migrator'
 import path from 'node:path'
+import fs from 'node:fs'
 
 import { MonitRoutes } from './modules/monit/monit.routes'
 import handleError from './middlewares/handle-error'
@@ -103,6 +104,7 @@ class Server {
     this.app = express()
     this.preMiddlewareConfig()
     this.routes()
+    this.clientStaticConfig()
     this.postMiddlewareConfig()
     this.sqlite()
   }
@@ -132,9 +134,39 @@ class Server {
     this.app.use('/api/credit-cards', creditCardsRoutes)
   }
 
+  public clientStaticConfig (): void {
+    if (config.client.serve && fs.existsSync(config.client.distPath)) {
+      this.app.use(express.static(config.client.distPath))
+      this.app.use((req, res, next) => {
+        if (req.method === 'GET' && !req.path.startsWith('/api')) {
+          const indexHtml = path.join(config.client.distPath, 'index.html')
+          if (fs.existsSync(indexHtml)) {
+            return res.sendFile(indexHtml)
+          }
+        }
+        next()
+      })
+    }
+  }
+
   public preMiddlewareConfig (): void {
     this.app.set('port', config.port)
-    this.app.use(helmet())
+    this.app.use(
+      helmet({
+        contentSecurityPolicy: config.client.serve
+          ? {
+              directives: {
+                defaultSrc: ["'self'"],
+                scriptSrc: ["'self'", "'unsafe-inline'"],
+                styleSrc: ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
+                fontSrc: ["'self'", 'https://fonts.gstatic.com', 'data:'],
+                imgSrc: ["'self'", 'data:', 'https:'],
+                connectSrc: ["'self'", 'https://soker90.github.io']
+              }
+            }
+          : undefined
+      })
+    )
     this.app.use(express.json())
     this.app.use(express.urlencoded({ extended: false }))
     this.app.use(compression())
@@ -162,8 +194,9 @@ class Server {
   }
 
   private sqlite () {
+    const migrationsFolder = process.env.MIGRATIONS_FOLDER || path.resolve(__dirname, '../../db/drizzle')
     migrate(sqliteDb as any, {
-      migrationsFolder: path.resolve(__dirname, '../../db/drizzle')
+      migrationsFolder
     })
     console.log('[finper-api] Drizzle SQLite migrations applied')
   }
