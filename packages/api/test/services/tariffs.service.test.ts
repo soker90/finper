@@ -138,6 +138,7 @@ describe('TariffsService.simulateTariff — ramas de descuento', () => {
 
   test('does not calculate first-year total without full-year reading coverage', async () => {
     const service = new TariffsService()
+    sqliteDb.delete(schema.supplyReadings).run()
     const endDate = Date.now()
     await insertSupplyReading({
       user,
