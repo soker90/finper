@@ -22,14 +22,14 @@ export const createSupplyReadingRepository = (db: DB) => ({
       .orderBy(desc(supplyReadings.endDate))
       .get(),
 
-  // Lecturas que se solapan con la ventana del último año.
+  // Lecturas cuyo periodo completo está dentro de la ventana del último año.
   findInLastYear: (supplyId: string, user: string, to: number, from: number): Reading[] =>
     db.select().from(supplyReadings)
       .where(and(
         eq(supplyReadings.supplyId, supplyId),
         eq(supplyReadings.user, user),
-        lte(supplyReadings.startDate, to),
-        gte(supplyReadings.endDate, from)
+        lte(supplyReadings.endDate, to),
+        gte(supplyReadings.startDate, from)
       ))
       .orderBy(desc(supplyReadings.endDate))
       .all(),
