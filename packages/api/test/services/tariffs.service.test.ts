@@ -87,18 +87,24 @@ describe('TariffsService.simulateTariff — ramas de descuento', () => {
     expect(typeof results[0].firstYearTotal).toBe('number')
   })
 
-  test('discount tipo fijo: firstYearTotal is a number', async () => {
-    const service = new TariffsService()
-    jest.spyOn(global, 'fetch').mockResolvedValueOnce({
-      ok: true,
-      json: async () => makeApiResponse({ tipo: 'fijo', valor: 5, meses: 6 })
-    } as Response)
+  test.each([10, 36, null])(
+    'fixed monthly discount is independent from %s months of price guarantee',
+    async (priceGuaranteeMonths) => {
+      const service = new TariffsService()
+      jest.spyOn(global, 'fetch').mockResolvedValueOnce({
+        ok: true,
+        json: async () => makeApiResponse(
+          { tipo: 'fijo', valor: 5, meses: 6 },
+          priceGuaranteeMonths
+        )
+      } as Response)
 
-    const results = await service.compareTariffs(supplyId, user)
+      const results = await service.compareTariffs(supplyId, user)
 
-    expect(results).toHaveLength(1)
-    expect(results[0].firstYearTotal).toBeCloseTo(results[0].estimatedAnnualTotal - 30, 2)
-  })
+      expect(results).toHaveLength(1)
+      expect(results[0].firstYearTotal).toBeCloseTo(results[0].estimatedAnnualTotal - 30, 2)
+    }
+  )
 
   test('discount tipo fijo con meses null (duración desconocida): firstYearTotal is null', async () => {
     const service = new TariffsService()
