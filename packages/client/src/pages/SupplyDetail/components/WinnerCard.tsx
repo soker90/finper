@@ -47,9 +47,9 @@ const WinnerCard = ({ winner }: Props) => (
           <Typography variant='h3' sx={{ fontWeight: 800, mb: 0 }}>
             {winner.retailer}
           </Typography>
-          {winner.priceGuaranteeMonths !== null && (
+          {winner.billingMonths !== null && (
             <Chip
-              label={`${winner.priceGuaranteeMonths} meses`}
+              label={`${winner.billingMonths} meses`}
               color='default'
               variant='outlined'
               size='small'
