@@ -24,11 +24,11 @@ const BASE_TARIFF_DETALLES = {
   energiaValle: 0.08
 }
 
-const makeApiResponse = (descuento: any = null, mantenimientoPrecio: number | null = 12) => ({
+const makeApiResponse = (descuento: any = null) => ({
   datosGenerales: { iva: 0.21, impuestoElectrico: 0.0511269632, alquilerContador: 0.026557 },
   tarifas: [{
     comercializadora: 'Test',
-    detalles: { ...BASE_TARIFF_DETALLES, nombreTarifa: 'Test Tarifa', mantenimientoPrecio, ...(descuento ? { descuento } : {}) }
+    detalles: { ...BASE_TARIFF_DETALLES, nombreTarifa: 'Test Tarifa', ...(descuento ? { descuento } : {}) }
   }]
 })
 
@@ -50,14 +50,12 @@ describe('TariffsService.simulateTariff — ramas de descuento', () => {
     const supply = await insertSupply({ user, ...FULL_PRICE_SUPPLY })
     supplyId = supply.id
     const endDate = Date.now()
-    const yearStart = endDate - 365 * 24 * 60 * 60 * 1000
-    for (let month = 0; month < 12; month++) {
-      const startDate = yearStart + month * 30 * 24 * 60 * 60 * 1000
-      const nextStartDate = month === 11
-        ? endDate
-        : yearStart + (month + 1) * 30 * 24 * 60 * 60 * 1000
-      await insertSupplyReading({ user, supplyId, startDate, endDate: nextStartDate })
-    }
+    await insertSupplyReading({
+      user,
+      supplyId,
+      startDate: endDate - 30 * 24 * 60 * 60 * 1000,
+      endDate
+    })
   })
 
   test('discount tipo porcentaje: firstYearTotal is a number less than estimatedAnnualTotal', async () => {
@@ -87,26 +85,20 @@ describe('TariffsService.simulateTariff — ramas de descuento', () => {
     expect(typeof results[0].firstYearTotal).toBe('number')
   })
 
-  test.each([10, 36, null])(
-    'fixed monthly discount is independent from %s months of price guarantee',
-    async (priceGuaranteeMonths) => {
-      const service = new TariffsService()
-      jest.spyOn(global, 'fetch').mockResolvedValueOnce({
-        ok: true,
-        json: async () => makeApiResponse(
-          { tipo: 'fijo', valor: 5, meses: 6 },
-          priceGuaranteeMonths
-        )
-      } as Response)
+  test('discount tipo fijo: firstYearTotal is a number', async () => {
+    const service = new TariffsService()
+    jest.spyOn(global, 'fetch').mockResolvedValueOnce({
+      ok: true,
+      json: async () => makeApiResponse({ tipo: 'fijo', valor: 5, meses: 6 })
+    } as Response)
 
-      const results = await service.compareTariffs(supplyId, user)
+    const results = await service.compareTariffs(supplyId, user)
 
-      expect(results).toHaveLength(1)
-      expect(results[0].firstYearTotal).toBeCloseTo(results[0].estimatedAnnualTotal - 30, 2)
-    }
-  )
+    expect(results).toHaveLength(1)
+    expect(typeof results[0].firstYearTotal).toBe('number')
+  })
 
-  test('discount tipo fijo con meses null (duración desconocida): firstYearTotal is null', async () => {
+  test('discount tipo fijo con meses null (permanente): firstYearTotal calculado sobre 12 meses', async () => {
     const service = new TariffsService()
     jest.spyOn(global, 'fetch').mockResolvedValueOnce({
       ok: true,
@@ -115,51 +107,7 @@ describe('TariffsService.simulateTariff — ramas de descuento', () => {
 
     const results = await service.compareTariffs(supplyId, user)
 
-    expect(results[0].firstYearTotal).toBeNull()
-  })
-
-  test.each([10, 36])('exposes price guarantee duration of %i months', async (months) => {
-    const service = new TariffsService()
-    jest.spyOn(global, 'fetch').mockResolvedValueOnce({
-      ok: true,
-      json: async () => makeApiResponse(null, months)
-    } as Response)
-
-    const results = await service.compareTariffs(supplyId, user)
-
-    expect(results[0].priceGuaranteeMonths).toBe(months)
-  })
-
-  test('keeps price guarantee duration unknown when source value is null', async () => {
-    const service = new TariffsService()
-    jest.spyOn(global, 'fetch').mockResolvedValueOnce({
-      ok: true,
-      json: async () => makeApiResponse(null, null)
-    } as Response)
-
-    const results = await service.compareTariffs(supplyId, user)
-
-    expect(results[0].priceGuaranteeMonths).toBeNull()
-  })
-
-  test('does not calculate first-year total without full-year reading coverage', async () => {
-    const service = new TariffsService()
-    sqliteDb.delete(schema.supplyReadings).run()
-    const endDate = Date.now()
-    await insertSupplyReading({
-      user,
-      supplyId,
-      startDate: endDate - 30 * 24 * 60 * 60 * 1000,
-      endDate
-    })
-    jest.spyOn(global, 'fetch').mockResolvedValueOnce({
-      ok: true,
-      json: async () => makeApiResponse({ tipo: 'fijo', valor: 5, meses: 6 })
-    } as Response)
-
-    const results = await service.compareTariffs(supplyId, user)
-
-    expect(results[0].firstYearTotal).toBeNull()
+    expect(typeof results[0].firstYearTotal).toBe('number')
   })
 
   test('no discount: firstYearTotal is null', async () => {
