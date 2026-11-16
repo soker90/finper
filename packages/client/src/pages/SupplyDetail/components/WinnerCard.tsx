@@ -49,7 +49,7 @@ const WinnerCard = ({ winner }: Props) => (
           </Typography>
           {winner.priceGuaranteeMonths !== null && (
             <Chip
-              label={`Precio fijo ${winner.priceGuaranteeMonths} meses`}
+              label={`${winner.priceGuaranteeMonths} meses`}
               color='default'
               variant='outlined'
               size='small'
