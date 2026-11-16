@@ -280,22 +280,22 @@ describe('Supply Routes', () => {
       }
     })
 
-    test('when all readings are older than 1 year, it should respond 400', async () => {
-      // Para que fetchYearReadings devuelva 0 resultados necesitamos una lectura cuyo
-      // endDate sea reciente pero cuyo startDate caiga ANTES de (endDate - 1 año).
-      // Así: startDate < lastReading.endDate - ONE_YEAR_MS → no incluida → readings = 0.
+    test('includes a reading period that overlaps the last-year window', async () => {
       const supply = await insertSupply({ user, ...FULL_PRICE_SUPPLY })
+      const endDate = Date.now()
       await insertSupplyReading({
         user,
         supplyId: supply.id,
-        endDate: Date.now(),
-        startDate: Date.now() - 366 * 24 * 60 * 60 * 1000 // >365 días antes
+        endDate,
+        startDate: endDate - 366 * 24 * 60 * 60 * 1000
       })
 
-      await supertest(server.app)
+      const response = await supertest(server.app)
         .get(path(supply.id))
         .auth(token, { type: 'bearer' })
-        .expect(400)
+        .expect(200)
+
+      expect(response.body.data[0].invoices).toHaveLength(1)
     })
   })
 })
