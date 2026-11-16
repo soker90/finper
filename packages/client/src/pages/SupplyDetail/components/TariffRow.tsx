@@ -111,7 +111,7 @@ const TariffRow = ({ row, isBest }: Props) => {
               </Typography>
               {row.priceGuaranteeMonths !== null && (
                 <Chip
-                  label={`Precio fijo ${row.priceGuaranteeMonths} meses`}
+                  label={`${row.priceGuaranteeMonths} meses`}
                   size='small'
                   color='default'
                   variant='outlined'
