@@ -109,13 +109,13 @@ const TariffRow = ({ row, isBest }: Props) => {
               <Typography variant='body2' color='text.secondary'>
                 {row.tariffName}
               </Typography>
-              {row.priceGuaranteeMonths !== null && (
+              {row.billingMonths && (
                 <Chip
-                  label={`${row.priceGuaranteeMonths} meses`}
+                  label={`${row.billingMonths} meses`}
                   size='small'
                   color='default'
                   variant='outlined'
-                  sx={{ height: 20, fontSize: '0.65rem', fontWeight: 700 }}
+                  sx={{ height: 16, fontSize: '0.65rem', fontWeight: 700 }}
                 />
               )}
               {row.discount && (
