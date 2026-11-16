@@ -295,7 +295,7 @@ describe('Supply Routes', () => {
         .auth(token, { type: 'bearer' })
         .expect(200)
 
-      expect(response.body.data[0].invoices).toHaveLength(1)
+      expect(response.body[0].invoices).toHaveLength(1)
     })
   })
 })
