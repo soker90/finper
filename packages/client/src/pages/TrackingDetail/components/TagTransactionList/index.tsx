@@ -1,4 +1,4 @@
-import { Chip, Table, TableBody, TableCell, TableHead, TableRow, Typography } from '@mui/material'
+import { Chip, TableBody, TableCell, TableHead, TableRow, Typography } from '@mui/material'
 import { MainCard, ScrollableTable } from 'components'
 import { Transaction } from 'types'
 import { format } from 'utils'
