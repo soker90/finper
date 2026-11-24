@@ -1,4 +1,4 @@
-import { Chip, Table, TableBody, TableCell, TableHead, TableRow, Typography } from '@mui/material'
+import { Chip, Table, TableBody, TableCell, TableHead, TableRow, TableContainer, Typography } from '@mui/material'
 import { MainCard } from 'components'
 import { Transaction } from 'types'
 import { format } from 'utils'
@@ -12,7 +12,8 @@ const AMOUNT_COLORS: Record<string, string> = {
 const TagTransactionList = ({ transactions }: { transactions: Transaction[] }) => {
   return (
     <MainCard title={`Movimientos (${transactions.length})`} divider>
-      <Table size='small'>
+      <TableContainer sx={{ width: '100%', overflowX: 'auto' }}>
+        <Table size='small' sx={{ minWidth: 600 }}>
         <TableHead>
           <TableRow>
             <TableCell>Fecha</TableCell>
@@ -57,7 +58,8 @@ const TagTransactionList = ({ transactions }: { transactions: Transaction[] }) =
             </TableRow>
           ))}
         </TableBody>
-      </Table>
+        </Table>
+      </TableContainer>
     </MainCard>
   )
 }
