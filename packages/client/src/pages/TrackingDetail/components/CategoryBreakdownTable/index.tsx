@@ -1,4 +1,4 @@
-import { Chip, LinearProgress, Table, TableBody, TableCell, TableHead, TableRow } from '@mui/material'
+import { Chip, LinearProgress, Table, TableBody, TableCell, TableHead, TableRow, TableContainer } from '@mui/material'
 import { MainCard } from 'components'
 import { TagCategoryBreakdown } from 'types'
 import { format } from 'utils'
@@ -14,7 +14,8 @@ const CategoryBreakdownTable = ({ categories, totalAmount }: CategoryBreakdownTa
 
   return (
     <MainCard title='Desglose por categorías' divider>
-      <Table size='small'>
+      <TableContainer sx={{ width: '100%', overflowX: 'auto' }}>
+        <Table size='small' sx={{ minWidth: 500 }}>
         <TableHead>
           <TableRow>
             <TableCell>Categoría</TableCell>
@@ -52,7 +53,8 @@ const CategoryBreakdownTable = ({ categories, totalAmount }: CategoryBreakdownTa
             )
           })}
         </TableBody>
-      </Table>
+        </Table>
+      </TableContainer>
     </MainCard>
   )
 }
