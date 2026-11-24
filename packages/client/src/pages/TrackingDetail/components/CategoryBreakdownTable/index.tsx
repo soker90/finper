@@ -1,4 +1,4 @@
-import { Chip, LinearProgress, Table, TableBody, TableCell, TableHead, TableRow } from '@mui/material'
+import { Chip, LinearProgress, TableBody, TableCell, TableHead, TableRow } from '@mui/material'
 import { MainCard, ScrollableTable } from 'components'
 import { TagCategoryBreakdown } from 'types'
 import { format } from 'utils'
