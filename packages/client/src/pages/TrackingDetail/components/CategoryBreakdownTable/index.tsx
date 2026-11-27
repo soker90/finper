@@ -14,7 +14,7 @@ const CategoryBreakdownTable = ({ categories, totalAmount }: CategoryBreakdownTa
 
   return (
     <MainCard title='Desglose por categorías' divider>
-      <ScrollableTable size='small' sx={{ minWidth: 500 }}>
+      <ScrollableTable size='small' sx={{ minWidth: 500 }} containerProps={{ tabIndex: 0, role: 'region', 'aria-label': 'Desglose por categorías' }}>
         <TableHead>
           <TableRow>
             <TableCell>Categoría</TableCell>
@@ -52,7 +52,7 @@ const CategoryBreakdownTable = ({ categories, totalAmount }: CategoryBreakdownTa
             )
           })}
         </TableBody>
-        </ScrollableTable>
+      </ScrollableTable>
     </MainCard>
   )
 }
