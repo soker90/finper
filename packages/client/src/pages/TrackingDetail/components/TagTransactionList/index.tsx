@@ -12,7 +12,11 @@ const AMOUNT_COLORS: Record<string, string> = {
 const TagTransactionList = ({ transactions }: { transactions: Transaction[] }) => {
   return (
     <MainCard title={`Movimientos (${transactions.length})`} divider>
-      <ScrollableTable size='small' sx={{ minWidth: 600 }} containerProps={{ tabIndex: 0, role: 'region', 'aria-label': 'Movimientos' }}>
+      <ScrollableTable
+        size='small'
+        sx={{ minWidth: 600 }}
+        containerProps={{ tabIndex: 0, role: 'region', 'aria-label': 'Movimientos' }}
+      >
         <TableHead>
           <TableRow>
             <TableCell>Fecha</TableCell>
