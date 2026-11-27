@@ -1,4 +1,4 @@
-import { ReactNode } from 'react'
+import { HTMLAttributes, ReactNode } from 'react'
 import {
   IconButton,
   Table,
@@ -24,11 +24,14 @@ interface ContainerProps {
   size: 'small' | 'medium'
   sx?: SxProps<Theme>
   children: ReactNode
+  containerProps?: HTMLAttributes<HTMLDivElement>
 }
 
-const TableWrapper = ({ containerSx, stickyHeader, size, sx, children }: ContainerProps) => (
+const TableWrapper = ({ containerSx, stickyHeader, size, sx, children, containerProps }: ContainerProps) => (
   <TableContainer
+    {...containerProps}
     sx={[
+
       {
         width: '100%',
         overflowX: 'auto',
@@ -179,6 +182,7 @@ interface BaseProps {
   size?: 'small' | 'medium'
   sx?: SxProps<Theme>
   containerSx?: SxProps<Theme>
+  containerProps?: HTMLAttributes<HTMLDivElement>
 }
 
 type DeclarativeProps<T> = BaseProps & {
@@ -213,7 +217,8 @@ function ScrollableTableInner<T> (props: Props<T>) {
     stickyHeader = false,
     size = 'medium',
     sx,
-    containerSx
+    containerSx,
+    containerProps
   } = props
 
   const columns = 'columns' in props ? props.columns : undefined
@@ -243,6 +248,7 @@ function ScrollableTableInner<T> (props: Props<T>) {
   const table = (
     <TableWrapper
       containerSx={containerSx}
+      containerProps={containerProps}
       stickyHeader={stickyHeader}
       size={size}
       sx={sx}
