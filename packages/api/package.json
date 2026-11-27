@@ -5,6 +5,7 @@
   "main": "src/server",
   "scripts": {
     "start": "pnpm run build-ts && pnpm run serve",
+    "start:pc": "SERVE_CLIENT=true pnpm run serve",
     "start:pro": "LOG=1 NODE_ENV=prod pnpm run serve",
     "start:dev": "NODE_ENV=dev pnpm run serve",
     "build": "pnpm run build-ts",
