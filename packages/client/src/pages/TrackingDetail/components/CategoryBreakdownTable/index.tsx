@@ -1,5 +1,5 @@
-import { Chip, LinearProgress, Table, TableBody, TableCell, TableHead, TableRow } from '@mui/material'
-import { MainCard } from 'components'
+import { Chip, LinearProgress, TableBody, TableCell, TableHead, TableRow } from '@mui/material'
+import { MainCard, ScrollableTable } from 'components'
 import { TagCategoryBreakdown } from 'types'
 import { format } from 'utils'
 import { useChartColors } from '../../../Dashboard/components/shared'
@@ -14,7 +14,11 @@ const CategoryBreakdownTable = ({ categories, totalAmount }: CategoryBreakdownTa
 
   return (
     <MainCard title='Desglose por categorías' divider>
-      <Table size='small'>
+      <ScrollableTable
+        size='small'
+        sx={{ minWidth: 500 }}
+        containerProps={{ tabIndex: 0, role: 'region', 'aria-label': 'Desglose por categorías' }}
+      >
         <TableHead>
           <TableRow>
             <TableCell>Categoría</TableCell>
@@ -52,7 +56,7 @@ const CategoryBreakdownTable = ({ categories, totalAmount }: CategoryBreakdownTa
             )
           })}
         </TableBody>
-      </Table>
+      </ScrollableTable>
     </MainCard>
   )
 }

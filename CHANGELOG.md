@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.6.2] - 2026-11-27
+
+### Fixed
+
+- **client**: Enable horizontal scrolling and keyboard accessibility in tracking tables on mobile. ([#965](https://github.com/soker90/finper/pull/965))
+
+---
+
 ## [2.6.1] - 2026-11-16
 
 ### Fixed
