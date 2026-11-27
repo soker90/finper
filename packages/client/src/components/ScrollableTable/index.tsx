@@ -31,7 +31,6 @@ const TableWrapper = ({ containerSx, stickyHeader, size, sx, children, container
   <TableContainer
     {...containerProps}
     sx={[
-
       {
         width: '100%',
         overflowX: 'auto',
